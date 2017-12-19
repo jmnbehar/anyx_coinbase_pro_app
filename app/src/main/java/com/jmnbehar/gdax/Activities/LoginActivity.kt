@@ -53,9 +53,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         setContentView(R.layout.activity_login)
 
-        val apiKey: String = txt_login_api_key.text.toString()
-        val apiSecret: String = txt_login_secret.text.toString()
-        val passphrase: String = txt_login_passphrase.text.toString()
+        var apiKey: String = txt_login_api_key.text.toString()
+        var apiSecret: String = txt_login_secret.text.toString()
+        var passphrase: String = txt_login_passphrase.text.toString()
 
         var apiCredentials = ApiCredentials(passphrase, apiKey, apiSecret)
 
@@ -80,8 +80,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private fun signIn(view: View, apiCredentials: ApiCredentials) {
         // Usage
-        var data: String? = nu
-        Fuel.request(GdaxApi.accounts(apiCredentials)).responseString { request, response, result ->
+        var data: String? = null
+        GdaxApi.credentials = apiCredentials
+        Fuel.request(GdaxApi.accounts()).responseString { request, response, result ->
             //do something with response
             println("url: " + request.url)
             when (result) {
@@ -91,7 +92,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 }
                 is Result.Success -> {
                     data = result.getAs()
-                    println("Error!: ${data}")
+                    println("Success!: ${data}")
                 }
             }
         }

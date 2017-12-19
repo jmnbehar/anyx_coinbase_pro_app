@@ -17,9 +17,14 @@ class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: Str
 sealed class GdaxApi: FuelRouting {
 
 
+    companion object {
+        lateinit var credentials: ApiCredentials
+    }
+
+
     override val basePath = "https://api.gdax.com"
 
-    class accounts(val apiCredentials: ApiCredentials): GdaxApi() {}
+    class accounts(): GdaxApi() {}
 
     override val method: Method
         get() {
@@ -45,32 +50,23 @@ sealed class GdaxApi: FuelRouting {
 
     override val headers: Map<String, String>?
         get() {
-            var apiCredentials: ApiCredentials? = null
-            when(this) {
-                is accounts -> apiCredentials = this.apiCredentials
-            }
-            if (apiCredentials != null) {
-                val body = ""
-                var timestamp = Date().toInstant().epochSecond.toString()
-                var message = timestamp + method + path + body
-                println("timestamp:")
-                println(timestamp)
+            val body = ""
+            var timestamp = Date().toInstant().epochSecond.toString()
+            var message = timestamp + method + path + body
+            println("timestamp:")
+            println(timestamp)
 
-                val secretDecoded = Base64.getDecoder().decode(apiCredentials.secret)
+            val secretDecoded = Base64.getDecoder().decode(credentials.secret)
 
-                val sha256_HMAC = Mac.getInstance("HmacSHA256")
-                val secret_key = SecretKeySpec(secretDecoded, "HmacSHA256")
-                sha256_HMAC.init(secret_key)
+            val sha256_HMAC = Mac.getInstance("HmacSHA256")
+            val secret_key = SecretKeySpec(secretDecoded, "HmacSHA256")
+            sha256_HMAC.init(secret_key)
 
-                val hash = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(message.toByteArray()))
-                println("hash:")
-                println(hash)
+            val hash = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(message.toByteArray()))
+            println("hash:")
+            println(hash)
 
-                var headers: Map<String, String> = mapOf(Pair("CB-ACCESS-KEY", apiCredentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", apiCredentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
-                return headers
-            } else {
-                return null
-            }
+            var headers: Map<String, String> = mapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+            return headers
         }
-
 }
