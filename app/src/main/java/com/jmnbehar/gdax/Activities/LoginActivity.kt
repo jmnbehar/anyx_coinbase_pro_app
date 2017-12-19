@@ -9,6 +9,12 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.getAs
+import com.jmnbehar.gdax.Classes.ApiCredentials
+import com.jmnbehar.gdax.Classes.GdaxApi
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_login.*
 import java.net.HttpURLConnection
@@ -51,12 +57,13 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val apiSecret: String = txt_login_secret.text.toString()
         val passphrase: String = txt_login_passphrase.text.toString()
 
+        var apiCredentials = ApiCredentials(passphrase, apiKey, apiSecret)
 
         btn_login.setOnClickListener { view ->
             showMessage(view,"Button")
             btn_login.text = "newButtonText"
 
-            signIn(view, passphrase, apiKey, apiSecret)
+            signIn(view, apiCredentials)
         }
 
 //        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -71,49 +78,23 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 .setAction("Action", null).show()
     }
 
-    private fun signIn(view: View, passPhrase: String, apiKey: String, secret: String) {
-        var timestamp = Date()
-        var requestPath = "/accounts"
-
-//        var body = JSON.stringify({
-//            price: '1.0',
-//            size: '1.0',
-//            side: 'buy',
-//            product_id: 'BTC-USD'
-//    });
-        val body = ""
-        var method = "GET"
-
-        var message = timestamp.toInstant().epochSecond.toString() + method + requestPath + body
-        println("timestamp:")
-        println(timestamp)
-        println(timestamp.toString())
-        println(timestamp.toInstant().epochSecond)
-        println(timestamp.toInstant())
-
-        val secretDecoded = Base64.getDecoder().decode(secret)
-
-        val sha256_HMAC = Mac.getInstance("HmacSHA256")
-        val secret_key = SecretKeySpec(secretDecoded, "HmacSHA256")
-        sha256_HMAC.init(secret_key)
-
-
-        val hash = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(message.toByteArray()))
-        println("hash:")
-        println(hash)
-
-//        async {
-//            val result = URL("<api call>").readText()
-//            uiThread {
-//                Log.d("Request", result)
-
-//                longToast("Request performed")
-//            }
-//        }
-        val connection = URL("https://api.gdax.com/accounts").openConnection() as HttpURLConnection
-        connection.headerFields
-
-        val result = URL("https://api.gdax.com/accounts").readText()
+    private fun signIn(view: View, apiCredentials: ApiCredentials) {
+        // Usage
+        var data: String? = nu
+        Fuel.request(GdaxApi.accounts(apiCredentials)).responseString { request, response, result ->
+            //do something with response
+            println("url: " + request.url)
+            when (result) {
+                is Result.Failure -> {
+                    //error
+                    println("Error!: ${result.error}")
+                }
+                is Result.Success -> {
+                    data = result.getAs()
+                    println("Error!: ${data}")
+                }
+            }
+        }
     }
 
 //    override fun onBackPressed() {
