@@ -82,7 +82,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // Usage
         var data: String? = null
         GdaxApi.credentials = apiCredentials
-        Fuel.request(GdaxApi.accounts()).responseString { request, response, result ->
+        Fuel.request(GdaxApi.products()).responseString { request, response, result ->
             //do something with response
             println("url: " + request.url)
             when (result) {
@@ -93,6 +93,11 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 is Result.Success -> {
                     data = result.getAs()
                     println("Success!: ${data}")
+
+
+                    val intent = MainActivity.newIntent(this, result.value)
+
+                    startActivity(intent)
                 }
             }
         }

@@ -2,6 +2,9 @@ package com.jmnbehar.gdax.Classes
 
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -25,11 +28,17 @@ sealed class GdaxApi: FuelRouting {
     override val basePath = "https://api.gdax.com"
 
     class accounts(): GdaxApi() {}
+    class products(): GdaxApi() {}
+    class ticker(val productId: String): GdaxApi() {}
+    class candles(val productId: String, val time: Int = 86400, val granularity: Int = 432): GdaxApi() {}
 
     override val method: Method
         get() {
             when(this) {
                 is accounts -> return Method.GET
+                is products -> return Method.GET
+                is ticker -> return Method.GET
+                is candles -> return Method.GET
             }
         }
 
@@ -38,15 +47,32 @@ sealed class GdaxApi: FuelRouting {
         get() {
             return when(this) {
                 is accounts -> "/accounts"
+                is products -> "/products"
+                is ticker -> "/products/$productId/ticker"
+                is candles -> "/products/$productId/candles"
             }
         }
 
     override val params: List<Pair<String, Any?>>?
         get() {
-            return when(this) {
-                is accounts -> null
+            when(this) {
+                is candles -> {
+
+                    var now: LocalDateTime = LocalDateTime.now()
+                    var start = now.minusDays(1)
+                    return listOf(Pair("start", start), Pair("end", now), Pair("granularity", granularity.toString()))
+                }
+                else  -> return null
             }
         }
+
+    fun toISO8601UTC(date: Date): String {
+        val tz = TimeZone.getTimeZone("UTC")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+        df.setTimeZone(tz)
+        return df.format(date)
+    }
+
 
     override val headers: Map<String, String>?
         get() {
