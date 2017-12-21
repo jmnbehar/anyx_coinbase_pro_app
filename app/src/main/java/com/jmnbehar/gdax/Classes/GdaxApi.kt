@@ -3,7 +3,7 @@ package com.jmnbehar.gdax.Classes
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import java.text.SimpleDateFormat
-import java.time.LocalDate
+import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 import javax.crypto.Mac
@@ -28,6 +28,7 @@ sealed class GdaxApi: FuelRouting {
     override val basePath = "https://api.gdax.com"
 
     class accounts(): GdaxApi() {}
+    class account(val accountId: String): GdaxApi() {}
     class products(): GdaxApi() {}
     class ticker(val productId: String): GdaxApi() {}
     class candles(val productId: String, val time: Int = 86400, val granularity: Int = 432): GdaxApi() {}
@@ -36,6 +37,7 @@ sealed class GdaxApi: FuelRouting {
         get() {
             when(this) {
                 is accounts -> return Method.GET
+                is account -> return Method.GET
                 is products -> return Method.GET
                 is ticker -> return Method.GET
                 is candles -> return Method.GET
@@ -47,6 +49,7 @@ sealed class GdaxApi: FuelRouting {
         get() {
             return when(this) {
                 is accounts -> "/accounts"
+                is account -> "/accounts/$accountId"
                 is products -> "/products"
                 is ticker -> "/products/$productId/ticker"
                 is candles -> "/products/$productId/candles"
@@ -58,7 +61,7 @@ sealed class GdaxApi: FuelRouting {
             when(this) {
                 is candles -> {
 
-                    var now: LocalDateTime = LocalDateTime.now()
+                    var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
                     var start = now.minusDays(1)
                     return listOf(Pair("start", start), Pair("end", now), Pair("granularity", granularity.toString()))
                 }

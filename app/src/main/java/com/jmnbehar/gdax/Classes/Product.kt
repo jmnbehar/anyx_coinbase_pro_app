@@ -5,12 +5,13 @@ package com.jmnbehar.gdax.Classes
  */
 
 
-class Product(val apiProduct: ApiProduct, val candles: List<List<Long>>) {
+class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
     var currency: String
-    lateinit var price: String
+    var price: Double
 
     init {
         currency = apiProduct.base_currency
+        price = candles.first().close
     }
 
 }

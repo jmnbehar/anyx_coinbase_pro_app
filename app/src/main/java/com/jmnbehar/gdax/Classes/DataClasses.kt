@@ -37,3 +37,19 @@ data class ApiStats(
 data class ApiTime(
         val iso: String,
         val epoch: String)
+
+data class Candle(
+        val time: Double,
+        val low: Double,
+        val high: Double,
+        val open: Double,
+        val close: Double,
+        val volume: Double)
+
+data class ApiAccount(
+        val id: String,
+        val currency: String,
+        val balance: String,
+        val holds: String,
+        val available: String,
+        val profile_id: String)

@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class HomeFragment : Fragment() {
+class PricesFragment : Fragment() {
     var currentProduct: Product? = null
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
@@ -22,7 +22,8 @@ class HomeFragment : Fragment() {
     companion object {
         lateinit var products: List<Product>
         fun newInstance(products: List<Product>): Fragment {
-            return HomeFragment()
+            this.products = products
+            return PricesFragment()
         }
     }
 

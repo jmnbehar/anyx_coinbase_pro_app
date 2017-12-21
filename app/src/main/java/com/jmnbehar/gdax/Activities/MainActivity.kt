@@ -13,19 +13,14 @@ import android.view.Menu
 import android.view.MenuItem
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getAs
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jmnbehar.gdax.Classes.ApiProduct
-import com.jmnbehar.gdax.Classes.ApiTicker
-import com.jmnbehar.gdax.Classes.GdaxApi
-import com.jmnbehar.gdax.Classes.Product
-import com.jmnbehar.gdax.Fragments.ChartFragment
-import com.jmnbehar.gdax.Fragments.HomeFragment
+import com.jmnbehar.gdax.Classes.*
+import com.jmnbehar.gdax.Fragments.AccountsFragment
+import com.jmnbehar.gdax.Fragments.PricesFragment
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     var currentFragment: Fragment? = null
@@ -41,7 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
 
             apiProductList = unfilteredApiProductList.filter {
-                s -> s.quote_currency == "USD"
+                s -> s.quote_currency == "USD" && s.base_currency != "BCH"
             }
 
             return intent
@@ -95,16 +90,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun getProductInfo() {
-
-        val productDetails = getProductDetails(apiProductList)
-
-        println(productDetails)
-        println("look at that")
-    }
-
-    fun getProductDetails(productList: List<ApiProduct>) {
-        for (product in productList) {
-            Fuel.request(GdaxApi.candles(product.id)).responseString { request, response, result ->
+        for (product in apiProductList) {
+            Fuel.request(GdaxApi.candles(product.id)).responseString { request, _, result ->
                 //do something with response
                 println("url: " + request.url)
                 when (result) {
@@ -123,13 +110,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun addToProductList(apiProduct: ApiProduct, candles: String) {
         val gson = Gson()
 
-        val candlesList: List<List<Long>> = gson.fromJson(candles, object : TypeToken<List<List<Long>>>() {}.type)
-        val newProduct = Product(apiProduct,candlesList )
+        val candleLongList: List<List<Double>> = gson.fromJson(candles, object : TypeToken<List<List<Double>>>() {}.type)
+        var candleList = mutableListOf<Candle>()
+        for (list in candleLongList) {
+            candleList.add(Candle(list[0], list[1], list[2], list[3], list[4], list[5]))
+        }
+        val newProduct = Product(apiProduct,candleList)
+
         productList.add(newProduct)
         println("pl size: ${productList.size},    apl size: ${apiProductList.size}")
         if (productList.size == apiProductList.size) {
-            goToFragment(HomeFragment.newInstance(productList), "chart")
-
+            goToFragment(PricesFragment.newInstance(productList), "chart")
         }
     }
 
@@ -162,10 +153,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_ltc -> {
 
             }
-            R.id.nav_send -> {
-
+            R.id.nav_accounts -> {
+                goToFragment(AccountsFragment.newInstance(productList), "Accounts")
             }
-            R.id.nav_buy -> {
+            R.id.nav_send -> {
 
             }
             R.id.nav_alerts -> {

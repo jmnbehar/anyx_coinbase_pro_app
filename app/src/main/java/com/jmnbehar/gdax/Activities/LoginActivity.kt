@@ -1,32 +1,19 @@
 package com.jmnbehar.gdax.Activities
 
 import android.os.Bundle
-import android.support.compat.R.id.async
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.ApiCredentials
 import com.jmnbehar.gdax.Classes.GdaxApi
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_login.*
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.Buffer
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
-import java.util.Base64.getDecoder
-import java.util.Base64.getEncoder
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 
 class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {

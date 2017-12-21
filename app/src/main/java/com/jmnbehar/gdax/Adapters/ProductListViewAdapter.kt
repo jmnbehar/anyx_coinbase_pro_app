@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import com.jmnbehar.gdax.Classes.ApiProduct
 import com.jmnbehar.gdax.Classes.Product
 import com.jmnbehar.gdax.R
 
@@ -32,7 +31,18 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var products: List<P
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         var vi = inflater!!.inflate(R.layout.list_row_product, null)
 
+        val candles = products[i].candles
+        val now = candles.first().close.toDouble()
+        val open = candles.last().open.toDouble()
+        val change = now - open
+        val weightedChange: Double = (change / open)
+
+        val percentChange: Double = weightedChange * 100.0
         vi.txt_product_name.text = products[i].currency
+        vi.txt_product_ticker.text = products[i].currency
+        vi.txt_product_percent_change.text = "$percentChange"
+        vi.txt_product_price.text = "$now"
+
         vi.setOnClickListener { onClick(products[i]) }
 
         return vi
