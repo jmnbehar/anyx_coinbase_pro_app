@@ -7,10 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
@@ -23,7 +19,6 @@ class AccountsFragment : Fragment() {
     lateinit var listView: ListView
     lateinit var totalValueTextView: TextView
     lateinit var inflater: LayoutInflater
-    var accounts = mutableListOf<Account>()
 
     companion object {
         lateinit var products: List<Product>
@@ -46,46 +41,17 @@ class AccountsFragment : Fragment() {
         }
 
 
-        rootView.list_accounts.adapter = AccountListViewAdapter(inflater, accounts, selectGroup )
+        rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
 
         val updateList = lambda@ {
             (listView.adapter as AccountListViewAdapter).notifyDataSetChanged()
-            var totalValue = 0.0
-            for (account in accounts) {
-                totalValue += account.value
-            }
-            totalValueTextView.text = "Total Value: $totalValue"
         }
 
-        getAccountInfo(updateList)
+        AccountList.getAccountInfo(updateList)
 
         return rootView
     }
 
 
-    fun getAccountInfo(updateList: () -> Unit) {
-        Fuel.request(GdaxApi.accounts()).responseString { request, _, result ->
-            //do something with response
-            println("url: " + request.url)
-            when (result) {
-                is Result.Failure -> {
-                    //error
-                    println("Error!: ${result.error}")
-                }
-                is Result.Success -> {
-                    val gson = Gson()
-
-                    val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                    for (apiAccount in apiAccountList) {
-                        val relevantProduct = products.filter { p -> p.currency == apiAccount.currency }.firstOrNull()
-                        if (relevantProduct != null) {
-                            accounts.add(Account(relevantProduct, apiAccount))
-                        }
-                    }
-                    updateList()
-                }
-            }
-        }
-    }
 
 }

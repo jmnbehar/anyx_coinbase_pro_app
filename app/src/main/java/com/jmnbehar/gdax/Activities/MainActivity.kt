@@ -17,6 +17,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.Fragments.AccountsFragment
+import com.jmnbehar.gdax.Fragments.ChartFragment
 import com.jmnbehar.gdax.Fragments.PricesFragment
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_main.*
@@ -145,16 +146,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_btc -> {
-                // Handle the camera action
+                if (AccountList.btcAccount != null) {
+                    goToFragment(ChartFragment.newInstance(AccountList.btcAccount!!), "BTC Chart")
+                } else {
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.btcAccount!!), "BTC Chart") }
+                }
             }
             R.id.nav_eth -> {
-
+                if (AccountList.ethAccount != null) {
+                    goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart")
+                } else {
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "BTC Chart") }
+                }
             }
             R.id.nav_ltc -> {
-
+                if (AccountList.ltcAccount != null) {
+                    goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "ETH Chart")
+                } else {
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "BTC Chart") }
+                }
             }
             R.id.nav_accounts -> {
-                goToFragment(AccountsFragment.newInstance(productList), "Accounts")
+                goToFragment(AccountsFragment.newInstance(productList), "AccountList")
             }
             R.id.nav_send -> {
 

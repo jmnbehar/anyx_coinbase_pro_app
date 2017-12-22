@@ -24,23 +24,22 @@ sealed class GdaxApi: FuelRouting {
         lateinit var credentials: ApiCredentials
     }
 
-
     override val basePath = "https://api.gdax.com"
 
-    class accounts(): GdaxApi() {}
-    class account(val accountId: String): GdaxApi() {}
-    class products(): GdaxApi() {}
-    class ticker(val productId: String): GdaxApi() {}
-    class candles(val productId: String, val time: Int = 86400, val granularity: Int = 432): GdaxApi() {}
+    class accounts(): GdaxApi()
+    class account(val accountId: String): GdaxApi()
+    class products(): GdaxApi()
+    class ticker(val productId: String): GdaxApi()
+    class candles(val productId: String, val time: Int = 86400, val granularity: Int = 432): GdaxApi()
 
     override val method: Method
         get() {
-            when(this) {
-                is accounts -> return Method.GET
-                is account -> return Method.GET
-                is products -> return Method.GET
-                is ticker -> return Method.GET
-                is candles -> return Method.GET
+            return when(this) {
+                is accounts -> Method.GET
+                is account -> Method.GET
+                is products -> Method.GET
+                is ticker -> Method.GET
+                is candles -> Method.GET
             }
         }
 
@@ -69,13 +68,6 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
-    fun toISO8601UTC(date: Date): String {
-        val tz = TimeZone.getTimeZone("UTC")
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-        df.setTimeZone(tz)
-        return df.format(date)
-    }
-
 
     override val headers: Map<String, String>?
         get() {
@@ -87,11 +79,11 @@ sealed class GdaxApi: FuelRouting {
 
             val secretDecoded = Base64.getDecoder().decode(credentials.secret)
 
-            val sha256_HMAC = Mac.getInstance("HmacSHA256")
-            val secret_key = SecretKeySpec(secretDecoded, "HmacSHA256")
-            sha256_HMAC.init(secret_key)
+            val sha256HMAC = Mac.getInstance("HmacSHA256")
+            val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
+            sha256HMAC.init(secretKey)
 
-            val hash = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(message.toByteArray()))
+            val hash = Base64.getEncoder().encodeToString(sha256HMAC.doFinal(message.toByteArray()))
             println("hash:")
             println(hash)
 

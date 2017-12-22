@@ -10,6 +10,7 @@ class Account(product: Product, val apiAccount: ApiAccount) {
     var balance: Double
     var value: Double
     var price: Double
+
     init {
         currency = product.currency
         balance = apiAccount.balance.toDouble()
