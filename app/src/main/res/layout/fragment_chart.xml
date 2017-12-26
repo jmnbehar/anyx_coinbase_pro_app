@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/txt_chart_name"
         android:layout_width="wrap_content"
-        android:layout_height="77dp"
+        android:layout_height="wrap_content"
         android:text="Large Text Goes Here"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="48dp"

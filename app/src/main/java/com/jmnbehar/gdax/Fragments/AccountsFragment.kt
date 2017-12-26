@@ -21,8 +21,8 @@ class AccountsFragment : Fragment() {
     lateinit var inflater: LayoutInflater
 
     companion object {
-        lateinit var products: List<Product>
-        fun newInstance(products: List<Product>): Fragment {
+        var products = listOf<Product>()
+        fun newInstance(products: List<Product>): AccountsFragment {
             this.products = products
             return AccountsFragment()
         }
@@ -44,7 +44,7 @@ class AccountsFragment : Fragment() {
         rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
 
         val updateList = lambda@ {
-            (listView.adapter as AccountListViewAdapter).notifyDataSetChanged()
+            refreshData()
         }
 
         AccountList.getAccountInfo(updateList)
@@ -52,6 +52,9 @@ class AccountsFragment : Fragment() {
         return rootView
     }
 
+    fun refreshData() {
+        (listView.adapter as AccountListViewAdapter).notifyDataSetChanged()
+    }
 
 
 }

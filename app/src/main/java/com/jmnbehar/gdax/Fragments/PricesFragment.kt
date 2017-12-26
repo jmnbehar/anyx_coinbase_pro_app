@@ -21,7 +21,8 @@ class PricesFragment : Fragment() {
 
     companion object {
         lateinit var products: List<Product>
-        fun newInstance(products: List<Product>): Fragment {
+        fun newInstance(products: List<Product>): PricesFragment
+        {
             this.products = products
             return PricesFragment()
         }

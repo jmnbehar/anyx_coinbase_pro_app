@@ -12,16 +12,21 @@ import com.jmnbehar.gdax.Fragments.AccountsFragment
 
 object AccountList {
     var list = mutableListOf<Account>()
-    var btcAccount: Account? = list.filter { a -> a.currency == "BTC" }.firstOrNull()
-    var ltcAccount: Account? = list.filter { a -> a.currency == "LTC" }.firstOrNull()
-    var ethAccount: Account? = list.filter { a -> a.currency == "ETH" }.firstOrNull()
-    var usdAccount: Account? = list.filter { a -> a.currency == "USD" }.firstOrNull()
-    var bchAccount: Account? = list.filter { a -> a.currency == "BCH" }.firstOrNull()
+    var btcAccount: Account? = null
+        get() = list.filter { a -> a.currency == "BTC" }.firstOrNull()
+    var ltcAccount: Account? = null
+        get() = list.filter { a -> a.currency == "LTC" }.firstOrNull()
+    var ethAccount: Account? = null
+        get() = list.filter { a -> a.currency == "ETH" }.firstOrNull()
+    var usdAccount: Account? = null
+        get() = list.filter { a -> a.currency == "USD" }.firstOrNull()
+    var bchAccount: Account? = null
+        get() = list.filter { a -> a.currency == "BCH" }.firstOrNull()
 
     fun getAccountInfo(onComplete: () -> Unit) {
-        Fuel.request(GdaxApi.accounts()).responseString { request, _, result ->
-            //do something with response
-            println("url: " + request.url)
+        list.clear()
+
+        GdaxApi.accounts().executeRequest { result ->
             when (result) {
                 is Result.Failure -> {
                     //error
@@ -32,6 +37,7 @@ object AccountList {
 
                     val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                     for (apiAccount in apiAccountList) {
+                        //do not reference AccountsFragmet, thats not aprop
                         val relevantProduct = AccountsFragment.products.filter { p -> p.currency == apiAccount.currency }.firstOrNull()
                         if (relevantProduct != null) {
                             list.add(Account(relevantProduct, apiAccount))

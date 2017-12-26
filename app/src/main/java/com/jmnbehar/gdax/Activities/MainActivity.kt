@@ -16,9 +16,7 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
-import com.jmnbehar.gdax.Fragments.AccountsFragment
-import com.jmnbehar.gdax.Fragments.ChartFragment
-import com.jmnbehar.gdax.Fragments.PricesFragment
+import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -92,9 +90,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun getProductInfo() {
         for (product in apiProductList) {
-            Fuel.request(GdaxApi.candles(product.id)).responseString { request, _, result ->
-                //do something with response
-                println("url: " + request.url)
+            GdaxApi.candles(product.id).executeRequest { result ->
                 when (result) {
                     is Result.Failure -> {
                         //error
@@ -133,11 +129,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(tag)
                     .commit()
         } else {
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(tag)
                     .commit()
         }
     }
@@ -146,34 +144,37 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_btc -> {
-                if (AccountList.btcAccount != null) {
-                    goToFragment(ChartFragment.newInstance(AccountList.btcAccount!!), "BTC Chart")
+                val btcAccount = AccountList.btcAccount
+                if (btcAccount != null) {
+                    goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.btcAccount!!), "BTC Chart") }
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart") }
                 }
             }
             R.id.nav_eth -> {
-                if (AccountList.ethAccount != null) {
-                    goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart")
+                val ethAccount = AccountList.ethAccount
+                if (ethAccount != null) {
+                    goToFragment(ChartFragment.newInstance(ethAccount), "ETH Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "BTC Chart") }
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart") }
                 }
             }
             R.id.nav_ltc -> {
-                if (AccountList.ltcAccount != null) {
-                    goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "ETH Chart")
+                val ltcAccount = AccountList.ltcAccount
+                if (ltcAccount != null) {
+                    goToFragment(ChartFragment.newInstance(ltcAccount), "LTC Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "BTC Chart") }
+                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "LTC Chart") }
                 }
             }
             R.id.nav_accounts -> {
                 goToFragment(AccountsFragment.newInstance(productList), "AccountList")
             }
             R.id.nav_send -> {
-
+                goToFragment(RedFragment.newInstance(), "rojo")
             }
             R.id.nav_alerts -> {
-
+                goToFragment(BlueFragment.newInstance(), "azul")
             }
             R.id.nav_settings -> {
 
