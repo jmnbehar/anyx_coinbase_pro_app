@@ -70,36 +70,22 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         var data: String? = null
         GdaxApi.credentials = apiCredentials
         GdaxApi.products().executeRequest { result ->
-            val result = result as Result.Success
-            data = result.getAs()
-            println("Success!: ${data}")
-            val intent = MainActivity.newIntent(this, result.value)
+            when (result) {
+                is Result.Failure -> {
+                    //error
+                    println("Error!: ${result.error}")
+                }
+                is Result.Success -> {
+                    data = result.getAs()
+                    println("Success!: ${data}")
 
-            startActivity(intent)
+
+                    val intent = MainActivity.newIntent(this, result.value)
+
+                    startActivity(intent)
+                }
+            }
         }
-
-
-//
-//        Fuel.request(GdaxApi.products()).responseString { request, response, result ->
-//            //do something with response
-//
-//            println("url: " + request.url)
-//            when (result) {
-//                is Result.Failure -> {
-//                    //error
-//                    println("Error!: ${result.error}")
-//                }
-//                is Result.Success -> {
-//                    data = result.getAs()
-//                    println("Success!: ${data}")
-//
-//
-//                    val intent = MainActivity.newIntent(this, result.value)
-//
-//                    startActivity(intent)
-//                }
-//            }
-//        }
     }
 
 //    override fun onBackPressed() {
