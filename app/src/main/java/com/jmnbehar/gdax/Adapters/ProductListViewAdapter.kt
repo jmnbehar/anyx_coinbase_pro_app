@@ -14,10 +14,10 @@ import kotlinx.android.synthetic.main.list_row_product.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, var products: List<Product>, var onClick: (Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return products.size
+        return Product.list.size
     }
 
     override fun getItem(i: Int): Any {
@@ -31,6 +31,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var products: List<P
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         var vi = inflater!!.inflate(R.layout.list_row_product, null)
 
+        val products = Product.list
         val candles = products[i].candles
         val now = candles.first().close.toDouble()
         val open = candles.last().open.toDouble()

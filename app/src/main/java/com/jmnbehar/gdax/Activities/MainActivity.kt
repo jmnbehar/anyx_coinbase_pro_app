@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     companion object {
         lateinit var apiProductList: List<ApiProduct>
-        var productList = mutableListOf<Product>()
         fun newIntent(context: Context, result: String): Intent {
             val intent = Intent(context, MainActivity::class.java)
 
@@ -114,10 +113,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         val newProduct = Product(apiProduct,candleList)
 
-        productList.add(newProduct)
-        println("pl size: ${productList.size},    apl size: ${apiProductList.size}")
-        if (productList.size == apiProductList.size) {
-            goToFragment(PricesFragment.newInstance(productList), "chart")
+        Product.list.add(newProduct)
+        println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
+        if (Product.list.size == apiProductList.size) {
+            goToFragment(PricesFragment.newInstance(), "chart")
         }
     }
 
@@ -144,31 +143,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_btc -> {
-                val btcAccount = AccountList.btcAccount
+                val btcAccount = Account.btcAccount
                 if (btcAccount != null) {
                     goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart") }
+                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
                 }
             }
             R.id.nav_eth -> {
-                val ethAccount = AccountList.ethAccount
+                val ethAccount = Account.ethAccount
                 if (ethAccount != null) {
                     goToFragment(ChartFragment.newInstance(ethAccount), "ETH Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ethAccount!!), "ETH Chart") }
+                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
                 }
             }
             R.id.nav_ltc -> {
-                val ltcAccount = AccountList.ltcAccount
+                val ltcAccount = Account.ltcAccount
                 if (ltcAccount != null) {
                     goToFragment(ChartFragment.newInstance(ltcAccount), "LTC Chart")
                 } else {
-                    AccountList.getAccountInfo { goToFragment(ChartFragment.newInstance(AccountList.ltcAccount!!), "LTC Chart") }
+                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ltcAccount!!), "LTC Chart") }
                 }
             }
             R.id.nav_accounts -> {
-                goToFragment(AccountsFragment.newInstance(productList), "AccountList")
+                goToFragment(AccountsFragment.newInstance(), "AccountList")
             }
             R.id.nav_send -> {
                 goToFragment(RedFragment.newInstance(), "rojo")

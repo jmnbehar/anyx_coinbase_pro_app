@@ -20,10 +20,8 @@ class PricesFragment : Fragment() {
     lateinit var inflater: LayoutInflater
 
     companion object {
-        lateinit var products: List<Product>
-        fun newInstance(products: List<Product>): PricesFragment
+        fun newInstance(): PricesFragment
         {
-            this.products = products
             return PricesFragment()
         }
     }
@@ -40,7 +38,7 @@ class PricesFragment : Fragment() {
 //            listView.adapter = GroupMemberListViewAdapter(inflater, group.members.toTypedArray())
         }
 
-        rootView.list_products.adapter = ProductListViewAdapter(inflater, Companion.products, selectGroup )
+        rootView.list_products.adapter = ProductListViewAdapter(inflater, selectGroup )
 
         return rootView
     }

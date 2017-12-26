@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.Account
-import com.jmnbehar.gdax.Classes.AccountList
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
 
@@ -16,7 +15,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
 class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return AccountList.list.size + 1
+        return Account.list.size + 1
     }
 
     override fun getItem(i: Int): Any {
@@ -29,7 +28,7 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         var vi = inflater!!.inflate(R.layout.list_row_account, null)
-        var accounts = AccountList.list
+        var accounts = Account.list
         if(i >= accounts.size) {
 
             vi.txt_account_name.text = "TOTAL"

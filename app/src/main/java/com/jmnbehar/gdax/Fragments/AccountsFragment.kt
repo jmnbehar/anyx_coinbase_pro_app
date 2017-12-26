@@ -21,9 +21,7 @@ class AccountsFragment : Fragment() {
     lateinit var inflater: LayoutInflater
 
     companion object {
-        var products = listOf<Product>()
-        fun newInstance(products: List<Product>): AccountsFragment {
-            this.products = products
+        fun newInstance(): AccountsFragment {
             return AccountsFragment()
         }
     }
@@ -47,7 +45,7 @@ class AccountsFragment : Fragment() {
             refreshData()
         }
 
-        AccountList.getAccountInfo(updateList)
+        Account.getAccountInfo(updateList)
 
         return rootView
     }
