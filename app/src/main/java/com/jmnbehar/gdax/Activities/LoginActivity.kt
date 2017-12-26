@@ -79,7 +79,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     data = result.getAs()
                     println("Success!: ${data}")
 
-
                     val intent = MainActivity.newIntent(this, result.value)
 
                     startActivity(intent)
