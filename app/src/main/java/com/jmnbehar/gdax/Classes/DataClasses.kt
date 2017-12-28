@@ -4,6 +4,31 @@ package com.jmnbehar.gdax.Classes
  * Created by jmnbehar on 12/19/2017.
  */
 
+enum class TradeType {
+    BUY,
+    SELL;
+
+    override fun toString() : String {
+        return when (this) {
+            BUY -> "buy"
+            SELL -> "sell"
+        }
+    }
+}
+enum class TradeSubType {
+    MARKET,
+    LIMIT,
+    STOP;
+
+    override fun toString() : String {
+        return when (this) {
+            MARKET -> "market"
+            LIMIT -> "limit"
+            STOP -> "stop"
+        }
+    }
+}
+
 data class ApiProduct(
         val id: String,
         val base_currency: String,

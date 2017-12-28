@@ -15,7 +15,7 @@
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
 
-    <LinearLayout
+    <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -33,10 +33,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Sell" />
-    </LinearLayout>
+    </RadioGroup>
 
 
-    <LinearLayout
+    <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -62,7 +62,7 @@
             android:layout_weight="1"
             android:text="Stop" />
 
-    </LinearLayout>
+    </RadioGroup>
 
     <LinearLayout
         android:id="@+id/layout_trade_order_details"
@@ -90,6 +90,7 @@
                 <EditText
                     android:id="@+id/etxt_trade_amount"
                     android:layout_height="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_weight="20"
                     android:inputType="numberDecimal" />
 
@@ -124,6 +125,7 @@
                 <EditText
                     android:id="@+id/etxt_trade_limit"
                     android:layout_height="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_weight="20"
                     android:inputType="numberDecimal" />
 
@@ -171,7 +173,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnPlaceOrder"
+        android:id="@+id/btn_place_order"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Place Order" />

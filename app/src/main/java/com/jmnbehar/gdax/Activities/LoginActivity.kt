@@ -50,7 +50,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             showMessage(view,"Button")
             btn_login.text = "newButtonText"
 
-            signIn(view, apiCredentials)
+            signIn(apiCredentials)
         }
 
 //        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -65,9 +65,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 .setAction("Action", null).show()
     }
 
-    private fun signIn(view: View, apiCredentials: ApiCredentials) {
+    private fun signIn(apiCredentials: ApiCredentials) {
         // Usage
-        var data: String? = null
+        var data: String?
         GdaxApi.credentials = apiCredentials
         GdaxApi.products().executeRequest { result ->
             when (result) {

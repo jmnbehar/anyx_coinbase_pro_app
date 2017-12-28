@@ -1,14 +1,13 @@
 package com.jmnbehar.gdax.Fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
-import android.widget.TextView
+import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Classes.Account
+import com.jmnbehar.gdax.Classes.TradeType
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 
@@ -39,6 +38,17 @@ class ChartFragment : Fragment() {
         rootView.txt_chart_account_balance.text = "${account.balance}"
         rootView.txt_chart_account_value.text = "${account.value}"
 
+        val buyButton = rootView.btn_chart_buy
+        val sellButton = rootView.btn_chart_sell
+
+        //TODO: send over more info
+        buyButton.setOnClickListener {
+            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.BUY), "Trade: Buy")
+        }
+
+        sellButton.setOnClickListener {
+            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.SELL), "Trade: Sell")
+        }
 
         return rootView
     }

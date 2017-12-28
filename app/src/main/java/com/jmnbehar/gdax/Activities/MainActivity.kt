@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
@@ -22,10 +23,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    var currentFragment: Fragment? = null
 
     companion object {
+        var currentFragment: Fragment? = null
         lateinit var apiProductList: List<ApiProduct>
+        lateinit var fragmentManager: FragmentManager
         fun newIntent(context: Context, result: String): Intent {
             val intent = Intent(context, MainActivity::class.java)
 
@@ -39,12 +41,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             return intent
         }
+
+        fun setSupportFragmentManager(fragmentManager: FragmentManager) {
+            this.fragmentManager = fragmentManager
+        }
+
+
+        fun goToFragment(fragment: Fragment, tag: String) {
+            currentFragment = fragment
+            if (fragmentManager.fragments.isEmpty()) {
+                fragmentManager
+                        .beginTransaction()
+                        .add(R.id.fragment_container, fragment, tag)
+                        .addToBackStack(tag)
+                        .commit()
+            } else {
+                fragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment, tag)
+                        .addToBackStack(tag)
+                        .commit()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        setSupportFragmentManager(supportFragmentManager)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -120,24 +145,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-
-
-    fun goToFragment(fragment: Fragment, tag: String) {
-        currentFragment = fragment
-        if (supportFragmentManager.fragments.isEmpty()) {
-            supportFragmentManager
-                    .beginTransaction()
-                    .add(R.id.fragment_container, fragment, tag)
-                    .addToBackStack(tag)
-                    .commit()
-        } else {
-            supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment, tag)
-                    .addToBackStack(tag)
-                    .commit()
-        }
-    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
