@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (btcAccount != null) {
                     goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
                 } else {
-                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
+                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.btcAccount!!), "BTC Chart") }
                 }
             }
             R.id.nav_eth -> {

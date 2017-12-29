@@ -3,13 +3,17 @@ package com.jmnbehar.gdax.Fragments
 import android.opengl.Visibility
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.jmnbehar.gdax.Classes.Account
-import com.jmnbehar.gdax.Classes.TradeSubType
-import com.jmnbehar.gdax.Classes.TradeType
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.getAs
+import com.jmnbehar.gdax.Activities.MainActivity
+import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 
@@ -43,17 +47,11 @@ class TradeFragment : Fragment() {
 
     lateinit var advancedOptionsCheckBox: CheckBox
 
-    lateinit var placeOrderButton: Button
+    lateinit var submitOrderButton: Button
 
-    var tradeSubType = TradeSubType.MARKET
-        set(value) {
-            switchTradeType(tradeType, value)
-        }
+    var tradeSubType: TradeSubType = TradeSubType.MARKET
 
-    var tradeType = Companion.tradeType
-        set(value) {
-            switchTradeType(value, tradeSubType)
-        }
+    var tradeType: TradeType = Companion.tradeType
 
     companion object {
         var tradeType = TradeType.BUY
@@ -96,35 +94,106 @@ class TradeFragment : Fragment() {
         totalLabelText = rootView.txt_trade_total_label
         totalText = rootView.txt_trade_total
 
-        placeOrderButton = rootView.btn_place_order
+        submitOrderButton = rootView.btn_place_order
 
         titleText.text = account.currency
 
         switchTradeType(tradeType, tradeSubType)
 
 
+
+        amountEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                println(tradeType)
+                println(tradeSubType)
+                val amount = p0.toString().toDoubleOrZero()
+                updateTotalText(amount)
+
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
+
+        limitEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                val limitPrice = p0.toString().toDoubleOrZero()
+                updateTotalText(limitPrice = limitPrice)
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
+
+
+
         radioButtonBuy.setOnClickListener {
-            tradeType = TradeType.BUY
+            switchTradeType(TradeType.BUY)
         }
         radioButtonSell.setOnClickListener {
-            tradeType = TradeType.SELL
+            switchTradeType(TradeType.SELL)
         }
 
         radioButtonMarket.setOnClickListener {
-            tradeSubType = TradeSubType.MARKET
+            switchTradeType(tradeSubType =  TradeSubType.MARKET)
         }
         radioButtonLimit.setOnClickListener {
-            tradeSubType = TradeSubType.LIMIT
+            switchTradeType(tradeSubType =  TradeSubType.LIMIT)
         }
         radioButtonStop.setOnClickListener {
-            tradeSubType = TradeSubType.STOP
+            switchTradeType(tradeSubType =  TradeSubType.STOP)
         }
+
+        submitOrderButton.setOnClickListener { submitOrder() }
 
         return rootView
     }
 
-    private fun switchTradeType(tradeType: TradeType, tradeSubType: TradeSubType) {
 
+    private fun submitOrder() {
+        val amount = amountEditText.text.toString().toDoubleOrNull()
+        val funds: Double? = null
+
+        fun onComplete(result: Result<String, FuelError>) = {
+            when (result) {
+                is Result.Failure -> {
+                    //error
+                    println("Error!: ${result.error}")
+                    toast("Error!: ${result.error}", context)
+                }
+                is Result.Success -> {
+//                    val data = result.getAs()
+//                    println("Success!: ${data}")
+                    toast("success", context)
+                }
+            }
+        }
+        when(tradeSubType) {
+            TradeSubType.MARKET -> {
+                GdaxApi.orderMarket(tradeType, account.currency, amount, funds).executeRequest { onComplete(it) }
+            }
+            TradeSubType.LIMIT -> {
+                val limitPrice = limitEditText.text.toString().toDoubleOrZero()
+                GdaxApi.orderLimit(tradeType, account.currency, limitPrice, amount ?: 0.0).executeRequest { onComplete(it) }
+            }
+            TradeSubType.STOP -> {
+                val stopPrice = limitEditText.text.toString().toDoubleOrZero()
+                GdaxApi.orderStop(tradeType, account.currency, stopPrice, amount, funds).executeRequest { onComplete(it) }
+            }
+        }
+    }
+
+    private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
+        when (tradeSubType) {
+            TradeSubType.MARKET -> totalText.text = (amount / account.price).toString()
+            TradeSubType.LIMIT -> totalText.text = (amount * limitPrice).toString()
+            TradeSubType.STOP -> totalText.text = (amount * limitPrice).toString()
+        }
+    }
+
+    private fun switchTradeType(tradeType: TradeType = this.tradeType, tradeSubType: TradeSubType = this.tradeSubType) {
+        this.tradeType = tradeType
+        this.tradeSubType = tradeSubType
+
+        updateTotalText()
         when (tradeType) {
             TradeType.BUY -> {
                 radioButtonBuy.isChecked = true

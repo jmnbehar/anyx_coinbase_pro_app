@@ -51,8 +51,8 @@ sealed class GdaxApi: FuelRouting {
     class ticker(val productId: String) : GdaxApi()
     class candles(val productId: String, val time: Int = 86400, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
     class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double) : GdaxApi()
-    class orderMarket(val tradeType: TradeType, val productId: String, val amount: Double? = null, val funds: Double? = null) : GdaxApi()
-    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double? = null, val funds: Double? = null) : GdaxApi()
+    class orderMarket(val tradeType: TradeType, val productId: String, val amount: Double? = null, val size: Double? = null) : GdaxApi()
+    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double? = null, val size: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
     class cancelAllOrders() : GdaxApi()
     class listOrders(val status: String) : GdaxApi()
@@ -144,11 +144,11 @@ sealed class GdaxApi: FuelRouting {
                 is orderMarket -> {
                     var paramList = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
 
-                    //can add either amount or funds, for now lets do amount
-                    if (amount != null) {
-                        paramList.add(Pair("size", "$amount"))
-                    } else if (funds != null) {
-                        paramList.add(Pair("funds", "$funds"))
+                    //can add either size or funds, for now lets do funds
+                    if (size != null) {
+                        paramList.add(Pair("size", "$size"))
+                    } else if (amount != null) {
+                        paramList.add(Pair("funds", "$amount"))
                     } else {
                         //Throw an error here?
                     }
@@ -158,11 +158,11 @@ sealed class GdaxApi: FuelRouting {
                     var paramList = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
 
                     paramList.add(Pair("price", "$price"))
-                    //can add either amount or funds, for now lets do amount
-                    if (amount != null) {
-                        paramList.add(Pair("size", "$amount"))
-                    } else if (funds != null) {
-                        paramList.add(Pair("funds", "$funds"))
+                    //can add either size or funds, for now lets do funds
+                    if (size != null) {
+                        paramList.add(Pair("size", "$size"))
+                    } else if (amount != null) {
+                        paramList.add(Pair("funds", "$amount"))
                     } else {
                         //Throw an error here?
                     }
