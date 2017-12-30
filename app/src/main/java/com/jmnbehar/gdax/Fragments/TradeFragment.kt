@@ -1,6 +1,5 @@
 package com.jmnbehar.gdax.Fragments
 
-import android.opengl.Visibility
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Editable
@@ -11,8 +10,6 @@ import android.view.ViewGroup
 import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getAs
-import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
@@ -148,10 +145,9 @@ class TradeFragment : Fragment() {
 
     private fun submitOrder() {
         val amount = amountEditText.text.toString().toDoubleOrNull()
-        val size: Double? = null
+//        var size: Double? = null
 
-        fun onComplete(result: Result<ByteArray
-                , FuelError>) = { result: Result<String, FuelError> ->
+        fun onComplete(result: Result<ByteArray, FuelError>) {
             when (result) {
                 is Result.Failure -> {
                     //error
@@ -165,22 +161,13 @@ class TradeFragment : Fragment() {
                 }
             }
         }
+
         when(tradeSubType) {
             TradeSubType.MARKET -> {
                 val productId = account.product.id
-                GdaxApi.orderMarket(tradeType, productId, size, amount).executePost { result: Result<ByteArray, FuelError> ->
-                    when (result) {
-                        is Result.Failure -> {
-                            //error
-                            println("Error!: ${result.error}")
-                            toast("Error!: ${result.error.response}", activity)
-                        }
-                        is Result.Success -> {
-//                    val data = result.getAs()
-//                    println("Success!: ${data}")
-                            toast("success", context)
-                        }
-                    }
+                when (tradeType) {
+                    TradeType.BUY ->  GdaxApi.orderMarket(tradeType, productId, size = null, funds = amount).executePost { onComplete(it) }
+                    TradeType.SELL -> GdaxApi.orderMarket(tradeType, productId, size = amount, funds = null).executePost { onComplete(it) }
                 }
             }
             TradeSubType.LIMIT -> {
@@ -189,16 +176,26 @@ class TradeFragment : Fragment() {
             }
             TradeSubType.STOP -> {
                 val stopPrice = limitEditText.text.toString().toDoubleOrZero()
-                GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size, amount).executePost { onComplete(it) }
+                when (tradeType) {
+                    TradeType.BUY ->  GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size = null, funds = amount).executePost { onComplete(it) }
+                    TradeType.SELL -> GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size = amount, funds = null).executePost { onComplete(it) }
+                }
             }
         }
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
-        when (tradeSubType) {
-            TradeSubType.MARKET -> totalText.text = (amount / account.product.price).toString()
-            TradeSubType.LIMIT -> totalText.text = (amount * limitPrice).toString()
-            TradeSubType.STOP -> totalText.text = (amount * limitPrice).toString()
+        when (tradeType) {
+            TradeType.BUY -> when (tradeSubType) {
+                TradeSubType.MARKET -> totalText.text = "%.8f".format(amount / account.product.price)
+                TradeSubType.LIMIT -> totalText.text = "%.2f".format(amount * limitPrice)
+                TradeSubType.STOP -> totalText.text = "%.8f".format(amount/limitPrice)
+            }
+            TradeType.SELL -> when (tradeSubType) {
+                TradeSubType.MARKET -> totalText.text = "%.2f".format(amount * account.product.price)
+                TradeSubType.LIMIT -> totalText.text = "%.2f".format(amount * limitPrice)
+                TradeSubType.STOP -> totalText.text = "%.2f".format(amount * limitPrice)
+            }
         }
     }
 

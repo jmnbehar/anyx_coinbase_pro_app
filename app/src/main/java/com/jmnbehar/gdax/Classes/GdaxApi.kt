@@ -1,14 +1,11 @@
 package com.jmnbehar.gdax.Classes
 
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.android.core.Json
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.jmnbehar.gdax.Fragments.TradeFragment
 import org.json.JSONObject
 import java.time.Clock
 import java.time.LocalDateTime
@@ -53,9 +50,9 @@ sealed class GdaxApi: FuelRouting {
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
     class candles(val productId: String, val time: Int = 86400, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
-    class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double) : GdaxApi()
-    class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val amount: Double? = null) : GdaxApi()
-    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val amount: Double? = null) : GdaxApi()
+    class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val size: Double) : GdaxApi()
+    class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
+    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
     class cancelAllOrders() : GdaxApi()
     class listOrders(val status: String) : GdaxApi()
@@ -120,8 +117,8 @@ sealed class GdaxApi: FuelRouting {
                 is products -> "/products"
                 is ticker -> "/products/$productId/ticker"
                 is candles -> "/products/$productId/candles"
-                is orderLimit -> "/orders" //?client_oid=GdaxAppTrade&side=${tradeType},type=${TradeSubType.LIMIT},product_id=$productId,funds=$amount"
-                is orderMarket -> "/orders" //?client_oid=GdaxAppTrade&side=${tradeType},type=${TradeSubType.MARKET},product_id=$productId,funds=$amount"
+                is orderLimit -> "/orders"
+                is orderMarket -> "/orders"
                 is orderStop -> "/orders"
                 is cancelOrder -> "/orders/$orderId"
                 is cancelAllOrders -> "/orders"
@@ -153,7 +150,7 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is send -> {
                     var paramList = mutableListOf<Pair<String, String>>()
-                    paramList.add(Pair("amount", "$amount"))
+                    paramList.add(Pair("size", "$amount"))
                     paramList.add(Pair("currency", productId))
                     paramList.add(Pair("cryptoAddress", cryptoAddress))
 
@@ -165,7 +162,7 @@ sealed class GdaxApi: FuelRouting {
 
     private fun basicOrderParams(tradeType: TradeType, tradeSubType: TradeSubType, productId: String): JSONObject {
         val json = JSONObject()
-        json.put("client_oid", "GdaxAppTrade")
+//        json.put("client_oid", "GdaxAppTrade")
         json.put("side", tradeType.toString())
         json.put("type", tradeSubType.toString())
         json.put("product_id", productId)
@@ -181,16 +178,20 @@ sealed class GdaxApi: FuelRouting {
                     var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
 
                     json.put("price", "$price")
-                    json.put("size", "$amount")
+                    json.put("size", "$size")
 
                     return json.toString()
                 }
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+                    var json = basicOrderParams(tradeType, TradeSubType.MARKET, productId)
 
-                    json.put("funds", "$amount")
-//                    json.obj().put("size", "size")
+                    if (funds != null) {
+                        json.put("funds", "$funds")
+                    }
+                    if (size != null) {
+                          json.put("size", "$size")
+                    }
 
                     return json.toString()
 
@@ -198,17 +199,22 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+                    var json = basicOrderParams(tradeType, TradeSubType.STOP, productId)
 
-                    json.put("funds", "$amount")
                     json.put("price", "$price")
-//                    json.obj().put("size", "size")
+                    if (funds != null) {
+                        json.put("funds", "$funds")
+                    }
+                    if (size != null) {
+                        json.put("size", "$size")
+                    }
+
 
                     return json.toString()
                 }
                 is send -> {
 //                    var paramList = mutableListOf<Pair<String, String>>()
-//                    paramList.add(Pair("amount", "$amount"))
+//                    paramList.add(Pair("size", "$size"))
 //                    paramList.add(Pair("currency", productId))
 //                    paramList.add(Pair("cryptoAddress", cryptoAddress))
 //
