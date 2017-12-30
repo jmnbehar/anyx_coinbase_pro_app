@@ -39,7 +39,7 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
 
             vi.setOnClickListener { onClick(accounts[i]) }
         } else {
-            vi.txt_account_name.text = accounts[i].currency
+            vi.txt_account_name.text = accounts[i].product.currency
             vi.txt_account_value.text = "${accounts[i].value}"
             vi.txt_account_balance.text = "${accounts[i].balance}"
 

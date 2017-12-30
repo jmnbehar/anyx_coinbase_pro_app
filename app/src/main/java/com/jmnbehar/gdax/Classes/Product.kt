@@ -8,10 +8,12 @@ package com.jmnbehar.gdax.Classes
 class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
     var currency: String
     var price: Double
+    var id: String
 
     init {
         currency = apiProduct.base_currency
         price = candles.first().close
+        id = apiProduct.id
     }
 
     companion object {

@@ -9,32 +9,29 @@ import com.google.gson.reflect.TypeToken
  */
 
 
-class Account(product: Product, val apiAccount: ApiAccount) {
-    var currency: String
-    var balance: Double
+class Account(val product: Product, apiAccount: ApiAccount) {
+    var balance: Double = apiAccount.balance.toDoubleOrZero()
     var value: Double
-    var price: Double
+    var currency = product.currency
+        get() = product.currency
 
     init {
-        currency = product.currency
-        balance = apiAccount.balance.toDouble()
-        price = product.price
-        value = price * balance
+        value = product.price * balance
     }
 
     companion object {
 
         var list = mutableListOf<Account>()
         var btcAccount: Account? = null
-            get() = list.filter { a -> a.currency == "BTC" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == "BTC" }.firstOrNull()
         var ltcAccount: Account? = null
-            get() = list.filter { a -> a.currency == "LTC" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == "LTC" }.firstOrNull()
         var ethAccount: Account? = null
-            get() = list.filter { a -> a.currency == "ETH" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == "ETH" }.firstOrNull()
         var usdAccount: Account? = null
-            get() = list.filter { a -> a.currency == "USD" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == "USD" }.firstOrNull()
         var bchAccount: Account? = null
-            get() = list.filter { a -> a.currency == "BCH" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == "BCH" }.firstOrNull()
 
         fun getAccountInfo(onComplete: () -> Unit) {
             list.clear()

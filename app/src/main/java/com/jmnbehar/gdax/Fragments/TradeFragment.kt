@@ -100,8 +100,6 @@ class TradeFragment : Fragment() {
 
         switchTradeType(tradeType, tradeSubType)
 
-
-
         amountEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 println(tradeType)
@@ -150,9 +148,10 @@ class TradeFragment : Fragment() {
 
     private fun submitOrder() {
         val amount = amountEditText.text.toString().toDoubleOrNull()
-        val funds: Double? = null
+        val size: Double? = null
 
-        fun onComplete(result: Result<String, FuelError>) = {
+        fun onComplete(result: Result<ByteArray
+                , FuelError>) = { result: Result<String, FuelError> ->
             when (result) {
                 is Result.Failure -> {
                     //error
@@ -168,22 +167,36 @@ class TradeFragment : Fragment() {
         }
         when(tradeSubType) {
             TradeSubType.MARKET -> {
-                GdaxApi.orderMarket(tradeType, account.currency, amount, funds).executeRequest { onComplete(it) }
+                val productId = account.product.id
+                GdaxApi.orderMarket(tradeType, productId, size, amount).executePost { result: Result<ByteArray, FuelError> ->
+                    when (result) {
+                        is Result.Failure -> {
+                            //error
+                            println("Error!: ${result.error}")
+                            toast("Error!: ${result.error.response}", activity)
+                        }
+                        is Result.Success -> {
+//                    val data = result.getAs()
+//                    println("Success!: ${data}")
+                            toast("success", context)
+                        }
+                    }
+                }
             }
             TradeSubType.LIMIT -> {
                 val limitPrice = limitEditText.text.toString().toDoubleOrZero()
-                GdaxApi.orderLimit(tradeType, account.currency, limitPrice, amount ?: 0.0).executeRequest { onComplete(it) }
+                GdaxApi.orderLimit(tradeType, account.product.id, limitPrice, amount ?: 0.0).executePost { onComplete(it) }
             }
             TradeSubType.STOP -> {
                 val stopPrice = limitEditText.text.toString().toDoubleOrZero()
-                GdaxApi.orderStop(tradeType, account.currency, stopPrice, amount, funds).executeRequest { onComplete(it) }
+                GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size, amount).executePost { onComplete(it) }
             }
         }
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
         when (tradeSubType) {
-            TradeSubType.MARKET -> totalText.text = (amount / account.price).toString()
+            TradeSubType.MARKET -> totalText.text = (amount / account.product.price).toString()
             TradeSubType.LIMIT -> totalText.text = (amount * limitPrice).toString()
             TradeSubType.STOP -> totalText.text = (amount * limitPrice).toString()
         }

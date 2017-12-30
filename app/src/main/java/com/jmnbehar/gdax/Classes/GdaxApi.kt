@@ -1,12 +1,15 @@
 package com.jmnbehar.gdax.Classes
 
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.android.core.Json
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
+import com.google.gson.Gson
 import com.jmnbehar.gdax.Fragments.TradeFragment
+import org.json.JSONObject
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -51,8 +54,8 @@ sealed class GdaxApi: FuelRouting {
     class ticker(val productId: String) : GdaxApi()
     class candles(val productId: String, val time: Int = 86400, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
     class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double) : GdaxApi()
-    class orderMarket(val tradeType: TradeType, val productId: String, val amount: Double? = null, val size: Double? = null) : GdaxApi()
-    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val amount: Double? = null, val size: Double? = null) : GdaxApi()
+    class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val amount: Double? = null) : GdaxApi()
+    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val amount: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
     class cancelAllOrders() : GdaxApi()
     class listOrders(val status: String) : GdaxApi()
@@ -69,9 +72,23 @@ sealed class GdaxApi: FuelRouting {
     //TODO: make status enum
 
     fun executeRequest(onComplete: (result: Result<String, FuelError>) -> Unit) {
-        Fuel.request(this).responseString { _, _, result ->
+        Fuel.request(this).responseString { request, _, result ->
+            println(request.url)
             onComplete(result)
         }
+    }
+    //TODO: consider combining functions
+    fun executePost(onComplete: (result: Result<ByteArray, FuelError>) -> Unit) {
+       // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
+        Fuel.post(this.request.url.toString())
+                .header(headers)
+                .body(body)
+                .response  { request, _, result ->
+            println(request.url)
+            println("body callback = " + request.bodyCallback.toString())
+            onComplete(result)
+        }
+
     }
 
     override val method: Method
@@ -103,8 +120,8 @@ sealed class GdaxApi: FuelRouting {
                 is products -> "/products"
                 is ticker -> "/products/$productId/ticker"
                 is candles -> "/products/$productId/candles"
-                is orderLimit -> "/orders"
-                is orderMarket -> "/orders"
+                is orderLimit -> "/orders" //?client_oid=GdaxAppTrade&side=${tradeType},type=${TradeSubType.LIMIT},product_id=$productId,funds=$amount"
+                is orderMarket -> "/orders" //?client_oid=GdaxAppTrade&side=${tradeType},type=${TradeSubType.MARKET},product_id=$productId,funds=$amount"
                 is orderStop -> "/orders"
                 is cancelOrder -> "/orders/$orderId"
                 is cancelAllOrders -> "/orders"
@@ -115,15 +132,6 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
-    private fun basicOrderParams(tradeType: TradeType, tradeSubType: TradeSubType, productId: String): MutableList<Pair<String, String>> {
-        val orderId = Pair("client_oid", "GdaxAppTrade")
-        val side = Pair("side", tradeType.toString())
-        val type = Pair("type", tradeSubType.toString())
-        val productId = Pair("product_id", productId)
-
-        return mutableListOf(orderId, side, type, productId)
-    }
-
     override val params: List<Pair<String, Any?>>?
         get() {
             when (this) {
@@ -133,41 +141,6 @@ sealed class GdaxApi: FuelRouting {
 
                     return listOf(Pair("start", start), Pair("end", now), Pair("granularity", granularity.toString()))
                 }
-                is orderLimit -> {
-                    var paramList = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
-
-                    paramList.add(Pair("price", "$price"))
-                    paramList.add(Pair("size", "$amount"))
-
-                    return paramList
-                }
-                is orderMarket -> {
-                    var paramList = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
-
-                    //can add either size or funds, for now lets do funds
-                    if (size != null) {
-                        paramList.add(Pair("size", "$size"))
-                    } else if (amount != null) {
-                        paramList.add(Pair("funds", "$amount"))
-                    } else {
-                        //Throw an error here?
-                    }
-                    return paramList
-                }
-                is orderStop -> {
-                    var paramList = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
-
-                    paramList.add(Pair("price", "$price"))
-                    //can add either size or funds, for now lets do funds
-                    if (size != null) {
-                        paramList.add(Pair("size", "$size"))
-                    } else if (amount != null) {
-                        paramList.add(Pair("funds", "$amount"))
-                    } else {
-                        //Throw an error here?
-                    }
-                    return paramList
-                }
                 is fills -> {
                     var paramList = mutableListOf<Pair<String, String>>()
                     if (orderId != null) {
@@ -176,7 +149,7 @@ sealed class GdaxApi: FuelRouting {
                     if (productId != null) {
                         paramList.add(Pair("product_id", productId))
                     }
-                    return paramList
+                    return paramList.toList()
                 }
                 is send -> {
                     var paramList = mutableListOf<Pair<String, String>>()
@@ -184,16 +157,70 @@ sealed class GdaxApi: FuelRouting {
                     paramList.add(Pair("currency", productId))
                     paramList.add(Pair("cryptoAddress", cryptoAddress))
 
-                    return paramList
+                    return paramList.toList()
                 }
                 else -> return null
             }
         }
 
+    private fun basicOrderParams(tradeType: TradeType, tradeSubType: TradeSubType, productId: String): JSONObject {
+        val json = JSONObject()
+        json.put("client_oid", "GdaxAppTrade")
+        json.put("side", tradeType.toString())
+        json.put("type", tradeSubType.toString())
+        json.put("product_id", productId)
+
+        return json
+    }
+
+
+    val body: String
+        get() {
+            when (this) {
+                is orderLimit -> {
+                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+
+                    json.put("price", "$price")
+                    json.put("size", "$amount")
+
+                    return json.toString()
+                }
+                is orderMarket -> {
+                    //can add either size or funds, for now lets do funds
+                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+
+                    json.put("funds", "$amount")
+//                    json.obj().put("size", "size")
+
+                    return json.toString()
+
+//                    return "{\"product_id\":\"BTC:USD\"}"
+                }
+                is orderStop -> {
+                    //can add either size or funds, for now lets do funds
+                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+
+                    json.put("funds", "$amount")
+                    json.put("price", "$price")
+//                    json.obj().put("size", "size")
+
+                    return json.toString()
+                }
+                is send -> {
+//                    var paramList = mutableListOf<Pair<String, String>>()
+//                    paramList.add(Pair("amount", "$amount"))
+//                    paramList.add(Pair("currency", productId))
+//                    paramList.add(Pair("cryptoAddress", cryptoAddress))
+//
+//                    return paramList.toList()
+                    return ""
+                }
+                else -> return ""
+            }
+        }
 
     override val headers: Map<String, String>?
         get() {
-            val body = ""
             var timestamp = Date().toInstant().epochSecond.toString()
             var message = timestamp + method + path + body
             println("timestamp:")
@@ -209,7 +236,12 @@ sealed class GdaxApi: FuelRouting {
             println("hash:")
             println(hash)
 
-            var headers: Map<String, String> = mapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+            var headers: MutableMap<String, String> = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+
+            if (method == Method.POST) {
+                headers.put("Content-Type", "application/json")
+            }
+
             return headers
         }
 }
