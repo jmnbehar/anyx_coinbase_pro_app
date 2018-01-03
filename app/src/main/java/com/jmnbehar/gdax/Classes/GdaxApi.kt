@@ -55,7 +55,7 @@ sealed class GdaxApi: FuelRouting {
     class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
     class cancelAllOrders() : GdaxApi()
-    class listOrders(val status: String) : GdaxApi()
+    class listOrders(val status: String = "all", val productId: String?) : GdaxApi()
     class getOrder(val orderId: String) : GdaxApi()
     class fills(val orderId: String? = null, val productId: String? = null) : GdaxApi()
     //add position?

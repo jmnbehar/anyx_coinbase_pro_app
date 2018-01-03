@@ -5,10 +5,15 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Activities.MainActivity
-import com.jmnbehar.gdax.Classes.Account
-import com.jmnbehar.gdax.Classes.TradeType
+import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
+import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
+import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
+import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 
 /**
@@ -49,6 +54,41 @@ class ChartFragment : Fragment() {
         sellButton.setOnClickListener {
             MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.SELL), "Trade: Sell")
         }
+
+
+        GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
+            when (result) {
+                is Result.Failure -> {
+                    //error
+                    println("Error!: ${result.error}")
+                }
+                is Result.Success -> {
+                    val gson = Gson()
+
+                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+
+
+                    GdaxApi.fills(productId = account.product.id).executeRequest { result ->
+                        when (result) {
+                            is Result.Failure -> {
+                                //error
+                                println("Error!: ${result.error}")
+                            }
+                            is Result.Success -> {
+                                val gson = Gson()
+
+                                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+
+
+                                rootView.list_history.adapter = HistoryListViewAdapter(inflater, apiOrderList, apiFillList, { })
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         return rootView
     }

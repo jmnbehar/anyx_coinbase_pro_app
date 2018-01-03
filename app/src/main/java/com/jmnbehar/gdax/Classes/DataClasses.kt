@@ -41,6 +41,37 @@ data class ApiProduct(
         val margin_enabled: Boolean,
         val status_message: String?)
 
+data class ApiOrder(
+        val id: String,
+        val size: String,
+        val product_id: String,
+        val side: String,
+        val stp: String,
+        val funds: String,
+        val specified_funds: String,
+        val type: String,
+        val post_only: Boolean,
+        val created_at: String,
+        val done_at: String,
+        val done_reason: String,
+        val fill_fees: String,
+        val filled_size: String,
+        val executed_value: String,
+        val status: String,
+        val settled: Boolean)
+
+data class ApiFill(
+        val trade_id: Int,
+        val product_id: String,
+        val price: String,
+        val size: String,
+        val order_id: String,
+        val created_at: String,
+        val liquidity: String,
+        val fee: String,
+        val settled: Boolean,
+        val side: String)
+
 data class ApiTicker(
         val trade_id: Int,
         val price: String,
