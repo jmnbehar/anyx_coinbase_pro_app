@@ -27,6 +27,16 @@ enum class TradeSubType {
             STOP -> "stop"
         }
     }
+    companion object {
+        fun fromString(string: String) : TradeSubType {
+            return when (string) {
+                "market"  ->  MARKET
+                "limit"  -> LIMIT
+                "stop" -> STOP
+                else -> MARKET
+            }
+        }
+    }
 }
 
 data class ApiProduct(
@@ -43,13 +53,15 @@ data class ApiProduct(
 
 data class ApiOrder(
         val id: String,
-        val size: String,
+        val price: String,
+        val size: String?,
         val product_id: String,
         val side: String,
         val stp: String,
-        val funds: String,
-        val specified_funds: String,
+        val funds: String?,
+        val specified_funds: String?,
         val type: String,
+        val time_in_force: String,
         val post_only: Boolean,
         val created_at: String,
         val done_at: String,
