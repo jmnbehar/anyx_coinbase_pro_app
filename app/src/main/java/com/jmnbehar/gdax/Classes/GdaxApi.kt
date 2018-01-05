@@ -49,7 +49,7 @@ sealed class GdaxApi: FuelRouting {
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
-    class candles(val productId: String, val time: Int = 86400, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
+    class candles(val productId: String, val time: Int = Granularity.oneDay, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
     class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val size: Double) : GdaxApi()
     class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
@@ -57,7 +57,7 @@ sealed class GdaxApi: FuelRouting {
     class cancelAllOrders() : GdaxApi()
     class listOrders(val status: String = "all", val productId: String?) : GdaxApi()
     class getOrder(val orderId: String) : GdaxApi()
-    class fills(val orderId: String? = null, val productId: String? = null) : GdaxApi()
+    class fills(val orderId: String = "all", val productId: String = "all") : GdaxApi()
     //add position?
     //add deposit and withdrawal
     class send(val amount: Double, val productId: String, val cryptoAddress: String) : GdaxApi()
@@ -131,6 +131,7 @@ sealed class GdaxApi: FuelRouting {
 
     override val params: List<Pair<String, Any?>>?
         get() {
+            var paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is candles -> {
                     var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
@@ -139,17 +140,18 @@ sealed class GdaxApi: FuelRouting {
                     return listOf(Pair("start", start), Pair("end", now), Pair("granularity", granularity.toString()))
                 }
                 is fills -> {
-                    var paramList = mutableListOf<Pair<String, String>>()
-                    if (orderId != null) {
-                        paramList.add(Pair("order_id", orderId))
-                    }
-                    if (productId != null) {
-                        paramList.add(Pair("product_id", productId))
-                    }
-                    return paramList.toList()
+                    paramList.add(Pair("order_id", orderId))
+                    paramList.add(Pair("product_id", productId))
+                    return listOf()
+                }
+                is listOrders -> {
+                    paramList.add(Pair("status", status))
+//                    if (productId != null) {
+//                        paramList.add(Pair("product_id", productId))
+//                    }
+                    return listOf()
                 }
                 is send -> {
-                    var paramList = mutableListOf<Pair<String, String>>()
                     paramList.add(Pair("size", "$amount"))
                     paramList.add(Pair("currency", productId))
                     paramList.add(Pair("cryptoAddress", cryptoAddress))
@@ -162,16 +164,13 @@ sealed class GdaxApi: FuelRouting {
 
     private fun basicOrderParams(tradeType: TradeType, tradeSubType: TradeSubType, productId: String): JSONObject {
         val json = JSONObject()
-//        json.put("client_oid", "GdaxAppTrade")
         json.put("side", tradeType.toString())
         json.put("type", tradeSubType.toString())
         json.put("product_id", productId)
-
         return json
     }
 
-
-    val body: String
+    private val body: String
         get() {
             when (this) {
                 is orderLimit -> {
@@ -194,8 +193,6 @@ sealed class GdaxApi: FuelRouting {
                     }
 
                     return json.toString()
-
-//                    return "{\"product_id\":\"BTC:USD\"}"
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
@@ -243,6 +240,7 @@ sealed class GdaxApi: FuelRouting {
             println(hash)
 
             var headers: MutableMap<String, String> = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+
 
             if (method == Method.POST) {
                 headers.put("Content-Type", "application/json")
