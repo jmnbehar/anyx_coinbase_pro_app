@@ -15,11 +15,10 @@
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
 
-    <ImageView
-        android:id="@+id/imageView4"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_launcher_background" />
+        android:layout_height="200dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

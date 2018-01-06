@@ -137,7 +137,10 @@ sealed class GdaxApi: FuelRouting {
                     var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
                     var start = now.minusDays(1)
 
-                    return listOf(Pair("start", start), Pair("end", now), Pair("granularity", granularity.toString()))
+                    paramList.add(Pair("start", start.toString()))
+                    paramList.add(Pair("end", now.toString()))
+                    paramList.add(Pair("granularity", granularity.toString()))
+                    return paramList.toList()
                 }
                 is fills -> {
                     paramList.add(Pair("order_id", orderId))
@@ -146,9 +149,9 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is listOrders -> {
                     paramList.add(Pair("status", status))
-//                    if (productId != null) {
-//                        paramList.add(Pair("product_id", productId))
-//                    }
+                    if (productId != null) {
+                        paramList.add(Pair("product_id", productId))
+                    }
                     return listOf()
                 }
                 is send -> {
