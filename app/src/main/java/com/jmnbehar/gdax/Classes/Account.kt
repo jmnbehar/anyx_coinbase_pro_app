@@ -47,7 +47,6 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
                         val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                         for (apiAccount in apiAccountList) {
-                            //do not reference AccountsFragmet, thats not aprop
                             val relevantProduct = Product.list.filter { p -> p.currency == apiAccount.currency }.firstOrNull()
                             if (relevantProduct != null) {
                                 list.add(Account(relevantProduct, apiAccount))

@@ -3,7 +3,6 @@ package com.jmnbehar.gdax.Activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -12,7 +11,6 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
@@ -78,7 +76,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
         if (savedInstanceState == null) {
-            getProductInfo()
+            getCandles()
         }
     }
 
@@ -106,36 +104,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun getProductInfo() {
+    fun getCandles(time: Int = TimeInSeconds.oneDay) {
         for (product in apiProductList) {
-            GdaxApi.candles(product.id).executeRequest { result ->
-                when (result) {
-                    is Result.Failure -> {
-                        //error
-                        println("Error!: ${result.error}")
-                    }
-                    is Result.Success -> {
-                        addToProductList(product, result.value)
-                    }
+            Candle.getCandles(product.id, time, { candleList ->
+
+                val newProduct = Product(product, candleList)
+                Product.list.add(newProduct)
+                println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
+                if (Product.list.size == apiProductList.size) {
+                    goToFragment(PricesFragment.newInstance(), "chart")
                 }
-            }
-        }
-    }
-
-    fun addToProductList(apiProduct: ApiProduct, candles: String) {
-        val gson = Gson()
-
-        val candleLongList: List<List<Double>> = gson.fromJson(candles, object : TypeToken<List<List<Double>>>() {}.type)
-        var candleList = mutableListOf<Candle>()
-        for (list in candleLongList) {
-            candleList.add(Candle(list[0], list[1], list[2], list[3], list[4], list[5]))
-        }
-        val newProduct = Product(apiProduct,candleList)
-
-        Product.list.add(newProduct)
-        println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
-        if (Product.list.size == apiProductList.size) {
-            goToFragment(PricesFragment.newInstance(), "chart")
+            })
         }
     }
 

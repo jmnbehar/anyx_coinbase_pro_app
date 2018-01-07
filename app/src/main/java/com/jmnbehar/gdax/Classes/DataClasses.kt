@@ -1,5 +1,12 @@
 package com.jmnbehar.gdax.Classes
 
+import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
 /**
  * Created by jmnbehar on 12/19/2017.
  */
@@ -112,7 +119,33 @@ data class Candle(
         val high: Double,
         val open: Double,
         val close: Double,
-        val volume: Double)
+        val volume: Double) {
+     companion object {
+         fun getCandles(productId: String, time: Int, onComplete: (List<Candle>) -> Unit) {
+
+             GdaxApi.candles(productId, time = time).executeRequest { result ->
+                 when (result) {
+                     is Result.Failure -> {
+                         println("Error!: ${result.error}")
+                     }
+                     is Result.Success -> {
+                         val gson = Gson()
+                         val apiCandles = result.value
+                         val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                         var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
+
+                         var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
+                         var start = now.toEpochSecond(ZoneOffset.UTC) - time - 60
+
+                         candles = candles.filter { it.time >=  start }
+
+                         onComplete(candles)
+                     }
+                 }
+             }
+         }
+     }
+}
 
 data class ApiAccount(
         val id: String,

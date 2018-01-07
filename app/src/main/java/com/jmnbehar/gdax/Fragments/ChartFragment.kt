@@ -40,19 +40,7 @@ class ChartFragment : Fragment() {
 
         val candles = account.product.candles
         var lineChart = rootView.chart
-//        lineChart.addCandles(candles)
-
-        candles.withIndex()
-//        val entries = candles.map { Entry(it.time.toFloat(), it.close.toFloat()) }
-        val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-
-        val dataSet = LineDataSet(entries, "Chart")
-        dataSet.setColor(Color.BLUE)
-//    dataSet.setValueTextColors(Color.GRAY)
-        val lineData = LineData(dataSet)
-        rootView.chart.data = lineData
-        rootView.chart.invalidate()
-
+        lineChart.addCandles(candles)
 
         rootView.txt_chart_name.text = account.currency
         rootView.txt_chart_ticker.text = account.currency
@@ -92,7 +80,6 @@ class ChartFragment : Fragment() {
                                 println("Error!: ${result.error}")
                             }
                             is Result.Success -> {
-                                val gson = Gson()
                                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                                 rootView.list_history.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })

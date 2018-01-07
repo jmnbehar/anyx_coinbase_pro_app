@@ -31,7 +31,10 @@ fun DecimalFormat.getBitcoinFormat(value: Double) = "%.8f".format(value)
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 
 fun LineChart.addCandles(candles: List<Candle>) {
-    val entries = candles.map { Entry(it.time.toFloat(), it.close.toFloat()) }
+    val entries = candles.reversed().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
+    println("first time: " + candles.first().time)
+    println("last time: " + candles.last().time)
+
     val dataSet = LineDataSet(entries, "Chart")
     dataSet.setColor(Color.BLUE)
 //    dataSet.setValueTextColors(Color.GRAY)

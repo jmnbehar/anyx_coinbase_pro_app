@@ -8,7 +8,9 @@ import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 import java.time.Clock
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -20,13 +22,18 @@ import javax.crypto.spec.SecretKeySpec
 class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
 
 
-object Granularity {
+object TimeInSeconds {
     val oneMinute = 60
     val fiveMinutes = 300
     val fifteenMinutes = 900
+    val thirtyMinutes = 1800
+    val halfHour = 1800
     val oneHour = 3600
     val sixHours = 21600
     val oneDay = 86400
+    val oneWeek = 604800
+    val twoWeeks = 1209600
+    val oneMonth = 2592000
 }
 
 sealed class GdaxApi: FuelRouting {
@@ -49,7 +56,7 @@ sealed class GdaxApi: FuelRouting {
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
-    class candles(val productId: String, val time: Int = Granularity.oneDay, val granularity: Int = Granularity.fifteenMinutes) : GdaxApi()
+    class candles(val productId: String, val time: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
     class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val size: Double) : GdaxApi()
     class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
@@ -65,7 +72,7 @@ sealed class GdaxApi: FuelRouting {
     //look into reports
 
 
-    //TOOD: consider making productId enum
+    //TODO: consider making productId enum
     //TODO: make status enum
 
     fun executeRequest(onComplete: (result: Result<String, FuelError>) -> Unit) {
@@ -135,10 +142,26 @@ sealed class GdaxApi: FuelRouting {
             when (this) {
                 is candles -> {
                     var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
-                    var start = now.minusDays(1)
+                    var startInt = now.atZone(ZoneId.systemDefault()).toEpochSecond() - time
+                    //var start = now.minusDays(1)
+                    var start = Instant.ofEpochSecond(startInt).atZone(ZoneId.systemDefault()).toLocalDateTime()
 
                     paramList.add(Pair("start", start.toString()))
+
                     paramList.add(Pair("end", now.toString()))
+
+                    if (granularity == null) {
+                        granularity = when (time) {
+                            TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
+                            TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
+                            TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
+                            TimeInSeconds.oneDay -> TimeInSeconds.fiveMinutes
+                            TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
+                            TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
+                            TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
+                            else -> TimeInSeconds.fiveMinutes
+                        }
+                    }
                     paramList.add(Pair("granularity", granularity.toString()))
                     return paramList.toList()
                 }
