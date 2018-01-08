@@ -67,7 +67,7 @@ sealed class GdaxApi: FuelRouting {
     class fills(val orderId: String = "all", val productId: String = "all") : GdaxApi()
     //add position?
     //add deposit and withdrawal
-    class send(val amount: Double, val productId: String, val cryptoAddress: String) : GdaxApi()
+    class send(val amount: Double, val currency: Currency, val cryptoAddress: String) : GdaxApi()
     //add payment methods
     //look into reports
 
@@ -177,13 +177,6 @@ sealed class GdaxApi: FuelRouting {
                     }
                     return listOf()
                 }
-                is send -> {
-                    paramList.add(Pair("size", "$amount"))
-                    paramList.add(Pair("currency", productId))
-                    paramList.add(Pair("cryptoAddress", cryptoAddress))
-
-                    return paramList.toList()
-                }
                 else -> return null
             }
         }
@@ -236,13 +229,13 @@ sealed class GdaxApi: FuelRouting {
                     return json.toString()
                 }
                 is send -> {
-//                    var paramList = mutableListOf<Pair<String, String>>()
-//                    paramList.add(Pair("size", "$size"))
-//                    paramList.add(Pair("currency", productId))
-//                    paramList.add(Pair("cryptoAddress", cryptoAddress))
-//
-//                    return paramList.toList()
-                    return ""
+                    val json = JSONObject()
+
+                    json.put("amount", amount)
+                    json.put("currency", currency.toString())
+//                    json.put("crypto_address", cryptoAddress)
+                    json.put("cryptoAddress", "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio")
+                    return json.toString()
                 }
                 else -> return ""
             }

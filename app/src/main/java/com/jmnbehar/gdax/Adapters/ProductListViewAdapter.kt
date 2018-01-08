@@ -39,8 +39,8 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val weightedChange: Double = (change / open)
 
         val percentChange: Double = weightedChange * 100.0
-        vi.txt_product_name.text = products[i].currency
-        vi.txt_product_ticker.text = products[i].currency
+        vi.txt_product_name.text = products[i].currency.toString()
+        vi.txt_product_ticker.text = products[i].currency.toString()
         vi.txt_product_percent_change.text = "$percentChange"
         vi.txt_product_price.text = "$now"
 

@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 goToFragment(AccountsFragment.newInstance(), "AccountList")
             }
             R.id.nav_send -> {
-                goToFragment(RedFragment.newInstance(), "rojo")
+                goToFragment(SendFragment.newInstance(), "Send")
             }
             R.id.nav_alerts -> {
                 goToFragment(BlueFragment.newInstance(), "azul")

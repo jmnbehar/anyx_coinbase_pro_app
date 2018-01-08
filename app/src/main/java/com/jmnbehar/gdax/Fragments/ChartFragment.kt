@@ -42,8 +42,8 @@ class ChartFragment : Fragment() {
         var lineChart = rootView.chart
         lineChart.addCandles(candles)
 
-        rootView.txt_chart_name.text = account.currency
-        rootView.txt_chart_ticker.text = account.currency
+        rootView.txt_chart_name.text = account.currency.toString()
+        rootView.txt_chart_ticker.text = account.currency.toString()
         rootView.txt_chart_account_balance.text = "${account.balance}"
         rootView.txt_chart_account_value.text = "${account.value}"
 

@@ -65,7 +65,6 @@ class TradeFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_trade, container, false)
 
-//        rootView.setBackgroundColor(Color.YELLOW)
         this.inflater = inflater
 
         titleText = rootView.txt_trade_name
@@ -93,7 +92,7 @@ class TradeFragment : Fragment() {
 
         submitOrderButton = rootView.btn_place_order
 
-        titleText.text = account.currency
+        titleText.text = account.currency.toString()
 
         switchTradeType(tradeType, tradeSubType)
 
@@ -216,7 +215,7 @@ class TradeFragment : Fragment() {
                     }
                     TradeSubType.LIMIT -> {
                         radioButtonLimit.isChecked = true
-                        amountUnitText.text = account.currency
+                        amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
                         limitUnitText.text = localCurrency
                         limitLabelText.text = "Limit Price"
@@ -238,13 +237,13 @@ class TradeFragment : Fragment() {
                 when (tradeSubType) {
                     TradeSubType.MARKET -> {
                         radioButtonMarket.isChecked = true
-                        amountUnitText.text = account.currency
+                        amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.GONE
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
                     TradeSubType.LIMIT -> {
                         radioButtonLimit.isChecked = true
-                        amountUnitText.text = account.currency
+                        amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
                         limitUnitText.text = localCurrency
                         limitLabelText.text = "Limit Price"
@@ -253,7 +252,7 @@ class TradeFragment : Fragment() {
                     }
                     TradeSubType.STOP -> {
                         radioButtonStop.isChecked = true
-                        amountUnitText.text = account.currency
+                        amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
                         limitUnitText.text = localCurrency
                         limitLabelText.text = "Stop Price"

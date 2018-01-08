@@ -23,15 +23,15 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
         var list = mutableListOf<Account>()
         var btcAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == "BTC" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == Currency.BTC }.firstOrNull()
         var ltcAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == "LTC" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == Currency.LTC }.firstOrNull()
         var ethAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == "ETH" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == Currency.ETH }.firstOrNull()
         var usdAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == "USD" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == Currency.USD }.firstOrNull()
         var bchAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == "BCH" }.firstOrNull()
+            get() = list.filter { a -> a.product.currency == Currency.BCH }.firstOrNull()
 
         fun getAccountInfo(onComplete: () -> Unit) {
             list.clear()
@@ -47,7 +47,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
                         val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                         for (apiAccount in apiAccountList) {
-                            val relevantProduct = Product.list.filter { p -> p.currency == apiAccount.currency }.firstOrNull()
+                            val relevantProduct = Product.list.filter { p -> p.currency.toString() == apiAccount.currency }.firstOrNull()
                             if (relevantProduct != null) {
                                 list.add(Account(relevantProduct, apiAccount))
                             }
