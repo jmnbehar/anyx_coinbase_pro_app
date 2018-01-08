@@ -1,22 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
+
+<TextView
+    android:id="@+id/txt_alert_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Alert Page"
+    android:textSize="30sp"
+    tools:layout_editor_absoluteX="48dp"
+    tools:layout_editor_absoluteY="16dp" />
+
+<RadioGroup
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <RadioButton
+        android:id="@+id/rbtn_trade_btc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="BTC" />
+
+    <RadioButton
+        android:id="@+id/rbtn_trade_eth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="ETH" />
+
+    <RadioButton
+        android:id="@+id/rbtn_trade_ltc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="LTC" />
+
+</RadioGroup>
+
+
+<LinearLayout
+    android:id="@+id/layout_alert_price"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layout_alert_price_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txt_alert_price_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="price" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etxt_alert_price"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="20"
+                android:inputType="numberDecimal" />
+
+            <TextView
+                android:id="@+id/txt_alert_price_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="BTC" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>
+
+<Button
+    android:id="@+id/btn_alert_set"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Send" />
 
     <ListView
-        android:layout_width="368dp"
-        android:layout_height="495dp"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp" />
+        android:id="@+id/list_alerts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="77dp"
-        android:text="Large Text Goes Here"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-</android.support.constraint.ConstraintLayout>
+
+</LinearLayout>
