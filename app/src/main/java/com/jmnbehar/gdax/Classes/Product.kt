@@ -61,17 +61,17 @@ class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
     }
 
     companion object {
-        var list = mutableListOf<Product>()
-        var btcProduct: Product? = null
-            get() = list.filter { a -> a.currency == Currency.BTC }.firstOrNull()
-        var ltcProduct: Product? = null
-            get() = list.filter { a -> a.currency == Currency.LTC }.firstOrNull()
-        var ethProduct: Product? = null
-            get() = list.filter { a -> a.currency == Currency.ETH }.firstOrNull()
-        var usdProduct: Product? = null
-            get() = list.filter { a -> a.currency == Currency.USD }.firstOrNull()
-        var bchProduct: Product? = null
-            get() = list.filter { a -> a.currency == Currency.BCH }.firstOrNull()
+        private var list = mutableListOf<Product>()
+
+        fun addToList(product: Product) {
+            list.add(product)
+        }
+        var listSize: Int = 0
+            get() = list.size
+
+        fun withCurrency(currency: Currency): Product? {
+            return list.find { p -> p.currency == currency }
+        }
     }
 
 }

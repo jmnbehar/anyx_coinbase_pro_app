@@ -3,17 +3,13 @@ package com.jmnbehar.gdax.Fragments
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
-import kotlinx.android.synthetic.main.fragment_send.view.*
+import kotlinx.android.synthetic.main.fragment_alerts.view.*
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -48,15 +44,20 @@ class AlertsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_send, container, false)
+        val rootView = inflater!!.inflate(R.layout.fragment_alerts, container, false)
 
         this.inflater = inflater
 
-        titleText = rootView.txt_send_name
+        titleText = rootView.txt_alert_name
 
-        radioButtonBtc = rootView.rbtn_trade_btc
-        radioButtonEth = rootView.rbtn_trade_eth
-        radioButtonLtc = rootView.rbtn_trade_ltc
+        radioButtonBtc = rootView.rbtn_alert_btc
+        radioButtonEth = rootView.rbtn_alert_eth
+        radioButtonLtc = rootView.rbtn_alert_ltc
+
+        priceUnitText = rootView.txt_alert_price_unit
+        priceEditText = rootView.etxt_alert_price
+
+        setButton = rootView.btn_alert_set
 
         titleText.text = currency.toString()
 
@@ -93,7 +94,7 @@ class AlertsFragment : Fragment() {
         priceUnitText.text = currency.toString()
         when (currency) {
             Currency.BTC -> radioButtonBtc.isChecked = true
-            Currency.ETH -> radioButtonBtc.isChecked = true
+            Currency.ETH -> radioButtonEth.isChecked = true
             Currency.LTC -> radioButtonLtc.isChecked = true
         }
 

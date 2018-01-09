@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="horizontal">
 
@@ -20,43 +20,47 @@
             android:text="Bitcoin"
             android:textSize="24sp" />
 
-        <android.support.v4.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:id="@+id/txt_product_price"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="$500" />
-    </LinearLayout>
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/txt_product_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="$500" />
 
-        <TextView
-            android:id="@+id/txt_product_ticker"
+            <TextView
+                android:id="@+id/txt_product_percent_change"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="20%" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="BTC" />
+            android:orientation="vertical">
 
-        <android.support.v4.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            <TextView
+                android:id="@+id/txt_product_amount_owned"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="BTC" />
 
-        <TextView
-            android:id="@+id/txt_product_percent_change"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="20%" />
+            <TextView
+                android:id="@+id/txt_product_account_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="BTC" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -21,21 +21,21 @@ android:orientation="vertical">
     android:orientation="horizontal">
 
     <RadioButton
-        android:id="@+id/rbtn_trade_btc"
+        android:id="@+id/rbtn_alert_btc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="BTC" />
 
     <RadioButton
-        android:id="@+id/rbtn_trade_eth"
+        android:id="@+id/rbtn_alert_eth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="ETH" />
 
     <RadioButton
-        android:id="@+id/rbtn_trade_ltc"
+        android:id="@+id/rbtn_alert_ltc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"

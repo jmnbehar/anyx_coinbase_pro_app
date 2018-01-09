@@ -23,18 +23,18 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
         var list = mutableListOf<Account>()
         var btcAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == Currency.BTC }.firstOrNull()
+            get() = forCurrency(Currency.BTC)
         var ltcAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == Currency.LTC }.firstOrNull()
+            get() = forCurrency(Currency.LTC)
         var ethAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == Currency.ETH }.firstOrNull()
+            get() = forCurrency(Currency.ETH)
         var usdAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == Currency.USD }.firstOrNull()
+            get() = forCurrency(Currency.USD)
         var bchAccount: Account? = null
-            get() = list.filter { a -> a.product.currency == Currency.BCH }.firstOrNull()
+            get() = forCurrency(Currency.BCH)
 
         fun forCurrency(currency: Currency): Account? {
-            return list.filter { a -> a.product.currency == currency }.firstOrNull()
+            return list.find { a -> a.product.currency == currency }
         }
 
         fun getAccountInfo(onComplete: () -> Unit) {
@@ -51,7 +51,8 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
                         val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                         for (apiAccount in apiAccountList) {
-                            val relevantProduct = Product.list.filter { p -> p.currency.toString() == apiAccount.currency }.firstOrNull()
+                            val currency = Currency.fromString(apiAccount.currency)
+                            val relevantProduct = Product.withCurrency( currency )
                             if (relevantProduct != null) {
                                 list.add(Account(relevantProduct, apiAccount))
                             }

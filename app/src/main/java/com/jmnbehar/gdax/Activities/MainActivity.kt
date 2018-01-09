@@ -110,9 +110,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -121,11 +121,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Candle.getCandles(product.id, time, { candleList ->
 
                 val newProduct = Product(product, candleList)
-                Product.list.add(newProduct)
-                println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
-                if (Product.list.size == apiProductList.size) {
+                Product.addToList(newProduct)
+               // println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
+                if (Product.listSize == apiProductList.size) {
                     runAlarms()
-                    goToFragment(PricesFragment.newInstance(), "chart")
+                    Account.getAccountInfo { goToFragment(PricesFragment.newInstance(), "chart") }
                 }
             })
         }
@@ -159,18 +159,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val prefs = Prefs(this)
             val alerts = prefs.alerts
 
-            val demoAlert = Alert(500.0, Currency.BTC, true, false)
-
-            triggerAlert(demoAlert)
+//            val demoAlert = Alert(500.0, Currency.BTC, true, false)
+//
+//            triggerAlert(demoAlert)
 
             for (alert in alerts) {
                 if (!alert.hasTriggered) {
-                    var currentPrice = when (alert.currency) {
-                        Currency.BTC -> Account.btcAccount?.product?.price
-                        Currency.ETH -> Account.ethAccount?.product?.price
-                        Currency.LTC -> Account.ltcAccount?.product?.price
-                        else -> null
-                    }
+                    var currentPrice = Account.forCurrency(alert.currency)?.product?.price
                     if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                         triggerAlert(alert)
                     } else if ((currentPrice != null) && (currentPrice <= alert.price)) {
@@ -181,7 +176,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             runAlarms()
         }
 
-        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 3).toLong())
+        //TODO: add variable time checking, and run on launch
+        //TODO: (ideally run on system launch)
+        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 1000).toLong())
     }
 
     fun triggerAlert(alert: Alert) {
