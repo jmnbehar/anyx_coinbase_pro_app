@@ -1,16 +1,24 @@
 package com.jmnbehar.gdax.Activities
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.media.RingtoneManager
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
+import android.support.v4.app.NotificationCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
@@ -20,7 +28,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    private var notificationManager: NotificationManager? = null
 
+    object Constants {
+        val alertChannelId = "com.jmnbehar.gdax.alerts"
+    }
     companion object {
         var currentFragment: Fragment? = null
         lateinit var apiProductList: List<ApiProduct>
@@ -42,8 +54,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fun setSupportFragmentManager(fragmentManager: FragmentManager) {
             this.fragmentManager = fragmentManager
         }
-
-
         fun goToFragment(fragment: Fragment, tag: String) {
             currentFragment = fragment
             if (fragmentManager.fragments.isEmpty()) {
@@ -74,6 +84,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
 
         if (savedInstanceState == null) {
             getCandles()
@@ -112,11 +124,110 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Product.list.add(newProduct)
                 println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
                 if (Product.list.size == apiProductList.size) {
+                    runAlarms()
                     goToFragment(PricesFragment.newInstance(), "chart")
                 }
             })
         }
     }
+
+    fun updatePrices() {
+        for (account in Account.list) {
+            GdaxApi.ticker(account.product.id).executeRequest { result ->
+                when (result) {
+                    is Result.Failure -> {
+                        println("Error!: ${result.error}")
+                    }
+                    is Result.Success -> {
+                        val gson = Gson()
+                        val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                        val price = ticker.price.toDoubleOrNull()
+                        if (price != null) {
+                            account.product.price = price
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun runAlarms() {
+        val handler = Handler()
+
+        val runnable = Runnable {
+            updatePrices()
+            val prefs = Prefs(this)
+            val alerts = prefs.alerts
+
+            val demoAlert = Alert(500.0, Currency.BTC, true, false)
+
+            triggerAlert(demoAlert)
+
+            for (alert in alerts) {
+                if (!alert.hasTriggered) {
+                    var currentPrice = when (alert.currency) {
+                        Currency.BTC -> Account.btcAccount?.product?.price
+                        Currency.ETH -> Account.ethAccount?.product?.price
+                        Currency.LTC -> Account.ltcAccount?.product?.price
+                        else -> null
+                    }
+                    if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
+                        triggerAlert(alert)
+                    } else if ((currentPrice != null) && (currentPrice <= alert.price)) {
+                        triggerAlert(alert)
+                    }
+                }
+            }
+            runAlarms()
+        }
+
+        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 3).toLong())
+    }
+
+    fun triggerAlert(alert: Alert) {
+        val prefs = Prefs(this)
+        prefs.removeAlert(alert)
+
+        val overUnder = when(alert.triggerIfAbove) {
+            true  -> "over"
+            false -> "under"
+        }
+        val notificationString = "${alert.currency.toString()} is $overUnder ${alert.price}"
+        val intent = Intent(this, this.javaClass)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val notificationBuilder = NotificationCompat.Builder(this, Constants.alertChannelId)
+                .setContentText(notificationString)
+                .setAutoCancel(true)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent)
+
+
+        notificationManager?.notify(0, notificationBuilder.build())
+    }
+
+    private fun createNotificationChannel(id: String, name: String,
+                                          description: String) {
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val importance = NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(id, name, importance)
+
+        channel.description = description
+        channel.enableLights(true)
+        channel.lightColor = Color.RED
+        channel.enableVibration(true)
+        channel.vibrationPattern =
+                longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+        notificationManager?.createNotificationChannel(channel)
+    }
+
+
+
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -153,10 +264,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 goToFragment(SendFragment.newInstance(), "Send")
             }
             R.id.nav_alerts -> {
-                goToFragment(BlueFragment.newInstance(), "azul")
+                goToFragment(AlertsFragment.newInstance(this), "Alerts")
             }
             R.id.nav_settings -> {
-
+                goToFragment(RedFragment.newInstance(), "red page = killer feature")
             }
         }
 

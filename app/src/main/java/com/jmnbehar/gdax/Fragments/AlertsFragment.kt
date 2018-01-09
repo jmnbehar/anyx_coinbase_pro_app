@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Editable
@@ -19,7 +20,6 @@ import kotlinx.android.synthetic.main.fragment_send.view.*
  */
 class AlertsFragment : Fragment() {
 
-
     lateinit private var inflater: LayoutInflater
     lateinit private var titleText: TextView
 
@@ -37,7 +37,11 @@ class AlertsFragment : Fragment() {
 
     companion object {
         lateinit var currency: Currency
-        fun newInstance(): AlertsFragment {
+        lateinit var prefs: Prefs
+        var alerts: MutableSet<Alert> = mutableSetOf()
+        fun newInstance(ctx: Context): AlertsFragment {
+            prefs = Prefs(ctx)
+            alerts = prefs.alerts.toMutableSet()
             return AlertsFragment()
         }
     }
@@ -75,9 +79,12 @@ class AlertsFragment : Fragment() {
 
 
     private fun setAlert() {
-        val amount = priceEditText.text.toString().toDoubleOrZero()
-
-        //TODO: set recurring price checks
+        val price = priceEditText.text.toString().toDoubleOrZero()
+        val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
+        val triggerIfAbove = price < productPrice
+        val alert = Alert(price, currency, triggerIfAbove)
+        alerts.add(alert)
+        prefs.addAlert(alert)
     }
 
     private fun switchCurrency(currency: Currency = this.currency) {

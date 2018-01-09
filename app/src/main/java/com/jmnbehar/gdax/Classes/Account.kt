@@ -33,6 +33,10 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         var bchAccount: Account? = null
             get() = list.filter { a -> a.product.currency == Currency.BCH }.firstOrNull()
 
+        fun forCurrency(currency: Currency): Account? {
+            return list.filter { a -> a.product.currency == currency }.firstOrNull()
+        }
+
         fun getAccountInfo(onComplete: () -> Unit) {
             list.clear()
 
