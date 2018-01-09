@@ -17,7 +17,11 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
 class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<ApiOrder>, var fills: List<ApiFill>, var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return orders.size + fills.size + 2
+        var offset = 1
+        if (orders.isNotEmpty()) { offset++ }
+        else if (fills.isNotEmpty()) { offset++ }
+
+        return orders.size + fills.size + offset
     }
 
     override fun getItem(i: Int): Any {
@@ -30,12 +34,15 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
 
-        if (i == 0) {
+        if ((i == 0) && (orders.isNotEmpty() || fills.isNotEmpty())) {
             var vi = inflater!!.inflate(R.layout.list_header, null)
-            vi.txt_header.text = "ORDERS"
-
+            if (orders.isNotEmpty()) {
+                vi.txt_header.text = "ORDERS"
+            } else {
+                vi.txt_header.text = "FILLS"
+            }
             return vi
-        } else if (i <= orders.size) {
+        } else if ((i <= orders.size) && orders.isNotEmpty()) {
             val index = i - 1
             val order = orders[index]
             var vi = inflater!!.inflate(R.layout.list_row_fill, null)
@@ -67,13 +74,14 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
             vi.txt_fill_time.setTextColor(textColor)
 
             return vi
-        } else if (i == (orders.size + 1)) {
+        } else if ((i == (orders.size + 1)) && orders.isNotEmpty() && fills.isNotEmpty()) {
             var vi = inflater!!.inflate(R.layout.list_header, null)
             vi.txt_header.text = "FILLS"
 
             return vi
-        } else {
-            val index = i - orders.size -  2
+        } else if (fills.isNotEmpty()) {
+            val offset = if (orders.isEmpty()) 1 else  2
+            val index = i - orders.size -  offset
 
             val fill = fills[index]
             var vi = inflater!!.inflate(R.layout.list_row_fill, null)
@@ -93,6 +101,10 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
             vi.txt_fill_fee.setTextColor(textColor)
             vi.txt_fill_time.setTextColor(textColor)
 
+            return vi
+        } else {
+            var vi = inflater!!.inflate(R.layout.list_header, null)
+            vi.txt_header.text = "You have no orders or fills"
             return vi
         }
 
