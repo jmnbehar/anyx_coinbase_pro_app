@@ -21,30 +21,36 @@ class TradeFragment : Fragment() {
 
 
     private lateinit var inflater: LayoutInflater
-    lateinit var titleText: TextView
+    private lateinit var titleText: TextView
 
-    lateinit var radioButtonBuy: RadioButton
-    lateinit var radioButtonSell: RadioButton
+    private lateinit var balancesLayout: LinearLayout
+    private lateinit var usdBalanceText: TextView
+    private lateinit var usdBalanceLabelText: TextView
+    private lateinit var cryptoBalanceText: TextView
+    private lateinit var cryptoBalanceLabelText: TextView
 
-    lateinit var radioButtonMarket: RadioButton
-    lateinit var radioButtonLimit: RadioButton
-    lateinit var radioButtonStop: RadioButton
+    private lateinit var radioButtonBuy: RadioButton
+    private lateinit var radioButtonSell: RadioButton
 
-    lateinit var amountEditText: EditText
-    lateinit var amountUnitText: TextView
-    lateinit var amountLabelText: TextView
+    private lateinit var radioButtonMarket: RadioButton
+    private lateinit var radioButtonLimit: RadioButton
+    private lateinit var radioButtonStop: RadioButton
 
-    lateinit var limitLayout: LinearLayout
-    lateinit var limitEditText: EditText
-    lateinit var limitUnitText: TextView
-    lateinit var limitLabelText: TextView
+    private lateinit var amountEditText: EditText
+    private lateinit var amountUnitText: TextView
+    private lateinit var amountLabelText: TextView
 
-    lateinit var totalLabelText: TextView
-    lateinit var totalText: TextView
+    private lateinit var limitLayout: LinearLayout
+    private lateinit var limitEditText: EditText
+    private lateinit var limitUnitText: TextView
+    private lateinit var limitLabelText: TextView
 
-    lateinit var advancedOptionsCheckBox: CheckBox
+    private lateinit var totalLabelText: TextView
+    private lateinit var totalText: TextView
 
-    lateinit var submitOrderButton: Button
+    private lateinit var advancedOptionsCheckBox: CheckBox
+
+    private lateinit var submitOrderButton: Button
 
     var tradeSubType: TradeSubType = TradeSubType.MARKET
 
@@ -85,6 +91,11 @@ class TradeFragment : Fragment() {
         limitEditText = rootView.etxt_trade_limit
         limitUnitText = rootView.txt_trade_limit_unit
 
+        usdBalanceText = rootView.txt_trade_usd_balance
+        usdBalanceLabelText = rootView.txt_trade_usd_balance_label
+        cryptoBalanceText = rootView.txt_trade_crypto_balance
+        cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
+
         advancedOptionsCheckBox = rootView.cb_trade_advanced
 
         totalLabelText = rootView.txt_trade_total_label
@@ -93,6 +104,11 @@ class TradeFragment : Fragment() {
         submitOrderButton = rootView.btn_place_order
 
         titleText.text = account.currency.toString()
+
+        usdBalanceText.text = Account.usdAccount?.balance.toString()
+
+        cryptoBalanceLabelText.text = account.currency.toString()
+        cryptoBalanceText.text = account.balance.toString()
 
         switchTradeType(tradeType, tradeSubType)
 
@@ -248,7 +264,6 @@ class TradeFragment : Fragment() {
                         limitUnitText.text = localCurrency
                         limitLabelText.text = "Limit Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
-
                     }
                     TradeSubType.STOP -> {
                         radioButtonStop.isChecked = true
@@ -257,7 +272,6 @@ class TradeFragment : Fragment() {
                         limitUnitText.text = localCurrency
                         limitLabelText.text = "Stop Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
-
                     }
                 }
             }

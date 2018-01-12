@@ -233,8 +233,7 @@ sealed class GdaxApi: FuelRouting {
 
                     json.put("amount", amount)
                     json.put("currency", currency.toString())
-//                    json.put("crypto_address", cryptoAddress)
-                    json.put("cryptoAddress", "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio")
+                    json.put("crypto_address", cryptoAddress)
                     return json.toString()
                 }
                 else -> return ""
