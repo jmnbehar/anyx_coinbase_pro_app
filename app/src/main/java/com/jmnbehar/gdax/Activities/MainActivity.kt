@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fun setSupportFragmentManager(fragmentManager: FragmentManager) {
             this.fragmentManager = fragmentManager
         }
+
+
         fun goToFragment(fragment: Fragment, tag: String) {
             currentFragment = fragment
             if (fragmentManager.fragments.isEmpty()) {
@@ -124,6 +126,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Product.addToList(newProduct)
                // println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
                 if (Product.listSize == apiProductList.size) {
+                    loopThroughAlerts()
                     runAlarms()
                     Account.getAccountInfo { goToFragment(PricesFragment.newInstance(), "chart") }
                 }
@@ -151,34 +154,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun runAlarms() {
+    private fun runAlarms() {
         val handler = Handler()
 
         val runnable = Runnable {
             updatePrices()
-            val prefs = Prefs(this)
-            val alerts = prefs.alerts
 
-//            val demoAlert = Alert(500.0, Currency.BTC, true, false)
-//
-//            triggerAlert(demoAlert)
+            loopThroughAlerts()
 
-            for (alert in alerts) {
-                if (!alert.hasTriggered) {
-                    var currentPrice = Account.forCurrency(alert.currency)?.product?.price
-                    if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
-                        triggerAlert(alert)
-                    } else if ((currentPrice != null) && (currentPrice <= alert.price)) {
-                        triggerAlert(alert)
-                    }
-                }
-            }
             runAlarms()
         }
 
         //TODO: add variable time checking, and run on launch
         //TODO: (ideally run on system launch)
         handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 1000).toLong())
+    }
+
+    fun loopThroughAlerts() {
+        val prefs = Prefs(this)
+        val alerts = prefs.alerts
+        for (alert in alerts) {
+            if (!alert.hasTriggered) {
+                var currentPrice = Account.forCurrency(alert.currency)?.product?.price
+                if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
+                    triggerAlert(alert)
+                } else if ((currentPrice != null) && (currentPrice <= alert.price)) {
+                    triggerAlert(alert)
+                }
+            }
+        }
     }
 
     fun triggerAlert(alert: Alert) {

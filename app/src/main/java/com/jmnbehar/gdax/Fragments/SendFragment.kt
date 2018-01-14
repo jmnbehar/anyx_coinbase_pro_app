@@ -79,6 +79,8 @@ class SendFragment : Fragment() {
 
         switchCurrency()
 
+        radioButtonBtc.isChecked = true
+
         radioButtonBtc.setOnClickListener {
             switchCurrency(Currency.BTC)
         }
@@ -94,11 +96,18 @@ class SendFragment : Fragment() {
         return rootView
     }
 
-
     private fun submitSend() {
         val amount = amountEditText.text.toString().toDoubleOrZero()
-        val destination = destinationEditText.text.toString()
-//        var size: Double? = null
+     //   val destination = destinationEditText.text.toString()
+        val destination = "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio"
+
+        val min = when (currency) {
+            Currency.BTC -> .0001
+            Currency.ETH -> .001
+            Currency.BCH -> .001
+            Currency.LTC -> .1
+            else -> 100.0
+        }
 
         fun onComplete(result: Result<ByteArray, FuelError>) {
             when (result) {
@@ -113,8 +122,12 @@ class SendFragment : Fragment() {
             }
         }
 
-        GdaxApi.send(amount, currency, destination).executePost { result ->
-            onComplete(result)
+        if (amount > min) {
+            GdaxApi.send(amount, currency, destination).executePost { result ->
+                onComplete(result)
+            }
+        } else {
+            toast("error! Trying to send less than minimum which is $min", context)
         }
     }
 
@@ -123,11 +136,6 @@ class SendFragment : Fragment() {
 
         amountUnitText.text = currency.toString()
         destinationLabelText.text = "Destination ($currency address)"
-        when (currency) {
-            Currency.BTC -> radioButtonBtc.isChecked = true
-            Currency.ETH -> radioButtonBtc.isChecked = true
-            Currency.LTC -> radioButtonLtc.isChecked = true
-        }
 
     }
 
