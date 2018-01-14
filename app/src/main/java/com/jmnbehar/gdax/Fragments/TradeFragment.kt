@@ -13,6 +13,8 @@ import com.github.kittinunf.result.Result
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
+import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.alert
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -53,6 +55,7 @@ class TradeFragment : Fragment() {
     companion object {
         var tradeType = TradeType.BUY
         var localCurrency = "USD"
+
         lateinit var account: Account
         fun newInstance(accountIn: Account, tradeTypeIn: TradeType): TradeFragment {
             account = accountIn
@@ -136,7 +139,55 @@ class TradeFragment : Fragment() {
             switchTradeType(tradeSubType =  TradeSubType.STOP)
         }
 
-        submitOrderButton.setOnClickListener { submitOrder() }
+
+
+
+        submitOrderButton.setOnClickListener {
+//            alert {
+//                ankoView() {
+//                    editText()
+//                }
+//            }.show()
+
+
+            alert {
+                title = "Alert"
+                positiveButton("Confirm") { submitOrder() }
+
+                val amount = amountEditText.text.toString().toDoubleOrZero()
+                val limitPrice = limitEditText.text.toString().toDoubleOrZero()
+
+                val cryptoTotal = totalInCrypto(amount, limitPrice)
+                val dollarTotal = totalInDollars(amount, limitPrice)
+
+                customView {
+                    linearLayout {
+                        verticalLayout {
+                            linearLayout {
+                                textView("Total ${account.currency}:")
+                                textView( "%.8f".format(cryptoTotal)).lparams { textAlignment = right }
+                                padding = dip(5)
+                            }.lparams(width = matchParent) {}
+                            linearLayout {
+                                textView("Total $localCurrency:")
+                                textView( "%.2f".format(dollarTotal)).lparams { textAlignment = right }
+                                padding = dip(5)
+                            }.lparams(width = matchParent) {}
+                            linearLayout {
+                                textView("Total fees:")
+                                textView("%.2f".format(feeEstimate(dollarTotal))).lparams { textAlignment = right }
+                                padding = dip(5)
+                            }.lparams(width = matchParent) {}
+
+                            checkBox("Don't show this again")
+                        }.lparams(width = matchParent) {leftMargin = dip(10) }
+                    }
+                }
+
+                positiveButton("Confirm") { submitOrder() }
+                negativeButton("Cancel") { }
+            }.show()
+        }
 
         return rootView
     }
@@ -184,16 +235,62 @@ class TradeFragment : Fragment() {
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
-        when (tradeType) {
+        totalText.text = totalText(amount, limitPrice)
+    }
+
+    private fun totalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : String {
+        return when (tradeType) {
             TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET -> totalText.text = "%.8f".format(amount / account.product.price)
-                TradeSubType.LIMIT -> totalText.text = "%.2f".format(amount * limitPrice)
-                TradeSubType.STOP -> totalText.text = "%.8f".format(amount/limitPrice)
+                TradeSubType.MARKET ->  "%.8f".format(totalInCrypto(amount, limitPrice))
+                TradeSubType.LIMIT -> "%.2f".format(totalInDollars(amount, limitPrice))
+                TradeSubType.STOP ->  "%.8f".format(totalInCrypto(amount, limitPrice))
             }
             TradeType.SELL -> when (tradeSubType) {
-                TradeSubType.MARKET -> totalText.text = "%.2f".format(amount * account.product.price)
-                TradeSubType.LIMIT -> totalText.text = "%.2f".format(amount * limitPrice)
-                TradeSubType.STOP -> totalText.text = "%.2f".format(amount * limitPrice)
+                TradeSubType.MARKET ->  "%.2f".format(totalInDollars(amount, limitPrice))
+                TradeSubType.LIMIT ->  "%.2f".format(totalInDollars(amount, limitPrice))
+                TradeSubType.STOP ->  "%.2f".format(totalInDollars(amount, limitPrice))
+            }
+        }
+    }
+
+    private fun totalInDollars(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
+        return when (tradeType) {
+            TradeType.BUY -> when (tradeSubType) {
+                TradeSubType.MARKET -> amount
+                TradeSubType.LIMIT -> amount * limitPrice
+                TradeSubType.STOP -> amount
+            }
+            TradeType.SELL -> when (tradeSubType) {
+                TradeSubType.MARKET -> amount * account.product.price
+                TradeSubType.LIMIT -> amount * limitPrice
+                TradeSubType.STOP -> amount * limitPrice
+            }
+        }
+    }
+
+    private fun totalInCrypto(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
+        return when (tradeType) {
+            TradeType.BUY -> when (tradeSubType) {
+                TradeSubType.MARKET -> amount / account.product.price
+                TradeSubType.LIMIT -> amount
+                TradeSubType.STOP -> amount/limitPrice
+            }
+            TradeType.SELL -> amount
+        }
+    }
+
+    private fun feeEstimate(amount: Double) : Double {
+        //TODO: make this work
+        return when (tradeType) {
+            TradeType.BUY -> when (tradeSubType) {
+                TradeSubType.MARKET -> amount * .01
+                TradeSubType.LIMIT -> 0.0
+                TradeSubType.STOP -> 0.0
+            }
+            TradeType.SELL -> when (tradeSubType) {
+                TradeSubType.MARKET -> amount * .01
+                TradeSubType.LIMIT -> amount * .01
+                TradeSubType.STOP -> amount * .01
             }
         }
     }
