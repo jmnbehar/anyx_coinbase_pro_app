@@ -12,9 +12,9 @@ import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.ApiCredentials
 import com.jmnbehar.gdax.Classes.GdaxApi
 import com.jmnbehar.gdax.Classes.Prefs
-import com.jmnbehar.gdax.Classes.toast
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 

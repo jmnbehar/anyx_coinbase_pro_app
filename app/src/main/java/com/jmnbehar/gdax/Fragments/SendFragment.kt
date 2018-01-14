@@ -1,7 +1,6 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +10,13 @@ import com.github.kittinunf.result.Result
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
+import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class SendFragment : Fragment() {
+class SendFragment : RefreshFragment() {
 
 
     lateinit private var inflater: LayoutInflater
@@ -91,7 +92,15 @@ class SendFragment : Fragment() {
             switchCurrency(Currency.LTC)
         }
 
-        sendButton.setOnClickListener { submitSend() }
+        sendButton.setOnClickListener {
+            val amount = amountEditText.text.toString()
+            val destination = destinationEditText.text.toString()
+            alert {
+                title = "Send $amount $currency to $destination"
+
+                positiveButton("Confirm") { submitSend() }
+                negativeButton("Cancel") { }
+            }.show()}
 
         return rootView
     }
@@ -114,10 +123,10 @@ class SendFragment : Fragment() {
                 is Result.Failure -> {
                     //error
                     println("Error!: ${result.error}")
-                    toast("Error!: ${result.error}", context)
+                    toast("Error!: ${result.error}")
                 }
                 is Result.Success -> {
-                    toast("success", context)
+                    toast("success")
                 }
             }
         }
@@ -127,7 +136,7 @@ class SendFragment : Fragment() {
                 onComplete(result)
             }
         } else {
-            toast("error! Trying to send less than minimum which is $min", context)
+            toast("error! Trying to send less than minimum which is $min")
         }
     }
 

@@ -15,11 +15,12 @@ import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class TradeFragment : Fragment() {
+class TradeFragment : RefreshFragment() {
 
 
     private lateinit var inflater: LayoutInflater
@@ -159,17 +160,8 @@ class TradeFragment : Fragment() {
 
 
         submitOrderButton.setOnClickListener {
-//            alert {
-//                ankoView() {
-//                    editText()
-//                }
-//            }.show()
-
-
             alert {
                 title = "Alert"
-                positiveButton("Confirm") { submitOrder() }
-
                 val amount = amountEditText.text.toString().toDoubleOrZero()
                 val limitPrice = limitEditText.text.toString().toDoubleOrZero()
 
@@ -218,12 +210,12 @@ class TradeFragment : Fragment() {
                 is Result.Failure -> {
                     //error
                     println("Error!: ${result.error}")
-                    toast("Error!: ${result.error}", context)
+                    toast("Error!: ${result.error}")
                 }
                 is Result.Success -> {
 //                    val data = result.getAs()
 //                    println("Success!: ${data}")
-                    toast("success", context)
+                    toast("success")
                 }
             }
         }

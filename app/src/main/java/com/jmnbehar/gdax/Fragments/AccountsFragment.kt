@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_accounts.view.*
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class AccountsFragment : Fragment() {
+class AccountsFragment : RefreshFragment() {
     lateinit var listView: ListView
     lateinit var totalValueTextView: TextView
     lateinit var inflater: LayoutInflater

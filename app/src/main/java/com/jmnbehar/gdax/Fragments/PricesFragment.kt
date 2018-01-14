@@ -6,15 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.Product
+import com.jmnbehar.gdax.Classes.RefreshFragment
+import com.jmnbehar.gdax.Classes.setHeightBasedOnChildren
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class PricesFragment : Fragment() {
+class PricesFragment : RefreshFragment() {
     var currentProduct: Product? = null
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
@@ -35,11 +39,17 @@ class PricesFragment : Fragment() {
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
-//            listView.adapter = GroupMemberListViewAdapter(inflater, group.members.toTypedArray())
         }
 
-        rootView.list_products.adapter = ProductListViewAdapter(inflater, selectGroup )
+        listView.adapter = ProductListViewAdapter(inflater, selectGroup )
+        listView.setHeightBasedOnChildren()
 
         return rootView
     }
+
+    override fun refresh(onComplete: () -> Unit) {
+        (activity as MainActivity).updatePrices()
+        onComplete()
+    }
+
 }

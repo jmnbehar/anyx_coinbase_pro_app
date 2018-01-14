@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -21,8 +22,10 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class ChartFragment : Fragment() {
+class ChartFragment : RefreshFragment() {
     private lateinit var inflater: LayoutInflater
+
+    private lateinit var historyList: ListView
 
     companion object {
         lateinit var account: Account
@@ -58,8 +61,14 @@ class ChartFragment : Fragment() {
         sellButton.setOnClickListener {
             MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.SELL), "Trade: Sell")
         }
+        historyList = rootView.list_history
 
+        refresh {  }
 
+        return rootView
+    }
+
+    override fun refresh(onComplete: () -> Unit) {
         GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
             when (result) {
                 is Result.Failure -> {
@@ -82,15 +91,14 @@ class ChartFragment : Fragment() {
                             is Result.Success -> {
                                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                                rootView.list_history.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                                historyList.setHeightBasedOnChildren()
+                                onComplete()
                             }
                         }
                     }
                 }
             }
         }
-
-
-        return rootView
     }
 }

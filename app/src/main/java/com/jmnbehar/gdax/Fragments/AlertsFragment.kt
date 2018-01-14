@@ -2,7 +2,6 @@ package com.jmnbehar.gdax.Fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,7 @@ import kotlinx.android.synthetic.main.fragment_alerts.view.*
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class AlertsFragment : Fragment() {
+class AlertsFragment : RefreshFragment() {
 
     lateinit private var inflater: LayoutInflater
     lateinit private var titleText: TextView
@@ -35,6 +34,7 @@ class AlertsFragment : Fragment() {
         lateinit var currency: Currency
         lateinit var prefs: Prefs
         var alerts: MutableSet<Alert> = mutableSetOf()
+
         fun newInstance(ctx: Context): AlertsFragment {
             prefs = Prefs(ctx)
             alerts = prefs.alerts.toMutableSet()

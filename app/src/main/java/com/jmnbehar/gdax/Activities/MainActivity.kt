@@ -10,7 +10,6 @@ import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.view.GravityCompat
@@ -26,6 +25,9 @@ import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.support.v4.onRefresh
+
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var notificationManager: NotificationManager? = null
@@ -34,7 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alertChannelId = "com.jmnbehar.gdax.alerts"
     }
     companion object {
-        var currentFragment: Fragment? = null
+        var currentFragment: RefreshFragment? = null
         lateinit var apiProductList: List<ApiProduct>
         lateinit var fragmentManager: FragmentManager
         fun newIntent(context: Context, result: String): Intent {
@@ -56,7 +58,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
 
-        fun goToFragment(fragment: Fragment, tag: String) {
+        fun goToFragment(fragment: RefreshFragment, tag: String) {
             currentFragment = fragment
             if (fragmentManager.fragments.isEmpty()) {
                 fragmentManager
@@ -88,6 +90,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
         createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
+
+        swipeContainer.onRefresh {
+            if (currentFragment != null) {
+                currentFragment?.refresh { swipeContainer.isRefreshing = false }
+            } else {
+                swipeContainer.isRefreshing = false
+            }
+
+        }
 
         if (savedInstanceState == null) {
             getCandles()
@@ -226,10 +237,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         notificationManager?.createNotificationChannel(channel)
     }
-
-
-
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.

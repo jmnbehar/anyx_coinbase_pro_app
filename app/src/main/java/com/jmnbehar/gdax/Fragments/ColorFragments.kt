@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.jmnbehar.gdax.Classes.RefreshFragment
 import com.jmnbehar.gdax.R
 
 /**
@@ -14,7 +15,7 @@ import com.jmnbehar.gdax.R
 
 
 
-class RedFragment : Fragment() {
+class RedFragment : RefreshFragment() {
     companion object {
         fun newInstance(): RedFragment
         {
@@ -26,23 +27,6 @@ class RedFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_red, container, false)
         rootView.setBackgroundColor(Color.RED)
-        return rootView
-    }
-}
-
-
-class BlueFragment : Fragment() {
-    companion object {
-        fun newInstance(): BlueFragment
-        {
-            return BlueFragment()
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
-        rootView.setBackgroundColor(Color.BLUE)
         return rootView
     }
 }

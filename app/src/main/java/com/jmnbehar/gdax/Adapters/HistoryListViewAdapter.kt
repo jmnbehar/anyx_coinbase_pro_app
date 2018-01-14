@@ -14,15 +14,14 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<ApiOrder>, var fills: List<ApiFill>, var onClick: (Account) -> Unit) : BaseAdapter() {
+class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, var fills: List<ApiFill>, var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        var offset = 1
-        if (orders.isNotEmpty()) { offset++ }
-        else if (fills.isNotEmpty()) { offset++ }
-
         return orders.size + fills.size + offset
     }
+
+    var offset : Int = 1
+        get() = if (orders.isNotEmpty() && fills.isNotEmpty()) { 2 } else { 1 }
 
     override fun getItem(i: Int): Any {
         return i
@@ -35,7 +34,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
 
         if ((i == 0) && (orders.isNotEmpty() || fills.isNotEmpty())) {
-            var vi = inflater!!.inflate(R.layout.list_header, null)
+            var vi = inflater.inflate(R.layout.list_header, null)
             if (orders.isNotEmpty()) {
                 vi.txt_header.text = "ORDERS"
             } else {
@@ -45,7 +44,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
         } else if ((i <= orders.size) && orders.isNotEmpty()) {
             val index = i - 1
             val order = orders[index]
-            var vi = inflater!!.inflate(R.layout.list_row_fill, null)
+            var vi = inflater.inflate(R.layout.list_row_fill, null)
             vi.txt_fill_fee.text = "order item"
 
             val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
@@ -80,8 +79,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater?, var orders: List<Api
 
             return vi
         } else if (fills.isNotEmpty()) {
-            val offset = if (orders.isEmpty()) 1 else  2
-            val index = i - orders.size -  offset
+            val index = i - (orders.size + offset)
 
             val fill = fills[index]
             var vi = inflater!!.inflate(R.layout.list_row_fill, null)

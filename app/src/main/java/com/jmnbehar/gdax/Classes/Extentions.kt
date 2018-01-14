@@ -1,32 +1,49 @@
 package com.jmnbehar.gdax.Classes
 
-import android.content.Context
 import android.graphics.Color
 import android.support.v4.app.Fragment
-import android.widget.Toast
+import android.widget.ListView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import java.text.DecimalFormat
+import android.view.ViewGroup
+import android.view.View.MeasureSpec
+import android.view.View
+
 
 /**
  * Created by josephbehar on 12/28/17.
  */
 
 
-fun Context.toast(message: CharSequence) =
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-fun Context.toastLong(message: CharSequence) =
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+open class RefreshFragment: Fragment() {
+    open fun refresh(onComplete: () -> Unit) {
+        onComplete()
+    }
+}
 
+fun ListView.setHeightBasedOnChildren() {
+    val listAdapter = adapter ?: return
+    val desiredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED)
+    var totalHeight = 0
+    var view: View? = null
+    for (i in 0 until listAdapter.count) {
+        view = listAdapter.getView(i, view, this)
+        if (i == 0) {
+            view?.layoutParams = (ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
 
-fun Fragment.toast(message: CharSequence, context: Context) =
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-fun Fragment.toastLong(message: CharSequence, context: Context) =
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        view!!.measure(desiredWidth, MeasureSpec.UNSPECIFIED)
+        totalHeight += view!!.measuredHeight
+    }
+    val params = layoutParams
+    params.height = totalHeight + dividerHeight * (listAdapter.count - 1)
+    layoutParams = params
+}
 
-fun DecimalFormat.getBitcoinFormat(value: Double) = "%.8f".format(value)
+fun DecimalFormat.btcFormat(value: Double) = "%.8f".format(value)
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 
