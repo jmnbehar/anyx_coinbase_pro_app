@@ -16,7 +16,8 @@ import kotlinx.android.synthetic.main.list_row_product.view.*
 class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return Account.list.size
+        //return Account.list.size
+        return 3
     }
 
     override fun getItem(i: Int): Any {
@@ -30,7 +31,13 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         var vi = inflater!!.inflate(R.layout.list_row_product, null)
 
-        val account = Account.list[i]
+        val account = when (i) {
+            0 -> Account.btcAccount
+            1 -> Account.ethAccount
+            2 -> Account.ltcAccount
+            else -> Account.list[i]
+        } ?: Account.list[i]
+       // val account = Account.list[i]
 
         val candles = account.product.candles
         val currentPrice = account.product.price

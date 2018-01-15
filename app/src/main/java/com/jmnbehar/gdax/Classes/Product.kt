@@ -54,9 +54,10 @@ class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
     var price: Double
     var id: String
 
+
     init {
         currency = Currency.fromString(apiProduct.base_currency)
-        price = candles.first().close
+        price = candles.firstOrNull()?.close ?: 0.0
         id = apiProduct.id
     }
 
@@ -72,6 +73,8 @@ class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
         fun withCurrency(currency: Currency): Product? {
             return list.find { p -> p.currency == currency }
         }
+
+        fun fiatProduct(currency: String) = Product(ApiProduct(currency, currency, "0", "0", "0", "0", "0", "0", false, "0"), listOf(Candle(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)))
     }
 
 }

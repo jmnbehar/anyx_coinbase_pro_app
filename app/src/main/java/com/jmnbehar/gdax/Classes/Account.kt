@@ -105,6 +105,8 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                             val relevantProduct = Product.withCurrency( currency )
                             if (relevantProduct != null) {
                                 list.add(Account(relevantProduct, apiAccount))
+                            } else if (currency == Currency.USD) {
+                                list.add(Account(Product.fiatProduct(currency.toString()), apiAccount))
                             }
                         }
                         onComplete()
