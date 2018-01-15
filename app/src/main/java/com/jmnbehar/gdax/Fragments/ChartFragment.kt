@@ -7,6 +7,11 @@ import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
 import com.github.kittinunf.result.Result
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartGestureListener
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Activities.MainActivity
@@ -15,18 +20,23 @@ import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
+import android.view.MotionEvent
+import com.github.mikephil.charting.listener.ChartTouchListener
+
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class ChartFragment : RefreshFragment() {
+class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
     private lateinit var inflater: LayoutInflater
 
     private lateinit var historyList: ListView
 
+    private lateinit var priceText: TextView
+
     private lateinit var balanceText: TextView
     private lateinit var valueText: TextView
-
+    private lateinit var lineChart: LineChart
     private var chartLength = TimeInSeconds.oneDay
 
     companion object {
@@ -44,15 +54,19 @@ class ChartFragment : RefreshFragment() {
         this.inflater = inflater
 
         val candles = account.product.candles
-        var lineChart = rootView.chart
-        lineChart.addCandles(candles)
+        lineChart = rootView.chart
+        lineChart.configure(candles, account.currency, true, true)
+        lineChart.setOnChartValueSelectedListener(this)
+        lineChart.onChartGestureListener = this
 
         rootView.txt_chart_name.text = account.currency.toString()
         rootView.txt_chart_ticker.text = account.currency.toString()
 
         balanceText = rootView.txt_chart_account_balance
         valueText = rootView.txt_chart_account_value
+        priceText = rootView.txt_chart_price
 
+        priceText.text = "${account.product.price}"
         balanceText.text = "${account.balance}"
         valueText.text = "${account.value}"
 
@@ -95,6 +109,28 @@ class ChartFragment : RefreshFragment() {
 
         return rootView
     }
+
+    override fun onValueSelected(entry: Entry, h: Highlight) {
+        priceText.text = entry.y.toString()
+    }
+
+    override fun onNothingSelected() {
+        priceText.text = account.product.price.fiatFormat()
+        lineChart.highlightValues(arrayOf<Highlight>())
+    }
+
+    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        toast("gesture started")
+    }
+    override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        onNothingSelected()
+    }
+    override fun onChartLongPressed(me: MotionEvent) { }
+    override fun onChartDoubleTapped(me: MotionEvent) { }
+    override fun onChartSingleTapped(me: MotionEvent) { }
+    override fun onChartFling(me1: MotionEvent, me2: MotionEvent, velocityX: Float, velocityY: Float) { }
+    override fun onChartScale(me: MotionEvent, scaleX: Float, scaleY: Float) { }
+    override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     override fun refresh(onComplete: () -> Unit) {
         GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
@@ -140,6 +176,8 @@ class ChartFragment : RefreshFragment() {
                                                             account.updateAccount(newBalance, newPrice)
                                                             historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
                                                             historyList.setHeightBasedOnChildren()
+
+                                                            priceText.text = "${account.product.price}"
 
                                                             balanceText.text = "${account.balance}"
                                                             valueText.text = "${account.value}"

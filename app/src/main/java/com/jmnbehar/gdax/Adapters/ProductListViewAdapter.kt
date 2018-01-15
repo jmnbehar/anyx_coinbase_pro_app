@@ -4,10 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import com.jmnbehar.gdax.Classes.Account
-import com.jmnbehar.gdax.Classes.Product
-import com.jmnbehar.gdax.Classes.addCandles
-import com.jmnbehar.gdax.Classes.fiatFormat
+import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 
 import kotlinx.android.synthetic.main.list_row_product.view.*
@@ -50,8 +47,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         vi.txt_product_account_value.text = "${account.value}"
 
         var lineChart = vi.chart_product
-        lineChart.addCandles(candles)
-        lineChart.setTouchEnabled(false)
+        lineChart.configure(candles, account.currency, false, false)
 
         vi.setOnClickListener { onClick(account.product) }
 
