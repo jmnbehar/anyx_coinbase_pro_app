@@ -51,6 +51,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         var lineChart = vi.chart_product
         lineChart.addCandles(candles)
+        lineChart.setTouchEnabled(false)
 
         vi.setOnClickListener { onClick(account.product) }
 

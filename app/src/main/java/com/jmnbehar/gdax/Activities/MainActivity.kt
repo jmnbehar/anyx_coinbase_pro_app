@@ -96,6 +96,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 R.id.nav_settings -> {
                     goToFragment(RedFragment.newInstance(), "red page = killer feature")
                 }
+                R.id.nav_home -> {
+                    goToFragment(PricesFragment.newInstance(), "red page = killer feature")
+                }
             }
         }
 

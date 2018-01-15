@@ -25,6 +25,10 @@
                 android:icon="@drawable/ic_menu_send"
                 android:title="Accounts" />
             <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Home" />
+            <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
                 android:title="Send" />
