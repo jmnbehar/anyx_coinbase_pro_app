@@ -1,16 +1,12 @@
 package com.jmnbehar.gdax.Fragments
 
-import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
 import com.github.kittinunf.result.Result
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Activities.MainActivity
@@ -18,6 +14,7 @@ import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -26,6 +23,11 @@ class ChartFragment : RefreshFragment() {
     private lateinit var inflater: LayoutInflater
 
     private lateinit var historyList: ListView
+
+    private lateinit var balanceText: TextView
+    private lateinit var valueText: TextView
+
+    private var chartLength = TimeInSeconds.oneDay
 
     companion object {
         lateinit var account: Account
@@ -47,8 +49,12 @@ class ChartFragment : RefreshFragment() {
 
         rootView.txt_chart_name.text = account.currency.toString()
         rootView.txt_chart_ticker.text = account.currency.toString()
-        rootView.txt_chart_account_balance.text = "${account.balance}"
-        rootView.txt_chart_account_value.text = "${account.value}"
+
+        balanceText = rootView.txt_chart_account_balance
+        valueText = rootView.txt_chart_account_value
+
+        balanceText.text = "${account.balance}"
+        valueText.text = "${account.value}"
 
         val buyButton = rootView.btn_chart_buy
         val sellButton = rootView.btn_chart_sell
@@ -63,7 +69,29 @@ class ChartFragment : RefreshFragment() {
         }
         historyList = rootView.list_history
 
-        refresh {  }
+        GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
+            when (result) {
+                is Result.Failure -> println("Error!: ${result.error}")
+                is Result.Success -> {
+                    val gson = Gson()
+                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+                    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+                    GdaxApi.fills(productId = account.product.id).executeRequest { result ->
+                        when (result) {
+                            is Result.Failure -> println("Error!: ${result.error}")
+                            is Result.Success -> {
+                                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                                historyList.setHeightBasedOnChildren()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         return rootView
     }
@@ -72,7 +100,6 @@ class ChartFragment : RefreshFragment() {
         GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
             when (result) {
                 is Result.Failure -> {
-                    //error
                     println("Error!: ${result.error}")
                 }
                 is Result.Success -> {
@@ -85,15 +112,46 @@ class ChartFragment : RefreshFragment() {
                     GdaxApi.fills(productId = account.product.id).executeRequest { result ->
                         when (result) {
                             is Result.Failure -> {
-                                //error
                                 println("Error!: ${result.error}")
                             }
                             is Result.Success -> {
                                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
-                                historyList.setHeightBasedOnChildren()
-                                onComplete()
+                                Candle.getCandles(account.product.id, chartLength, { candleList ->
+                                    account.product.candles = candleList
+                                    GdaxApi.account(account.id).executeRequest {  result ->
+                                        when (result) {
+                                            is Result.Failure -> {
+                                                println("Error!: ${result.error}")
+                                            }
+                                            is Result.Success -> {
+                                                val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                                                val newBalance = apiAccount.balance.toDoubleOrZero()
+
+                                                GdaxApi.ticker(account.product.id).executeRequest { result ->
+                                                    when (result) {
+                                                        is Result.Failure -> {
+                                                            toast("Error!: ${result.error}")
+                                                        }
+                                                        is Result.Success -> {
+                                                            val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                                                            val newPrice = ticker.price.toDoubleOrZero()
+
+                                                            account.updateAccount(newBalance, newPrice)
+                                                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                                                            historyList.setHeightBasedOnChildren()
+
+                                                            balanceText.text = "${account.balance}"
+                                                            valueText.text = "${account.value}"
+
+                                                            onComplete()
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
                             }
                         }
                     }

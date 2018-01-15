@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.toast
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -101,7 +102,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         if (savedInstanceState == null) {
-            getCandles()
+            getCandles {
+                loopThroughAlerts()
+                runAlarms()
+                Account.getAccountInfo { goToFragment(PricesFragment.newInstance(), "chart") }
+            }
         }
     }
 
@@ -129,28 +134,39 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun getCandles(time: Int = TimeInSeconds.oneDay) {
-        for (product in apiProductList) {
-            Candle.getCandles(product.id, time, { candleList ->
-
-                val newProduct = Product(product, candleList)
-                Product.addToList(newProduct)
-               // println("pl size: ${Product.list.size},    apl size: ${apiProductList.size}")
-                if (Product.listSize == apiProductList.size) {
-                    loopThroughAlerts()
-                    runAlarms()
-                    Account.getAccountInfo { goToFragment(PricesFragment.newInstance(), "chart") }
-                }
-            })
+    fun getCandles(time: Int = TimeInSeconds.oneDay, onComplete: () -> Unit) {
+        if (Product.listSize == 0) {
+            for (product in apiProductList) {
+                Candle.getCandles(product.id, time, { candleList ->
+                    val newProduct = Product(product, candleList)
+                    Product.addToList(newProduct)
+                    if (Product.listSize == apiProductList.size) {
+                        onComplete()
+                    }
+                })
+            }
+        } else {
+            var productsUpdated = 0
+            for (account in Account.list) {
+                Candle.getCandles(account.product.id, time, { candleList ->
+                    productsUpdated++
+                    account.product.candles = candleList
+                    if (productsUpdated == Product.listSize) {
+                        onComplete()
+                    }
+                })
+            }
         }
     }
 
-    fun updatePrices() {
+    fun updatePrices(onComplete: () -> Unit) {
+        var tickersUpdated = 0
+        val accountListSize = Account.list.size
         for (account in Account.list) {
             GdaxApi.ticker(account.product.id).executeRequest { result ->
                 when (result) {
                     is Result.Failure -> {
-                        println("Error!: ${result.error}")
+                        toast("Error!: ${result.error}")
                     }
                     is Result.Success -> {
                         val gson = Gson()
@@ -158,6 +174,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {
                             account.product.price = price
+                        }
+                        tickersUpdated++
+                        if (tickersUpdated == accountListSize) {
+                            onComplete()
                         }
                     }
                 }
@@ -169,11 +189,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val handler = Handler()
 
         val runnable = Runnable {
-            updatePrices()
-
-            loopThroughAlerts()
-
-            runAlarms()
+            updatePrices {
+                loopThroughAlerts()
+                runAlarms()
+            }
         }
 
         //TODO: add variable time checking, and run on launch

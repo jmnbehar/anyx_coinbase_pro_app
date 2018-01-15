@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import android.os.Handler
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
@@ -71,12 +72,30 @@ sealed class GdaxApi: FuelRouting {
     //add payment methods
     //look into reports
 
+    var timeLock = 0
+
 
     //TODO: consider making productId enum
     //TODO: make status enum
 
     fun executeRequest(onComplete: (result: Result<String, FuelError>) -> Unit) {
         Fuel.request(this).responseString { request, _, result ->
+            if ((result is Result.Failure) && (result.error.response.statusCode == 429)) {
+                timeLock++
+
+                val handler = Handler()
+                var retry = Runnable {  }
+                retry = Runnable {
+                    timeLock--
+                    if (timeLock <= 0) {
+                        timeLock = 0
+                        executeRequest(onComplete)
+                    } else {
+                        handler.postDelayed(retry, 1000.toLong())
+                    }
+                }
+                handler.postDelayed(retry, 5000.toLong())
+            }
             println(request.url)
             onComplete(result)
         }

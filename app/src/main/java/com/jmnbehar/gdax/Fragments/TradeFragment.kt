@@ -173,17 +173,17 @@ class TradeFragment : RefreshFragment() {
                         verticalLayout {
                             linearLayout {
                                 textView("Total ${account.currency}:")
-                                textView( "%.8f".format(cryptoTotal)).lparams { textAlignment = right }
+                                textView(cryptoTotal.btcFormat()).lparams { textAlignment = right }
                                 padding = dip(5)
                             }.lparams(width = matchParent) {}
                             linearLayout {
                                 textView("Total $localCurrency:")
-                                textView( "%.2f".format(dollarTotal)).lparams { textAlignment = right }
+                                textView( dollarTotal.fiatFormat()).lparams { textAlignment = right }
                                 padding = dip(5)
                             }.lparams(width = matchParent) {}
                             linearLayout {
                                 textView("Total fees:")
-                                textView("%.2f".format(feeEstimate(dollarTotal))).lparams { textAlignment = right }
+                                textView(feeEstimate(dollarTotal).fiatFormat()).lparams { textAlignment = right }
                                 padding = dip(5)
                             }.lparams(width = matchParent) {}
 
@@ -249,14 +249,14 @@ class TradeFragment : RefreshFragment() {
     private fun totalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : String {
         return when (tradeType) {
             TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET ->  "%.8f".format(totalInCrypto(amount, limitPrice))
-                TradeSubType.LIMIT -> "%.2f".format(totalInDollars(amount, limitPrice))
-                TradeSubType.STOP ->  "%.8f".format(totalInCrypto(amount, limitPrice))
+                TradeSubType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
+                TradeSubType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat()
+                TradeSubType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
             }
             TradeType.SELL -> when (tradeSubType) {
-                TradeSubType.MARKET ->  "%.2f".format(totalInDollars(amount, limitPrice))
-                TradeSubType.LIMIT ->  "%.2f".format(totalInDollars(amount, limitPrice))
-                TradeSubType.STOP ->  "%.2f".format(totalInDollars(amount, limitPrice))
+                TradeSubType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat()
+                TradeSubType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat()
+                TradeSubType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat()
             }
         }
     }

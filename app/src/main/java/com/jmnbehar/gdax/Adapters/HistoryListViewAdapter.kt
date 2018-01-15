@@ -50,7 +50,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
-            vi.txt_fill_size.text = "%.8f".format(unfilledSize)
+            vi.txt_fill_size.text = unfilledSize.btcFormat()
             vi.txt_fill_price.text = order.price
             vi.txt_fill_fee.text = order.fill_fees
             vi.txt_fill_time.text = order.created_at

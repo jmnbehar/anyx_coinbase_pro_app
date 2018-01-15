@@ -7,7 +7,6 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import java.text.DecimalFormat
 import android.view.ViewGroup
 import android.view.View.MeasureSpec
 import android.view.View
@@ -43,7 +42,8 @@ fun ListView.setHeightBasedOnChildren() {
     layoutParams = params
 }
 
-fun DecimalFormat.btcFormat(value: Double) = "%.8f".format(value)
+fun Double.btcFormat(): String = "%.8f".format(this)
+fun Double.fiatFormat(): String = "%.2f".format(this)
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 

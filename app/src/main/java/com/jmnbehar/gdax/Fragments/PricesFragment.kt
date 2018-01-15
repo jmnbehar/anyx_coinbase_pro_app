@@ -48,8 +48,12 @@ class PricesFragment : RefreshFragment() {
     }
 
     override fun refresh(onComplete: () -> Unit) {
-        (activity as MainActivity).updatePrices()
-        onComplete()
+        (activity as MainActivity).getCandles {
+            (activity as MainActivity).updatePrices {
+                (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                onComplete()
+            }
+        }
     }
 
 }

@@ -12,26 +12,76 @@ import com.google.gson.reflect.TypeToken
 class Account(val product: Product, apiAccount: ApiAccount) {
     var balance: Double = apiAccount.balance.toDoubleOrZero()
     var value: Double
+    var id: String
     var currency = product.currency
         get() = product.currency
 
     init {
         value = product.price * balance
+        id = apiAccount.id
+    }
+
+    fun updateAccount(balance: Double, price: Double) {
+        product.price = price
+        this.balance = balance
+        value = product.price * balance
+        updateInList()
+    }
+
+    fun updateInList() {
+        list.remove(forCurrency(currency))
+        if (value != null) {
+            list.add(this)
+        }
     }
 
     companion object {
 
         var list = mutableListOf<Account>()
-        var btcAccount: Account? = null
+        var btcAccount: Account?
             get() = forCurrency(Currency.BTC)
-        var ltcAccount: Account? = null
+            set(value) {
+                list.remove(btcAccount)
+                if (value != null) {
+                    list.add(value)
+                }
+            }
+
+        var ltcAccount: Account?
             get() = forCurrency(Currency.LTC)
-        var ethAccount: Account? = null
+            set(value) {
+                list.remove(ltcAccount)
+                if (value != null) {
+                    list.add(value)
+                }
+            }
+
+        var ethAccount: Account?
             get() = forCurrency(Currency.ETH)
-        var usdAccount: Account? = null
+            set(value) {
+                list.remove(ethAccount)
+                if (value != null) {
+                    list.add(value)
+                }
+            }
+
+        var usdAccount: Account?
             get() = forCurrency(Currency.USD)
-        var bchAccount: Account? = null
+            set(value) {
+                list.remove(usdAccount)
+                if (value != null) {
+                    list.add(value)
+                }
+            }
+
+        var bchAccount: Account?
             get() = forCurrency(Currency.BCH)
+            set(value) {
+                list.remove(bchAccount)
+                if (value != null) {
+                    list.add(value)
+                }
+            }
 
         fun forCurrency(currency: Currency): Account? {
             return list.find { a -> a.product.currency == currency }
