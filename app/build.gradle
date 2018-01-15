@@ -44,4 +44,6 @@ dependencies {
     compile "org.jetbrains.anko:anko-sdk25-coroutines:$anko_version"
     compile "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
     compile "org.jetbrains.anko:anko-commons:$anko_version"
+    compile 'com.baoyz.swipemenulistview:library:1.3.0'
+
 }

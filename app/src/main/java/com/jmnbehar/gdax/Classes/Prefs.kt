@@ -45,7 +45,7 @@ class Prefs (context: Context) {
 
     fun removeAlert(alert: Alert) {
         val tempAlerts = alerts.toMutableSet()
-        tempAlerts.remove(alert)
+        tempAlerts.removeAlert(alert)
         alerts = tempAlerts.toSet()
     }
 }

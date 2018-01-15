@@ -23,6 +23,13 @@ open class RefreshFragment: Fragment() {
     }
 }
 
+fun MutableSet<Alert>.removeAlert(alert: Alert) {
+    val removeItem = this.find { a -> alert == a }
+    if (removeItem != null) {
+        this.remove(removeItem)
+    }
+}
+
 fun ListView.setHeightBasedOnChildren() {
     val listAdapter = adapter ?: return
     val desiredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED)

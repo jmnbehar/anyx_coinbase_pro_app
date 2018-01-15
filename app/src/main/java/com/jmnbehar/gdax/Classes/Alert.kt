@@ -4,8 +4,15 @@ package com.jmnbehar.gdax.Classes
  * Created by jmnbehar on 12/20/2017.
  */
 
-class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boolean, var hasTriggered: Boolean = false
-) {
+class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boolean, var hasTriggered: Boolean = false) {
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is Alert) {
+            ((this.currency == other.currency) && (this.price == other.price) && (this.triggerIfAbove == other.triggerIfAbove))
+        } else {
+            false
+        }
+    }
 
     override fun toString(): String {
         var alertString = price.toString() + '\n'

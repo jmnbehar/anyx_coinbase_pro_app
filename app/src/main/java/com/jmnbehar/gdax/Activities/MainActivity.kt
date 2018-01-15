@@ -58,17 +58,57 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             this.fragmentManager = fragmentManager
         }
 
+        fun goToNavigationId(navigationId: Int, context: Context) {
+            when (navigationId) {
+                R.id.nav_btc -> {
+                    val btcAccount = Account.btcAccount
+                    if (btcAccount != null) {
+                        goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
+                    } else {
+                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.btcAccount!!), "BTC Chart") }
+                    }
+                }
+                R.id.nav_eth -> {
+                    val ethAccount = Account.ethAccount
+                    if (ethAccount != null) {
+                        goToFragment(ChartFragment.newInstance(ethAccount), "ETH Chart")
+                    } else {
+                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
+                    }
+                }
+                R.id.nav_ltc -> {
+                    val ltcAccount = Account.ltcAccount
+                    if (ltcAccount != null) {
+                        goToFragment(ChartFragment.newInstance(ltcAccount), "LTC Chart")
+                    } else {
+                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ltcAccount!!), "LTC Chart") }
+                    }
+                }
+                R.id.nav_accounts -> {
+                    goToFragment(AccountsFragment.newInstance(), "AccountList")
+                }
+                R.id.nav_send -> {
+                    goToFragment(SendFragment.newInstance(), "Send")
+                }
+                R.id.nav_alerts -> {
+                    goToFragment(AlertsFragment.newInstance(context), "Alerts")
+                }
+                R.id.nav_settings -> {
+                    goToFragment(RedFragment.newInstance(), "red page = killer feature")
+                }
+            }
+        }
 
         fun goToFragment(fragment: RefreshFragment, tag: String) {
             currentFragment = fragment
-            if (fragmentManager.fragments.isEmpty()) {
-                fragmentManager
+            if (Companion.fragmentManager.fragments.isEmpty()) {
+                Companion.fragmentManager
                         .beginTransaction()
                         .add(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
                         .commit()
             } else {
-                fragmentManager
+                Companion.fragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
@@ -197,7 +237,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //TODO: add variable time checking, and run on launch
         //TODO: (ideally run on system launch)
-        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 1000).toLong())
+//        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 1000).toLong())
+        handler.postDelayed(runnable, (TimeInSeconds.oneMinute * 1000).toLong())
     }
 
     fun loopThroughAlerts() {
@@ -208,7 +249,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 var currentPrice = Account.forCurrency(alert.currency)?.product?.price
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     triggerAlert(alert)
-                } else if ((currentPrice != null) && (currentPrice <= alert.price)) {
+                } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
                     triggerAlert(alert)
                 }
             }
@@ -257,48 +298,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         notificationManager?.createNotificationChannel(channel)
     }
 
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_btc -> {
-                val btcAccount = Account.btcAccount
-                if (btcAccount != null) {
-                    goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
-                } else {
-                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.btcAccount!!), "BTC Chart") }
-                }
-            }
-            R.id.nav_eth -> {
-                val ethAccount = Account.ethAccount
-                if (ethAccount != null) {
-                    goToFragment(ChartFragment.newInstance(ethAccount), "ETH Chart")
-                } else {
-                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
-                }
-            }
-            R.id.nav_ltc -> {
-                val ltcAccount = Account.ltcAccount
-                if (ltcAccount != null) {
-                    goToFragment(ChartFragment.newInstance(ltcAccount), "LTC Chart")
-                } else {
-                    Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ltcAccount!!), "LTC Chart") }
-                }
-            }
-            R.id.nav_accounts -> {
-                goToFragment(AccountsFragment.newInstance(), "AccountList")
-            }
-            R.id.nav_send -> {
-                goToFragment(SendFragment.newInstance(), "Send")
-            }
-            R.id.nav_alerts -> {
-                goToFragment(AlertsFragment.newInstance(this), "Alerts")
-            }
-            R.id.nav_settings -> {
-                goToFragment(RedFragment.newInstance(), "red page = killer feature")
-            }
-        }
+        goToNavigationId(item.itemId, this)
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
+
 }
