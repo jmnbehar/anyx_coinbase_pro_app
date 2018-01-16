@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import com.github.mikephil.charting.listener.ChartTouchListener
+import org.jetbrains.anko.support.v4.swipeRefreshLayout
 
 
 /**
@@ -106,7 +107,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
 
-
         return rootView
     }
 
@@ -119,8 +119,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart.highlightValues(arrayOf<Highlight>())
     }
 
-    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
+    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        MainActivity.swipeRefreshLayout.isEnabled = false
+        LockableScrollView.scrollLocked = true
+    }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        MainActivity.swipeRefreshLayout.isEnabled = true
+        LockableScrollView.scrollLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) { }

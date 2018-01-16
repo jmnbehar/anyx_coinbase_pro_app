@@ -13,6 +13,7 @@ import android.support.design.widget.NavigationView
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.view.GravityCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var currentFragment: RefreshFragment? = null
         lateinit var apiProductList: List<ApiProduct>
         lateinit var fragmentManager: FragmentManager
+        lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
         var btcChartFragment: ChartFragment? = null
         var ethChartFragment: ChartFragment? = null
@@ -137,10 +139,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     goToFragment(FragmentType.SEND)
                 }
                 R.id.nav_alerts -> {
-                    goToFragment(FragmentType.ALERTS)
+                    goToFragment(FragmentType.ALERTS, context = context)
                 }
                 R.id.nav_settings -> {
-                    goToFragment(FragmentType.SETTINGS, context = context)
+                    goToFragment(FragmentType.SETTINGS)
                 }
                 R.id.nav_home -> {
                     goToFragment(FragmentType.PRICES)
@@ -233,13 +235,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
 
-        swipeContainer.onRefresh {
+        swipeRefreshLayout = swipe_refresh_layout
+        swipeRefreshLayout.onRefresh {
             if (currentFragment != null) {
-                currentFragment?.refresh { swipeContainer.isRefreshing = false }
+                currentFragment?.refresh { swipeRefreshLayout.isRefreshing = false }
             } else {
-                swipeContainer.isRefreshing = false
+                swipeRefreshLayout.isRefreshing = false
             }
-
         }
 
         if (savedInstanceState == null) {

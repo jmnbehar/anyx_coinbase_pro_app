@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
  * Created by jmnbehar on 11/5/2017.
  */
 class PricesFragment : RefreshFragment() {
-    var currentProduct: Product? = null
+    private var currentProduct: Product? = null
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
 

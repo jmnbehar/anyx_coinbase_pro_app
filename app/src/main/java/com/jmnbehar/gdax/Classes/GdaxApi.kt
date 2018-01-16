@@ -95,9 +95,10 @@ sealed class GdaxApi: FuelRouting {
                     }
                 }
                 handler.postDelayed(retry, 5000.toLong())
+            } else {
+                println(request.url)
+                onComplete(result)
             }
-            println(request.url)
-            onComplete(result)
         }
     }
     //TODO: consider combining functions

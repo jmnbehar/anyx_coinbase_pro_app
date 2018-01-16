@@ -19,12 +19,6 @@ import com.github.mikephil.charting.components.XAxis
  */
 
 
-open class RefreshFragment: Fragment() {
-    open fun refresh(onComplete: () -> Unit) {
-        onComplete()
-    }
-}
-
 fun MutableSet<Alert>.removeAlert(alert: Alert) {
     val removeItem = this.find { a -> alert == a }
     if (removeItem != null) {

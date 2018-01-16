@@ -65,15 +65,6 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                 }
             }
 
-        var usdAccount: Account?
-            get() = forCurrency(Currency.USD)
-            set(value) {
-                list.remove(usdAccount)
-                if (value != null) {
-                    list.add(value)
-                }
-            }
-
         var bchAccount: Account?
             get() = forCurrency(Currency.BCH)
             set(value) {
@@ -82,6 +73,8 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                     list.add(value)
                 }
             }
+
+        var usdAccount: Account? = null
 
         fun forCurrency(currency: Currency): Account? {
             return list.find { a -> a.product.currency == currency }
@@ -106,7 +99,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                             if (relevantProduct != null) {
                                 list.add(Account(relevantProduct, apiAccount))
                             } else if (currency == Currency.USD) {
-                                list.add(Account(Product.fiatProduct(currency.toString()), apiAccount))
+                                usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
                             }
                         }
                         onComplete()
