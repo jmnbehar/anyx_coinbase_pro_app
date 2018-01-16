@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
@@ -160,46 +162,71 @@ class TradeFragment : RefreshFragment() {
 
 
         submitOrderButton.setOnClickListener {
-            alert {
-                title = "Alert"
-                val amount = amountEditText.text.toString().toDoubleOrZero()
-                val limitPrice = limitEditText.text.toString().toDoubleOrZero()
-
-                val cryptoTotal = totalInCrypto(amount, limitPrice)
-                val dollarTotal = totalInDollars(amount, limitPrice)
-
-                customView {
-                    linearLayout {
-                        verticalLayout {
-                            linearLayout {
-                                textView("Total ${account.currency}:")
-                                textView(cryptoTotal.btcFormat()).lparams { textAlignment = right }
-                                padding = dip(5)
-                            }.lparams(width = matchParent) {}
-                            linearLayout {
-                                textView("Total $localCurrency:")
-                                textView( dollarTotal.fiatFormat()).lparams { textAlignment = right }
-                                padding = dip(5)
-                            }.lparams(width = matchParent) {}
-                            linearLayout {
-                                textView("Total fees:")
-                                textView(feeEstimate(dollarTotal).fiatFormat()).lparams { textAlignment = right }
-                                padding = dip(5)
-                            }.lparams(width = matchParent) {}
-
-                            checkBox("Don't show this again")
-                        }.lparams(width = matchParent) {leftMargin = dip(10) }
+            if (tradeSubType == TradeSubType.MARKET) {
+                GdaxApi.ticker(account.product.id).executeRequest { result ->
+                    when (result) {
+                        is Result.Failure -> {
+                            toast("Error!: ${result.error}")
+                        }
+                        is Result.Success -> {
+                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                            val price = ticker.price.toDoubleOrNull()
+                            confirmPopup(price)
+                        }
                     }
                 }
-
-                positiveButton("Confirm") { submitOrder() }
-                negativeButton("Cancel") { }
-            }.show()
+            } else {
+                confirmPopup()
+            }
         }
 
         return rootView
     }
 
+    private fun confirmPopup(updatedTicker: Double? = null) {
+        val amount = amountEditText.text.toString().toDoubleOrZero()
+        val limitPrice = limitEditText.text.toString().toDoubleOrZero()
+
+        val cryptoTotal = totalInCrypto(amount, limitPrice)
+        val dollarTotal = totalInDollars(amount, limitPrice)
+
+        alert {
+            title = "Alert"
+            customView {
+                linearLayout {
+                    verticalLayout {
+                        if (updatedTicker != null) {
+                            linearLayout {
+                                textView("${account.currency} price:")
+                                textView(updatedTicker.fiatFormat()).lparams { textAlignment = right }
+                                padding = dip(5)
+                            }.lparams(width = matchParent) {}
+                        }
+                        linearLayout {
+                            textView("Total ${account.currency}:")
+                            textView(cryptoTotal.btcFormat()).lparams { textAlignment = right }
+                            padding = dip(5)
+                        }.lparams(width = matchParent) {}
+                        linearLayout {
+                            textView("Total $localCurrency:")
+                            textView( dollarTotal.fiatFormat()).lparams { textAlignment = right }
+                            padding = dip(5)
+                        }.lparams(width = matchParent) {}
+                        linearLayout {
+                            textView("Estimated fees:")
+                            textView(feeEstimate(dollarTotal).fiatFormat()).lparams { textAlignment = right }
+                            padding = dip(5)
+                        }.lparams(width = matchParent) {}
+
+                        checkBox("Don't show this again")
+                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+                }
+            }
+
+            positiveButton("Confirm") { submitOrder() }
+            negativeButton("Cancel") { }
+        }.show()
+    }
 
     private fun submitOrder() {
         val amount = amountEditText.text.toString().toDoubleOrNull()
@@ -216,6 +243,7 @@ class TradeFragment : RefreshFragment() {
 //                    val data = result.getAs()
 //                    println("Success!: ${data}")
                     toast("success")
+                    activity.onBackPressed()
                 }
             }
         }
