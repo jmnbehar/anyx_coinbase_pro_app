@@ -32,24 +32,69 @@ import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var notificationManager: NotificationManager? = null
-
     object Constants {
         val alertChannelId = "com.jmnbehar.gdax.alerts"
     }
+
+    enum class FragmentType {
+        BTC_CHART,
+        BCH_CHART,
+        ETH_CHART,
+        LTC_CHART,
+        ACCOUNT,
+        SEND,
+        ALERTS,
+        SETTINGS,
+        TRADE,
+        PRICES;
+
+
+        override fun toString() : String {
+            return when (this) {
+                BTC_CHART -> "BTC"
+                BCH_CHART -> "BCH"
+                ETH_CHART -> "ETH"
+                LTC_CHART -> "LTC"
+                ACCOUNT -> "ACCOUNT"
+                SEND -> "SEND"
+                ALERTS -> "ALERTS"
+                SETTINGS -> "SETTINGS"
+                TRADE -> "TRADE"
+                PRICES -> "PRICES"
+            }
+        }
+
+    }
+
     companion object {
         var currentFragment: RefreshFragment? = null
         lateinit var apiProductList: List<ApiProduct>
         lateinit var fragmentManager: FragmentManager
+
+        var btcChartFragment: ChartFragment? = null
+        var ethChartFragment: ChartFragment? = null
+        var ltcChartFragment: ChartFragment? = null
+
+        var accountsFragment: AccountsFragment? = null
+
+        var sendFragment: SendFragment? = null
+
+        var alertsFragment: AlertsFragment? = null
+
+        var settingsFragment: RedFragment? = null
+
+        var pricesFragment: PricesFragment? = null
+
         fun newIntent(context: Context, result: String): Intent {
             val intent = Intent(context, MainActivity::class.java)
 
             val gson = Gson()
 
             val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
-
             apiProductList = unfilteredApiProductList.filter {
                 s -> s.quote_currency == "USD" && s.base_currency != "BCH"
             }
+//            apiProductList = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
 
             return intent
         }
@@ -58,47 +103,100 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             this.fragmentManager = fragmentManager
         }
 
+
         fun goToNavigationId(navigationId: Int, context: Context) {
             when (navigationId) {
                 R.id.nav_btc -> {
                     val btcAccount = Account.btcAccount
                     if (btcAccount != null) {
-                        goToFragment(ChartFragment.newInstance(btcAccount), "BTC Chart")
+                        goToFragment(FragmentType.BTC_CHART)
                     } else {
-                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.btcAccount!!), "BTC Chart") }
+                        Account.getAccountInfo { goToFragment(FragmentType.BTC_CHART) }
                     }
                 }
                 R.id.nav_eth -> {
                     val ethAccount = Account.ethAccount
                     if (ethAccount != null) {
-                        goToFragment(ChartFragment.newInstance(ethAccount), "ETH Chart")
+                        goToFragment(FragmentType.ETH_CHART)
                     } else {
-                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ethAccount!!), "ETH Chart") }
+                        Account.getAccountInfo { goToFragment(FragmentType.ETH_CHART) }
                     }
                 }
                 R.id.nav_ltc -> {
                     val ltcAccount = Account.ltcAccount
                     if (ltcAccount != null) {
-                        goToFragment(ChartFragment.newInstance(ltcAccount), "LTC Chart")
+                        goToFragment(FragmentType.LTC_CHART)
                     } else {
-                        Account.getAccountInfo { goToFragment(ChartFragment.newInstance(Account.ltcAccount!!), "LTC Chart") }
+                        Account.getAccountInfo { goToFragment(FragmentType.LTC_CHART) }
                     }
                 }
                 R.id.nav_accounts -> {
-                    goToFragment(AccountsFragment.newInstance(), "AccountList")
+                    goToFragment(FragmentType.ACCOUNT)
                 }
                 R.id.nav_send -> {
-                    goToFragment(SendFragment.newInstance(), "Send")
+                    goToFragment(FragmentType.SEND)
                 }
                 R.id.nav_alerts -> {
-                    goToFragment(AlertsFragment.newInstance(context), "Alerts")
+                    goToFragment(FragmentType.ALERTS)
                 }
                 R.id.nav_settings -> {
-                    goToFragment(RedFragment.newInstance(), "red page = killer feature")
+                    goToFragment(FragmentType.SETTINGS, context = context)
                 }
                 R.id.nav_home -> {
-                    goToFragment(PricesFragment.newInstance(), "red page = killer feature")
+                    goToFragment(FragmentType.PRICES)
                 }
+            }
+        }
+
+        fun goToFragment(fragmentType: FragmentType, account: Account? = null, context: Context? = null) {
+            val fragment = when (fragmentType) {
+
+                FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
+                    //TODO: confirm account is not null
+                    val account = Account.btcAccount!!
+                    ChartFragment.newInstance(account)
+                }
+                FragmentType.BCH_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
+                    //TODO: confirm account is not null
+                    //TODO: switch to actual bch at some point
+                    val account = Account.bchAccount!!
+                    ChartFragment.newInstance(account)
+                }
+                FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
+                    //TODO: confirm account is not null
+                    val account = Account.ethAccount!!
+                    ChartFragment.newInstance(account)
+                }
+                FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
+                    //TODO: confirm account is not null
+                    val account = Account.ltcAccount!!
+                    ChartFragment.newInstance(account)
+                }
+                FragmentType.ACCOUNT -> if (accountsFragment != null ) { accountsFragment } else {
+                    AccountsFragment.newInstance()
+                }
+                FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
+                    SendFragment.newInstance()
+                }
+                FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
+                    AlertsFragment.newInstance(context!!)
+                }
+                FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
+                    RedFragment.newInstance()
+                }
+                FragmentType.PRICES -> if (pricesFragment != null ) { pricesFragment } else {
+                    PricesFragment.newInstance()
+                }
+                FragmentType.TRADE -> {
+                    println("Do not use this function for tradeFragments")
+                    null
+                }
+            }
+            if (fragment != null) {
+                val tag = fragmentType.toString()
+                goToFragment(fragment, tag)
+            } else {
+                println("Error switching fragments")
             }
         }
 
@@ -148,7 +246,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             getCandles {
                 loopThroughAlerts()
                 runAlarms()
-                Account.getAccountInfo { goToFragment(PricesFragment.newInstance(), "chart") }
+                Account.getAccountInfo { goToFragment(FragmentType.PRICES) }
             }
         }
     }
