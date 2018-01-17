@@ -31,6 +31,15 @@ enum class Currency {
         }
     }
 
+    var fullName : String = ""
+        get() = when (this) {
+            BTC -> "Bitcoin"
+            BCH -> "Bitcoin Cash"
+            ETH -> "Ethereum"
+            LTC -> "Litecoin"
+            USD -> "USD"
+        }
+
     companion object {
         fun fromString(string: String) : Currency {
             return when (string) {
@@ -57,7 +66,7 @@ class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
 
     init {
         currency = Currency.fromString(apiProduct.base_currency)
-        price = candles.firstOrNull()?.close ?: 0.0
+        price = candles.lastOrNull()?.close ?: 0.0
         id = apiProduct.id
     }
 

@@ -5,6 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.Account
+import com.jmnbehar.gdax.Classes.Currency
+import com.jmnbehar.gdax.Classes.btcFormat
+import com.jmnbehar.gdax.Classes.fiatFormat
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
 
@@ -35,16 +38,20 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
             accounts.add(usdAccount)
         }
         if(i < accounts.size) {
-            vi.txt_account_name.text = accounts[i].product.currency.toString()
-            vi.txt_account_value.text = "${accounts[i].value}"
-            vi.txt_account_balance.text = "${accounts[i].balance}"
+            val account = accounts[i]
+            vi.txt_account_name.text = account.product.currency.fullName
+            vi.txt_account_value.text = account.value.fiatFormat()
+            if (account.currency != Currency.USD) {
+                vi.txt_account_balance.text = account.balance.btcFormat()
+            } else {
+                vi.txt_account_balance.text = ""
+            }
 
-            vi.setOnClickListener { onClick(accounts[i]) }
+            vi.setOnClickListener { onClick(account) }
         } else {
             vi.txt_account_name.text = "TOTAL"
-            val valuesList = accounts.map { a -> a.value }
-            val totalValue = valuesList.sum()
-            vi.txt_account_value.text = "${totalValue}"
+            val totalValue = Account.list.map { a -> a.value }.sum()
+            vi.txt_account_value.text = totalValue.fiatFormat()
             vi.txt_account_balance.text = ""
 
             vi.setOnClickListener { onClick(accounts[i]) }

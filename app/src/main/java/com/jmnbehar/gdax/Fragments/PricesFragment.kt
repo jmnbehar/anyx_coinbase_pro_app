@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
 import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
@@ -17,6 +18,10 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 class PricesFragment : RefreshFragment() {
     private var currentProduct: Product? = null
     lateinit var listView: ListView
+
+    lateinit var totalValueText: TextView
+    lateinit var totalValueLabelText: TextView
+
     lateinit var inflater: LayoutInflater
 
     companion object {
@@ -32,6 +37,8 @@ class PricesFragment : RefreshFragment() {
 
         listView = rootView.list_products
         this.inflater = inflater
+        totalValueText = rootView.txt_home_total_value
+        totalValueLabelText = rootView.txt_home_total_value_label
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
@@ -44,6 +51,9 @@ class PricesFragment : RefreshFragment() {
             }
             MainActivity.goToNavigationId(equivalentMenuItem, activity)
         }
+
+        totalValueText.text = "$${Account.totalBalance.fiatFormat()}"
+        totalValueLabelText.text = "Account total value"
 
         listView.adapter = ProductListViewAdapter(inflater, selectGroup )
         listView.setHeightBasedOnChildren()

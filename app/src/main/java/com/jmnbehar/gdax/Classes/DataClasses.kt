@@ -139,6 +139,7 @@ data class Candle(
 
                          candles = candles.filter { it.time >=  start }
 
+                         candles = candles.reversed()
                          onComplete(candles)
                      }
                  }

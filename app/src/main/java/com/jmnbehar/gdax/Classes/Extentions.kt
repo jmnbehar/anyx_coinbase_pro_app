@@ -1,7 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
 import android.graphics.Color
-import android.support.v4.app.Fragment
 import android.widget.ListView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
@@ -49,51 +48,3 @@ fun Double.btcFormat(): String = "%.8f".format(this)
 fun Double.fiatFormat(): String = "%.2f".format(this)
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
-
-
-fun LineChart.configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, timeChangable: Boolean) {
-    setDrawGridBackground(false)
-    setDrawBorders(false)
-    var noDescription = Description()
-    noDescription.text = ""
-    description = noDescription
-    legend.isEnabled = false
-    xAxis.setDrawGridLines(false)
-    xAxis.position = XAxis.XAxisPosition.BOTTOM
-    axisLeft.setDrawGridLines(false)
-    axisRight.setDrawGridLines(false)
-    axisLeft.setLabelCount(3, false)
-    axisRight.setLabelCount(3, false)
-
-    setTouchEnabled(touchEnabled)
-
-    setScaleEnabled(false)
-    isDoubleTapToZoomEnabled = false
-
-
-    addCandles(candles, currency)
-}
-
-fun LineChart.addCandles(candles: List<Candle>, currency: Currency) {
-    val entries = candles.reversed().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-    println("first time: " + candles.first().time)
-    println("last time: " + candles.last().time)
-    val dataSet = LineDataSet(entries, "Chart")
-
-    val color = when (currency) {
-        Currency.BTC -> Color.YELLOW
-        Currency.BCH -> Color.GREEN
-        Currency.ETH -> Color.BLUE
-        Currency.LTC -> Color.GRAY
-        Currency.USD -> Color.BLACK
-    }
-    dataSet.color = color
-    dataSet.lineWidth = 2.toFloat()
-    dataSet.setDrawFilled(true)
-    dataSet.fillColor = color
-
-    dataSet.setDrawCircles(false)
-    val lineData = LineData(dataSet)
-    this.data = lineData
-    this.invalidate()
-}

@@ -13,7 +13,8 @@ class Prefs (context: Context) {
     private val PASSPHRASE = "passphrase"
     private val API_KEY = "api_key"
     private val API_SECRET = "api_secret"
-    private val SAVE_PASSWORDS = "save_passwords"
+    private val SAVE_API_INFO = "save_api_info"
+    private val SAVE_PASSPHRASE = "save_passphrase"
     private val ALERTS = "alerts"
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
 
@@ -29,9 +30,18 @@ class Prefs (context: Context) {
         get() = prefs.getString(API_SECRET, "")
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
 
-    var shouldSavePasswords: Boolean
-        get() = prefs.getBoolean(SAVE_PASSWORDS, false)
-        set(value) = prefs.edit().putBoolean(SAVE_PASSWORDS, value).apply()
+    var shouldSaveApiInfo: Boolean
+        get() = prefs.getBoolean(SAVE_API_INFO, false)
+        set(value) {
+            prefs.edit().putBoolean(SAVE_API_INFO, value).apply()
+            if (!value) {
+                shouldSavePassphrase = false
+            }
+        }
+
+    var shouldSavePassphrase: Boolean
+        get() = prefs.getBoolean(SAVE_PASSPHRASE, false)
+        set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<Alert>
         get() = prefs.getStringSet(ALERTS, setOf<String>()).map { s -> Alert.fromString(s) }.toSet()

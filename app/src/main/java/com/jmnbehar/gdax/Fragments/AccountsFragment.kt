@@ -31,7 +31,7 @@ class AccountsFragment : RefreshFragment() {
         val rootView = inflater!!.inflate(R.layout.fragment_accounts, container, false)
 
         listView = rootView.list_accounts
-        totalValueTextView = rootView.txt_accounts_total_value
+
         this.inflater = inflater
 
         val selectGroup = lambda@ { account: Account ->

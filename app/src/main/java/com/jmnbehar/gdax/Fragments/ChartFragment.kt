@@ -23,6 +23,7 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
+import java.sql.Time
 
 
 /**
@@ -55,8 +56,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         this.inflater = inflater
 
         val candles = account.product.candles
+        val timeRange = TimeInSeconds.oneDay
+
+
         lineChart = rootView.chart
-        lineChart.configure(candles, account.currency, true, true)
+        lineChart.configure(candles, account.currency, true, timeRange, true)
         lineChart.setOnChartValueSelectedListener(this)
         lineChart.onChartGestureListener = this
 
@@ -111,7 +115,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        priceText.text = entry.y.toString()
+        priceText.text = entry.y.toDouble().fiatFormat()
     }
 
     override fun onNothingSelected() {
@@ -180,10 +184,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                                                             historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
                                                             historyList.setHeightBasedOnChildren()
 
-                                                            priceText.text = "${account.product.price}"
+                                                            priceText.text = account.product.price.fiatFormat()
 
-                                                            balanceText.text = "${account.balance}"
-                                                            valueText.text = "${account.value}"
+                                                            balanceText.text = account.balance.fiatFormat()
+                                                            valueText.text = account.value.fiatFormat()
 
                                                             onComplete()
                                                         }

@@ -1,13 +1,16 @@
 package com.jmnbehar.gdax.Adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
+import kotlinx.android.synthetic.main.list_row_fill.view.*
 
 import kotlinx.android.synthetic.main.list_row_product.view.*
+import org.jetbrains.anko.textColor
 
 /**
  * Created by jmnbehar on 11/12/2017.
@@ -41,20 +44,32 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         val candles = account.product.candles
         val currentPrice = account.product.price
-        val open = candles.last().open
+        val open = candles.first().open
         val change = currentPrice - open
         val weightedChange: Double = (change / open)
 
         val percentChange: Double = weightedChange * 100.0
-        vi.txt_product_name.text = account.product.currency.toString()
-        vi.txt_product_percent_change.text = percentChange.fiatFormat() + "%"
-        vi.txt_product_price.text = "$currentPrice"
 
-        vi.txt_product_amount_owned.text = "${account.balance}"
-        vi.txt_product_account_value.text = "${account.value}"
+        var productNameText = vi.txt_product_name
+        var percentChangeText = vi.txt_product_percent_change
+        var priceText = vi.txt_product_price
+        var balanceText =  vi.txt_product_amount_owned
+
+        productNameText.text = account.product.currency.toString()
+
+        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.textColor = if (percentChange >= 0) {
+            Color.GREEN
+        } else {
+            Color.RED
+        }
+
+        priceText.text = currentPrice.fiatFormat()
+
+        balanceText.text = "Balance: ${account.balance} ${account.currency}"
 
         var lineChart = vi.chart_product
-        lineChart.configure(candles, account.currency, false, false)
+        lineChart.configure(candles, account.currency, false,  TimeInSeconds.oneDay, false)
 
         vi.setOnClickListener { onClick(account.product) }
 

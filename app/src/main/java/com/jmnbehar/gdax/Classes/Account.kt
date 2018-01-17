@@ -3,6 +3,7 @@ package com.jmnbehar.gdax.Classes
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.android.synthetic.main.list_row_account.view.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
@@ -75,6 +76,9 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             }
 
         var usdAccount: Account? = null
+
+        var totalBalance: Double = 0.0
+            get() = Account.list.map { a -> a.value }.sum() + (Account.usdAccount?.value ?: 0.0)
 
         fun forCurrency(currency: Currency): Account? {
             return list.find { a -> a.product.currency == currency }

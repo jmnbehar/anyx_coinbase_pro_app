@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.CheckBox
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.ApiCredentials
@@ -20,49 +21,92 @@ import se.simbio.encryption.Encryption
 
 class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    lateinit var prefs: Prefs
+    private lateinit var prefs: Prefs
 
-    var apiKey: String? = ""
-    var apiSecret: String? = ""
+    private lateinit var saveApiInfoCheckBox: CheckBox
+    private lateinit var savePassphraseCheckBox: CheckBox
 
-    fun checkUser() {
-        // Check if user is signed in (non-null) and update UI accordingly.
+    private var apiKey: String? = ""
+    private var apiSecret: String? = ""
 
-//        if (currentUser == null) {
-//            //stay here
-//        } else {
-//            val intent = MainActivity.newIntent(this, currentUser)
-//            startActivity(intent)
-//        }
+    private var shouldSaveApiInfo = false
+    private var shouldSavePassphrase = false
 
+    private fun checkUser() : Boolean {
+        if(shouldSaveApiInfo && shouldSavePassphrase) {
+            apiKey = prefs.apiKey
+            apiSecret = prefs.apiSecret
+            var passphrase = prefs.passphrase
+
+            val salt = "GdaxApp"
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(passphrase, salt, iv)
+
+            val apiKeyVal = encryption.decryptOrNull(apiKey)
+            val apiSecretVal = encryption.decryptOrNull(apiSecret)
+            if((apiKeyVal != null) && (apiSecretVal != null)) {
+                var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
+                loginWithCredentials(apiCredentials)
+                return true
+            }
+        }
+        return false
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            checkUser()
-        }
-
-        setContentView(R.layout.activity_login)
-
         prefs = Prefs(this)
+        shouldSaveApiInfo = prefs.shouldSaveApiInfo
+        shouldSavePassphrase = prefs.shouldSavePassphrase
+        if (savedInstanceState == null) {
+            if (!checkUser()) {
+                setContentView(R.layout.activity_login)
 
-        if(prefs.apiKey != "") {
-            apiKey = prefs.apiKey
-            txt_login_api_key.setText("*****")
-        }
-        if (prefs.apiSecret != "") {
-            apiSecret = prefs.apiSecret
-            txt_login_secret.setText("*****")
+
+                if(prefs.apiKey != "") {
+                    apiKey = prefs.apiKey
+                    txt_login_api_key.setText("*****")
+                }
+                if (prefs.apiSecret != "") {
+                    apiSecret = prefs.apiSecret
+                    txt_login_secret.setText("*****")
+                }
+                saveApiInfoCheckBox = cb_save_api_key
+                savePassphraseCheckBox = cb_save_passphrase
+
+                if(shouldSaveApiInfo) {
+                    saveApiInfoCheckBox.isChecked = true
+                    if(shouldSavePassphrase) {
+                        savePassphraseCheckBox.isChecked = true
+                    }
+                } else {
+                    savePassphraseCheckBox.isChecked = false
+                    savePassphraseCheckBox.isEnabled = false
+                }
+
+                saveApiInfoCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                    prefs.shouldSaveApiInfo = isChecked
+                    if (!isChecked) {
+                        savePassphraseCheckBox.isChecked = false
+                        savePassphraseCheckBox.isEnabled = false
+                    } else {
+                        savePassphraseCheckBox.isEnabled = true
+                    }
+                }
+                savePassphraseCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                    prefs.shouldSavePassphrase = isChecked
+                }
+
+                btn_login.setOnClickListener { view ->
+                    showMessage(view,"Button")
+                    btn_login.text = "newButtonText"
+
+                    signIn()
+                }
+            }
         }
 
-        btn_login.setOnClickListener { view ->
-            showMessage(view,"Button")
-            btn_login.text = "newButtonText"
-
-            signIn()
-        }
 
     }
 
@@ -73,14 +117,15 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private fun signIn() {
         // Usage
-        var data: String?
 
         var passphrase = txt_login_passphrase.text.toString()
+
         val salt = "GdaxApp"
         val iv = ByteArray(16)
         val encryption = Encryption.getDefault(passphrase, salt, iv)
 
-        val shouldSavePassword = cb_save_passwords.isChecked
+        shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
+        shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
         apiKey = if (apiKey == prefs.apiKey) {
             encryption.decryptOrNull(apiKey)
@@ -93,37 +138,52 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         } else {
             txt_login_secret.text.toString()
         }
-        
-        if (shouldSavePassword) {
+
+        if (shouldSaveApiInfo) {
             val apiKeyEncrypted = encryption.encrypt(apiKey)
             val apiSecretEncrypted = encryption.encrypt(apiSecret)
             prefs.apiKey = apiKeyEncrypted
             prefs.apiSecret = apiSecretEncrypted
+            if (shouldSavePassphrase)  {
+                prefs.passphrase = passphrase
+            }
+
+            var apiKeyDecrypted = encryption.decryptOrNull(apiKeyEncrypted)
+            var apiSecretDecrypted = encryption.decryptOrNull(apiSecretEncrypted)
+
+            println(apiKeyDecrypted)
+            println(apiSecretDecrypted)
+            toast(apiKeyDecrypted)
         }
         val apiKeyVal = apiKey
         val apiSecretVal = apiSecret
         if((apiKeyVal != null) && (apiSecretVal != null)) {
             var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
 
-            GdaxApi.credentials = apiCredentials
-            GdaxApi.products().executeRequest { result ->
-                when (result) {
-                    is Result.Failure -> {
-                        //error
-                        println("Error!: ${result.error}")
-                    }
-                    is Result.Success -> {
-                        data = result.getAs()
-                        println("Success!: ${data}")
-
-                        val intent = MainActivity.newIntent(this, result.value)
-
-                        startActivity(intent)
-                    }
-                }
-            }
+            loginWithCredentials(apiCredentials)
         } else {
             toast("Wrong Passphrase")
+        }
+    }
+
+    fun loginWithCredentials(credentials: ApiCredentials) {
+        var data: String?
+        GdaxApi.credentials = credentials
+        GdaxApi.products().executeRequest { result ->
+            when (result) {
+                is Result.Failure -> {
+                    //error
+                    println("Error!: ${result.error}")
+                }
+                is Result.Success -> {
+                    data = result.getAs()
+                    println("Success!: ${data}")
+
+                    val intent = MainActivity.newIntent(this, result.value)
+
+                    startActivity(intent)
+                }
+            }
         }
     }
 

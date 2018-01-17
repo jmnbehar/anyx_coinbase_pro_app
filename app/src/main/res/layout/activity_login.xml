@@ -15,14 +15,6 @@
         tools:layout_editor_absoluteY="16dp" />
 
     <EditText
-        android:id="@+id/txt_login_passphrase"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Passphrase"
-        android:inputType="textPassword" />
-
-    <EditText
         android:id="@+id/txt_login_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,11 +30,25 @@
         android:hint="API Secret"
         android:inputType="textPassword" />
 
+    <EditText
+        android:id="@+id/txt_login_passphrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Passphrase"
+        android:inputType="textPassword" />
+
     <CheckBox
-        android:id="@+id/cb_save_passwords"
+        android:id="@+id/cb_save_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save API key and secret" />
+
+    <CheckBox
+        android:id="@+id/cb_save_passphrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Also save passphrase" />
 
     <Button
         android:id="@+id/btn_login"
