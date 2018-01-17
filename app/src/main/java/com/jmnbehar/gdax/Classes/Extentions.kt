@@ -1,16 +1,9 @@
 package com.jmnbehar.gdax.Classes
 
-import android.graphics.Color
 import android.widget.ListView
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import android.view.ViewGroup
 import android.view.View.MeasureSpec
 import android.view.View
-import com.github.mikephil.charting.components.Description
-import com.github.mikephil.charting.components.XAxis
 
 
 /**

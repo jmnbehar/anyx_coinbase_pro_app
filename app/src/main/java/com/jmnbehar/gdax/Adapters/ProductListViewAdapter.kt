@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
-import kotlinx.android.synthetic.main.list_row_fill.view.*
-
 import kotlinx.android.synthetic.main.list_row_product.view.*
 import org.jetbrains.anko.textColor
 

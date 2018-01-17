@@ -3,7 +3,6 @@ package com.jmnbehar.gdax.Classes
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.list_row_account.view.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
