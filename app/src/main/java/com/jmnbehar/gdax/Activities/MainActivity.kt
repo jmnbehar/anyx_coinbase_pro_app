@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         var currentFragment: RefreshFragment? = null
         lateinit var apiProductList: List<ApiProduct>
-        lateinit var fragmentManager: FragmentManager
+        lateinit private var fragmentManager: FragmentManager
         lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
         var btcChartFragment: ChartFragment? = null
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        fun goToFragment(fragmentType: FragmentType, account: Account? = null, context: Context? = null) {
+        fun goToFragment(fragmentType: FragmentType, context: Context? = null) {
             val fragment = when (fragmentType) {
 
                 FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
@@ -238,7 +238,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         swipeRefreshLayout = swipe_refresh_layout
         swipeRefreshLayout.onRefresh {
             if (currentFragment != null) {
-                currentFragment?.refresh { swipeRefreshLayout.isRefreshing = false }
+                currentFragment?.refresh { endRefresh() }
             } else {
                 swipeRefreshLayout.isRefreshing = false
             }
@@ -253,11 +253,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    fun endRefresh() {
+        swipeRefreshLayout.isRefreshing = false
+    }
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
+
+            val fragmentManager = supportFragmentManager
+            val fragmentTag = fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
+            currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
+            currentFragment?.refresh { endRefresh() }
         }
     }
 

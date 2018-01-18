@@ -22,8 +22,6 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import com.github.mikephil.charting.listener.ChartTouchListener
-import org.jetbrains.anko.support.v4.swipeRefreshLayout
-import java.sql.Time
 
 
 /**
@@ -54,26 +52,29 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val rootView = inflater!!.inflate(R.layout.fragment_chart, container, false)
 
         this.inflater = inflater
+        //TODO: investigate autoscroll
 
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
-
+        val currency = account.currency
 
         lineChart = rootView.chart
-        lineChart.configure(candles, account.currency, true, timeRange, true)
+        lineChart.configure(candles, currency, true, timeRange, true)
         lineChart.setOnChartValueSelectedListener(this)
         lineChart.onChartGestureListener = this
 
-        rootView.txt_chart_name.text = account.currency.toString()
-        rootView.txt_chart_ticker.text = account.currency.toString()
+        rootView.txt_chart_name.text = currency.fullName
+        rootView.txt_chart_ticker.text = currency.toString()
+        rootView.img_chart_account_icon.setImageResource(currency.iconId)
 
         balanceText = rootView.txt_chart_account_balance
         valueText = rootView.txt_chart_account_value
         priceText = rootView.txt_chart_price
 
         priceText.text = "${account.product.price}"
-        balanceText.text = "${account.balance}"
-        valueText.text = "${account.value}"
+
+        balanceText.text = "${account.balance.btcFormat()} ${currency}"
+        valueText.text = "$${account.value.fiatFormat()}"
 
         val buyButton = rootView.btn_chart_buy
         val sellButton = rootView.btn_chart_sell
@@ -124,6 +125,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        //TODO: don't lock if its a swipe down
         MainActivity.swipeRefreshLayout.isEnabled = false
         LockableScrollView.scrollLocked = true
     }
@@ -188,6 +190,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                                                             balanceText.text = account.balance.fiatFormat()
                                                             valueText.text = account.value.fiatFormat()
+
+                                                            lineChart.addCandles(candleList, account.currency, TimeInSeconds.oneDay)
 
                                                             onComplete()
                                                         }

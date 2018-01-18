@@ -39,18 +39,19 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
         }
         if(i < accounts.size) {
             val account = accounts[i]
-            vi.txt_account_name.text = account.product.currency.fullName
+            vi.txt_account_name.text = account.currency.fullName
             vi.txt_account_value.text = account.value.fiatFormat()
             if (account.currency != Currency.USD) {
                 vi.txt_account_balance.text = account.balance.btcFormat()
             } else {
                 vi.txt_account_balance.text = ""
             }
+            vi.img_account_icon.setImageResource(account.currency.iconId)
 
             vi.setOnClickListener { onClick(account) }
         } else {
             vi.txt_account_name.text = "TOTAL"
-            val totalValue = Account.list.map { a -> a.value }.sum()
+            val totalValue = accounts.map { a -> a.value }.sum()
             vi.txt_account_value.text = totalValue.fiatFormat()
             vi.txt_account_balance.text = ""
 

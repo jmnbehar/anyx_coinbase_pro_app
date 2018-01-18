@@ -111,10 +111,10 @@ class TradeFragment : RefreshFragment() {
 
         titleText.text = account.currency.toString()
 
-        usdBalanceText.text = Account.usdAccount?.balance.toString()
+        usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
 
         cryptoBalanceLabelText.text = account.currency.toString()
-        cryptoBalanceText.text = account.balance.toString()
+        cryptoBalanceText.text = account.balance.btcFormat()
 
         switchTradeType(tradeType, tradeSubType)
 

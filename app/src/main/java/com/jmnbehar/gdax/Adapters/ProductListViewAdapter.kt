@@ -38,7 +38,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             2 -> Account.ltcAccount
             else -> Account.list[i]
         } ?: Account.list[i]
-       // val account = Account.list[i]
 
         val candles = account.product.candles
         val currentPrice = account.product.price
@@ -52,6 +51,9 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         var percentChangeText = vi.txt_product_percent_change
         var priceText = vi.txt_product_price
         var balanceText =  vi.txt_product_amount_owned
+
+
+        vi.img_product_icon.setImageResource(account.currency.iconId)
 
         productNameText.text = account.product.currency.toString()
 

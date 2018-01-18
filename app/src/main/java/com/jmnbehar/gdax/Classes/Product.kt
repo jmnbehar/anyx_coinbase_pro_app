@@ -1,5 +1,7 @@
 package com.jmnbehar.gdax.Classes
 
+import com.jmnbehar.gdax.R
+
 /**
  * Created by jmnbehar on 12/20/2017.
  */
@@ -38,6 +40,15 @@ enum class Currency {
             ETH -> "Ethereum"
             LTC -> "Litecoin"
             USD -> "USD"
+        }
+
+    var iconId = 0
+        get() = when(this) {
+            BTC -> R.drawable.icon_btc
+            ETH ->  R.drawable.icon_eth
+            LTC -> R.drawable.icon_ltc
+            BCH -> R.drawable.icon_bch
+            USD -> R.drawable.icon_usd
         }
 
     companion object {
