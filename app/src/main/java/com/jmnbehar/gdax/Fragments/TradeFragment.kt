@@ -316,20 +316,21 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun feeEstimate(amount: Double) : Double {
-        //TODO: make this work
-        return when (tradeType) {
-            TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET -> amount * .01
-                TradeSubType.LIMIT -> 0.0
-                TradeSubType.STOP -> 0.0
-            }
-            TradeType.SELL -> when (tradeSubType) {
-                TradeSubType.MARKET -> amount * .01
-                TradeSubType.LIMIT -> amount * .01
-                TradeSubType.STOP -> amount * .01
-            }
+        //TODO: double check that limit and stop trades are REALLY limit or stop trades
+        val baseFee = when (account.currency) {
+            Currency.BTC -> 0.0025
+            Currency.BCH -> 0.0025
+            Currency.ETH -> 0.003
+            Currency.LTC -> 0.003
+            Currency.USD -> 0.0
+        }
+        return when (tradeSubType) {
+            TradeSubType.MARKET -> amount * baseFee
+            TradeSubType.LIMIT -> 0.0
+            TradeSubType.STOP -> 0.0
         }
     }
+
 
     private fun switchTradeType(tradeType: TradeType = this.tradeType, tradeSubType: TradeSubType = this.tradeSubType) {
         this.tradeType = tradeType

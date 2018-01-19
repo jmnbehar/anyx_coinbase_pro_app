@@ -8,6 +8,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import java.time.Instant
 import java.time.ZoneId
@@ -30,7 +31,9 @@ fun LineChart.configure(candles: List<Candle>, currency: Currency, touchEnabled:
     axisLeft.setDrawGridLines(false)
     axisRight.setDrawGridLines(false)
     axisLeft.setLabelCount(3, false)
+    axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
     axisRight.setLabelCount(3, false)
+    axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
 
     setTouchEnabled(touchEnabled)
 
