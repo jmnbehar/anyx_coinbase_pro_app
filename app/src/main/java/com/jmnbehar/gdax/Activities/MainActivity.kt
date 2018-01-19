@@ -33,9 +33,6 @@ import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var notificationManager: NotificationManager? = null
-    object Constants {
-        val alertChannelId = "com.jmnbehar.gdax.alerts"
-    }
 
     enum class FragmentType {
         BTC_CHART,
@@ -263,9 +260,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             super.onBackPressed()
 
             val fragmentManager = supportFragmentManager
-            val fragmentTag = fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
-            currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
-            currentFragment?.refresh { endRefresh() }
+            if (fragmentManager.backStackEntryCount > 0) {
+                val fragmentTag = fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
+                currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
+                currentFragment?.refresh { endRefresh() }
+            } else {
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                intent.putExtra(Constants.exit, true)
+                startActivity(intent)
+            }
         }
     }
 

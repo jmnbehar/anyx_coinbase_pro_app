@@ -56,6 +56,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra("EXIT", false)) {
+            finish();
+        }
         prefs = Prefs(this)
         shouldSaveApiInfo = prefs.shouldSaveApiInfo
         shouldSavePassphrase = prefs.shouldSavePassphrase

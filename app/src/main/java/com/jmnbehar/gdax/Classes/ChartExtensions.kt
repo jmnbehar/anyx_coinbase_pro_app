@@ -29,6 +29,7 @@ fun LineChart.configure(candles: List<Candle>, currency: Currency, touchEnabled:
     xAxis.setDrawGridLines(false)
     xAxis.position = XAxis.XAxisPosition.BOTTOM
 
+
     axisLeft.showOnlyMinMaxValues = true
     axisLeft.setDrawGridLines(false)
     axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
