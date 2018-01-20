@@ -18,6 +18,7 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -316,23 +317,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePrices(onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         for (account in Account.list) {
-            GdaxApi.ticker(account.product.id).executeRequest { result ->
-                when (result) {
-                    is Result.Failure -> {
-                        toast("Error!: ${result.error}")
-                    }
-                    is Result.Success -> {
-                        val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                        val price = ticker.price.toDoubleOrNull()
-                        if (price != null) {
-                            account.product.price = price
-                        }
-                        tickersUpdated++
-                        if (tickersUpdated == accountListSize) {
-                            onComplete()
-                        }
-                    }
+            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                val price = ticker.price.toDoubleOrNull()
+                if (price != null) {
+                    account.product.price = price
+                }
+                tickersUpdated++
+                if (tickersUpdated == accountListSize) {
+                    onComplete()
                 }
             }
         }

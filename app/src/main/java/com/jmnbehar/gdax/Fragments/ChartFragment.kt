@@ -137,73 +137,48 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     override fun refresh(onComplete: () -> Unit) {
-        GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
-            when (result) {
-                is Result.Failure -> {
-                    println("Error!: ${result.error}")
-                }
-                is Result.Success -> {
-                    val gson = Gson()
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+    val gson = Gson()
 
-                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
 
-                    GdaxApi.fills(productId = account.product.id).executeRequest { result ->
-                        when (result) {
-                            is Result.Failure -> {
-                                println("Error!: ${result.error}")
-                            }
-                            is Result.Success -> {
-                                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                                Candle.getCandles(account.product.id, chartLength, { candleList ->
-                                    account.product.candles = candleList
-                                    GdaxApi.account(account.id).executeRequest {  result ->
-                                        when (result) {
-                                            is Result.Failure -> {
-                                                println("Error!: ${result.error}")
-                                            }
-                                            is Result.Success -> {
-                                                val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                                                val newBalance = apiAccount.balance.toDoubleOrZero()
+    GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
 
-                                                GdaxApi.ticker(account.product.id).executeRequest { result ->
-                                                    when (result) {
-                                                        is Result.Failure -> {
-                                                            toast("Error!: ${result.error}")
-                                                        }
-                                                        is Result.Success -> {
-                                                            val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                                                            val newPrice = ticker.price.toDoubleOrZero()
+                Candle.getCandles(account.product.id, chartLength, { candleList ->
+                    account.product.candles = candleList
+                    GdaxApi.account(account.id).executeRequest(onFailure) {  result ->
+                        val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                        val newBalance = apiAccount.balance.toDoubleOrZero()
 
-                                                            account.updateAccount(newBalance, newPrice)
-                                                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
-                                                            historyList.setHeightBasedOnChildren()
+                        GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                            val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                            val newPrice = ticker.price.toDoubleOrZero()
 
-                                                            priceText.text = account.product.price.fiatFormat()
+                            account.updateAccount(newBalance, newPrice)
+                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                            historyList.setHeightBasedOnChildren()
 
-                                                            balanceText.text = account.balance.fiatFormat()
-                                                            valueText.text = account.value.fiatFormat()
+                            priceText.text = account.product.price.fiatFormat()
+
+                            balanceText.text = account.balance.fiatFormat()
+                            valueText.text = account.value.fiatFormat()
 //                                                            val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
 //                                                            val newCandle = Candle(now.toDouble(), newPrice, newPrice, newPrice, newPrice, 0.0)
 //                                                            val mutableCandles = candleList.toMutableList()
 //                                                            mutableCandles.add(newCandle)
 
-                                                            lineChart.addCandles(candleList, account.currency, TimeInSeconds.oneDay)
+                            lineChart.addCandles(candleList, account.currency, TimeInSeconds.oneDay)
 
-                                                            onComplete()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                            }
+                            onComplete()
                         }
                     }
-                }
+                })
             }
         }
     }

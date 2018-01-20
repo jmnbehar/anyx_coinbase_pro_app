@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -121,27 +122,22 @@ data class Candle(
         val close: Double,
         val volume: Double) {
      companion object {
+
          fun getCandles(productId: String, time: Int, onComplete: (List<Candle>) -> Unit) {
-             GdaxApi.candles(productId, time = time).executeRequest { result ->
-                 when (result) {
-                     is Result.Failure -> {
-                         println("Error!: ${result.error}")
-                     }
-                     is Result.Success -> {
-                         val gson = Gson()
-                         val apiCandles = result.value
-                         val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-                         var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
+             val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+             GdaxApi.candles(productId, time = time).executeRequest(onFailure) { result ->
+                 val gson = Gson()
+                 val apiCandles = result.value
+                 val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                 var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
 
-                         var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
-                         var start = now.toEpochSecond(ZoneOffset.UTC) - time - 60
+                 var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
+                 var start = now.toEpochSecond(ZoneOffset.UTC) - time - 60
 
-                         candles = candles.filter { it.time >=  start }
+                 candles = candles.filter { it.time >=  start }
 
-                         candles = candles.reversed()
-                         onComplete(candles)
-                     }
-                 }
+                 candles = candles.reversed()
+                 onComplete(candles)
              }
          }
      }

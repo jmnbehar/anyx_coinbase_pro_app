@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -82,28 +83,22 @@ class PricesFragment : RefreshFragment() {
                     }
                 })
             } else {
-                GdaxApi.ticker(account.product.id).executeRequest { result ->
-                    when (result) {
-                        is Result.Failure -> {
-                            toast("Error!: ${result.error}")
-                        }
-                        is Result.Success -> {
-                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                            val price = ticker.price.toDoubleOrNull()
-                            if (price != null) {
-                                account.product.price = price
+                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val price = ticker.price.toDoubleOrNull()
+                    if (price != null) {
+                        account.product.price = price
 //                                val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
 //                                val newCandle = Candle(now.toDouble(), price, price, price, price, 0.0)
 //                                val mutableCandles = account.product.candles.toMutableList()
 //                                mutableCandles.add(newCandle)
 //                                account.product.candles = mutableCandles
-                            }
-                            productsUpdated++
-                            if (productsUpdated == productListSize) {
-                                (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                                onComplete()
-                            }
-                        }
+                    }
+                    productsUpdated++
+                    if (productsUpdated == productListSize) {
+                        (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                        onComplete()
                     }
                 }
             }

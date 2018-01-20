@@ -11,6 +11,9 @@ import android.view.View
  */
 
 
+
+class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
+
 fun MutableSet<Alert>.removeAlert(alert: Alert) {
     val removeItem = this.find { a -> alert == a }
     if (removeItem != null) {

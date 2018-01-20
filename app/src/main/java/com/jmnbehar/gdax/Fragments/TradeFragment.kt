@@ -159,21 +159,13 @@ class TradeFragment : RefreshFragment() {
         }
 
 
-
-
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         submitOrderButton.setOnClickListener {
             if (tradeSubType == TradeSubType.MARKET) {
-                GdaxApi.ticker(account.product.id).executeRequest { result ->
-                    when (result) {
-                        is Result.Failure -> {
-                            toast("Error!: ${result.error}")
-                        }
-                        is Result.Success -> {
-                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                            val price = ticker.price.toDoubleOrNull()
-                            confirmPopup(price)
-                        }
-                    }
+                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val price = ticker.price.toDoubleOrNull()
+                    confirmPopup(price)
                 }
             } else {
                 confirmPopup()

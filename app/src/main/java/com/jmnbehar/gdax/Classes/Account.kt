@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -85,29 +86,20 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
         fun getAccountInfo(onComplete: () -> Unit) {
             list.clear()
+            val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
 
-            GdaxApi.accounts().executeRequest { result ->
-                when (result) {
-                    is Result.Failure -> {
-                        //error
-                        println("Error!: ${result.error}")
-                    }
-                    is Result.Success -> {
-                        val gson = Gson()
-
-                        val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                        for (apiAccount in apiAccountList) {
-                            val currency = Currency.fromString(apiAccount.currency)
-                            val relevantProduct = Product.withCurrency( currency )
-                            if (relevantProduct != null) {
-                                list.add(Account(relevantProduct, apiAccount))
-                            } else if (currency == Currency.USD) {
-                                usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
-                            }
-                        }
-                        onComplete()
+            GdaxApi.accounts().executeRequest(onFailure) { result ->
+                val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                for (apiAccount in apiAccountList) {
+                    val currency = Currency.fromString(apiAccount.currency)
+                    val relevantProduct = Product.withCurrency( currency )
+                    if (relevantProduct != null) {
+                        list.add(Account(relevantProduct, apiAccount))
+                    } else if (currency == Currency.USD) {
+                        usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
                     }
                 }
+                onComplete()
             }
         }
     }

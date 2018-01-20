@@ -7,9 +7,6 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
 import java.time.Clock
 import java.time.Instant
@@ -22,8 +19,6 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Created by jmnbehar on 12/18/2017.
  */
-
-class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
 
 
 sealed class GdaxApi: FuelRouting {
@@ -65,32 +60,6 @@ sealed class GdaxApi: FuelRouting {
 
 
     //TODO: make status enum
-    //TODO: make input onSuccess and onFailure instead of unified onComplete
-
-    fun executeRequest(onComplete: (result: Result<String, FuelError>) -> Unit) {
-        Fuel.request(this).responseString { request, _, result ->
-            if ((result is Result.Failure) && (result.error.response.statusCode == 429)) {
-                timeLock++
-
-                val handler = Handler()
-                var retry = Runnable {  }
-                retry = Runnable {
-                    timeLock--
-                    if (timeLock <= 0) {
-                        timeLock = 0
-                        executeRequest(onComplete)
-                    } else {
-                        handler.postDelayed(retry, 1000.toLong())
-                    }
-                }
-                handler.postDelayed(retry, 5000.toLong())
-            } else {
-                println(request.url)
-                onComplete(result)
-            }
-        }
-    }
-
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
         Fuel.request(this).responseString { request, _, result ->
             when (result) {
@@ -119,6 +88,7 @@ sealed class GdaxApi: FuelRouting {
             }
         }
     }
+
     //TODO: consider combining functions
     fun executePost(onComplete: (result: Result<ByteArray, FuelError>) -> Unit) {
        // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
