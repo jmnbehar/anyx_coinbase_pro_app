@@ -20,16 +20,19 @@ import android.view.Menu
 import android.view.MenuItem
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.getAs
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
+import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.toast
+import se.simbio.encryption.Encryption
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -82,7 +85,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var alertsFragment: AlertsFragment? = null
 
-        var settingsFragment: RedFragment? = null
+        var settingsFragment: SettingsFragment? = null
 
         var pricesFragment: PricesFragment? = null
 
@@ -191,7 +194,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     AlertsFragment.newInstance(context!!)
                 }
                 FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
-                    RedFragment.newInstance()
+                    SettingsFragment.newInstance()
                 }
                 FragmentType.PRICES -> if (pricesFragment != null ) { pricesFragment } else {
                     PricesFragment.newInstance()
@@ -257,6 +260,62 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 runAlarms()
                 Account.getAccountInfo { goToFragment(FragmentType.PRICES) }
             }
+        }
+    }
+
+
+    private fun signIn() {
+        val iv = ByteArray(16)
+        val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
+
+        shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
+        shouldSavePassphrase = saveApiInfoCheckBox.isChecked
+
+        apiKey = if (apiKey == prefs.apiKey) {
+            encryption.decryptOrNull(apiKey)
+        } else {
+            txt_login_api_key.text.toString()
+        }
+
+        apiSecret = if (apiSecret == prefs.apiSecret) {
+            encryption.decryptOrNull(apiSecret)
+        } else {
+            txt_login_secret.text.toString()
+        }
+
+        if (shouldSaveApiInfo) {
+            val apiKeyEncrypted = encryption.encrypt(apiKey)
+            val apiSecretEncrypted = encryption.encrypt(apiSecret)
+            prefs.apiKey = apiKeyEncrypted
+            prefs.apiSecret = apiSecretEncrypted
+            if (shouldSavePassphrase)  {
+                prefs.passphrase = passphrase
+            }
+        }
+        val apiKeyVal = apiKey
+        val apiSecretVal = apiSecret
+        if((apiKeyVal != null) && (apiSecretVal != null)) {
+            var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
+
+            loginWithCredentials(apiCredentials)
+        } else {
+            toast("Wrong Passphrase")
+        }
+    }
+
+
+    fun loginWithCredentials(credentials: ApiCredentials) {
+        var data: String?
+        GdaxApi.credentials = credentials
+        //TODO: move this call into mainactivity
+        //TODO: make mainactivity default 1st activity, bounce back to login if not available
+
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
+            data = result.getAs()
+            println("Success!: ${data}")
+            val intent = MainActivity.newIntent(this, result.value)
+            startActivity(intent)
         }
     }
 

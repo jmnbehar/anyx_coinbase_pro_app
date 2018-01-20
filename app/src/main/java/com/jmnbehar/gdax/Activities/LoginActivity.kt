@@ -12,6 +12,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.ApiCredentials
+import com.jmnbehar.gdax.Classes.Constants
 import com.jmnbehar.gdax.Classes.GdaxApi
 import com.jmnbehar.gdax.Classes.Prefs
 import com.jmnbehar.gdax.R
@@ -125,9 +126,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         var passphrase = txt_login_passphrase.text.toString()
 
-        val salt = "GdaxApp"
         val iv = ByteArray(16)
-        val encryption = Encryption.getDefault(passphrase, salt, iv)
+        val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
 
         shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         shouldSavePassphrase = saveApiInfoCheckBox.isChecked
@@ -152,13 +152,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             if (shouldSavePassphrase)  {
                 prefs.passphrase = passphrase
             }
-
-            var apiKeyDecrypted = encryption.decryptOrNull(apiKeyEncrypted)
-            var apiSecretDecrypted = encryption.decryptOrNull(apiSecretEncrypted)
-
-            println(apiKeyDecrypted)
-            println(apiSecretDecrypted)
-            toast(apiKeyDecrypted)
         }
         val apiKeyVal = apiKey
         val apiSecretVal = apiSecret
@@ -170,6 +163,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             toast("Wrong Passphrase")
         }
     }
+
 
     fun loginWithCredentials(credentials: ApiCredentials) {
         var data: String?

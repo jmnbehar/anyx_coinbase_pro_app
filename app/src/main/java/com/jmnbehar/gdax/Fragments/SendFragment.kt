@@ -100,7 +100,8 @@ class SendFragment : RefreshFragment() {
 
                 positiveButton("Confirm") { submitSend() }
                 negativeButton("Cancel") { }
-            }.show()}
+            }.show()
+        }
 
         return rootView
     }

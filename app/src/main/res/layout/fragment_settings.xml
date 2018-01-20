@@ -1,22 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ListView
-        android:layout_width="368dp"
-        android:layout_height="495dp"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp" />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/textView2"
         android:layout_width="wrap_content"
-        android:layout_height="77dp"
-        android:text="Large Text Goes Here"
+        android:layout_height="wrap_content"
+        android:text="Settings page"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
-</android.support.constraint.ConstraintLayout>
+
+    <CheckBox
+        android:id="@+id/cb_setting_dark_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dark Mode" />
+
+    <CheckBox
+        android:id="@+id/cb_setting_show_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show confirm button before buy/sell" />
+
+    <CheckBox
+        android:id="@+id/cb_setting_show_idk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="idk what will go here" />
+
+    <Button
+        android:id="@+id/btn_setting_show_disclaimer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="read legal disclaimer so i don't get sued" />
+
+    <Button
+        android:id="@+id/btn_setting_log_out"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log out" />
+
+</LinearLayout>
