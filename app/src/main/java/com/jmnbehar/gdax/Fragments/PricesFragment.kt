@@ -15,9 +15,7 @@ import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 /**
  * Created by jmnbehar on 11/5/2017.

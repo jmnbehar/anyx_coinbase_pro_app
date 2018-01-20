@@ -22,8 +22,6 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import com.github.mikephil.charting.listener.ChartTouchListener
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 
 /**
@@ -57,6 +55,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         //TODO: investigate autoscroll
 
         //TODO: add autorefresh
+
 
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
