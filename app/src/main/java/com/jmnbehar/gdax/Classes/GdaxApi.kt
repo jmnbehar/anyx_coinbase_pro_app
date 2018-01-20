@@ -7,6 +7,9 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
 import java.time.Clock
 import java.time.Instant
@@ -84,6 +87,35 @@ sealed class GdaxApi: FuelRouting {
             } else {
                 println(request.url)
                 onComplete(result)
+            }
+        }
+    }
+
+    fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
+        Fuel.request(this).responseString { request, _, result ->
+            when (result) {
+                is Result.Failure -> {
+                    if ((result is Result.Failure) && (result.error.response.statusCode == 429)) {
+                        timeLock++
+                        val handler = Handler()
+                        var retry = Runnable {  }
+                        retry = Runnable {
+                            timeLock--
+                            if (timeLock <= 0) {
+                                timeLock = 0
+                                executeRequest(onFailure, onSuccess)
+                            } else {
+                                handler.postDelayed(retry, 1000.toLong())
+                            }
+                        }
+                        handler.postDelayed(retry, 5000.toLong())
+                    } else {
+                        onFailure(result)
+                    }
+                }
+                is Result.Success -> {
+                    onSuccess(result)
+                }
             }
         }
     }

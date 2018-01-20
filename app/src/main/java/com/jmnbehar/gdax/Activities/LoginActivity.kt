@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.ApiCredentials
@@ -175,21 +176,13 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         GdaxApi.credentials = credentials
         //TODO: move this call into mainactivity
         //TODO: make mainactivity default 1st activity, bounce back to login if not available
-        GdaxApi.products().executeRequest { result ->
-            when (result) {
-                is Result.Failure -> {
-                    //error
-                    println("Error!: ${result.error}")
-                }
-                is Result.Success -> {
-                    data = result.getAs()
-                    println("Success!: ${data}")
 
-                    val intent = MainActivity.newIntent(this, result.value)
-
-                    startActivity(intent)
-                }
-            }
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
+            data = result.getAs()
+            println("Success!: ${data}")
+            val intent = MainActivity.newIntent(this, result.value)
+            startActivity(intent)
         }
     }
 

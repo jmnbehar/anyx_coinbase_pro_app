@@ -21,6 +21,7 @@ import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
 
 
@@ -92,26 +93,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
         historyList = rootView.list_history
 
-        GdaxApi.listOrders(productId = account.product.id).executeRequest { result ->
-            when (result) {
-                is Result.Failure -> println("Error!: ${result.error}")
-                is Result.Success -> {
-                    val gson = Gson()
-                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
-                    GdaxApi.fills(productId = account.product.id).executeRequest { result ->
-                        when (result) {
-                            is Result.Failure -> println("Error!: ${result.error}")
-                            is Result.Success -> {
-                                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
-                                historyList.setHeightBasedOnChildren()
-                            }
-                        }
-                    }
-                }
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+            val gson = Gson()
+            val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+            val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+            //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                historyList.setHeightBasedOnChildren()
             }
         }
 

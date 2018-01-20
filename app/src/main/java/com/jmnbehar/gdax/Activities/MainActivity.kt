@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
             apiProductList = unfilteredApiProductList.filter {
-                s -> s.quote_currency == "USD"// && s.base_currency != "BCH"
+                s -> s.quote_currency == "USD"
             }
 //            apiProductList = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
 

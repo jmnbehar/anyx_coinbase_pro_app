@@ -122,7 +122,6 @@ data class Candle(
         val volume: Double) {
      companion object {
          fun getCandles(productId: String, time: Int, onComplete: (List<Candle>) -> Unit) {
-
              GdaxApi.candles(productId, time = time).executeRequest { result ->
                  when (result) {
                      is Result.Failure -> {
