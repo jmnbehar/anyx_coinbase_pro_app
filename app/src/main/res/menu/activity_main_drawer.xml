@@ -16,6 +16,10 @@
             android:id="@+id/nav_ltc"
             android:icon="@drawable/icon_ltc_cutout"
             android:title="Litecoin" />
+        <item
+            android:id="@+id/nav_bch"
+            android:icon="@drawable/icon_bch_cutout"
+            android:title="Bitcoin Cash" />
     </group>
 
     <item android:title="Communicate">

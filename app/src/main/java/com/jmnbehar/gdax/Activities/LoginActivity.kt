@@ -57,7 +57,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (intent.getBooleanExtra("EXIT", false)) {
-            finish();
+            finish()
+            return
         }
         prefs = Prefs(this)
         shouldSaveApiInfo = prefs.shouldSaveApiInfo
@@ -172,6 +173,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     fun loginWithCredentials(credentials: ApiCredentials) {
         var data: String?
         GdaxApi.credentials = credentials
+        //TODO: move this call into mainactivity
+        //TODO: make mainactivity default 1st activity, bounce back to login if not available
         GdaxApi.products().executeRequest { result ->
             when (result) {
                 is Result.Failure -> {

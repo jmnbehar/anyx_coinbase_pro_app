@@ -23,20 +23,6 @@ import javax.crypto.spec.SecretKeySpec
 class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
 
 
-object TimeInSeconds {
-    val oneMinute = 60
-    val fiveMinutes = 300
-    val fifteenMinutes = 900
-    val thirtyMinutes = 1800
-    val halfHour = 1800
-    val oneHour = 3600
-    val sixHours = 21600
-    val oneDay = 86400
-    val oneWeek = 604800
-    val twoWeeks = 1209600
-    val oneMonth = 2592000
-}
-
 sealed class GdaxApi: FuelRouting {
 
 
@@ -75,8 +61,8 @@ sealed class GdaxApi: FuelRouting {
     var timeLock = 0
 
 
-    //TODO: consider making productId enum
     //TODO: make status enum
+    //TODO: make input onSuccess and onFailure instead of unified onComplete
 
     fun executeRequest(onComplete: (result: Result<String, FuelError>) -> Unit) {
         Fuel.request(this).responseString { request, _, result ->

@@ -22,6 +22,8 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import com.github.mikephil.charting.listener.ChartTouchListener
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 /**
@@ -54,6 +56,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         this.inflater = inflater
         //TODO: investigate autoscroll
 
+        //TODO: add autorefresh
+
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
         val currency = account.currency
@@ -64,7 +68,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart.onChartGestureListener = this
 
         rootView.txt_chart_name.text = currency.fullName
-        rootView.txt_chart_ticker.text = currency.toString()
+        rootView.txt_chart_ticker.text = "$currency wallet"
         rootView.img_chart_account_icon.setImageResource(currency.iconId)
 
         balanceText = rootView.txt_chart_account_balance
@@ -190,6 +194,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                                                             balanceText.text = account.balance.fiatFormat()
                                                             valueText.text = account.value.fiatFormat()
+//                                                            val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+//                                                            val newCandle = Candle(now.toDouble(), newPrice, newPrice, newPrice, newPrice, 0.0)
+//                                                            val mutableCandles = candleList.toMutableList()
+//                                                            mutableCandles.add(newCandle)
 
                                                             lineChart.addCandles(candleList, account.currency, TimeInSeconds.oneDay)
 

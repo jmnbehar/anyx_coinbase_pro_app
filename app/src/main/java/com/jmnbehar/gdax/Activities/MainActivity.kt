@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var btcChartFragment: ChartFragment? = null
         var ethChartFragment: ChartFragment? = null
         var ltcChartFragment: ChartFragment? = null
+        var bchChartFragment: ChartFragment? = null
 
         var accountsFragment: AccountsFragment? = null
 
@@ -91,7 +92,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
             apiProductList = unfilteredApiProductList.filter {
-                s -> s.quote_currency == "USD" && s.base_currency != "BCH"
+                s -> s.quote_currency == "USD"// && s.base_currency != "BCH"
             }
 //            apiProductList = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
 
@@ -129,6 +130,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         Account.getAccountInfo { goToFragment(FragmentType.LTC_CHART) }
                     }
                 }
+                R.id.nav_bch -> {
+                    val ltcAccount = Account.bchAccount
+                    if (ltcAccount != null) {
+                        goToFragment(FragmentType.BCH_CHART)
+                    } else {
+                        Account.getAccountInfo { goToFragment(FragmentType.BCH_CHART) }
+                    }
+                }
                 R.id.nav_accounts -> {
                     goToFragment(FragmentType.ACCOUNT)
                 }
@@ -155,7 +164,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val account = Account.btcAccount!!
                     ChartFragment.newInstance(account)
                 }
-                FragmentType.BCH_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
+                FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
                     //TODO: confirm account is not null
                     //TODO: switch to actual bch at some point
                     val account = Account.bchAccount!!
@@ -253,6 +262,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun endRefresh() {
         swipeRefreshLayout.isRefreshing = false
     }
+
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -300,17 +310,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 })
             }
-        } else {
-            var productsUpdated = 0
-            for (account in Account.list) {
-                Candle.getCandles(account.product.id, time, { candleList ->
-                    productsUpdated++
-                    account.product.candles = candleList
-                    if (productsUpdated == Product.listSize) {
-                        onComplete()
-                    }
-                })
-            }
         }
     }
 
@@ -324,8 +323,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         toast("Error!: ${result.error}")
                     }
                     is Result.Success -> {
-                        val gson = Gson()
-                        val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                        val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {
                             account.product.price = price
@@ -371,7 +369,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun triggerAlert(alert: Alert) {
+    private fun triggerAlert(alert: Alert) {
         val prefs = Prefs(this)
         prefs.removeAlert(alert)
 

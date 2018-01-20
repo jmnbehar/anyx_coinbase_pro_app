@@ -6,11 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
+import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
+import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -46,8 +53,8 @@ class PricesFragment : RefreshFragment() {
                 Currency.BTC -> R.id.nav_btc
                 Currency.ETH -> R.id.nav_eth
                 Currency.LTC -> R.id.nav_ltc
-                Currency.BCH -> R.id.nav_btc
-                Currency.USD -> R.id.nav_btc
+                Currency.BCH -> R.id.nav_bch
+                Currency.USD -> R.id.nav_home
             }
             MainActivity.goToNavigationId(equivalentMenuItem, activity)
         }
@@ -62,10 +69,45 @@ class PricesFragment : RefreshFragment() {
     }
 
     override fun refresh(onComplete: () -> Unit) {
-        (activity as MainActivity).getCandles {
-            (activity as MainActivity).updatePrices {
-                (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                onComplete()
+        var productsUpdated = 0
+        var productListSize = Product.listSize
+        val time = TimeInSeconds.oneDay
+        for (account in Account.list) {
+            if (account.product.lastCandleUpdateTime.isBefore(LocalDateTime.now().minusMinutes(2))) {
+                Candle.getCandles(account.product.id, time, { candleList ->
+                    account.product.lastCandleUpdateTime = LocalDateTime.now()
+                    productsUpdated++
+                    account.product.candles = candleList
+                    if (productsUpdated == productListSize) {
+                        (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                        onComplete()
+                    }
+                })
+            } else {
+                GdaxApi.ticker(account.product.id).executeRequest { result ->
+                    when (result) {
+                        is Result.Failure -> {
+                            toast("Error!: ${result.error}")
+                        }
+                        is Result.Success -> {
+                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                            val price = ticker.price.toDoubleOrNull()
+                            if (price != null) {
+                                account.product.price = price
+//                                val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+//                                val newCandle = Candle(now.toDouble(), price, price, price, price, 0.0)
+//                                val mutableCandles = account.product.candles.toMutableList()
+//                                mutableCandles.add(newCandle)
+//                                account.product.candles = mutableCandles
+                            }
+                            productsUpdated++
+                            if (productsUpdated == productListSize) {
+                                (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                onComplete()
+                            }
+                        }
+                    }
+                }
             }
         }
     }

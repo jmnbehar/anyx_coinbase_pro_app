@@ -18,7 +18,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
     override fun getCount(): Int {
         //return Account.list.size
-        return 3
+        return 4
     }
 
     override fun getItem(i: Int): Any {
@@ -36,6 +36,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             0 -> Account.btcAccount
             1 -> Account.ethAccount
             2 -> Account.ltcAccount
+            3 -> Account.bchAccount
             else -> Account.list[i]
         } ?: Account.list[i]
 
