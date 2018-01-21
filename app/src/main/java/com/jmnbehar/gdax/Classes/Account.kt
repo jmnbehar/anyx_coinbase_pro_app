@@ -12,6 +12,8 @@ import com.google.gson.reflect.TypeToken
 
 class Account(val product: Product, apiAccount: ApiAccount) {
     var balance: Double = apiAccount.balance.toDoubleOrZero()
+        private set(value) {}
+
     var value: Double
     var id: String
     var currency = product.currency
@@ -35,6 +37,19 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             list.add(this)
         }
     }
+
+//    fun updateInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+//        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+//        GdaxApi.account(id).executeRequest(onFailure) { result ->
+//            val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+//            val apiAccountBalance =  apiAccount.balance.toDoubleOrNull()
+//            if (apiAccountBalance != null) {
+//                balance = apiAccount.balance.toDouble()
+//            }
+//            updateInList()
+//            onComplete()
+//        }
+//    }
 
     companion object {
 
@@ -84,22 +99,52 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             return list.find { a -> a.product.currency == currency }
         }
 
-        fun getAccountInfo(onComplete: () -> Unit) {
-            list.clear()
-            val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-
+        fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             GdaxApi.accounts().executeRequest(onFailure) { result ->
                 val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                for (apiAccount in apiAccountList) {
-                    val currency = Currency.fromString(apiAccount.currency)
-                    val relevantProduct = Product.withCurrency( currency )
-                    if (relevantProduct != null) {
-                        list.add(Account(relevantProduct, apiAccount))
-                    } else if (currency == Currency.USD) {
-                        usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
+                for (account in list) {
+                    val apiAccount = apiAccountList.find { a -> a.currency == account.currency.toString() }
+                    val apiAccountBalance =  apiAccount?.balance?.toDoubleOrNull()
+                    if (apiAccountBalance != null) {
+                        account.balance = apiAccount.balance.toDouble()
                     }
                 }
                 onComplete()
+            }
+        }
+
+        fun getAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            list.clear()
+            GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
+                val gson = Gson()
+
+                val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
+                val apiProductList = unfilteredApiProductList.filter { s ->
+                    s.quote_currency == "USD"
+                }
+                val time = TimeInSeconds.oneDay
+                var productList: MutableList<Product> = mutableListOf()
+                for (product in apiProductList) {
+                    Candle.getCandles(product.id, time, { candleList ->
+                        val newProduct = Product(product, candleList)
+                        productList.add(newProduct)
+                        if (productList.size == apiProductList.size) {
+                            GdaxApi.accounts().executeRequest(onFailure) { result ->
+                                val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                                for (apiAccount in apiAccountList) {
+                                    val currency = Currency.fromString(apiAccount.currency)
+                                    val relevantProduct = productList.find { p -> p.currency == currency }
+                                    if (relevantProduct != null) {
+                                        list.add(Account(relevantProduct, apiAccount))
+                                    } else if (currency == Currency.USD) {
+                                        usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
+                                    }
+                                }
+                                onComplete()
+                            }
+                        }
+                    })
+                }
             }
         }
     }

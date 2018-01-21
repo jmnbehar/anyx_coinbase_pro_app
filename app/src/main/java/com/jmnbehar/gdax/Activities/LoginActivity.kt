@@ -11,10 +11,7 @@ import android.widget.CheckBox
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getAs
-import com.jmnbehar.gdax.Classes.ApiCredentials
-import com.jmnbehar.gdax.Classes.Constants
-import com.jmnbehar.gdax.Classes.GdaxApi
-import com.jmnbehar.gdax.Classes.Prefs
+import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.toast
@@ -171,12 +168,13 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         //TODO: move this call into mainactivity
         //TODO: make mainactivity default 1st activity, bounce back to login if not available
 
+
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-        GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
-            data = result.getAs()
-            println("Success!: ${data}")
-            val intent = MainActivity.newIntent(this, result.value)
+        Account.getAccounts(onFailure) {
+            toast("Success! logging in")
+            val intent = MainActivity.newIntent(this, true)
             startActivity(intent)
+
         }
     }
 

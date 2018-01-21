@@ -22,8 +22,6 @@ import javax.crypto.spec.SecretKeySpec
 
 
 sealed class GdaxApi: FuelRouting {
-
-
     companion object {
         lateinit var credentials: ApiCredentials
         val basePath = "https://api.gdax.com"
@@ -64,7 +62,7 @@ sealed class GdaxApi: FuelRouting {
         Fuel.request(this).responseString { request, _, result ->
             when (result) {
                 is Result.Failure -> {
-                    if ((result is Result.Failure) && (result.error.response.statusCode == 429)) {
+                    if (result.error.response.statusCode == 429) {
                         timeLock++
                         val handler = Handler()
                         var retry = Runnable {  }

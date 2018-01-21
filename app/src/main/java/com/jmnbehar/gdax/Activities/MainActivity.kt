@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     companion object {
         var currentFragment: RefreshFragment? = null
-        lateinit var apiProductList: List<ApiProduct>
         lateinit private var fragmentManager: FragmentManager
         lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
@@ -88,19 +87,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var settingsFragment: SettingsFragment? = null
 
         var pricesFragment: PricesFragment? = null
+        var areAccountsPreloaded = false
 
-        fun newIntent(context: Context, result: String): Intent {
-            val intent = Intent(context, MainActivity::class.java)
-
-            val gson = Gson()
-
-            val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
-            apiProductList = unfilteredApiProductList.filter {
-                s -> s.quote_currency == "USD"
-            }
-//            apiProductList = gson.fromJson(result, object : TypeToken<List<ApiProduct>>() {}.type)
-
-            return intent
+        fun newIntent(context: Context, accountsPreloaded: Boolean): Intent {
+            //TODO: pass accountsPreloaded as intent flag
+            areAccountsPreloaded = accountsPreloaded
+            return Intent(context, MainActivity::class.java)
         }
 
         fun setSupportFragmentManager(fragmentManager: FragmentManager) {
@@ -111,36 +103,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fun goToNavigationId(navigationId: Int, context: Context) {
             when (navigationId) {
                 R.id.nav_btc -> {
-                    val btcAccount = Account.btcAccount
-                    if (btcAccount != null) {
-                        goToFragment(FragmentType.BTC_CHART)
-                    } else {
-                        Account.getAccountInfo { goToFragment(FragmentType.BTC_CHART) }
-                    }
+                    goToFragment(FragmentType.BTC_CHART)
                 }
                 R.id.nav_eth -> {
-                    val ethAccount = Account.ethAccount
-                    if (ethAccount != null) {
-                        goToFragment(FragmentType.ETH_CHART)
-                    } else {
-                        Account.getAccountInfo { goToFragment(FragmentType.ETH_CHART) }
-                    }
+                    goToFragment(FragmentType.ETH_CHART)
                 }
                 R.id.nav_ltc -> {
-                    val ltcAccount = Account.ltcAccount
-                    if (ltcAccount != null) {
-                        goToFragment(FragmentType.LTC_CHART)
-                    } else {
-                        Account.getAccountInfo { goToFragment(FragmentType.LTC_CHART) }
-                    }
+                    goToFragment(FragmentType.LTC_CHART)
                 }
                 R.id.nav_bch -> {
-                    val ltcAccount = Account.bchAccount
-                    if (ltcAccount != null) {
-                        goToFragment(FragmentType.BCH_CHART)
-                    } else {
-                        Account.getAccountInfo { goToFragment(FragmentType.BCH_CHART) }
-                    }
+                    goToFragment(FragmentType.BCH_CHART)
                 }
                 R.id.nav_accounts -> {
                     goToFragment(FragmentType.ACCOUNT)
@@ -253,70 +225,53 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 swipeRefreshLayout.isRefreshing = false
             }
         }
-
-        if (savedInstanceState == null) {
-            getCandles {
-                loopThroughAlerts()
-                runAlarms()
-                Account.getAccountInfo { goToFragment(FragmentType.PRICES) }
-            }
+        if (Account.list.size > 0) {
+            goHome()
+        } else {
+            signIn()
         }
+    }
+
+   // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
+   private fun goHome() {
+        loopThroughAlerts()
+        runAlarms()
+        goToFragment(FragmentType.PRICES)
     }
 
 
     private fun signIn() {
-        val iv = ByteArray(16)
-        val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
+        val prefs = Prefs(this)
 
-        shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
-        shouldSavePassphrase = saveApiInfoCheckBox.isChecked
+        val passphrase = prefs.passphrase
+        val apiKeyEncrypted = prefs.apiKey
+        val apiSecretEncrypted = prefs.apiSecret
 
-        apiKey = if (apiKey == prefs.apiKey) {
-            encryption.decryptOrNull(apiKey)
-        } else {
-            txt_login_api_key.text.toString()
-        }
+        if ((passphrase != null) && (apiKeyEncrypted != null) && (apiSecretEncrypted != null)) {
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
+            val apiKey = encryption.decryptOrNull(apiKeyEncrypted)
+            val apiSecret = encryption.decryptOrNull(apiSecretEncrypted)
 
-        apiSecret = if (apiSecret == prefs.apiSecret) {
-            encryption.decryptOrNull(apiSecret)
-        } else {
-            txt_login_secret.text.toString()
-        }
+            if ((apiKey != null) && (apiSecret != null)) {
+                GdaxApi.credentials = ApiCredentials(passphrase, apiKey, apiSecret)
 
-        if (shouldSaveApiInfo) {
-            val apiKeyEncrypted = encryption.encrypt(apiKey)
-            val apiSecretEncrypted = encryption.encrypt(apiSecret)
-            prefs.apiKey = apiKeyEncrypted
-            prefs.apiSecret = apiSecretEncrypted
-            if (shouldSavePassphrase)  {
-                prefs.passphrase = passphrase
+                Account.getAccounts({ toast("Error!")}) {
+                    goHome()
+                }
+            } else {
+                returnToLogin()
             }
-        }
-        val apiKeyVal = apiKey
-        val apiSecretVal = apiSecret
-        if((apiKeyVal != null) && (apiSecretVal != null)) {
-            var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
-
-            loginWithCredentials(apiCredentials)
         } else {
-            toast("Wrong Passphrase")
+            returnToLogin()
         }
     }
 
 
-    fun loginWithCredentials(credentials: ApiCredentials) {
-        var data: String?
-        GdaxApi.credentials = credentials
-        //TODO: move this call into mainactivity
-        //TODO: make mainactivity default 1st activity, bounce back to login if not available
-
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-        GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
-            data = result.getAs()
-            println("Success!: ${data}")
-            val intent = MainActivity.newIntent(this, result.value)
-            startActivity(intent)
-        }
+    fun returnToLogin() {
+        //TODO: nuke backstack
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
     }
 
     fun endRefresh() {
@@ -356,20 +311,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    fun getCandles(time: Int = TimeInSeconds.oneDay, onComplete: () -> Unit) {
-        if (Product.listSize == 0) {
-            for (product in apiProductList) {
-                Candle.getCandles(product.id, time, { candleList ->
-                    val newProduct = Product(product, candleList)
-                    Product.addToList(newProduct)
-                    if (Product.listSize == apiProductList.size) {
-                        onComplete()
-                    }
-                })
-            }
         }
     }
 

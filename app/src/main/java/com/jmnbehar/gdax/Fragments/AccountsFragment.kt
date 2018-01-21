@@ -1,23 +1,21 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import android.widget.TextView
 import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
 class AccountsFragment : RefreshFragment() {
     lateinit var listView: ListView
-    lateinit var totalValueTextView: TextView
     lateinit var inflater: LayoutInflater
 
     companion object {
@@ -38,14 +36,10 @@ class AccountsFragment : RefreshFragment() {
 
         }
 
-
-        rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
-
-        val updateList = lambda@ {
-            refreshData()
+        for (account in Account.list)
+        Account.updateAllAccounts({ toast("error!")}) {
+            rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
         }
-
-        Account.getAccountInfo(updateList)
 
         return rootView
     }

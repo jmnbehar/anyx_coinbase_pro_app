@@ -15,7 +15,6 @@ import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
-import org.jetbrains.anko.support.v4.toast
 import java.time.LocalDateTime
 
 /**
@@ -69,7 +68,7 @@ class PricesFragment : RefreshFragment() {
 
     override fun refresh(onComplete: () -> Unit) {
         var productsUpdated = 0
-        var productListSize = Product.listSize
+        var accountListSize = Account.list.size
         val time = TimeInSeconds.oneDay
         for (account in Account.list) {
             if (account.product.lastCandleUpdateTime.isBefore(LocalDateTime.now().minusMinutes(2))) {
@@ -77,7 +76,7 @@ class PricesFragment : RefreshFragment() {
                     account.product.lastCandleUpdateTime = LocalDateTime.now()
                     productsUpdated++
                     account.product.candles = candleList
-                    if (productsUpdated == productListSize) {
+                    if (productsUpdated == accountListSize) {
                         (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
                         onComplete()
                     }
@@ -96,7 +95,7 @@ class PricesFragment : RefreshFragment() {
 //                                account.product.candles = mutableCandles
                     }
                     productsUpdated++
-                    if (productsUpdated == productListSize) {
+                    if (productsUpdated == accountListSize) {
                         (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
                         onComplete()
                     }
