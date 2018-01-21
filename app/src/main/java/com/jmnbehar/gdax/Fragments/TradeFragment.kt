@@ -1,7 +1,6 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -140,7 +139,6 @@ class TradeFragment : RefreshFragment() {
         })
 
 
-
         radioButtonBuy.setOnClickListener {
             switchTradeType(TradeType.BUY)
         }
@@ -161,21 +159,20 @@ class TradeFragment : RefreshFragment() {
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         submitOrderButton.setOnClickListener {
-            if (tradeSubType == TradeSubType.MARKET) {
-                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
+            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                val price = ticker.price.toDoubleOrNull()
+                if (price != null) {
+                    account.updateAccount(price = price)
                     confirmPopup(price)
                 }
-            } else {
-                confirmPopup()
             }
         }
 
         return rootView
     }
 
-    private fun confirmPopup(updatedTicker: Double? = null) {
+    private fun confirmPopup(updatedTicker: Double) {
         val amount = amountEditText.text.toString().toDoubleOrZero()
         val limitPrice = limitEditText.text.toString().toDoubleOrZero()
 
@@ -187,7 +184,7 @@ class TradeFragment : RefreshFragment() {
             customView {
                 linearLayout {
                     verticalLayout {
-                        if (updatedTicker != null) {
+                        if (tradeSubType == TradeSubType.MARKET) {
                             linearLayout {
                                 textView("${account.currency} price:")
                                 textView(updatedTicker.fiatFormat()).lparams { textAlignment = right }
@@ -206,7 +203,7 @@ class TradeFragment : RefreshFragment() {
                         }.lparams(width = matchParent) {}
                         linearLayout {
                             textView("Estimated fees:")
-                            textView(feeEstimate(dollarTotal).fiatFormat()).lparams { textAlignment = right }
+                            textView(feeEstimate(dollarTotal, limitPrice).fiatFormat()).lparams { textAlignment = right }
                             padding = dip(5)
                         }.lparams(width = matchParent) {}
 
@@ -215,7 +212,9 @@ class TradeFragment : RefreshFragment() {
                 }
             }
 
-            positiveButton("Confirm") { submitOrder() }
+            positiveButton("Confirm") {
+                submitOrder()
+            }
             negativeButton("Cancel") { }
         }.show()
     }
@@ -307,19 +306,28 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
-    private fun feeEstimate(amount: Double) : Double {
-        //TODO: double check that limit and stop trades are REALLY limit or stop trades
-        val baseFee = when (account.currency) {
+    private fun feeEstimate(amount: Double, limitPrice: Double?) : Double {
+        val feePercentage = when (account.currency) {
             Currency.BTC -> 0.0025
             Currency.BCH -> 0.0025
             Currency.ETH -> 0.003
             Currency.LTC -> 0.003
             Currency.USD -> 0.0
         }
+
+        val fee = amount * feePercentage
         return when (tradeSubType) {
-            TradeSubType.MARKET -> amount * baseFee
-            TradeSubType.LIMIT -> 0.0
-            TradeSubType.STOP -> 0.0
+            TradeSubType.MARKET -> fee
+            TradeSubType.LIMIT -> if ((limitPrice != null) && (limitPrice >= account.product.price)) {
+                0.0
+            } else {
+                fee
+            }
+            TradeSubType.STOP -> if ((limitPrice != null) && (limitPrice <= account.product.price)) {
+                0.0
+            } else {
+                fee
+            }
         }
     }
 

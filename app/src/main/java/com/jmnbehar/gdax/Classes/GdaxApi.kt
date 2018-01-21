@@ -56,9 +56,9 @@ sealed class GdaxApi: FuelRouting {
 
     var timeLock = 0
 
-
     //TODO: make status enum
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
+       // MainActivity.progressDialog?.show()
         Fuel.request(this).responseString { request, _, result ->
             when (result) {
                 is Result.Failure -> {
@@ -78,10 +78,12 @@ sealed class GdaxApi: FuelRouting {
                         handler.postDelayed(retry, 5000.toLong())
                     } else {
                         onFailure(result)
+                   //     MainActivity.progressDialog?.dismiss()
                     }
                 }
                 is Result.Success -> {
                     onSuccess(result)
+                 //   MainActivity.progressDialog?.dismiss()
                 }
             }
         }

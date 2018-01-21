@@ -3,6 +3,7 @@ package com.jmnbehar.gdax.Activities
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -20,16 +21,15 @@ import android.view.Menu
 import android.view.MenuItem
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getAs
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
@@ -88,6 +88,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var pricesFragment: PricesFragment? = null
         var areAccountsPreloaded = false
+
+        var progressDialog: ProgressDialog? = null
 
         fun newIntent(context: Context, accountsPreloaded: Boolean): Intent {
             //TODO: pass accountsPreloaded as intent flag
@@ -216,6 +218,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
         createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
+
+        progressDialog = indeterminateProgressDialog("")
 
         swipeRefreshLayout = swipe_refresh_layout
         swipeRefreshLayout.onRefresh {

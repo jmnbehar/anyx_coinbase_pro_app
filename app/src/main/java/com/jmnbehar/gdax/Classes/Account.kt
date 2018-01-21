@@ -24,7 +24,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         id = apiAccount.id
     }
 
-    fun updateAccount(balance: Double, price: Double) {
+    fun updateAccount(balance: Double = this.balance, price: Double) {
         product.price = price
         this.balance = balance
         value = product.price * balance
