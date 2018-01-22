@@ -1,6 +1,5 @@
 package com.jmnbehar.gdax.Classes
 
-import android.content.Context
 import android.os.Handler
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
@@ -8,6 +7,7 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
+import com.jmnbehar.gdax.Activities.MainActivity
 import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
 import java.time.Clock
@@ -32,8 +32,9 @@ sealed class GdaxApi: FuelRouting {
             FuelManager.instance.basePath = basePath
         }
 
-        fun defaultPostFailure(fragment: RefreshFragment,  result: Result.Failure<ByteArray, FuelError>) {
+        fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
+            val fragment = MainActivity.currentFragment!!
             when (errorCode) {
                 GdaxApi.ErrorCode.BadRequest -> { fragment.toast("400 Error: Missing something from the request")}
                 GdaxApi.ErrorCode.Unauthorized -> { fragment.toast("401 Error: You don't have permission to do that")}
@@ -79,9 +80,9 @@ sealed class GdaxApi: FuelRouting {
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
     class candles(val productId: String, val time: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
-    class orderLimit(val tradeType: TradeType, val productId: String, val price: Double, val size: Double) : GdaxApi()
-    class orderMarket(val tradeType: TradeType, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
-    class orderStop(val tradeType: TradeType, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
+    class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double) : GdaxApi()
+    class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
+    class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
     class cancelAllOrders() : GdaxApi()
     class listOrders(val status: String = "all", val productId: String?) : GdaxApi()
@@ -227,10 +228,10 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
-    private fun basicOrderParams(tradeType: TradeType, tradeSubType: TradeSubType, productId: String): JSONObject {
+    private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String): JSONObject {
         val json = JSONObject()
-        json.put("side", tradeType.toString())
-        json.put("type", tradeSubType.toString())
+        json.put("side", tradeSide.toString())
+        json.put("type", tradeType.toString())
         json.put("product_id", productId)
         return json
     }
@@ -239,7 +240,7 @@ sealed class GdaxApi: FuelRouting {
         get() {
             when (this) {
                 is orderLimit -> {
-                    var json = basicOrderParams(tradeType, TradeSubType.LIMIT, productId)
+                    var json = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
 
                     json.put("price", "$price")
                     json.put("size", "$size")
@@ -248,7 +249,7 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeType, TradeSubType.MARKET, productId)
+                    var json = basicOrderParams(tradeSide, TradeType.MARKET, productId)
 
                     if (funds != null) {
                         json.put("funds", "$funds")
@@ -261,7 +262,7 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeType, TradeSubType.STOP, productId)
+                    var json = basicOrderParams(tradeSide, TradeType.STOP, productId)
 
                     json.put("price", "$price")
                     if (funds != null) {

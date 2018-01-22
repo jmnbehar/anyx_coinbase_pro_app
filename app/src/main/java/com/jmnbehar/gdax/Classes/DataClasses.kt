@@ -12,7 +12,7 @@ import java.time.ZoneOffset
  * Created by jmnbehar on 12/19/2017.
  */
 
-enum class TradeType {
+enum class TradeSide {
     BUY,
     SELL;
 
@@ -23,7 +23,8 @@ enum class TradeType {
         }
     }
 }
-enum class TradeSubType {
+
+enum class TradeType {
     MARKET,
     LIMIT,
     STOP;
@@ -36,7 +37,7 @@ enum class TradeSubType {
         }
     }
     companion object {
-        fun fromString(string: String) : TradeSubType {
+        fun fromString(string: String) : TradeType {
             return when (string) {
                 "market"  ->  MARKET
                 "limit"  -> LIMIT

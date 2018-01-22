@@ -133,7 +133,7 @@ class SendFragment : RefreshFragment() {
         }
 
         if (amount > min) {
-            GdaxApi.send(amount, currency, destination).executePost({ }) { result ->
+            GdaxApi.send(amount, currency, destination).executePost({ result ->  GdaxApi.defaultPostFailure(result) }) { result ->
                 onComplete(result)
             }
         } else {

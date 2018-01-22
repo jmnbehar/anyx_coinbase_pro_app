@@ -17,8 +17,6 @@ import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
-import android.widget.Button
-import android.widget.LinearLayout
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
@@ -84,11 +82,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         //TODO: send over more info
         buyButton.setOnClickListener {
-            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.BUY), "Trade: Buy")
+            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
         }
 
         sellButton.setOnClickListener {
-            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.SELL), "Trade: Sell")
+            MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
         }
 
         historyList = rootView.list_history

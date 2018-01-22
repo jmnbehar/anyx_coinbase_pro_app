@@ -55,14 +55,14 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.txt_fill_fee.text = order.fill_fees
             vi.txt_fill_time.text = order.created_at
 
-            val subtype = TradeSubType.fromString(order.type)
+            val subtype = TradeType.fromString(order.type)
             vi.txt_fill_type.text = when (subtype) {
-                TradeSubType.MARKET -> subtype.toString()
-                TradeSubType.LIMIT -> subtype.toString()
-                TradeSubType.STOP ->"$subtype: ${order.price}"
+                TradeType.MARKET -> subtype.toString()
+                TradeType.LIMIT -> subtype.toString()
+                TradeType.STOP ->"$subtype: ${order.price}"
             }
 
-            var textColor = if (order.side == TradeType.BUY.toString()) {
+            var textColor = if (order.side == TradeSide.BUY.toString()) {
                 Color.GREEN
             } else {
                 Color.RED
@@ -90,7 +90,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.txt_fill_time.text = fill.created_at
             vi.txt_fill_type.text = ""
 
-            var textColor = if (fill.side == TradeType.BUY.toString()) {
+            var textColor = if (fill.side == TradeSide.BUY.toString()) {
                 Color.GREEN
             } else {
                 Color.RED

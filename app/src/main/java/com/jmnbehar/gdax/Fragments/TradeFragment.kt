@@ -56,18 +56,18 @@ class TradeFragment : RefreshFragment() {
 
     private lateinit var submitOrderButton: Button
 
-    var tradeSubType: TradeSubType = TradeSubType.MARKET
+    var tradeType: TradeType = TradeType.MARKET
 
-    var tradeType: TradeType = Companion.tradeType
+    var tradeSide: TradeSide = Companion.tradeType
 
     companion object {
-        var tradeType = TradeType.BUY
+        var tradeType = TradeSide.BUY
         var localCurrency = "USD"
 
         lateinit var account: Account
-        fun newInstance(accountIn: Account, tradeTypeIn: TradeType): TradeFragment {
+        fun newInstance(accountIn: Account, tradeSideIn: TradeSide): TradeFragment {
             account = accountIn
-            tradeType = tradeTypeIn
+            tradeType = tradeSideIn
             return TradeFragment()
         }
     }
@@ -115,12 +115,12 @@ class TradeFragment : RefreshFragment() {
         cryptoBalanceLabelText.text = account.currency.toString()
         cryptoBalanceText.text = account.balance.btcFormat()
 
-        switchTradeType(tradeType, tradeSubType)
+        switchTradeType(tradeSide, tradeType)
 
         amountEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
+                println(tradeSide)
                 println(tradeType)
-                println(tradeSubType)
                 val amount = p0.toString().toDoubleOrZero()
                 updateTotalText(amount)
 
@@ -140,56 +140,64 @@ class TradeFragment : RefreshFragment() {
 
 
         radioButtonBuy.setOnClickListener {
-            switchTradeType(TradeType.BUY)
+            switchTradeType(TradeSide.BUY)
         }
         radioButtonSell.setOnClickListener {
-            switchTradeType(TradeType.SELL)
+            switchTradeType(TradeSide.SELL)
         }
 
         radioButtonMarket.setOnClickListener {
-            switchTradeType(tradeSubType =  TradeSubType.MARKET)
+            switchTradeType(tradeType =  TradeType.MARKET)
         }
         radioButtonLimit.setOnClickListener {
-            switchTradeType(tradeSubType =  TradeSubType.LIMIT)
+            switchTradeType(tradeType =  TradeType.LIMIT)
         }
         radioButtonStop.setOnClickListener {
-            switchTradeType(tradeSubType =  TradeSubType.STOP)
+            switchTradeType(tradeType =  TradeType.STOP)
         }
 
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         submitOrderButton.setOnClickListener {
             val prefs = Prefs(activity)
-            if (prefs.shouldShowConfirmModal) {
-                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
-                    if (price != null) {
-                        account.updateAccount(price = price)
-                        confirmPopup(price)
-                    }
-                }
+
+            val amount = amountEditText.text.toString().toDoubleOrNull()
+            val limit = limitEditText.text.toString().toDoubleOrNull()
+            if (amount == null || amount <= 0) {
+                toast("Amount is not valid")
+            } else if ((tradeType == TradeType.LIMIT) && ((limit == null) || (limit <= 0.0))) {
+                toast("Limit is not valid")
+            } else if ((tradeType == TradeType.STOP) && ((limit == null) || (limit <= 0.0))) {
+                toast("Stop is not valid")
             } else {
-                submitOrder()
+                if (prefs.shouldShowConfirmModal) {
+                    GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                        val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                        val price = ticker.price.toDoubleOrNull()
+                        if (price != null) {
+                            account.updateAccount(price = price)
+                            confirmPopup(price, amount, limit ?: 0.0)
+                        }
+                    }
+                } else {
+                    submitOrder(amount, limit ?: 0.0)
+                }
             }
         }
 
         return rootView
     }
 
-    private fun confirmPopup(updatedTicker: Double) {
-        val amount = amountEditText.text.toString().toDoubleOrZero()
-        val limitPrice = limitEditText.text.toString().toDoubleOrZero()
-
-        val cryptoTotal = totalInCrypto(amount, limitPrice)
-        val dollarTotal = totalInDollars(amount, limitPrice)
+    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double) {
+        val cryptoTotal = totalInCrypto(amount, limit)
+        val dollarTotal = totalInDollars(amount, limit)
 
         alert {
             title = "Alert"
             customView {
                 linearLayout {
                     verticalLayout {
-                        if (tradeSubType == TradeSubType.MARKET) {
+                        if (tradeType == TradeType.MARKET) {
                             linearLayout {
                                 textView("${account.currency} price:")
                                 textView(updatedTicker.fiatFormat()).lparams { textAlignment = right }
@@ -208,7 +216,7 @@ class TradeFragment : RefreshFragment() {
                         }.lparams(width = matchParent) {}
                         linearLayout {
                             textView("Estimated fees:")
-                            textView(feeEstimate(dollarTotal, limitPrice).fiatFormat()).lparams { textAlignment = right }
+                            textView(feeEstimate(dollarTotal, limit).fiatFormat()).lparams { textAlignment = right }
                             padding = dip(5)
                         }.lparams(width = matchParent) {}
 
@@ -218,22 +226,20 @@ class TradeFragment : RefreshFragment() {
             }
 
             positiveButton("Confirm") {
-                submitOrder()
+                submitOrder(amount, limit)
             }
             negativeButton("Cancel") { }
         }.show()
     }
 
-    private fun submitOrder() {
-        val amount = amountEditText.text.toString().toDoubleOrNull()
+    private fun submitOrder(amount: Double, limitPrice: Double) {
 //        var size: Double? = null
 
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
-
             when (errorCode) {
                 GdaxApi.ErrorCode.BadRequest -> {toast("400 Error: Missing something from the request")}
-                else -> GdaxApi.defaultPostFailure(this, result)
+                else -> GdaxApi.defaultPostFailure(result)
             }
         }
 
@@ -243,22 +249,21 @@ class TradeFragment : RefreshFragment() {
         }
 
         val productId = account.product.id
-        when(tradeSubType) {
-            TradeSubType.MARKET -> {
-                when (tradeType) {
-                    TradeType.BUY ->  GdaxApi.orderMarket(tradeType, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                    TradeType.SELL -> GdaxApi.orderMarket(tradeType, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+        when(tradeType) {
+            TradeType.MARKET -> {
+                when (tradeSide) {
+                    TradeSide.BUY ->  GdaxApi.orderMarket(tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                    TradeSide.SELL -> GdaxApi.orderMarket(tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                 }
             }
-            TradeSubType.LIMIT -> {
-                val limitPrice = limitEditText.text.toString().toDoubleOrZero()
-                GdaxApi.orderLimit(tradeType, account.product.id, limitPrice, amount ?: 0.0).executePost({ onFailure(it) }, { onComplete(it) })
+            TradeType.LIMIT -> {
+                GdaxApi.orderLimit(tradeSide, account.product.id, limitPrice, amount ?: 0.0).executePost({ onFailure(it) }, { onComplete(it) })
             }
-            TradeSubType.STOP -> {
-                val stopPrice = limitEditText.text.toString().toDoubleOrZero()
-                when (tradeType) {
-                    TradeType.BUY ->  GdaxApi.orderStop(tradeType, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                    TradeType.SELL -> GdaxApi.orderStop(tradeType, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+            TradeType.STOP -> {
+                val stopPrice = limitPrice
+                when (tradeSide) {
+                    TradeSide.BUY ->  GdaxApi.orderStop(tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                    TradeSide.SELL -> GdaxApi.orderStop(tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                 }
             }
         }
@@ -269,43 +274,43 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun totalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : String {
-        return when (tradeType) {
-            TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
-                TradeSubType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat()
-                TradeSubType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
+        return when (tradeSide) {
+            TradeSide.BUY -> when (tradeType) {
+                TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
+                TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat()
+                TradeType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
             }
-            TradeType.SELL -> when (tradeSubType) {
-                TradeSubType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat()
-                TradeSubType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat()
-                TradeSubType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat()
+            TradeSide.SELL -> when (tradeType) {
+                TradeType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat()
+                TradeType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat()
+                TradeType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat()
             }
         }
     }
 
     private fun totalInDollars(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
-        return when (tradeType) {
-            TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET -> amount
-                TradeSubType.LIMIT -> amount * limitPrice
-                TradeSubType.STOP -> amount
+        return when (tradeSide) {
+            TradeSide.BUY -> when (tradeType) {
+                TradeType.MARKET -> amount
+                TradeType.LIMIT -> amount * limitPrice
+                TradeType.STOP -> amount
             }
-            TradeType.SELL -> when (tradeSubType) {
-                TradeSubType.MARKET -> amount * account.product.price
-                TradeSubType.LIMIT -> amount * limitPrice
-                TradeSubType.STOP -> amount * limitPrice
+            TradeSide.SELL -> when (tradeType) {
+                TradeType.MARKET -> amount * account.product.price
+                TradeType.LIMIT -> amount * limitPrice
+                TradeType.STOP -> amount * limitPrice
             }
         }
     }
 
     private fun totalInCrypto(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
-        return when (tradeType) {
-            TradeType.BUY -> when (tradeSubType) {
-                TradeSubType.MARKET -> amount / account.product.price
-                TradeSubType.LIMIT -> amount
-                TradeSubType.STOP -> amount/limitPrice
+        return when (tradeSide) {
+            TradeSide.BUY -> when (tradeType) {
+                TradeType.MARKET -> amount / account.product.price
+                TradeType.LIMIT -> amount
+                TradeType.STOP -> amount/limitPrice
             }
-            TradeType.SELL -> amount
+            TradeSide.SELL -> amount
         }
     }
 
@@ -319,14 +324,14 @@ class TradeFragment : RefreshFragment() {
         }
 
         val fee = amount * feePercentage
-        return when (tradeSubType) {
-            TradeSubType.MARKET -> fee
-            TradeSubType.LIMIT -> if ((limitPrice != null) && (limitPrice >= account.product.price)) {
+        return when (tradeType) {
+            TradeType.MARKET -> fee
+            TradeType.LIMIT -> if ((limitPrice != null) && (limitPrice >= account.product.price)) {
                 0.0
             } else {
                 fee
             }
-            TradeSubType.STOP -> if ((limitPrice != null) && (limitPrice <= account.product.price)) {
+            TradeType.STOP -> if ((limitPrice != null) && (limitPrice <= account.product.price)) {
                 0.0
             } else {
                 fee
@@ -335,22 +340,22 @@ class TradeFragment : RefreshFragment() {
     }
 
 
-    private fun switchTradeType(tradeType: TradeType = this.tradeType, tradeSubType: TradeSubType = this.tradeSubType) {
+    private fun switchTradeType(tradeSide: TradeSide = this.tradeSide, tradeType: TradeType = this.tradeType) {
+        this.tradeSide = tradeSide
         this.tradeType = tradeType
-        this.tradeSubType = tradeSubType
 
         updateTotalText()
-        when (tradeType) {
-            TradeType.BUY -> {
+        when (tradeSide) {
+            TradeSide.BUY -> {
                 radioButtonBuy.isChecked = true
-                when (tradeSubType) {
-                    TradeSubType.MARKET -> {
+                when (tradeType) {
+                    TradeType.MARKET -> {
                         radioButtonMarket.isChecked = true
                         amountUnitText.text = localCurrency
                         limitLayout.visibility = View.GONE
                         totalLabelText.text = "Total (${account.currency}) ="
                     }
-                    TradeSubType.LIMIT -> {
+                    TradeType.LIMIT -> {
                         radioButtonLimit.isChecked = true
                         amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
@@ -358,7 +363,7 @@ class TradeFragment : RefreshFragment() {
                         limitLabelText.text = "Limit Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
-                    TradeSubType.STOP -> {
+                    TradeType.STOP -> {
                         radioButtonStop.isChecked = true
                         amountUnitText.text = localCurrency
                         limitLayout.visibility = View.VISIBLE
@@ -369,16 +374,16 @@ class TradeFragment : RefreshFragment() {
                     }
                 }
             }
-            TradeType.SELL -> {
+            TradeSide.SELL -> {
                 radioButtonSell.isChecked = true
-                when (tradeSubType) {
-                    TradeSubType.MARKET -> {
+                when (tradeType) {
+                    TradeType.MARKET -> {
                         radioButtonMarket.isChecked = true
                         amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.GONE
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
-                    TradeSubType.LIMIT -> {
+                    TradeType.LIMIT -> {
                         radioButtonLimit.isChecked = true
                         amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
@@ -386,7 +391,7 @@ class TradeFragment : RefreshFragment() {
                         limitLabelText.text = "Limit Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
-                    TradeSubType.STOP -> {
+                    TradeType.STOP -> {
                         radioButtonStop.isChecked = true
                         amountUnitText.text = account.currency.toString()
                         limitLayout.visibility = View.VISIBLE
