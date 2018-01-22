@@ -4,13 +4,14 @@ import android.widget.ListView
 import android.view.ViewGroup
 import android.view.View.MeasureSpec
 import android.view.View
+import android.view.ViewManager
+import android.widget.LinearLayout
+import org.jetbrains.anko.*
 
 
 /**
  * Created by josephbehar on 12/28/17.
  */
-
-
 
 class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
 
@@ -18,6 +19,14 @@ fun MutableSet<Alert>.removeAlert(alert: Alert) {
     val removeItem = this.find { a -> alert == a }
     if (removeItem != null) {
         this.remove(removeItem)
+    }
+}
+
+fun ViewManager.horizontalLayout(string1: String, string2: String) : LinearLayout {
+    return linearLayout {
+        textView(string1)
+        textView(string2).lparams(width = matchParent) { textAlignment = right }
+        padding = dip(3)
     }
 }
 

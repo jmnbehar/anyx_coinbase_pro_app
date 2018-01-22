@@ -1,9 +1,7 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ListView
 import android.widget.TextView
 import com.github.kittinunf.result.Result
@@ -19,10 +17,13 @@ import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
-import org.jetbrains.anko.support.v4.toast
-import android.view.MotionEvent
+import android.widget.Button
+import android.widget.LinearLayout
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
+import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.toast
 
 
 /**
@@ -54,9 +55,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         this.inflater = inflater
         //TODO: investigate autoscroll
-
         //TODO: add autorefresh
-
 
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
@@ -91,6 +90,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         sellButton.setOnClickListener {
             MainActivity.goToFragment(TradeFragment.newInstance(account, TradeType.SELL), "Trade: Sell")
         }
+
         historyList = rootView.list_history
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
@@ -102,12 +102,62 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
+                        { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                 historyList.setHeightBasedOnChildren()
             }
         }
 
         return rootView
+    }
+
+    fun orderOnClick(order: ApiOrder) {
+        alert {
+            title = "Order"
+
+            customView {
+                linearLayout {
+                    verticalLayout {
+                        horizontalLayout("Side:  ", order.side).lparams(width = matchParent) {}
+                        horizontalLayout("Size:  ", order.size ?: "0").lparams(width = matchParent) {}
+                        horizontalLayout("Filled Size:  ", order.filled_size).lparams(width = matchParent) {}
+                        horizontalLayout("Price:  ", order.price).lparams(width = matchParent) {}
+                        horizontalLayout("Status:  ", order.status).lparams(width = matchParent) {}
+                        horizontalLayout("Fill fees:  ", order.fill_fees).lparams(width = matchParent) {}
+                        horizontalLayout("Time:  ", order.created_at).lparams(width = matchParent) {}
+                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+                }
+            }
+            positiveButton("Close") {  }
+            negativeButton("Delete") {
+                GdaxApi.cancelOrder(order.id).executeRequest({ }) {
+                    var orders = (historyList.adapter as HistoryListViewAdapter).orders.toMutableList()
+                    orders.removeIf { o -> o.id == order.id }
+                    (historyList.adapter as HistoryListViewAdapter).orders = orders
+                    (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
+                    toast("order cancelled")
+                }
+            }
+        }.show()
+    }
+
+    fun fillOnClick(fill: ApiFill) {
+        alert {
+            title = "Order"
+
+            customView {
+                linearLayout {
+                    verticalLayout {
+                        horizontalLayout("Side:  ", fill.side).lparams(width = matchParent) {}
+                        horizontalLayout("Size:  ", fill.size).lparams(width = matchParent) {}
+                        horizontalLayout("Price:  ", fill.price).lparams(width = matchParent) {}
+                        horizontalLayout("Fee:  ", fill.fee).lparams(width = matchParent) {}
+                        horizontalLayout("Time:  ", fill.created_at).lparams(width = matchParent) {}
+                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+                }
+            }
+            positiveButton("Close") {  }
+        }.show()
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
@@ -161,7 +211,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                             val newPrice = ticker.price.toDoubleOrZero()
 
                             account.updateAccount(newBalance, newPrice)
-                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills, { })
+                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
+                                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                             historyList.setHeightBasedOnChildren()
 
                             priceText.text = account.product.price.fiatFormat()

@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, var fills: List<ApiFill>, var onClick: (Account) -> Unit) : BaseAdapter() {
+class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, private var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return orders.size + fills.size + offset
@@ -72,6 +72,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.txt_fill_fee.setTextColor(textColor)
             vi.txt_fill_time.setTextColor(textColor)
 
+            vi.setOnClickListener { orderOnClick(order) }
             return vi
         } else if ((i == (orders.size + 1)) && orders.isNotEmpty() && fills.isNotEmpty()) {
             var vi = inflater!!.inflate(R.layout.list_header, null)
@@ -99,6 +100,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.txt_fill_fee.setTextColor(textColor)
             vi.txt_fill_time.setTextColor(textColor)
 
+            vi.setOnClickListener { fillOnClick(fill) }
             return vi
         } else {
             var vi = inflater!!.inflate(R.layout.list_header, null)

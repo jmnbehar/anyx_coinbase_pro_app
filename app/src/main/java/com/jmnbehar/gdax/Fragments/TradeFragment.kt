@@ -159,13 +159,18 @@ class TradeFragment : RefreshFragment() {
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         submitOrderButton.setOnClickListener {
-            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                val price = ticker.price.toDoubleOrNull()
-                if (price != null) {
-                    account.updateAccount(price = price)
-                    confirmPopup(price)
+            val prefs = Prefs(activity)
+            if (prefs.shouldShowConfirmModal) {
+                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val price = ticker.price.toDoubleOrNull()
+                    if (price != null) {
+                        account.updateAccount(price = price)
+                        confirmPopup(price)
+                    }
                 }
+            } else {
+                submitOrder()
             }
         }
 

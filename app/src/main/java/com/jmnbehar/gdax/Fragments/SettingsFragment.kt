@@ -40,14 +40,19 @@ class SettingsFragment : RefreshFragment() {
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showConfirmCheckBox = rootView.cb_setting_show_confirm
 
+        val prefs = Prefs(activity)
+
         logoutButton.setOnClickListener  {
             val intent = Intent(activity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.putExtra(Constants.logout, true)
-            val prefs = Prefs(activity)
             prefs.shouldAutologin = false
             startActivity(intent)
             activity.finish()
+        }
+
+        showConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+            prefs.shouldShowConfirmModal = isChecked
         }
 
         return rootView
