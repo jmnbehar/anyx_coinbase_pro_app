@@ -108,8 +108,8 @@ class SendFragment : RefreshFragment() {
 
     private fun submitSend() {
         val amount = amountEditText.text.toString().toDoubleOrZero()
-     //   val destination = destinationEditText.text.toString()
-        val destination = "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio"
+        var destination = destinationEditText.text.toString()
+        destination = "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio"  //TODO: remove this: sry aksai
 
         val min = when (currency) {
             Currency.BTC -> .0001
@@ -133,7 +133,7 @@ class SendFragment : RefreshFragment() {
         }
 
         if (amount > min) {
-            GdaxApi.send(amount, currency, destination).executePost { result ->
+            GdaxApi.send(amount, currency, destination).executePost({ }) { result ->
                 onComplete(result)
             }
         } else {

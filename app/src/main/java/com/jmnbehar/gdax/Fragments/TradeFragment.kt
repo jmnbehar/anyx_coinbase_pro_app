@@ -228,39 +228,37 @@ class TradeFragment : RefreshFragment() {
         val amount = amountEditText.text.toString().toDoubleOrNull()
 //        var size: Double? = null
 
-        fun onComplete(result: Result<ByteArray, FuelError>) {
-            when (result) {
-                is Result.Failure -> {
-                    //error
-                    println("Error!: ${result.error}")
-                    toast("Error!: ${result.error}")
-                }
-                is Result.Success -> {
-//                    val data = result.getAs()
-//                    println("Success!: ${data}")
-                    toast("success")
-                    activity.onBackPressed()
-                }
+        fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
+            val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
+
+            when (errorCode) {
+                GdaxApi.ErrorCode.BadRequest -> {toast("400 Error: Missing something from the request")}
+                else -> GdaxApi.defaultPostFailure(this, result)
             }
         }
 
+        fun onComplete(result: Result<ByteArray, FuelError>) {
+            toast("success")
+            activity.onBackPressed()
+        }
+
+        val productId = account.product.id
         when(tradeSubType) {
             TradeSubType.MARKET -> {
-                val productId = account.product.id
                 when (tradeType) {
-                    TradeType.BUY ->  GdaxApi.orderMarket(tradeType, productId, size = null, funds = amount).executePost { onComplete(it) }
-                    TradeType.SELL -> GdaxApi.orderMarket(tradeType, productId, size = amount, funds = null).executePost { onComplete(it) }
+                    TradeType.BUY ->  GdaxApi.orderMarket(tradeType, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                    TradeType.SELL -> GdaxApi.orderMarket(tradeType, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                 }
             }
             TradeSubType.LIMIT -> {
                 val limitPrice = limitEditText.text.toString().toDoubleOrZero()
-                GdaxApi.orderLimit(tradeType, account.product.id, limitPrice, amount ?: 0.0).executePost { onComplete(it) }
+                GdaxApi.orderLimit(tradeType, account.product.id, limitPrice, amount ?: 0.0).executePost({ onFailure(it) }, { onComplete(it) })
             }
             TradeSubType.STOP -> {
                 val stopPrice = limitEditText.text.toString().toDoubleOrZero()
                 when (tradeType) {
-                    TradeType.BUY ->  GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size = null, funds = amount).executePost { onComplete(it) }
-                    TradeType.SELL -> GdaxApi.orderStop(tradeType, account.product.id, stopPrice, size = amount, funds = null).executePost { onComplete(it) }
+                    TradeType.BUY ->  GdaxApi.orderStop(tradeType, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                    TradeType.SELL -> GdaxApi.orderStop(tradeType, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                 }
             }
         }

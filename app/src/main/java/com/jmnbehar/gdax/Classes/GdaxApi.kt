@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import android.content.Context
 import android.os.Handler
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
@@ -7,6 +8,7 @@ import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
+import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
 import java.time.Clock
 import java.time.Instant
@@ -30,6 +32,43 @@ sealed class GdaxApi: FuelRouting {
             FuelManager.instance.basePath = basePath
         }
 
+        fun defaultPostFailure(fragment: RefreshFragment,  result: Result.Failure<ByteArray, FuelError>) {
+            val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
+            when (errorCode) {
+                GdaxApi.ErrorCode.BadRequest -> { fragment.toast("400 Error: Missing something from the request")}
+                GdaxApi.ErrorCode.Unauthorized -> { fragment.toast("401 Error: You don't have permission to do that")}
+                GdaxApi.ErrorCode.Forbidden -> { fragment.toast("403 Error: You don't have permission to do that")}
+                GdaxApi.ErrorCode.NotFound -> { fragment.toast("404 Error: Content not found")}
+                GdaxApi.ErrorCode.TooManyRequests -> { fragment.toast("Error! Too many requests in a row")}
+                GdaxApi.ErrorCode.ServerError -> { fragment.toast("Error! Sorry, Gdax Servers are encountering problems right now")}
+                GdaxApi.ErrorCode.UnknownError -> { fragment.toast("Error!: ${result.error}")}
+            }
+        }
+
+    }
+
+    enum class ErrorCode(val code: Int) {
+        BadRequest(400), //Invalid request format
+        Unauthorized(401),
+        Forbidden(403),
+        NotFound(404),
+        TooManyRequests(429),
+        ServerError(500), //Problem with our server
+        UnknownError(999);
+
+        companion object {
+            fun withCode(code: Int): ErrorCode {
+                return when (code) {
+                    400 -> BadRequest//Invalid request format
+                    401 -> Unauthorized
+                    403 -> Forbidden
+                    404 -> NotFound
+                    429 -> TooManyRequests
+                    500 -> ServerError //Problem with our server
+                    else -> UnknownError
+                }
+            }
+        }
     }
 
     override val basePath = Companion.basePath
@@ -59,10 +98,10 @@ sealed class GdaxApi: FuelRouting {
     //TODO: make status enum
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
        // MainActivity.progressDialog?.show()
-        Fuel.request(this).responseString { request, _, result ->
+        Fuel.request(this).responseString { _, _, result ->
             when (result) {
                 is Result.Failure -> {
-                    if (result.error.response.statusCode == 429) {
+                    if (result.error.response.statusCode == ErrorCode.TooManyRequests.code) {
                         timeLock++
                         val handler = Handler()
                         var retry = Runnable {  }
@@ -89,18 +128,17 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
-    //TODO: consider combining functions
-    fun executePost(onComplete: (result: Result<ByteArray, FuelError>) -> Unit) {
+    fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
        // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
         Fuel.post(this.request.url.toString())
                 .header(headers)
                 .body(body)
-                .response  { request, _, result ->
-            println(request.url)
-            println("body callback = " + request.bodyCallback.toString())
-            onComplete(result)
-        }
-
+                .response  { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> onFailure(result)
+                        is Result.Success -> onSuccess(result)
+                    }
+                }
     }
 
     override val method: Method

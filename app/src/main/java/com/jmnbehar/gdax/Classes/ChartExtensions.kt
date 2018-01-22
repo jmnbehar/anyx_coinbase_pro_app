@@ -50,7 +50,6 @@ fun LineChart.configure(candles: List<Candle>, currency: Currency, touchEnabled:
 
 fun LineChart.addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
     val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-    //TODO: reverse candles at its source
     println("first time: " + candles.first().time)
     println("last time: " + candles.last().time)
     val dataSet = LineDataSet(entries, "Chart")
