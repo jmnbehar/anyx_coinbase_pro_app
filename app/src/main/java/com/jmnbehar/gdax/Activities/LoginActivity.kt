@@ -8,9 +8,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
+import android.widget.EditText
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getAs
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_login.*
@@ -25,14 +25,20 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private lateinit var saveApiInfoCheckBox: CheckBox
     private lateinit var savePassphraseCheckBox: CheckBox
 
+    private lateinit var apiKeyEditText: EditText
+    private lateinit var apiSecretEditText: EditText
+    private lateinit var passphraseEditText: EditText
+
     private var apiKey: String? = ""
     private var apiSecret: String? = ""
+    private var passphrase: String? = ""
 
     private var shouldSaveApiInfo = false
     private var shouldSavePassphrase = false
+    private var skipLogin = false
 
     private fun checkUser() : Boolean {
-        if(shouldSaveApiInfo && shouldSavePassphrase) {
+        if(!skipLogin && shouldSaveApiInfo && shouldSavePassphrase) {
             apiKey = prefs.apiKey
             apiSecret = prefs.apiSecret
             var passphrase = prefs.passphrase
@@ -55,26 +61,36 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent.getBooleanExtra("EXIT", false)) {
+        if (intent.getBooleanExtra(Constants.exit, false)) {
             finish()
             return
+        } else if (intent.getBooleanExtra(Constants.logout, false)) {
+            skipLogin = true
         }
+
         prefs = Prefs(this)
         shouldSaveApiInfo = prefs.shouldSaveApiInfo
         shouldSavePassphrase = prefs.shouldSavePassphrase
         if (savedInstanceState == null) {
             if (!checkUser()) {
                 setContentView(R.layout.activity_login)
-
-
+                apiKeyEditText = etxt_login_api_key
+                apiSecretEditText = etxt_login_secret
+                passphraseEditText = etxt_login_passphrase
                 if(prefs.apiKey != "") {
                     apiKey = prefs.apiKey
-                    txt_login_api_key.setText("*****")
+                    apiKeyEditText.setText("*****")
                 }
                 if (prefs.apiSecret != "") {
                     apiSecret = prefs.apiSecret
-                    txt_login_secret.setText("*****")
+                    apiSecretEditText.setText("*****")
                 }
+
+                if (prefs.passphrase != "") {
+                    passphrase = prefs.passphrase
+                    passphraseEditText.setText("*****")
+                }
+
                 saveApiInfoCheckBox = cb_save_api_key
                 savePassphraseCheckBox = cb_save_passphrase
 
@@ -109,8 +125,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
         }
-
-
     }
 
     private fun showMessage(view: View, string: String) {
@@ -121,8 +135,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private fun signIn() {
         // Usage
 
-        var passphrase = txt_login_passphrase.text.toString()
-
         val iv = ByteArray(16)
         val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
 
@@ -132,55 +144,50 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         apiKey = if (apiKey == prefs.apiKey) {
             encryption.decryptOrNull(apiKey)
         } else {
-            txt_login_api_key.text.toString()
+            apiKeyEditText.text.toString()
         }
 
         apiSecret = if (apiSecret == prefs.apiSecret) {
             encryption.decryptOrNull(apiSecret)
         } else {
-            txt_login_secret.text.toString()
+            apiSecretEditText.text.toString()
         }
 
-        if (shouldSaveApiInfo) {
-            val apiKeyEncrypted = encryption.encrypt(apiKey)
-            val apiSecretEncrypted = encryption.encrypt(apiSecret)
-            prefs.apiKey = apiKeyEncrypted
-            prefs.apiSecret = apiSecretEncrypted
-            if (shouldSavePassphrase)  {
-                prefs.passphrase = passphrase
-            }
+        if (passphrase != prefs.passphrase) {
+            passphrase = passphraseEditText.text.toString()
         }
+
         val apiKeyVal = apiKey
         val apiSecretVal = apiSecret
-        if((apiKeyVal != null) && (apiSecretVal != null)) {
-            var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
-
-            loginWithCredentials(apiCredentials)
+        val passphraseVal = passphrase
+        if (shouldSaveApiInfo) {
+            val apiKeyEncrypted = encryption.encrypt(apiKeyVal)
+            val apiSecretEncrypted = encryption.encrypt(apiSecretVal)
+            prefs.apiKey = apiKeyEncrypted
+            prefs.apiSecret = apiSecretEncrypted
+            if (shouldSavePassphrase && (passphraseVal != null))  {
+                prefs.passphrase = passphraseVal!!
+            }
+        }
+        if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)) {
+            loginWithCredentials(ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal))
         } else {
             toast("Wrong Passphrase")
         }
     }
 
-
-    fun loginWithCredentials(credentials: ApiCredentials) {
-        var data: String?
+    private fun loginWithCredentials(credentials: ApiCredentials) {
         GdaxApi.credentials = credentials
-        //TODO: move this call into mainactivity
-        //TODO: make mainactivity default 1st activity, bounce back to login if not available
-
-
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         Account.getAccounts(onFailure) {
             toast("Success! logging in")
+            var prefs = Prefs(this)
+            prefs.shouldAutologin = true
             val intent = MainActivity.newIntent(this, true)
             startActivity(intent)
-
         }
     }
 
-//    override fun onBackPressed() {
-//        super.onBackPressed()
-//    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.

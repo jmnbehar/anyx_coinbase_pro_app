@@ -16,6 +16,7 @@ class Prefs (context: Context) {
     private val SAVE_API_INFO = "save_api_info"
     private val SAVE_PASSPHRASE = "save_passphrase"
     private val ALERTS = "alerts"
+    private val AUTOLOGIN = "should_autologin"
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
 
     var passphrase: String
@@ -29,6 +30,10 @@ class Prefs (context: Context) {
     var apiSecret: String
         get() = prefs.getString(API_SECRET, "")
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
+
+    var shouldAutologin: Boolean
+        get() = prefs.getBoolean(AUTOLOGIN, true)
+        set(value) = prefs.edit().putBoolean(AUTOLOGIN, value).apply()
 
     var shouldSaveApiInfo: Boolean
         get() = prefs.getBoolean(SAVE_API_INFO, false)

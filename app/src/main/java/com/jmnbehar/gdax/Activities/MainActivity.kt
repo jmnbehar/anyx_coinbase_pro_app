@@ -220,6 +220,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
 
         progressDialog = indeterminateProgressDialog("")
+        progressDialog?.dismiss()
 
         swipeRefreshLayout = swipe_refresh_layout
         swipeRefreshLayout.onRefresh {
@@ -229,7 +230,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 swipeRefreshLayout.isRefreshing = false
             }
         }
-        if (Account.list.size > 0) {
+        val prefs = Prefs(this)
+        if (!prefs.shouldAutologin) {
+            returnToLogin()
+        } else if (Account.list.size > 0) {
             goHome()
         } else {
             signIn()
@@ -254,6 +258,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if ((passphrase != null) && (apiKeyEncrypted != null) && (apiSecretEncrypted != null)) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
+
             val apiKey = encryption.decryptOrNull(apiKeyEncrypted)
             val apiSecret = encryption.decryptOrNull(apiSecretEncrypted)
 
@@ -275,6 +280,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun returnToLogin() {
         //TODO: nuke backstack
         val intent = Intent(this, LoginActivity::class.java)
+        intent.putExtra(Constants.logout, true)
         startActivity(intent)
     }
 

@@ -6,6 +6,7 @@ package com.jmnbehar.gdax.Classes
 
 object Constants {
     val exit = "EXIT"
+    val logout = "LOGOUT"
     val alertChannelId = "com.jmnbehar.gdax.alerts"
     val salt = "GdaxApp"
 }

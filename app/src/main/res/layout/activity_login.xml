@@ -15,7 +15,7 @@
         tools:layout_editor_absoluteY="16dp" />
 
     <EditText
-        android:id="@+id/txt_login_api_key"
+        android:id="@+id/etxt_login_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -23,7 +23,7 @@
         android:hint="Api Key" />
 
     <EditText
-        android:id="@+id/txt_login_secret"
+        android:id="@+id/etxt_login_secret"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -31,7 +31,7 @@
         android:inputType="textPassword" />
 
     <EditText
-        android:id="@+id/txt_login_passphrase"
+        android:id="@+id/etxt_login_passphrase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
