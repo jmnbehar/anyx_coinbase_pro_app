@@ -53,6 +53,14 @@ class TradeFragment : RefreshFragment() {
     private lateinit var totalText: TextView
 
     private lateinit var advancedOptionsCheckBox: CheckBox
+    private lateinit var advancedOptionsLayout: LinearLayout
+    private lateinit var advancedOptionsLimitLayout: LinearLayout
+    private lateinit var advancedOptionsStopLayout: LinearLayout
+
+    private lateinit var advancedOptionTimeInForceSpinner: Spinner
+
+    private lateinit var advancedOptionStopLimitEditText: EditText
+    private lateinit var advancedOptionStopLimitUser: TextView
 
     private lateinit var submitOrderButton: Button
 
@@ -102,6 +110,9 @@ class TradeFragment : RefreshFragment() {
         cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
 
         advancedOptionsCheckBox = rootView.cb_trade_advanced
+        advancedOptionsLayout = rootView.layout_trade_advanced
+        advancedOptionsLimitLayout = rootView.layout_trade_advanced_limit
+        advancedOptionsStopLayout = rootView.layout_trade_advanced_stop
 
         totalLabelText = rootView.txt_trade_total_label
         totalText = rootView.txt_trade_total
@@ -155,7 +166,13 @@ class TradeFragment : RefreshFragment() {
         radioButtonStop.setOnClickListener {
             switchTradeType(tradeType =  TradeType.STOP)
         }
-
+        advancedOptionsCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                advancedOptionsLayout.visibility = View.VISIBLE
+            } else {
+                advancedOptionsLayout.visibility = View.GONE
+            }
+        }
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         submitOrderButton.setOnClickListener {
@@ -339,36 +356,83 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
+    enum class TimeInForce {
+        GoodTilCancelled,
+        GoodTilTime,
+        ImmediateOrCancel,
+        FirstOrKill;
+
+        override fun toString(): String {
+            return when (this) {
+                GoodTilCancelled -> "GTC"
+                GoodTilTime -> "GTT"
+                ImmediateOrCancel -> "IOC"
+                FirstOrKill -> "FOK"
+            }
+        }
+        fun label(): String {
+            return when (this) {
+                GoodTilCancelled -> "Good Til Cancelled"
+                GoodTilTime -> "Good Til Time"
+                ImmediateOrCancel -> "Immediate Or Cancel"
+                FirstOrKill -> "First Or Kill"
+            }
+        }
+    }
 
     private fun switchTradeType(tradeSide: TradeSide = this.tradeSide, tradeType: TradeType = this.tradeType) {
         this.tradeSide = tradeSide
         this.tradeType = tradeType
 
         updateTotalText()
+
+        if (advancedOptionsCheckBox.isChecked) {
+            advancedOptionsLayout.visibility = View.VISIBLE
+        } else {
+            advancedOptionsLayout.visibility = View.GONE
+        }
+        when (tradeType) {
+            TradeType.MARKET -> {
+                radioButtonMarket.isChecked = true
+                limitLayout.visibility = View.GONE
+            }
+            TradeType.LIMIT -> {
+                radioButtonLimit.isChecked = true
+                limitUnitText.text = localCurrency
+                limitLayout.visibility = View.VISIBLE
+                limitLabelText.text = "Limit Price"
+                advancedOptionsLimitLayout.visibility = View.VISIBLE
+                advancedOptionsStopLayout.visibility = View.GONE
+                advancedOptionsCheckBox.visibility = View.VISIBLE
+                //TODO: set Time In Force spinner
+//                val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list_of_items)
+//                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//                advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+            }
+            TradeType.STOP -> {
+                radioButtonStop.isChecked = true
+                limitUnitText.text = localCurrency
+                limitLayout.visibility = View.VISIBLE
+                limitLabelText.text = "Stop Price"
+                advancedOptionsLimitLayout.visibility = View.GONE
+                advancedOptionsStopLayout.visibility = View.VISIBLE
+                advancedOptionsCheckBox.visibility = View.VISIBLE
+            }
+        }
         when (tradeSide) {
             TradeSide.BUY -> {
                 radioButtonBuy.isChecked = true
                 when (tradeType) {
                     TradeType.MARKET -> {
-                        radioButtonMarket.isChecked = true
                         amountUnitText.text = localCurrency
-                        limitLayout.visibility = View.GONE
                         totalLabelText.text = "Total (${account.currency}) ="
                     }
                     TradeType.LIMIT -> {
-                        radioButtonLimit.isChecked = true
                         amountUnitText.text = account.currency.toString()
-                        limitLayout.visibility = View.VISIBLE
-                        limitUnitText.text = localCurrency
-                        limitLabelText.text = "Limit Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
                     TradeType.STOP -> {
-                        radioButtonStop.isChecked = true
                         amountUnitText.text = localCurrency
-                        limitLayout.visibility = View.VISIBLE
-                        limitUnitText.text = localCurrency
-                        limitLabelText.text = "Stop Price"
                         totalLabelText.text = "Total (${account.currency}) ="
 
                     }
@@ -378,25 +442,15 @@ class TradeFragment : RefreshFragment() {
                 radioButtonSell.isChecked = true
                 when (tradeType) {
                     TradeType.MARKET -> {
-                        radioButtonMarket.isChecked = true
                         amountUnitText.text = account.currency.toString()
-                        limitLayout.visibility = View.GONE
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
                     TradeType.LIMIT -> {
-                        radioButtonLimit.isChecked = true
                         amountUnitText.text = account.currency.toString()
-                        limitLayout.visibility = View.VISIBLE
-                        limitUnitText.text = localCurrency
-                        limitLabelText.text = "Limit Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
                     TradeType.STOP -> {
-                        radioButtonStop.isChecked = true
                         amountUnitText.text = account.currency.toString()
-                        limitLayout.visibility = View.VISIBLE
-                        limitUnitText.text = localCurrency
-                        limitLabelText.text = "Stop Price"
                         totalLabelText.text = "Total (${localCurrency}) ="
                     }
                 }

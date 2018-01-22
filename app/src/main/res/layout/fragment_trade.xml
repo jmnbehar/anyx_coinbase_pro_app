@@ -206,13 +206,78 @@
                     android:text="USD" />
             </LinearLayout>
 
-        </LinearLayout>
+            <CheckBox
+                android:id="@+id/cb_trade_advanced"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Advanced (Not Yet Available)" />
 
-        <CheckBox
-            android:id="@+id/cb_trade_advanced"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Advanced (Not Yet Available)" />
+            <LinearLayout
+                android:id="@+id/layout_trade_advanced"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:id="@+id/layout_trade_advanced_limit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_trade_advanced_time_in_force"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Time In Force" />
+
+                    <Spinner
+                        android:id="@+id/spinner_trade_time_in_force"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_trade_advanced_stop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_trade_stop_limit_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Limit Price" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_trade_stop_limit"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="numberDecimal" />
+
+                        <TextView
+                            android:id="@+id/txt_trade_stop_limit_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="USD" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
