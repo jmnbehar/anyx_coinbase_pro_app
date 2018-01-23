@@ -55,12 +55,9 @@ class TradeFragment : RefreshFragment() {
     private lateinit var advancedOptionsCheckBox: CheckBox
     private lateinit var advancedOptionsLayout: LinearLayout
     private lateinit var advancedOptionsLimitLayout: LinearLayout
-    private lateinit var advancedOptionsStopLayout: LinearLayout
 
     private lateinit var advancedOptionTimeInForceSpinner: Spinner
-
-    private lateinit var advancedOptionStopLimitEditText: EditText
-    private lateinit var advancedOptionStopLimitUser: TextView
+    private lateinit var advancedOptionEndTimeSpinner: Spinner
 
     private lateinit var submitOrderButton: Button
 
@@ -112,7 +109,9 @@ class TradeFragment : RefreshFragment() {
         advancedOptionsCheckBox = rootView.cb_trade_advanced
         advancedOptionsLayout = rootView.layout_trade_advanced
         advancedOptionsLimitLayout = rootView.layout_trade_advanced_limit
-        advancedOptionsStopLayout = rootView.layout_trade_advanced_stop
+
+        advancedOptionTimeInForceSpinner = rootView.spinner_trade_time_in_force
+        advancedOptionEndTimeSpinner = rootView.spinner_trade_good_til_time
 
         totalLabelText = rootView.txt_trade_total_label
         totalText = rootView.txt_trade_total
@@ -178,13 +177,31 @@ class TradeFragment : RefreshFragment() {
         submitOrderButton.setOnClickListener {
             val prefs = Prefs(activity)
 
-            val amount = amountEditText.text.toString().toDoubleOrNull()
-            val limit = limitEditText.text.toString().toDoubleOrNull()
+            val amount = amountEditText.text.toString().toDoubleOrZero()
+            val limit = limitEditText.text.toString().toDoubleOrZero()
+
+            var timeInForce: GdaxApi.TimeInForce? = null
+            var cancelAfter: String? = null
+            var stopLimit: Double? = null
+            if (advancedOptionsCheckBox.isChecked) {
+                when (tradeType) {
+                    TradeType.LIMIT -> {
+                        val tifIndex = advancedOptionTimeInForceSpinner.selectedItemPosition
+                        timeInForce = GdaxApi.TimeInForce.values()[tifIndex]
+                        if (timeInForce == GdaxApi.TimeInForce.GoodTilTime) {
+                            cancelAfter = advancedOptionEndTimeSpinner.selectedItem as String
+                        }
+                    }
+                    TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
+                    TradeType.MARKET -> { /* do nothing */ }
+                }
+            }
+
             if (amount == null || amount <= 0) {
                 toast("Amount is not valid")
-            } else if ((tradeType == TradeType.LIMIT) && ((limit == null) || (limit <= 0.0))) {
+            } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
                 toast("Limit is not valid")
-            } else if ((tradeType == TradeType.STOP) && ((limit == null) || (limit <= 0.0))) {
+            } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
                 toast("Stop is not valid")
             } else {
                 if (prefs.shouldShowConfirmModal) {
@@ -193,11 +210,11 @@ class TradeFragment : RefreshFragment() {
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {
                             account.updateAccount(price = price)
-                            confirmPopup(price, amount, limit ?: 0.0)
+                            confirmPopup(price, amount, limit, timeInForce, cancelAfter)
                         }
                     }
                 } else {
-                    submitOrder(amount, limit ?: 0.0)
+                    submitOrder(amount, limit, timeInForce, cancelAfter)
                 }
             }
         }
@@ -205,53 +222,32 @@ class TradeFragment : RefreshFragment() {
         return rootView
     }
 
-    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double) {
+    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?) {
         val cryptoTotal = totalInCrypto(amount, limit)
         val dollarTotal = totalInDollars(amount, limit)
-
         alert {
             title = "Alert"
             customView {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            linearLayout {
-                                textView("${account.currency} price:")
-                                textView(updatedTicker.fiatFormat()).lparams { textAlignment = right }
-                                padding = dip(5)
-                            }.lparams(width = matchParent) {}
+                            horizontalLayout("${account.currency} price:", updatedTicker.fiatFormat()).lparams(width = matchParent) {}
                         }
-                        linearLayout {
-                            textView("Total ${account.currency}:")
-                            textView(cryptoTotal.btcFormat()).lparams { textAlignment = right }
-                            padding = dip(5)
-                        }.lparams(width = matchParent) {}
-                        linearLayout {
-                            textView("Total $localCurrency:")
-                            textView( dollarTotal.fiatFormat()).lparams { textAlignment = right }
-                            padding = dip(5)
-                        }.lparams(width = matchParent) {}
-                        linearLayout {
-                            textView("Estimated fees:")
-                            textView(feeEstimate(dollarTotal, limit).fiatFormat()).lparams { textAlignment = right }
-                            padding = dip(5)
-                        }.lparams(width = matchParent) {}
-
+                        horizontalLayout("Total ${account.currency}:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("Total $localCurrency:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("Estimated fees:", feeEstimate(dollarTotal, limit).fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again")
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
-
             positiveButton("Confirm") {
-                submitOrder(amount, limit)
+                submitOrder(amount, limit, timeInForce, cancelAfter)
             }
             negativeButton("Cancel") { }
         }.show()
     }
 
-    private fun submitOrder(amount: Double, limitPrice: Double) {
-//        var size: Double? = null
-
+    private fun submitOrder(amount: Double, limitPrice: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
             when (errorCode) {
@@ -274,7 +270,7 @@ class TradeFragment : RefreshFragment() {
                 }
             }
             TradeType.LIMIT -> {
-                GdaxApi.orderLimit(tradeSide, account.product.id, limitPrice, amount ?: 0.0).executePost({ onFailure(it) }, { onComplete(it) })
+                GdaxApi.orderLimit(tradeSide, account.product.id, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
             }
             TradeType.STOP -> {
                 val stopPrice = limitPrice
@@ -287,11 +283,7 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
-        totalText.text = totalText(amount, limitPrice)
-    }
-
-    private fun totalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : String {
-        return when (tradeSide) {
+        totalText.text = when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
                 TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat()
@@ -325,7 +317,11 @@ class TradeFragment : RefreshFragment() {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET -> amount / account.product.price
                 TradeType.LIMIT -> amount
-                TradeType.STOP -> amount/limitPrice
+                TradeType.STOP -> if (limitPrice > 0.0) {
+                    amount / limitPrice
+                } else {
+                    0.00
+                }
             }
             TradeSide.SELL -> amount
         }
@@ -356,29 +352,6 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
-    enum class TimeInForce {
-        GoodTilCancelled,
-        GoodTilTime,
-        ImmediateOrCancel,
-        FirstOrKill;
-
-        override fun toString(): String {
-            return when (this) {
-                GoodTilCancelled -> "GTC"
-                GoodTilTime -> "GTT"
-                ImmediateOrCancel -> "IOC"
-                FirstOrKill -> "FOK"
-            }
-        }
-        fun label(): String {
-            return when (this) {
-                GoodTilCancelled -> "Good Til Cancelled"
-                GoodTilTime -> "Good Til Time"
-                ImmediateOrCancel -> "Immediate Or Cancel"
-                FirstOrKill -> "First Or Kill"
-            }
-        }
-    }
 
     private fun switchTradeType(tradeSide: TradeSide = this.tradeSide, tradeType: TradeType = this.tradeType) {
         this.tradeSide = tradeSide
@@ -402,12 +375,30 @@ class TradeFragment : RefreshFragment() {
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = "Limit Price"
                 advancedOptionsLimitLayout.visibility = View.VISIBLE
-                advancedOptionsStopLayout.visibility = View.GONE
                 advancedOptionsCheckBox.visibility = View.VISIBLE
-                //TODO: set Time In Force spinner
-//                val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list_of_items)
-//                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//                advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+
+                val timeInForceList =  GdaxApi.TimeInForce.values()
+                val spinnerList = timeInForceList.map { t -> t.label() }
+                val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+                advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                        val selectedItem = timeInForceList[position]
+                        if (selectedItem == GdaxApi.TimeInForce.GoodTilTime) {
+                            advancedOptionEndTimeSpinner.visibility = View.VISIBLE
+                        } else {
+                            advancedOptionEndTimeSpinner.visibility = View.GONE
+                        }
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>) {
+                        advancedOptionEndTimeSpinner.visibility = View.GONE
+                    }
+                }
+                val endTimeList = listOf("min", "hour", "day")
+                val endTimeArrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, endTimeList)
+                endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
             }
             TradeType.STOP -> {
                 radioButtonStop.isChecked = true
@@ -415,8 +406,7 @@ class TradeFragment : RefreshFragment() {
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = "Stop Price"
                 advancedOptionsLimitLayout.visibility = View.GONE
-                advancedOptionsStopLayout.visibility = View.VISIBLE
-                advancedOptionsCheckBox.visibility = View.VISIBLE
+                advancedOptionsCheckBox.visibility = View.GONE
             }
         }
         when (tradeSide) {

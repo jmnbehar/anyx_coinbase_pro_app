@@ -17,8 +17,7 @@ import org.jetbrains.anko.textColor
 class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        //return Account.list.size
-        return 4
+        return Account.list.size
     }
 
     override fun getItem(i: Int): Any {
@@ -38,7 +37,8 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             2 -> Account.ltcAccount
             3 -> Account.bchAccount
             else -> Account.list[i]
-        } ?: Account.list[i]
+        } ?: null
+        account ?: return vi
 
         val candles = account.product.candles
         val currentPrice = account.product.price

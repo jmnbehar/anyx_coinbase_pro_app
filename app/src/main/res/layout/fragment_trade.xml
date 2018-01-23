@@ -238,40 +238,13 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1" />
 
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_trade_advanced_stop"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/txt_trade_stop_limit_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Limit Price" />
-
-                    <LinearLayout
+                    <Spinner
+                        android:id="@+id/spinner_trade_good_til_time"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <EditText
-                            android:id="@+id/etxt_trade_stop_limit"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="20"
-                            android:inputType="numberDecimal" />
-
-                        <TextView
-                            android:id="@+id/txt_trade_stop_limit_unit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="USD" />
-                    </LinearLayout>
+                        android:layout_marginTop="3dp"
+                        android:layout_weight="1"
+                        android:paddingTop="20dp" />
 
                 </LinearLayout>
 
@@ -284,7 +257,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
 
         <TextView
             android:id="@+id/txt_trade_total_label"

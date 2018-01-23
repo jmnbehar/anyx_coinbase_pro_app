@@ -80,7 +80,7 @@ sealed class GdaxApi: FuelRouting {
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
     class candles(val productId: String, val time: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
-    class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double) : GdaxApi()
+    class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : GdaxApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class cancelOrder(val orderId: String) : GdaxApi()
@@ -245,6 +245,12 @@ sealed class GdaxApi: FuelRouting {
                     json.put("price", "$price")
                     json.put("size", "$size")
 
+                    if (timeInForce != null) {
+                        json.put("time_in_force", timeInForce.toString())
+                        if (timeInForce == TimeInForce.GoodTilTime && cancelAfter != null) {
+                            json.put("cancel_after", cancelAfter)
+                        }
+                    }
                     return json.toString()
                 }
                 is orderMarket -> {
@@ -271,7 +277,6 @@ sealed class GdaxApi: FuelRouting {
                     if (size != null) {
                         json.put("size", "$size")
                     }
-
 
                     return json.toString()
                 }
@@ -313,4 +318,30 @@ sealed class GdaxApi: FuelRouting {
 
             return headers
         }
+
+
+    enum class TimeInForce {
+        GoodTilCancelled,
+        GoodTilTime,
+        ImmediateOrCancel,
+        FirstOrKill;
+
+        override fun toString(): String {
+            return when (this) {
+                GoodTilCancelled -> "GTC"
+                GoodTilTime -> "GTT"
+                ImmediateOrCancel -> "IOC"
+                FirstOrKill -> "FOK"
+            }
+        }
+        fun label(): String {
+            return when (this) {
+                GoodTilCancelled -> "Good Til Cancelled"
+                GoodTilTime -> "Good Til Time"
+                ImmediateOrCancel -> "Immediate Or Cancel"
+                FirstOrKill -> "First Or Kill"
+            }
+        }
+    }
+
 }
