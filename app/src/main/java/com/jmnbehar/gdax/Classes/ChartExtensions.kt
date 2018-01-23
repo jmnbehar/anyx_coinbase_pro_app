@@ -76,15 +76,20 @@ fun LineChart.addCandles(candles: List<Candle>, currency: Currency, timeRange: I
 
 class XAxisDateFormatter(private val values: DoubleArray, var timeRange: Int) : IAxisValueFormatter {
     override fun getFormattedValue(value: Float, axis: AxisBase): String {
-        val formatter = when (timeRange) {
-            TimeInSeconds.oneDay -> DateTimeFormatter.ofPattern("h:mma")
-            TimeInSeconds.oneWeek -> DateTimeFormatter.ofPattern("EEE")
-            TimeInSeconds.oneMonth -> DateTimeFormatter.ofPattern("M/d")
-           // TimeInSeconds.oneYear -> DateTimeFormatter.ofPattern("LLL")
-           // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
-            else -> DateTimeFormatter.ofPattern("h:mma")
-        }
-        val dateLong = values[value.toInt()].toLong()
-        return Instant.ofEpochSecond(dateLong).atZone(ZoneId.systemDefault()).toLocalDateTime().format(formatter)
+        val dateDouble = values[value.toInt()]
+        return dateDouble.toStringWithTimeRange(timeRange)
     }
+}
+fun Double.toStringWithTimeRange(timeRange: Int) : String {
+    val formatter = when (timeRange) {
+        TimeInSeconds.oneDay -> DateTimeFormatter.ofPattern("h:mma")
+        TimeInSeconds.oneWeek -> DateTimeFormatter.ofPattern("EEE")
+        TimeInSeconds.oneMonth -> DateTimeFormatter.ofPattern("M/d")
+    // TimeInSeconds.oneYear -> DateTimeFormatter.ofPattern("LLL")
+    // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
+        else -> DateTimeFormatter.ofPattern("h:mma")
+    }
+    val dateLong = this.toLong()
+    return Instant.ofEpochSecond(dateLong).atZone(ZoneId.systemDefault()).toLocalDateTime().format(formatter)
+
 }

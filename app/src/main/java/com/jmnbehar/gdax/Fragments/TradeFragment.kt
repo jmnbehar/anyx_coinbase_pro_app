@@ -15,6 +15,7 @@ import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
@@ -236,7 +237,10 @@ class TradeFragment : RefreshFragment() {
                         horizontalLayout("Total ${account.currency}:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout("Total $localCurrency:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
                         horizontalLayout("Estimated fees:", feeEstimate(dollarTotal, limit).fiatFormat()).lparams(width = matchParent) {}
-                        checkBox("Don't show this again")
+                        checkBox("Don't show this again").onCheckedChange { _, isChecked ->
+                            val prefs = Prefs(activity)
+                            prefs.shouldShowConfirmModal = !isChecked
+                        }
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }

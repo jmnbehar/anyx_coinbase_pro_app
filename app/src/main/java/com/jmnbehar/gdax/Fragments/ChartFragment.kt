@@ -1,7 +1,9 @@
 package com.jmnbehar.gdax.Fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import com.github.kittinunf.result.Result
@@ -37,6 +39,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var balanceText: TextView
     private lateinit var valueText: TextView
     private lateinit var lineChart: LineChart
+
+    private lateinit var nameText: TextView
+    private lateinit var tickerText: TextView
+    private lateinit var iconView: ImageView
+    private lateinit var percentChangeText: TextView
+
     private var chartLength = TimeInSeconds.oneDay
 
     companion object {
@@ -64,15 +72,23 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart.setOnChartValueSelectedListener(this)
         lineChart.onChartGestureListener = this
 
-        rootView.txt_chart_name.text = currency.fullName
-        rootView.txt_chart_ticker.text = "$currency wallet"
-        rootView.img_chart_account_icon.setImageResource(currency.iconId)
+        nameText = rootView.txt_chart_name
+        tickerText = rootView.txt_chart_ticker
+        iconView = rootView.img_chart_account_icon
 
         balanceText = rootView.txt_chart_account_balance
         valueText = rootView.txt_chart_account_value
         priceText = rootView.txt_chart_price
+        percentChangeText = rootView.txt_chart_change_or_date
 
-        priceText.text = "${account.product.price}"
+        val price = account.product.price
+        priceText.text = price.fiatFormat()
+
+        setPercentChangeText(price, candles.first().open)
+
+        nameText.text = currency.fullName
+        tickerText.text = "$currency wallet"
+        iconView.setImageResource(currency.iconId)
 
         balanceText.text = "${account.balance.btcFormat()} ${currency}"
         valueText.text = "$${account.value.fiatFormat()}"
@@ -107,6 +123,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         return rootView
+    }
+
+    fun setPercentChangeText(price: Double, open: Double) {
+        val change = price - open
+        val weightedChange: Double = (change / open)
+        val percentChange: Double = weightedChange * 100.0
+        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.textColor = if (percentChange >= 0) {
+            Color.GREEN
+        } else {
+            Color.RED
+        }
     }
 
     fun orderOnClick(order: ApiOrder) {
@@ -160,10 +188,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         priceText.text = entry.y.toDouble().fiatFormat()
+        val candle = account.product.candles[entry.x.toInt()]
+        percentChangeText.text = candle.time.toStringWithTimeRange(TimeInSeconds.oneDay)
+        percentChangeText.textColor = Color.BLACK
     }
 
     override fun onNothingSelected() {
-        priceText.text = account.product.price.fiatFormat()
+        val price = account.product.price
+        val open = account.product.candles.first().open
+        priceText.text = price.fiatFormat()
+        setPercentChangeText(price, open)
         lineChart.highlightValues(arrayOf<Highlight>())
     }
 

@@ -87,13 +87,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var settingsFragment: SettingsFragment? = null
 
         var pricesFragment: PricesFragment? = null
-        var areAccountsPreloaded = false
 
         var progressDialog: ProgressDialog? = null
 
-        fun newIntent(context: Context, accountsPreloaded: Boolean): Intent {
-            //TODO: pass accountsPreloaded as intent flag
-            areAccountsPreloaded = accountsPreloaded
+        fun newIntent(context: Context): Intent {
             return Intent(context, MainActivity::class.java)
         }
 
@@ -143,18 +140,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     ChartFragment.newInstance(account)
                 }
                 FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
-                    //TODO: confirm account is not null
-                    //TODO: switch to actual bch at some point
                     val account = Account.bchAccount!!
                     ChartFragment.newInstance(account)
                 }
                 FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
-                    //TODO: confirm account is not null
                     val account = Account.ethAccount!!
                     ChartFragment.newInstance(account)
                 }
                 FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
-                    //TODO: confirm account is not null
                     val account = Account.ltcAccount!!
                     ChartFragment.newInstance(account)
                 }
@@ -278,7 +271,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     fun returnToLogin() {
-        //TODO: nuke backstack
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(Constants.logout, true)
         startActivity(intent)
@@ -355,7 +347,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //TODO: add variable time checking, and run on launch
         //TODO: (ideally run on system launch)
-//        handler.postDelayed(runnable, (TimeInSeconds.fifteenMinutes * 1000).toLong())
         handler.postDelayed(runnable, (TimeInSeconds.oneMinute * 1000).toLong())
     }
 
