@@ -7,7 +7,6 @@ import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import com.github.kittinunf.result.Result
-import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartGestureListener
@@ -24,6 +23,8 @@ import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import android.view.MotionEvent
+
 
 
 /**
@@ -38,7 +39,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private lateinit var balanceText: TextView
     private lateinit var valueText: TextView
-    private lateinit var lineChart: LineChart
+    private lateinit var lineChart: PriceChart
 
     private lateinit var nameText: TextView
     private lateinit var tickerText: TextView
@@ -70,7 +71,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart = rootView.chart
         lineChart.configure(candles, currency, true, timeRange, true)
         lineChart.setOnChartValueSelectedListener(this)
+        lineChart.ignoreVerticalDrag = true
+        lineChart.underlyingView = rootView
         lineChart.onChartGestureListener = this
+        lineChart.isDragYEnabled = false
+        lineChart.onSideDrag = {
+            MainActivity.swipeRefreshLayout.isEnabled = false
+            LockableScrollView.scrollLocked = true
+        }
 
         nameText = rootView.txt_chart_name
         tickerText = rootView.txt_chart_ticker
@@ -201,11 +209,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart.highlightValues(arrayOf<Highlight>())
     }
 
-    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
-        //TODO: don't lock if its a swipe down
-        MainActivity.swipeRefreshLayout.isEnabled = false
-        LockableScrollView.scrollLocked = true
-    }
+    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
+
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         MainActivity.swipeRefreshLayout.isEnabled = true
         LockableScrollView.scrollLocked = false

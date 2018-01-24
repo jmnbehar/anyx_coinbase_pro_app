@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
 import org.jetbrains.anko.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 /**
@@ -53,3 +56,18 @@ fun Double.btcFormat(): String = "%.8f".format(this)
 fun Double.fiatFormat(): String = "%.2f".format(this)
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
+
+
+fun Double.toStringWithTimeRange(timeRange: Int) : String {
+    val formatter = when (timeRange) {
+        TimeInSeconds.oneDay -> DateTimeFormatter.ofPattern("h:mma")
+        TimeInSeconds.oneWeek -> DateTimeFormatter.ofPattern("EEE")
+        TimeInSeconds.oneMonth -> DateTimeFormatter.ofPattern("M/d")
+    // TimeInSeconds.oneYear -> DateTimeFormatter.ofPattern("LLL")
+    // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
+        else -> DateTimeFormatter.ofPattern("h:mma")
+    }
+    val dateLong = this.toLong()
+    return Instant.ofEpochSecond(dateLong).atZone(ZoneId.systemDefault()).toLocalDateTime().format(formatter)
+
+}

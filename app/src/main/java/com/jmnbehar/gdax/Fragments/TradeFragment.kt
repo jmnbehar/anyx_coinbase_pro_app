@@ -134,7 +134,6 @@ class TradeFragment : RefreshFragment() {
                 println(tradeType)
                 val amount = p0.toString().toDoubleOrZero()
                 updateTotalText(amount)
-
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}

@@ -72,7 +72,7 @@
     </LinearLayout>
 
 
-    <com.github.mikephil.charting.charts.LineChart
+    <com.jmnbehar.gdax.Classes.PriceChart
         android:id="@+id/chart_product"
         android:layout_width="match_parent"
         android:layout_height="150dp" />
