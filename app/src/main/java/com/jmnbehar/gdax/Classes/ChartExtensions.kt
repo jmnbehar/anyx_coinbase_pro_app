@@ -14,7 +14,6 @@ import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import android.view.VelocityTracker
-import android.view.View
 import kotlin.math.absoluteValue
 
 
@@ -34,7 +33,6 @@ class PriceChart : LineChart {
 
     var velocityTracker: VelocityTracker? = null
     private var isVerticalDrag: Boolean? = null
-    var underlyingView: View? = null
     private var onSideDrag: () -> Unit = { }
     private var onVerticalDrag: () -> Unit = { }
     var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal

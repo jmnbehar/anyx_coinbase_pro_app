@@ -13,6 +13,7 @@ object Constants {
 
 
 object TimeInSeconds {
+    val halfMinute = 30
     val oneMinute = 60
     val fiveMinutes = 300
     val fifteenMinutes = 900

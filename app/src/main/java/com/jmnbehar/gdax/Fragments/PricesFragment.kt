@@ -66,6 +66,19 @@ class PricesFragment : RefreshFragment() {
         return rootView
     }
 
+    override fun onResume() {
+        super.onResume()
+        autoRefresh = Runnable {
+            miniRefresh({ }, { })
+            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+        }
+        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+    }
+
+    override fun onPause() {
+        handler.removeCallbacks(autoRefresh)
+        super.onPause()
+    }
 
 
     override fun refresh(onComplete: () -> Unit) {
@@ -98,9 +111,4 @@ class PricesFragment : RefreshFragment() {
             }
         }
     }
-
-    fun miniRefresh(onComplete: () -> Unit) {
-
-    }
-
 }

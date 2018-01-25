@@ -46,8 +46,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var iconView: ImageView
     private lateinit var percentChangeText: TextView
 
-    private val handler = Handler()
-    private var autoRefresh: Runnable? = null
     private var chartLength = TimeInSeconds.oneDay
 
     companion object {
@@ -77,7 +75,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         }
         lineChart.setOnChartValueSelectedListener(this)
-        lineChart.underlyingView = rootView
         lineChart.onChartGestureListener = this
 
         nameText = rootView.txt_chart_name
@@ -130,13 +127,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
 
+        return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
         autoRefresh = Runnable {
             miniRefresh({ }, { })
-            handler.postDelayed(autoRefresh, (TimeInSeconds.oneMinute * 1000).toLong())
-
+            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.oneMinute * 1000).toLong())
-        return rootView
+        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
     }
 
     override fun onPause() {
