@@ -54,6 +54,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         var balanceText =  vi.txt_product_amount_owned
 
 
+        //TODO: someday add ability to select values here
         vi.img_product_icon.setImageResource(account.currency.iconId)
 
         productNameText.text = account.product.currency.toString()
@@ -70,7 +71,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         balanceText.text = "Balance: ${account.balance} ${account.currency}"
 
         var lineChart = vi.chart_product
-        lineChart.configure(candles, account.currency, false,  TimeInSeconds.oneDay, false)
+        lineChart.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 
         vi.setOnClickListener { onClick(account.product) }
 

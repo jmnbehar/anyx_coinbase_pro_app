@@ -66,6 +66,8 @@ class PricesFragment : RefreshFragment() {
         return rootView
     }
 
+
+
     override fun refresh(onComplete: () -> Unit) {
         var productsUpdated = 0
         var accountListSize = Account.list.size
@@ -88,11 +90,6 @@ class PricesFragment : RefreshFragment() {
                     val price = ticker.price.toDoubleOrNull()
                     if (price != null) {
                         account.product.price = price
-//                                val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-//                                val newCandle = Candle(now.toDouble(), price, price, price, price, 0.0)
-//                                val mutableCandles = account.product.candles.toMutableList()
-//                                mutableCandles.add(newCandle)
-//                                account.product.candles = mutableCandles
                     }
                     productsUpdated++
                     if (productsUpdated == accountListSize) {
@@ -102,6 +99,10 @@ class PricesFragment : RefreshFragment() {
                 }
             }
         }
+    }
+
+    fun miniRefresh(onComplete: () -> Unit) {
+
     }
 
 }

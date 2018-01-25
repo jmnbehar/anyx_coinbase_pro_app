@@ -27,11 +27,17 @@ class PriceChart : LineChart {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
 
-    var ignoreVerticalDrag = true
+    enum class DefaultDragDirection {
+        Horizontal,
+        Vertical;
+    }
+
     var velocityTracker: VelocityTracker? = null
     private var isVerticalDrag: Boolean? = null
     var underlyingView: View? = null
-    var onSideDrag: () -> Unit = { }
+    private var onSideDrag: () -> Unit = { }
+    private var onVerticalDrag: () -> Unit = { }
+    var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked
@@ -39,14 +45,11 @@ class PriceChart : LineChart {
         when (action) {
             MotionEvent.ACTION_DOWN -> {
                 if (velocityTracker == null) {
-                    // Retrieve a new VelocityTracker object to watch the
-                    // velocity of a motion.
                     velocityTracker = VelocityTracker.obtain()
                 } else {
                     // Reset the velocity tracker back to its initial state.
                     velocityTracker?.clear()
                 }
-                // Add a user's movement to the tracker.
                 velocityTracker?.addMovement(event)
                 isVerticalDrag = null
             }
@@ -56,15 +59,20 @@ class PriceChart : LineChart {
 
                 val xVelocity = velocityTracker?.xVelocity?.absoluteValue ?: 0.0.toFloat()
                 val yVelocity = velocityTracker?.yVelocity?.absoluteValue ?: 0.0.toFloat()
-                if (isVerticalDrag == null && (xVelocity > 1 || yVelocity > 1)) {
-                    if (yVelocity > (xVelocity * 1.5)) {
+
+                //TODO: this code is messy, due for a refactor:
+                val xCoefficient = if (defaultDragDirection == DefaultDragDirection.Horizontal) { 5.toFloat() } else { 1.25.toFloat() }
+                val yCoefficient = if (defaultDragDirection == DefaultDragDirection.Vertical)   { 5.toFloat() } else { 1.25.toFloat() }
+
+                if (isVerticalDrag == null && (xVelocity > 5 || yVelocity > 5)) {
+                    if (yVelocity > (xVelocity * xCoefficient)) {
+                        onVerticalDrag()
                         isVerticalDrag = true
-                    } else if (yVelocity < (xVelocity * 1.5)) {
+                    } else if (xVelocity > (yVelocity * yCoefficient)) {
                         onSideDrag()
                         isVerticalDrag = false
                     }
                 }
-                println("is vertical drag? $isVerticalDrag")
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 velocityTracker?.recycle()
@@ -73,19 +81,26 @@ class PriceChart : LineChart {
             }
         }
 
-        return if (ignoreVerticalDrag && (isVerticalDrag == true)) {
-           // underlyingView?.onTouchEvent(event) ?: false
+        return if (defaultDragDirection == DefaultDragDirection.Horizontal && (isVerticalDrag == true)) {
+            false
+        } else if (defaultDragDirection == DefaultDragDirection.Vertical && (isVerticalDrag == false)) {
             false
         } else {
             super.onTouchEvent(event)
         }
     }
 
-fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, timeRange: Int, timeChangable: Boolean) {
+fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, timeChangable: Boolean, onDefaultDrag: () -> Unit) {
     setDrawGridBackground(false)
     setDrawBorders(false)
     var noDescription = Description()
     noDescription.text = ""
+    this.defaultDragDirection = defaultDragDirection
+    when (defaultDragDirection) {
+        DefaultDragDirection.Horizontal -> onSideDrag   = onDefaultDrag
+        DefaultDragDirection.Vertical -> onVerticalDrag = onDefaultDrag
+    }
+
     description = noDescription
     legend.isEnabled = false
     xAxis.setDrawGridLines(false)

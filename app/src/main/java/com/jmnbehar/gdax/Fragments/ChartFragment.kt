@@ -24,7 +24,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
-
+import android.widget.HorizontalScrollView
 
 
 /**
@@ -69,16 +69,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val currency = account.currency
 
         lineChart = rootView.chart
-        lineChart.configure(candles, currency, true, timeRange, true)
-        lineChart.setOnChartValueSelectedListener(this)
-        lineChart.ignoreVerticalDrag = true
-        lineChart.underlyingView = rootView
-        lineChart.onChartGestureListener = this
-        lineChart.isDragYEnabled = false
-        lineChart.onSideDrag = {
+        lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
             MainActivity.swipeRefreshLayout.isEnabled = false
             LockableScrollView.scrollLocked = true
+
         }
+        lineChart.setOnChartValueSelectedListener(this)
+        lineChart.underlyingView = rootView
+        lineChart.onChartGestureListener = this
 
         nameText = rootView.txt_chart_name
         tickerText = rootView.txt_chart_ticker
@@ -210,7 +208,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
-
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         MainActivity.swipeRefreshLayout.isEnabled = true
         LockableScrollView.scrollLocked = false
