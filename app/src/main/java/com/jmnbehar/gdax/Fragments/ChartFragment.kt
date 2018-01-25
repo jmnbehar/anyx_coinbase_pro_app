@@ -3,6 +3,7 @@ package com.jmnbehar.gdax.Fragments
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
 import android.widget.ImageView
 import android.widget.ListView
@@ -70,7 +71,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         lineChart = rootView.chart
         lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
-            MainActivity.swipeRefreshLayout.isEnabled = false
+            swipeRefreshLayout?.isEnabled = false
             LockableScrollView.scrollLocked = true
 
         }
@@ -222,7 +223,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
-        MainActivity.swipeRefreshLayout.isEnabled = true
+        swipeRefreshLayout?.isEnabled = true
         LockableScrollView.scrollLocked = false
         onNothingSelected()
     }

@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <com.jmnbehar.gdax.Classes.LockableScrollView
+        android:id="@+id/lockable_scrollview_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" >
+
+        <LinearLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
 
     <TextView
         android:id="@+id/txt_home_total_value"
@@ -32,4 +47,9 @@
         android:dividerHeight="8dp"
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp" />
-</LinearLayout>
+
+
+        </LinearLayout>
+
+    </com.jmnbehar.gdax.Classes.LockableScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>

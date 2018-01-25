@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         var currentFragment: RefreshFragment? = null
         lateinit private var fragmentManager: FragmentManager
-        lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
         var btcChartFragment: ChartFragment? = null
         var ethChartFragment: ChartFragment? = null
@@ -180,19 +179,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         fun goToFragment(fragment: RefreshFragment, tag: String) {
             currentFragment = fragment
+            if (Companion.fragmentManager.backStackEntryCount == 0) {
 //            if (Companion.fragmentManager.fragments.isEmpty()) {
                 Companion.fragmentManager
                         .beginTransaction()
                         .add(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
                         .commit()
-//            } else {
-//                Companion.fragmentManager
-//                        .beginTransaction()
-//                        .replace(R.id.fragment_container, fragment, tag)
-//                        .addToBackStack(tag)
-//                        .commit()
-//            }
+            } else {
+                Companion.fragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment, tag)
+                        .addToBackStack(tag)
+                        .commit()
+            }
         }
     }
 
@@ -212,14 +212,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressDialog = indeterminateProgressDialog("")
         progressDialog?.dismiss()
 
-        swipeRefreshLayout = swipe_refresh_layout
-        swipeRefreshLayout.onRefresh {
-            if (currentFragment != null) {
-                currentFragment?.refresh { endRefresh() }
-            } else {
-                swipeRefreshLayout.isRefreshing = false
-            }
-        }
+//        swipeRefreshLayout = swipe_refresh_layout
+//        swipeRefreshLayout.onRefresh {
+//            if (currentFragment != null) {
+//                currentFragment?.refresh { endRefresh() }
+//            } else {
+//                swipeRefreshLayout.isRefreshing = false
+//            }
+//        }
+
         val prefs = Prefs(this)
         if (!prefs.shouldAutologin) {
             returnToLogin()
@@ -272,10 +273,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         startActivity(intent)
     }
 
-    private fun endRefresh() {
-        swipeRefreshLayout.isRefreshing = false
-    }
-
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -286,7 +283,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (fragmentManager.backStackEntryCount > 0) {
                 val fragmentTag = fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
                 currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
-                currentFragment?.refresh { endRefresh() }
+                currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

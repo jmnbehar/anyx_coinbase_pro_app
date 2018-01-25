@@ -42,7 +42,8 @@ class Account(val product: Product, apiAccount: ApiAccount) {
     //TODO: update to onfailure and onsuccess
     fun updateCandles(time: Int, onComplete: (didUpdate: Boolean) -> Unit) {
         var twoMinutesAgo = Calendar.getInstance()
-        twoMinutesAgo.add(Int.MIN_VALUE, -2)
+        twoMinutesAgo.add(Calendar.MINUTE, -2)
+
         val lastCandleUpdateTime = product.lastCandleUpdateTime.timeInSeconds()
         val twoMinutesAgoInSeconds = twoMinutesAgo.timeInSeconds()
         if (lastCandleUpdateTime > twoMinutesAgoInSeconds) {
