@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val apiKeyEncrypted = prefs.apiKey
         val apiSecretEncrypted = prefs.apiSecret
 
-        if ((passphrase != null) && (apiKeyEncrypted != null) && (apiSecretEncrypted != null)) {
+        if ((apiKeyEncrypted != null) && (apiSecretEncrypted != null)) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
 
@@ -257,7 +257,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if ((apiKey != null) && (apiSecret != null)) {
                 GdaxApi.credentials = ApiCredentials(passphrase, apiKey, apiSecret)
-
                 Account.getAccounts({ toast("Error!")}) {
                     goHome()
                 }
@@ -270,13 +269,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-    fun returnToLogin() {
+    private fun returnToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(Constants.logout, true)
         startActivity(intent)
     }
 
-    fun endRefresh() {
+    private fun endRefresh() {
         swipeRefreshLayout.isRefreshing = false
     }
 

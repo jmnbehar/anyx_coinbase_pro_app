@@ -24,12 +24,12 @@ class Prefs (context: Context) {
         get() = prefs.getString(PASSPHRASE, "")
         set(value) = prefs.edit().putString(PASSPHRASE, value).apply()
 
-    var apiKey: String
-        get() = prefs.getString(API_KEY, "")
+    var apiKey: String?
+        get() = prefs.getString(API_KEY, null)
         set(value) = prefs.edit().putString(API_KEY, value).apply()
 
-    var apiSecret: String
-        get() = prefs.getString(API_SECRET, "")
+    var apiSecret: String?
+        get() = prefs.getString(API_SECRET, null)
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
 
     var shouldAutologin: Boolean

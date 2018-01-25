@@ -2,6 +2,7 @@ package com.jmnbehar.gdax.Fragments
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import android.widget.ImageView
 import android.widget.ListView
@@ -26,7 +27,6 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.HorizontalScrollView
 
-
 /**
  * Created by jmnbehar on 11/5/2017.
  */
@@ -46,6 +46,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var iconView: ImageView
     private lateinit var percentChangeText: TextView
 
+    private val handler = Handler()
+    private var autoRefresh: Runnable? = null
     private var chartLength = TimeInSeconds.oneDay
 
     companion object {
@@ -128,10 +130,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
 
+        autoRefresh = Runnable {
+            miniRefresh({ }, { })
+            handler.postDelayed(autoRefresh, (TimeInSeconds.oneMinute * 1000).toLong())
+
+        }
+        handler.postDelayed(autoRefresh, (TimeInSeconds.oneMinute * 1000).toLong())
         return rootView
     }
 
-    fun setPercentChangeText(price: Double, open: Double) {
+    override fun onPause() {
+        handler.removeCallbacks(autoRefresh)
+        super.onPause()
+    }
+
+    private fun setPercentChangeText(price: Double, open: Double) {
         val change = price - open
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
@@ -143,7 +156,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    fun orderOnClick(order: ApiOrder) {
+    private fun orderOnClick(order: ApiOrder) {
         alert {
             title = "Order"
 
@@ -173,7 +186,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }.show()
     }
 
-    fun fillOnClick(fill: ApiFill) {
+    private fun fillOnClick(fill: ApiFill) {
         alert {
             title = "Order"
 
@@ -234,36 +247,41 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                 val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
 
-                Candle.getCandles(account.product.id, chartLength, { candleList ->
-                    account.product.candles = candleList
-                    GdaxApi.account(account.id).executeRequest(onFailure) {  result ->
-                        val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                        val newBalance = apiAccount.balance.toDoubleOrZero()
 
-                        GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                            val ticker: ApiTicker = gson.fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                            val newPrice = ticker.price.toDoubleOrZero()
+                GdaxApi.account(account.id).executeRequest(onFailure) { result ->
+                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                    val newBalance = apiAccount.balance.toDoubleOrZero()
 
-                            account.updateAccount(newBalance, newPrice)
-                            historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
-                                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-                            historyList.setHeightBasedOnChildren()
-
-                            priceText.text = account.product.price.fiatFormat()
-
-                            balanceText.text = account.balance.fiatFormat()
-                            valueText.text = account.value.fiatFormat()
-//                                                            val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-//                                                            val newCandle = Candle(now.toDouble(), newPrice, newPrice, newPrice, newPrice, 0.0)
-//                                                            val mutableCandles = candleList.toMutableList()
-//                                                            mutableCandles.add(newCandle)
-
-                            lineChart.addCandles(candleList, account.currency, TimeInSeconds.oneDay)
-
-                            onComplete()
-                        }
+                    miniRefresh(onFailure) {
+                        account.updateAccount(newBalance, account.product.price)
+                        historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
+                                { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+                        onComplete()
                     }
-                })
+                }
+            }
+        }
+    }
+
+    private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        val time = TimeInSeconds.oneDay
+        account.updateCandles(time) { _ ->
+            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                val price = ticker.price.toDoubleOrNull()
+                if (price != null) {
+                    account.product.price = price
+                }
+                historyList.setHeightBasedOnChildren()
+
+                priceText.text = account.product.price.fiatFormat()
+
+                balanceText.text = account.balance.fiatFormat()
+                valueText.text = account.value.fiatFormat()
+
+                lineChart.addCandles(account.product.candles, account.currency, TimeInSeconds.oneDay)
+
+                onComplete()
             }
         }
     }

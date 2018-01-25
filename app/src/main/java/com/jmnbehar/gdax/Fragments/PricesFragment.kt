@@ -72,29 +72,27 @@ class PricesFragment : RefreshFragment() {
         var productsUpdated = 0
         var accountListSize = Account.list.size
         val time = TimeInSeconds.oneDay
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         for (account in Account.list) {
-            if (account.product.lastCandleUpdateTime.isBefore(LocalDateTime.now().minusMinutes(2))) {
-                Candle.getCandles(account.product.id, time, { candleList ->
-                    account.product.lastCandleUpdateTime = LocalDateTime.now()
-                    productsUpdated++
-                    account.product.candles = candleList
-                    if (productsUpdated == accountListSize) {
-                        (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                        onComplete()
-                    }
-                })
-            } else {
-                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
-                    if (price != null) {
-                        account.product.price = price
-                    }
+            account.updateCandles(time) { didUpdate ->
+                if (didUpdate) {
                     productsUpdated++
                     if (productsUpdated == accountListSize) {
                         (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
                         onComplete()
+                    }
+                } else {
+                    GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                        val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                        val price = ticker.price.toDoubleOrNull()
+                        if (price != null) {
+                            account.product.price = price
+                        }
+                        productsUpdated++
+                        if (productsUpdated == accountListSize) {
+                            (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                            onComplete()
+                        }
                     }
                 }
             }
