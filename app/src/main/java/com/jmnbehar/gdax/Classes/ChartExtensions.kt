@@ -123,8 +123,8 @@ fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, 
 
 fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
     val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-    println("first time: " + candles.first().time)
-    println("last time: " + candles.last().time)
+//    println("first time: " + candles.first().time)
+//    println("last time: " + candles.last().time)
     val dataSet = LineDataSet(entries, "Chart")
 
     val color = when (currency) {

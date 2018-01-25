@@ -15,17 +15,16 @@ import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
-import java.time.LocalDateTime
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
 class PricesFragment : RefreshFragment() {
     private var currentProduct: Product? = null
-    lateinit var listView: ListView
+    private lateinit var listView: ListView
 
-    lateinit var totalValueText: TextView
-    lateinit var totalValueLabelText: TextView
+    private lateinit var totalValueText: TextView
+    private lateinit var totalValueLabelText: TextView
 
     lateinit var inflater: LayoutInflater
 
@@ -69,7 +68,7 @@ class PricesFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
         autoRefresh = Runnable {
-            miniRefresh({ }, { })
+            refresh({ })
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())

@@ -5,15 +5,13 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
+import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
 import com.jmnbehar.gdax.Activities.MainActivity
 import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -111,7 +109,7 @@ sealed class GdaxApi: FuelRouting {
                                 timeLock = 0
                                 executeRequest(onFailure, onSuccess)
                             } else {
-                                handler.postDelayed(retry, 1000.toLong())
+                                handler.postDelayed(retry, 500.toLong())
                             }
                         }
                         handler.postDelayed(retry, 5000.toLong())
@@ -187,14 +185,17 @@ sealed class GdaxApi: FuelRouting {
             var paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is candles -> {
-                    var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
-                    var startInt = now.atZone(ZoneId.systemDefault()).toEpochSecond() - time
-                    //var start = now.minusDays(1)
-                    var start = Instant.ofEpochSecond(startInt).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    var now = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    var startInt = now.timeInSeconds() - time
 
-                    paramList.add(Pair("start", start.toString()))
+                    var start = Date(startInt.toLong() * 1000)
 
-                    paramList.add(Pair("end", now.toString()))
+                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
+                    val startString = formatter.format(start)
+                    val nowString = formatter.format(now.time)
+                    paramList.add(Pair("start", formatter.format(start)))
+                    paramList.add(Pair("end", formatter.format(now.time)))
 
                     if (granularity == null) {
                         granularity = when (time) {
@@ -293,18 +294,18 @@ sealed class GdaxApi: FuelRouting {
 
     override val headers: Map<String, String>?
         get() {
-            var timestamp = Date().toInstant().epochSecond.toString()
+            var timestamp = (Date().timeInSeconds()).toString()
             var message = timestamp + method + path + body
             println("timestamp:")
             println(timestamp)
 
-            val secretDecoded = Base64.getDecoder().decode(credentials.secret)
+            val secretDecoded = Base64.decode(credentials.secret, 0)
 
             val sha256HMAC = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
             sha256HMAC.init(secretKey)
 
-            val hash = Base64.getEncoder().encodeToString(sha256HMAC.doFinal(message.toByteArray()))
+            val hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
             println("hash:")
             println(hash)
 

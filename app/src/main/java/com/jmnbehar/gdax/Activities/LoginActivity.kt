@@ -104,7 +104,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     savePassphraseCheckBox.isEnabled = false
                 }
 
-                saveApiInfoCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                saveApiInfoCheckBox.setOnCheckedChangeListener { _, isChecked ->
                     prefs.shouldSaveApiInfo = isChecked
                     if (!isChecked) {
                         savePassphraseCheckBox.isChecked = false
@@ -113,7 +113,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                         savePassphraseCheckBox.isEnabled = true
                     }
                 }
-                savePassphraseCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                savePassphraseCheckBox.setOnCheckedChangeListener { _, isChecked ->
                     prefs.shouldSavePassphrase = isChecked
                 }
 
@@ -166,7 +166,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             prefs.apiKey = apiKeyEncrypted
             prefs.apiSecret = apiSecretEncrypted
             if (shouldSavePassphrase && (passphraseVal != null))  {
-                prefs.passphrase = passphraseVal!!
+                prefs.passphrase = passphraseVal
             }
         }
         if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)) {

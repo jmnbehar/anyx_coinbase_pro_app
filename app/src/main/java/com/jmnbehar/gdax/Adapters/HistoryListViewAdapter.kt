@@ -75,7 +75,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.setOnClickListener { orderOnClick(order) }
             return vi
         } else if ((i == (orders.size + 1)) && orders.isNotEmpty() && fills.isNotEmpty()) {
-            var vi = inflater!!.inflate(R.layout.list_header, null)
+            var vi = inflater.inflate(R.layout.list_header, null)
             vi.txt_header.text = "FILLS"
 
             return vi
@@ -83,7 +83,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             val index = i - (orders.size + offset)
 
             val fill = fills[index]
-            var vi = inflater!!.inflate(R.layout.list_row_fill, null)
+            var vi = inflater.inflate(R.layout.list_row_fill, null)
             vi.txt_fill_size.text = fill.size
             vi.txt_fill_price.text = fill.price
             vi.txt_fill_fee.text = fill.fee
@@ -103,7 +103,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.setOnClickListener { fillOnClick(fill) }
             return vi
         } else {
-            var vi = inflater!!.inflate(R.layout.list_header, null)
+            var vi = inflater.inflate(R.layout.list_header, null)
             vi.txt_header.text = "You have no orders or fills"
             return vi
         }

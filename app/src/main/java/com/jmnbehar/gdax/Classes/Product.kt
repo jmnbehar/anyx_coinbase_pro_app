@@ -1,8 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
-import java.time.LocalDateTime
-
-import com.jmnbehar.gdax.R
+import java.util.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
@@ -13,14 +11,14 @@ class Product(apiProduct: ApiProduct, var candles: List<Candle>) {
     var currency: Currency
     var price: Double
     var id: String
-    var lastCandleUpdateTime: LocalDateTime
+    var lastCandleUpdateTime: Calendar
 
 
     init {
         currency = Currency.fromString(apiProduct.base_currency)
         price = candles.lastOrNull()?.close ?: 0.0
         id = apiProduct.id
-        lastCandleUpdateTime = LocalDateTime.now()
+        lastCandleUpdateTime = Calendar.getInstance()
     }
 
     companion object {

@@ -4,9 +4,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.time.Clock
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.util.*
 
 /**
  * Created by jmnbehar on 12/19/2017.
@@ -131,8 +129,9 @@ data class Candle(
                  val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                  var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
 
-                 var now: LocalDateTime = LocalDateTime.now(Clock.systemUTC())
-                 var start = now.toEpochSecond(ZoneOffset.UTC) - time - 60
+                 var now = Calendar.getInstance()
+
+                 var start = now.timeInSeconds() - time - 30
 
                  candles = candles.filter { it.time >=  start }
 

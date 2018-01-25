@@ -4,8 +4,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
-import java.time.LocalDateTime
+import java.util.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
@@ -33,7 +32,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         updateInList()
     }
 
-    fun updateInList() {
+    private fun updateInList() {
         list.remove(forCurrency(currency))
         if (value != null) {
             list.add(this)
@@ -42,9 +41,13 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
     //TODO: update to onfailure and onsuccess
     fun updateCandles(time: Int, onComplete: (didUpdate: Boolean) -> Unit) {
-        if (product.lastCandleUpdateTime.isBefore(LocalDateTime.now().minusMinutes(2))) {
+        var twoMinutesAgo = Calendar.getInstance()
+        twoMinutesAgo.add(Int.MIN_VALUE, -2)
+        val lastCandleUpdateTime = product.lastCandleUpdateTime.timeInSeconds()
+        val twoMinutesAgoInSeconds = twoMinutesAgo.timeInSeconds()
+        if (lastCandleUpdateTime > twoMinutesAgoInSeconds) {
             Candle.getCandles(product.id, time, { candleList ->
-                product.lastCandleUpdateTime = LocalDateTime.now()
+                product.lastCandleUpdateTime = Calendar.getInstance()
                 product.candles = candleList
                 onComplete(true)
             })

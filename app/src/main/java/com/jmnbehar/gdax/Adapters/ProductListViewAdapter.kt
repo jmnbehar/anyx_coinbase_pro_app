@@ -38,11 +38,17 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             3 -> Account.bchAccount
             else -> Account.list[i]
         } ?: null
-        account ?: return vi
+        if (account == null) {
+            return vi
+        }
 
         val candles = account.product.candles
         val currentPrice = account.product.price
-        val open = candles.first().open
+        val open = if (candles.isNotEmpty()) {
+            candles.first().open
+        } else {
+            0.0
+        }
         val change = currentPrice - open
         val weightedChange: Double = (change / open)
 

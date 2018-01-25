@@ -1,6 +1,5 @@
 package com.jmnbehar.gdax.Activities
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.ProgressDialog
@@ -181,19 +180,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         fun goToFragment(fragment: RefreshFragment, tag: String) {
             currentFragment = fragment
-            if (Companion.fragmentManager.fragments.isEmpty()) {
+//            if (Companion.fragmentManager.fragments.isEmpty()) {
                 Companion.fragmentManager
                         .beginTransaction()
                         .add(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
                         .commit()
-            } else {
-                Companion.fragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, fragment, tag)
-                        .addToBackStack(tag)
-                        .commit()
-            }
+//            } else {
+//                Companion.fragmentManager
+//                        .beginTransaction()
+//                        .replace(R.id.fragment_container, fragment, tag)
+//                        .addToBackStack(tag)
+//                        .commit()
+//            }
         }
     }
 
@@ -209,8 +208,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-
-        createNotificationChannel(Constants.alertChannelId, "Alerts", "Alerts go here")
 
         progressDialog = indeterminateProgressDialog("")
         progressDialog?.dismiss()
@@ -372,39 +369,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             true  -> "over"
             false -> "under"
         }
-        val notificationString = "${alert.currency.toString()} is $overUnder ${alert.price}"
+        val notificationString = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
         val intent = Intent(this, this.javaClass)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notificationBuilder = NotificationCompat.Builder(this, Constants.alertChannelId)
+        val notificationBuilder = NotificationCompat.Builder(this)
                 .setContentText(notificationString)
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
 
-
         notificationManager?.notify(0, notificationBuilder.build())
     }
 
-    private fun createNotificationChannel(id: String, name: String,
-                                          description: String) {
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val importance = NotificationManager.IMPORTANCE_LOW
-        val channel = NotificationChannel(id, name, importance)
-
-        channel.description = description
-        channel.enableLights(true)
-        channel.lightColor = Color.RED
-        channel.enableVibration(true)
-        channel.vibrationPattern =
-                longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
-        notificationManager?.createNotificationChannel(channel)
-    }
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
