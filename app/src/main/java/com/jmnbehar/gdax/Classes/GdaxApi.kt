@@ -92,7 +92,7 @@ sealed class GdaxApi: FuelRouting {
     //add payment methods
     //look into reports
 
-    var timeLock = 0
+    private var timeLock = 0
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
        // MainActivity.progressDialog?.show()
@@ -109,10 +109,10 @@ sealed class GdaxApi: FuelRouting {
                                 timeLock = 0
                                 executeRequest(onFailure, onSuccess)
                             } else {
-                                handler.postDelayed(retry, 500.toLong())
+                                handler.postDelayed(retry, 200.toLong())
                             }
                         }
-                        handler.postDelayed(retry, 5000.toLong())
+                        handler.postDelayed(retry, 1000.toLong())
                     } else {
                         onFailure(result)
                    //     MainActivity.progressDialog?.dismiss()

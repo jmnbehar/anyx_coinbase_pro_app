@@ -18,6 +18,8 @@ class Prefs (context: Context) {
     private val ALERTS = "alerts"
     private val AUTOLOGIN = "should_autologin"
     private val SHOW_CONFIRM = "show_confirm"
+    private val STASHED_PRODUCTS = "stashed_products"
+
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
 
     var passphrase: String
@@ -56,6 +58,11 @@ class Prefs (context: Context) {
     var alerts: Set<Alert>
         get() = prefs.getStringSet(ALERTS, setOf<String>()).map { s -> Alert.fromString(s) }.toSet()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
+
+    var stashedProducts: List<Product>
+        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
+        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
+
 
     fun addAlert(alert: Alert) {
         val tempAlerts = alerts.toMutableSet()

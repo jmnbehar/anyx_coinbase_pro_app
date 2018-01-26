@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if ((apiKey != null) && (apiSecret != null)) {
                 GdaxApi.credentials = ApiCredentials(passphrase, apiKey, apiSecret)
-                Account.getAccounts({ toast("Error!")}) {
+                Account.getAccounts(this, { toast("Error!")}) {
                     goHome()
                 }
             } else {
