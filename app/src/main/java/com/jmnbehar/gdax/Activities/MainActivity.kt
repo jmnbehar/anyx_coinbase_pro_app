@@ -289,6 +289,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 intent.putExtra(Constants.exit, true)
                 startActivity(intent)
+                finish()
             }
         }
     }

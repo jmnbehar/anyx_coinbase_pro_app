@@ -2,8 +2,6 @@ package com.jmnbehar.gdax.Fragments
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
 import android.widget.ImageView
 import android.widget.ListView
@@ -26,7 +24,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
-import android.widget.HorizontalScrollView
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -63,17 +60,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         this.inflater = inflater
         //TODO: investigate autoscroll
-        //TODO: add autorefresh
 
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
         val currency = account.currency
+        swipeRefreshLayout = rootView.swipe_refresh_layout
 
         lineChart = rootView.chart
         lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
             swipeRefreshLayout?.isEnabled = false
             LockableScrollView.scrollLocked = true
-
         }
         lineChart.setOnChartValueSelectedListener(this)
         lineChart.onChartGestureListener = this

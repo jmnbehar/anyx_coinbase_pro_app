@@ -9,10 +9,10 @@ import android.support.v4.widget.SwipeRefreshLayout
  */
 
 open class RefreshFragment: Fragment() {
-    var refreshLocked = false
     val handler = Handler()
     var autoRefresh: Runnable? = null
     var swipeRefreshLayout: SwipeRefreshLayout? = null
+
 
     open fun refresh(onComplete: () -> Unit) {
         onComplete()
