@@ -77,11 +77,11 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 apiKeyEditText = etxt_login_api_key
                 apiSecretEditText = etxt_login_secret
                 passphraseEditText = etxt_login_passphrase
-                if(prefs.apiKey != "") {
+                if(prefs.apiKey != null) {
                     apiKey = prefs.apiKey
                     apiKeyEditText.setText("*****")
                 }
-                if (prefs.apiSecret != "") {
+                if (prefs.apiSecret != null) {
                     apiSecret = prefs.apiSecret
                     apiSecretEditText.setText("*****")
                 }
