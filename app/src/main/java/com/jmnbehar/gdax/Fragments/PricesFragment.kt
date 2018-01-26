@@ -45,6 +45,8 @@ class PricesFragment : RefreshFragment() {
         totalValueText = rootView.txt_home_total_value
         totalValueLabelText = rootView.txt_home_total_value_label
 
+        setupSwipeRefresh(rootView)
+
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
             var equivalentMenuItem = when(product.currency) {
