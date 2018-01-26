@@ -185,15 +185,15 @@ sealed class GdaxApi: FuelRouting {
             var paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is candles -> {
-                    var now = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    val utcTimeZone = TimeZone.getTimeZone("UTC")
+                    var now = Calendar.getInstance(utcTimeZone)
                     var startInt = now.timeInSeconds() - time
 
                     var start = Date(startInt.toLong() * 1000)
 
                     val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    formatter.timeZone = utcTimeZone
 
-                    val startString = formatter.format(start)
-                    val nowString = formatter.format(now.time)
                     paramList.add(Pair("start", formatter.format(start)))
                     paramList.add(Pair("end", formatter.format(now.time)))
 

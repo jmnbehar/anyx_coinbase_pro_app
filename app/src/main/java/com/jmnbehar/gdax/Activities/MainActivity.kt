@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.Handler
@@ -13,7 +12,6 @@ import android.support.design.widget.NavigationView
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.view.GravityCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -27,9 +25,7 @@ import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.indeterminateProgressDialog
-import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 

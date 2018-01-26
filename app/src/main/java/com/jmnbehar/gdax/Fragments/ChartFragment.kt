@@ -64,7 +64,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
         val currency = account.currency
-        swipeRefreshLayout = rootView.swipe_refresh_layout
+        setupSwipeRefresh(rootView)
 
         lineChart = rootView.chart
         lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
