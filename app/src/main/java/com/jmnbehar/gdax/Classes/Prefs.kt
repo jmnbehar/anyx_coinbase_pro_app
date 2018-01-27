@@ -22,8 +22,8 @@ class Prefs (context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
 
-    var passphrase: String
-        get() = prefs.getString(PASSPHRASE, "")
+    var passphrase: String?
+        get() = prefs.getString(PASSPHRASE, null)
         set(value) = prefs.edit().putString(PASSPHRASE, value).apply()
 
     var apiKey: String?

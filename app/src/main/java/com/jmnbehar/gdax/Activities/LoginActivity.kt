@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
             val apiKeyVal = encryption.decryptOrNull(apiKey)
             val apiSecretVal = encryption.decryptOrNull(apiSecret)
-            if((apiKeyVal != null) && (apiSecretVal != null)) {
+            if((apiKeyVal != null) && (apiSecretVal != null) && (passphrase != null)) {
                 var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
                 loginWithCredentials(apiCredentials)
                 return true
@@ -86,7 +86,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     apiSecretEditText.setText("*****")
                 }
 
-                if (prefs.passphrase != "") {
+                if (prefs.passphrase != null) {
                     passphrase = prefs.passphrase
                     passphraseEditText.setText("*****")
                 }
@@ -141,35 +141,37 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
-        apiKey = if (apiKey == prefs.apiKey) {
-            encryption.decryptOrNull(apiKey)
-        } else {
-            apiKeyEditText.text.toString()
+        if (apiKeyEditText.text.toString() != "*****") {
+            apiKey = apiKeyEditText.text.toString()
         }
-
-        apiSecret = if (apiSecret == prefs.apiSecret) {
-            encryption.decryptOrNull(apiSecret)
-        } else {
-            apiSecretEditText.text.toString()
+        if (apiSecretEditText.text.toString() != "*****") {
+            apiSecret = apiSecretEditText.text.toString()
         }
-
-        if (passphrase != prefs.passphrase) {
+        if (passphraseEditText.text.toString() != "*****") {
             passphrase = passphraseEditText.text.toString()
+        }
+
+        if (apiKey == prefs.apiKey) {
+            apiKey =  encryption.decryptOrNull(apiKey)
+        }
+        if (apiSecret == prefs.apiSecret) {
+            apiSecret = encryption.decryptOrNull(apiSecret)
         }
 
         val apiKeyVal = apiKey
         val apiSecretVal = apiSecret
         val passphraseVal = passphrase
         if (shouldSaveApiInfo) {
-            val apiKeyEncrypted = encryption.encrypt(apiKeyVal)
-            val apiSecretEncrypted = encryption.encrypt(apiSecretVal)
+            val apiKeyEncrypted = encryption.encryptOrNull(apiKeyVal)
+            val apiSecretEncrypted = encryption.encryptOrNull(apiSecretVal)
             prefs.apiKey = apiKeyEncrypted
             prefs.apiSecret = apiSecretEncrypted
             if (shouldSavePassphrase && (passphraseVal != null))  {
                 prefs.passphrase = passphraseVal
             }
         }
-        if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)) {
+        if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)
+            && (apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
             loginWithCredentials(ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal))
         } else {
             toast("Wrong Passphrase")
