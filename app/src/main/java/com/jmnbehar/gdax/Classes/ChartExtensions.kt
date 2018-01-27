@@ -115,10 +115,6 @@ fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, 
     axisRight.showOnlyMinMaxValues = true
     axisRight.setDrawGridLines(false)
     axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-    val last = candles.lastOrNull()?.close?.toFloat()
-    if (last != null) {
-        axisRight.showSpecificLabels(floatArrayOf(last), false)
-    }
 
     setTouchEnabled(touchEnabled)
 
