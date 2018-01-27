@@ -107,15 +107,23 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
         }
 
+        var prefs = Prefs(activity)
+        val stashedFills = prefs.getStashedFills(account.product.id)
+        val stashedOrders = prefs.getStashedOrders(account.product.id)
         historyList = rootView.list_history
+        historyList.adapter = HistoryListViewAdapter(inflater, stashedOrders, stashedFills,
+                { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+        historyList.setHeightBasedOnChildren()
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+            prefs.stashOrders(result.value)
             val gson = Gson()
             val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
             val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
             //TODO: instead of filtering these, fix the api requests, this shit is wasteful
             GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                prefs.stashFills(result.value)
                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                 historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
@@ -174,6 +182,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             negativeButton("Delete") {
                 GdaxApi.cancelOrder(order.id).executeRequest({ }) {
                     var orders = (historyList.adapter as HistoryListViewAdapter).orders.toMutableList()
+                    //TODO: this:
                     orders.removeIf { o -> o.id == order.id }
                     (historyList.adapter as HistoryListViewAdapter).orders = orders
                     (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()

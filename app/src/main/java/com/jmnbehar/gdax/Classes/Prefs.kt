@@ -2,7 +2,8 @@ package com.jmnbehar.gdax.Classes
 
 import android.content.Context
 import android.content.SharedPreferences
-//import se.simbio.encryption.Encryption
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 /**
  * Created by josephbehar on 12/28/17.
@@ -19,6 +20,8 @@ class Prefs (context: Context) {
     private val AUTOLOGIN = "should_autologin"
     private val SHOW_CONFIRM = "show_confirm"
     private val STASHED_PRODUCTS = "stashed_products"
+    private val STASHED_ORDERS = "stashed_orders"
+    private val STASHED_FILLS = "stashed_fills"
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
 
@@ -63,6 +66,31 @@ class Prefs (context: Context) {
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
+    fun stashOrders(orderListString: String) {
+        prefs.edit().putString(STASHED_ORDERS, orderListString).apply()
+    }
+    fun getStashedOrders(productId: String) : List<ApiOrder> {
+        val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
+        return if (apiOrdersJson != null) {
+            val apiOrderList: List<ApiOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<ApiOrder>>() {}.type)
+            apiOrderList.filter { it.product_id == productId }
+        } else {
+            listOf()
+        }
+    }
+
+    fun stashFills(fillListJson: String) {
+        prefs.edit().putString(STASHED_FILLS, fillListJson).apply()
+    }
+    fun getStashedFills(productId: String) : List<ApiFill> {
+        val fillListJson = prefs.getString(STASHED_FILLS, null)
+        return if (fillListJson != null) {
+            val apiFillList: List<ApiFill> = Gson().fromJson(fillListJson, object : TypeToken<List<ApiFill>>() {}.type)
+            apiFillList.filter { it.product_id == productId }
+        } else {
+            listOf()
+        }
+    }
 
     fun addAlert(alert: Alert) {
         val tempAlerts = alerts.toMutableSet()
