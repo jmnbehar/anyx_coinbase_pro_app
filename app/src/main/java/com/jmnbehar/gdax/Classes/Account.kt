@@ -16,7 +16,9 @@ class Account(val product: Product, apiAccount: ApiAccount) {
     var balance: Double = apiAccount.balance.toDoubleOrZero()
         private set(value) {}
 
-    var value: Double
+    var value: Double = 0.0
+        get() = balance * product.price
+
     var id: String
     var currency = product.currency
         get() = product.currency
@@ -42,12 +44,13 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
     //TODO: update to onfailure and onsuccess
     fun updateCandles(time: Int, onComplete: (didUpdate: Boolean) -> Unit) {
-        var twoMinutesAgo = Calendar.getInstance()
-        twoMinutesAgo.add(Calendar.MINUTE, -2)
+        var oneMinuteAgo = Calendar.getInstance()
+        oneMinuteAgo.add(Calendar.MINUTE, -1)
 
+        //TODO: update this to look at granularity
         val lastCandleUpdateTime = product.lastCandleUpdateTime.timeInSeconds()
-        val twoMinutesAgoInSeconds = twoMinutesAgo.timeInSeconds()
-        if (lastCandleUpdateTime > twoMinutesAgoInSeconds) {
+        val oneMinuteAgoInSeconds = oneMinuteAgo.timeInSeconds()
+        if (lastCandleUpdateTime < oneMinuteAgoInSeconds) {
             Candle.getCandles(product.id, time, { candleList ->
                 product.lastCandleUpdateTime = Calendar.getInstance()
                 product.candles = candleList
@@ -57,19 +60,6 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             onComplete(false)
         }
     }
-
-//    fun updateInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-//        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-//        GdaxApi.account(id).executeRequest(onFailure) { result ->
-//            val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-//            val apiAccountBalance =  apiAccount.balance.toDoubleOrNull()
-//            if (apiAccountBalance != null) {
-//                balance = apiAccount.balance.toDouble()
-//            }
-//            updateInList()
-//            onComplete()
-//        }
-//    }
 
     companion object {
 

@@ -181,9 +181,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             positiveButton("Close") {  }
             negativeButton("Delete") {
                 GdaxApi.cancelOrder(order.id).executeRequest({ }) {
-                    var orders = (historyList.adapter as HistoryListViewAdapter).orders.toMutableList()
-                    //TODO: this:
-                    orders.removeIf { o -> o.id == order.id }
+                    var orders = (historyList.adapter as HistoryListViewAdapter).orders
+                    orders = orders.filter { o -> o.id != order.id }
                     (historyList.adapter as HistoryListViewAdapter).orders = orders
                     (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
                     toast("order cancelled")
@@ -240,31 +239,35 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     override fun refresh(onComplete: () -> Unit) {
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        val gson = Gson()
+        val onFailure = { result: Result.Failure<String, FuelError> ->
+            toast("Error!: ${result.error}")
+            println("error!" )}
+        GdaxApi.account(account.id).executeRequest(onFailure) { result ->
+            val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+            val newBalance = apiAccount.balance.toDoubleOrZero()
+            balanceText.text = account.balance.fiatFormat()
+
+            miniRefresh(onFailure) {
+                account.updateAccount(newBalance, account.product.price)
+                onComplete()
+            }
+        }
+
         GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
-    val gson = Gson()
 
-    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+            val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+            val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+            //TODO: instead of filtering these, fix the api requests, this shit is wasteful
 
-    GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
                 val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
 
+                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
+                        { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
 
-                GdaxApi.account(account.id).executeRequest(onFailure) { result ->
-                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                    val newBalance = apiAccount.balance.toDoubleOrZero()
-
-                    miniRefresh(onFailure) {
-                        account.updateAccount(newBalance, account.product.price)
-                        historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
-                                { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-                        onComplete()
-                    }
-                }
+                historyList.setHeightBasedOnChildren()
             }
         }
     }
@@ -278,11 +281,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 if (price != null) {
                     account.product.price = price
                 }
-                historyList.setHeightBasedOnChildren()
 
                 priceText.text = account.product.price.fiatFormat()
 
-                balanceText.text = account.balance.fiatFormat()
                 valueText.text = account.value.fiatFormat()
 
                 lineChart.addCandles(account.product.candles, account.currency, TimeInSeconds.oneDay)
