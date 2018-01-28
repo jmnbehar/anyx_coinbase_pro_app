@@ -59,7 +59,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val rootView = inflater!!.inflate(R.layout.fragment_chart, container, false)
 
         this.inflater = inflater
-        //TODO: investigate autoscroll
 
         val candles = account.product.candles
         val timeRange = TimeInSeconds.oneDay
@@ -107,7 +106,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
         }
 
-        var prefs = Prefs(activity)
+        val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(account.product.id)
         val stashedOrders = prefs.getStashedOrders(account.product.id)
         historyList = rootView.list_history
@@ -116,15 +115,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         historyList.setHeightBasedOnChildren()
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-        GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
-            prefs.stashOrders(result.value)
+        GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { orderResult ->
+            prefs.stashOrders(orderResult.value)
             val gson = Gson()
-            val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+            val apiOrderList: List<ApiOrder> = gson.fromJson(orderResult.value, object : TypeToken<List<ApiOrder>>() {}.type)
             val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
             //TODO: instead of filtering these, fix the api requests, this shit is wasteful
-            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
-                prefs.stashFills(result.value)
-                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { fillResult ->
+                prefs.stashFills(fillResult.value)
+                val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
                 val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                 historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
                         { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
@@ -254,27 +253,36 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
 
+        var filteredOrders: List<ApiOrder>? = null
+        var filteredFills : List<ApiFill>?  = null
+
         GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
-
             val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-            val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-            //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+            filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+            if (filteredOrders != null && filteredFills != null) {
+                updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+            }
+        }
 
-            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
-                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-
-                historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
-                        { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-
-                historyList.setHeightBasedOnChildren()
+        GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+            val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+            filteredFills = apiFillList.filter { it.product_id == account.product.id }
+            if (filteredOrders != null && filteredFills != null) {
+                updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
             }
         }
     }
 
+    private fun updateHistoryListAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>) {
+        (historyList.adapter as HistoryListViewAdapter).orders = orderList
+        (historyList.adapter as HistoryListViewAdapter).fills  = fillList
+        (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
+        historyList.setHeightBasedOnChildren()
+    }
+
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val time = TimeInSeconds.oneDay
-        account.updateCandles(time) { _ ->
+        account.updateCandles(time, onFailure, { _ ->
             GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                 val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                 val price = ticker.price.toDoubleOrNull()
@@ -283,13 +291,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
 
                 priceText.text = account.product.price.fiatFormat()
-
                 valueText.text = account.value.fiatFormat()
-
                 lineChart.addCandles(account.product.candles, account.currency, TimeInSeconds.oneDay)
-
                 onComplete()
             }
-        }
+        })
     }
 }

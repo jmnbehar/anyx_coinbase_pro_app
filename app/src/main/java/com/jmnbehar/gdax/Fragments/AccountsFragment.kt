@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
@@ -33,7 +34,7 @@ class AccountsFragment : RefreshFragment() {
         this.inflater = inflater
 
         val selectGroup = lambda@ { account: Account ->
-
+            MainActivity.goToChartFragment(account.currency)
         }
 
         for (account in Account.list)
@@ -43,10 +44,5 @@ class AccountsFragment : RefreshFragment() {
 
         return rootView
     }
-
-    fun refreshData() {
-        (listView.adapter as AccountListViewAdapter).notifyDataSetChanged()
-    }
-
 
 }

@@ -43,7 +43,7 @@ fun ListView.setHeightBasedOnChildren() {
         }
 
         view!!.measure(desiredWidth, MeasureSpec.UNSPECIFIED)
-        totalHeight += view!!.measuredHeight
+        totalHeight += view.measuredHeight
     }
     val params = layoutParams
     params.height = totalHeight + dividerHeight * (listAdapter.count - 1)

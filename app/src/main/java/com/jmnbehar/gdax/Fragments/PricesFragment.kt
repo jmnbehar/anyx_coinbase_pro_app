@@ -1,7 +1,6 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +15,7 @@ import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -49,7 +49,7 @@ class PricesFragment : RefreshFragment() {
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
-            var equivalentMenuItem = when(product.currency) {
+            val equivalentMenuItem = when(product.currency) {
                 Currency.BTC -> R.id.nav_btc
                 Currency.ETH -> R.id.nav_eth
                 Currency.LTC -> R.id.nav_ltc
@@ -90,7 +90,7 @@ class PricesFragment : RefreshFragment() {
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
-            account.updateCandles(time) { didUpdate ->
+            account.updateCandles(time, { _ -> toast("error!") }, { didUpdate ->
                 if (didUpdate) {
                     productsUpdated++
                     if (productsUpdated == accountListSize) {
@@ -111,7 +111,7 @@ class PricesFragment : RefreshFragment() {
                         }
                     }
                 }
-            }
+            })
         }
     }
 }

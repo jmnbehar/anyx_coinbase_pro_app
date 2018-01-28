@@ -14,13 +14,13 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, private var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
+class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return orders.size + fills.size + offset
     }
 
-    var offset : Int = 1
+    private var offset : Int = 1
         get() = if (orders.isNotEmpty() && fills.isNotEmpty()) { 2 } else { 1 }
 
     override fun getItem(i: Int): Any {
@@ -44,7 +44,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
         } else if ((i <= orders.size) && orders.isNotEmpty()) {
             val index = i - 1
             val order = orders[index]
-            var vi = inflater.inflate(R.layout.list_row_fill, null)
+            val vi = inflater.inflate(R.layout.list_row_fill, null)
             vi.txt_fill_fee.text = "order item"
 
             val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
@@ -62,7 +62,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
                 TradeType.STOP ->"$subtype: ${order.price}"
             }
 
-            var textColor = if (order.side == TradeSide.BUY.toString()) {
+            val textColor = if (order.side == TradeSide.BUY.toString()) {
                 Color.GREEN
             } else {
                 Color.RED
@@ -83,7 +83,8 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             val index = i - (orders.size + offset)
 
             val fill = fills[index]
-            var vi = inflater.inflate(R.layout.list_row_fill, null)
+            //TODO: this warning:
+            val vi = inflater.inflate(R.layout.list_row_fill, null)
             vi.txt_fill_size.text = fill.size
             vi.txt_fill_price.text = fill.price
             vi.txt_fill_fee.text = fill.fee
@@ -103,7 +104,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.setOnClickListener { fillOnClick(fill) }
             return vi
         } else {
-            var vi = inflater.inflate(R.layout.list_header, null)
+            val vi = inflater.inflate(R.layout.list_header, null)
             vi.txt_header.text = "You have no orders or fills"
             return vi
         }

@@ -108,8 +108,8 @@ class SendFragment : RefreshFragment() {
 
     private fun submitSend() {
         val amount = amountEditText.text.toString().toDoubleOrZero()
-        var destination = destinationEditText.text.toString()
-        destination = "18vYdgX81Zc2XoY66rbfWvMz4QSxdW9mio"  //TODO: remove this: sry aksai
+        val destination = destinationEditText.text.toString()
+        //TODO: verify legitimacy
 
         val min = when (currency) {
             Currency.BTC -> .0001

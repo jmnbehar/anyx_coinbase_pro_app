@@ -37,13 +37,10 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
     private fun updateInList() {
         list.remove(forCurrency(currency))
-        if (value != null) {
-            list.add(this)
-        }
+        list.add(this)
     }
 
-    //TODO: update to onfailure and onsuccess
-    fun updateCandles(time: Int, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(time: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         var oneMinuteAgo = Calendar.getInstance()
         oneMinuteAgo.add(Calendar.MINUTE, -1)
 
@@ -51,7 +48,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         val lastCandleUpdateTime = product.lastCandleUpdateTime.timeInSeconds()
         val oneMinuteAgoInSeconds = oneMinuteAgo.timeInSeconds()
         if (lastCandleUpdateTime < oneMinuteAgoInSeconds) {
-            Candle.getCandles(product.id, time, { candleList ->
+            Candle.getCandles(product.id, time, onFailure, { candleList ->
                 product.lastCandleUpdateTime = Calendar.getInstance()
                 product.candles = candleList
                 onComplete(true)
@@ -147,7 +144,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    Candle.getCandles(product.id, time, { candleList ->
+                    Candle.getCandles(product.id, time, onFailure, { candleList ->
                         product.candles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
@@ -164,7 +161,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        Candle.getCandles(product.id, time, { candleList ->
+                        Candle.getCandles(product.id, time, onFailure, { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {

@@ -121,8 +121,7 @@ data class Candle(
         val close: Double,
         val volume: Double) {
      companion object {
-         fun getCandles(productId: String, time: Int, onComplete: (List<Candle>) -> Unit) {
-             val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+         fun getCandles(productId: String, time: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit,  onComplete: (List<Candle>) -> Unit) {
              GdaxApi.candles(productId, time = time).executeRequest(onFailure) { result ->
                  val gson = Gson()
                  val apiCandles = result.value

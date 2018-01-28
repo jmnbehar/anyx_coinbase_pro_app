@@ -29,6 +29,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
     }
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
+        //TODO: this warning:
         var vi = inflater!!.inflate(R.layout.list_row_product, null)
 
         val account = when (i) {
@@ -37,7 +38,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             2 -> Account.ltcAccount
             3 -> Account.bchAccount
             else -> Account.list[i]
-        } ?: null
+        }
         if (account == null) {
             return vi
         }
@@ -65,7 +66,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         productNameText.text = account.product.currency.toString()
 
-        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.text = "${percentChange.fiatFormat()}%"
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
@@ -76,7 +77,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         balanceText.text = "Balance: ${account.balance} ${account.currency}"
 
-        var lineChart = vi.chart_product
+        val lineChart = vi.chart_product
         lineChart.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 
         vi.setOnClickListener { onClick(account.product) }

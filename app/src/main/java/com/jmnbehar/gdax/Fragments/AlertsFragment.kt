@@ -31,6 +31,7 @@ class AlertsFragment : RefreshFragment() {
     lateinit private var radioButtonBtc: RadioButton
     lateinit private var radioButtonEth: RadioButton
     lateinit private var radioButtonLtc: RadioButton
+    lateinit private var radioButtonBch: RadioButton
 
     lateinit private var priceEditText: EditText
     lateinit private var priceUnitText: TextView
@@ -66,6 +67,7 @@ class AlertsFragment : RefreshFragment() {
         radioButtonBtc = rootView.rbtn_alert_btc
         radioButtonEth = rootView.rbtn_alert_eth
         radioButtonLtc = rootView.rbtn_alert_ltc
+        radioButtonBch = rootView.rbtn_alert_bch
 
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
@@ -108,7 +110,7 @@ class AlertsFragment : RefreshFragment() {
 
         alertList.setMenuCreator(swipeMenuCreator)
 
-        alertList.setOnMenuItemClickListener { position, menu, index ->
+        alertList.setOnMenuItemClickListener { position, _, index ->
             when (index) {
                 0 -> {
                     val alertAtPos = alerts.toList()[position]
@@ -161,6 +163,8 @@ class AlertsFragment : RefreshFragment() {
             Currency.BTC -> radioButtonBtc.isChecked = true
             Currency.ETH -> radioButtonEth.isChecked = true
             Currency.LTC -> radioButtonLtc.isChecked = true
+            Currency.BCH -> radioButtonLtc.isChecked = true
+            Currency.USD -> { }
         }
 
     }
@@ -170,11 +174,9 @@ class AlertsFragment : RefreshFragment() {
         alertAdapter.notifyDataSetChanged()
         alertList.adapter = alertAdapter
 
-        (activity as MainActivity).updatePrices {
+        (activity as MainActivity).updatePrices({ /* fail silently */ }, {
             (activity as MainActivity).loopThroughAlerts()
             onComplete()
-        }
-
+        })
     }
-
 }

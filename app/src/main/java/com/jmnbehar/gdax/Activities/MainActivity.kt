@@ -3,6 +3,7 @@ package com.jmnbehar.gdax.Activities
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.ProgressDialog
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
@@ -125,6 +126,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
+        fun goToChartFragment(currency: Currency, context: Context? = null) {
+            when (currency) {
+                Currency.BTC -> goToFragment(FragmentType.BTC_CHART, context)
+                Currency.BCH -> goToFragment(FragmentType.BCH_CHART, context)
+                Currency.ETH -> goToFragment(FragmentType.ETH_CHART, context)
+                Currency.LTC -> goToFragment(FragmentType.LTC_CHART, context)
+                Currency.USD -> {}
+            }
+        }
+
         fun goToFragment(fragmentType: FragmentType, context: Context? = null) {
             val fragment = when (fragmentType) {
 
@@ -204,8 +215,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-
-        progressDialog = indeterminateProgressDialog("")
+        val nullMessage: CharSequence? = null
+        progressDialog = indeterminateProgressDialog(nullMessage)
         progressDialog?.dismiss()
 
 //        swipeRefreshLayout = swipe_refresh_layout
@@ -310,10 +321,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun updatePrices(onComplete: () -> Unit) {
+    fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         for (account in Account.list) {
             GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                 val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
@@ -333,13 +343,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val handler = Handler()
 
         val runnable = Runnable {
-            updatePrices {
+            updatePrices( { /* do nothing*/ }, {
                 loopThroughAlerts()
                 runAlarms()
-            }
+            })
         }
 
-        //TODO: add variable time checking, and run on launch
+        //TODO: add variable time checking
         //TODO: (ideally run on system launch)
         handler.postDelayed(runnable, (TimeInSeconds.oneMinute * 1000).toLong())
     }

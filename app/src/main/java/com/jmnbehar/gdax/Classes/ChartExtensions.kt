@@ -88,7 +88,7 @@ class PriceChart : LineChart {
         }
     }
 
-fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, timeChangable: Boolean, onDefaultDrag: () -> Unit) {
+fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
     setDrawGridBackground(false)
     setDrawBorders(false)
     var noDescription = Description()

@@ -180,14 +180,13 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private fun loginWithCredentials(credentials: ApiCredentials) {
         GdaxApi.credentials = credentials
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-        Account.getAccounts(this, onFailure) {
+        Account.getAccounts(this, { result -> toast("Error!: ${result.error}") }, {
             toast("Success! logging in")
             var prefs = Prefs(this)
             prefs.shouldAutologin = true
             val intent = MainActivity.newIntent(this)
             startActivity(intent)
-        }
+        })
     }
 
 

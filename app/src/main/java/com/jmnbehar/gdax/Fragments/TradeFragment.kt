@@ -182,7 +182,7 @@ class TradeFragment : RefreshFragment() {
 
             var timeInForce: GdaxApi.TimeInForce? = null
             var cancelAfter: String? = null
-            var stopLimit: Double? = null
+
             if (advancedOptionsCheckBox.isChecked) {
                 when (tradeType) {
                     TradeType.LIMIT -> {
@@ -197,7 +197,7 @@ class TradeFragment : RefreshFragment() {
                 }
             }
 
-            if (amount == null || amount <= 0) {
+            if (amount <= 0) {
                 toast("Amount is not valid")
             } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
                 toast("Limit is not valid")
