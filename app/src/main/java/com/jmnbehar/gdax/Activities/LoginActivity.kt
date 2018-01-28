@@ -180,7 +180,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private fun loginWithCredentials(credentials: ApiCredentials) {
         GdaxApi.credentials = credentials
+        MainActivity.progressDialog?.show()
         Account.getAccounts(this, { result -> toast("Error!: ${result.error}") }, {
+            MainActivity.progressDialog?.dismiss()
             toast("Success! logging in")
             var prefs = Prefs(this)
             prefs.shouldAutologin = true
