@@ -12,6 +12,12 @@ import java.util.*
 
 /**
  * Created by josephbehar on 12/28/17.
+ *
+ *
+import org.bitcoinj.core.Address
+import org.bitcoinj.core.AddressFormatException
+import org.bitcoinj.core.NetworkParameters
+
  */
 
 class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
@@ -80,4 +86,29 @@ fun Date.timeInSeconds() : Int {
     val floatMillis = this.time
     val floatSeconds = floatMillis / 1000
     return floatSeconds.toInt()
+}
+
+/**
+ * Created by josephbehar on 1/30/18.
+ */
+
+fun String.isValidAddress(currency: Currency): Boolean {
+    //TODO: this
+    return if ((this.length < 25)  || (this.length > 36)) {
+        false
+    } else if (this.contains('0', true)) {
+        false
+    } else if (this.contains('O', true)) {
+        false
+//    } else if (this.contains('1', true)) {
+//        false
+    } else if (this.contains('I', true)) {
+        false
+    } else {
+        return when (currency) {
+            Currency.BTC -> (this[0] == '1')
+            Currency.ETH -> (this[0] == '0' && this[0] == '0')
+            else -> true
+        }
+    }
 }

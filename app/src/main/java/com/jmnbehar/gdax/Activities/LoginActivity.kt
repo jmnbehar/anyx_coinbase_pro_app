@@ -133,8 +133,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     private fun signIn() {
-        // Usage
-
         val iv = ByteArray(16)
         val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
 

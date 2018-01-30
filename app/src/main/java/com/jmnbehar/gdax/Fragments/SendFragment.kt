@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+
+
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -109,33 +109,34 @@ class SendFragment : RefreshFragment() {
     private fun submitSend() {
         val amount = amountEditText.text.toString().toDoubleOrZero()
         val destination = destinationEditText.text.toString()
-        //TODO: verify legitimacy
 
-        val min = when (currency) {
-            Currency.BTC -> .0001
-            Currency.ETH -> .001
-            Currency.BCH -> .001
-            Currency.LTC -> .1
-            else -> 100.0
-        }
-
-        fun onComplete(result: Result<ByteArray, FuelError>) {
-            when (result) {
-                is Result.Failure -> {
-                    //error
-                    println("Error!: ${result.error}")
-                    toast("Error!: ${result.error}")
-                }
-                is Result.Success -> {
-                    toast("success")
-                }
-            }
-        }
+        val min = currency.minSendAmount
 
         if (amount > min) {
-            GdaxApi.send(amount, currency, destination).executePost({ result ->  GdaxApi.defaultPostFailure(result) }) { result ->
-                onComplete(result)
-            }
+            GdaxApi.send(amount, currency, destination).executePost(
+                    { result -> //failure
+                        val response = result.error.response.data
+
+
+                        var i = 0
+                        val len = response.size
+                        while (i < len) {
+                            response[i] = java.lang.Byte.parseByte(response[i].toString())
+                            i++
+                        }
+
+                        var responseDataStr = String(response)
+                        responseDataStr = responseDataStr.removePrefix("{\"message\":\"")
+                        responseDataStr = responseDataStr.removeSuffix("\"}")
+                        val errorString = when(responseDataStr) {
+                            "invalid crypto_address" -> "Error: Invalid $currency address"
+                            else -> GdaxApi.defaultPostFailure(result)
+                        }
+                        toast (errorString)
+                    },
+                    { result -> //success
+                        toast("success")
+                    })
         } else {
             toast("error! Trying to send less than minimum which is $min")
         }

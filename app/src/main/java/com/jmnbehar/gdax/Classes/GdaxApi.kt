@@ -30,17 +30,38 @@ sealed class GdaxApi: FuelRouting {
             FuelManager.instance.basePath = basePath
         }
 
-        fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) {
+        fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
-            val fragment = MainActivity.currentFragment!!
-            when (errorCode) {
-                GdaxApi.ErrorCode.BadRequest -> { fragment.toast("400 Error: Missing something from the request")}
-                GdaxApi.ErrorCode.Unauthorized -> { fragment.toast("401 Error: You don't have permission to do that")}
-                GdaxApi.ErrorCode.Forbidden -> { fragment.toast("403 Error: You don't have permission to do that")}
-                GdaxApi.ErrorCode.NotFound -> { fragment.toast("404 Error: Content not found")}
-                GdaxApi.ErrorCode.TooManyRequests -> { fragment.toast("Error! Too many requests in a row")}
-                GdaxApi.ErrorCode.ServerError -> { fragment.toast("Error! Sorry, Gdax Servers are encountering problems right now")}
-                GdaxApi.ErrorCode.UnknownError -> { fragment.toast("Error!: ${result.error}")}
+//            val fragment = MainActivity.currentFragment!!
+//            when (errorCode) {
+//                GdaxApi.ErrorCode.BadRequest -> { fragment.toast("400 Error: Missing something from the request")}
+//                GdaxApi.ErrorCode.Unauthorized -> { fragment.toast("401 Error: You don't have permission to do that")}
+//                GdaxApi.ErrorCode.Forbidden -> { fragment.toast("403 Error: You don't have permission to do that")}
+//                GdaxApi.ErrorCode.NotFound -> { fragment.toast("404 Error: Content not found")}
+//                GdaxApi.ErrorCode.TooManyRequests -> { fragment.toast("Error! Too many requests in a row")}
+//                GdaxApi.ErrorCode.ServerError -> { fragment.toast("Error! Sorry, Gdax Servers are encountering problems right now")}
+//                GdaxApi.ErrorCode.UnknownError -> { fragment.toast("Error!: ${result.error}")}
+//            }
+
+            return when (errorCode) {
+                GdaxApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
+                GdaxApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
+                GdaxApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
+                GdaxApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
+                GdaxApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
+                GdaxApi.ErrorCode.ServerError -> { "Error! Sorry, Gdax Servers are encountering problems right now" }
+                GdaxApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
+                else -> ""
+            }
+        }
+
+        fun developerAddress(currency: Currency) : String {
+            return when (currency) {
+                Currency.BTC -> "1xxxxx"
+                Currency.ETH -> "0x3333"
+                Currency.BCH -> "1xxxxx"
+                Currency.LTC -> "0xabcd"
+                Currency.USD -> "my irl address?"
             }
         }
 

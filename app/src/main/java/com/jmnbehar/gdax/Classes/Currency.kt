@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import com.jmnbehar.gdax.Fragments.TradeFragment
 import com.jmnbehar.gdax.R
 
 /**
@@ -23,17 +24,16 @@ enum class Currency {
         }
     }
 
-    fun productId() : String {
-        return when (this) {
+    val productId : String
+        get() = when (this) {
             BTC -> "BTC-USD"
             BCH -> "BCH-USD"
             ETH -> "ETH-USD"
             LTC -> "LTC-USD"
             USD -> "USD"
         }
-    }
 
-    var fullName : String = ""
+    val fullName : String
         get() = when (this) {
             BTC -> "Bitcoin"
             BCH -> "Bitcoin Cash"
@@ -42,13 +42,32 @@ enum class Currency {
             USD -> "USD"
         }
 
-    var iconId = 0
+    val iconId
         get() = when(this) {
             BTC -> R.drawable.icon_btc
             ETH ->  R.drawable.icon_eth
             LTC -> R.drawable.icon_ltc
             BCH -> R.drawable.icon_bch
             USD -> R.drawable.icon_usd
+        }
+
+    val feePercentage : Double
+        get() = when(this) {
+            Currency.BTC -> 0.0025
+            Currency.BCH -> 0.0025
+            Currency.ETH -> 0.003
+            Currency.LTC -> 0.003
+            Currency.USD -> 0.0
+        }
+
+
+    val minSendAmount : Double
+        get() = when (this) {
+            Currency.BTC -> .0001
+            Currency.ETH -> .001
+            Currency.BCH -> .001
+            Currency.LTC -> .1
+            else -> 100.0
         }
 
     companion object {

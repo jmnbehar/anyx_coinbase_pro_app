@@ -51,6 +51,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             Candle.getCandles(product.id, time, onFailure, { candleList ->
                 product.lastCandleUpdateTime = Calendar.getInstance()
                 product.candles = candleList
+                product.price = candleList.last().close
                 onComplete(true)
             })
         } else {

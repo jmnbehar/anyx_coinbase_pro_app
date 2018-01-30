@@ -107,10 +107,6 @@ fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, 
     axisLeft.showOnlyMinMaxValues = true
     axisLeft.setDrawGridLines(false)
     axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-    val open = candles.firstOrNull()?.open?.toFloat()
-    if (open != null) {
-        axisLeft.showSpecificLabels(floatArrayOf(open), false)
-    }
 
     axisRight.showOnlyMinMaxValues = true
     axisRight.setDrawGridLines(false)
@@ -142,6 +138,11 @@ fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
     dataSet.lineWidth = 2.toFloat()
     dataSet.setDrawFilled(true)
     dataSet.fillColor = color
+
+    val open = candles.firstOrNull()?.close?.toFloat()
+    if (open != null) {
+        axisLeft.showSpecificLabels(floatArrayOf(open), false)
+    }
 
     val dates = candles.map { c -> c.time }.toDoubleArray()
     xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
