@@ -11,18 +11,7 @@ class Product(var currency: Currency, var id: String, var candles: List<Candle>)
     constructor(apiProduct: ApiProduct, candles: List<Candle>)
             : this(Currency.fromString(apiProduct.base_currency), apiProduct.id, candles)
 
-    var price: Double
-    var lastCandleUpdateTime: Calendar
-
-    init {
-        price = candles.lastOrNull()?.close ?: 0.0
-        if (candles.isNotEmpty()) {
-            lastCandleUpdateTime = Calendar.getInstance()
-        } else {
-            lastCandleUpdateTime = Calendar.getInstance()
-            lastCandleUpdateTime.set(2000, 1, 1)
-        }
-    }
+    var price = candles.lastOrNull()?.close ?: 0.0
 
     override fun toString(): String {
         var alertString = currency.toString() + '\n'

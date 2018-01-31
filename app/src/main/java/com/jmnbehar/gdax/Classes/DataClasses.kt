@@ -121,8 +121,9 @@ data class Candle(
         val close: Double,
         val volume: Double) {
      companion object {
-         fun getCandles(productId: String, time: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit,  onComplete: (List<Candle>) -> Unit) {
-             GdaxApi.candles(productId, time = time).executeRequest(onFailure) { result ->
+         //TODO: consider moving this code elsewhere
+         fun getCandles(productId: String, timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
+             GdaxApi.candles(productId, timespan = timespan).executeRequest(onFailure) { result ->
                  val gson = Gson()
                  val apiCandles = result.value
                  val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
@@ -130,7 +131,7 @@ data class Candle(
 
                  var now = Calendar.getInstance()
 
-                 var start = now.timeInSeconds() - time - 30
+                 var start = now.timeInSeconds() - timespan - 30
 
                  candles = candles.filter { it.time >=  start }
 
@@ -138,6 +139,20 @@ data class Candle(
                  onComplete(candles)
              }
          }
+
+         fun granularityForTimespan(timespan: Int) : Int {
+             return when (timespan) {
+                 TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
+                 TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
+                 TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
+                 TimeInSeconds.oneDay -> TimeInSeconds.fiveMinutes
+                 TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
+                 TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
+                 TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
+                 else -> TimeInSeconds.fiveMinutes
+             }
+         }
+
      }
 }
 

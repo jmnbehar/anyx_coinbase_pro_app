@@ -40,19 +40,23 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         list.add(this)
     }
 
-    fun updateCandles(time: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
-        var oneMinuteAgo = Calendar.getInstance()
-        oneMinuteAgo.add(Calendar.MINUTE, -1)
+    fun updateCandles(timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+        var now = Calendar.getInstance()
+        var longAgo = Calendar.getInstance()
+        longAgo.add(Calendar.YEAR, -2)
+        val lastCandleTime = product.candles.lastOrNull()?.time?.toInt() ?: longAgo.timeInSeconds()
+        val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
+        val nowInSeconds = now.timeInSeconds()
 
-        //TODO: update this to look at granularity
-        val lastCandleUpdateTime = product.lastCandleUpdateTime.timeInSeconds()
-        val oneMinuteAgoInSeconds = oneMinuteAgo.timeInSeconds()
-        if (lastCandleUpdateTime < oneMinuteAgoInSeconds) {
-            Candle.getCandles(product.id, time, onFailure, { candleList ->
-                product.lastCandleUpdateTime = Calendar.getInstance()
-                product.candles = candleList
-                product.price = candleList.last().close
-                onComplete(true)
+        if (nextCandleTime < nowInSeconds) {
+            Candle.getCandles(product.id, timespan, onFailure, { candleList ->
+                val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
+                val didGetNewCandle = (lastCandleTime != newLastCandleTime)
+                if (didGetNewCandle) {
+                    product.candles = candleList
+                    product.price = candleList.last().close
+                }
+                onComplete(didGetNewCandle)
             })
         } else {
             onComplete(false)

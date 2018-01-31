@@ -8,8 +8,6 @@ import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
-import com.jmnbehar.gdax.Activities.MainActivity
-import org.jetbrains.anko.support.v4.toast
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -98,7 +96,7 @@ sealed class GdaxApi: FuelRouting {
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
-    class candles(val productId: String, val time: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
+    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
     class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : GdaxApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
@@ -208,7 +206,7 @@ sealed class GdaxApi: FuelRouting {
                 is candles -> {
                     val utcTimeZone = TimeZone.getTimeZone("UTC")
                     var now = Calendar.getInstance(utcTimeZone)
-                    var startInt = now.timeInSeconds() - time
+                    var startInt = now.timeInSeconds() - timespan
 
                     var start = Date(startInt.toLong() * 1000)
 
@@ -219,16 +217,7 @@ sealed class GdaxApi: FuelRouting {
                     paramList.add(Pair("end", formatter.format(now.time)))
 
                     if (granularity == null) {
-                        granularity = when (time) {
-                            TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
-                            TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
-                            TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
-                            TimeInSeconds.oneDay -> TimeInSeconds.fiveMinutes
-                            TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
-                            TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
-                            TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
-                            else -> TimeInSeconds.fiveMinutes
-                        }
+                        granularity = Candle.granularityForTimespan(timespan)
                     }
                     paramList.add(Pair("granularity", granularity.toString()))
                     return paramList.toList()
