@@ -25,4 +25,15 @@ object TimeInSeconds {
     val oneWeek = 604800
     val twoWeeks = 1209600
     val oneMonth = 2592000
+    val oneYear = 31622400
+    val fiveYears = 158112000
+}
+
+object Granularity {
+    val oneMinute = 60
+    val fiveMinutes = 300
+    val fifteenMinutes = 900
+    val oneHour = 3600
+    val sixHours = 21600
+    val oneDay = 86400
 }

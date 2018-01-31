@@ -134,12 +134,10 @@ sealed class GdaxApi: FuelRouting {
                         handler.postDelayed(retry, 1000.toLong())
                     } else {
                         onFailure(result)
-                   //     MainActivity.progressDialog?.dismiss()
                     }
                 }
                 is Result.Success -> {
                     onSuccess(result)
-                 //   MainActivity.progressDialog?.dismiss()
                 }
             }
         }

@@ -123,6 +123,7 @@ data class Candle(
      companion object {
          //TODO: consider moving this code elsewhere
          fun getCandles(productId: String, timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
+             //TODO: fix for a year or more
              GdaxApi.candles(productId, timespan = timespan).executeRequest(onFailure) { result ->
                  val gson = Gson()
                  val apiCandles = result.value

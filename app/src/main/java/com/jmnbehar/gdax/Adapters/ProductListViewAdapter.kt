@@ -43,7 +43,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             return vi
         }
 
-        val candles = account.product.candles
+        val candles = account.product.dayCandles
         val currentPrice = account.product.price
         val open = if (candles.isNotEmpty()) {
             candles.first().open

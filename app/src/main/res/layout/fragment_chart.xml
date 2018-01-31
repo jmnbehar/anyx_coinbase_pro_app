@@ -68,6 +68,59 @@
 
     </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_chart_timespan_hour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAllCaps="false"
+                android:text="Hour" />
+
+            <Button
+                android:id="@+id/btn_chart_timespan_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAllCaps="false"
+                android:text="Day" />
+
+            <Button
+                android:id="@+id/btn_chart_timespan_week"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAllCaps="false"
+                android:text="Week" />
+
+            <Button
+                android:id="@+id/btn_chart_timespan_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:text="Month" />
+
+            <Button
+                android:id="@+id/btn_chart_timespan_year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAllCaps="false"
+                android:text="Year" />
+
+            <Button
+                android:id="@+id/btn_chart_timespan_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAllCaps="false"
+                android:text="All" />
+        </LinearLayout>
+
     <com.jmnbehar.gdax.Classes.PriceChart
         android:id="@+id/chart"
         android:layout_width="match_parent"

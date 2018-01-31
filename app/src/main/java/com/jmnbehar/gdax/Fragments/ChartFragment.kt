@@ -24,6 +24,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import android.widget.Button
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -44,7 +45,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var iconView: ImageView
     private lateinit var percentChangeText: TextView
 
-    private var chartLength = TimeInSeconds.oneDay
+    private lateinit var timespanButtonHour: Button
+    private lateinit var timespanButtonDay: Button
+    private lateinit var timespanButtonWeek: Button
+    private lateinit var timespanButtonMonth: Button
+    private lateinit var timespanButtonYear: Button
+    private lateinit var timespanButtonAll: Button
+
+    private var chartTimeSpan = TimeInSeconds.oneDay
 
     companion object {
         var account: Account? = null
@@ -68,6 +76,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         valueText = rootView.txt_chart_account_value
         priceText = rootView.txt_chart_price
         percentChangeText = rootView.txt_chart_change_or_date
+
+        timespanButtonHour = rootView.btn_chart_timespan_hour
+        timespanButtonDay = rootView.btn_chart_timespan_day
+        timespanButtonWeek = rootView.btn_chart_timespan_week
+        timespanButtonMonth = rootView.btn_chart_timespan_month
+        timespanButtonYear = rootView.btn_chart_timespan_year
+        timespanButtonAll = rootView.btn_chart_timespan_all
 
         val account = account
         if (account == null) {
@@ -108,6 +123,25 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             sellButton.setOnClickListener {
                 MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+            }
+
+            timespanButtonHour.setOnClickListener {
+                setChartTimespan(TimeInSeconds.oneHour)
+            }
+            timespanButtonDay.setOnClickListener {
+                setChartTimespan(TimeInSeconds.oneDay)
+            }
+            timespanButtonWeek.setOnClickListener {
+                setChartTimespan(TimeInSeconds.oneWeek)
+            }
+            timespanButtonMonth.setOnClickListener {
+                setChartTimespan(TimeInSeconds.oneMonth)
+            }
+            timespanButtonYear.setOnClickListener {
+                setChartTimespan(TimeInSeconds.oneYear)
+            }
+            timespanButtonAll.setOnClickListener {
+                setChartTimespan(TimeInSeconds.fiveYears)
             }
 
             val prefs = Prefs(activity)
@@ -152,6 +186,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPause()
     }
 
+    private fun setChartTimespan(timespan: Int) {
+        chartTimeSpan = timespan
+        miniRefresh({ }, { })
+    }
     private fun setPercentChangeText(price: Double, open: Double) {
         val change = price - open
         val weightedChange: Double = (change / open)
@@ -254,6 +292,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val onFailure = { result: Result.Failure<String, FuelError> ->
             toast("Error!: ${result.error}")
             println("error!" )}
+
         account?. let { account ->
             GdaxApi.account(account.id).executeRequest(onFailure) { result ->
                 val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
@@ -293,9 +332,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        val time = TimeInSeconds.oneDay
         account?. let { account ->
-            account.updateCandles(time, onFailure, { _ ->
+            account.updateCandles(chartTimeSpan, onFailure, { _ ->
                 GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()

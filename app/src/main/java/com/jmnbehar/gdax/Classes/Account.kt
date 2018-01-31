@@ -40,20 +40,29 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         list.add(this)
     }
 
+    //TODO: move this code to product?
     fun updateCandles(timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         var now = Calendar.getInstance()
         var longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
-        val lastCandleTime = product.candles.lastOrNull()?.time?.toInt() ?: longAgo.timeInSeconds()
-        val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
+        val longAgoInSeconds = longAgo.timeInSeconds()
+        val lastCandleTime = product.candles.lastOrNull()?.time?.toInt() ?: longAgoInSeconds
+        var nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
         val nowInSeconds = now.timeInSeconds()
 
+        if (timespan != product.candlesTimespan) {
+            nextCandleTime = longAgoInSeconds
+            product.candlesTimespan = timespan
+        }
         if (nextCandleTime < nowInSeconds) {
             Candle.getCandles(product.id, timespan, onFailure, { candleList ->
                 val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
                 val didGetNewCandle = (lastCandleTime != newLastCandleTime)
                 if (didGetNewCandle) {
                     product.candles = candleList
+                    if (timespan == TimeInSeconds.oneDay) {
+                        product.dayCandles = candleList
+                    }
                     product.price = candleList.last().close
                 }
                 onComplete(didGetNewCandle)
@@ -151,6 +160,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                 for (product in stashedProductList) {
                     Candle.getCandles(product.id, time, onFailure, { candleList ->
                         product.candles = candleList
+                        product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
                         if (productList.size == stashedProductList.size) {
