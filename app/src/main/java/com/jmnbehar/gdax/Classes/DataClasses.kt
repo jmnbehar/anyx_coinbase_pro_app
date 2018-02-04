@@ -120,16 +120,28 @@ data class Candle(
         val open: Double,
         val close: Double,
         val volume: Double) {
+
      companion object {
+
          //TODO: consider moving this code elsewhere
-         fun getCandles(productId: String, timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
+         fun getCandles(productId: String, timespan: Int, granularity: Int?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
              //TODO: fix for a year or more
-             GdaxApi.candles(productId, timespan = timespan).executeRequest(onFailure) { result ->
+             var granularity = granularity
+             if (granularity == null) {
+                 granularity = Candle.granularityForTimespan(timespan)
+             }
+             var currentTimespan = timespan
+             var remainingTimespan = 0
+             if ((timespan / granularity) > 300) {
+                 //split into 2 requests
+                 currentTimespan = granularity * 300
+                 remainingTimespan = timespan - currentTimespan
+             }
+             GdaxApi.candles(productId, currentTimespan, granularity).executeRequest(onFailure) { result ->
                  val gson = Gson()
                  val apiCandles = result.value
                  val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                  var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
-
                  var now = Calendar.getInstance()
 
                  var start = now.timeInSeconds() - timespan - 30

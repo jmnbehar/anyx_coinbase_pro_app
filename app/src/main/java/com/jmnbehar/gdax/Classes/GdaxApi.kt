@@ -89,6 +89,8 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
+    //TODO: add pagination cursor stuff
+
     override val basePath = Companion.basePath
 
 
@@ -96,7 +98,7 @@ sealed class GdaxApi: FuelRouting {
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
-    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int? = null) : GdaxApi()
+    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?) : GdaxApi()
     class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : GdaxApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
@@ -214,6 +216,7 @@ sealed class GdaxApi: FuelRouting {
                     paramList.add(Pair("start", formatter.format(start)))
                     paramList.add(Pair("end", formatter.format(now.time)))
 
+                    //TODO: dumb this down, the granularity smarts live elsewhere
                     if (granularity == null) {
                         granularity = Candle.granularityForTimespan(timespan)
                     }

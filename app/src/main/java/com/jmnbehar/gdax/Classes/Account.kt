@@ -55,7 +55,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             product.candlesTimespan = timespan
         }
         if (nextCandleTime < nowInSeconds) {
-            Candle.getCandles(product.id, timespan, onFailure, { candleList ->
+            Candle.getCandles(product.id, timespan, null, onFailure, { candleList ->
                 val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
                 val didGetNewCandle = (lastCandleTime != newLastCandleTime)
                 if (didGetNewCandle) {
@@ -158,7 +158,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    Candle.getCandles(product.id, time, onFailure, { candleList ->
+                    Candle.getCandles(product.id, time, null, onFailure, { candleList ->
                         product.candles = candleList
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
@@ -176,7 +176,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        Candle.getCandles(product.id, time, onFailure, { candleList ->
+                        Candle.getCandles(product.id, time, null, onFailure, { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
