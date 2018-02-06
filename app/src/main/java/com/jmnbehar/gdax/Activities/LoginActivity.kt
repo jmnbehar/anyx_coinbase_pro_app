@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
@@ -50,15 +51,18 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         )
       //  nav_view.setNavigationItemSelectedListener(this)
 
+        prefs = Prefs(this)
 
         if (intent.getBooleanExtra(Constants.exit, false)) {
             finish()
             return
+        } else if (prefs.isFirstTime) {
+            onboardNewUser()
+            skipLogin = true
         } else if (intent.getBooleanExtra(Constants.logout, false)) {
             skipLogin = true
         }
 
-        prefs = Prefs(this)
         shouldSaveApiInfo = prefs.shouldSaveApiInfo
         shouldSavePassphrase = prefs.shouldSavePassphrase
         if (savedInstanceState == null) {
@@ -66,6 +70,11 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 goToFragment(false)
             }
         }
+    }
+
+    private fun onboardNewUser() {
+        val intent = Intent(this, OnboardActivity::class.java)
+        startActivity(intent)
     }
 
     fun goToFragment(isWebViewFragment: Boolean, url: String? = null) {

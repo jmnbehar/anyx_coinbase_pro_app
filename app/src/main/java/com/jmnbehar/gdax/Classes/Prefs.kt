@@ -22,8 +22,14 @@ class Prefs (context: Context) {
     private val STASHED_PRODUCTS = "stashed_products"
     private val STASHED_ORDERS = "stashed_orders"
     private val STASHED_FILLS = "stashed_fills"
+    private val IS_FIRST_TIME = "is_first_time"
+
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
+
+    var isFirstTime: Boolean
+        get() = prefs.getBoolean(IS_FIRST_TIME, true)
+        set(value) = prefs.edit().putBoolean(IS_FIRST_TIME, value).apply()
 
     var passphrase: String?
         get() = prefs.getString(PASSPHRASE, null)

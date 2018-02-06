@@ -229,6 +229,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        }
 
         val prefs = Prefs(this)
+
         if (!prefs.shouldAutologin) {
             returnToLogin()
         } else if (Account.list.size > 0) {
