@@ -88,68 +88,70 @@ class PriceChart : LineChart {
         }
     }
 
-fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
-    setDrawGridBackground(false)
-    setDrawBorders(false)
-    var noDescription = Description()
-    noDescription.text = ""
-    this.defaultDragDirection = defaultDragDirection
-    when (defaultDragDirection) {
-        DefaultDragDirection.Horizontal -> onSideDrag   = onDefaultDrag
-        DefaultDragDirection.Vertical -> onVerticalDrag = onDefaultDrag
+    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
+        setDrawGridBackground(false)
+        setDrawBorders(false)
+        var noDescription = Description()
+        noDescription.text = ""
+        this.defaultDragDirection = defaultDragDirection
+        when (defaultDragDirection) {
+            DefaultDragDirection.Horizontal -> onSideDrag   = onDefaultDrag
+            DefaultDragDirection.Vertical -> onVerticalDrag = onDefaultDrag
+        }
+
+        description = noDescription
+        legend.isEnabled = false
+        xAxis.setDrawGridLines(false)
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+
+        axisLeft.showOnlyMinMaxValues = true
+        axisLeft.setDrawGridLines(false)
+        axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+
+        axisRight.showOnlyMinMaxValues = true
+        axisRight.setDrawGridLines(false)
+        axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+
+        setTouchEnabled(touchEnabled)
+
+        setScaleEnabled(false)
+        isDoubleTapToZoomEnabled = false
+
+
+        addCandles(candles, currency, timeRange)
     }
 
-    description = noDescription
-    legend.isEnabled = false
-    xAxis.setDrawGridLines(false)
-    xAxis.position = XAxis.XAxisPosition.BOTTOM
+    fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
+        val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
 
-    axisLeft.showOnlyMinMaxValues = true
-    axisLeft.setDrawGridLines(false)
-    axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+        val dataSet = LineDataSet(entries, "Chart")
 
-    axisRight.showOnlyMinMaxValues = true
-    axisRight.setDrawGridLines(false)
-    axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+        val color = when (currency) {
+            Currency.BTC -> Color.YELLOW
+            Currency.BCH -> Color.GREEN
+            Currency.ETH -> Color.BLUE
+            Currency.LTC -> Color.GRAY
+            Currency.USD -> Color.BLACK
+        }
 
-    setTouchEnabled(touchEnabled)
+        dataSet.color = color
+        dataSet.lineWidth = 2.toFloat()
+        dataSet.setDrawFilled(true)
+        dataSet.fillColor = color
 
-    setScaleEnabled(false)
-    isDoubleTapToZoomEnabled = false
+        val open = candles.firstOrNull()?.close?.toFloat()
+        if (open != null) {
+            axisLeft.showSpecificLabels(floatArrayOf(open), false)
+        }
 
-
-    addCandles(candles, currency, timeRange)
-}
-
-fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
-    val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-
-    val dataSet = LineDataSet(entries, "Chart")
-
-    val color = when (currency) {
-        Currency.BTC -> Color.YELLOW
-        Currency.BCH -> Color.GREEN
-        Currency.ETH -> Color.BLUE
-        Currency.LTC -> Color.GRAY
-        Currency.USD -> Color.BLACK
+        //TODO: fill in missing entries
+        val dates = candles.map { c -> c.time }.toDoubleArray()
+        xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
+        dataSet.setDrawCircles(false)
+        val lineData = LineData(dataSet)
+        this.data = lineData
+        this.invalidate()
     }
-    dataSet.color = color
-    dataSet.lineWidth = 2.toFloat()
-    dataSet.setDrawFilled(true)
-    dataSet.fillColor = color
-
-    val open = candles.firstOrNull()?.close?.toFloat()
-    if (open != null) {
-        axisLeft.showSpecificLabels(floatArrayOf(open), false)
-    }
-
-    val dates = candles.map { c -> c.time }.toDoubleArray()
-    xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
-    dataSet.setDrawCircles(false)
-    val lineData = LineData(dataSet)
-    this.data = lineData
-    this.invalidate()
-}
 
 }
 

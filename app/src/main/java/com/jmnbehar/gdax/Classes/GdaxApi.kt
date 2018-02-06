@@ -72,6 +72,7 @@ sealed class GdaxApi: FuelRouting {
         NotFound(404),
         TooManyRequests(429),
         ServerError(500), //Problem with our server
+        ServiceUnavailable(503), //Problem with our server
         UnknownError(999);
 
         companion object {
@@ -83,6 +84,7 @@ sealed class GdaxApi: FuelRouting {
                     404 -> NotFound
                     429 -> TooManyRequests
                     500 -> ServerError //Problem with our server
+                    503 -> ServiceUnavailable //Problem with our server
                     else -> UnknownError
                 }
             }
