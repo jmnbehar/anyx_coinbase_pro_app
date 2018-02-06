@@ -234,7 +234,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun fillOnClick(fill: ApiFill) {
         alert {
-            title = "Order"
+            title = "Fill"
 
             customView {
                 linearLayout {

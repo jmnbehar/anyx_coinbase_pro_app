@@ -34,7 +34,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
 
         if ((i == 0) && (orders.isNotEmpty() || fills.isNotEmpty())) {
-            var vi = inflater.inflate(R.layout.list_header, null)
+            val vi = viewGroup.inflate(R.layout.list_header)
             if (orders.isNotEmpty()) {
                 vi.txt_header.text = "ORDERS"
             } else {
@@ -44,7 +44,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
         } else if ((i <= orders.size) && orders.isNotEmpty()) {
             val index = i - 1
             val order = orders[index]
-            val vi = inflater.inflate(R.layout.list_row_fill, null)
+            val vi = viewGroup.inflate(R.layout.list_row_fill)
             vi.txt_fill_fee.text = "order item"
 
             val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
@@ -75,7 +75,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.setOnClickListener { orderOnClick(order) }
             return vi
         } else if ((i == (orders.size + 1)) && orders.isNotEmpty() && fills.isNotEmpty()) {
-            var vi = inflater.inflate(R.layout.list_header, null)
+            val vi = viewGroup.inflate(R.layout.list_header)
             vi.txt_header.text = "FILLS"
 
             return vi
@@ -84,14 +84,14 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
 
             val fill = fills[index]
             //TODO: this warning:
-            val vi = inflater.inflate(R.layout.list_row_fill, null)
+            val vi = viewGroup.inflate(R.layout.list_row_fill)
             vi.txt_fill_size.text = fill.size
             vi.txt_fill_price.text = fill.price
             vi.txt_fill_fee.text = fill.fee
             vi.txt_fill_time.text = fill.created_at
             vi.txt_fill_type.text = ""
 
-            var textColor = if (fill.side == TradeSide.BUY.toString()) {
+            val textColor = if (fill.side == TradeSide.BUY.toString()) {
                 Color.GREEN
             } else {
                 Color.RED
@@ -104,7 +104,7 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             vi.setOnClickListener { fillOnClick(fill) }
             return vi
         } else {
-            val vi = inflater.inflate(R.layout.list_header, null)
+            val vi = viewGroup.inflate(R.layout.list_header)
             vi.txt_header.text = "You have no orders or fills"
             return vi
         }

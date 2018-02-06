@@ -1,5 +1,7 @@
 package com.jmnbehar.gdax.Classes
 
+import android.support.annotation.LayoutRes
+import android.view.LayoutInflater
 import android.widget.ListView
 import android.view.ViewGroup
 import android.view.View.MeasureSpec
@@ -61,6 +63,9 @@ fun Double.fiatFormat(): String = "%.2f".format(this)
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 
+fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
+    return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
+}
 
 fun Double.toStringWithTimeRange(timeRange: Int) : String {
     val formatter = when (timeRange) {

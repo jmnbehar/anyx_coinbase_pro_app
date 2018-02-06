@@ -388,11 +388,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationBuilder = NotificationCompat.Builder(this)
-                .setContentText(notificationString)
-                .setAutoCancel(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+            .setContentText(notificationString)
+            .setAutoCancel(true)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSound(defaultSoundUri)
+            .setContentIntent(pendingIntent)
 
         notificationManager?.notify(0, notificationBuilder.build())
     }

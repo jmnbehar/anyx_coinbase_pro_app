@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
+import android.widget.TextView
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_alarm.view.*
@@ -26,17 +28,34 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
         return i.toLong()
     }
 
-    override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
-        var vi = inflater!!.inflate(R.layout.list_row_alarm, null)
+    internal class ViewHolder {
+        var productNameText: TextView? = null
+        var triggerPriceText: TextView? = null
+    }
 
+    override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
+        val viewHolder: ViewHolder?
+        val outputView: View
+        if (convertView == null) {
+            viewHolder = ViewHolder()
+            outputView = viewGroup.inflate(R.layout.list_row_alarm)
+            viewHolder.productNameText = outputView.txt_alert_product
+            viewHolder.triggerPriceText = outputView.txt_alert_value
+
+            outputView?.tag = viewHolder
+
+        } else {
+            viewHolder = convertView.tag as ViewHolder
+            outputView = convertView
+        }
         val alert = alerts[i]
 
-        vi.txt_alert_product.text = alert.currency.toString()
-        vi.txt_alert_value.text = alert.price.fiatFormat()
+        viewHolder.productNameText?.text = alert.currency.toString()
+        viewHolder.triggerPriceText?.text = alert.price.fiatFormat()
 
-        vi.setOnClickListener { onClick(alert) }
+        outputView.setOnClickListener { onClick(alert) }
 
-        return vi
+        return outputView
     }
 
 

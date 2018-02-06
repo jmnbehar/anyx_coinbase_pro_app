@@ -9,6 +9,9 @@ import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_product.view.*
 import org.jetbrains.anko.textColor
+import android.widget.ImageView
+import android.widget.TextView
+
 
 /**
  * Created by jmnbehar on 11/12/2017.
@@ -28,9 +31,36 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         return i.toLong()
     }
 
+    internal class ViewHolder {
+        var productNameText: TextView? = null
+        var percentChangeText: TextView? = null
+        var priceText: TextView? = null
+        var balanceText: TextView? = null
+        var productIcon: ImageView? = null
+        var lineChart:  PriceChart? = null
+    }
+
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
-        //TODO: this warning:
-        var vi = inflater!!.inflate(R.layout.list_row_product, null)
+        val viewHolder: ViewHolder?
+        val outputView: View
+        if (convertView == null) {
+            viewHolder = ViewHolder()
+
+            val vi = viewGroup.inflate(R.layout.list_row_product)
+
+            viewHolder.productNameText = vi.txt_product_name
+            viewHolder.percentChangeText = vi.txt_product_percent_change
+            viewHolder.priceText = vi.txt_product_price
+            viewHolder.balanceText =  vi.txt_product_amount_owned
+            viewHolder.productIcon = vi.img_product_icon
+            viewHolder.lineChart = vi.chart_product
+
+            vi?.tag = viewHolder
+            outputView = vi
+        } else {
+            viewHolder = convertView.tag as ViewHolder
+            outputView = convertView
+        }
 
         val account = when (i) {
             0 -> Account.btcAccount
@@ -40,7 +70,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             else -> Account.list[i]
         }
         if (account == null) {
-            return vi
+            return outputView
         }
 
         val candles = account.product.dayCandles
@@ -55,33 +85,27 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         val percentChange: Double = weightedChange * 100.0
 
-        var productNameText = vi.txt_product_name
-        var percentChangeText = vi.txt_product_percent_change
-        var priceText = vi.txt_product_price
-        var balanceText =  vi.txt_product_amount_owned
-
 
         //TODO: someday add ability to select values here
-        vi.img_product_icon.setImageResource(account.currency.iconId)
+        viewHolder.productIcon?.setImageResource(account.currency.iconId)
 
-        productNameText.text = account.product.currency.toString()
+        viewHolder.productNameText?.text = account.product.currency.toString()
 
-        percentChangeText.text = "${percentChange.fiatFormat()}%"
-        percentChangeText.textColor = if (percentChange >= 0) {
+        viewHolder.percentChangeText?.text = "${percentChange.fiatFormat()}%"
+        viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
             Color.RED
         }
 
-        priceText.text = currentPrice.fiatFormat()
+        viewHolder.priceText?.text = currentPrice.fiatFormat()
 
-        balanceText.text = "Balance: ${account.balance} ${account.currency}"
+        viewHolder.balanceText?.text = "Balance: ${account.balance} ${account.currency}"
 
-        val lineChart = vi.chart_product
-        lineChart.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
+        viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 
-        vi.setOnClickListener { onClick(account.product) }
+        outputView?.setOnClickListener { onClick(account.product) }
 
-        return vi
+        return outputView
     }
 }
