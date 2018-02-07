@@ -40,6 +40,9 @@ class PricesFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
 
+        showDarkMode(rootView)
+
+
         listView = rootView.list_products
         this.inflater = inflater
         totalValueText = rootView.txt_home_total_value

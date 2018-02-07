@@ -29,7 +29,8 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var logoutButton: Button
     private lateinit var disclaimerButton: Button
     private lateinit var darkModeCheckBox: CheckBox
-    private lateinit var showConfirmCheckBox: CheckBox
+    private lateinit var showTradeConfirmCheckBox: CheckBox
+    private lateinit var showSendConfirmCheckBox: CheckBox
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -38,7 +39,11 @@ class SettingsFragment : RefreshFragment() {
         logoutButton = rootView.btn_setting_log_out
         disclaimerButton = rootView.btn_setting_show_disclaimer
         darkModeCheckBox = rootView.cb_setting_dark_mode
-        showConfirmCheckBox = rootView.cb_setting_show_confirm
+        showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
+        showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
+
+        showDarkMode(rootView)
+
 
         val prefs = Prefs(activity)
 
@@ -51,9 +56,23 @@ class SettingsFragment : RefreshFragment() {
             activity.finish()
         }
 
-        showConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-            prefs.shouldShowConfirmModal = isChecked
+        showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
+        showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+            prefs.shouldShowTradeConfirmModal = isChecked
         }
+
+        showSendConfirmCheckBox.isChecked = prefs.shouldShowSendConfirmModal
+        showSendConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+            prefs.shouldShowSendConfirmModal = isChecked
+        }
+
+        darkModeCheckBox.isChecked = prefs.isDarkModeOn
+        darkModeCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+            prefs.isDarkModeOn = isChecked
+            showDarkMode()
+        }
+        showDarkMode()
+
 
         return rootView
     }

@@ -204,7 +204,7 @@ class TradeFragment : RefreshFragment() {
             } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
                 toast("Stop is not valid")
             } else {
-                if (prefs.shouldShowConfirmModal) {
+                if (prefs.shouldShowTradeConfirmModal) {
                     GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                         val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                         val price = ticker.price.toDoubleOrNull()
@@ -240,7 +240,7 @@ class TradeFragment : RefreshFragment() {
                         horizontalLayout("Estimated fees:", feeEstimate.fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again").onCheckedChange { _, isChecked ->
                             val prefs = Prefs(activity)
-                            prefs.shouldShowConfirmModal = !isChecked
+                            prefs.shouldShowTradeConfirmModal = !isChecked
                         }
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }

@@ -20,7 +20,13 @@
         android:text="Dark Mode" />
 
     <CheckBox
-        android:id="@+id/cb_setting_show_confirm"
+        android:id="@+id/cb_setting_show_trade_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show confirm button before buy/sell" />
+
+    <CheckBox
+        android:id="@+id/cb_setting_show_send_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Show confirm button before buy/sell" />

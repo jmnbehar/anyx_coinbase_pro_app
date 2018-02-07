@@ -66,6 +66,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_chart, container, false)
 
+        showDarkMode(rootView)
+
         this.inflater = inflater
 
         nameText = rootView.txt_chart_name

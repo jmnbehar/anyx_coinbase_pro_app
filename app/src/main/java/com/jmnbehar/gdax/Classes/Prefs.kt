@@ -18,10 +18,12 @@ class Prefs (context: Context) {
     private val SAVE_PASSPHRASE = "save_passphrase"
     private val ALERTS = "alerts"
     private val AUTOLOGIN = "should_autologin"
-    private val SHOW_CONFIRM = "show_confirm"
+    private val SHOW_TRADE_CONFIRM = "show_trade_confirm"
+    private val SHOW_SEND_CONFIRM = "show_send_confirm"
     private val STASHED_PRODUCTS = "stashed_products"
     private val STASHED_ORDERS = "stashed_orders"
     private val STASHED_FILLS = "stashed_fills"
+    private val DARK_MODE = "dark_mode"
     private val IS_FIRST_TIME = "is_first_time"
 
 
@@ -47,9 +49,17 @@ class Prefs (context: Context) {
         get() = prefs.getBoolean(AUTOLOGIN, true)
         set(value) = prefs.edit().putBoolean(AUTOLOGIN, value).apply()
 
-    var shouldShowConfirmModal: Boolean
-        get() = prefs.getBoolean(SHOW_CONFIRM, true)
-        set(value) = prefs.edit().putBoolean(SHOW_CONFIRM, value).apply()
+    var shouldShowTradeConfirmModal: Boolean
+        get() = prefs.getBoolean(SHOW_TRADE_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOW_TRADE_CONFIRM, value).apply()
+
+    var shouldShowSendConfirmModal: Boolean
+        get() = prefs.getBoolean(SHOW_SEND_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOW_SEND_CONFIRM, value).apply()
+
+    var isDarkModeOn: Boolean
+        get() = prefs.getBoolean(DARK_MODE, false)
+        set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
     var shouldSaveApiInfo: Boolean
         get() = prefs.getBoolean(SAVE_API_INFO, false)

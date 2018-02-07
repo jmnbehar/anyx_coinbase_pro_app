@@ -92,15 +92,21 @@ class SendFragment : RefreshFragment() {
             switchCurrency(Currency.LTC)
         }
 
+        val prefs = Prefs(context)
+
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
             val destination = destinationEditText.text.toString()
-            alert {
-                title = "Send $amount $currency to $destination"
+            if (prefs.shouldShowSendConfirmModal) {
+                alert {
+                    title = "Send $amount $currency to $destination"
 
-                positiveButton("Confirm") { submitSend() }
-                negativeButton("Cancel") { }
-            }.show()
+                    positiveButton("Confirm") { submitSend() }
+                    negativeButton("Cancel") { }
+                }.show()
+            } else {
+                submitSend()
+            }
         }
 
         return rootView
@@ -134,7 +140,7 @@ class SendFragment : RefreshFragment() {
                         }
                         toast (errorString)
                     },
-                    { result -> //success
+                    { _ -> //success
                         toast("success")
                     })
         } else {
