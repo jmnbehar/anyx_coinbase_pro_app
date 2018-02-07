@@ -3,7 +3,6 @@ package com.jmnbehar.gdax.Activities
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.ProgressDialog
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
@@ -265,7 +264,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if ((apiKey != null) && (apiSecret != null)) {
                 GdaxApi.credentials = ApiCredentials(passphrase, apiKey, apiSecret)
                 progressDialog?.show()
-                Account.getAccounts(this, { _ ->
+                GdaxApi.accounts().getAllAccountInfo(this, { _ ->
                     toast("Error!")
                     progressDialog?.dismiss()
                     returnToLogin()

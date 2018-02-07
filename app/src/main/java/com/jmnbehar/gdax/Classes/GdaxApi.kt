@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import android.content.Context
 import android.os.Handler
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
@@ -8,6 +9,8 @@ import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec
 
 sealed class GdaxApi: FuelRouting {
     companion object {
-        lateinit var credentials: ApiCredentials
+        var credentials: ApiCredentials? = null
         val basePath = "https://api.gdax.com"
 
         init {
@@ -30,16 +33,6 @@ sealed class GdaxApi: FuelRouting {
 
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
-//            val fragment = MainActivity.currentFragment!!
-//            when (errorCode) {
-//                GdaxApi.ErrorCode.BadRequest -> { fragment.toast("400 Error: Missing something from the request")}
-//                GdaxApi.ErrorCode.Unauthorized -> { fragment.toast("401 Error: You don't have permission to do that")}
-//                GdaxApi.ErrorCode.Forbidden -> { fragment.toast("403 Error: You don't have permission to do that")}
-//                GdaxApi.ErrorCode.NotFound -> { fragment.toast("404 Error: Content not found")}
-//                GdaxApi.ErrorCode.TooManyRequests -> { fragment.toast("Error! Too many requests in a row")}
-//                GdaxApi.ErrorCode.ServerError -> { fragment.toast("Error! Sorry, Gdax Servers are encountering problems right now")}
-//                GdaxApi.ErrorCode.UnknownError -> { fragment.toast("Error!: ${result.error}")}
-//            }
 
             return when (errorCode) {
                 GdaxApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
@@ -47,7 +40,7 @@ sealed class GdaxApi: FuelRouting {
                 GdaxApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
                 GdaxApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
                 GdaxApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
-                GdaxApi.ErrorCode.ServerError -> { "Error! Sorry, Gdax Servers are encountering problems right now" }
+                GdaxApi.ErrorCode.ServerError -> { "Sorry, Gdax Servers are encountering problems right now" }
                 GdaxApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
                 else -> ""
             }
@@ -62,7 +55,6 @@ sealed class GdaxApi: FuelRouting {
                 Currency.USD -> "my irl address?"
             }
         }
-
     }
 
     enum class ErrorCode(val code: Int) {
@@ -96,11 +88,109 @@ sealed class GdaxApi: FuelRouting {
     override val basePath = Companion.basePath
 
 
-    class accounts() : GdaxApi()
+    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?) : GdaxApi() {
+        fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
+            //TODO: fix for a year or more
+            var granularity = granularity
+            if (granularity == null) {
+                granularity = Candle.granularityForTimespan(timespan)
+            }
+            var currentTimespan = timespan
+            var remainingTimespan = 0
+            if ((timespan / granularity) > 300) {
+                //split into 2 requests
+                currentTimespan = granularity * 300
+                remainingTimespan = timespan - currentTimespan
+            }
+            GdaxApi.candles(productId, currentTimespan, granularity).executeRequest(onFailure) { result ->
+                val gson = Gson()
+                val apiCandles = result.value
+                val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
+                var now = Calendar.getInstance()
+
+                var start = now.timeInSeconds() - timespan - 30
+
+                candles = candles.filter { it.time >=  start }
+
+                candles = candles.reversed()
+                onComplete(candles)
+            }
+        }
+    }
+
+    class accounts() : GdaxApi() {
+        //TODO: move this code out of here
+        fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            Account.list.clear()
+            var prefs = Prefs(context)
+            val time = TimeInSeconds.oneDay
+            var productList: MutableList<Product> = mutableListOf()
+            val stashedProductList = prefs.stashedProducts
+            if (stashedProductList.isNotEmpty()) {
+                for (product in stashedProductList) {
+                    GdaxApi.candles(product.id, time, null).getCandles(onFailure, { candleList ->
+                        product.candles = candleList
+                        product.dayCandles = candleList
+                        product.price = candleList.lastOrNull()?.close  ?: 0.0
+                        productList.add(product)
+                        if (productList.size == stashedProductList.size) {
+                            getAccountsWithProductList(productList, onFailure, onComplete)
+                        }
+                    })
+                }
+            } else {
+                GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
+                    val gson = Gson()
+                    val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
+                    val apiProductList = unfilteredApiProductList.filter { s ->
+                        s.quote_currency == "USD"
+                    }
+                    for (product in apiProductList) {
+                        GdaxApi.candles(product.id, time, null).getCandles(onFailure, { candleList ->
+                            val newProduct = Product(product, candleList)
+                            productList.add(newProduct)
+                            if (productList.size == apiProductList.size) {
+                                prefs.stashedProducts = productList
+                                getAccountsWithProductList(productList, onFailure, onComplete)
+                            }
+                        })
+                    }
+                }
+            }
+        }
+
+        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            if (GdaxApi.credentials == null) {
+                for (product in productList) {
+                    val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
+                    Account.list.add(Account(product, apiAccount))
+                }
+                val fiatString = Currency.USD.toString()
+                val usdAccount = ApiAccount("", fiatString, "0.0", "", "0.0", "")
+                Account.usdAccount = Account(Product.fiatProduct(fiatString), usdAccount)
+                onComplete()
+            } else {
+                this.executeRequest(onFailure) { result ->
+                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                    for (apiAccount in apiAccountList) {
+                        val currency = Currency.fromString(apiAccount.currency)
+                        val relevantProduct = productList.find { p -> p.currency == currency }
+                        if (relevantProduct != null) {
+                            Account.list.add(Account(relevantProduct, apiAccount))
+                        } else if (currency == Currency.USD) {
+                            Account.usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
+                        }
+                    }
+                    onComplete()
+                }
+            }
+        }
+
+    }
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
-    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?) : GdaxApi()
     class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : GdaxApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
@@ -203,15 +293,16 @@ sealed class GdaxApi: FuelRouting {
 
     override val params: List<Pair<String, Any?>>?
         get() {
-            var paramList = mutableListOf<Pair<String, String>>()
+            val paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is candles -> {
                     val utcTimeZone = TimeZone.getTimeZone("UTC")
-                    var now = Calendar.getInstance(utcTimeZone)
-                    var startInt = now.timeInSeconds() - timespan
+                    val now = Calendar.getInstance(utcTimeZone)
+                    val startInt = now.timeInSeconds() - timespan
 
-                    var start = Date(startInt.toLong() * 1000)
+                    val start = Date(startInt.toLong() * 1000)
 
+                    //TODO: this warning
                     val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                     formatter.timeZone = utcTimeZone
 
@@ -253,7 +344,7 @@ sealed class GdaxApi: FuelRouting {
         get() {
             when (this) {
                 is orderLimit -> {
-                    var json = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
+                    val json = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
 
                     json.put("price", "$price")
                     json.put("size", "$size")
@@ -268,7 +359,7 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeSide, TradeType.MARKET, productId)
+                    val json = basicOrderParams(tradeSide, TradeType.MARKET, productId)
 
                     if (funds != null) {
                         json.put("funds", "$funds")
@@ -281,7 +372,7 @@ sealed class GdaxApi: FuelRouting {
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
-                    var json = basicOrderParams(tradeSide, TradeType.STOP, productId)
+                    val json = basicOrderParams(tradeSide, TradeType.STOP, productId)
 
                     json.put("price", "$price")
                     if (funds != null) {
@@ -307,28 +398,30 @@ sealed class GdaxApi: FuelRouting {
 
     override val headers: Map<String, String>?
         get() {
-            var timestamp = (Date().timeInSeconds()).toString()
-            var message = timestamp + method + path + body
-            println("timestamp:")
-            println(timestamp)
+            var headers: MutableMap<String, String> = mutableMapOf()
+            val credentials = credentials
+            if (credentials != null) {
+                var timestamp = (Date().timeInSeconds()).toString()
+                var message = timestamp + method + path + body
+                println("timestamp:")
+                println(timestamp)
 
-            val secretDecoded = Base64.decode(credentials.secret, 0)
+                val secretDecoded = Base64.decode(credentials.secret, 0)
+                val sha256HMAC = Mac.getInstance("HmacSHA256")
+                val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
+                sha256HMAC.init(secretKey)
 
-            val sha256HMAC = Mac.getInstance("HmacSHA256")
-            val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
-            sha256HMAC.init(secretKey)
+                val hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
+                println("hash:")
+                println(hash)
 
-            val hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
-            println("hash:")
-            println(hash)
+                headers = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
 
-            var headers: MutableMap<String, String> = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
-
+            }
 
             if (method == Method.POST) {
                 headers.put("Content-Type", "application/json")
             }
-
             return headers
         }
 

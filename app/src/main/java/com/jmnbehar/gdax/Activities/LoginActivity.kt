@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Activities
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -22,6 +23,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var shouldSavePassphrase = false
     private var skipLogin = false
     private var currentFragment: Fragment? = null
+    var progressDialog: ProgressDialog? = null
+
 
     private fun checkUser() : Boolean {
         if(!skipLogin && shouldSaveApiInfo && shouldSavePassphrase) {
@@ -102,11 +105,13 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    private fun loginWithCredentials(credentials: ApiCredentials) {
+    fun loginWithCredentials(credentials: ApiCredentials?) {
         GdaxApi.credentials = credentials
-        MainActivity.progressDialog?.show()
-        Account.getAccounts(this, { result -> toast("Error!: ${result.error}") }, {
-            MainActivity.progressDialog?.dismiss()
+        progressDialog?.show()
+        GdaxApi.accounts().getAllAccountInfo(this, { result ->
+            toast("Error!: ${result.error}")
+        }, {
+            progressDialog?.dismiss()
             toast("Success! logging in")
             var prefs = Prefs(this)
             prefs.shouldAutologin = true

@@ -62,13 +62,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:gravity="bottom|center_horizontal"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btn_login_new_apikey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create new api key"
+            android:text="New api key"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="93dp" />
 
@@ -76,9 +77,18 @@
             android:id="@+id/btn_login_new_acccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create new GDAX account"
+            android:text="New GDAX account"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="93dp" />
+
+        <Button
+            android:id="@+id/btn_login_skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip login"
+            tools:layout_editor_absoluteX="148dp"
+            tools:layout_editor_absoluteY="93dp" />
+
     </LinearLayout>
 
 </LinearLayout>

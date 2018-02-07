@@ -22,7 +22,6 @@ import se.simbio.encryption.Encryption
  */
 
 class LoginFragment : Fragment()  {
-    lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
 
     private lateinit var apiKeyEditText: EditText
@@ -37,8 +36,6 @@ class LoginFragment : Fragment()  {
 
     private var shouldSaveApiInfo = false
     private var shouldSavePassphrase = false
-    private var skipLogin = false
-
 
     companion object {
         fun newInstance(): LoginFragment {
@@ -56,8 +53,9 @@ class LoginFragment : Fragment()  {
         apiSecretEditText = rootView.etxt_login_secret
         passphraseEditText = rootView.etxt_login_passphrase
         val btnLogin = rootView.btn_login
-        val btnNewAccount = rootView.btn_login_new_acccount
         val btnNewApiKey = rootView.btn_login_new_apikey
+        val btnNewAccount = rootView.btn_login_new_acccount
+        val btnSkipLogin = rootView.btn_login_skip
 
         if(prefs.apiKey != null) {
             apiKey = prefs.apiKey
@@ -115,13 +113,12 @@ class LoginFragment : Fragment()  {
             (activity as LoginActivity).goToFragment(true, newAccountUrl)
         }
 
+        btnSkipLogin.setOnClickListener { _ ->
+            (activity as LoginActivity).loginWithCredentials(null)
+        }
+
         return rootView
     }
-
-    fun goToUrl(string: String) {
-        //do nothing
-    }
-
 
     private fun signIn() {
         val prefs = Prefs(context)
@@ -163,24 +160,9 @@ class LoginFragment : Fragment()  {
         }
         if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)
                 && (apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
-            loginWithCredentials(ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal))
+            (activity as LoginActivity).loginWithCredentials(ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal))
         } else {
             toast("Wrong Passphrase")
         }
     }
-
-    //TODO: move this somewhere, combine with loginActivity
-    private fun loginWithCredentials(credentials: ApiCredentials) {
-        GdaxApi.credentials = credentials
-        MainActivity.progressDialog?.show()
-        Account.getAccounts(context, { result -> toast("Error!: ${result.error}") }, {
-            MainActivity.progressDialog?.dismiss()
-            toast("Success! logging in")
-            val prefs = Prefs(context)
-            prefs.shouldAutologin = true
-            val intent = MainActivity.newIntent(context)
-            startActivity(intent)
-        })
-    }
-
 }

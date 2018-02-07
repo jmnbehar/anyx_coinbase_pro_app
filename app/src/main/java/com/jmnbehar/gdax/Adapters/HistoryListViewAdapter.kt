@@ -83,7 +83,6 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             val index = i - (orders.size + offset)
 
             val fill = fills[index]
-            //TODO: this warning:
             val vi = viewGroup.inflate(R.layout.list_row_fill)
             vi.txt_fill_size.text = fill.size
             vi.txt_fill_price.text = fill.price
