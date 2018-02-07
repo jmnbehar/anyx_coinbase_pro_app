@@ -25,6 +25,7 @@ class Prefs (context: Context) {
     private val STASHED_FILLS = "stashed_fills"
     private val DARK_MODE = "dark_mode"
     private val IS_FIRST_TIME = "is_first_time"
+    private val IS_LOGGED_IN = "is_logged_in"
 
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
@@ -61,6 +62,10 @@ class Prefs (context: Context) {
         get() = prefs.getBoolean(DARK_MODE, false)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
+    var isLoggedIn: Boolean
+        get() = prefs.getBoolean(IS_LOGGED_IN, false)
+        set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
+
     var shouldSaveApiInfo: Boolean
         get() = prefs.getBoolean(SAVE_API_INFO, false)
         set(value) {
@@ -82,7 +87,7 @@ class Prefs (context: Context) {
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
-    fun stashOrders(orderListString: String) {
+    fun stashOrders(orderListString: String?) {
         prefs.edit().putString(STASHED_ORDERS, orderListString).apply()
     }
     fun getStashedOrders(productId: String) : List<ApiOrder> {
@@ -95,7 +100,7 @@ class Prefs (context: Context) {
         }
     }
 
-    fun stashFills(fillListJson: String) {
+    fun stashFills(fillListJson: String?) {
         prefs.edit().putString(STASHED_FILLS, fillListJson).apply()
     }
     fun getStashedFills(productId: String) : List<ApiFill> {

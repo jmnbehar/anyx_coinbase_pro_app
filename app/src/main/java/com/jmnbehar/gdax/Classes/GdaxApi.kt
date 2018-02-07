@@ -135,7 +135,7 @@ sealed class GdaxApi: FuelRouting {
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
                         if (productList.size == stashedProductList.size) {
-                            getAccountsWithProductList(productList, onFailure, onComplete)
+                            getAccountsWithProductList(context, productList, onFailure, onComplete)
                         }
                     })
                 }
@@ -152,7 +152,7 @@ sealed class GdaxApi: FuelRouting {
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
                                 prefs.stashedProducts = productList
-                                getAccountsWithProductList(productList, onFailure, onComplete)
+                                getAccountsWithProductList(context, productList, onFailure, onComplete)
                             }
                         })
                     }
@@ -160,7 +160,7 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
-        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        private fun getAccountsWithProductList(context: Context, productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (GdaxApi.credentials == null) {
                 for (product in productList) {
                     val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
@@ -182,12 +182,15 @@ sealed class GdaxApi: FuelRouting {
                             Account.usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
                         }
                     }
+                    var prefs = Prefs(context)
+                    prefs.isLoggedIn = true
                     onComplete()
                 }
             }
         }
 
     }
+
     class account(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()

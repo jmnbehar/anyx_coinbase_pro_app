@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiOrder>, var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
+class HistoryListViewAdapter(var inflater: LayoutInflater, val isLoggedIn: Boolean, var orders: List<ApiOrder>, var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return orders.size + fills.size + offset
@@ -32,7 +32,6 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
     }
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
-
         if ((i == 0) && (orders.isNotEmpty() || fills.isNotEmpty())) {
             val vi = viewGroup.inflate(R.layout.list_header)
             if (orders.isNotEmpty()) {
@@ -104,7 +103,12 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, var orders: List<ApiO
             return vi
         } else {
             val vi = viewGroup.inflate(R.layout.list_header)
-            vi.txt_header.text = "You have no orders or fills"
+
+            vi.txt_header.text = if (isLoggedIn) {
+                "You have no orders or fills"
+            } else {
+                "Log in to see account history"
+            }
             return vi
         }
 

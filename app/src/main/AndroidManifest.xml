@@ -12,17 +12,20 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Activities.LoginActivity"
+            android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
             android:name=".Activities.OnboardActivity"
+            android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
 
         <activity
             android:name=".Activities.MainActivity"
+            android:screenOrientation="sensorPortrait"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

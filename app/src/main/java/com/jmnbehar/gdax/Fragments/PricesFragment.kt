@@ -40,13 +40,13 @@ class PricesFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
 
-        showDarkMode(rootView)
-
+        val prefs = Prefs(context)
 
         listView = rootView.list_products
         this.inflater = inflater
         totalValueText = rootView.txt_home_total_value
         totalValueLabelText = rootView.txt_home_total_value_label
+
 
         setupSwipeRefresh(rootView)
 
@@ -62,10 +62,16 @@ class PricesFragment : RefreshFragment() {
             MainActivity.goToNavigationId(equivalentMenuItem, activity)
         }
 
-        totalValueText.text = "$${Account.totalBalance.fiatFormat()}"
-        totalValueLabelText.text = "Account total value"
+        val isLoggedIn = prefs.isLoggedIn
+        if (isLoggedIn) {
+            totalValueText.text = "$${Account.totalBalance.fiatFormat()}"
+            totalValueLabelText.text = "Account total value"
+        } else {
+            totalValueText.visibility = View.GONE
+            totalValueLabelText.visibility = View.GONE
+        }
 
-        listView.adapter = ProductListViewAdapter(inflater, selectGroup )
+        listView.adapter = ProductListViewAdapter(inflater, isLoggedIn, selectGroup)
         listView.setHeightBasedOnChildren()
 
         return rootView

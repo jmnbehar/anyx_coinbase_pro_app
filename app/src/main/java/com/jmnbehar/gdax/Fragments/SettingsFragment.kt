@@ -52,6 +52,9 @@ class SettingsFragment : RefreshFragment() {
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.putExtra(Constants.logout, true)
             prefs.shouldAutologin = false
+            prefs.isLoggedIn = false
+            prefs.stashOrders(null)
+            prefs.stashFills(null)
             startActivity(intent)
             activity.finish()
         }

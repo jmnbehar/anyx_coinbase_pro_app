@@ -11,6 +11,7 @@ import android.view.MenuItem
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.Fragments.*
 import com.jmnbehar.gdax.R
+import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -53,6 +54,10 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         setContentView(R.layout.activity_login
         )
       //  nav_view.setNavigationItemSelectedListener(this)
+
+        val nullMessage: CharSequence? = null
+        progressDialog = indeterminateProgressDialog(nullMessage)
+        progressDialog?.dismiss()
 
         prefs = Prefs(this)
 

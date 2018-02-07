@@ -90,6 +90,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account == null) {
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss();
         } else {
+            val prefs = Prefs(activity)
+
             val candles = account.product.candles
             val timeRange = TimeInSeconds.oneDay
             val currency = account.currency
@@ -109,22 +111,37 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setPercentChangeText(price, candles.first().open)
 
             nameText.text = currency.fullName
-            tickerText.text = "$currency wallet"
-            iconView.setImageResource(currency.iconId)
 
-            balanceText.text = "${account.balance.btcFormat()} ${currency}"
-            valueText.text = "$${account.value.fiatFormat()}"
+            if (prefs.isLoggedIn) {
+                tickerText.text = "$currency wallet"
+                iconView.setImageResource(currency.iconId)
+                balanceText.text = "${account.balance.btcFormat()} ${currency}"
+                valueText.text = "$${account.value.fiatFormat()}"
+            } else {
+                tickerText.visibility = View.GONE
+                iconView.visibility = View.GONE
+                balanceText.visibility = View.GONE
+                valueText.visibility = View.GONE
+            }
 
             val buyButton = rootView.btn_chart_buy
             val sellButton = rootView.btn_chart_sell
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+                if (prefs.isLoggedIn) {
+                    MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+                } else {
+                    toast("Log in to buy or sell $currency")
+                }
             }
 
             sellButton.setOnClickListener {
-                MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+                if (prefs.isLoggedIn) {
+                    MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+                } else {
+                    toast("Log in to buy or sell $currency")
+                }
             }
 
             timespanButtonHour.setOnClickListener {
@@ -146,30 +163,32 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 setChartTimespan(TimeInSeconds.fiveYears)
             }
 
-            val prefs = Prefs(activity)
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
             historyList = rootView.list_history
-            historyList.adapter = HistoryListViewAdapter(inflater, stashedOrders, stashedFills,
+            historyList.adapter = HistoryListViewAdapter(inflater, prefs.isLoggedIn, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyList.setHeightBasedOnChildren()
 
-            val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-            GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { orderResult ->
-                prefs.stashOrders(orderResult.value)
-                val gson = Gson()
-                val apiOrderList: List<ApiOrder> = gson.fromJson(orderResult.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                //TODO: instead of filtering these, fix the api requests, this shit is wasteful
-                GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { fillResult ->
-                    prefs.stashFills(fillResult.value)
-                    val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
-                    val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                    historyList.adapter = HistoryListViewAdapter(inflater, filteredOrders, filteredFills,
-                            { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-                    historyList.setHeightBasedOnChildren()
+            if (prefs.isLoggedIn) {
+                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+                GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { orderResult ->
+                    prefs.stashOrders(orderResult.value)
+                    val gson = Gson()
+                    val apiOrderList: List<ApiOrder> = gson.fromJson(orderResult.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+                    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
+                    GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { fillResult ->
+                        prefs.stashFills(fillResult.value)
+                        val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
+                        val filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                        historyList.adapter = HistoryListViewAdapter(inflater, true, filteredOrders, filteredFills,
+                                { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+                        historyList.setHeightBasedOnChildren()
+                    }
                 }
             }
+
         }
         return rootView
     }
@@ -294,33 +313,45 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val onFailure = { result: Result.Failure<String, FuelError> ->
             toast("Error!: ${result.error}")
             println("error!" )}
+        val prefs = Prefs(context)
+        if (prefs.isLoggedIn) {
 
+        }
         account?. let { account ->
-            GdaxApi.account(account.id).executeRequest(onFailure) { result ->
-                val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                val newBalance = apiAccount.balance.toDoubleOrZero()
-                balanceText.text = account.balance.fiatFormat()
-                valueText.text = account.value.fiatFormat()
-                miniRefresh(onFailure) {
-                    account.updateAccount(newBalance, account.product.price)
-                    onComplete()
+            if (prefs.isLoggedIn) {
+                GdaxApi.account(account.id).executeRequest(onFailure) { result ->
+                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                    val newBalance = apiAccount.balance.toDoubleOrZero()
+                    balanceText.text = account.balance.fiatFormat()
+                    valueText.text = account.value.fiatFormat()
+                    miniRefresh(onFailure) {
+                        account.updateAccount(newBalance, account.product.price)
+                        onComplete()
+                    }
                 }
-            }
 
-            var filteredOrders: List<ApiOrder>? = null
-            var filteredFills: List<ApiFill>? = null
-            GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
-                val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                if (filteredOrders != null && filteredFills != null) {
-                    updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                var filteredOrders: List<ApiOrder>? = null
+                var filteredFills: List<ApiFill>? = null
+                GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+                    prefs.stashOrders(result.value)
+                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                    filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+                    if (filteredOrders != null && filteredFills != null) {
+                        updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                    }
                 }
-            }
-            GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
-                val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                if (filteredOrders != null && filteredFills != null) {
-                    updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                    prefs.stashFills(result.value)
+                    val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                    filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                    if (filteredOrders != null && filteredFills != null) {
+                        updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                    }
+                }
+            } else {
+                miniRefresh(onFailure) {
+                    account.updateAccount(0.0, account.product?.price)
+                    onComplete()
                 }
             }
         }
