@@ -48,10 +48,11 @@ sealed class GdaxApi: FuelRouting {
 
         fun developerAddress(currency: Currency) : String {
             return when (currency) {
-                Currency.BTC -> "1xxxxx"
-                Currency.ETH -> "0x3333"
-                Currency.BCH -> "1xxxxx"
-                Currency.LTC -> "0xabcd"
+                //paper wallets: (Messiah)
+                Currency.BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
+                Currency.ETH -> "0xE2A61A7f99a1331CD9721D9F23c359E827100B7D"
+                Currency.BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
+                Currency.LTC -> "LR4VR5QeXGAwJwCRGrvxTUk4VViTz1sEJP"
                 Currency.USD -> "my irl address?"
             }
         }
