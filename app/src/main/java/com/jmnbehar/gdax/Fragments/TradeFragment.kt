@@ -24,6 +24,7 @@ import org.jetbrains.anko.support.v4.toast
  */
 class TradeFragment : RefreshFragment() {
 
+    val DEV_FEE_PERCENTAGE : Double = 0.001
 
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
@@ -248,7 +249,7 @@ class TradeFragment : RefreshFragment() {
             positiveButton("Confirm") {
                 submitOrder(amount, limit, timeInForce, cancelAfter)
                 if (feeEstimate > 0.0) {
-                    var devFee = amount * 0.05
+                    var devFee = cryptoTotal * DEV_FEE_PERCENTAGE
                     if (devFee > currency.minSendAmount) {
                         payFee(devFee)
                     }
@@ -357,7 +358,7 @@ class TradeFragment : RefreshFragment() {
             }
         }
         val gdaxFee = amount * account.currency.feePercentage
-        val devFee  = amount * 0.05
+        val devFee  = amount * DEV_FEE_PERCENTAGE
         return (devFee + gdaxFee)
     }
 
