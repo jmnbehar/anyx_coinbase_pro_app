@@ -152,9 +152,15 @@ class TradeFragment : RefreshFragment() {
 
         radioButtonBuy.setOnClickListener {
             switchTradeType(TradeSide.BUY)
+            if (tradeType != TradeType.LIMIT) {
+                amountEditText.setText("")
+            }
         }
         radioButtonSell.setOnClickListener {
             switchTradeType(TradeSide.SELL)
+            if (tradeType != TradeType.LIMIT) {
+                amountEditText.setText("")
+            }
         }
 
         radioButtonMarket.setOnClickListener {
@@ -270,17 +276,16 @@ class TradeFragment : RefreshFragment() {
             }
             positiveButton("Confirm") {
                 //TODO: actually submit order dont just pay fee thats dumb wut r u doin sdjkdfjkhdsk
-                //submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
+                submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
 
 
-
-                if (devFee > 0.0) {
-                    if (devFee > account.currency.minSendAmount) {
-                        payFee(devFee)
-                    } else {
-                        //stash fee for later
-                    }
-                }
+//                if (devFee > 0.0) {
+//                    if (devFee > account.currency.minSendAmount) {
+//                        payFee(devFee)
+//                    } else {
+//                        //stash fee for later
+//                    }
+//                }
             }
             negativeButton("Cancel") { }
         }.show()
