@@ -123,7 +123,6 @@ class SendFragment : RefreshFragment() {
                     { result -> //failure
                         val response = result.error.response.data
 
-
                         var i = 0
                         val len = response.size
                         while (i < len) {

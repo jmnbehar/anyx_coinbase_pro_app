@@ -175,14 +175,39 @@ class TradeFragment : RefreshFragment() {
         }
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+
         submitOrderButton.setOnClickListener {
             val prefs = Prefs(activity)
 
-            val amount = amountEditText.text.toString().toDoubleOrZero()
+            var amount = amountEditText.text.toString().toDoubleOrZero()
             val limit = limitEditText.text.toString().toDoubleOrZero()
 
             var timeInForce: GdaxApi.TimeInForce? = null
             var cancelAfter: String? = null
+
+            val cryptoTotal = totalInCrypto(amount, limit)
+            val dollarTotal = totalInDollars(amount, limit)
+            val feeEstimate = feeEstimate(dollarTotal, limit)
+            val devFee: Double
+
+            if (feeEstimate > 0.0) {
+                //half fees for limit orders that are fuckin up? consider this later
+                devFee = cryptoTotal * DEV_FEE_PERCENTAGE
+
+                //TODO: change this to an if, but only if this holds true after testing
+                when (tradeSide) {
+                //always deduct the amount the user specified, even if its not all bought/sold
+                    TradeSide.SELL -> {
+                        amount -= devFee
+                        //don't sell the devFee because it will be deducted by sending fees
+                    }
+                    TradeSide.BUY -> {
+                        //should never need to change amount here, just buy it all and then deduct a bit
+                    }
+                }
+            } else {
+                devFee = 0.0
+            }
 
             if (advancedOptionsCheckBox.isChecked) {
                 when (tradeType) {
@@ -211,11 +236,11 @@ class TradeFragment : RefreshFragment() {
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {
                             account.updateAccount(price = price)
-                            confirmPopup(price, amount, limit, timeInForce, cancelAfter)
+                            confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
                         }
                     }
                 } else {
-                    submitOrder(amount, limit, timeInForce, cancelAfter)
+                    submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
                 }
             }
         }
@@ -223,11 +248,8 @@ class TradeFragment : RefreshFragment() {
         return rootView
     }
 
-    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?) {
-        val cryptoTotal = totalInCrypto(amount, limit)
-        val dollarTotal = totalInDollars(amount, limit)
-        val feeEstimate = feeEstimate(dollarTotal, limit)
-        val currency = account.currency
+    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,
+                             cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         alert {
             title = "Alert"
             customView {
@@ -247,11 +269,16 @@ class TradeFragment : RefreshFragment() {
                 }
             }
             positiveButton("Confirm") {
-                submitOrder(amount, limit, timeInForce, cancelAfter)
-                if (feeEstimate > 0.0) {
-                    var devFee = cryptoTotal * DEV_FEE_PERCENTAGE
-                    if (devFee > currency.minSendAmount) {
+                //TODO: actually submit order dont just pay fee thats dumb wut r u doin sdjkdfjkhdsk
+                //submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
+
+
+
+                if (devFee > 0.0) {
+                    if (devFee > account.currency.minSendAmount) {
                         payFee(devFee)
+                    } else {
+                        //stash fee for later
                     }
                 }
             }
@@ -259,7 +286,7 @@ class TradeFragment : RefreshFragment() {
         }.show()
     }
 
-    private fun submitOrder(amount: Double, limitPrice: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
+    private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
             when (errorCode) {
@@ -271,6 +298,14 @@ class TradeFragment : RefreshFragment() {
         fun onComplete(result: Result<ByteArray, FuelError>) {
             toast("success")
             activity.onBackPressed()
+
+            if (devFee > 0.0) {
+                if (devFee > account.currency.minSendAmount) {
+                    payFee(devFee)
+                } else {
+                    //stash fee for later
+                }
+            }
         }
 
         val productId = account.product.id
@@ -298,8 +333,12 @@ class TradeFragment : RefreshFragment() {
         val currency = account.currency
         val destination = GdaxApi.developerAddress(currency)
         GdaxApi.send(amount, currency, destination).executePost(
-                { _ -> /*  fail silently   */ },
-                { _ -> /* succeed silently */ })
+                { response -> /*  fail silently   */
+                    println("failure")
+                },
+                { response -> /* succeed silently */
+                    println("success")
+                })
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {

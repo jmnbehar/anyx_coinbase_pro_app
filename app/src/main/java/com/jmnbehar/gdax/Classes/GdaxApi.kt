@@ -391,7 +391,7 @@ sealed class GdaxApi: FuelRouting {
                 is send -> {
                     val json = JSONObject()
 
-                    json.put("amount", amount)
+                    json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())
                     json.put("crypto_address", cryptoAddress)
                     return json.toString()
