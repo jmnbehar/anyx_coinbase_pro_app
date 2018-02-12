@@ -26,6 +26,7 @@ class Prefs (context: Context) {
     private val DARK_MODE = "dark_mode"
     private val IS_FIRST_TIME = "is_first_time"
     private val IS_LOGGED_IN = "is_logged_in"
+    private val UNPAID_FEES = "unpaid_fees_"
 
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
@@ -86,6 +87,22 @@ class Prefs (context: Context) {
     var stashedProducts: List<Product>
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
+
+    fun addUnpaidFee(unpaidFee: Double, currency: Currency): Boolean {
+        /* Keeps track of unpaid fees, returns true if unpaid fees total over the minimum fee.
+         * If total unpaid fees are over the minimum send amount, send only the minimum send
+         * amount to keep things consistant and then reset unpaid fees to 0.0
+         */
+        var totalUnpaidFees = prefs.getFloat(UNPAID_FEES + currency.toString(), 0.0f)
+        totalUnpaidFees += unpaidFee.toFloat()
+        if (totalUnpaidFees > currency.minSendAmount) {
+            prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
+            return true
+        } else {
+            prefs.edit().putFloat(UNPAID_FEES + currency.toString(), totalUnpaidFees).apply()
+            return false
+        }
+    }
 
     fun stashOrders(orderListString: String?) {
         prefs.edit().putString(STASHED_ORDERS, orderListString).apply()

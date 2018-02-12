@@ -42,7 +42,7 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
             viewHolder.productNameText = outputView.txt_alert_product
             viewHolder.triggerPriceText = outputView.txt_alert_value
 
-            outputView?.tag = viewHolder
+            outputView.tag = viewHolder
 
         } else {
             viewHolder = convertView.tag as ViewHolder

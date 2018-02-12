@@ -305,10 +305,11 @@ class TradeFragment : RefreshFragment() {
             activity.onBackPressed()
 
             if (devFee > 0.0) {
+                val prefs = Prefs(context)
                 if (devFee > account.currency.minSendAmount) {
                     payFee(devFee)
-                } else {
-                    //stash fee for later
+                } else if (prefs.addUnpaidFee(devFee, account.currency)) {
+                    payFee(account.currency.minSendAmount)
                 }
             }
         }
@@ -338,10 +339,10 @@ class TradeFragment : RefreshFragment() {
         val currency = account.currency
         val destination = GdaxApi.developerAddress(currency)
         GdaxApi.send(amount, currency, destination).executePost(
-                { response -> /*  fail silently   */
+                { _ -> /*  fail silently   */
                     println("failure")
                 },
-                { response -> /* succeed silently */
+                { _ -> /* succeed silently */
                     println("success")
                 })
     }

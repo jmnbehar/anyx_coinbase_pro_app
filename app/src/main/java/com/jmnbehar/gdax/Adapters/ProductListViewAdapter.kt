@@ -55,7 +55,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val isLoggedIn: Bool
             viewHolder.productIcon = vi.img_product_icon
             viewHolder.lineChart = vi.chart_product
 
-            vi?.tag = viewHolder
+            vi.tag = viewHolder
             outputView = vi
         } else {
             viewHolder = convertView.tag as ViewHolder
