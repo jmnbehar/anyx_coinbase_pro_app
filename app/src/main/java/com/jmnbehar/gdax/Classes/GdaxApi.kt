@@ -50,9 +50,9 @@ sealed class GdaxApi: FuelRouting {
             return when (currency) {
                 //paper wallets: (Messiah)
                 Currency.BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-                Currency.ETH -> "0xE2A61A7f99a1331CD9721D9F23c359E827100B7D"
+                Currency.ETH -> "0xAA75018336e91f3b621205b8cbdf020304052b5a"
                 Currency.BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-                Currency.LTC -> "LR4VR5QeXGAwJwCRGrvxTUk4VViTz1sEJP"
+                Currency.LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
                 Currency.USD -> "my irl address?"
             }
         }
