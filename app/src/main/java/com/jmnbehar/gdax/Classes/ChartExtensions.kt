@@ -93,6 +93,7 @@ class PriceChart : LineChart {
         setDrawBorders(false)
         var noDescription = Description()
         noDescription.text = ""
+        description = noDescription
         this.defaultDragDirection = defaultDragDirection
         when (defaultDragDirection) {
             DefaultDragDirection.Horizontal -> onSideDrag   = onDefaultDrag
@@ -103,6 +104,7 @@ class PriceChart : LineChart {
         legend.isEnabled = false
         xAxis.setDrawGridLines(false)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.setDrawLabels(false)
 
         axisLeft.showOnlyMinMaxValues = true
         axisLeft.setDrawGridLines(false)
@@ -138,15 +140,31 @@ class PriceChart : LineChart {
         dataSet.lineWidth = 2.toFloat()
         dataSet.setDrawFilled(true)
         dataSet.fillColor = color
+        dataSet.setDrawValues(false)
 
         val open = candles.firstOrNull()?.close?.toFloat()
         if (open != null) {
             axisLeft.showSpecificLabels(floatArrayOf(open), false)
         }
 
+
+        //TODO: center description
+        description.textSize = 18.0f
+//        description.setPosition(center.x, top.toFloat())
+        description.text = when (timeRange) {
+            TimeInSeconds.oneHour -> "1 hour"
+            TimeInSeconds.oneDay -> "24 hours"
+            TimeInSeconds.oneWeek -> "7 days"
+            TimeInSeconds.oneMonth-> "1 month"
+            TimeInSeconds.oneYear-> "1 year"
+            else -> ""
+        } + "                              "
+
+        description.isEnabled = true
+
         //TODO: fill in missing entries
-        val dates = candles.map { c -> c.time }.toDoubleArray()
-        xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
+//        val dates = candles.map { c -> c.time }.toDoubleArray()
+//        xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
         dataSet.setDrawCircles(false)
         val lineData = LineData(dataSet)
         this.data = lineData
@@ -156,9 +174,9 @@ class PriceChart : LineChart {
 }
 
 
-class XAxisDateFormatter(private val values: DoubleArray, var timeRange: Int) : IAxisValueFormatter {
-    override fun getFormattedValue(value: Float, axis: AxisBase): String {
-        val dateDouble = values[value.toInt()]
-        return dateDouble.toStringWithTimeRange(timeRange)
-    }
-}
+//class XAxisDateFormatter(private val values: DoubleArray, var timeRange: Int) : IAxisValueFormatter {
+//    override fun getFormattedValue(value: Float, axis: AxisBase): String {
+//        val dateDouble = values[value.toInt()]
+//        return dateDouble.toStringWithTimeRange(timeRange)
+//    }
+//}

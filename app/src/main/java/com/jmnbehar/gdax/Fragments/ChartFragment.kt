@@ -209,7 +209,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun setChartTimespan(timespan: Int) {
         chartTimeSpan = timespan
-        miniRefresh({ }, { })
+        MainActivity.progressDialog?.show()
+        miniRefresh({
+            toast("Error updating chart time")
+            MainActivity.progressDialog?.dismiss()
+        }, {
+            MainActivity.progressDialog?.dismiss()
+        })
     }
     private fun setPercentChangeText(price: Double, open: Double) {
         val change = price - open
@@ -276,7 +282,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceText.text = entry.y.toDouble().fiatFormat()
         account?. let { account ->
             val candle = account.product.candles[entry.x.toInt()]
-            percentChangeText.text = candle.time.toStringWithTimeRange(TimeInSeconds.oneDay)
+            percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
             percentChangeText.textColor = Color.BLACK
         }
     }
@@ -379,7 +385,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                     setPercentChangeText(account.product.price, account.product.candles.first().open)
 
-                    lineChart.addCandles(account.product.candles, account.currency, TimeInSeconds.oneDay)
+                    lineChart.addCandles(account.product.candles, account.currency, chartTimeSpan)
                     onComplete()
                 }
             })

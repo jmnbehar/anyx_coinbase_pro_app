@@ -24,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec
 
 sealed class GdaxApi: FuelRouting {
     companion object {
+        //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
         val basePath = "https://api.gdax.com"
 
@@ -121,7 +122,6 @@ sealed class GdaxApi: FuelRouting {
     }
 
     class accounts() : GdaxApi() {
-        //TODO: move this code out of here
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
             var prefs = Prefs(context)

@@ -162,10 +162,15 @@ class OnboardActivity : AppCompatActivity() {
      */
     class PlaceholderFragment : Fragment() {
 
+        val pageStrings: Array<String> = arrayOf("Hello and welcome to my Gdax App! Its in early alpha so I'm sure lots of stuff is broken still",
+                "Theres nothing on this page go to the next one",
+                "You need a Gdax API key to use this app. I'll add instructions later, but my advice is to log into gdax in a browser and make a new api key and copy the info over." +
+                        "More updates to come...")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
-            rootView.section_label.text = "jjkkj"
+//            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
+            rootView.section_label.text = pageStrings[arguments.getInt(ARG_SECTION_NUMBER)]
             return rootView
         }
 

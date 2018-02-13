@@ -191,13 +191,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         .beginTransaction()
                         .add(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
-                        .commit()
+                        .commitAllowingStateLoss()
             } else {
                 Companion.fragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container, fragment, tag)
                         .addToBackStack(tag)
-                        .commit()
+                        .commitAllowingStateLoss()
             }
         }
     }

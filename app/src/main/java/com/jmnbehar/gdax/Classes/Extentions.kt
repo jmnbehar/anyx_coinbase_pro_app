@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import android.content.Context
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -68,18 +69,19 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
 }
 
 fun Double.toStringWithTimeRange(timeRange: Int) : String {
+    val locale = Locale.getDefault()
     val formatter = when (timeRange) {
-        TimeInSeconds.oneDay -> SimpleDateFormat("h:mma")
-        TimeInSeconds.oneWeek -> SimpleDateFormat("EEE")
-        TimeInSeconds.oneMonth -> SimpleDateFormat("M/d")
-    // TimeInSeconds.oneYear -> DateTimeFormatter.ofPattern("LLL")
+        TimeInSeconds.oneHour -> SimpleDateFormat("h:mma", locale)
+        TimeInSeconds.oneDay -> SimpleDateFormat("h:mma M/d", locale)
+        TimeInSeconds.oneWeek -> SimpleDateFormat("h:mma M/d", locale)
+        TimeInSeconds.oneMonth -> SimpleDateFormat("h:mma M/d", locale)
+        TimeInSeconds.oneYear -> SimpleDateFormat("h:mma M/d/YYYY", locale)
     // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
-        else -> SimpleDateFormat("h:mma")
+        else -> SimpleDateFormat("h:mma M/d", locale)
     }
     val itemLong = (this * 1000).toLong()
     val itemDate = Date(itemLong)
     return formatter.format(itemDate)
-//    return Instant.ofEpochSecond(dateLong).atZone(ZoneId.systemDefault()).toLocalDateTime().format(formatter)
 }
 
 fun Calendar.timeInSeconds() : Int {
