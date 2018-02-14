@@ -170,7 +170,7 @@ class OnboardActivity : AppCompatActivity() {
                                   savedInstanceState: Bundle?): View? {
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
-            rootView.section_label.text = pageStrings[arguments.getInt(ARG_SECTION_NUMBER)]
+            rootView.section_label.text = pageStrings[arguments.getInt(ARG_SECTION_NUMBER) - 1]
             return rootView
         }
 

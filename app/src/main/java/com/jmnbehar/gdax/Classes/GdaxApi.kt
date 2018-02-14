@@ -89,9 +89,9 @@ sealed class GdaxApi: FuelRouting {
 
     override val basePath = Companion.basePath
 
-
     class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
+            //TODO: add bar chart to show volume
             //TODO: fix for a year or more
             var granularity = granularity
             if (granularity == null) {
@@ -404,12 +404,12 @@ sealed class GdaxApi: FuelRouting {
         get() {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
+            //TODO: shuffle how creds are hashed
             if (credentials != null) {
                 var timestamp = (Date().timeInSeconds()).toString()
                 var message = timestamp + method + path + body
                 println("timestamp:")
                 println(timestamp)
-
                 val secretDecoded = Base64.decode(credentials.secret, 0)
                 val sha256HMAC = Mac.getInstance("HmacSHA256")
                 val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
