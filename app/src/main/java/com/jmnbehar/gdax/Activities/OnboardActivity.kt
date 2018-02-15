@@ -163,9 +163,9 @@ class OnboardActivity : AppCompatActivity() {
     class PlaceholderFragment : Fragment() {
 
         val pageStrings: Array<String> = arrayOf("Hello and welcome to my Gdax App! Its in early alpha so I'm sure lots of stuff is broken still",
-                "Theres nothing on this page go to the next one",
+                "Heads up: This app charges a 0.1% fee for taker orders (Generally just Market Orders)",
                 "You need a Gdax API key to use this app. I'll add instructions later, but my advice is to log into gdax in a browser and make a new api key and copy the info over." +
-                        "More updates to come...")
+                        "\nMore updates to come...")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
