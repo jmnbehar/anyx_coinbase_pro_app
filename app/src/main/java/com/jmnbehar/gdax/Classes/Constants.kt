@@ -13,27 +13,27 @@ object Constants {
 
 
 object TimeInSeconds {
-    val halfMinute = 30
-    val oneMinute = 60
-    val fiveMinutes = 300
-    val fifteenMinutes = 900
-    val thirtyMinutes = 1800
-    val halfHour = 1800
-    val oneHour = 3600
-    val sixHours = 21600
-    val oneDay = 86400
-    val oneWeek = 604800
-    val twoWeeks = 1209600
-    val oneMonth = 2592000
-    val oneYear = 31622400
-    val fiveYears = 158112000
+    const val halfMinute: Long = 30
+    const val oneMinute: Long = 60
+    const val fiveMinutes: Long = 300
+    const val fifteenMinutes: Long = 900
+    const val thirtyMinutes: Long = 1800
+    const val halfHour: Long = 1800
+    const val oneHour: Long = 3600
+    const val sixHours: Long = 21600
+    const val oneDay: Long = 86400
+    const val oneWeek: Long = 604800
+    const val twoWeeks: Long = 1209600
+    const val oneMonth: Long = 2592000
+    const val oneYear: Long = 31622400
+    const val fiveYears: Long = 158112000
 }
 
 object Granularity {
-    val oneMinute = 60
-    val fiveMinutes = 300
-    val fifteenMinutes = 900
-    val oneHour = 3600
-    val sixHours = 21600
-    val oneDay = 86400
+    const val oneMinute: Long = 60
+    const val fiveMinutes: Long = 300
+    const val fifteenMinutes: Long = 900
+    const val oneHour: Long = 3600
+    const val sixHours: Long = 21600
+    const val oneDay: Long = 86400
 }

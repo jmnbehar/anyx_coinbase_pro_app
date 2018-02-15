@@ -68,7 +68,7 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
     return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
 }
 
-fun Double.toStringWithTimeRange(timeRange: Int) : String {
+fun Double.toStringWithTimeRange(timeRange: Long) : String {
     val locale = Locale.getDefault()
     val formatter = when (timeRange) {
         TimeInSeconds.oneHour -> SimpleDateFormat("h:mma", locale)
@@ -76,23 +76,22 @@ fun Double.toStringWithTimeRange(timeRange: Int) : String {
         TimeInSeconds.oneWeek -> SimpleDateFormat("h:mma M/d", locale)
         TimeInSeconds.oneMonth -> SimpleDateFormat("h:mma M/d", locale)
         TimeInSeconds.oneYear -> SimpleDateFormat("M/d/YYYY", locale)
-    // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
-        else -> SimpleDateFormat("h:mma M/d", locale)
+        else -> SimpleDateFormat("M/d/YYYY", locale) //This is most likely all
     }
     val itemLong = (this * 1000).toLong()
     val itemDate = Date(itemLong)
     return formatter.format(itemDate)
 }
 
-fun Calendar.timeInSeconds() : Int {
+fun Calendar.timeInSeconds() : Long {
     val timeInMillis = this.timeInMillis
-    return (timeInMillis / 1000).toInt()
+    return (timeInMillis / 1000)
 }
 
-fun Date.timeInSeconds() : Int {
+fun Date.timeInSeconds() : Long {
     val floatMillis = this.time
     val floatSeconds = floatMillis / 1000
-    return floatSeconds.toInt()
+    return floatSeconds
 }
 
 /**

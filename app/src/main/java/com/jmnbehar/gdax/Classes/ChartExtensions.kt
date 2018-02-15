@@ -88,7 +88,7 @@ class PriceChart : LineChart {
         }
     }
 
-    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Int, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Long, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         var noDescription = Description()
@@ -123,7 +123,7 @@ class PriceChart : LineChart {
         addCandles(candles, currency, timeRange)
     }
 
-    fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Int) {
+    fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Long) {
         val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
 
         val dataSet = LineDataSet(entries, "Chart")

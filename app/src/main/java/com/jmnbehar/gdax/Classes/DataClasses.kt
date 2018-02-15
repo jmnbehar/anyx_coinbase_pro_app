@@ -123,7 +123,7 @@ data class Candle(
 
      companion object {
 
-         fun granularityForTimespan(timespan: Int) : Int {
+         fun granularityForTimespan(timespan: Long) : Long {
              return when (timespan) {
                  TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
                  TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
