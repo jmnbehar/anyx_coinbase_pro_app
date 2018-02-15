@@ -160,7 +160,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 setChartTimespan(TimeInSeconds.oneYear)
             }
             timespanButtonAll.setOnClickListener {
-                setChartTimespan(TimeInSeconds.fiveYears)
+                //TODO: fix this
+                setChartTimespan(TimeInSeconds.oneYear)
             }
 
             val stashedFills = prefs.getStashedFills(account.product.id)

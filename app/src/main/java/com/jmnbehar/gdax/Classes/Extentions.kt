@@ -75,7 +75,7 @@ fun Double.toStringWithTimeRange(timeRange: Int) : String {
         TimeInSeconds.oneDay -> SimpleDateFormat("h:mma M/d", locale)
         TimeInSeconds.oneWeek -> SimpleDateFormat("h:mma M/d", locale)
         TimeInSeconds.oneMonth -> SimpleDateFormat("h:mma M/d", locale)
-        TimeInSeconds.oneYear -> SimpleDateFormat("h:mma M/d/YYYY", locale)
+        TimeInSeconds.oneYear -> SimpleDateFormat("M/d/YYYY", locale)
     // TimeInSeconds.all -> DateTimeFormatter.ofPattern("M/d")
         else -> SimpleDateFormat("h:mma M/d", locale)
     }

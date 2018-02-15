@@ -85,38 +85,52 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
-    //TODO: add pagination cursor stuff
-
     override val basePath = Companion.basePath
 
-    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?) : GdaxApi() {
+    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?, var startOffset: Int) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
-            //TODO: add bar chart to show volume
-            //TODO: fix for a year or more
             var granularity = granularity
             if (granularity == null) {
                 granularity = Candle.granularityForTimespan(timespan)
             }
-            var currentTimespan = timespan
-            var remainingTimespan = 0
-            if ((timespan / granularity) > 300) {
-                //split into 2 requests
-                currentTimespan = granularity * 300
-                remainingTimespan = timespan - currentTimespan
-            }
-            GdaxApi.candles(productId, currentTimespan, granularity).executeRequest(onFailure) { result ->
-                val gson = Gson()
-                val apiCandles = result.value
-                val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-                var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
-                var now = Calendar.getInstance()
+            var currentTimespan: Int
+            var coveredTimespan = 0
+            var nextCoveredTimespan = 0
+            var remainingTimespan = timespan
+            var pages = 1
+            var pagesReceived = 0
 
-                var start = now.timeInSeconds() - timespan - 30
+            while (remainingTimespan > 0) {
+                coveredTimespan = nextCoveredTimespan
+                if ((remainingTimespan / granularity) > 300) {
+                    //split into 2 requests
+                    currentTimespan = granularity * 300
+                    remainingTimespan = timespan - currentTimespan
+                    nextCoveredTimespan = coveredTimespan + currentTimespan
+                    pages++
+                } else {
+                    currentTimespan = remainingTimespan
+                    remainingTimespan = 0
+                }
+                var allCandles = mutableListOf<Candle>()
+                GdaxApi.candles(productId, currentTimespan, granularity, coveredTimespan).executeRequest(onFailure) { result ->
+                    pagesReceived ++
+                    val gson = Gson()
+                    val apiCandles = result.value
+                    val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                    var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
+                    var now = Calendar.getInstance()
 
-                candles = candles.filter { it.time >=  start }
+                    var start = now.timeInSeconds() - timespan - 30
 
-                candles = candles.reversed()
-                onComplete(candles)
+                    candles = candles.filter { it.time >=  start }
+
+                    candles = candles.reversed()
+                    allCandles.addAll(candles)
+                    if (pagesReceived == pages) {
+                        onComplete(allCandles)
+                    }
+                }
             }
         }
     }
@@ -130,7 +144,7 @@ sealed class GdaxApi: FuelRouting {
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    GdaxApi.candles(product.id, time, null).getCandles(onFailure, { candleList ->
+                    GdaxApi.candles(product.id, time, null, 0).getCandles(onFailure, { candleList ->
                         product.candles = candleList
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
@@ -148,7 +162,7 @@ sealed class GdaxApi: FuelRouting {
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        GdaxApi.candles(product.id, time, null).getCandles(onFailure, { candleList ->
+                        GdaxApi.candles(product.id, time, null, 0).getCandles(onFailure, { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
@@ -302,7 +316,7 @@ sealed class GdaxApi: FuelRouting {
                 is candles -> {
                     val utcTimeZone = TimeZone.getTimeZone("UTC")
                     val now = Calendar.getInstance(utcTimeZone)
-                    val startInt = now.timeInSeconds() - timespan
+                    val startInt = now.timeInSeconds() - timespan + startOffset
 
                     val start = Date(startInt.toLong() * 1000)
 
@@ -404,12 +418,12 @@ sealed class GdaxApi: FuelRouting {
         get() {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
-            //TODO: shuffle how creds are hashed
             if (credentials != null) {
                 var timestamp = (Date().timeInSeconds()).toString()
                 var message = timestamp + method + path + body
                 println("timestamp:")
                 println(timestamp)
+
                 val secretDecoded = Base64.decode(credentials.secret, 0)
                 val sha256HMAC = Mac.getInstance("HmacSHA256")
                 val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")

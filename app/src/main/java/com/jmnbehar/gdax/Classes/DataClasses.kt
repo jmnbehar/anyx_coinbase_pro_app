@@ -132,7 +132,8 @@ data class Candle(
                  TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
                  TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
                  TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
-                 else -> TimeInSeconds.fiveMinutes
+                 TimeInSeconds.oneYear -> TimeInSeconds.oneDay
+                 else -> TimeInSeconds.oneDay
              }
          }
 

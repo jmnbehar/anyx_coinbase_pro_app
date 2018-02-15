@@ -55,7 +55,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             product.candlesTimespan = timespan
         }
         if (nextCandleTime < nowInSeconds) {
-            GdaxApi.candles(product.id, timespan, null).getCandles(onFailure, { candleList ->
+            GdaxApi.candles(product.id, timespan, null, 0).getCandles(onFailure, { candleList ->
                 val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
                 val didGetNewCandle = (lastCandleTime != newLastCandleTime)
                 if (didGetNewCandle) {
