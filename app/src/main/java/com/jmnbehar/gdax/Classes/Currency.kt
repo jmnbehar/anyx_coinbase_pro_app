@@ -2,6 +2,7 @@ package com.jmnbehar.gdax.Classes
 
 import com.jmnbehar.gdax.Fragments.TradeFragment
 import com.jmnbehar.gdax.R
+import java.util.*
 
 /**
  * Created by jmnbehar on 1/19/2018.
@@ -68,6 +69,24 @@ enum class Currency {
             Currency.BCH -> .001
             Currency.LTC -> .1
             else -> 100.0
+        }
+
+    private val startDate : Date
+        get() = when (this) {
+            Currency.BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+            Currency.ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).time
+            Currency.BCH -> GregorianCalendar(2017, Calendar.JULY, 1).time
+            Currency.LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+            else         -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+        }
+
+    val lifetimeInSeconds : Long
+        get() {
+            val utcTimeZone = TimeZone.getTimeZone("UTC")
+            val now = Calendar.getInstance(utcTimeZone)
+            val nowTime = now.timeInSeconds()
+            val startTime = startDate.time / 1000
+            return now.timeInSeconds() - startTime
         }
 
     companion object {

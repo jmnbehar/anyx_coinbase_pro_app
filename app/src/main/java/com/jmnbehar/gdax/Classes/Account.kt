@@ -41,12 +41,12 @@ class Account(val product: Product, apiAccount: ApiAccount) {
     }
 
     //TODO: move this code to product?
-    fun updateCandles(timespan: Int, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Long, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         var now = Calendar.getInstance()
         var longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
         val longAgoInSeconds = longAgo.timeInSeconds()
-        val lastCandleTime = product.candles.lastOrNull()?.time?.toInt() ?: longAgoInSeconds
+        val lastCandleTime = product.candles.lastOrNull()?.time?.toLong() ?: longAgoInSeconds
         var nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
         val nowInSeconds = now.timeInSeconds()
 

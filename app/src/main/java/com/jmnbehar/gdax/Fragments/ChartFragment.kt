@@ -161,7 +161,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             timespanButtonAll.setOnClickListener {
                 //TODO: fix this
-                setChartTimespan(TimeInSeconds.oneYear)
+                setChartTimespan(currency.lifetimeInSeconds)
             }
 
             val stashedFills = prefs.getStashedFills(account.product.id)
@@ -208,7 +208,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPause()
     }
 
-    private fun setChartTimespan(timespan: Int) {
+    private fun setChartTimespan(timespan: Long) {
         chartTimeSpan = timespan
         MainActivity.progressDialog?.show()
         miniRefresh({

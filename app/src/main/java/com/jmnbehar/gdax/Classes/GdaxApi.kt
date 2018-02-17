@@ -87,16 +87,16 @@ sealed class GdaxApi: FuelRouting {
 
     override val basePath = Companion.basePath
 
-    class candles(val productId: String, val timespan: Int = TimeInSeconds.oneDay, var granularity: Int?, var startOffset: Int) : GdaxApi() {
+    class candles(val productId: String, val timespan: Long = TimeInSeconds.oneDay, var granularity: Long?, var startOffset: Long) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var granularity = granularity
             if (granularity == null) {
                 granularity = Candle.granularityForTimespan(timespan)
             }
-            var currentTimespan: Int
-            var coveredTimespan = 0
-            var nextCoveredTimespan = 0
-            var remainingTimespan = timespan
+            var currentTimespan: Long
+            var coveredTimespan: Long = 0
+            var nextCoveredTimespan: Long = 0
+            var remainingTimespan: Long = timespan.toLong()
             var pages = 1
             var pagesReceived = 0
 
@@ -105,7 +105,7 @@ sealed class GdaxApi: FuelRouting {
                 if ((remainingTimespan / granularity) > 300) {
                     //split into 2 requests
                     currentTimespan = granularity * 300
-                    remainingTimespan = timespan - currentTimespan
+                    remainingTimespan -= currentTimespan
                     nextCoveredTimespan = coveredTimespan + currentTimespan
                     pages++
                 } else {
