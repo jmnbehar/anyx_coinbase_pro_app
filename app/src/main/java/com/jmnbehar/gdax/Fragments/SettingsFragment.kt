@@ -56,7 +56,7 @@ class SettingsFragment : RefreshFragment() {
             prefs.stashOrders(null)
             prefs.stashFills(null)
             startActivity(intent)
-            activity.finish()
+            activity.finishAffinity()
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal

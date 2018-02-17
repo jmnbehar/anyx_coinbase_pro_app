@@ -122,6 +122,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             prefs.shouldAutologin = prefs.isLoggedIn
             val intent = MainActivity.newIntent(this)
             startActivity(intent)
+            finish()
         })
     }
 
@@ -134,6 +135,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             }
         } else {
             super.onBackPressed()
+            finish()
         }
     }
 

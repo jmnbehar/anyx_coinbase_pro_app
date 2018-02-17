@@ -285,6 +285,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra(Constants.logout, true)
         startActivity(intent)
+        finish()
     }
 
     override fun onBackPressed() {
@@ -299,11 +300,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
                 currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                intent.putExtra(Constants.exit, true)
-                startActivity(intent)
-                finish()
+//                val intent = Intent(this, LoginActivity::class.java)
+//                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                intent.putExtra(Constants.exit, true)
+//                startActivity(intent)
+                finishAffinity()
             }
         }
     }
