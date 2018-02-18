@@ -42,16 +42,15 @@ class HomeFragment : RefreshFragment() {
 
         viewPager = rootView.view_pager
 
-        collectionPagerAdapter = HomePagerAdapter(fragmentManager)
+        collectionPagerAdapter = HomePagerAdapter(childFragmentManager)
         viewPager?.adapter = collectionPagerAdapter
 
         return rootView
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewPager?.adapter = collectionPagerAdapter
-    }
+//    override fun onResume() {
+//        super.onResume()
+//    }
 
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)

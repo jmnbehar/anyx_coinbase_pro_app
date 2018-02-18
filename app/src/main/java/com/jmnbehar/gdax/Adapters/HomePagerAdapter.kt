@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import com.jmnbehar.gdax.Classes.RefreshFragment
 import com.jmnbehar.gdax.Fragments.AccountsFragment
-import com.jmnbehar.gdax.Fragments.PricesFragment
+import com.jmnbehar.gdax.Fragments.MarketFragment
 
 
 /**
@@ -20,7 +20,7 @@ class HomePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     override fun getItem(i: Int): Fragment {
         when (i) {
             0 -> {
-                val fragment = PricesFragment()
+                val fragment = MarketFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
@@ -35,7 +35,7 @@ class HomePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
             }
             else -> {
                 //do something here
-                val fragment = PricesFragment()
+                val fragment = MarketFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args

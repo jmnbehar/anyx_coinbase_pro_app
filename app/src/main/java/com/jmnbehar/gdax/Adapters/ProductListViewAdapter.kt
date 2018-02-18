@@ -17,7 +17,7 @@ import android.widget.TextView
  * Created by jmnbehar on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, val isLoggedIn: Boolean, var onClick: (Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return Account.list.size
@@ -35,7 +35,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val isLoggedIn: Bool
         var productNameText: TextView? = null
         var percentChangeText: TextView? = null
         var priceText: TextView? = null
-        var balanceText: TextView? = null
         var productIcon: ImageView? = null
         var lineChart:  PriceChart? = null
     }
@@ -99,12 +98,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val isLoggedIn: Bool
         }
 
         viewHolder.priceText?.text = currentPrice.fiatFormat()
-
-        if (isLoggedIn) {
-            viewHolder.balanceText?.text = "Balance: ${account.balance} ${account.currency}"
-        } else {
-            viewHolder.balanceText?.visibility = View.GONE
-        }
 
         viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 

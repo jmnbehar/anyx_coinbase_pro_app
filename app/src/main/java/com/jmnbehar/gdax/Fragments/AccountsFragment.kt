@@ -37,9 +37,12 @@ class AccountsFragment : RefreshFragment() {
             MainActivity.goToChartFragment(account.currency)
         }
 
-        for (account in Account.list)
-        Account.updateAllAccounts({ toast("error!")}) {
-            rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
+        if (GdaxApi.credentials != null) {
+            Account.updateAllAccounts({ toast("error!")}) {
+                rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup )
+            }
+        } else {
+            rootView.list_accounts.visibility = View.GONE
         }
 
         return rootView

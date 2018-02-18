@@ -20,19 +20,16 @@ import org.jetbrains.anko.support.v4.toast
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class PricesFragment : RefreshFragment() {
+class MarketFragment : RefreshFragment() {
     private var currentProduct: Product? = null
     private lateinit var listView: ListView
-
-    private lateinit var totalValueText: TextView
-    private lateinit var totalValueLabelText: TextView
 
     lateinit var inflater: LayoutInflater
 
     companion object {
-        fun newInstance(): PricesFragment
+        fun newInstance(): MarketFragment
         {
-            return PricesFragment()
+            return MarketFragment()
         }
     }
 
@@ -44,9 +41,6 @@ class PricesFragment : RefreshFragment() {
 
         listView = rootView.list_products
         this.inflater = inflater
-        totalValueText = rootView.txt_home_total_value
-        totalValueLabelText = rootView.txt_home_total_value_label
-
 
         setupSwipeRefresh(rootView)
 
@@ -62,16 +56,7 @@ class PricesFragment : RefreshFragment() {
             MainActivity.goToNavigationId(equivalentMenuItem, activity)
         }
 
-        val isLoggedIn = prefs.isLoggedIn
-        if (isLoggedIn) {
-            totalValueText.text = "$${Account.totalBalance.fiatFormat()}"
-            totalValueLabelText.text = "Account total value"
-        } else {
-            totalValueText.visibility = View.GONE
-            totalValueLabelText.visibility = View.GONE
-        }
-
-        listView.adapter = ProductListViewAdapter(inflater, isLoggedIn, selectGroup)
+        listView.adapter = ProductListViewAdapter(inflater, selectGroup)
         listView.setHeightBasedOnChildren()
 
         return rootView

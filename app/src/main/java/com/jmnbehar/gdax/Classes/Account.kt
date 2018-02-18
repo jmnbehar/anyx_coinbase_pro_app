@@ -120,6 +120,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             return list.find { a -> a.product.currency == currency }
         }
 
+        //TODO: move to GdaxApi
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             GdaxApi.accounts().executeRequest(onFailure) { result ->
                 val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)

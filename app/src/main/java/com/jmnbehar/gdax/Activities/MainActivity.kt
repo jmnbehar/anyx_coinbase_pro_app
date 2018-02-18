@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var settingsFragment: SettingsFragment? = null
 
-        var pricesFragment: PricesFragment? = null
+        var marketFragment: MarketFragment? = null
 
         var progressDialog: ProgressDialog? = null
 
@@ -167,9 +167,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
                     SettingsFragment.newInstance()
                 }
-                FragmentType.PRICES -> if (pricesFragment != null ) { pricesFragment } else {
+                FragmentType.PRICES -> if (marketFragment != null ) {
+                    marketFragment
+                } else {
                     //TODO: think about this
-                    //PricesFragment.newInstance()
+                    //MarketFragment.newInstance()
                     HomeFragment.newInstance()
                 }
                 FragmentType.TRADE -> {
