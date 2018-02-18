@@ -6,74 +6,51 @@
     android:layout_weight="1"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="25dp"
-    android:paddingRight="25dp">
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/img_product_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            app:srcCompat="@android:drawable/btn_star" />
+
+        <TextView
+            android:id="@+id/txt_product_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_weight="6"
+            android:text="Bitcoin"
+            android:textSize="24sp" />
 
-            <ImageView
-                android:id="@+id/img_product_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:srcCompat="@android:drawable/btn_star" />
-
-            <TextView
-                android:id="@+id/txt_product_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="Bitcoin"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/txt_product_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="BTC"
-                android:textAlignment="textEnd"
-                android:textSize="24sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/txt_product_price"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_weight="3"
+            android:text="100"
+            android:textAlignment="textEnd"
+            android:textSize="24sp" />
 
-
-            <TextView
-                android:id="@+id/txt_product_amount_owned"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="BTC" />
-
-            <TextView
-                android:id="@+id/txt_product_percent_change"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="20%"
-                android:textAlignment="textEnd" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/txt_product_percent_change"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20%"
+            android:textAlignment="textEnd" />
 
     </LinearLayout>
-
 
     <com.jmnbehar.gdax.Classes.PriceChart
         android:id="@+id/chart_product"
         android:layout_width="match_parent"
-        android:layout_height="150dp" />
+        android:layout_height="150dp"
+        android:paddingTop="-10dp" />
 </LinearLayout>

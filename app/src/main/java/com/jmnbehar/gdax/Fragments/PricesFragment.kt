@@ -14,7 +14,7 @@ import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
-import kotlinx.android.synthetic.main.fragment_home.view.*
+import kotlinx.android.synthetic.main.fragment_market.view.*
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -38,7 +38,7 @@ class PricesFragment : RefreshFragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
+        val rootView = inflater!!.inflate(R.layout.fragment_market, container, false)
 
         val prefs = Prefs(context)
 

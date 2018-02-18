@@ -21,6 +21,10 @@ open class RefreshFragment: Fragment() {
     var autoRefresh: Runnable? = null
     var swipeRefreshLayout: SwipeRefreshLayout? = null
 
+    companion object {
+        val ARG_OBJECT = "object"
+    }
+
     override fun onResume() {
         super.onResume()
         showDarkMode()

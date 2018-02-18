@@ -168,7 +168,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     SettingsFragment.newInstance()
                 }
                 FragmentType.PRICES -> if (pricesFragment != null ) { pricesFragment } else {
-                    PricesFragment.newInstance()
+                    //TODO: think about this
+                    //PricesFragment.newInstance()
+                    HomeFragment.newInstance()
                 }
                 FragmentType.TRADE -> {
                     println("Do not use this function for tradeFragments")
@@ -292,13 +294,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            //super.onBackPressed()
 
-            val fragmentManager = supportFragmentManager
-            if (fragmentManager.backStackEntryCount > 0) {
-                val fragmentTag = fragmentManager.getBackStackEntryAt(fragmentManager.backStackEntryCount - 1).name
-                currentFragment = fragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
-                currentFragment?.refresh { currentFragment?.endRefresh() }
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+                currentFragment = supportFragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
+
+                supportFragmentManager.popBackStack();
+                //currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
 //                val intent = Intent(this, LoginActivity::class.java)
 //                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

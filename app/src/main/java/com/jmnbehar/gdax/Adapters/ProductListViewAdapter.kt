@@ -51,7 +51,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val isLoggedIn: Bool
             viewHolder.productNameText = vi.txt_product_name
             viewHolder.percentChangeText = vi.txt_product_percent_change
             viewHolder.priceText = vi.txt_product_price
-            viewHolder.balanceText =  vi.txt_product_amount_owned
+            //viewHolder.balanceText =  vi.txt_product_amount_owned
             viewHolder.productIcon = vi.img_product_icon
             viewHolder.lineChart = vi.chart_product
 
