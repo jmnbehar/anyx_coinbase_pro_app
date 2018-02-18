@@ -1,10 +1,5 @@
 package com.jmnbehar.gdax.Classes
 
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.util.*
 
 /**
  * Created by jmnbehar on 12/19/2017.
@@ -113,32 +108,6 @@ data class ApiTime(
         val iso: String,
         val epoch: String)
 
-data class Candle(
-        val time: Double,
-        val low: Double,
-        val high: Double,
-        val open: Double,
-        val close: Double,
-        val volume: Double) {
-
-     companion object {
-
-         fun granularityForTimespan(timespan: Long) : Long {
-             return when (timespan) {
-                 TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
-                 TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
-                 TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
-                 TimeInSeconds.oneDay -> TimeInSeconds.fiveMinutes
-                 TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
-                 TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
-                 TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
-                 TimeInSeconds.oneYear -> TimeInSeconds.oneDay
-                 else -> TimeInSeconds.oneDay
-             }
-         }
-
-     }
-}
 
 data class ApiAccount(
         val id: String,

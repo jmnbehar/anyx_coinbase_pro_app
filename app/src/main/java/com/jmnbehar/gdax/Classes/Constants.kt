@@ -25,7 +25,7 @@ object TimeInSeconds {
     const val oneWeek: Long = 604800
     const val twoWeeks: Long = 1209600
     const val oneMonth: Long = 2592000
-    const val oneYear: Long = 31622400
+    const val oneYear: Long = 31536000
     const val fiveYears: Long = 158112000
 }
 

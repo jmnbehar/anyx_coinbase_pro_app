@@ -87,7 +87,7 @@ sealed class GdaxApi: FuelRouting {
 
     override val basePath = Companion.basePath
 
-    class candles(val productId: String, val timespan: Long = TimeInSeconds.oneDay, var granularity: Long?, var startOffset: Long) : GdaxApi() {
+    class candles(val productId: String, val timespan: Long = TimeInSeconds.oneDay, var granularity: Long?, var timeOffset: Long) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var granularity = granularity
             if (granularity == null) {
@@ -100,6 +100,7 @@ sealed class GdaxApi: FuelRouting {
             var pages = 1
             var pagesReceived = 0
 
+            var allCandles = mutableListOf<Candle>()
             while (remainingTimespan > 0) {
                 coveredTimespan = nextCoveredTimespan
                 if ((remainingTimespan / granularity) > 300) {
@@ -112,7 +113,7 @@ sealed class GdaxApi: FuelRouting {
                     currentTimespan = remainingTimespan
                     remainingTimespan = 0
                 }
-                var allCandles = mutableListOf<Candle>()
+
                 GdaxApi.candles(productId, currentTimespan, granularity, coveredTimespan).executeRequest(onFailure) { result ->
                     pagesReceived ++
                     val gson = Gson()
@@ -125,11 +126,16 @@ sealed class GdaxApi: FuelRouting {
 
                     candles = candles.filter { it.time >=  start }
 
+                    //TODO: edit chart library so it doesnt show below 0
                     candles = candles.reversed()
-                    allCandles.addAll(candles)
+                    allCandles = allCandles.addingCandles(candles)
                     if (pagesReceived == pages) {
+                        if (pages > 1) {
+                            allCandles = allCandles.sorted()
+                        }
                         onComplete(allCandles)
                     }
+
                 }
             }
         }
@@ -316,7 +322,8 @@ sealed class GdaxApi: FuelRouting {
                 is candles -> {
                     val utcTimeZone = TimeZone.getTimeZone("UTC")
                     val now = Calendar.getInstance(utcTimeZone)
-                    val startInt = now.timeInSeconds() - timespan + startOffset
+                    val nowLong = now.timeInSeconds() - timeOffset
+                    val startInt = nowLong - timespan
 
                     val start = Date(startInt.toLong() * 1000)
 
@@ -325,7 +332,7 @@ sealed class GdaxApi: FuelRouting {
                     formatter.timeZone = utcTimeZone
 
                     paramList.add(Pair("start", formatter.format(start)))
-                    paramList.add(Pair("end", formatter.format(now.time)))
+                    paramList.add(Pair("end", formatter.format(nowLong * 1000)))
 
                     //TODO: dumb this down, the granularity smarts live elsewhere
                     if (granularity == null) {

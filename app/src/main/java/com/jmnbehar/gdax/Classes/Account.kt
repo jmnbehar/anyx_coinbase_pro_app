@@ -47,7 +47,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         longAgo.add(Calendar.YEAR, -2)
         val longAgoInSeconds = longAgo.timeInSeconds()
         val lastCandleTime = product.candles.lastOrNull()?.time?.toLong() ?: longAgoInSeconds
-        var nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
+        var nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
         val nowInSeconds = now.timeInSeconds()
 
         if (timespan != product.candlesTimespan) {
