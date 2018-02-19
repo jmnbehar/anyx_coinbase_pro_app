@@ -128,12 +128,18 @@ class PriceChart : LineChart {
 
         val dataSet = LineDataSet(entries, "Chart")
 
+        val prefs = Prefs(context)
+
         val color = when (currency) {
             Currency.BTC -> Color.YELLOW
             Currency.BCH -> Color.GREEN
             Currency.ETH -> Color.BLUE
             Currency.LTC -> Color.GRAY
-            Currency.USD -> Color.WHITE
+            Currency.USD -> if(prefs.isDarkModeOn) {
+                Color.WHITE
+            } else {
+                Color.BLACK
+            }
         }
 
         dataSet.color = color

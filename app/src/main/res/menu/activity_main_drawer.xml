@@ -3,31 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_btc"
-            android:icon="@drawable/icon_btc_cutout"
-            android:title="Bitcoin" />
-        <item
-            android:id="@+id/nav_eth"
-            android:icon="@drawable/icon_eth_cutout"
-            android:title="Ethereum" />
-        <item
-            android:id="@+id/nav_ltc"
-            android:icon="@drawable/icon_ltc_cutout"
-            android:title="Litecoin" />
-        <item
-            android:id="@+id/nav_bch"
-            android:icon="@drawable/icon_bch_cutout"
-            android:title="Bitcoin Cash" />
-    </group>
-
     <item android:title="Communicate">
         <menu>
-            <item
-                android:id="@+id/nav_accounts"
-                android:icon="@drawable/icon_accounts"
-                android:title="Accounts" />
             <item
                 android:id="@+id/nav_home"
                 android:icon="@drawable/icon_home"
