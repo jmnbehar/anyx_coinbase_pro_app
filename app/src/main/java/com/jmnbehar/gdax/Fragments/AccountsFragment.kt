@@ -32,7 +32,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private lateinit var percentChangeText: TextView
 
     private var chartTimeSpan = TimeInSeconds.oneDay
-
+    private var accountTotalCandles = listOf<Candle>()
     companion object {
         fun newInstance(): AccountsFragment {
             return AccountsFragment()
@@ -56,21 +56,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             valueText = rootView.txt_accounts_total_value
             percentChangeText = rootView.txt_accounts_percent_change
 
-            val accountTotalCandles = sumAccountCandles()
-            val usdValue = Account.usdAccount?.value ?: 0.0
-            val totalValue = Account.list.map { a -> a.value }.sum() + usdValue
-            valueText.text = totalValue.fiatFormat()
-            val open = if (accountTotalCandles.isNotEmpty()) {
-                accountTotalCandles.first().open
-            } else {
-                0.0
-            }
-            val change = totalValue - open
-            val weightedChange: Double = (change / open)
-            val percentChange: Double = weightedChange * 100.0
+            accountTotalCandles = sumAccountCandles()
+            setValueAndPercentChangeTexts()
 
             rootView.txt_all_accounts_label.text = "All accounts"
-            percentChangeText.text = "${percentChange.fiatFormat()}%"
 
             lineChart = rootView.chart_accounts
             lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
@@ -107,25 +96,33 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     override fun onNothingSelected() {
-        //TODO: fix this
-//        val account = ChartFragment.account
-//        val price = account.product.price
-//        val open = account.product.candles.first().open
-//        valueText.text = price.fiatFormat()
-//        setPercentChangeText(price, open)
-//        lineChart.highlightValues(arrayOf<Highlight>())
+        setValueAndPercentChangeTexts()
+        lineChart.highlightValues(arrayOf<Highlight>())
     }
 
     private fun setPercentChangeText(price: Double, open: Double) {
         val change = price - open
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
-        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.text = percentChange.percentFormat()
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
             Color.RED
         }
+    }
+
+    private fun setValueAndPercentChangeTexts() {
+        val usdValue = Account.usdAccount?.value ?: 0.0
+        val totalValue = Account.list.map { a -> a.value }.sum() + usdValue
+        valueText.text = totalValue.fiatFormat()
+
+        val open = if (accountTotalCandles.isNotEmpty()) {
+            accountTotalCandles.first().open
+        } else {
+            0.0
+        }
+        setPercentChangeText(totalValue, open)
     }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
