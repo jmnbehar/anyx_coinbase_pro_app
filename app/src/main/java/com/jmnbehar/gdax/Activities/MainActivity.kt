@@ -222,15 +222,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressDialog = indeterminateProgressDialog(nullMessage)
         progressDialog?.dismiss()
 
-//        swipeRefreshLayout = swipe_refresh_layout
-//        swipeRefreshLayout.onRefresh {
-//            if (currentFragment != null) {
-//                currentFragment?.refresh { endRefresh() }
-//            } else {
-//                swipeRefreshLayout.isRefreshing = false
-//            }
-//        }
-
         val prefs = Prefs(this)
 
         if (Account.list.size > 0) {
@@ -241,6 +232,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             signIn()
         }
     }
+
+//    override fun onResume() {
+//        super.onResume()
+//    }
 
    // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {

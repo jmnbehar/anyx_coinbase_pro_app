@@ -18,7 +18,6 @@ import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 /**
@@ -30,9 +29,12 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private lateinit var lineChart: PriceChart
     private lateinit var valueText: TextView
     private lateinit var percentChangeText: TextView
+    private lateinit var titleText: TextView
+    private lateinit var accountList: ListView
 
     private var chartTimeSpan = TimeInSeconds.oneDay
     private var accountTotalCandles = listOf<Candle>()
+
     companion object {
         fun newInstance(): AccountsFragment {
             return AccountsFragment()
@@ -46,40 +48,36 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         listView = rootView.list_accounts
 
         this.inflater = inflater
+        setupSwipeRefresh(rootView)
 
+        lineChart = rootView.chart_accounts
+        valueText = rootView.txt_accounts_total_value
+        percentChangeText = rootView.txt_accounts_percent_change
+        accountList = rootView.list_accounts
+        titleText = rootView.account_text
 
         if (GdaxApi.credentials != null) {
+            rootView.layout_accounts_chart_info.visibility = View.VISIBLE
+            accountTotalCandles = sumAccountCandles()
+            rootView.txt_all_accounts_label.text = "All accounts"
+
+            lineChart.setOnChartValueSelectedListener(this)
+            lineChart.onChartGestureListener = this
 
             val selectGroup = lambda@ { account: Account ->
                 MainActivity.goToChartFragment(account.currency)
             }
-            valueText = rootView.txt_accounts_total_value
-            percentChangeText = rootView.txt_accounts_percent_change
+            accountList.adapter = AccountListViewAdapter(inflater, selectGroup)
+            titleText.visibility = View.GONE
 
-            accountTotalCandles = sumAccountCandles()
-            setValueAndPercentChangeTexts()
-
-            rootView.txt_all_accounts_label.text = "All accounts"
-
-            lineChart = rootView.chart_accounts
-            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
-                swipeRefreshLayout?.isEnabled = false
-                LockableViewPager.isLocked = true
-                LockableScrollView.scrollLocked = true
-            }
-            lineChart.setOnChartValueSelectedListener(this)
-            lineChart.onChartGestureListener = this
-
-            Account.updateAllAccounts({ toast("error!")}) {
-                rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup)
-                rootView.account_text.visibility = View.GONE
-            }
+            refresh { /*done refreshing */ }
         } else {
-            rootView.list_accounts.visibility = View.GONE
-            rootView.chart_accounts.visibility = View.GONE
+            accountList.visibility = View.GONE
+            lineChart.visibility = View.GONE
             rootView.layout_accounts_chart_info.visibility = View.GONE
             //TODO: put a login button here
-            rootView.account_text.text = "Sign in to view account info"
+            titleText.visibility = View.VISIBLE
+            titleText.text = "Sign in to view account info"
         }
 
         return rootView
@@ -162,5 +160,27 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             return accountTotalCandleList
         }
         return listOf()
+    }
+
+
+    override fun refresh(onComplete: () -> Unit) {
+        val prefs = Prefs(context)
+        if (prefs.isLoggedIn) {
+
+            setValueAndPercentChangeTexts()
+
+            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
+                swipeRefreshLayout?.isEnabled = false
+                LockableViewPager.isLocked = true
+                LockableScrollView.scrollLocked = true
+            }
+
+            Account.updateAllAccounts({ onComplete() }) {
+                (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
+                onComplete()
+            }
+        } else {
+            onComplete()
+        }
     }
 }
