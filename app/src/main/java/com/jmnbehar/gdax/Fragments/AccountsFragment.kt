@@ -1,23 +1,37 @@
 package com.jmnbehar.gdax.Fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.ChartTouchListener
+import com.github.mikephil.charting.listener.OnChartGestureListener
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Adapters.AccountListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.textColor
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class AccountsFragment : RefreshFragment() {
+class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
+    private lateinit var lineChart: PriceChart
+    private lateinit var valueText: TextView
+    private lateinit var percentChangeText: TextView
+
+    private var chartTimeSpan = TimeInSeconds.oneDay
 
     companion object {
         fun newInstance(): AccountsFragment {
@@ -39,10 +53,13 @@ class AccountsFragment : RefreshFragment() {
             val selectGroup = lambda@ { account: Account ->
                 MainActivity.goToChartFragment(account.currency)
             }
+            valueText = rootView.txt_accounts_total_value
+            percentChangeText = rootView.txt_accounts_percent_change
 
             val accountTotalCandles = sumAccountCandles()
-            val totalValue = Account.list.map { a -> a.value }.sum()
-            rootView.txt_accounts_total_value.text = totalValue.fiatFormat()
+            val usdValue = Account.usdAccount?.value ?: 0.0
+            val totalValue = Account.list.map { a -> a.value }.sum() + usdValue
+            valueText.text = totalValue.fiatFormat()
             val open = if (accountTotalCandles.isNotEmpty()) {
                 accountTotalCandles.first().open
             } else {
@@ -53,12 +70,16 @@ class AccountsFragment : RefreshFragment() {
             val percentChange: Double = weightedChange * 100.0
 
             rootView.txt_all_accounts_label.text = "All accounts"
-            rootView.txt_accounts_percent_change.text = "$percentChange%"
+            percentChangeText.text = "${percentChange.fiatFormat()}%"
 
-            rootView.chart_accounts.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
+            lineChart = rootView.chart_accounts
+            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
                 swipeRefreshLayout?.isEnabled = false
+                LockableViewPager.isLocked = true
                 LockableScrollView.scrollLocked = true
             }
+            lineChart.setOnChartValueSelectedListener(this)
+            lineChart.onChartGestureListener = this
 
             Account.updateAllAccounts({ toast("error!")}) {
                 rootView.list_accounts.adapter = AccountListViewAdapter(inflater, selectGroup)
@@ -67,6 +88,7 @@ class AccountsFragment : RefreshFragment() {
         } else {
             rootView.list_accounts.visibility = View.GONE
             rootView.chart_accounts.visibility = View.GONE
+            rootView.layout_accounts_chart_info.visibility = View.GONE
             //TODO: put a login button here
             rootView.account_text.text = "Sign in to view account info"
         }
@@ -74,15 +96,63 @@ class AccountsFragment : RefreshFragment() {
         return rootView
     }
 
+
+    override fun onValueSelected(entry: Entry, h: Highlight) {
+        valueText.text = entry.y.toDouble().fiatFormat()
+        ChartFragment.account?. let { account ->
+            val candle = account.product.candles[entry.x.toInt()]
+            percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
+            percentChangeText.textColor = Color.BLACK
+        }
+    }
+
+    override fun onNothingSelected() {
+        //TODO: fix this
+//        val account = ChartFragment.account
+//        val price = account.product.price
+//        val open = account.product.candles.first().open
+//        valueText.text = price.fiatFormat()
+//        setPercentChangeText(price, open)
+//        lineChart.highlightValues(arrayOf<Highlight>())
+    }
+
+    private fun setPercentChangeText(price: Double, open: Double) {
+        val change = price - open
+        val weightedChange: Double = (change / open)
+        val percentChange: Double = weightedChange * 100.0
+        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.textColor = if (percentChange >= 0) {
+            Color.GREEN
+        } else {
+            Color.RED
+        }
+    }
+
+    override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
+    override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
+        swipeRefreshLayout?.isEnabled = true
+        LockableViewPager.isLocked = false
+        onNothingSelected()
+    }
+    override fun onChartLongPressed(me: MotionEvent) {
+        swipeRefreshLayout?.isEnabled = false
+        LockableViewPager.isLocked = true
+    }
+    override fun onChartDoubleTapped(me: MotionEvent) { }
+    override fun onChartSingleTapped(me: MotionEvent) { }
+    override fun onChartFling(me1: MotionEvent, me2: MotionEvent, velocityX: Float, velocityY: Float) { }
+    override fun onChartScale(me: MotionEvent, scaleX: Float, scaleY: Float) { }
+    override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
+
     fun sumAccountCandles() : List<Candle> {
         val btcAccount = Account.btcAccount?.product
         if (btcAccount != null) {
             var accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            for (i in 0..btcAccount.dayCandles.size) {
-                var totalCandleValue = 0.0
+            for (i in 0..(btcAccount.dayCandles.size - 1)) {
+                var totalCandleValue = Account.usdAccount?.value ?: 0.0
                 val time = btcAccount.dayCandles[i].time
                 for (account in Account.list) {
-                    val accountCandleValue = if (account.product.dayCandles.size >= (i - 1)) {
+                    val accountCandleValue = if (account.product.dayCandles.size > i) {
                         account.product.dayCandles[i].close
                     } else {
                         1.0

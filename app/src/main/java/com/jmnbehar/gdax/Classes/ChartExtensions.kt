@@ -133,7 +133,7 @@ class PriceChart : LineChart {
             Currency.BCH -> Color.GREEN
             Currency.ETH -> Color.BLUE
             Currency.LTC -> Color.GRAY
-            Currency.USD -> Color.BLACK
+            Currency.USD -> Color.WHITE
         }
 
         dataSet.color = color

@@ -62,6 +62,7 @@ fun ListView.setHeightBasedOnChildren() {
 
 fun Double.btcFormat(): String = "%.8f".format(this)
 fun Double.fiatFormat(): String = "%.2f".format(this)
+fun Double.percentFormat(): String = "%.2f".format(this) + "%"
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 

@@ -146,9 +146,14 @@ class LoginFragment : Fragment()  {
             apiSecret = encryption.decryptOrNull(apiSecret)
         }
 
-        val apiKeyVal = apiKey
-        val apiSecretVal = apiSecret
-        val passphraseVal = passphrase
+//        val apiKeyVal = apiKey
+//        val apiSecretVal = apiSecret
+//        val passphraseVal = passphrase
+
+        val apiKeyVal = "a25b417f35dcab1968ad6ca57a7cfd86"
+        val apiSecretVal = "FWZnMOARW3XAXcz/COHaZG5Dbmq9dkzY1Rz+mnMiJqc2tjIBJwYt9Bw6GLYPc6OSdmR1AlA1y5uysrF1+7pBHQ=="
+        val passphraseVal = "gdaxApp"
+
         if (shouldSaveApiInfo) {
             val apiKeyEncrypted = encryption.encryptOrNull(apiKeyVal)
             val apiSecretEncrypted = encryption.encryptOrNull(apiSecretVal)

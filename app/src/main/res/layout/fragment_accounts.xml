@@ -33,7 +33,7 @@
             android:layout_weight="6"
             android:paddingLeft="20dp"
             android:text="All accounts"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/txt_accounts_total_value"
@@ -43,7 +43,7 @@
             android:paddingLeft="3dp"
             android:text="100"
             android:textAlignment="textEnd"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/txt_accounts_percent_change"
@@ -58,7 +58,7 @@
     <com.jmnbehar.gdax.Classes.PriceChart
         android:id="@+id/chart_accounts"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="200dp"
         android:paddingTop="-10dp" />
 
     <ListView

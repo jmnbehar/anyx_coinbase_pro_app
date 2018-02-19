@@ -18,13 +18,13 @@ class HomeFragment : RefreshFragment() {
 
     lateinit var inflater: LayoutInflater
     var collectionPagerAdapter: HomePagerAdapter? = null
-    var viewPager: ViewPager? = null
 
     companion object {
         fun newInstance(): HomeFragment
         {
             return HomeFragment()
         }
+        var viewPager: LockableViewPager? = null
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
