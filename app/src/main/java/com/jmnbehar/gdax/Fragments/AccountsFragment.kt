@@ -170,7 +170,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
                 swipeRefreshLayout?.isEnabled = false
                 LockableViewPager.isLocked = true
-                LockableScrollView.scrollLocked = true
             }
 
             Account.updateAllAccounts({ onComplete() }) {
