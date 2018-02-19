@@ -28,9 +28,9 @@
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:divider="@android:color/transparent"
-                android:dividerHeight="8dp"
-                tools:layout_editor_absoluteX="8dp"
-                tools:layout_editor_absoluteY="8dp" />
+                android:dividerHeight="0dp"
+                android:paddingBottom="50dp"
+                android:clipToPadding="false" />
 
 
         </LinearLayout>

@@ -4,10 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import com.jmnbehar.gdax.Classes.Account
-import com.jmnbehar.gdax.Classes.Currency
-import com.jmnbehar.gdax.Classes.btcFormat
-import com.jmnbehar.gdax.Classes.fiatFormat
+import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
 
@@ -31,8 +28,9 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
     }
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
+        //TODO: quash this warning
         var vi = inflater!!.inflate(R.layout.list_row_account, null)
-        var accounts = Account.list.toMutableList()
+        val accounts = Account.list.toMutableList()
         val usdAccount = Account.usdAccount
         if (usdAccount != null) {
             accounts.add(usdAccount)

@@ -81,7 +81,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         }
         val change = currentPrice - open
         val weightedChange: Double = (change / open)
-
         val percentChange: Double = weightedChange * 100.0
 
 
@@ -97,7 +96,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = currentPrice.fiatFormat()
+        viewHolder.priceText?.text = "$${currentPrice.fiatFormat()}"
 
         viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 
