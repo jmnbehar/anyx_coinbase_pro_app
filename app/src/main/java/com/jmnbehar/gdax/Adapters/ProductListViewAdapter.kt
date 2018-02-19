@@ -89,14 +89,14 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         viewHolder.productNameText?.text = account.product.currency.toString()
 
-        viewHolder.percentChangeText?.text = "${percentChange.fiatFormat()}%"
+        viewHolder.percentChangeText?.text = percentChange.percentFormat()
         viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
             Color.RED
         }
 
-        viewHolder.priceText?.text = "$${currentPrice.fiatFormat()}"
+        viewHolder.priceText?.text = currentPrice.fiatFormat()
 
         viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
 

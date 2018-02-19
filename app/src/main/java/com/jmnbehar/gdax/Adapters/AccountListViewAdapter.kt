@@ -54,14 +54,14 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
                 val weightedChange: Double = (change / open)
                 val percentChange: Double = weightedChange * 100.0
                 if (account.value > 0) {
-                    vi.txt_account_value.text = "$${account.value.fiatFormat()}"
+                    vi.txt_account_value.text = account.value.fiatFormat()
                     vi.txt_account_percent_change.text = percentChange.percentFormat()
                 } else {
                     vi.txt_account_value.visibility = View.INVISIBLE
                     vi.txt_account_percent_change.visibility = View.INVISIBLE
                 }
             } else {
-                vi.txt_account_value.text = "$${account.value.fiatFormat()}"
+                vi.txt_account_value.text = account.value.fiatFormat()
                 vi.txt_account_balance.visibility = View.INVISIBLE
 //                vi.txt_account_percent_change.visibility = View.INVISIBLE
                 vi.txt_account_percent_change.text = ""

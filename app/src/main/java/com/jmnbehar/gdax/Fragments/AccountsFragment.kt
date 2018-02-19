@@ -86,11 +86,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         valueText.text = entry.y.toDouble().fiatFormat()
-        ChartFragment.account?. let { account ->
-            val candle = account.product.candles[entry.x.toInt()]
-            percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
-            percentChangeText.textColor = Color.BLACK
-        }
+        val candle = accountTotalCandles[entry.x.toInt()]
+        percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
+        percentChangeText.textColor = Color.BLACK
     }
 
     override fun onNothingSelected() {

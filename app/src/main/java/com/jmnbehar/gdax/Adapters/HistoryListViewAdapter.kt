@@ -50,7 +50,9 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, val isLoggedIn: Boole
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
             vi.txt_fill_size.text = unfilledSize.btcFormat()
-            vi.txt_fill_price.text = order.price
+
+            val price = order.price.toDouble()
+            vi.txt_fill_price.text = price.fiatFormat()
             vi.txt_fill_fee.text = order.fill_fees
             vi.txt_fill_time.text = order.created_at
 
@@ -84,7 +86,9 @@ class HistoryListViewAdapter(var inflater: LayoutInflater, val isLoggedIn: Boole
             val fill = fills[index]
             val vi = viewGroup.inflate(R.layout.list_row_fill)
             vi.txt_fill_size.text = fill.size
-            vi.txt_fill_price.text = fill.price
+
+            val price = fill.price.toDouble()
+            vi.txt_fill_price.text = price.fiatFormat()
             vi.txt_fill_fee.text = fill.fee
             vi.txt_fill_time.text = fill.created_at
             vi.txt_fill_type.text = ""

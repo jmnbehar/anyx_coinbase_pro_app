@@ -116,7 +116,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 tickerText.text = "$currency wallet"
                 iconView.setImageResource(currency.iconId)
                 balanceText.text = "${account.balance.btcFormat()} ${currency}"
-                valueText.text = "$${account.value.fiatFormat()}"
+                valueText.text = account.value.fiatFormat()
             } else {
                 tickerText.visibility = View.GONE
                 iconView.visibility = View.GONE
@@ -222,7 +222,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val change = price - open
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
-        percentChangeText.text = percentChange.fiatFormat() + "%"
+        percentChangeText.text = percentChange.percentFormat()
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {

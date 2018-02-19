@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
 import org.jetbrains.anko.*
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -61,7 +62,15 @@ fun ListView.setHeightBasedOnChildren() {
 }
 
 fun Double.btcFormat(): String = "%.8f".format(this)
-fun Double.fiatFormat(): String = "%.2f".format(this)
+fun Double.fiatFormat(): String {
+    var numberFormat = NumberFormat.getNumberInstance(Locale.US)
+    numberFormat.currency = java.util.Currency.getInstance(Locale.US)
+    numberFormat.minimumFractionDigits = 2
+    numberFormat.maximumFractionDigits = 2
+    val output = "$${numberFormat.format(this)}"
+    return output
+}
+
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
 
 fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
