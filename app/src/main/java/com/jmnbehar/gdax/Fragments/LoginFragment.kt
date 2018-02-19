@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.ListView
 import com.jmnbehar.gdax.Activities.LoginActivity
-import com.jmnbehar.gdax.Activities.MainActivity
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_login.*

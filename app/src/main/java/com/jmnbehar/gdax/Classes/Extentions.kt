@@ -1,6 +1,5 @@
 package com.jmnbehar.gdax.Classes
 
-import android.content.Context
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView

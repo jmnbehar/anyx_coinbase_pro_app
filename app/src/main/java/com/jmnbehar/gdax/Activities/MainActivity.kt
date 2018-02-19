@@ -107,9 +107,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 R.id.nav_bch -> {
                     goToFragment(FragmentType.BCH_CHART)
                 }
-                R.id.nav_accounts -> {
-                    goToFragment(FragmentType.ACCOUNT)
-                }
                 R.id.nav_send -> {
                     goToFragment(FragmentType.SEND)
                 }
