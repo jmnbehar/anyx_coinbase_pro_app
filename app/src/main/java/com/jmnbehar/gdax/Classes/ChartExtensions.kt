@@ -140,8 +140,18 @@ class PriceChart : LineChart {
             }
         }
 
+        val strokeWidth = 2.toFloat()
         dataSet.color = color
-        dataSet.lineWidth = 2.toFloat()
+        dataSet.lineWidth = strokeWidth
+
+        xAxis.axisLineColor = color
+//        axisLeft.axisLineColor = color
+//        axisRight.axisLineColor = color
+
+        xAxis.axisLineWidth = strokeWidth
+//        axisLeft.axisLineWidth = strokeWidth
+//        axisRight.axisLineWidth = strokeWidth
+
         dataSet.setDrawFilled(true)
         dataSet.fillColor = color
         dataSet.setDrawValues(false)
@@ -149,8 +159,13 @@ class PriceChart : LineChart {
         val open = candles.firstOrNull()?.close?.toFloat()
         if (open != null) {
             axisLeft.showSpecificLabels(floatArrayOf(open), false)
+            axisLeft.setDrawPartialAxis(open)
         }
-
+        val close = candles.lastOrNull()?.close?.toFloat()
+        if (close != null) {
+            //axisRight.showSpecificLabels(floatArrayOf(close), false)
+            axisRight.setDrawPartialAxis(close)
+        }
 
         //TODO: center description
         description.textSize = 18.0f

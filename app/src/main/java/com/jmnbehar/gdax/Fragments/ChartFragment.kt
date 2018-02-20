@@ -143,22 +143,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     toast("Log in to buy or sell $currency")
                 }
             }
-
+            timespanButtonHour.setText("1H")
             timespanButtonHour.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneHour)
             }
+            timespanButtonDay.setText("1D")
             timespanButtonDay.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneDay)
             }
+            timespanButtonWeek.setText("1W")
             timespanButtonWeek.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneWeek)
             }
+            timespanButtonMonth.setText("1M")
             timespanButtonMonth.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneMonth)
             }
+            timespanButtonYear.setText("1Y")
             timespanButtonYear.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneYear)
             }
+            timespanButtonAll.setText("ALL")
             timespanButtonAll.setOnClickListener {
                 //TODO: fix this
                 setChartTimespan(currency.lifetimeInSeconds)
