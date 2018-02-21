@@ -129,6 +129,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val buyButton = rootView.btn_chart_buy
             val sellButton = rootView.btn_chart_sell
 
+            val buttonColors = currency.colorStateList(activity)
+            buyButton.backgroundTintList = buttonColors
+            sellButton.backgroundTintList = buttonColors
 
             //TODO: send over more info
             buyButton.setOnClickListener {

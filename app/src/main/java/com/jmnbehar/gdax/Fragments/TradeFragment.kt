@@ -119,6 +119,8 @@ class TradeFragment : RefreshFragment() {
         totalText = rootView.txt_trade_total
 
         submitOrderButton = rootView.btn_place_order
+        val buttonColors = account.currency.colorStateList(activity)
+        submitOrderButton.backgroundTintList = buttonColors
 
         titleText.text = account.currency.toString()
 

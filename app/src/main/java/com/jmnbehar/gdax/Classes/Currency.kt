@@ -1,8 +1,12 @@
 package com.jmnbehar.gdax.Classes
 
+import android.content.Context
+import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
 import com.jmnbehar.gdax.Fragments.TradeFragment
 import com.jmnbehar.gdax.R
+import org.jetbrains.anko.backgroundColor
 import java.util.*
 
 /**
@@ -103,6 +107,26 @@ enum class Currency {
             }
         }
 
+    fun colorStateList(context: Context) : ColorStateList {
+        val prefs = Prefs(context)
+        return if (prefs.isDarkModeOn) {
+            when (this) {
+                Currency.BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_dark, context.resources.newTheme())
+                Currency.ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
+                Currency.BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
+                Currency.LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
+                Currency.USD -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
+            }
+        } else {
+            when (this) {
+                Currency.BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_light, context.resources.newTheme())
+                Currency.ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_light, context.resources.newTheme())
+                Currency.BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
+                Currency.LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
+                Currency.USD -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
+            }
+        }
+    }
     val lifetimeInSeconds : Long
         get() {
             val utcTimeZone = TimeZone.getTimeZone("UTC")
