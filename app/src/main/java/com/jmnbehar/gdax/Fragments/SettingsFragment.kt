@@ -1,18 +1,21 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.TextView
 import com.jmnbehar.gdax.Activities.LoginActivity
 import com.jmnbehar.gdax.Classes.Constants
 import com.jmnbehar.gdax.Classes.Prefs
 import com.jmnbehar.gdax.Classes.RefreshFragment
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import org.jetbrains.anko.textColor
 
 /**
  * Created by josephbehar on 1/20/18.
@@ -26,6 +29,7 @@ class SettingsFragment : RefreshFragment() {
         }
     }
 
+    private lateinit var titleText: TextView
     private lateinit var logoutButton: Button
     private lateinit var disclaimerButton: Button
     private lateinit var darkModeCheckBox: CheckBox
@@ -36,6 +40,7 @@ class SettingsFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_settings, container, false)
 
+        titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
         disclaimerButton = rootView.btn_setting_show_disclaimer
         darkModeCheckBox = rootView.cb_setting_dark_mode
@@ -43,7 +48,6 @@ class SettingsFragment : RefreshFragment() {
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
 
         showDarkMode(rootView)
-
 
         val prefs = Prefs(activity)
 
@@ -73,6 +77,23 @@ class SettingsFragment : RefreshFragment() {
         darkModeCheckBox.setOnCheckedChangeListener {  _, isChecked ->
             prefs.isDarkModeOn = isChecked
             showDarkMode()
+
+            if (isChecked) {
+                darkModeCheckBox.textColor = Color.WHITE
+                showTradeConfirmCheckBox.textColor = Color.WHITE
+                showSendConfirmCheckBox.textColor = Color.WHITE
+                titleText.textColor = Color.WHITE
+
+                disclaimerButton.textColor = Color.WHITE
+            } else {
+                darkModeCheckBox.textColor = Color.BLACK
+                showTradeConfirmCheckBox.textColor = Color.BLACK
+                showSendConfirmCheckBox.textColor = Color.BLACK
+                titleText.textColor = Color.BLACK
+
+                logoutButton.textColor = Color.BLACK
+                disclaimerButton.textColor = Color.BLACK
+            }
         }
         showDarkMode()
 

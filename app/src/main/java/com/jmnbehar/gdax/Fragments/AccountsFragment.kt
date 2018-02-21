@@ -65,7 +65,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart.onChartGestureListener = this
 
             val selectGroup = lambda@ { account: Account ->
-                MainActivity.goToChartFragment(account.currency)
+                (activity as MainActivity).goToChartFragment(account.currency)
             }
             accountList.adapter = AccountListViewAdapter(selectGroup)
             titleText.visibility = View.GONE

@@ -53,7 +53,7 @@ class MarketFragment : RefreshFragment() {
                 Currency.BCH -> R.id.nav_bch
                 Currency.USD -> R.id.nav_home
             }
-            MainActivity.goToNavigationId(equivalentMenuItem, activity)
+            (activity as MainActivity).goToNavigationId(equivalentMenuItem, activity)
         }
 
         listView.adapter = ProductListViewAdapter(inflater, selectGroup)

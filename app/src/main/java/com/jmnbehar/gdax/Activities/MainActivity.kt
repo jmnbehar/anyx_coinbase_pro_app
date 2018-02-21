@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     companion object {
         var currentFragment: RefreshFragment? = null
-        lateinit private var fragmentManager: FragmentManager
 
         var btcChartFragment: ChartFragment? = null
         var ethChartFragment: ChartFragment? = null
@@ -88,126 +87,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             return Intent(context, MainActivity::class.java)
         }
 
-        fun setSupportFragmentManager(fragmentManager: FragmentManager) {
-            this.fragmentManager = fragmentManager
-        }
 
-
-        fun goToNavigationId(navigationId: Int, context: Context) {
-            when (navigationId) {
-                R.id.nav_btc -> {
-                    goToFragment(FragmentType.BTC_CHART)
-                }
-                R.id.nav_eth -> {
-                    goToFragment(FragmentType.ETH_CHART)
-                }
-                R.id.nav_ltc -> {
-                    goToFragment(FragmentType.LTC_CHART)
-                }
-                R.id.nav_bch -> {
-                    goToFragment(FragmentType.BCH_CHART)
-                }
-                R.id.nav_send -> {
-                    goToFragment(FragmentType.SEND)
-                }
-                R.id.nav_alerts -> {
-                    goToFragment(FragmentType.ALERTS, context = context)
-                }
-                R.id.nav_settings -> {
-                    goToFragment(FragmentType.SETTINGS)
-                }
-                R.id.nav_home -> {
-                    goToFragment(FragmentType.PRICES)
-                }
-            }
-        }
-
-        fun goToChartFragment(currency: Currency, context: Context? = null) {
-            when (currency) {
-                Currency.BTC -> goToFragment(FragmentType.BTC_CHART, context)
-                Currency.BCH -> goToFragment(FragmentType.BCH_CHART, context)
-                Currency.ETH -> goToFragment(FragmentType.ETH_CHART, context)
-                Currency.LTC -> goToFragment(FragmentType.LTC_CHART, context)
-                Currency.USD -> {}
-            }
-        }
-
-        fun goToFragment(fragmentType: FragmentType, context: Context? = null) {
-            val fragment = when (fragmentType) {
-
-                FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
-                    //TODO: confirm account is not null
-                    val account = Account.btcAccount!!
-                    ChartFragment.newInstance(account)
-                }
-                FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
-                    val account = Account.bchAccount!!
-                    ChartFragment.newInstance(account)
-                }
-                FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
-                    val account = Account.ethAccount!!
-                    ChartFragment.newInstance(account)
-                }
-                FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
-                    val account = Account.ltcAccount!!
-                    ChartFragment.newInstance(account)
-                }
-                FragmentType.ACCOUNT -> if (accountsFragment != null ) { accountsFragment } else {
-                    AccountsFragment.newInstance()
-                }
-                FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
-                    SendFragment.newInstance()
-                }
-                FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
-                    AlertsFragment.newInstance(context!!)
-                }
-                FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
-                    SettingsFragment.newInstance()
-                }
-                FragmentType.PRICES -> if (marketFragment != null ) {
-                    marketFragment
-                } else {
-                    //TODO: think about this
-                    //MarketFragment.newInstance()
-                    HomeFragment.newInstance()
-                }
-                FragmentType.TRADE -> {
-                    println("Do not use this function for tradeFragments")
-                    null
-                }
-            }
-            if (fragment != null) {
-                val tag = fragmentType.toString()
-                goToFragment(fragment, tag)
-            } else {
-                println("Error switching fragments")
-            }
-        }
-
-        fun goToFragment(fragment: RefreshFragment, tag: String) {
-            currentFragment = fragment
-            if (Companion.fragmentManager.backStackEntryCount == 0) {
-//            if (Companion.fragmentManager.fragments.isEmpty()) {
-                Companion.fragmentManager
-                        .beginTransaction()
-                        .add(R.id.fragment_container, fragment, tag)
-                        .addToBackStack(tag)
-                        .commitAllowingStateLoss()
-            } else {
-                Companion.fragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, fragment, tag)
-                        .addToBackStack(tag)
-                        .commitAllowingStateLoss()
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        setSupportFragmentManager(supportFragmentManager)
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -404,5 +290,133 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
+
+    fun goToNavigationId(navigationId: Int, context: Context) {
+        when (navigationId) {
+            R.id.nav_btc -> {
+                goToFragment(FragmentType.BTC_CHART)
+            }
+            R.id.nav_eth -> {
+                goToFragment(FragmentType.ETH_CHART)
+            }
+            R.id.nav_ltc -> {
+                goToFragment(FragmentType.LTC_CHART)
+            }
+            R.id.nav_bch -> {
+                goToFragment(FragmentType.BCH_CHART)
+            }
+            R.id.nav_send -> {
+                goToFragment(FragmentType.SEND)
+            }
+            R.id.nav_alerts -> {
+                goToFragment(FragmentType.ALERTS, context = context)
+            }
+            R.id.nav_settings -> {
+                goToFragment(FragmentType.SETTINGS)
+            }
+            R.id.nav_home -> {
+                goToFragment(FragmentType.PRICES)
+            }
+        }
+    }
+    fun goToChartFragment(currency: Currency, context: Context? = null) {
+        when (currency) {
+            Currency.BTC -> goToFragment(FragmentType.BTC_CHART, context)
+            Currency.BCH -> goToFragment(FragmentType.BCH_CHART, context)
+            Currency.ETH -> goToFragment(FragmentType.ETH_CHART, context)
+            Currency.LTC -> goToFragment(FragmentType.LTC_CHART, context)
+            Currency.USD -> {}
+        }
+    }
+    fun goToFragment(fragmentType: FragmentType, context: Context? = null) {
+        val prefs = Prefs(this)
+        val fragment = when (fragmentType) {
+            FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
+                //TODO: confirm account is not null
+                //                if (prefs.isDarkModeOn) {
+                //                    setTheme(R.style.AppThemeDarkBtc)
+                //                } else {
+                //                    setTheme(R.style.AppThemeLightBtc)
+                //                }
+                val account = Account.btcAccount!!
+                ChartFragment.newInstance(account)
+            }
+            FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
+                //                if (prefs.isDarkModeOn) {
+                //                    setTheme(R.style.AppThemeDarkBch)
+                //                } else {
+                //                    setTheme(R.style.AppThemeLightBch)
+                //                }
+                val account = Account.bchAccount!!
+                ChartFragment.newInstance(account)
+            }
+            FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
+                //                if (prefs.isDarkModeOn) {
+                //                    setTheme(R.style.AppThemeDarkEth)
+                //                } else {
+                //                    setTheme(R.style.AppThemeLightEth)
+                //                }
+                val account = Account.ethAccount!!
+                ChartFragment.newInstance(account)
+            }
+
+            FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
+//                if (prefs.isDarkModeOn) {
+//                    setTheme(R.style.AppThemeDarkLtc)
+//                } else {
+//                    setTheme(R.style.AppThemeLightLtc)
+//                }
+                val account = Account.ltcAccount!!
+                ChartFragment.newInstance(account)
+            }
+            FragmentType.ACCOUNT -> if (accountsFragment != null ) { accountsFragment } else {
+                AccountsFragment.newInstance()
+            }
+            FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
+                SendFragment.newInstance()
+            }
+            FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
+                AlertsFragment.newInstance(context!!)
+            }
+            FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
+                SettingsFragment.newInstance()
+            }
+            FragmentType.PRICES -> if (marketFragment != null ) {
+                marketFragment
+            } else {
+                //TODO: think about this
+                //MarketFragment.newInstance()
+                HomeFragment.newInstance()
+            }
+            FragmentType.TRADE -> {
+                println("Do not use this function for tradeFragments")
+                null
+            }
+        }
+        if (fragment != null) {
+            val tag = fragmentType.toString()
+            goToFragment(fragment, tag)
+        } else {
+            println("Error switching fragments")
+        }
+    }
+    fun goToFragment(fragment: RefreshFragment, tag: String) {
+        currentFragment = fragment
+        if (supportFragmentManager.backStackEntryCount == 0) {
+//            if (Companion.fragmentManager.fragments.isEmpty()) {
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(tag)
+                    .commitAllowingStateLoss()
+        } else {
+            supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(tag)
+                    .commitAllowingStateLoss()
+        }
+    }
+
 
 }

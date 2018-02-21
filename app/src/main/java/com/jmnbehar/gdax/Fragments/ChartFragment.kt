@@ -129,18 +129,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val buyButton = rootView.btn_chart_buy
             val sellButton = rootView.btn_chart_sell
 
-            val color = if(prefs.isDarkModeOn) {
-                currency.colorPrimaryDark
-            } else {
-                currency.colorPrimaryLight
-            }
-            buyButton.setBackgroundColor(color)
-            sellButton.setBackgroundColor(color)
 
             //TODO: send over more info
             buyButton.setOnClickListener {
                 if (prefs.isLoggedIn) {
-                    MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
                 } else {
                     toast("Log in to buy or sell $currency")
                 }
@@ -148,7 +141,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             sellButton.setOnClickListener {
                 if (prefs.isLoggedIn) {
-                    MainActivity.goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
                 } else {
                     toast("Log in to buy or sell $currency")
                 }
@@ -207,6 +200,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
                         val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         //TODO: don't replace adapter, simply update what it holds
+                        //TODO: investigate crash onbackpressed
                         historyPager.adapter = HistoryPagerAdapter(childFragmentManager, filteredOrders, filteredFills,
                                 { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                         history_view_pager
