@@ -67,7 +67,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             val selectGroup = lambda@ { account: Account ->
                 MainActivity.goToChartFragment(account.currency)
             }
-            accountList.adapter = AccountListViewAdapter(inflater, selectGroup)
+            accountList.adapter = AccountListViewAdapter(selectGroup)
             titleText.visibility = View.GONE
 
             refresh { /*done refreshing */ }

@@ -3,12 +3,78 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/gray_bg</item>
+        <item name="colorPrimaryDark">@color/gray_bg</item>
+        <item name="android:colorAccent">@color/dark_accent</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
+
+    <style name="AppThemeLight" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/gray_bg</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="AppThemeLight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+
+    <!-- Dark application theme. -->
+    <style name="AppThemeDark" parent="Theme.AppCompat">
+        <!-- Customize your theme here. -->
+        <item name="android:textColor">@color/white</item>
+        <item name="android:windowBackground">@color/gray_bg</item>
+        <item name="android:colorBackground">@color/gray_bg</item>
+    </style>
+
+    <style name="AppThemeDarkBtc" parent="AppThemeDark">
+        <item name="android:colorAccent">@color/btc_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/btc_dk</item>
+    </style>
+    <style name="AppThemeDarkBch" parent="AppThemeDark">
+        <item name="android:colorAccent">@color/bch_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/bch_dk</item>
+    </style>
+    <style name="AppThemeDarkEth" parent="AppThemeDark">
+        <item name="android:colorAccent">@color/eth_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/eth_dk</item>
+    </style>
+    <style name="AppThemeDarkLtc" parent="AppThemeDark">
+        <item name="android:colorAccent">@color/ltc_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorDarkText</item>
+        <item name="android:colorButtonNormal">@color/ltc_dk</item>
+    </style>
+
+    <style name="AppThemeLightBtc" parent="AppThemeLight">
+        <item name="android:colorAccent">@color/btc_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/btc_light</item>
+    </style>
+    <style name="AppThemeLightBch" parent="AppThemeLight">
+        <item name="android:colorAccent">@color/bch_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/bch_light</item>
+    </style>
+    <style name="AppThemeLightEth" parent="AppThemeLight">
+        <item name="android:colorAccent">@color/eth_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/eth_light</item>
+    </style>
+    <style name="AppThemeLightLtc" parent="AppThemeLight">
+        <item name="android:colorAccent">@color/ltc_accent</item>
+        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
+        <item name="android:colorButtonNormal">@color/ltc_light</item>
+    </style>
+
+
+    <style name="AppThemeDark.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -19,5 +85,12 @@
 
     <style name="MyRadioButtonStyle" parent="@android:style/Widget.CompoundButton.RadioButton">
         <item name="android:button">@drawable/timespan_radio_button</item>
+    </style>
+
+    <style name="ButtonColorWhiteText" parent="@android:style/Widget.Button">
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="ButtonColorDarkText" parent="@android:style/Widget.Button">
+        <item name="android:textColor">@color/black</item>
     </style>
 </resources>

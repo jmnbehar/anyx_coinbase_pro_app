@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.view.*
 import android.widget.ImageView
-import android.widget.ListView
 import android.widget.TextView
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
@@ -15,7 +14,6 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.gdax.Activities.MainActivity
-import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
@@ -26,16 +24,16 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.Button
+import android.widget.RadioButton
 import com.jmnbehar.gdax.Adapters.HistoryPagerAdapter
 import kotlinx.android.synthetic.main.fragment_chart.*
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
+class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener {
     private lateinit var inflater: LayoutInflater
 
-    private lateinit var historyList: ListView
     private lateinit var historyPager: ViewPager
 
     private lateinit var priceText: TextView
@@ -49,12 +47,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var iconView: ImageView
     private lateinit var percentChangeText: TextView
 
-    private lateinit var timespanButtonHour: Button
-    private lateinit var timespanButtonDay: Button
-    private lateinit var timespanButtonWeek: Button
-    private lateinit var timespanButtonMonth: Button
-    private lateinit var timespanButtonYear: Button
-    private lateinit var timespanButtonAll: Button
+    private lateinit var timespanButtonHour: RadioButton
+    private lateinit var timespanButtonDay: RadioButton
+    private lateinit var timespanButtonWeek: RadioButton
+    private lateinit var timespanButtonMonth: RadioButton
+    private lateinit var timespanButtonYear: RadioButton
+    private lateinit var timespanButtonAll: RadioButton
 
     private var chartTimeSpan = TimeInSeconds.oneDay
 
@@ -131,6 +129,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val buyButton = rootView.btn_chart_buy
             val sellButton = rootView.btn_chart_sell
 
+            val color = if(prefs.isDarkModeOn) {
+                currency.colorPrimaryDark
+            } else {
+                currency.colorPrimaryLight
+            }
+            buyButton.setBackgroundColor(color)
+            sellButton.setBackgroundColor(color)
+
             //TODO: send over more info
             buyButton.setOnClickListener {
                 if (prefs.isLoggedIn) {
@@ -146,6 +152,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 } else {
                     toast("Log in to buy or sell $currency")
                 }
+            }
+            when (chartTimeSpan) {
+                TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
+                TimeInSeconds.oneDay  -> timespanButtonDay.isChecked = true
+                TimeInSeconds.oneWeek -> timespanButtonWeek.isChecked = true
+                TimeInSeconds.oneMonth -> timespanButtonMonth.isChecked = true
+                TimeInSeconds.oneYear -> timespanButtonYear.isChecked = true
+                currency.lifetimeInSeconds -> timespanButtonAll.isChecked = true
             }
             timespanButtonHour.setText("1H")
             timespanButtonHour.setOnClickListener {
@@ -175,14 +189,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
-            historyList = rootView.list_history
             historyPager = rootView.history_view_pager
-            historyPager.adapter = HistoryPagerAdapter(prefs.isLoggedIn, stashedOrders, stashedFills,
+            historyPager.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-
-            historyList.adapter = HistoryListViewAdapter(prefs.isLoggedIn, stashedOrders, stashedFills,
-                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-            historyList.setHeightBasedOnChildren()
+            historyPager.setOnTouchListener(this)
 
             if (prefs.isLoggedIn) {
                 val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
@@ -196,9 +206,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         prefs.stashFills(fillResult.value)
                         val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
                         val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                        historyList.adapter = HistoryListViewAdapter(true, filteredOrders, filteredFills,
+                        //TODO: don't replace adapter, simply update what it holds
+                        historyPager.adapter = HistoryPagerAdapter(childFragmentManager, filteredOrders, filteredFills,
                                 { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-                        historyList.setHeightBasedOnChildren()
                         history_view_pager
                     }
                 }
@@ -220,6 +230,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)
         super.onPause()
+    }
+
+    fun setHistoryPagerHeight(height: Int) {
+        if (height > historyPager.layoutParams.height) {
+            val tabLayoutHeight = 80 // history_tab_layout.height
+            historyPager.layoutParams.height = (height + tabLayoutHeight)
+        }
     }
 
     private fun setChartTimespan(timespan: Long) {
@@ -264,10 +281,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             positiveButton("Close") {  }
             negativeButton("Delete") {
                 GdaxApi.cancelOrder(order.id).executeRequest({ }) {
-                    var orders = (historyList.adapter as HistoryListViewAdapter).orders
+                    var orders = (historyPager.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
-                    (historyList.adapter as HistoryListViewAdapter).orders = orders
-                    (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
+                    (historyPager.adapter as HistoryPagerAdapter).orders = orders
+                    (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
                     toast("order cancelled")
                 }
             }
@@ -311,6 +328,29 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setPercentChangeText(price, open)
             lineChart.highlightValues(arrayOf<Highlight>())
         }
+    }
+
+
+    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+        when (view) {
+            historyPager -> {
+                when (motionEvent.action){
+                    MotionEvent.ACTION_MOVE -> {
+                        swipeRefreshLayout?.isEnabled = false
+                    }
+                    MotionEvent.ACTION_DOWN -> {
+                        swipeRefreshLayout?.isEnabled = false
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        swipeRefreshLayout?.isEnabled = true
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                        swipeRefreshLayout?.isEnabled = true
+                    }
+                }
+            }
+        }
+        return false
     }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
@@ -378,11 +418,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
+    //TODO: rename
     private fun updateHistoryListAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>) {
-        (historyList.adapter as HistoryListViewAdapter).orders = orderList
-        (historyList.adapter as HistoryListViewAdapter).fills  = fillList
-        (historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
-        historyList.setHeightBasedOnChildren()
+        (historyPager.adapter as HistoryPagerAdapter).orders = orderList
+        (historyPager.adapter as HistoryPagerAdapter).fills  = fillList
+        (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+        //historyList.setHeightBasedOnChildren()
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {

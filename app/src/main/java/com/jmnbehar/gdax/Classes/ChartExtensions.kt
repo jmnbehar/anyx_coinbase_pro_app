@@ -128,16 +128,10 @@ class PriceChart : LineChart {
 
         val prefs = Prefs(context)
 
-        val color = when (currency) {
-            Currency.BTC -> Color.YELLOW
-            Currency.BCH -> Color.GREEN
-            Currency.ETH -> Color.BLUE
-            Currency.LTC -> Color.GRAY
-            Currency.USD -> if(prefs.isDarkModeOn) {
-                Color.WHITE
-            } else {
-                Color.BLACK
-            }
+        val color = if(prefs.isDarkModeOn) {
+            currency.colorPrimaryDark
+        } else {
+            currency.colorPrimaryLight
         }
 
         val strokeWidth = 2.toFloat()

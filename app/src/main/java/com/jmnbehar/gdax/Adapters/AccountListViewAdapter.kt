@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Account) -> Unit) : BaseAdapter() {
+class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         var listSize = Account.list.size
@@ -29,7 +29,7 @@ class AccountListViewAdapter(var inflater: LayoutInflater?, var onClick: (Accoun
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         //TODO: quash this warning
-        var vi = inflater!!.inflate(R.layout.list_row_account, null)
+        val vi = viewGroup.inflate(R.layout.list_row_account)
         val accounts = Account.list.toMutableList()
         val usdAccount = Account.usdAccount
         if (usdAccount != null) {

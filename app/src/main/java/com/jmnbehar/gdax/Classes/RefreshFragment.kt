@@ -5,6 +5,7 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
+import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.onRefresh
@@ -31,11 +32,11 @@ open class RefreshFragment: Fragment() {
         val backgroundView = newView ?: view
         val prefs = Prefs(context)
         if (prefs.isDarkModeOn) {
-            backgroundView?.backgroundColor = Color.DKGRAY
-            activity.setTheme(android.R.style.Theme_Material)
-        } else {
             backgroundView?.backgroundColor = Color.TRANSPARENT
-            activity.setTheme(android.R.style.Theme_Material_Light)
+            activity.setTheme(R.style.AppThemeDark)
+        } else {
+            backgroundView?.backgroundColor = Color.WHITE
+            activity.setTheme(R.style.AppThemeLight)
         }
     }
 

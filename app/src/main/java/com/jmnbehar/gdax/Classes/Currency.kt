@@ -1,5 +1,6 @@
 package com.jmnbehar.gdax.Classes
 
+import android.graphics.Color
 import com.jmnbehar.gdax.Fragments.TradeFragment
 import com.jmnbehar.gdax.R
 import java.util.*
@@ -78,6 +79,28 @@ enum class Currency {
             Currency.BCH -> GregorianCalendar(2017, Calendar.JULY, 1).time
             Currency.LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
             else         -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+        }
+
+    val colorPrimaryDark : Int
+        get() {
+            return when (this) {
+                Currency.BTC -> Color.YELLOW
+                Currency.BCH -> Color.GREEN
+                Currency.ETH -> Color.BLUE
+                Currency.LTC -> Color.GRAY
+                Currency.USD -> Color.WHITE
+            }
+        }
+
+    val colorPrimaryLight : Int
+        get() {
+            return when (this) {
+                Currency.BTC -> Color.YELLOW
+                Currency.BCH -> Color.GREEN
+                Currency.ETH -> Color.BLUE
+                Currency.LTC -> Color.GRAY
+                Currency.USD -> Color.BLACK
+            }
         }
 
     val lifetimeInSeconds : Long

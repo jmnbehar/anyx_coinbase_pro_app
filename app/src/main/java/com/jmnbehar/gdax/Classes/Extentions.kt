@@ -40,8 +40,8 @@ fun ViewManager.horizontalLayout(string1: String, string2: String) : LinearLayou
     }
 }
 
-fun ListView.setHeightBasedOnChildren() {
-    val listAdapter = adapter ?: return
+fun ListView.setHeightBasedOnChildren(): Int {
+    val listAdapter = adapter ?: return 0
     val bottomPadding = 66
     val desiredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED)
     var totalHeight = 0
@@ -58,6 +58,7 @@ fun ListView.setHeightBasedOnChildren() {
     val params = layoutParams
     params.height = totalHeight + dividerHeight * (listAdapter.count - 1) + bottomPadding
     layoutParams = params
+    return params.height
 }
 
 fun Double.btcFormat(): String = "%.8f".format(this)
