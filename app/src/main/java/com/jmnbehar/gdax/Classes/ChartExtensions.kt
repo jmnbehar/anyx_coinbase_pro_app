@@ -126,13 +126,7 @@ class PriceChart : LineChart {
 
         val dataSet = LineDataSet(entries, "Chart")
 
-        val prefs = Prefs(context)
-
-        val color = if(prefs.isDarkModeOn) {
-            currency.colorPrimaryDark
-        } else {
-            currency.colorPrimaryLight
-        }
+        val color = currency.colorPrimary(context)
 
         val strokeWidth = 2.toFloat()
         dataSet.color = color

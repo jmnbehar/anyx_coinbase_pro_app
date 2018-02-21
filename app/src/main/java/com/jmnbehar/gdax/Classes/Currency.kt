@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
+import android.support.v4.content.ContextCompat
 import com.jmnbehar.gdax.Fragments.TradeFragment
 import com.jmnbehar.gdax.R
 import org.jetbrains.anko.backgroundColor
@@ -85,27 +86,27 @@ enum class Currency {
             else         -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
         }
 
-    val colorPrimaryDark : Int
-        get() {
-            return when (this) {
-                Currency.BTC -> Color.YELLOW
-                Currency.BCH -> Color.GREEN
-                Currency.ETH -> Color.BLUE
-                Currency.LTC -> Color.GRAY
-                Currency.USD -> Color.WHITE
-            }
-        }
+    fun colorPrimary(context: Context) : Int {
+        val prefs = Prefs(context)
 
-    val colorPrimaryLight : Int
-        get() {
-            return when (this) {
-                Currency.BTC -> Color.YELLOW
-                Currency.BCH -> Color.GREEN
-                Currency.ETH -> Color.BLUE
-                Currency.LTC -> Color.GRAY
-                Currency.USD -> Color.BLACK
+        return if (prefs.isDarkModeOn) {
+            when (this) {
+                Currency.BTC -> ContextCompat.getColor(context, R.color.btc_dk)
+                Currency.BCH -> ContextCompat.getColor(context, R.color.bch_dk)
+                Currency.ETH -> ContextCompat.getColor(context, R.color.eth_dk)
+                Currency.LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
+                Currency.USD -> ContextCompat.getColor(context, R.color.white)
+            }
+        } else {
+            when (this) {
+                Currency.BTC -> ContextCompat.getColor(context, R.color.btc_light)
+                Currency.BCH -> ContextCompat.getColor(context, R.color.bch_light)
+                Currency.ETH -> ContextCompat.getColor(context, R.color.eth_light)
+                Currency.LTC -> ContextCompat.getColor(context, R.color.ltc_light)
+                Currency.USD -> ContextCompat.getColor(context, R.color.black)
             }
         }
+    }
 
     fun colorStateList(context: Context) : ColorStateList {
         val prefs = Prefs(context)

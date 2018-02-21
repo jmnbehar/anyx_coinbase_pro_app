@@ -189,6 +189,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             historyPager.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyPager.setOnTouchListener(this)
+            val historyTabList = rootView.history_tab_layout
+            val color = currency.colorPrimary(activity)
+            historyTabList.setSelectedTabIndicatorColor(color)
 
             if (prefs.isLoggedIn) {
                 val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
