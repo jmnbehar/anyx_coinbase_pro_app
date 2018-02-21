@@ -3,19 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <com.jmnbehar.gdax.Classes.LockableViewPager
-        android:id="@+id/view_pager"
+        android:id="@+id/home_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <android.support.design.widget.TabLayout
-            android:id="@+id/tab_layout"
+            android:id="@+id/home_tab_layout"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="top" >
 
 
         </android.support.design.widget.TabLayout>
-
 
     </com.jmnbehar.gdax.Classes.LockableViewPager>
 </LinearLayout>

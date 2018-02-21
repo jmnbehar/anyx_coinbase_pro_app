@@ -2,6 +2,7 @@ package com.jmnbehar.gdax.Fragments
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v4.view.ViewPager
 import android.view.*
 import android.widget.ImageView
 import android.widget.ListView
@@ -25,6 +26,8 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.Button
+import com.jmnbehar.gdax.Adapters.HistoryPagerAdapter
+import kotlinx.android.synthetic.main.fragment_chart.*
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -33,6 +36,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var inflater: LayoutInflater
 
     private lateinit var historyList: ListView
+    private lateinit var historyPager: ViewPager
 
     private lateinit var priceText: TextView
 
@@ -79,12 +83,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceText = rootView.txt_chart_price
         percentChangeText = rootView.txt_chart_change_or_date
 
-        timespanButtonHour = rootView.btn_chart_timespan_hour
-        timespanButtonDay = rootView.btn_chart_timespan_day
-        timespanButtonWeek = rootView.btn_chart_timespan_week
-        timespanButtonMonth = rootView.btn_chart_timespan_month
-        timespanButtonYear = rootView.btn_chart_timespan_year
-        timespanButtonAll = rootView.btn_chart_timespan_all
+        timespanButtonHour = rootView.rbtn_chart_timespan_hour
+        timespanButtonDay = rootView.rbtn_chart_timespan_day
+        timespanButtonWeek = rootView.rbtn_chart_timespan_week
+        timespanButtonMonth = rootView.rbtn_chart_timespan_month
+        timespanButtonYear = rootView.rbtn_chart_timespan_year
+        timespanButtonAll = rootView.rbtn_chart_timespan_all
 
         val account = account
         if (account == null) {
@@ -172,7 +176,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
             historyList = rootView.list_history
-            historyList.adapter = HistoryListViewAdapter(inflater, prefs.isLoggedIn, stashedOrders, stashedFills,
+            historyPager = rootView.history_view_pager
+            historyPager.adapter = HistoryPagerAdapter(prefs.isLoggedIn, stashedOrders, stashedFills,
+                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+
+            historyList.adapter = HistoryListViewAdapter(prefs.isLoggedIn, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyList.setHeightBasedOnChildren()
 
@@ -188,9 +196,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         prefs.stashFills(fillResult.value)
                         val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
                         val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                        historyList.adapter = HistoryListViewAdapter(inflater, true, filteredOrders, filteredFills,
+                        historyList.adapter = HistoryListViewAdapter(true, filteredOrders, filteredFills,
                                 { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                         historyList.setHeightBasedOnChildren()
+                        history_view_pager
                     }
                 }
             }

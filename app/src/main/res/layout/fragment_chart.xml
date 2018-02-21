@@ -74,58 +74,85 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />
 
-            <LinearLayout
+            <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btn_chart_timespan_hour"
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_hour"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:text="Hour" />
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="1H" />
 
-                <Button
-                    android:id="@+id/btn_chart_timespan_day"
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_day"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:text="Day" />
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="1D" />
 
-                <Button
-                    android:id="@+id/btn_chart_timespan_week"
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_week"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:text="Week" />
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="1W" />
 
-                <Button
-                    android:id="@+id/btn_chart_timespan_month"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAllCaps="false"
-                    android:text="Month" />
-
-                <Button
-                    android:id="@+id/btn_chart_timespan_year"
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_month"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:text="Year" />
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="1M" />
 
-                <Button
-                    android:id="@+id/btn_chart_timespan_all"
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_year"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:text="All" />
-            </LinearLayout>
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="1Y" />
+
+                <RadioButton
+                    android:id="@+id/rbtn_chart_timespan_all"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/timespan_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:text="All"/>
+            </RadioGroup>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -195,24 +222,28 @@
 
         </LinearLayout>
 
+        <android.support.v4.view.ViewPager
+            android:id="@+id/history_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="500dp" >
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="History"
-            android:textSize="30sp"
-            tools:layout_editor_absoluteX="48dp"
-            tools:layout_editor_absoluteY="16dp" />
+            <android.support.design.widget.TabLayout
+                android:id="@+id/history_tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="top" >
+
+
+            </android.support.design.widget.TabLayout>
+
+        </android.support.v4.view.ViewPager>
 
         <ListView
             android:id="@+id/list_history"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="1dp"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="8dp" />
-
-
         </LinearLayout>
     </com.jmnbehar.gdax.Classes.LockableScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

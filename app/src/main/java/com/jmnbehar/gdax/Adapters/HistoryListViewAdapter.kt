@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_fill.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(var inflater: LayoutInflater, val isLoggedIn: Boolean, var orders: List<ApiOrder>, var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
+class HistoryListViewAdapter(val isLoggedIn: Boolean, var orders: List<ApiOrder>, var fills: List<ApiFill>, var orderOnClick: (ApiOrder) -> Unit, var fillOnClick: (ApiFill) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return orders.size + fills.size + offset

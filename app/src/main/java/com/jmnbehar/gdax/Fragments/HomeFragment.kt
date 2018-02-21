@@ -2,7 +2,6 @@ package com.jmnbehar.gdax.Fragments
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +31,7 @@ class HomeFragment : RefreshFragment() {
         val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
 
         val prefs = Prefs(context)
-        val tabLayout = rootView.tab_layout
+        val tabLayout = rootView.home_tab_layout
 
         if (prefs.isDarkModeOn) {
             tabLayout.setTabTextColors(Color.LTGRAY, Color.WHITE)
@@ -40,7 +39,7 @@ class HomeFragment : RefreshFragment() {
             tabLayout.setTabTextColors(Color.DKGRAY, Color.BLACK)
         }
 
-        viewPager = rootView.view_pager
+        viewPager = rootView.home_view_pager
 
         collectionPagerAdapter = HomePagerAdapter(childFragmentManager)
         viewPager?.adapter = collectionPagerAdapter

@@ -67,7 +67,7 @@ class OnboardActivity : AppCompatActivity() {
         finishBtn = intro_btn_finish
 
         // Set up the ViewPager with the sections adapter.
-        viewPager = view_pager
+        viewPager = home_view_pager
         viewPager.adapter = mSectionsPagerAdapter
 
         val evaluator = ArgbEvaluator()
