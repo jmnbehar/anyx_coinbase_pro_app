@@ -212,7 +212,7 @@
                 android:id="@+id/cb_trade_advanced"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Advanced (Not Yet Available)" />
+                android:text="Advanced" />
 
             <LinearLayout
                 android:id="@+id/layout_trade_advanced"

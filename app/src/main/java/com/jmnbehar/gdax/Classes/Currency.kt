@@ -88,7 +88,6 @@ enum class Currency {
 
     fun colorPrimary(context: Context) : Int {
         val prefs = Prefs(context)
-
         return if (prefs.isDarkModeOn) {
             when (this) {
                 Currency.BTC -> ContextCompat.getColor(context, R.color.btc_dk)
@@ -103,6 +102,27 @@ enum class Currency {
                 Currency.BCH -> ContextCompat.getColor(context, R.color.bch_light)
                 Currency.ETH -> ContextCompat.getColor(context, R.color.eth_light)
                 Currency.LTC -> ContextCompat.getColor(context, R.color.ltc_light)
+                Currency.USD -> ContextCompat.getColor(context, R.color.black)
+            }
+        }
+    }
+
+    fun colorAccent(context: Context) : Int {
+        val prefs = Prefs(context)
+        return if (prefs.isDarkModeOn) {
+            when (this) {
+                Currency.BTC -> ContextCompat.getColor(context, R.color.btc_accent)
+                Currency.BCH -> ContextCompat.getColor(context, R.color.bch_accent)
+                Currency.ETH -> ContextCompat.getColor(context, R.color.eth_accent)
+                Currency.LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
+                Currency.USD -> ContextCompat.getColor(context, R.color.white)
+            }
+        } else {
+            when (this) {
+                Currency.BTC -> ContextCompat.getColor(context, R.color.btc_accent)
+                Currency.BCH -> ContextCompat.getColor(context, R.color.bch_accent)
+                Currency.ETH -> ContextCompat.getColor(context, R.color.eth_accent)
+                Currency.LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
                 Currency.USD -> ContextCompat.getColor(context, R.color.black)
             }
         }
@@ -143,8 +163,8 @@ enum class Currency {
                 Currency.BTC -> Color.WHITE
                 Currency.ETH -> Color.WHITE
                 Currency.BCH -> Color.WHITE
-                Currency.LTC -> Color.BLACK
-                Currency.USD -> Color.BLACK
+                Currency.LTC -> Color.WHITE
+                Currency.USD -> Color.WHITE
             }
         }
     }

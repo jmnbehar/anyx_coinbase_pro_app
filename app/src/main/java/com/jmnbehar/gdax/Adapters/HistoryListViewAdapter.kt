@@ -7,6 +7,7 @@ import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_history.view.*
+import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.image
 
 /**
@@ -97,6 +98,11 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
             }
         }
 
+        val imageView = vi.img_history_icon
+        imageView.backgroundColor = when (tradeSide) {  //TODO: change to Ellie Approved Colors
+            TradeSide.BUY -> Color.GREEN
+            TradeSide.SELL -> Color.RED
+        }
         vi.img_history_icon.setImageResource(currency.iconId)
         amountTextView.text = amount.btcFormat()
         currencyTextView.text = " $currency for "

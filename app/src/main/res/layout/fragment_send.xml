@@ -15,33 +15,36 @@
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
 
-    <RadioGroup
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabl_send_currency"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="40dp"
+        android:layout_gravity="top">
 
-        <RadioButton
-            android:id="@+id/rbtn_trade_btc"
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_send_btc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="BTC" />
+            android:text="BTC"/>
 
-        <RadioButton
-            android:id="@+id/rbtn_trade_eth"
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_send_eth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="ETH" />
+            android:text="ETH"/>
 
-        <RadioButton
-            android:id="@+id/rbtn_trade_ltc"
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_send_bch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="LTC" />
+            android:text="BCH"/>
 
-    </RadioGroup>
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_send_ltc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LTC"/>
+    </android.support.design.widget.TabLayout>
 
 
     <LinearLayout
@@ -117,7 +120,8 @@
             android:id="@+id/layout_send_two_factor"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/txt_send_two_factor_label"
@@ -154,6 +158,7 @@
         android:id="@+id/btn_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="Send" />
 
 

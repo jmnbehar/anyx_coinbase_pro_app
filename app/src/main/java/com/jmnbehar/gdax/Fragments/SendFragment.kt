@@ -1,6 +1,7 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,9 +23,10 @@ class SendFragment : RefreshFragment() {
     lateinit private var inflater: LayoutInflater
     lateinit private var titleText: TextView
 
-    lateinit private var radioButtonBtc: RadioButton
-    lateinit private var radioButtonEth: RadioButton
-    lateinit private var radioButtonLtc: RadioButton
+//    lateinit private var radioButtonBtc: RadioButton
+//    lateinit private var radioButtonEth: RadioButton
+//    lateinit private var radioButtonLtc: RadioButton
+    lateinit private var currencyTabLayout: TabLayout
 
     lateinit private var amountEditText: EditText
     lateinit private var amountUnitText: TextView
@@ -59,9 +61,10 @@ class SendFragment : RefreshFragment() {
 
         titleText = rootView.txt_send_name
 
-        radioButtonBtc = rootView.rbtn_trade_btc
-        radioButtonEth = rootView.rbtn_trade_eth
-        radioButtonLtc = rootView.rbtn_trade_ltc
+//        radioButtonBtc = rootView.rbtn_trade_btc
+//        radioButtonEth = rootView.rbtn_trade_eth
+//        radioButtonLtc = rootView.rbtn_trade_ltc
+        currencyTabLayout = rootView.tabl_send_currency
 
         amountLabelText = rootView.txt_send_amount_label
         amountEditText = rootView.etxt_send_amount
@@ -80,17 +83,29 @@ class SendFragment : RefreshFragment() {
 
         switchCurrency()
 
-        radioButtonBtc.isChecked = true
+        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                when(tab.position) {
+                    0 -> switchCurrency(Currency.BTC)
+                    1 -> switchCurrency(Currency.ETH)
+                    2 -> switchCurrency(Currency.BCH)
+                    3 -> switchCurrency(Currency.LTC)
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
-        radioButtonBtc.setOnClickListener {
-            switchCurrency(Currency.BTC)
-        }
-        radioButtonEth.setOnClickListener {
-            switchCurrency(Currency.ETH)
-        }
-        radioButtonLtc.setOnClickListener {
-            switchCurrency(Currency.LTC)
-        }
+//        radioButtonBtc.isChecked = true
+//        radioButtonBtc.setOnClickListener {
+//            switchCurrency(Currency.BTC)
+//        }
+//        radioButtonEth.setOnClickListener {
+//            switchCurrency(Currency.ETH)
+//        }
+//        radioButtonLtc.setOnClickListener {
+//            switchCurrency(Currency.LTC)
+//        }
 
         val prefs = Prefs(context)
 

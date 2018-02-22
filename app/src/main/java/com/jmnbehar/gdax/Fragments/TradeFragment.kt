@@ -115,7 +115,7 @@ class TradeFragment : RefreshFragment() {
         val buttonTextColor = account.currency.buttonTextColor(activity)
         submitOrderButton.textColor = buttonTextColor
 
-        titleText.text = account.currency.toString()
+        titleText.text = "Buy and Sell " + account.currency.toString()
 
         usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
 
@@ -144,8 +144,7 @@ class TradeFragment : RefreshFragment() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
 
-        //TODO: use accent color instead
-        val tabAccentColor = account.currency.colorPrimary(context)
+        val tabAccentColor = account.currency.colorAccent(context)
         tradeSideTabLayout = rootView.tabl_trade_side
         tradeSideTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
         tradeSideTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -188,7 +187,7 @@ class TradeFragment : RefreshFragment() {
             if (isChecked) {
                 advancedOptionsLayout.visibility = View.VISIBLE
             } else {
-                advancedOptionsLayout.visibility = View.GONE
+                advancedOptionsLayout.visibility = View.INVISIBLE
             }
         }
 

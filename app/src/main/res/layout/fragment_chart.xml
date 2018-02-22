@@ -21,7 +21,9 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -79,28 +81,30 @@
 
             <com.jmnbehar.gdax.Classes.PriceChart
                 android:id="@+id/chart"
-                android:layout_marginTop="-20dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="20" />
+                android:layout_marginTop="-20dp"
+                android:layout_weight="20"
+                android:paddingLeft="-10dp"
+                android:paddingRight="-10dp" />
 
             <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:layout_weight="1"
+                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
                 android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_hour"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
@@ -110,9 +114,9 @@
                     android:id="@+id/rbtn_chart_timespan_day"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
@@ -122,9 +126,9 @@
                     android:id="@+id/rbtn_chart_timespan_week"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
@@ -134,9 +138,9 @@
                     android:id="@+id/rbtn_chart_timespan_month"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
@@ -146,9 +150,9 @@
                     android:id="@+id/rbtn_chart_timespan_year"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
@@ -158,22 +162,22 @@
                     android:id="@+id/rbtn_chart_timespan_all"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_weight="1"
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
-                    android:text="All"/>
+                    android:text="All" />
             </RadioGroup>
 
             <LinearLayout
                 android:id="@+id/ll_chart_trade_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:layout_weight="1"
                 android:orientation="horizontal">
 
                 <Button
@@ -194,11 +198,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
                 android:gravity="center_vertical">
 
                 <ImageView
@@ -236,8 +240,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textAlignment="textEnd"
-                        android:text="20" />
+                        android:text="20"
+                        android:textAlignment="textEnd" />
 
                 </LinearLayout>
             </LinearLayout>
