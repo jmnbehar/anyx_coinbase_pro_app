@@ -155,17 +155,8 @@ class PriceChart : LineChart {
             axisRight.setDrawPartialAxis(close)
         }
 
-        //TODO: center description
-        description.textSize = 18.0f
-//        description.setPosition(center.x, top.toFloat())
-        description.text = when (timeRange) {
-            TimeInSeconds.oneHour -> "1 hour"
-            TimeInSeconds.oneDay -> "24 hours"
-            TimeInSeconds.oneWeek -> "7 days"
-            TimeInSeconds.oneMonth-> "1 month"
-            TimeInSeconds.oneYear-> "1 year"
-            else -> ""
-        } + "                              "
+//        //TODO: center
+//       "
 
         description.isEnabled = true
 

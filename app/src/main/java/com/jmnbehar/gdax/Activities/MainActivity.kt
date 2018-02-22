@@ -176,11 +176,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else {
             //super.onBackPressed()
 
-            if (supportFragmentManager.backStackEntryCount > 0) {
+            if (supportFragmentManager.backStackEntryCount > 1) {
                 val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
                 currentFragment = supportFragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
 
-                supportFragmentManager.popBackStack();
+                supportFragmentManager.popBackStack()
+
                 //currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
 //                val intent = Intent(this, LoginActivity::class.java)

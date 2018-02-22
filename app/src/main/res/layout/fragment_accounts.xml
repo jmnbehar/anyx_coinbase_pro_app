@@ -68,7 +68,7 @@
             android:id="@+id/chart_accounts"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:paddingTop="-10dp" />
+            android:paddingTop="-20dp" />
 
         <ListView
             android:id="@+id/list_accounts"

@@ -27,56 +27,62 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txt_chart_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="BTC"
-                    android:textSize="30sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-                <TextView
-                    android:id="@+id/txt_chart_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="500"
-                    android:textAlignment="textEnd"
-                    android:textSize="30sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/txt_chart_change_or_date"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="20%"
-                    android:textAlignment="textEnd"
-                    android:textSize="18sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
 
+                    <TextView
+                        android:id="@+id/txt_chart_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="BTC"
+                        android:textSize="30sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
+
+                    <TextView
+                        android:id="@+id/txt_chart_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="500"
+                        android:textAlignment="textEnd"
+                        android:textSize="30sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_chart_change_or_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="20%"
+                        android:textAlignment="textEnd"
+                        android:textSize="18sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
+
+                </LinearLayout>
             </LinearLayout>
 
 
             <com.jmnbehar.gdax.Classes.PriceChart
                 android:id="@+id/chart"
+                android:layout_marginTop="-20dp"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_weight="6" />
+                android:layout_height="0dp"
+                android:layout_weight="20" />
 
             <RadioGroup
                 android:layout_width="match_parent"
@@ -185,11 +191,14 @@
                     android:text="Sell" />
             </LinearLayout>
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:gravity="center_vertical">
 
                 <ImageView
@@ -232,6 +241,7 @@
 
                 </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 

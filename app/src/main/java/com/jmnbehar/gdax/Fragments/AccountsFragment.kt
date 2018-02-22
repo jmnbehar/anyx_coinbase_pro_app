@@ -88,7 +88,13 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         valueText.text = entry.y.toDouble().fiatFormat()
         val candle = accountTotalCandles[entry.x.toInt()]
         percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
-        percentChangeText.textColor = Color.BLACK
+        val prefs = Prefs(context)
+
+        percentChangeText.textColor = if (prefs.isDarkModeOn) {
+            Color.WHITE
+        } else {
+            Color.BLACK
+        }
     }
 
     override fun onNothingSelected() {

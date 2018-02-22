@@ -128,6 +128,26 @@ enum class Currency {
             }
         }
     }
+    fun buttonTextColor(context: Context) : Int {
+        val prefs = Prefs(context)
+        return if (prefs.isDarkModeOn) {
+            when (this) {
+                Currency.BTC -> Color.WHITE
+                Currency.ETH -> Color.WHITE
+                Currency.BCH -> Color.WHITE
+                Currency.LTC -> Color.BLACK
+                Currency.USD -> Color.BLACK
+            }
+        } else {
+            when (this) {
+                Currency.BTC -> Color.WHITE
+                Currency.ETH -> Color.WHITE
+                Currency.BCH -> Color.WHITE
+                Currency.LTC -> Color.BLACK
+                Currency.USD -> Color.BLACK
+            }
+        }
+    }
     val lifetimeInSeconds : Long
         get() {
             val utcTimeZone = TimeZone.getTimeZone("UTC")

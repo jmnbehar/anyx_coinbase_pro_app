@@ -7,6 +7,7 @@ import android.widget.BaseAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_row_history.view.*
+import org.jetbrains.anko.image
 
 /**
  * Created by jmnbehar on 11/12/2017.
@@ -95,10 +96,17 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
                 TradeSide.SELL -> "Sold "
             }
         }
-        amountTextView.text = amount.toString()
+
+        vi.img_history_icon.setImageResource(currency.iconId)
+        amountTextView.text = amount.btcFormat()
         currencyTextView.text = " $currency for "
         priceTextView.text = price.fiatFormat()
-        tradeTypeTextView.text = "(${tradeType.toString()})"
+        if (tradeType == null) {
+            tradeTypeTextView.visibility = View.GONE
+        } else {
+            tradeTypeTextView.visibility = View.VISIBLE
+            tradeTypeTextView.text = "($tradeType order)"
+        }
 
         return vi
 

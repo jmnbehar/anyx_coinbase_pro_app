@@ -130,6 +130,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val buttonColors = currency.colorStateList(activity)
             buyButton.backgroundTintList = buttonColors
             sellButton.backgroundTintList = buttonColors
+            val buttonTextColor = currency.buttonTextColor(activity)
+            buyButton.textColor = buttonTextColor
+            sellButton.textColor = buttonTextColor
 
             //TODO: send over more info
             buyButton.setOnClickListener {
@@ -205,8 +208,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         //TODO: don't replace adapter, simply update what it holds
                         //TODO: investigate crash onbackpressed
-                        historyPager.adapter = HistoryPagerAdapter(childFragmentManager, filteredOrders, filteredFills,
-                                { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+                        (historyPager.adapter as HistoryPagerAdapter)?.orders = filteredOrders
+                        (historyPager.adapter as HistoryPagerAdapter)?.fills = filteredFills
+
                         history_view_pager
                     }
                 }
@@ -230,13 +234,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPause()
     }
 
-    fun setHistoryPagerHeight(height: Int) {
-        if (height > historyPager.layoutParams.height) {
-            val tabLayoutHeight = 80 // history_tab_layout.height
-            historyPager.layoutParams.height = (height + tabLayoutHeight)
-        }
-    }
-
     private fun setChartTimespan(timespan: Long) {
         chartTimeSpan = timespan
         MainActivity.progressDialog?.show()
@@ -247,6 +244,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             MainActivity.progressDialog?.dismiss()
         })
     }
+
     private fun setPercentChangeText(price: Double, open: Double) {
         val change = price - open
         val weightedChange: Double = (change / open)
@@ -384,7 +382,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 GdaxApi.account(account.id).executeRequest(onFailure) { result ->
                     val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                     val newBalance = apiAccount.balance.toDoubleOrZero()
-                    balanceText.text = account.balance.fiatFormat()
+                    balanceText.text = newBalance.btcFormat() + " " + account.currency
                     valueText.text = account.value.fiatFormat()
                     miniRefresh(onFailure) {
                         account.updateAccount(newBalance, account.product.price)

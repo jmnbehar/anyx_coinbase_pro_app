@@ -121,6 +121,8 @@ class TradeFragment : RefreshFragment() {
         submitOrderButton = rootView.btn_place_order
         val buttonColors = account.currency.colorStateList(activity)
         submitOrderButton.backgroundTintList = buttonColors
+        val buttonTextColor = account.currency.buttonTextColor(activity)
+        submitOrderButton.textColor = buttonTextColor
 
         titleText.text = account.currency.toString()
 
