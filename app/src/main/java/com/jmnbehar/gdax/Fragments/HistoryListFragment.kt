@@ -45,12 +45,12 @@ class HistoryListFragment() : Fragment() {
         } else {
             historyList.adapter = HistoryListViewAdapter(fills, fillOnClick = { fill -> onFillClick(fill) })
         }
-        val listHeight = historyList.setHeightBasedOnChildren()
-
-        val params = rootView.layoutParams
-        params.height = listHeight
-        rootView.layoutParams = params
-        (parentFragment as ChartFragment).setHistoryPagerHeight(listHeight)
+//        val listHeight = historyList.setHeightBasedOnChildren()
+//
+//        val params = rootView.layoutParams
+//        params.height = listHeight
+//        rootView.layoutParams = params
+//        (parentFragment as ChartFragment).setHistoryPagerHeight(listHeight)
         return rootView
     }
 }

@@ -74,6 +74,12 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
             currency = Currency.fromString(order.product_id)
             tradeType = TradeType.fromString(order.type)
             vi.setOnClickListener { orderOnClick(order) }
+
+
+            sideTextView.text = when (tradeSide) {
+                TradeSide.BUY -> "Buying "
+                TradeSide.SELL -> "Selling "
+            }
         } else {
             val fill = fills[i]
             tradeSide = TradeSide.fromString(fill.side)
@@ -82,10 +88,12 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
             amount = fill.size.toDoubleOrZero()
             tradeType = null
             vi.setOnClickListener { fillOnClick(fill) }
-        }
-        sideTextView.text = when (tradeSide) {
-            TradeSide.BUY -> "Buying "
-            TradeSide.SELL -> "Selling "
+
+
+            sideTextView.text = when (tradeSide) {
+                TradeSide.BUY -> "Bought "
+                TradeSide.SELL -> "Sold "
+            }
         }
         amountTextView.text = amount.toString()
         currencyTextView.text = " $currency for "

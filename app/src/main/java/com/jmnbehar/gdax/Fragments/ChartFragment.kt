@@ -23,7 +23,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
-import android.widget.Button
 import android.widget.RadioButton
 import com.jmnbehar.gdax.Adapters.HistoryPagerAdapter
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -102,7 +101,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             lineChart = rootView.chart
             lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
                 swipeRefreshLayout?.isEnabled = false
-                LockableScrollView.scrollLocked = true
             }
             lineChart.setOnChartValueSelectedListener(this)
             lineChart.onChartGestureListener = this
@@ -117,7 +115,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             if (prefs.isLoggedIn) {
                 tickerText.text = "$currency wallet"
                 iconView.setImageResource(currency.iconId)
-                balanceText.text = "${account.balance.btcFormat()} ${currency}"
+                balanceText.text = "${account.balance.btcFormat()} $currency"
                 valueText.text = account.value.fiatFormat()
             } else {
                 tickerText.visibility = View.GONE
@@ -315,7 +313,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         account?. let { account ->
             val candle = account.product.candles[entry.x.toInt()]
             percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
-            percentChangeText.textColor = Color.BLACK
+            val prefs = Prefs(context)
+            if (prefs.isDarkModeOn) {
+                percentChangeText.textColor = Color.WHITE
+            } else {
+                percentChangeText.textColor = Color.BLACK
+            }
         }
     }
 
@@ -356,12 +359,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
-        LockableScrollView.scrollLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
-        LockableScrollView.scrollLocked = true
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }

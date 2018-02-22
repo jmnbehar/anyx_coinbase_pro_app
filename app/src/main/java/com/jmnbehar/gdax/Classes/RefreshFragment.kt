@@ -40,12 +40,22 @@ open class RefreshFragment: Fragment() {
         }
     }
 
+
+    //TODO: use the other one
     fun setupSwipeRefresh(rootView: View) {
         swipeRefreshLayout = rootView.swipe_refresh_layout
         swipeRefreshLayout?.onRefresh {
             refresh { endRefresh() }
         }
     }
+
+//    fun setupSwipeRefresh(swipeRefreshLayout: SwipeRefreshLayout) {
+//        this.swipeRefreshLayout = swipeRefreshLayout
+//        this.swipeRefreshLayout?.onRefresh {
+//            refresh { endRefresh() }
+//        }
+//    }
+
 
     open fun refresh(onComplete: () -> Unit) {
         onComplete()
