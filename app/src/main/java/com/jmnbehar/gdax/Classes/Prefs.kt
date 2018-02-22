@@ -60,7 +60,7 @@ class Prefs (context: Context) {
         set(value) = prefs.edit().putBoolean(SHOW_SEND_CONFIRM, value).apply()
 
     var isDarkModeOn: Boolean
-        get() = prefs.getBoolean(DARK_MODE, false)
+        get() = prefs.getBoolean(DARK_MODE, true)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
     var isLoggedIn: Boolean

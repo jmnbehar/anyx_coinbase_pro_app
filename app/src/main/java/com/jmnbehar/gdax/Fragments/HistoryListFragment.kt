@@ -6,8 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import com.jmnbehar.gdax.Adapters.FillHistoryListViewAdapter
-import com.jmnbehar.gdax.Adapters.OrderHistoryListViewAdapter
+import com.jmnbehar.gdax.Adapters.HistoryListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.list_view.view.*
@@ -42,9 +41,9 @@ class HistoryListFragment() : Fragment() {
         val rootView = inflater!!.inflate(R.layout.list_view, container, false)
         historyList = rootView.list_view
         if (isOrderList) {
-            historyList.adapter = OrderHistoryListViewAdapter(orders, { order -> onOrderClick(order)})
+            historyList.adapter = HistoryListViewAdapter(orders, orderOnClick =  { order -> onOrderClick(order)})
         } else {
-            historyList.adapter = FillHistoryListViewAdapter(fills, { fill -> onFillClick(fill) })
+            historyList.adapter = HistoryListViewAdapter(fills, fillOnClick = { fill -> onFillClick(fill) })
         }
         val listHeight = historyList.setHeightBasedOnChildren()
 

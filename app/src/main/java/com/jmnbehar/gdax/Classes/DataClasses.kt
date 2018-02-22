@@ -15,6 +15,15 @@ enum class TradeSide {
             SELL -> "sell"
         }
     }
+    companion object {
+        fun fromString(string: String) : TradeSide {
+            return when (string) {
+                "buy"  -> BUY
+                "sell" -> SELL
+                else   -> BUY
+            }
+        }
+    }
 }
 
 enum class TradeType {

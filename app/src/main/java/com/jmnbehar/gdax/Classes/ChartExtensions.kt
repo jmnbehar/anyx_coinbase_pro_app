@@ -146,7 +146,7 @@ class PriceChart : LineChart {
 
         val open = candles.firstOrNull()?.close?.toFloat()
         if (open != null) {
-            axisLeft.showSpecificLabels(floatArrayOf(open), false)
+//            axisLeft.showSpecificLabels(floatArrayOf(open), false)
             axisLeft.setDrawPartialAxis(open)
         }
         val close = candles.lastOrNull()?.close?.toFloat()
