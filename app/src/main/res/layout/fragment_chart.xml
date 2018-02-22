@@ -1,248 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/swipe_refresh_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:screenOrientation="portrait"
     android:orientation="vertical">
-
-    <com.jmnbehar.gdax.Classes.LockableScrollView
-        android:id="@+id/lockable_scrollview_home"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/fragment_container"
+        <com.jmnbehar.gdax.Classes.LockableScrollView
+            android:id="@+id/lockable_scrollview_home"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:layout_alignParentTop="true" >
 
             <LinearLayout
+                android:id="@+id/fragment_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/txt_chart_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="BTC"
-                    android:textSize="30sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-                <TextView
-                    android:id="@+id/txt_chart_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="500"
-                    android:textAlignment="textEnd"
-                    android:textSize="30sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/txt_chart_change_or_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="20%"
-                    android:textAlignment="textEnd"
-                    android:textSize="18sp"
-                    tools:layout_editor_absoluteX="48dp"
-                    tools:layout_editor_absoluteY="16dp" />
-
-            </LinearLayout>
-
-
-            <com.jmnbehar.gdax.Classes.PriceChart
-                android:id="@+id/chart"
-                android:layout_width="match_parent"
-                android:layout_height="200dp" />
-
-            <RadioGroup
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_hour"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="1H" />
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_day"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="1D" />
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_week"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="1W" />
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_month"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="1M" />
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_year"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="1Y" />
-
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_all"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:text="All"/>
-            </RadioGroup>
-
-            <LinearLayout
-                android:id="@+id/ll_chart_trade_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_chart_buy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Buy" />
-
-                <Button
-                    android:id="@+id/btn_chart_sell"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sell" />
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/img_chart_account_icon"
-                    android:layout_width="30dp"
-                    android:layout_height="35dp" />
-
-                <TextView
-                    android:id="@+id/txt_chart_ticker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bitcoin"
-                    android:textSize="24sp" />
-
-                <android.support.v4.widget.Space
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5" />
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical" >
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/txt_chart_account_value"
-                        android:layout_width="match_parent"
+                        android:id="@+id/txt_chart_name"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="$A Billion"
-                        android:textAlignment="textEnd" />
+                        android:text="BTC"
+                        android:textSize="30sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
 
                     <TextView
-                        android:id="@+id/txt_chart_account_balance"
-                        android:layout_width="match_parent"
+                        android:id="@+id/txt_chart_price"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:text="500"
                         android:textAlignment="textEnd"
-                        android:text="20" />
+                        android:textSize="30sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_chart_change_or_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="20%"
+                        android:textAlignment="textEnd"
+                        android:textSize="18sp"
+                        tools:layout_editor_absoluteX="48dp"
+                        tools:layout_editor_absoluteY="16dp" />
+
+                </LinearLayout>
+
+
+                <com.jmnbehar.gdax.Classes.PriceChart
+                    android:id="@+id/chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp" />
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_hour"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="1H" />
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_day"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="1D" />
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_week"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="1W" />
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_month"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="1M" />
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_year"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="1Y" />
+
+                    <RadioButton
+                        android:id="@+id/rbtn_chart_timespan_all"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/timespan_radio_button"
+                        android:button="@android:color/transparent"
+                        android:gravity="center_horizontal"
+                        android:text="All"/>
+                </RadioGroup>
+
+                <LinearLayout
+                    android:id="@+id/ll_chart_trade_buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_chart_buy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Buy" />
+
+                    <Button
+                        android:id="@+id/btn_chart_sell"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Sell" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/img_chart_account_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="35dp" />
+
+                    <TextView
+                        android:id="@+id/txt_chart_ticker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bitcoin"
+                        android:textSize="24sp" />
+
+                    <android.support.v4.widget.Space
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txt_chart_account_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$A Billion"
+                            android:textAlignment="textEnd" />
+
+                        <TextView
+                            android:id="@+id/txt_chart_account_balance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAlignment="textEnd"
+                            android:text="20" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
-
-            <android.support.v4.view.ViewPager
-                android:id="@+id/history_view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="500dp">
-
-                <android.support.design.widget.TabLayout
-                    android:id="@+id/history_tab_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_gravity="top">
+        </com.jmnbehar.gdax.Classes.LockableScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 
-                </android.support.design.widget.TabLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/history_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="500dp">
 
-            </android.support.v4.view.ViewPager>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/history_tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="top">
 
-        </LinearLayout>
-    </com.jmnbehar.gdax.Classes.LockableScrollView>
-</android.support.v4.widget.SwipeRefreshLayout>
+
+        </android.support.design.widget.TabLayout>
+
+    </android.support.v4.view.ViewPager>
+</LinearLayout>
