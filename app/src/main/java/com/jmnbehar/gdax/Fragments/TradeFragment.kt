@@ -1,6 +1,8 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
+import android.support.design.widget.TabItem
+import android.support.design.widget.TabLayout
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -35,12 +37,8 @@ class TradeFragment : RefreshFragment() {
     private lateinit var cryptoBalanceText: TextView
     private lateinit var cryptoBalanceLabelText: TextView
 
-    private lateinit var radioButtonBuy: RadioButton
-    private lateinit var radioButtonSell: RadioButton
-
-    private lateinit var radioButtonMarket: RadioButton
-    private lateinit var radioButtonLimit: RadioButton
-    private lateinit var radioButtonStop: RadioButton
+    private lateinit var tradeTypeTabLayout: TabLayout
+    private lateinit var tradeSideTabLayout: TabLayout
 
     private lateinit var amountEditText: EditText
     private lateinit var amountUnitText: TextView
@@ -86,13 +84,6 @@ class TradeFragment : RefreshFragment() {
         this.inflater = inflater
 
         titleText = rootView.txt_trade_name
-
-        radioButtonBuy = rootView.rbtn_trade_buy
-        radioButtonSell = rootView.rbtn_trade_sell
-
-        radioButtonMarket = rootView.rbtn_trade_market
-        radioButtonLimit = rootView.rbtn_trade_limit
-        radioButtonStop = rootView.rbtn_trade_stop
 
         amountLabelText = rootView.txt_trade_amount_label
         amountEditText = rootView.etxt_trade_amount
@@ -153,29 +144,46 @@ class TradeFragment : RefreshFragment() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
 
-
-        radioButtonBuy.setOnClickListener {
-            switchTradeType(TradeSide.BUY)
-            if (tradeType != TradeType.LIMIT) {
-                amountEditText.setText("")
+        //TODO: use accent color instead
+        val tabAccentColor = account.currency.colorPrimary(context)
+        tradeSideTabLayout = rootView.tabl_trade_side
+        tradeSideTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+        tradeSideTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                when(tab.position) {
+                    1 -> {  //Sell
+                        switchTradeType(TradeSide.SELL)
+                        if (tradeType != TradeType.LIMIT) {
+                            amountEditText.setText("")
+                        }
+                    }
+                    else -> {  //Buy
+                        switchTradeType(TradeSide.BUY)
+                        if (tradeType != TradeType.LIMIT) {
+                            amountEditText.setText("")
+                        }
+                    }
+                }
             }
-        }
-        radioButtonSell.setOnClickListener {
-            switchTradeType(TradeSide.SELL)
-            if (tradeType != TradeType.LIMIT) {
-                amountEditText.setText("")
-            }
-        }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
-        radioButtonMarket.setOnClickListener {
-            switchTradeType(tradeType =  TradeType.MARKET)
-        }
-        radioButtonLimit.setOnClickListener {
-            switchTradeType(tradeType =  TradeType.LIMIT)
-        }
-        radioButtonStop.setOnClickListener {
-            switchTradeType(tradeType =  TradeType.STOP)
-        }
+        tradeTypeTabLayout = rootView.tabl_trade_type
+        tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+        tradeTypeTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                when(tab.position) {
+                    0 -> switchTradeType(tradeType =  TradeType.MARKET)
+                    1 -> switchTradeType(tradeType =  TradeType.LIMIT)
+                    2 -> switchTradeType(tradeType =  TradeType.STOP)
+                    else -> switchTradeType(tradeType =  TradeType.MARKET)
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
+
         advancedOptionsCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 advancedOptionsLayout.visibility = View.VISIBLE
@@ -425,11 +433,9 @@ class TradeFragment : RefreshFragment() {
         }
         when (tradeType) {
             TradeType.MARKET -> {
-                radioButtonMarket.isChecked = true
                 limitLayout.visibility = View.GONE
             }
             TradeType.LIMIT -> {
-                radioButtonLimit.isChecked = true
                 limitUnitText.text = localCurrency
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = "Limit Price"
@@ -460,7 +466,6 @@ class TradeFragment : RefreshFragment() {
                 advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
             }
             TradeType.STOP -> {
-                radioButtonStop.isChecked = true
                 limitUnitText.text = localCurrency
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = "Stop Price"
@@ -470,7 +475,6 @@ class TradeFragment : RefreshFragment() {
         }
         when (tradeSide) {
             TradeSide.BUY -> {
-                radioButtonBuy.isChecked = true
                 when (tradeType) {
                     TradeType.MARKET -> {
                         amountUnitText.text = localCurrency
@@ -488,7 +492,6 @@ class TradeFragment : RefreshFragment() {
                 }
             }
             TradeSide.SELL -> {
-                radioButtonSell.isChecked = true
                 when (tradeType) {
                     TradeType.MARKET -> {
                         amountUnitText.text = account.currency.toString()
