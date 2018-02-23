@@ -135,6 +135,19 @@ data class ApiCoinbaseAccount(
         val active: Boolean
         /* val wire_deposit_information: String */)
 
+data class ApiPaymentMethod(
+        val id: String,
+        val type: String,
+        val name: String,
+        val currency: String,
+        val balance: String,
+        val primary_buy: Boolean,
+        val primary_sell: Boolean,
+        val allow_deposit: Boolean,
+        val allow_withdraw: Boolean
+        /* val limits: String */)
+
+
 //data class ApiCoinbaseAccount(
 //        val id: String,
 //        val name: String,

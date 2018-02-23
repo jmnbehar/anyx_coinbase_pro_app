@@ -134,7 +134,7 @@ class SendFragment : RefreshFragment() {
 
         val min = currency.minSendAmount
 
-        if (amount > min) {
+        if (amount >= min) {
             GdaxApi.sendCrypto(amount, currency, destination).executePost(
                     { result -> //failure
                         val response = result.error.response.data
@@ -160,6 +160,7 @@ class SendFragment : RefreshFragment() {
                     })
         } else {
             toast("error! Trying to send less than minimum which is $min")
+            TransferHub.getFromPayment(10.0, Currency.USD)
         }
     }
 

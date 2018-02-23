@@ -14,33 +14,35 @@ import org.jetbrains.anko.image
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
-    var isOrderList: Boolean? = null
+class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: List<Any>, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
     var orders: List<ApiOrder> = listOf()
     var fills: List<ApiFill> = listOf()
 
     init {
-        val firstOrderOrFill = ordersOrFills.firstOrNull()
-        when (firstOrderOrFill) {
-            is ApiOrder -> {
-                isOrderList = true
-                orders = ordersOrFills as List<ApiOrder>
-            }
-            is ApiFill -> {
-                isOrderList = false
-                fills = ordersOrFills as List<ApiFill>
-            }
-            else -> isOrderList = null
+        if (isOrderList) {
+            orders = ordersOrFills as List<ApiOrder>
+        } else {
+            fills = ordersOrFills as List<ApiFill>
         }
     }
 
     override fun getCount(): Int {
-        return when (isOrderList) {
-            null -> 0
-            true -> orders.size
-            false -> fills.size
+
+        return if (isOrderList) {
+            if (orders.isEmpty()) {
+                1
+            } else {
+                orders.size
+            }
+        } else {
+            if (fills.isEmpty()) {
+                1
+            } else {
+                fills.size
+            }
         }
     }
+
 
     override fun getItem(i: Int): Any {
         return i
@@ -63,9 +65,18 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
         val priceTextView = vi.txt_history_price
         val currencyTextView = vi.txt_history_currency
         val tradeTypeTextView = vi.txt_history_trade_type
+        val imageView = vi.img_history_icon
 
 
         if (isOrderList == true) {
+            if (orders.isEmpty()) {
+                imageView.visibility = View.INVISIBLE
+                sideTextView.visibility = View.GONE
+                amountTextView.text = "You have no open orders"
+                priceTextView.visibility = View.GONE
+                currencyTextView.visibility = View.GONE
+                tradeTypeTextView.visibility = View.GONE
+            }
             val order = orders[i]
             tradeSide = TradeSide.fromString(order.side)
             price = order.price.toDoubleOrZero()
@@ -83,6 +94,14 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
                 TradeSide.SELL -> "Selling "
             }
         } else {
+            if (fills.isEmpty()) {
+                imageView.visibility = View.INVISIBLE
+                sideTextView.visibility = View.GONE
+                amountTextView.text = "You have no open orders"
+                priceTextView.visibility = View.GONE
+                currencyTextView.visibility = View.GONE
+                tradeTypeTextView.visibility = View.GONE
+            }
             val fill = fills[i]
             tradeSide = TradeSide.fromString(fill.side)
             currency = Currency.fromString(fill.product_id)
@@ -98,7 +117,6 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
             }
         }
 
-        val imageView = vi.img_history_icon
         imageView.backgroundColor = when (tradeSide) {  //TODO: change to Ellie Approved Colors
             TradeSide.BUY -> Color.GREEN
             TradeSide.SELL -> Color.RED
@@ -116,66 +134,6 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
         }
 
         return vi
-
-//        if (isOrderList == true) {
-//            val order = orders[i]
-//            val vi = viewGroup.inflate(R.layout.list_row_history)
-//            vi.txt_fill_fee.text = "order item"
-//
-//            val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
-//            val filled = order.filled_size.toDoubleOrZero()
-//            val unfilledSize = size - filled
-//            vi.txt_fill_size.text = unfilledSize.btcFormat()
-//
-//            val price = order.price.toDouble()
-//            vi.txt_fill_price.text = price.fiatFormat()
-//            vi.txt_fill_fee.text = order.fill_fees
-//            vi.txt_fill_time.text = order.created_at
-//
-//            val subtype = TradeType.fromString(order.type)
-//            vi.txt_fill_type.text = when (subtype) {
-//                TradeType.MARKET -> subtype.toString()
-//                TradeType.LIMIT -> subtype.toString()
-//                TradeType.STOP ->"$subtype: ${order.price}"
-//            }
-//
-//            val textColor = if (order.side == TradeSide.BUY.toString()) {
-//                Color.GREEN
-//            } else {
-//                Color.RED
-//            }
-//            vi.txt_fill_size.setTextColor(textColor)
-//            vi.txt_fill_price.setTextColor(textColor)
-//            vi.txt_fill_fee.setTextColor(textColor)
-//            vi.txt_fill_time.setTextColor(textColor)
-//
-//            vi.setOnClickListener { orderOnClick(order) }
-//            return vi
-//        } else {
-//            val fill = fills[i]
-//            val vi = viewGroup.inflate(R.layout.list_row_history)
-//            vi.txt_fill_size.text = fill.size
-//
-//            val price = fill.price.toDouble()
-//            vi.txt_fill_price.text = price.fiatFormat()
-//            vi.txt_fill_fee.text = fill.fee
-//            vi.txt_fill_time.text = fill.created_at
-//            vi.txt_fill_type.text = ""
-//
-//            val textColor = if (fill.side == TradeSide.BUY.toString()) {
-//                Color.GREEN
-//            } else {
-//                Color.RED
-//            }
-//
-//            vi.txt_fill_size.setTextColor(textColor)
-//            vi.txt_fill_price.setTextColor(textColor)
-//            vi.txt_fill_fee.setTextColor(textColor)
-//            vi.txt_fill_time.setTextColor(textColor)
-//
-//            vi.setOnClickListener { fillOnClick(fill) }
-//            return vi
-//        }
 
     }
 }
