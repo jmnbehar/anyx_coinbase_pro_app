@@ -107,7 +107,9 @@ class LoginFragment : Fragment()  {
         }
 
         btnNewAccount.setOnClickListener { _ ->
-            val newAccountUrl = "https://www.coinbase.com/users/oauth_signup?client_id=2e7433cc0730d8cb8c77dd30e04b5658aacbf7612b2bad8aa7bb97b87fc0f876&meta%5Baccount%5D=all&redirect_uri=https%3A%2F%2Fwww.gdax.com%2Foauth_redirect&response_type=code"
+            //            val newAccountUrl = "https://www.coinbase.com/users/oauth_signup?client_id=2e7433cc0730d8cb8c77dd30e04b5658aacbf7612b2bad8aa7bb97b87fc0f876&meta%5Baccount%5D=all&redirect_uri=https%3A%2F%2Fwww.gdax.com%2Foauth_redirect&response_type=code"
+//            val newAccountUrl = "https://www.coinbase.com/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URL&state=SECURE_RANDOM&scope=wallet:accounts:read"
+            val newAccountUrl = "https://www.gdax.com/trade/BTC-USD"
             (activity as LoginActivity).goToFragment(true, newAccountUrl)
         }
 

@@ -1,7 +1,6 @@
 package com.jmnbehar.gdax.Fragments
 
 import android.os.Bundle
-import android.support.design.widget.TabItem
 import android.support.design.widget.TabLayout
 import android.text.Editable
 import android.text.TextWatcher
@@ -20,9 +19,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
-import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.util.*
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -351,7 +347,7 @@ class TradeFragment : RefreshFragment() {
 //        }
         val currency = account.currency
         val destination = GdaxApi.developerAddress(currency)
-        GdaxApi.send(amount, currency, destination).executePost(
+        GdaxApi.sendCrypto(amount, currency, destination).executePost(
                 { _ -> /*  fail silently   */
                     println("failure")
                 },

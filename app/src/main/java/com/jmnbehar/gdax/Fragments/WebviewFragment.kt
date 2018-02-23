@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_webview.view.*
@@ -14,7 +15,8 @@ import kotlinx.android.synthetic.main.fragment_webview.view.*
  */
 
 class WebviewFragment : RefreshFragment() {
-    var webView: AdvancedWebView? = null
+    //    var webView: AdvancedWebView? = null
+    var webView: WebView? = null
     companion object {
         var url: String? = null
         fun newInstance(url: String?): WebviewFragment {

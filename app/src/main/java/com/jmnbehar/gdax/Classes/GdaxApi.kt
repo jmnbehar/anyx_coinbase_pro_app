@@ -224,9 +224,14 @@ sealed class GdaxApi: FuelRouting {
     class getOrder(val orderId: String) : GdaxApi()
     class fills(val orderId: String = "all", val productId: String = "all") : GdaxApi()
     //add position?
-    //add deposit and withdrawal
-    class send(val amount: Double, val currency: Currency, val cryptoAddress: String) : GdaxApi()
-    //add payment methods
+    class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : GdaxApi()
+    class coinbaseAccounts() : GdaxApi()
+    class paymentMethods() : GdaxApi()
+    class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
+    class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
+    class getFromCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
+    class getFromPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
+    //add deposits
     //look into reports
 
     private var timeLock = 0
@@ -290,10 +295,15 @@ sealed class GdaxApi: FuelRouting {
                 is listOrders -> Method.GET
                 is getOrder -> Method.GET
                 is fills -> Method.GET
-                is send -> Method.POST
+                is sendCrypto -> Method.POST
+                is coinbaseAccounts -> Method.GET
+                is paymentMethods -> Method.GET
+                is sendToCoinbase -> Method.POST
+                is sendToPayment -> Method.POST
+                is getFromCoinbase -> Method.POST
+                is getFromPayment -> Method.POST
             }
         }
-
 
     override val path: String
         get() {
@@ -311,7 +321,13 @@ sealed class GdaxApi: FuelRouting {
                 is listOrders -> "/orders"
                 is getOrder -> "/orders/$orderId"
                 is fills -> "/fills"
-                is send -> "/withdrawals/crypto"
+                is sendCrypto -> "/withdrawals/crypto"
+                is coinbaseAccounts -> "/coinbase-accounts"
+                is paymentMethods -> "/payment-methods"
+                is sendToCoinbase -> "/withdrawals/coinbase-account"
+                is sendToPayment -> "/withdrawals/payment-method"
+                is getFromCoinbase -> "/deposits/coinbase-account"
+                is getFromPayment -> "/deposits/payment-method"
             }
         }
 
@@ -409,12 +425,41 @@ sealed class GdaxApi: FuelRouting {
 
                     return json.toString()
                 }
-                is send -> {
+                is sendCrypto -> {
+                    val json = JSONObject()
+                    json.put("amount", amount.btcFormat())
+                    json.put("currency", currency.toString())
+                    json.put("crypto_address", cryptoAddress)
+                    return json.toString()
+                }
+                is sendToCoinbase -> {
                     val json = JSONObject()
 
                     json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())
-                    json.put("crypto_address", cryptoAddress)
+                    json.put("coinbase_account_id", accountId)
+                    return json.toString()
+                }
+                is sendToPayment -> {
+                    val json = JSONObject()
+
+                    json.put("amount", amount.btcFormat())
+                    json.put("currency", currency.toString())
+                    json.put("payment_method_id", paymentMethodId)
+                    return json.toString()
+                }
+                is getFromCoinbase -> {
+                    val json = JSONObject()
+                    json.put("amount", amount.btcFormat())
+                    json.put("currency", currency.toString())
+                    json.put("coinbase_account_id", accountId)
+                    return json.toString()
+                }
+                is getFromPayment -> {
+                    val json = JSONObject()
+                    json.put("amount", amount.btcFormat())
+                    json.put("currency", currency.toString())
+                    json.put("payment_method_id", paymentMethodId)
                     return json.toString()
                 }
                 else -> return ""

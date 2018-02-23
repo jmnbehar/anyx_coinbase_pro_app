@@ -117,7 +117,6 @@ data class ApiTime(
         val iso: String,
         val epoch: String)
 
-
 data class ApiAccount(
         val id: String,
         val currency: String,
@@ -125,3 +124,23 @@ data class ApiAccount(
         val holds: String,
         val available: String,
         val profile_id: String)
+
+data class ApiCoinbaseAccount(
+        val id: String,
+        val name: String,
+        val balance: String,
+        val currency: String,
+        val type: String,
+        val primary: Boolean,
+        val active: Boolean
+        /* val wire_deposit_information: String */)
+
+//data class ApiCoinbaseAccount(
+//        val id: String,
+//        val name: String,
+//        val balance: String,
+//        val currency: String,
+//        val type: String,
+//        val primary: Boolean,
+//        val active: Boolean
+//        /* val wire_deposit_information: String */)

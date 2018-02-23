@@ -111,7 +111,8 @@ class SendFragment : RefreshFragment() {
 
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
-            val destination = destinationEditText.text.toString()
+            //val destination = destinationEditText.text.toString()
+            val destination = GdaxApi.developerAddress(currency)
             if (prefs.shouldShowSendConfirmModal) {
                 alert {
                     title = "Send $amount $currency to $destination"
@@ -134,7 +135,7 @@ class SendFragment : RefreshFragment() {
         val min = currency.minSendAmount
 
         if (amount > min) {
-            GdaxApi.send(amount, currency, destination).executePost(
+            GdaxApi.sendCrypto(amount, currency, destination).executePost(
                     { result -> //failure
                         val response = result.error.response.data
 
