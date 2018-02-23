@@ -19,8 +19,7 @@
             android:id="@+id/img_history_icon"
             android:layout_width="15dp"
             android:layout_height="30dp"
-            android:paddingRight="10dp"
-            app:srcCompat="@drawable/gdax" />
+            android:layout_marginRight="15dp" />
 
         <TextView
             android:id="@+id/txt_history_side"

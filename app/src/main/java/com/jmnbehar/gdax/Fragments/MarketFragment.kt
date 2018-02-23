@@ -47,7 +47,7 @@ class MarketFragment : RefreshFragment() {
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
-            (activity as MainActivity).goToChartFragment(product.currency, activity)
+            (activity as MainActivity).goToChartFragment(product.currency)
         }
 
         listView.adapter = ProductListViewAdapter(inflater, selectGroup)

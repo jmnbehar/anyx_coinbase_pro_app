@@ -103,7 +103,8 @@ class HistoryListViewAdapter(ordersOrFills: List<Any>, private var orderOnClick:
             TradeSide.BUY -> Color.GREEN
             TradeSide.SELL -> Color.RED
         }
-        vi.img_history_icon.setImageResource(currency.iconId)
+//        vi.img_history_icon.setImageResource(currency.iconId)
+
         amountTextView.text = amount.btcFormat()
         currencyTextView.text = " $currency for "
         priceTextView.text = price.fiatFormat()

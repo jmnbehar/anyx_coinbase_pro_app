@@ -3,23 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <menu>
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/icon_home"
-            android:title="Home" />
-        <item
-            android:id="@+id/nav_send"
-            android:icon="@drawable/ic_menu_send"
-            android:title="Send" />
-        <item
-            android:id="@+id/nav_alerts"
-            android:icon="@drawable/icon_alert"
-            android:title="Alerts" />
-        <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Settings" />
-    </menu>
+
+    <item android:title="AnyX">
+        <menu>
+            <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/icon_home"
+                android:title="Home" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send" />
+            <item
+                android:id="@+id/nav_alerts"
+                android:icon="@drawable/icon_alert"
+                android:title="Alerts" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Settings" />
+        </menu>
+    </item>
 
 </menu>
