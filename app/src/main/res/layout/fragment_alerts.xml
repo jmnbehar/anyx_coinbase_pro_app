@@ -15,40 +15,37 @@ android:orientation="vertical">
     tools:layout_editor_absoluteX="48dp"
     tools:layout_editor_absoluteY="16dp" />
 
-<RadioGroup
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabl_alerts_currency"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="top">
 
-    <RadioButton
-        android:id="@+id/rbtn_alert_btc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="BTC" />
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_alerts_btc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BTC"/>
 
-    <RadioButton
-        android:id="@+id/rbtn_alert_eth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="ETH" />
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_alerts_eth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ETH"/>
 
-    <RadioButton
-        android:id="@+id/rbtn_alert_ltc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="LTC" />
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_alerts_bch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BCH"/>
 
-    <RadioButton
-        android:id="@+id/rbtn_alert_bch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="BCH" />
+        <android.support.design.widget.TabItem
+            android:id="@+id/tab_alerts_ltc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LTC"/>
+    </android.support.design.widget.TabLayout>
 
-</RadioGroup>
 
 
 <LinearLayout

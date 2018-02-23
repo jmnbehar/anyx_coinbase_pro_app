@@ -51,6 +51,11 @@ class SettingsFragment : RefreshFragment() {
 
         val prefs = Prefs(activity)
 
+        if (prefs.isLoggedIn) {
+            logoutButton.text = "Log Out"
+        } else {
+            logoutButton.text = "Log In"
+        }
         logoutButton.setOnClickListener  {
             val intent = Intent(activity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

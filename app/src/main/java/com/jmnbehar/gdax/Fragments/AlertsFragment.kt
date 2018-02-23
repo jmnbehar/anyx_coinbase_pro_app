@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,10 +29,7 @@ class AlertsFragment : RefreshFragment() {
     lateinit private var inflater: LayoutInflater
     lateinit private var titleText: TextView
 
-    lateinit private var radioButtonBtc: RadioButton
-    lateinit private var radioButtonEth: RadioButton
-    lateinit private var radioButtonLtc: RadioButton
-    lateinit private var radioButtonBch: RadioButton
+    lateinit private var currencyTabLayout: TabLayout
 
     lateinit private var priceEditText: EditText
     lateinit private var priceUnitText: TextView
@@ -64,10 +62,7 @@ class AlertsFragment : RefreshFragment() {
 
         titleText = rootView.txt_alert_name
 
-        radioButtonBtc = rootView.rbtn_alert_btc
-        radioButtonEth = rootView.rbtn_alert_eth
-        radioButtonLtc = rootView.rbtn_alert_ltc
-        radioButtonBch = rootView.rbtn_alert_bch
+        currencyTabLayout = rootView.tabl_alerts_currency
 
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
@@ -78,17 +73,19 @@ class AlertsFragment : RefreshFragment() {
 
         titleText.text = currency.toString()
 
-        switchCurrency()
-
-        radioButtonBtc.setOnClickListener {
-            switchCurrency(Currency.BTC)
-        }
-        radioButtonEth.setOnClickListener {
-            switchCurrency(Currency.ETH)
-        }
-        radioButtonLtc.setOnClickListener {
-            switchCurrency(Currency.LTC)
-        }
+//        switchCurrency(this.currency)
+        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                when(tab.position) {
+                    0 -> switchCurrency(Currency.BTC)
+                    1 -> switchCurrency(Currency.ETH)
+                    2 -> switchCurrency(Currency.BCH)
+                    3 -> switchCurrency(Currency.LTC)
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
         priceUnitText.text = "USD"
 
@@ -156,17 +153,15 @@ class AlertsFragment : RefreshFragment() {
     }
 
 
-    private fun switchCurrency(currency: Currency = this.currency) {
+    private fun switchCurrency(currency: Currency) {
         this.currency = currency
-
-        when (currency) {
-            Currency.BTC -> radioButtonBtc.isChecked = true
-            Currency.ETH -> radioButtonEth.isChecked = true
-            Currency.LTC -> radioButtonLtc.isChecked = true
-            Currency.BCH -> radioButtonLtc.isChecked = true
-            Currency.USD -> { }
-        }
-
+//        when (currency) {
+//            Currency.BTC -> currencyTabLayout.
+//            Currency.ETH -> radioButtonEth.isChecked = true
+//            Currency.LTC -> radioButtonLtc.isChecked = true
+//            Currency.BCH -> radioButtonLtc.isChecked = true
+//            Currency.USD -> { }
+//        }
     }
 
     override fun refresh(onComplete: () -> Unit) {

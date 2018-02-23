@@ -3,44 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <menu>
         <item
-            android:id="@+id/nav_btc"
-            android:icon="@drawable/icon_btc_cutout"
-            android:title="Bitcoin" />
+            android:id="@+id/nav_home"
+            android:icon="@drawable/icon_home"
+            android:title="Home" />
         <item
-            android:id="@+id/nav_eth"
-            android:icon="@drawable/icon_eth_cutout"
-            android:title="Ethereum" />
+            android:id="@+id/nav_send"
+            android:icon="@drawable/ic_menu_send"
+            android:title="Send" />
         <item
-            android:id="@+id/nav_ltc"
-            android:icon="@drawable/icon_ltc_cutout"
-            android:title="Litecoin" />
+            android:id="@+id/nav_alerts"
+            android:icon="@drawable/icon_alert"
+            android:title="Alerts" />
         <item
-            android:id="@+id/nav_bch"
-            android:icon="@drawable/icon_bch_cutout"
-            android:title="Bitcoin Cash" />
-    </group>
-
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_home"
-                android:icon="@drawable/icon_home"
-                android:title="Home" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-            <item
-                android:id="@+id/nav_alerts"
-                android:icon="@drawable/icon_alert"
-                android:title="Alerts" />
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="Settings" />
-        </menu>
-    </item>
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Settings" />
+    </menu>
 
 </menu>

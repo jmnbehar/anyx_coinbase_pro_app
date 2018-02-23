@@ -9,7 +9,7 @@
         android:id="@+id/txt_setting_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings page"
+        android:text="Settings"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
@@ -24,19 +24,20 @@
         android:id="@+id/cb_setting_show_trade_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show confirm button before buy/sell" />
+        android:text="Show confirm popup before buy/sell" />
 
     <CheckBox
         android:id="@+id/cb_setting_show_send_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show confirm button before buy/sell" />
+        android:text="Show confirm popup before sending crypto" />
 
     <CheckBox
         android:id="@+id/cb_setting_idk"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="idk what will go here" />
+        android:text="idk what will go here"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_setting_show_disclaimer"

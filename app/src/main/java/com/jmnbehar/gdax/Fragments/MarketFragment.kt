@@ -15,6 +15,7 @@ import com.jmnbehar.gdax.Adapters.ProductListViewAdapter
 import com.jmnbehar.gdax.Classes.*
 import com.jmnbehar.gdax.R
 import kotlinx.android.synthetic.main.fragment_market.view.*
+import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -46,14 +47,7 @@ class MarketFragment : RefreshFragment() {
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product
-            val equivalentMenuItem = when(product.currency) {
-                Currency.BTC -> R.id.nav_btc
-                Currency.ETH -> R.id.nav_eth
-                Currency.LTC -> R.id.nav_ltc
-                Currency.BCH -> R.id.nav_bch
-                Currency.USD -> R.id.nav_home
-            }
-            (activity as MainActivity).goToNavigationId(equivalentMenuItem, activity)
+            (activity as MainActivity).goToChartFragment(product.currency, activity)
         }
 
         listView.adapter = ProductListViewAdapter(inflater, selectGroup)

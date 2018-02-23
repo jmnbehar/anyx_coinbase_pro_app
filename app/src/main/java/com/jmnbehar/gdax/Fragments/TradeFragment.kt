@@ -288,15 +288,6 @@ class TradeFragment : RefreshFragment() {
             positiveButton("Confirm") {
                 //TODO: actually submit order dont just pay fee thats dumb wut r u doin sdjkdfjkhdsk
                 submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
-
-
-//                if (devFee > 0.0) {
-//                    if (devFee > account.currency.minSendAmount) {
-//                        payFee(devFee)
-//                    } else {
-//                        //stash fee for later
-//                    }
-//                }
             }
             negativeButton("Cancel") { }
         }.show()

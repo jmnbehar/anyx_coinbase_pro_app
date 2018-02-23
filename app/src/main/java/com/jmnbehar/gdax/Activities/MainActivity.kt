@@ -9,7 +9,6 @@ import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.NavigationView
-import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -135,7 +134,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val apiKeyEncrypted = prefs.apiKey
         val apiSecretEncrypted = prefs.apiSecret
 
-
         if ((apiKeyEncrypted != null) && (apiSecretEncrypted != null) && (passphrase != null)) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
@@ -195,8 +193,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return true
+        // menuInflater.inflate(R.menu.main, menu)
+        return false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -286,31 +284,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        goToNavigationId(item.itemId, this)
+        goToNavigationId(item.itemId)
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
-    fun goToNavigationId(navigationId: Int, context: Context) {
+    fun goToNavigationId(navigationId: Int) {
         when (navigationId) {
-            R.id.nav_btc -> {
-                goToFragment(FragmentType.BTC_CHART)
-            }
-            R.id.nav_eth -> {
-                goToFragment(FragmentType.ETH_CHART)
-            }
-            R.id.nav_ltc -> {
-                goToFragment(FragmentType.LTC_CHART)
-            }
-            R.id.nav_bch -> {
-                goToFragment(FragmentType.BCH_CHART)
-            }
             R.id.nav_send -> {
                 goToFragment(FragmentType.SEND)
             }
             R.id.nav_alerts -> {
-                goToFragment(FragmentType.ALERTS, context = context)
+                goToFragment(FragmentType.ALERTS)
             }
             R.id.nav_settings -> {
                 goToFragment(FragmentType.SETTINGS)
@@ -320,16 +306,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
     }
-    fun goToChartFragment(currency: Currency, context: Context? = null) {
+    fun goToChartFragment(currency: Currency) {
         when (currency) {
-            Currency.BTC -> goToFragment(FragmentType.BTC_CHART, context)
-            Currency.BCH -> goToFragment(FragmentType.BCH_CHART, context)
-            Currency.ETH -> goToFragment(FragmentType.ETH_CHART, context)
-            Currency.LTC -> goToFragment(FragmentType.LTC_CHART, context)
+            Currency.BTC -> goToFragment(FragmentType.BTC_CHART)
+            Currency.BCH -> goToFragment(FragmentType.BCH_CHART)
+            Currency.ETH -> goToFragment(FragmentType.ETH_CHART)
+            Currency.LTC -> goToFragment(FragmentType.LTC_CHART)
             Currency.USD -> {}
         }
     }
-    fun goToFragment(fragmentType: FragmentType, context: Context? = null) {
+    fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
         val fragment = when (fragmentType) {
             FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
@@ -377,7 +363,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 SendFragment.newInstance()
             }
             FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
-                AlertsFragment.newInstance(context!!)
+                AlertsFragment.newInstance(this)
             }
             FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
                 SettingsFragment.newInstance()
