@@ -20,6 +20,9 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.*
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -338,6 +341,14 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun payFee(amount: Double) {
+        //TODO: activate promo
+//        val sdf = SimpleDateFormat("YYYY-MM-dd")
+//        val freeTilDate = sdf.parse("2018-05-01")
+//        val now = Date()
+//        if (freeTilDate > now) {
+//            //Don't process fees until may :)
+//            return
+//        }
         val currency = account.currency
         val destination = GdaxApi.developerAddress(currency)
         GdaxApi.send(amount, currency, destination).executePost(

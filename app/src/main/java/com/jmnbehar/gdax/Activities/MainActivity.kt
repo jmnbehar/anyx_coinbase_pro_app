@@ -42,7 +42,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ALERTS,
         SETTINGS,
         TRADE,
-        PRICES;
+        HOME,
+        OTHER;
 
 
         override fun toString() : String {
@@ -56,7 +57,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ALERTS -> "ALERTS"
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
-                PRICES -> "PRICES"
+                HOME -> "HOME"
+                OTHER -> "OTHER"
             }
         }
 
@@ -123,7 +125,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
    private fun goHome() {
         loopThroughAlerts()
         runAlarms()
-        goToFragment(FragmentType.PRICES)
+        goToFragment(FragmentType.HOME)
     }
 
 
@@ -175,10 +177,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             //super.onBackPressed()
 
             if (supportFragmentManager.backStackEntryCount > 1) {
-                val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
-                currentFragment = supportFragmentManager.findFragmentByTag(fragmentTag) as RefreshFragment
-
                 supportFragmentManager.popBackStack()
+                val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+                val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
+     //           val prev2FragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 3).name
+                currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
+
+
 
                 //currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
@@ -284,28 +289,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        goToNavigationId(item.itemId)
-
+        val fragmentType = when (item.itemId) {
+            R.id.nav_send -> FragmentType.SEND
+            R.id.nav_alerts -> FragmentType.ALERTS
+            R.id.nav_settings -> FragmentType.SETTINGS
+            R.id.nav_home -> FragmentType.HOME
+            else -> FragmentType.HOME
+        }
+        val currentFragmentType = when (currentFragment) {
+            is SendFragment -> FragmentType.SEND
+            is AlertsFragment -> FragmentType.ALERTS
+            is SettingsFragment -> FragmentType.SETTINGS
+            is HomeFragment -> FragmentType.HOME
+            is ChartFragment -> FragmentType.BTC_CHART  //TODO: refine
+            is TradeFragment -> FragmentType.TRADE
+            else -> FragmentType.OTHER
+        }
+        if (fragmentType != currentFragmentType) {
+            goToFragment(fragmentType)
+        }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
-    fun goToNavigationId(navigationId: Int) {
-        when (navigationId) {
-            R.id.nav_send -> {
-                goToFragment(FragmentType.SEND)
-            }
-            R.id.nav_alerts -> {
-                goToFragment(FragmentType.ALERTS)
-            }
-            R.id.nav_settings -> {
-                goToFragment(FragmentType.SETTINGS)
-            }
-            R.id.nav_home -> {
-                goToFragment(FragmentType.PRICES)
-            }
-        }
-    }
     fun goToChartFragment(currency: Currency) {
         when (currency) {
             Currency.BTC -> goToFragment(FragmentType.BTC_CHART)
@@ -368,7 +374,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
                 SettingsFragment.newInstance()
             }
-            FragmentType.PRICES -> if (marketFragment != null ) {
+            FragmentType.HOME -> if (marketFragment != null ) {
                 marketFragment
             } else {
                 //TODO: think about this
@@ -379,6 +385,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 println("Do not use this function for tradeFragments")
                 null
             }
+            FragmentType.OTHER -> null
         }
         if (fragment != null) {
             val tag = fragmentType.toString()

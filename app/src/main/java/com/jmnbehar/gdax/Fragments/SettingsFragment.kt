@@ -88,16 +88,11 @@ class SettingsFragment : RefreshFragment() {
                 showTradeConfirmCheckBox.textColor = Color.WHITE
                 showSendConfirmCheckBox.textColor = Color.WHITE
                 titleText.textColor = Color.WHITE
-
-                disclaimerButton.textColor = Color.WHITE
             } else {
                 darkModeCheckBox.textColor = Color.BLACK
                 showTradeConfirmCheckBox.textColor = Color.BLACK
                 showSendConfirmCheckBox.textColor = Color.BLACK
                 titleText.textColor = Color.BLACK
-
-                logoutButton.textColor = Color.BLACK
-                disclaimerButton.textColor = Color.BLACK
             }
         }
         showDarkMode()
