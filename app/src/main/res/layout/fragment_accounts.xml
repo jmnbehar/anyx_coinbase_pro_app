@@ -64,7 +64,7 @@
 
         </LinearLayout>
 
-        <com.jmnbehar.gdax.Classes.PriceChart
+        <com.jmnbehar.anyx.Classes.PriceChart
             android:id="@+id/chart_accounts"
             android:layout_width="match_parent"
             android:layout_height="200dp"
