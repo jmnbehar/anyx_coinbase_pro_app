@@ -134,6 +134,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             buyButton.textColor = buttonTextColor
             sellButton.textColor = buttonTextColor
 
+            //trade disabled, so:
+            buyButton.visibility = View.GONE
+            sellButton.visibility = View.GONE
+
             //TODO: send over more info
             buyButton.setOnClickListener {
                 toast("Feature not yet available - stay tuned!")
