@@ -121,8 +121,12 @@ class PriceChart : LineChart {
     }
 
     fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Long) {
-        val entries = candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
-
+        val entries = if (candles.isEmpty()) {
+            val blankEntry = Entry(0.0f, 0.0f)
+            listOf<Entry>(blankEntry, blankEntry)
+        } else {
+            candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
+        }
         val dataSet = LineDataSet(entries, "Chart")
 
         val color = currency.colorPrimary(context)
