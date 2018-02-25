@@ -47,7 +47,6 @@ class SettingsFragment : RefreshFragment() {
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
 
-        disclaimerButton.visibility = View.INVISIBLE
         showDarkMode(rootView)
 
         val prefs = Prefs(activity)
