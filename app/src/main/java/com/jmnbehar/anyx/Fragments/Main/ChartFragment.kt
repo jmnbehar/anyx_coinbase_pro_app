@@ -136,27 +136,29 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                if (GdaxApi.credentials?.isValidated == null) {
-                    toast("Validate your account in Settings to buy or sell $currency")
-                } else if (GdaxApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
-                } else if (!prefs.isLoggedIn) {
-                    toast("Please log in to buy or sell $currency")
-                } else {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
-                }
+                toast("Feature not yet available - stay tuned!")
+//                if (GdaxApi.credentials?.isValidated == null) {
+//                    toast("Validate your account in Settings to buy or sell $currency")
+//                } else if (GdaxApi.credentials?.isValidated == false) {
+//                    toast("Please use an API Key with all permissions.")
+//                } else if (!prefs.isLoggedIn) {
+//                    toast("Please log in to buy or sell $currency")
+//                } else {
+//                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+//                }
             }
 
             sellButton.setOnClickListener {
-                if (GdaxApi.credentials?.isValidated == null) {
-                    toast("Validate your account in Settings to buy or sell $currency")
-                } else if (GdaxApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
-                } else if (!prefs.isLoggedIn) {
-                    toast("Please log in to buy or sell $currency")
-                } else {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
-                }
+                toast("Feature not yet available - stay tuned!")
+//                if (GdaxApi.credentials?.isValidated == null) {
+//                    toast("Validate your account in Settings to buy or sell $currency")
+//                } else if (GdaxApi.credentials?.isValidated == false) {
+//                    toast("Please use an API Key with all permissions.")
+//                } else if (!prefs.isLoggedIn) {
+//                    toast("Please log in to buy or sell $currency")
+//                } else {
+//                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+//                }
             }
             when (chartTimeSpan) {
                 TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
