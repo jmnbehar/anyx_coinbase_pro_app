@@ -57,16 +57,16 @@ class LoginFragment : Fragment()  {
 
         if(prefs.apiKey != null) {
             apiKey = prefs.apiKey
-            apiKeyEditText.setText("*****")
+            apiKeyEditText.setText(apiKey)
         }
         if (prefs.apiSecret != null) {
             apiSecret = prefs.apiSecret
-            apiSecretEditText.setText("*****")
+            apiSecretEditText.setText(apiSecret)
         }
 
         if (prefs.passphrase != null) {
             passphrase = prefs.passphrase
-            passphraseEditText.setText("*****")
+            passphraseEditText.setText(passphrase)
         }
 
         saveApiInfoCheckBox = rootView.cb_save_api_key
@@ -123,8 +123,6 @@ class LoginFragment : Fragment()  {
     private fun signIn() {
         val prefs = Prefs(context)
 
-        val iv = ByteArray(16)
-        val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
 
         shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         shouldSavePassphrase = saveApiInfoCheckBox.isChecked
@@ -139,33 +137,33 @@ class LoginFragment : Fragment()  {
             passphrase = passphraseEditText.text.toString()
         }
 
+        val iv = ByteArray(16)
+        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+
         if (apiKey == prefs.apiKey) {
             apiKey =  encryption.decryptOrNull(apiKey)
         }
-        if (apiSecret == prefs.apiSecret) {
+        if (passphrase == prefs.passphrase) {
             apiSecret = encryption.decryptOrNull(apiSecret)
         }
 
-        val apiKeyVal = apiKey
-        val apiSecretVal = apiSecret
-        val passphraseVal = passphrase
-
         if (shouldSaveApiInfo) {
-            val apiKeyEncrypted = encryption.encryptOrNull(apiKeyVal)
-            val apiSecretEncrypted = encryption.encryptOrNull(apiSecretVal)
-            prefs.apiKey = apiKeyEncrypted
-            prefs.apiSecret = apiSecretEncrypted
-            if (shouldSavePassphrase && (passphraseVal != null))  {
-                prefs.passphrase = passphraseVal
+            val passphraseEncrypted = encryption.encryptOrNull(passphrase)
+            prefs.apiKey = apiKey
+            prefs.apiSecret = apiSecret
+            if (shouldSavePassphrase && (passphrase != null))  {
+                prefs.passphrase = passphraseEncrypted
             }
         }
-        if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)
-                && (apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
 
+        val apiKeyVal = apiKey ?: ""
+        val apiSecretVal = apiSecret ?: ""
+        val passphraseVal = passphrase ?: ""
+        if((apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
-            (activity as LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal, isApiKeyValid))
+            (activity as LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
         } else {
-            toast("Wrong Passphrase")
+            toast("Invalid Api Key, Secret, or Passphrase")
         }
     }
 }

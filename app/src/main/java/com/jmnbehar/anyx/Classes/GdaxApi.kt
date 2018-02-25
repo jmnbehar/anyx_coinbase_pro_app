@@ -23,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec
 
 
 sealed class GdaxApi: FuelRouting {
-    class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String, var isValidated: Boolean?)
+    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
 
     companion object {
         //TODO: delete creds if api key becomes invalid
@@ -550,7 +550,7 @@ sealed class GdaxApi: FuelRouting {
                 println("timestamp:")
                 println(timestamp)
 
-                val secretDecoded = Base64.decode(credentials.secret, 0)
+                val secretDecoded = Base64.decode(credentials.apiSecret, 0)
                 val sha256HMAC = Mac.getInstance("HmacSHA256")
                 val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
                 sha256HMAC.init(secretKey)
@@ -559,7 +559,7 @@ sealed class GdaxApi: FuelRouting {
                 println("hash:")
                 println(hash)
 
-                headers = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.passPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+                headers = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.apiPassPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
 
             }
 

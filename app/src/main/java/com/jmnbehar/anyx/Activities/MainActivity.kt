@@ -132,32 +132,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun signIn() {
         val prefs = Prefs(this)
 
-        val passphrase = prefs.passphrase
-        val apiKeyEncrypted = prefs.apiKey
-        val apiSecretEncrypted = prefs.apiSecret
+        val apiKey = prefs.apiKey
+        val apiSecret = prefs.apiSecret
+        val passphraseEncrypted  = prefs.passphrase
 
-        if ((apiKeyEncrypted != null) && (apiSecretEncrypted != null) && (passphrase != null)) {
-            val iv = ByteArray(16)
-            val encryption = Encryption.getDefault(passphrase, Constants.salt, iv)
-
-            val apiKey = encryption.decryptOrNull(apiKeyEncrypted)
-            val apiSecret = encryption.decryptOrNull(apiSecretEncrypted)
-
-            if ((apiKey != null) && (apiSecret != null)) {
-                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                GdaxApi.credentials = GdaxApi.ApiCredentials(passphrase, apiKey, apiSecret, isApiKeyValid)
-                progressDialog?.show()
-                GdaxApi.accounts().getAllAccountInfo(this, { _ ->
-                    toast("Error!")
-                    progressDialog?.dismiss()
-                    returnToLogin()
-                }, {
-                    progressDialog?.dismiss()
-                    goHome()
-                })
-            } else {
+        val iv = ByteArray(16)
+        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+        val passphrase = encryption.decryptOrNull(passphraseEncrypted)
+        if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+            val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+            GdaxApi.credentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            progressDialog?.show()
+            GdaxApi.accounts().getAllAccountInfo(this, { _ ->
+                toast("Error!")
+                progressDialog?.dismiss()
                 returnToLogin()
-            }
+            }, {
+                progressDialog?.dismiss()
+                goHome()
+            })
         } else {
             returnToLogin()
         }

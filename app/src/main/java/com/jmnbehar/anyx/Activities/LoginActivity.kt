@@ -38,11 +38,10 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(passphrase, salt, iv)
 
-            val apiKeyVal = encryption.decryptOrNull(apiKey)
-            val apiSecretVal = encryption.decryptOrNull(apiSecret)
-            if((apiKeyVal != null) && (apiSecretVal != null) && (passphrase != null)) {
-                val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
-                var apiCredentials = GdaxApi.ApiCredentials(passphrase, apiKeyVal, apiSecretVal, isApiKeyValid)
+            passphrase = encryption.decryptOrNull(passphrase)
+            if((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                var apiCredentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 loginWithCredentials(apiCredentials)
                 return true
             }
