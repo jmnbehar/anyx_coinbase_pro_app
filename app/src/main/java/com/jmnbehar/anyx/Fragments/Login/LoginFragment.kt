@@ -32,9 +32,6 @@ class LoginFragment : Fragment()  {
     private var apiSecret: String? = ""
     private var passphrase: String? = ""
 
-    private var shouldSaveApiInfo = false
-    private var shouldSavePassphrase = false
-
     companion object {
         fun newInstance(): LoginFragment {
             return LoginFragment()
@@ -65,16 +62,19 @@ class LoginFragment : Fragment()  {
         }
 
         if (prefs.passphrase != null) {
-            passphrase = prefs.passphrase
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+            passphrase = encryption.decryptOrNull(prefs.passphrase)
+
             passphraseEditText.setText(passphrase)
         }
 
         saveApiInfoCheckBox = rootView.cb_save_api_key
         savePassphraseCheckBox = rootView.cb_save_passphrase
 
-        if(shouldSaveApiInfo) {
+        if (prefs.shouldSaveApiInfo) {
             saveApiInfoCheckBox.isChecked = true
-            if(shouldSavePassphrase) {
+            if (prefs.shouldSavePassphrase) {
                 savePassphraseCheckBox.isChecked = true
             }
         } else {
@@ -123,9 +123,9 @@ class LoginFragment : Fragment()  {
     private fun signIn() {
         val prefs = Prefs(context)
 
-
-        shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
-        shouldSavePassphrase = saveApiInfoCheckBox.isChecked
+        //TODO: is this necesary?
+        prefs.shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
+        prefs.shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
         if (apiKeyEditText.text.toString() != "*****") {
             apiKey = apiKeyEditText.text.toString()
@@ -137,21 +137,13 @@ class LoginFragment : Fragment()  {
             passphrase = passphraseEditText.text.toString()
         }
 
-        val iv = ByteArray(16)
-        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-
-        if (apiKey == prefs.apiKey) {
-            apiKey =  encryption.decryptOrNull(apiKey)
-        }
-        if (passphrase == prefs.passphrase) {
-            apiSecret = encryption.decryptOrNull(apiSecret)
-        }
-
-        if (shouldSaveApiInfo) {
+        if (prefs.shouldSaveApiInfo) {
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
             val passphraseEncrypted = encryption.encryptOrNull(passphrase)
             prefs.apiKey = apiKey
             prefs.apiSecret = apiSecret
-            if (shouldSavePassphrase && (passphrase != null))  {
+            if (prefs.shouldSavePassphrase && (passphrase != null))  {
                 prefs.passphrase = passphraseEncrypted
             }
         }

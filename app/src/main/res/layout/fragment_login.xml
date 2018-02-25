@@ -3,14 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:screenOrientation="portrait"
-    android:orientation="vertical">
+    android:layout_marginBottom="20dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical"
+    android:screenOrientation="portrait">
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
-        android:layout_height="77dp"
-        android:text="Login Text Goes Here"
+        android:layout_height="wrap_content"
+        android:text="Login with GDAX Api Key"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
@@ -19,7 +23,7 @@
         android:id="@+id/etxt_login_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:singleLine="false"
         android:hint="Api Key"
         android:inputType="text" />
 
@@ -27,15 +31,20 @@
         android:id="@+id/etxt_login_secret"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
         android:hint="API Secret"
-        android:inputType="text" />
+        android:inputType="textMultiLine"
+        android:maxLines ="6"
+        android:minLines="4"
+        android:lines="4"
+        android:singleLine="false" />
 
     <EditText
         android:id="@+id/etxt_login_passphrase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:lines="2"
         android:ems="10"
+        android:singleLine="false"
         android:hint="Passphrase"
         android:inputType="textPassword" />
 
@@ -62,14 +71,24 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom|center_horizontal"
+        android:gravity="bottom|right"
         android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_login_apikey_instructions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Help"
+            tools:layout_editor_absoluteX="148dp"
+            tools:layout_editor_absoluteY="93dp" />
 
         <Button
             android:id="@+id/btn_login_new_apikey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="New api key"
+            android:visibility="gone"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="93dp" />
 
@@ -78,6 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New GDAX account"
+            android:visibility="gone"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="93dp" />
 
