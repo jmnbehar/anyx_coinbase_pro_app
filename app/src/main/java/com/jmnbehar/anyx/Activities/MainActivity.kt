@@ -144,7 +144,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val apiSecret = encryption.decryptOrNull(apiSecretEncrypted)
 
             if ((apiKey != null) && (apiSecret != null)) {
-                GdaxApi.credentials = ApiCredentials(passphrase, apiKey, apiSecret)
+                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                GdaxApi.credentials = GdaxApi.ApiCredentials(passphrase, apiKey, apiSecret, isApiKeyValid)
                 progressDialog?.show()
                 GdaxApi.accounts().getAllAccountInfo(this, { _ ->
                     toast("Error!")
@@ -180,7 +181,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 supportFragmentManager.popBackStack()
                 val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
                 val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
-     //           val prev2FragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 3).name
+
                 currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
 
 
@@ -306,7 +307,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             else -> FragmentType.OTHER
         }
         if (fragmentType != currentFragmentType) {
-            goToFragment(fragmentType)
+            if ((fragmentType == FragmentType.SEND) && (GdaxApi.credentials?.isValidated != true)) {
+                //do nothing
+                toast("Please validate your account in Settings to send crypto assets")
+            } else {
+                goToFragment(fragmentType)
+            }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
@@ -326,39 +332,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragment = when (fragmentType) {
             FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
                 //TODO: confirm account is not null
-                //                if (prefs.isDarkModeOn) {
-                //                    setTheme(R.style.AppThemeDarkBtc)
-                //                } else {
-                //                    setTheme(R.style.AppThemeLightBtc)
-                //                }
                 val account = Account.btcAccount!!
                 ChartFragment.newInstance(account)
             }
             FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
-                //                if (prefs.isDarkModeOn) {
-                //                    setTheme(R.style.AppThemeDarkBch)
-                //                } else {
-                //                    setTheme(R.style.AppThemeLightBch)
-                //                }
                 val account = Account.bchAccount!!
                 ChartFragment.newInstance(account)
             }
             FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
-                //                if (prefs.isDarkModeOn) {
-                //                    setTheme(R.style.AppThemeDarkEth)
-                //                } else {
-                //                    setTheme(R.style.AppThemeLightEth)
-                //                }
                 val account = Account.ethAccount!!
                 ChartFragment.newInstance(account)
             }
 
             FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
-//                if (prefs.isDarkModeOn) {
-//                    setTheme(R.style.AppThemeDarkLtc)
-//                } else {
-//                    setTheme(R.style.AppThemeLightLtc)
-//                }
                 val account = Account.ltcAccount!!
                 ChartFragment.newInstance(account)
             }
@@ -366,6 +352,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 AccountsFragment.newInstance()
             }
             FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
+                //TODO: don't go to send frragment if not logged in
                 SendFragment.newInstance()
             }
             FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {

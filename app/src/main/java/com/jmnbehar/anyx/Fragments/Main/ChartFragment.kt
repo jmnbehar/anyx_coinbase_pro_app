@@ -136,18 +136,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                if (prefs.isLoggedIn) {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+                if (GdaxApi.credentials?.isValidated == null) {
+                    toast("Validate your account in Settings to buy or sell $currency")
+                } else if (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all permissions.")
+                } else if (!prefs.isLoggedIn) {
+                    toast("Please log in to buy or sell $currency")
                 } else {
-                    toast("Log in to buy or sell $currency")
+                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
                 }
             }
 
             sellButton.setOnClickListener {
-                if (prefs.isLoggedIn) {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+                if (GdaxApi.credentials?.isValidated == null) {
+                    toast("Validate your account in Settings to buy or sell $currency")
+                } else if (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all permissions.")
+                } else if (!prefs.isLoggedIn) {
+                    toast("Please log in to buy or sell $currency")
                 } else {
-                    toast("Log in to buy or sell $currency")
+                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
                 }
             }
             when (chartTimeSpan) {
@@ -374,9 +382,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             toast("Error!: ${result.error}")
             println("error!" )}
         val prefs = Prefs(context)
-        if (prefs.isLoggedIn) {
-
-        }
         account?. let { account ->
             if (prefs.isLoggedIn) {
                 GdaxApi.account(account.id).executeRequest(onFailure) { result ->

@@ -97,7 +97,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             if (fills.isEmpty()) {
                 imageView.visibility = View.INVISIBLE
                 sideTextView.visibility = View.GONE
-                amountTextView.text = "You have no open orders"
+                amountTextView.text = "You have no filled orders"
                 priceTextView.visibility = View.GONE
                 currencyTextView.visibility = View.GONE
                 tradeTypeTextView.visibility = View.GONE
@@ -125,7 +125,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
 //        vi.img_history_icon.setImageResource(currency.iconId)
 
         amountTextView.text = amount.btcFormat()
-        currencyTextView.text = " $currency for "
+        currencyTextView.text = " $currency at "
         priceTextView.text = price.fiatFormat()
         if (tradeType == null) {
             tradeTypeTextView.visibility = View.GONE

@@ -41,7 +41,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val apiKeyVal = encryption.decryptOrNull(apiKey)
             val apiSecretVal = encryption.decryptOrNull(apiSecret)
             if((apiKeyVal != null) && (apiSecretVal != null) && (passphrase != null)) {
-                var apiCredentials = ApiCredentials(passphrase, apiKeyVal, apiSecretVal)
+                val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
+                var apiCredentials = GdaxApi.ApiCredentials(passphrase, apiKeyVal, apiSecretVal, isApiKeyValid)
                 loginWithCredentials(apiCredentials)
                 return true
             }
@@ -111,7 +112,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    fun loginWithCredentials(credentials: ApiCredentials?) {
+    fun loginWithCredentials(credentials: GdaxApi.ApiCredentials?) {
         GdaxApi.credentials = credentials
         progressDialog?.show()
         GdaxApi.accounts().getAllAccountInfo(this, { result ->

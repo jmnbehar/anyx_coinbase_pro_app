@@ -65,6 +65,7 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(DARK_MODE, true)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
+    //TODO: remove this, move to a GdaxApi setting
     var isLoggedIn: Boolean
         get() = prefs.getBoolean(IS_LOGGED_IN, false)
         set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
@@ -132,7 +133,7 @@ class Prefs (var context: Context) {
         }
     }
 
-    fun checkApiKey(apiKey: String) : Boolean? {
+    fun isApiKeyValid(apiKey: String) : Boolean? {
         val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
         val rejectedApiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
         if (approvedApiKeys.contains(apiKey)) {
@@ -140,11 +141,6 @@ class Prefs (var context: Context) {
         } else if (rejectedApiKeys.contains(apiKey)) {
             return false
         } else {
-//            val testResult = GdaxApi.testApiKey(context)
-//            when (testResult) {
-//                true ->  approveApiKey(apiKey)
-//                false -> rejectApiKey(apiKey)
-//            }
             return null //testResult ?: false
         }
     }
@@ -152,11 +148,17 @@ class Prefs (var context: Context) {
         val apiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(APPROVED_API_KEYS, apiKeys).apply()
+        if (GdaxApi.credentials?.apiKey == apiKey) {
+            GdaxApi.credentials?.isValidated = true
+        }
     }
     private fun rejectApiKey(apiKey: String) {
         val apiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(REJECTED_API_KEYS, apiKeys).apply()
+        if (GdaxApi.credentials?.apiKey == apiKey) {
+            GdaxApi.credentials?.isValidated = false
+        }
     }
 
     fun addAlert(alert: Alert) {

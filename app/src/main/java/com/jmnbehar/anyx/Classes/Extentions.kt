@@ -1,5 +1,6 @@
 package com.jmnbehar.anyx.Classes
 
+import android.content.Context
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -16,14 +17,8 @@ import java.util.*
 /**
  * Created by josephbehar on 12/28/17.
  *
- *
-import org.bitcoinj.core.Address
-import org.bitcoinj.core.AddressFormatException
-import org.bitcoinj.core.NetworkParameters
 
  */
-
-class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String)
 
 fun MutableSet<Alert>.removeAlert(alert: Alert) {
     val removeItem = this.find { a -> alert == a }

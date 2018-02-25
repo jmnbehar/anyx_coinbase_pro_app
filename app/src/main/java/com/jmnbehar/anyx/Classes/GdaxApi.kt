@@ -23,6 +23,8 @@ import javax.crypto.spec.SecretKeySpec
 
 
 sealed class GdaxApi: FuelRouting {
+    class ApiCredentials(val passPhrase: String, val apiKey: String, val secret: String, var isValidated: Boolean?)
+
     companion object {
         //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null

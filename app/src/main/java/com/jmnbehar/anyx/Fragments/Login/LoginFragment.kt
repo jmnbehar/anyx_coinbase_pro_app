@@ -161,7 +161,9 @@ class LoginFragment : Fragment()  {
         }
         if((apiKeyVal != null) && (apiSecretVal != null) && (passphraseVal != null)
                 && (apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
-            (activity as LoginActivity).loginWithCredentials(ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal))
+
+            val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
+            (activity as LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(passphraseVal, apiKeyVal, apiSecretVal, isApiKeyValid))
         } else {
             toast("Wrong Passphrase")
         }
