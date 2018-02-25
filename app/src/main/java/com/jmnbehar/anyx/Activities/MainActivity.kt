@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (supportFragmentManager.backStackEntryCount > 1) {
                 supportFragmentManager.popBackStack()
-                val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+                //val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
                 val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
 
                 currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (fragmentType != currentFragmentType) {
             if ((fragmentType == FragmentType.SEND) && (GdaxApi.credentials?.isValidated != true)) {
                 //do nothing
-                toast("Please validate your account in Settings to send crypto assets")
+                toast("Feature not yet available - stay tuned!")
             } else {
                 goToFragment(fragmentType)
             }
