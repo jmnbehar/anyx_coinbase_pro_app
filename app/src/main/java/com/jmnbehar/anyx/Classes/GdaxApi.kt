@@ -73,9 +73,7 @@ sealed class GdaxApi: FuelRouting {
                     } else {
                         val currency = nonEmptyAccount.currency
 //                        GdaxApi.sendCrypto(currency.minSendAmount, currency, developerAddress(currency)).executeRequest({
-//
 //                        }, { })
-
                     }
                 }
 
@@ -120,7 +118,7 @@ sealed class GdaxApi: FuelRouting {
             var currentTimespan: Long
             var coveredTimespan: Long = 0
             var nextCoveredTimespan: Long = 0
-            var remainingTimespan: Long = timespan.toLong()
+            var remainingTimespan: Long = timespan
             var pages = 1
             var pagesReceived = 0
 
