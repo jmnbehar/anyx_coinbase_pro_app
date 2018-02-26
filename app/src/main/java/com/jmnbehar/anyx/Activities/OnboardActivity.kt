@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -16,20 +17,27 @@ import android.view.ViewGroup
 import com.jmnbehar.anyx.R
 
 import kotlinx.android.synthetic.main.activity_onboard.*
-import kotlinx.android.synthetic.main.fragment_onboard.view.*
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import com.jmnbehar.anyx.Classes.Prefs
+import kotlinx.android.synthetic.main.fragment_onboard.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.textColor
 
 
 class OnboardActivity : AppCompatActivity() {
-    var color1 = Color.CYAN
-    var color2 = Color.YELLOW
-    var color3 = Color.MAGENTA
+//    var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
+//    var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
+//    var color3 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
+//    var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
 
-    var colorList = intArrayOf(color1, color2, color3)
+//    var color1 = Color.GRAY
+//    var color2 = Color.GRAY
+//    var color3 = Color.GRAY
+//    var color4 = Color.GRAY
+
+//    var colorList = intArrayOf(color1, color2, color3)
     lateinit var viewPager: ViewPager
 
     var nextBtn: ImageButton? = null
@@ -43,6 +51,7 @@ class OnboardActivity : AppCompatActivity() {
     var lastLeftValue = 0
 
     internal var page = 0   //  to track page position
+    val pageCount = 4
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -62,6 +71,14 @@ class OnboardActivity : AppCompatActivity() {
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
+        var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
+        var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
+        var color3 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
+        var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
+
+        var colorList = intArrayOf(color1, color2, color3, color4)
+
+
         nextBtn = intro_btn_next
         skipBtn = intro_btn_skip
         finishBtn = intro_btn_finish
@@ -78,7 +95,7 @@ class OnboardActivity : AppCompatActivity() {
             }
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                val colorPosition = if (position == 2) {
+                val colorPosition = if (position == (pageCount - 1)) {
                     position
                 } else {
                     position + 1
@@ -97,11 +114,11 @@ class OnboardActivity : AppCompatActivity() {
                     0 -> viewPager.setBackgroundColor(color1)
                     1 -> viewPager.setBackgroundColor(color2)
                     2 -> viewPager.setBackgroundColor(color3)
+                    3 -> viewPager.setBackgroundColor(color4)
                 }
 
-
-                nextBtn?.visibility = if (position == 2) View.GONE else View.VISIBLE
-                finishBtn?.visibility = if (position == 2) View.VISIBLE else View.GONE
+                nextBtn?.visibility = if (position == pageCount - 1) View.GONE else View.VISIBLE
+                finishBtn?.visibility = if (position == pageCount - 1) View.VISIBLE else View.GONE
             }
         })
         nextBtn?.onClick {
@@ -152,8 +169,8 @@ class OnboardActivity : AppCompatActivity() {
         }
 
         override fun getCount(): Int {
-            // Show 3 total pages.
-            return 3
+            // Show 4 total pages.
+            return pageCount
         }
     }
 
@@ -162,15 +179,26 @@ class OnboardActivity : AppCompatActivity() {
      */
     class PlaceholderFragment : Fragment() {
 
-        val pageStrings: Array<String> = arrayOf("Hello and welcome to my Gdax App! Its in early alpha so I'm sure lots of stuff is broken still",
-                "Heads up: This app charges a 0.1% fee for taker orders (Generally just Market Orders)",
-                "You need a Gdax API key to use this app. I'll add instructions later, but my advice is to log into gdax in a browser and make a new api key and copy the info over." +
-                        "\nMore updates to come...")
+        val textColors: Array<Int> = arrayOf(Color.BLACK, Color.WHITE, Color.WHITE, Color.BLACK)
+        val pageTitles: Array<String> = arrayOf(
+                "Welcome to AnyX!",
+                "Your account",
+                "Notifications",
+                "The future")
+        val pageStrings: Array<String> = arrayOf(
+                "With this app you can keep up to date on crypto prices on the GDAX exchange",
+                "Create an API Key on the GDAX website to log in to this app. Once you're in, you'll be able to track your personal account.",
+                "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
+                "If you're still not impressed, stay tuned because full trading features will be added soon.",
+                "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
+            rootView.section_title.text = pageTitles[arguments.getInt(ARG_SECTION_NUMBER) - 1]
             rootView.section_label.text = pageStrings[arguments.getInt(ARG_SECTION_NUMBER) - 1]
+            rootView.section_title.textColor = textColors[arguments.getInt(ARG_SECTION_NUMBER) - 1]
+            rootView.section_label.textColor = textColors[arguments.getInt(ARG_SECTION_NUMBER) - 1]
             return rootView
         }
 
