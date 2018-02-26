@@ -70,7 +70,7 @@ class OnboardActivity : AppCompatActivity() {
 
         var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
         var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
-        var color3 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
+        var color3 = ResourcesCompat.getColor(resources, R.color.gray_bg, null)
         var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
 
         var colorList = intArrayOf(color1, color2, color3, color4)
@@ -188,7 +188,7 @@ class OnboardActivity : AppCompatActivity() {
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
                 "If you're still not impressed, stay tuned because full trading features will be added soon.",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_logo, R.drawable.anyx_logo, R.drawable.gdax, R.drawable.icon_eth)
+        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_logo, R.drawable.accounts_screenshots, R.drawable.accounts_screenshots, R.drawable.the_future)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {

@@ -144,7 +144,7 @@ class Prefs (var context: Context) {
             return null //testResult ?: false
         }
     }
-    private fun approveApiKey(apiKey: String) {
+    fun approveApiKey(apiKey: String) {
         val apiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(APPROVED_API_KEYS, apiKeys).apply()
@@ -152,7 +152,7 @@ class Prefs (var context: Context) {
             GdaxApi.credentials?.isValidated = true
         }
     }
-    private fun rejectApiKey(apiKey: String) {
+    fun rejectApiKey(apiKey: String) {
         val apiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(REJECTED_API_KEYS, apiKeys).apply()

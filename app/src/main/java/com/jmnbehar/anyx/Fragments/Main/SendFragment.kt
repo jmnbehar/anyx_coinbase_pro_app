@@ -23,9 +23,6 @@ class SendFragment : RefreshFragment() {
     lateinit private var inflater: LayoutInflater
     lateinit private var titleText: TextView
 
-//    lateinit private var radioButtonBtc: RadioButton
-//    lateinit private var radioButtonEth: RadioButton
-//    lateinit private var radioButtonLtc: RadioButton
     lateinit private var currencyTabLayout: TabLayout
 
     lateinit private var amountEditText: EditText
@@ -38,9 +35,6 @@ class SendFragment : RefreshFragment() {
     lateinit private var twoFactorEditText: EditText
     lateinit private var twoFactorLabelText: TextView
     lateinit private var twoFactorButton: Button
-
-    lateinit private var totalLabelText: TextView
-    lateinit private var totalText: TextView
 
     lateinit private var sendButton: Button
 
@@ -61,9 +55,6 @@ class SendFragment : RefreshFragment() {
 
         titleText = rootView.txt_send_name
 
-//        radioButtonBtc = rootView.rbtn_trade_btc
-//        radioButtonEth = rootView.rbtn_trade_eth
-//        radioButtonLtc = rootView.rbtn_trade_ltc
         currencyTabLayout = rootView.tabl_send_currency
 
         amountLabelText = rootView.txt_send_amount_label
