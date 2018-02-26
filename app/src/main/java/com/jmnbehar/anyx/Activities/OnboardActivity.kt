@@ -188,7 +188,7 @@ class OnboardActivity : AppCompatActivity() {
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
                 "If you're still not impressed, stay tuned because full trading features will be added soon.",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_logo, R.drawable.anyx_logo, R.drawable.gdax, R.drawable.icon_eth)
+        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_logo, R.drawable.anyx_logo, R.drawable.accounts_screenshots, R.drawable.icon_eth)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {

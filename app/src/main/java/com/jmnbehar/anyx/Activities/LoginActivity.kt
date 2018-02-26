@@ -62,15 +62,16 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         prefs = Prefs(this)
 
-        if (intent.getBooleanExtra(Constants.exit, false)) {
-            finish()
-            return
-        } else if (prefs.isFirstTime) {
-            onboardNewUser()
-            skipLogin = true
-        } else if (intent.getBooleanExtra(Constants.logout, false)) {
-            skipLogin = true
-        }
+        onboardNewUser()
+//        if (intent.getBooleanExtra(Constants.exit, false)) {
+//            finish()
+//            return
+//        } else if (prefs.isFirstTime) {
+//            onboardNewUser()
+//            skipLogin = true
+//        } else if (intent.getBooleanExtra(Constants.logout, false)) {
+//            skipLogin = true
+//        }
 
         shouldSaveApiInfo = prefs.shouldSaveApiInfo
         shouldSavePassphrase = prefs.shouldSavePassphrase

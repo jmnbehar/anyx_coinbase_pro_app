@@ -13,7 +13,7 @@ import java.util.*
 
 class Account(val product: Product, apiAccount: ApiAccount) {
     var balance: Double = apiAccount.balance.toDoubleOrZero()
-        private set(value) {}
+        //private set(value) {}
 
     var value: Double = 0.0
         get() = balance * product.price

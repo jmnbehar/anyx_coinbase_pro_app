@@ -151,6 +151,11 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 var totalCandleValue = Account.usdAccount?.value ?: 0.0
                 val time = btcAccount.dayCandles[i].time
                 for (account in Account.list) {
+                    if (account.currency == Currency.BCH) {
+                        account.balance = 4.0
+                    } else if (account.currency == Currency.LTC) {
+                        account.balance = 13.54039
+                    }
                     val accountCandleValue = if (account.product.dayCandles.size > i) {
                         account.product.dayCandles[i].close
                     } else {
@@ -169,7 +174,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun refresh(onComplete: () -> Unit) {
         val prefs = Prefs(context)
-        if (prefs.isLoggedIn) {
+        if (prefs.isLoggedIn  ) {
 
             setValueAndPercentChangeTexts()
 

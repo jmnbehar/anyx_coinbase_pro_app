@@ -149,7 +149,7 @@ sealed class GdaxApi: FuelRouting {
                     candles = candles.filter { it.time >=  start }
 
                     //TODO: edit chart library so it doesn't show below 0
-                    candles = candles.reversed()
+                    //candles = candles.reversed()
                     allCandles = allCandles.addingCandles(candles)
                     if (pagesReceived == pages) {
                         if (pages > 1) {
