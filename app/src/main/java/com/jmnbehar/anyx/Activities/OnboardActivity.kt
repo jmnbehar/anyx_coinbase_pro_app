@@ -44,9 +44,6 @@ class OnboardActivity : AppCompatActivity() {
     var skipBtn: Button? = null
     var finishBtn:Button? = null
 
-    var zero: ImageView? = null
-    var one:ImageView? = null
-    var two:ImageView? = null
     var indicators: Array<ImageView>? = null
     var lastLeftValue = 0
 
@@ -191,14 +188,18 @@ class OnboardActivity : AppCompatActivity() {
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
                 "If you're still not impressed, stay tuned because full trading features will be added soon.",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
+        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_logo, R.drawable.anyx_logo, R.drawable.gdax, R.drawable.icon_eth)
+
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
+            val position = arguments.getInt(ARG_SECTION_NUMBER) - 1
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
-            rootView.section_title.text = pageTitles[arguments.getInt(ARG_SECTION_NUMBER) - 1]
-            rootView.section_label.text = pageStrings[arguments.getInt(ARG_SECTION_NUMBER) - 1]
-            rootView.section_title.textColor = textColors[arguments.getInt(ARG_SECTION_NUMBER) - 1]
-            rootView.section_label.textColor = textColors[arguments.getInt(ARG_SECTION_NUMBER) - 1]
+            rootView.section_title.text = pageTitles[position]
+            rootView.section_label.text = pageStrings[position]
+            rootView.section_title.textColor = textColors[position]
+            rootView.section_label.textColor = textColors[position]
+            rootView.image_view.setImageResource(pageImages[position])
             return rootView
         }
 
