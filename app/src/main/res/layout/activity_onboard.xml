@@ -55,11 +55,8 @@
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
                     android:background="@drawable/ic_launcher_background" />
                 <!-- Your other 2 indicators here -->
-
-
-
+                
             </LinearLayout>
-
 
             <!-- This overlaps the next button in the last slide -->
 
