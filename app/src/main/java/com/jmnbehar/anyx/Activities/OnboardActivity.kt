@@ -22,29 +22,19 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import com.jmnbehar.anyx.Classes.Prefs
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
+import org.jetbrains.anko.image
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.textColor
 
 
 class OnboardActivity : AppCompatActivity() {
-//    var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
-//    var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
-//    var color3 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
-//    var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
-
-//    var color1 = Color.GRAY
-//    var color2 = Color.GRAY
-//    var color3 = Color.GRAY
-//    var color4 = Color.GRAY
-
-//    var colorList = intArrayOf(color1, color2, color3)
     lateinit var viewPager: ViewPager
 
     var nextBtn: ImageButton? = null
     var skipBtn: Button? = null
     var finishBtn:Button? = null
 
-    var indicators: Array<ImageView>? = null
+    var indicators: List<ImageView> = listOf()
     var lastLeftValue = 0
 
     internal var page = 0   //  to track page position
@@ -75,7 +65,14 @@ class OnboardActivity : AppCompatActivity() {
 
         var colorList = intArrayOf(color1, color2, color3, color4)
 
+        indicators = listOf(intro_indicator_0, intro_indicator_1, intro_indicator_2, intro_indicator_3, intro_indicator_4, intro_indicator_5, intro_indicator_6, intro_indicator_7)
 
+        for (i in (pageCount)..(indicators.count() - 1)) {
+            indicators[i].visibility = View.GONE
+        }
+
+        val imageIndicator = indicators[0]
+        indicators[0].setImageResource(R.drawable.white)
         nextBtn = intro_btn_next
         skipBtn = intro_btn_skip
         finishBtn = intro_btn_finish
@@ -114,7 +111,17 @@ class OnboardActivity : AppCompatActivity() {
                     3 -> viewPager.setBackgroundColor(color4)
                 }
 
-                nextBtn?.visibility = if (position == pageCount - 1) View.GONE else View.VISIBLE
+                for (i in 0..(indicators.count() - 1)) {
+                    indicators[i].setImageResource(R.drawable.ic_launcher_background)
+                }
+                val imageIndicator = indicators[position]
+                imageIndicator.setImageResource(R.drawable.white)
+//                imageIndicator.setColorFilter(Color.WHITE)
+//
+//                imageIndicator.setImageResource(R.drawable.anyx_logo)
+//                intro_indicator_1.setColorFilter(Color.WHITE)
+
+                nextBtn?.visibility = View.GONE // if (position == pageCount - 1) View.GONE else View.VISIBLE
                 finishBtn?.visibility = if (position == pageCount - 1) View.VISIBLE else View.GONE
             }
         })
