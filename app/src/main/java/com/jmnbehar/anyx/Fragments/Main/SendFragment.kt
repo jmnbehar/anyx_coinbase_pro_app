@@ -70,7 +70,7 @@ class SendFragment : RefreshFragment() {
 
         sendButton = rootView.btn_send
 
-        titleText.text = currency.toString()
+        titleText.text = "Send" //currency.toString()
 
         switchCurrency()
 
