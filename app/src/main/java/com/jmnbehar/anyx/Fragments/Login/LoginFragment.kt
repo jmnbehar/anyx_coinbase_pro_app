@@ -152,7 +152,6 @@ class LoginFragment : Fragment()  {
         val apiSecretVal = apiSecret ?: ""
         val passphraseVal = passphrase ?: ""
         if((apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
-            prefs.approveApiKey(apiKeyVal)
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
             (activity as LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
         } else {
