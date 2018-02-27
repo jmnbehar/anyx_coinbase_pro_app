@@ -25,6 +25,7 @@ import javax.crypto.spec.SecretKeySpec
 sealed class GdaxApi: FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
 
+
     companion object {
         //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
@@ -149,7 +150,7 @@ sealed class GdaxApi: FuelRouting {
                     candles = candles.filter { it.time >=  start }
 
                     //TODO: edit chart library so it doesn't show below 0
-                    //candles = candles.reversed()
+                    candles = candles.reversed()
                     allCandles = allCandles.addingCandles(candles)
                     if (pagesReceived == pages) {
                         if (pages > 1) {
