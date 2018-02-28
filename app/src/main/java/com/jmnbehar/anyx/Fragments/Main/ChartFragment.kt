@@ -27,6 +27,8 @@ import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
 import kotlinx.android.synthetic.main.fragment_chart.*
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -283,7 +285,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             title = "Order"
 
             val layoutWidth = 1000
-            val createdTime = order.created_at
+            val createdTimeRaw = order.created_at
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'")
+            val createdTime = try {
+                val date = format.parse(createdTimeRaw)
+//                System.out.println(date)
+                val outputFormat = SimpleDateFormat("II: mm MM/dd/yyyy")
+                outputFormat.format(date)
+
+            } catch (e: ParseException) {
+                //e.printStackTrace()
+                createdTimeRaw
+            }
             val fillFees = order.fill_fees.toDouble().fiatFormat()
             val price = order.price.toDouble().fiatFormat()
             val filledSize = order.filled_size.toDouble().toString()
@@ -293,13 +306,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 linearLayout {
                     verticalLayout {
                         horizontalLayout("Side:", order.side).lparams(width = layoutWidth) {}
-                        horizontalLayout("Size:", order.size ?: "0").lparams(width = layoutWidth) {}
+                        horizontalLayout("Size:", size).lparams(width = layoutWidth) {}
                         horizontalLayout("Filled Size:", filledSize).lparams(width = layoutWidth) {}
                         horizontalLayout("Price:", price).lparams(width = layoutWidth) {}
                         horizontalLayout("Status:", order.status).lparams(width = layoutWidth) {}
                         horizontalLayout("Fill fees:", fillFees).lparams(width = layoutWidth) {}
                         horizontalLayout("Time:", createdTime).lparams(width = layoutWidth) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(80) }
+                    }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
             positiveButton("OK") {  }
@@ -319,15 +332,31 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         alert {
             title = "Fill"
 
+            val layoutWidth = 1000
+            val createdTimeRaw = fill.created_at
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'")
+            val createdTime = try {
+                val date = format.parse(createdTimeRaw)
+//                System.out.println(date)
+                val outputFormat = SimpleDateFormat("hh:mm, MM/dd/yyyy")
+                outputFormat.format(date)
+
+            } catch (e: ParseException) {
+                //e.printStackTrace()
+                createdTimeRaw
+            }
+            val fee = fill.fee.toDouble().fiatFormat()
+            val price = fill.price.toDouble().fiatFormat()
+            val size = fill.size.toDouble().btcFormat()
             customView {
                 linearLayout {
                     verticalLayout {
-                        horizontalLayout("Side:  ", fill.side).lparams(width = matchParent) {}
-                        horizontalLayout("Size:  ", fill.size).lparams(width = matchParent) {}
-                        horizontalLayout("Price:  ", fill.price).lparams(width = matchParent) {}
-                        horizontalLayout("Fee:  ", fill.fee).lparams(width = matchParent) {}
-                        horizontalLayout("Time:  ", fill.created_at).lparams(width = matchParent) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+                        horizontalLayout("Side:  ", fill.side).lparams(width = layoutWidth) {}
+                        horizontalLayout("Size:  ", size).lparams(width = layoutWidth) {}
+                        horizontalLayout("Price:  ", price).lparams(width = layoutWidth) {}
+                        horizontalLayout("Fee:  ", fee).lparams(width = layoutWidth) {}
+                        horizontalLayout("Time:  ", createdTime).lparams(width = layoutWidth) {}
+                    }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
             positiveButton("OK") {  }
