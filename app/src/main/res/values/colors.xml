@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#aeb4c0</color>
     <color name="colorPrimaryDark">#15181b</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#ec4419</color>
 
 
     <color name="gray_bg">#15181c</color>
     <color name="dark_accent">#292e35</color>
 
+    <color name="anyx_green">#00c46e</color>
+    <color name="anyx_red">#ec4419</color>
+
     <color name="btc_light">#c1b400</color>
     <color name="eth_light">#697be5</color>
-    <color name="bch_light">#3bc8be</color>
+    <color name="bch_light">#25bb7a</color>
     <color name="ltc_light">#aeb4c0</color>
 
     <color name="btc_dk">#f9c800</color>
     <color name="eth_dk">#7086fd</color>
-    <color name="bch_dk">#3cd6cb</color>
+    <color name="bch_dk">#25bb7a</color>
     <color name="ltc_dk">#ccd0da</color>
 
     <color name="btc_accent">#c6b800</color>

@@ -1,6 +1,7 @@
 package com.jmnbehar.anyx.Adapters
 
-import android.graphics.Color
+import android.content.res.Resources
+import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -13,7 +14,7 @@ import org.jetbrains.anko.backgroundColor
  * Created by jmnbehar on 11/12/2017.
  */
 
-class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: List<Any>, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
+class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
     var orders: List<ApiOrder> = listOf()
     var fills: List<ApiFill> = listOf()
 
@@ -119,8 +120,9 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
         }
 
         imageView.backgroundColor = when (tradeSide) {  //TODO: change to Ellie Approved Colors
-            TradeSide.BUY -> Color.GREEN
-            TradeSide.SELL -> Color.RED
+            TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
+
+            TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
         }
 //        vi.img_history_icon.setImageResource(currency.iconId)
 

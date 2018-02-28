@@ -29,8 +29,9 @@ fun MutableSet<Alert>.removeAlert(alert: Alert) {
 
 fun ViewManager.horizontalLayout(string1: String, string2: String) : LinearLayout {
     return linearLayout {
-        textView(string1)
-        textView(string2).lparams(width = matchParent) { textAlignment = right }
+        textView(string1).lparams(weight = 1f)
+        space().lparams(weight = 20f)
+        textView(string2).lparams(weight = 1f)
         padding = dip(3)
     }
 }

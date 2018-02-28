@@ -1,10 +1,12 @@
 package com.jmnbehar.anyx.Classes
 
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
+import com.jmnbehar.anyx.Activities.MainActivity
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
@@ -26,6 +28,8 @@ open class RefreshFragment: Fragment() {
     override fun onResume() {
         super.onResume()
         showDarkMode()
+       // (activity as MainActivity).spinnerNav.isEnabled = false
+        (activity as MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
     }
 
     fun showDarkMode(newView: View? = null) {

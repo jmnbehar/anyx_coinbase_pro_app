@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.ColorFilter
 import android.media.RingtoneManager
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +16,9 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.AdapterView
+import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
@@ -31,6 +35,8 @@ import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var notificationManager: NotificationManager? = null
+    lateinit var spinnerNav: Spinner
+    var defaultSpinnerColorFilter: ColorFilter? = null
 
     enum class FragmentType {
         BTC_CHART,
@@ -105,6 +111,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val nullMessage: CharSequence? = null
         progressDialog = indeterminateProgressDialog(nullMessage)
         progressDialog?.dismiss()
+
+        spinnerNav = toolbar_spinner
+        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+        spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as String ?: ""
+                val selectedCurrency = Currency.fromString(selectedItem)
+                goToChartFragment(selectedCurrency)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        //TODO: show spinner later
+        spinnerNav.visibility = View.GONE
 
         val prefs = Prefs(this)
 

@@ -23,6 +23,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -89,7 +90,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val account = account
         if (account == null) {
-            activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss();
+            activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
             val prefs = Prefs(activity)
 
@@ -164,6 +165,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
 //                }
             }
+
             when (chartTimeSpan) {
                 TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
                 TimeInSeconds.oneDay  -> timespanButtonDay.isChecked = true
@@ -236,11 +238,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onResume() {
         super.onResume()
+        val mainActivity = (activity as MainActivity)
+        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+        mainActivity.spinnerNav.isEnabled = true
+        val spinnerStrings = Account.list.map { account -> account.currency.fullName }.toList()
+        mainActivity.spinnerNav.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, spinnerStrings)
         autoRefresh = Runnable {
             miniRefresh({ }, { })
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
     }
 
     override fun onPause() {
@@ -275,21 +282,28 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         alert {
             title = "Order"
 
+            val layoutWidth = 1000
+            val createdTime = order.created_at
+            val fillFees = order.fill_fees.toDouble().fiatFormat()
+            val price = order.price.toDouble().fiatFormat()
+            val filledSize = order.filled_size.toDouble().toString()
+            val size = (order.size ?: "0").toDouble().btcFormat()
+
             customView {
                 linearLayout {
                     verticalLayout {
-                        horizontalLayout("Side:  ", order.side).lparams(width = matchParent) {}
-                        horizontalLayout("Size:  ", order.size ?: "0").lparams(width = matchParent) {}
-                        horizontalLayout("Filled Size:  ", order.filled_size).lparams(width = matchParent) {}
-                        horizontalLayout("Price:  ", order.price).lparams(width = matchParent) {}
-                        horizontalLayout("Status:  ", order.status).lparams(width = matchParent) {}
-                        horizontalLayout("Fill fees:  ", order.fill_fees).lparams(width = matchParent) {}
-                        horizontalLayout("Time:  ", order.created_at).lparams(width = matchParent) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+                        horizontalLayout("Side:", order.side).lparams(width = layoutWidth) {}
+                        horizontalLayout("Size:", order.size ?: "0").lparams(width = layoutWidth) {}
+                        horizontalLayout("Filled Size:", filledSize).lparams(width = layoutWidth) {}
+                        horizontalLayout("Price:", price).lparams(width = layoutWidth) {}
+                        horizontalLayout("Status:", order.status).lparams(width = layoutWidth) {}
+                        horizontalLayout("Fill fees:", fillFees).lparams(width = layoutWidth) {}
+                        horizontalLayout("Time:", createdTime).lparams(width = layoutWidth) {}
+                    }.lparams(width = matchParent) {leftMargin = dip(80) }
                 }
             }
-            positiveButton("Close") {  }
-            negativeButton("Delete") {
+            positiveButton("OK") {  }
+            negativeButton("Cancel") {
                 GdaxApi.cancelOrder(order.id).executeRequest({ }) {
                     var orders = (historyPager.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
@@ -316,7 +330,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
-            positiveButton("Close") {  }
+            positiveButton("OK") {  }
         }.show()
     }
 
