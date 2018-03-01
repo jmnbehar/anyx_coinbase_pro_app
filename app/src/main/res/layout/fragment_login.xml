@@ -75,7 +75,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_login_apikey_instructions"
+            android:id="@+id/btn_login_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Help"

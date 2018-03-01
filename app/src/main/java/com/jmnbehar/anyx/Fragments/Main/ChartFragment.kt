@@ -316,13 +316,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
             positiveButton("OK") {  }
-            negativeButton("Cancel") {
+            negativeButton("Cancel Order") {
                 GdaxApi.cancelOrder(order.id).executeRequest({ }) {
                     var orders = (historyPager.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
                     (historyPager.adapter as HistoryPagerAdapter).orders = orders
                     (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
-                    toast("order cancelled")
+                    toast("Order cancelled")
                 }
             }
         }.show()

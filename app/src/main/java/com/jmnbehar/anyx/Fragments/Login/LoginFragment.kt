@@ -50,6 +50,7 @@ class LoginFragment : Fragment()  {
         val btnLogin = rootView.btn_login
         val btnNewApiKey = rootView.btn_login_new_apikey
         val btnNewAccount = rootView.btn_login_new_acccount
+        val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
 
         if(prefs.apiKey != null) {
@@ -103,18 +104,22 @@ class LoginFragment : Fragment()  {
 
         btnNewApiKey.setOnClickListener { _ ->
             val newApiKeyUrl = "https://www.gdax.com/settings/api"
-            (activity as LoginActivity).goToFragment(true, newApiKeyUrl)
+            (activity as LoginActivity).goToFragment(LoginActivity.LoginFragmentType.WebView, newApiKeyUrl)
         }
 
         btnNewAccount.setOnClickListener { _ ->
             //            val newAccountUrl = "https://www.coinbase.com/users/oauth_signup?client_id=2e7433cc0730d8cb8c77dd30e04b5658aacbf7612b2bad8aa7bb97b87fc0f876&meta%5Baccount%5D=all&redirect_uri=https%3A%2F%2Fwww.gdax.com%2Foauth_redirect&response_type=code"
 //            val newAccountUrl = "https://www.coinbase.com/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URL&state=SECURE_RANDOM&scope=wallet:accounts:read"
             val newAccountUrl = "https://www.gdax.com/trade/BTC-USD"
-            (activity as LoginActivity).goToFragment(true, newAccountUrl)
+            (activity as LoginActivity).goToFragment(LoginActivity.LoginFragmentType.WebView, newAccountUrl)
         }
 
         btnSkipLogin.setOnClickListener { _ ->
             (activity as LoginActivity).loginWithCredentials(null)
+        }
+
+        btnLoginHelp.setOnClickListener { _ ->
+            (activity as LoginActivity).goToFragment(LoginActivity.LoginFragmentType.Help)
         }
 
         return rootView

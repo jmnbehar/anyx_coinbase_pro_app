@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:screenOrientation="portrait"
+    android:orientation="vertical"
+    tools:openDrawer="start">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/login_help_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/login_help_tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="top">
+
+        </android.support.design.widget.TabLayout>
+
+    </android.support.v4.view.ViewPager>
+</LinearLayout>
