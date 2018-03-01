@@ -9,6 +9,7 @@ object Constants {
     val logout = "LOGOUT"
     val alertChannelId = "com.jmnbehar.gdax.alerts"
     val salt = "GdaxApp"
+    val isMobileLoginHelp = "LOGIN_HELP_TYPE"
 }
 
 
