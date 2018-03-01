@@ -3,24 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
     android:fitsSystemWindows="true"
-    android:screenOrientation="portrait"
+    android:gravity="center_vertical"
     android:orientation="vertical"
+    android:screenOrientation="portrait"
     tools:openDrawer="start">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/login_help_view_pager"
+    <Button
+        android:id="@+id/btn_login_help_mobile"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="Create Mobile " />
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/login_help_tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="top">
-
-        </android.support.design.widget.TabLayout>
-
-    </android.support.v4.view.ViewPager>
+    <Button
+        android:id="@+id/btn_login_help_desktop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button" />
 </LinearLayout>

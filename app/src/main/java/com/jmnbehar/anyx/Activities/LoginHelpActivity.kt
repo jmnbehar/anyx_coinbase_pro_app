@@ -1,7 +1,5 @@
 package com.jmnbehar.anyx.Activities
 
-import android.animation.ArgbEvaluator
-import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 
 import android.support.v4.app.Fragment
@@ -9,8 +7,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.os.Bundle
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.view.GravityCompat
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -21,15 +17,13 @@ import kotlinx.android.synthetic.main.activity_onboard.*
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import com.jmnbehar.anyx.Classes.Constants
 import com.jmnbehar.anyx.Classes.Prefs
-import com.jmnbehar.anyx.Classes.RefreshFragment
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.textColor
 
 
-class OnboardActivity : AppCompatActivity() {
+class LoginHelpActivity : AppCompatActivity() {
     lateinit var viewPager: ViewPager
 
     var nextBtn: ImageButton? = null
@@ -37,10 +31,10 @@ class OnboardActivity : AppCompatActivity() {
     var finishBtn:Button? = null
 
     var indicators: List<ImageView> = listOf()
-    var lastLeftValue = 0
+    var isMobileHelpPage = true
 
     internal var currentPage = 0   //  to track page position
-    val pageCount = 4
+    val pageCount = 5
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -60,12 +54,6 @@ class OnboardActivity : AppCompatActivity() {
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
-        var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
-        var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
-        var color3 = ResourcesCompat.getColor(resources, R.color.gray_bg, null)
-        var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
-
-        var colorList = intArrayOf(color1, color2, color3, color4)
 
         indicators = listOf(intro_indicator_0, intro_indicator_1, intro_indicator_2, intro_indicator_3, intro_indicator_4, intro_indicator_5, intro_indicator_6, intro_indicator_7)
 
@@ -82,51 +70,35 @@ class OnboardActivity : AppCompatActivity() {
         finishBtn?.visibility = View.VISIBLE
         finishBtn?.text = "Skip"
 
+        isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
+
         // Set up the ViewPager with the sections adapter.
         viewPager = home_view_pager
         viewPager.adapter = mSectionsPagerAdapter
 
-        val evaluator = ArgbEvaluator()
-
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
-            override fun onPageScrollStateChanged(state: Int) {
-            }
+            override fun onPageScrollStateChanged(state: Int) {}
 
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                val colorPosition = if (position == (pageCount - 1)) {
-                    position
-                } else {
-                    position + 1
-                }
-
-                val colorUpdate = evaluator.evaluate(positionOffset, colorList[position], colorList[colorPosition]) as Int
-                viewPager.setBackgroundColor(colorUpdate)
-            }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
             override fun onPageSelected(position: Int) {
                 currentPage = position
 
-                when (position) {
-                    0 -> viewPager.setBackgroundColor(color1)
-                    1 -> viewPager.setBackgroundColor(color2)
-                    2 -> viewPager.setBackgroundColor(color3)
-                    3 -> viewPager.setBackgroundColor(color4)
-                }
-
                 for (i in 0..(indicators.count() - 1)) {
                     indicators[i].setImageResource(R.drawable.ic_launcher_background)
                 }
+
                 val imageIndicator = indicators[position]
                 imageIndicator.setImageResource(R.drawable.white)
 //                imageIndicator.setColorFilter(Color.WHITE)
-//
 //                imageIndicator.setImageResource(R.drawable.anyx_logo)
 //                intro_indicator_1.setColorFilter(Color.WHITE)
 
                 nextBtn?.visibility = View.GONE // if (position == pageCount - 1) View.GONE else View.VISIBLE
+                finishBtn?.visibility = View.VISIBLE
                 if (position == pageCount - 1) {
-                    finishBtn?.text = "Continue"
+                    finishBtn?.text = "Done"
                 }
             }
         })
@@ -135,16 +107,12 @@ class OnboardActivity : AppCompatActivity() {
             viewPager.setCurrentItem(currentPage, true)
         }
 
-        val prefs = Prefs(this)
-
         skipBtn?.onClick {
             finish()
-            prefs.isFirstTime = false
         }
 
         finishBtn?.onClick {
             finish()
-            prefs.isFirstTime = false
         }
 
     }
@@ -155,6 +123,8 @@ class OnboardActivity : AppCompatActivity() {
         if (currentPage > 0) {
             currentPage -= 1
             viewPager.setCurrentItem(currentPage, true)
+        } else {
+            super.onBackPressed()
         }
     }
 
@@ -194,31 +164,51 @@ class OnboardActivity : AppCompatActivity() {
      * A placeholder fragment containing a simple view.
      */
     class PlaceholderFragment : Fragment() {
+        val mobileTitles: Array<String> = arrayOf(
+                "Create a new API Key on your phone",
+                "Open Menu",
+                "Open API Page",
+                "Create API Key",
+                "Enter Info To AnyX")
+        val mobileStrings: Array<String> = arrayOf(
+                " ",
+                "On the GDAX mobile site, click the menu icon in the upper right hand corner.",
+                "Select API from the menu.",
+                "On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase." +
+                        "\nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.",
+                "Copy the API key and API secret into AnyX's login screen. Save these in the app so you don't have to go through this process again. \nYou're ready to go!")
+        val mobileImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_mobile_1, R.drawable.login_help_mobile_2, R.drawable.login_help_mobile_4, R.drawable.login_help_mobile_5)
 
-        val textColors: Array<Int> = arrayOf(Color.BLACK, Color.WHITE, Color.WHITE, Color.BLACK)
-        val pageTitles: Array<String> = arrayOf(
-                "Welcome to AnyX!",
-                "Your account",
-                "Notifications",
-                "The future")
-        val pageStrings: Array<String> = arrayOf(
-                "With this app you can keep up to date on crypto prices on the GDAX exchange",
-                "Create an API Key on the GDAX website to log in to this app. Once you're in, you'll be able to track your personal account.",
-                "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
-                "If you're still not impressed, stay tuned because full trading features will be added soon.",
-                "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.accounts_screenshots, R.drawable.accounts_screenshots, R.drawable.the_future)
+        val desktopTitles: Array<String> = arrayOf(
+                "Create a new API Key on your computer",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ")
+        val desktopStrings: Array<String> = arrayOf(
+                " ",
+                "Log in to the GDAX website and click the menu icon in the upper right hand corner.",
+                "Choose API from the right hand menu.",
+                "On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase.\n" +
+                        "As long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.",
+                "Copy down the info into the AnyX login screen. Make sure you do not send this info on any unencrypted channels, because ")
+        val desktopImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_desktop_1, R.drawable.login_help_desktop_2, R.drawable.login_help_desktop_3, R.drawable.login_help_desktop_4)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
             val position = arguments.getInt(ARG_SECTION_NUMBER) - 1
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
-            rootView.section_title.text = pageTitles[position]
-            rootView.section_label.text = pageStrings[position]
-            rootView.section_title.textColor = textColors[position]
-            rootView.section_label.textColor = textColors[position]
-            rootView.image_view.setImageResource(pageImages[position])
+            if ((activity as LoginHelpActivity).isMobileHelpPage) {
+                rootView.section_title.text = mobileTitles[position]
+                rootView.section_label.text = mobileStrings[position]
+                rootView.image_view.setImageResource(mobileImages[position])
+            } else {
+                rootView.section_title.text = desktopTitles[position]
+                rootView.section_label.text = desktopStrings[position]
+                rootView.image_view.setImageResource(desktopImages[position])
+            }
             return rootView
         }
 
