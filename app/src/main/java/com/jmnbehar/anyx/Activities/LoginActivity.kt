@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Login.LoginFragment
+import com.jmnbehar.anyx.Fragments.Login.LoginHelpContainerFragment
 import com.jmnbehar.anyx.Fragments.Login.WebviewFragment
 import com.jmnbehar.anyx.R
 import org.jetbrains.anko.indeterminateProgressDialog
@@ -76,7 +77,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         shouldSavePassphrase = prefs.shouldSavePassphrase
         if (savedInstanceState == null) {
             if (!checkUser()) {
-                goToFragment(false)
+                goToFragment(LoginFragmentType.Login)
             }
         }
     }
@@ -86,15 +87,30 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         startActivity(intent)
     }
 
-    fun goToFragment(isWebViewFragment: Boolean, url: String? = null) {
+    enum class LoginFragmentType {
+        Login,
+        WebView,
+        Help;
+    }
+
+    fun goToFragment(loginFragmentType: LoginFragmentType, url: String? = null) {
         val tag: String
-        val fragment = if (isWebViewFragment) {
-            tag = "Webview"
-            WebviewFragment.newInstance(url)
-        } else {
-            tag = "Login"
-            LoginFragment.newInstance()
+
+        val fragment = when(loginFragmentType) {
+            LoginFragmentType.Login -> {
+                tag = "Login"
+                LoginFragment.newInstance()
+            }
+            LoginFragmentType.WebView -> {
+                tag = "Webview"
+                WebviewFragment.newInstance(url)
+            }
+            LoginFragmentType.Help -> {
+                tag = "Help"
+                LoginHelpContainerFragment.newInstance()
+            }
         }
+
         currentFragment = fragment
         if (supportFragmentManager.backStackEntryCount == 0) {
             supportFragmentManager
