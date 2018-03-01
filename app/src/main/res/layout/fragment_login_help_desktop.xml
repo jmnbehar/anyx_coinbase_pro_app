@@ -27,23 +27,72 @@
             tools:layout_editor_absoluteX="48dp"
             tools:layout_editor_absoluteY="16dp" />
 
+        <TextView
+            android:id="@+id/txt_login_help_desktop_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:text="Log in to the GDAX website and click the menu icon in the upper right hand corner."
+            android:textSize="18sp" />
+
         <ImageView
             android:id="@+id/img_login_help_desktop_1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             app:srcCompat="@drawable/login_help_desktop_1" />
 
-        <ImageView
-            android:id="@+id/img_login_help_desktop_2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/login_help_desktop_2" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/img_login_help_desktop_3"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txt_login_help_desktop_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:layout_weight="1"
+                android:text="Choose API from the right hand menu."
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/img_login_help_desktop_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/login_help_desktop_2" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txt_login_help_desktop_3"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/login_help_desktop_3" />
+            android:layout_marginTop="25dp"
+            android:text="On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase.
+        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets."
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/img_login_help_desktop_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/login_help_desktop_3" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txt_login_help_desktop_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:text="Copy the API key and API secret into AnyX's login screen. Save these in the app so you don't have to go through this process again. \nYou're ready to go!"
+            android:textSize="18sp" />
 
     </LinearLayout>
 </ScrollView>

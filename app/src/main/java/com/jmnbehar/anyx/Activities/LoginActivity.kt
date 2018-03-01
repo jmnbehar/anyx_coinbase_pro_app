@@ -145,15 +145,16 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     override fun onBackPressed() {
-        val currentFragment = currentFragment
-        if (currentFragment is WebviewFragment) {
-//            if (currentFragment.webView?.onBackPressed() ?: true) {
-//                super.onBackPressed()
-//            }
-            super.onBackPressed()
-        } else {
-            super.onBackPressed()
-            finish()
+        when (currentFragment) {
+            is LoginFragment -> {
+                super.onBackPressed()
+                finish()
+            }
+            else -> super.onBackPressed()
+        }
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+            currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag)
         }
     }
 
