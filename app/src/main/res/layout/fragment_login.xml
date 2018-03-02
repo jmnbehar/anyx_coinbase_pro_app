@@ -60,14 +60,6 @@
         android:layout_height="wrap_content"
         android:text="Also save passphrase" />
 
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Log in"
-        tools:layout_editor_absoluteX="148dp"
-        tools:layout_editor_absoluteY="93dp" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -75,39 +67,53 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_login_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Help"
-            tools:layout_editor_absoluteX="148dp"
-            tools:layout_editor_absoluteY="93dp" />
-
-        <Button
             android:id="@+id/btn_login_new_apikey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="New api key"
-            android:visibility="gone"
-            tools:layout_editor_absoluteX="148dp"
-            tools:layout_editor_absoluteY="93dp" />
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_login_new_acccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New GDAX account"
-            android:visibility="gone"
-            tools:layout_editor_absoluteX="148dp"
-            tools:layout_editor_absoluteY="93dp" />
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_login_skip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Skip login"
-            tools:layout_editor_absoluteX="148dp"
-            tools:layout_editor_absoluteY="93dp" />
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Skip login" />
+
+        <Button
+            android:id="@+id/btn_login_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Help" />
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:text="Log in" />
 
     </LinearLayout>
 

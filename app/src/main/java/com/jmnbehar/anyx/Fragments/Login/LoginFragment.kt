@@ -1,17 +1,22 @@
 package com.jmnbehar.anyx.Fragments.Login
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.PopupMenu
 import com.jmnbehar.anyx.Activities.LoginActivity
+import com.jmnbehar.anyx.Activities.LoginHelpActivity
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.android.synthetic.main.fragment_login.view.*
+import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.toast
 import se.simbio.encryption.Encryption
 
@@ -120,6 +125,35 @@ class LoginFragment : Fragment()  {
 
         btnLoginHelp.setOnClickListener { _ ->
             (activity as LoginActivity).goToFragment(LoginActivity.LoginFragmentType.Help)
+        }
+
+
+        btnLoginHelp.setOnClickListener {
+            //Creating the instance of PopupMenu
+            val popup = PopupMenu(activity, btnLoginHelp);
+            //Inflating the Popup using xml file
+            popup.getMenuInflater().inflate(R.menu.login_help_menu, popup.getMenu());
+
+            //registering popup with OnMenuItemClickListener
+            val intent = Intent(activity, LoginHelpActivity::class.java)
+            popup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item: MenuItem? ->
+                when (item?.itemId ?: R.id.login_help_mobile) {
+                    R.id.login_help_mobile -> {
+                        popup.dismiss()
+                        intent.putExtra(Constants.isMobileLoginHelp, true)
+                        startActivity(intent)
+                    }
+                    R.id.login_help_desktop -> {
+                        popup.dismiss()
+                        intent.putExtra(Constants.isMobileLoginHelp, false)
+                        startActivity(intent)
+                    }
+                }
+
+                true
+            })
+
+            popup.show();//showing popup menu
         }
 
         return rootView
