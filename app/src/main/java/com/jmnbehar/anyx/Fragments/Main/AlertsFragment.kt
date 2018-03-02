@@ -1,6 +1,7 @@
 package com.jmnbehar.anyx.Fragments.Main
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -18,6 +19,8 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import org.jetbrains.anko.support.v4.toast
 import android.util.TypedValue
+import android.view.MenuItem
+import com.jmnbehar.anyx.Activities.LoginHelpActivity
 import com.jmnbehar.anyx.Activities.MainActivity
 
 
@@ -26,19 +29,22 @@ import com.jmnbehar.anyx.Activities.MainActivity
  */
 class AlertsFragment : RefreshFragment() {
 
-    lateinit private var inflater: LayoutInflater
-    lateinit private var titleText: TextView
+    private lateinit var inflater: LayoutInflater
+    private lateinit var titleText: TextView
 
-    lateinit private var currencyTabLayout: TabLayout
+    private lateinit var currencyTabLayout: TabLayout
 
-    lateinit private var priceEditText: EditText
-    lateinit private var priceUnitText: TextView
-    lateinit private var priceLabelText: TextView
+    private lateinit var priceLabelText: TextView
+    private lateinit var currentPriceText: TextView
 
-    lateinit private var setButton: Button
+    private lateinit var triggerLabelText: TextView
+    private lateinit var priceEditText: EditText
+    private lateinit var priceUnitText: TextView
 
-    lateinit private var alertList: SwipeMenuListView
-    lateinit private var alertAdapter: AlertListViewAdapter
+    private lateinit var setButton: Button
+
+    private lateinit var alertList: SwipeMenuListView
+    private lateinit var alertAdapter: AlertListViewAdapter
 
     var currency = Currency.BTC
 
@@ -60,10 +66,16 @@ class AlertsFragment : RefreshFragment() {
 
         this.inflater = inflater
 
+        setupSwipeRefresh(rootView)
+
         titleText = rootView.txt_alert_name
 
         currencyTabLayout = rootView.tabl_alerts_currency
 
+        priceLabelText = rootView.txt_alert_price_label
+        currentPriceText = rootView.txt_alert_current_price
+
+        triggerLabelText = rootView.txt_alert_trigger_label
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
 
@@ -73,7 +85,7 @@ class AlertsFragment : RefreshFragment() {
 
         titleText.text = "Alerts"
 
-//        switchCurrency(this.currency)
+        switchCurrency(this.currency)
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
@@ -87,46 +99,56 @@ class AlertsFragment : RefreshFragment() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        priceUnitText.text = "USD"
+        priceUnitText.text = ""
+        triggerLabelText.text = "New alert at: "
 
         setButton.setOnClickListener { setAlert() }
+        setButton.text = "Set"
 
 
-        alertAdapter = AlertListViewAdapter(inflater, alerts.toList(), { alert ->
-            deleteAlert(alert)
+        alertAdapter = AlertListViewAdapter(inflater, alerts.toList(), { view, alert ->
+            val popup = PopupMenu(activity, view)
+            //Inflating the Popup using xml file
+            popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                when (item?.itemId ?: R.id.delete_alert) {
+                    R.id.delete_alert -> {
+                        deleteAlert(alert)
+                    }
+                }
+                true
+            }
+            popup.show()
         })
+
         alertList.adapter = alertAdapter
 
-        val swipeMenuCreator = SwipeMenuCreator { menu ->
-            var deleteItem = SwipeMenuItem(context)
-            deleteItem.background = ColorDrawable(Color.RED)
-            deleteItem.width = dp2px(90)
-            deleteItem.title = "Delete"
-            menu.addMenuItem(deleteItem)
-        }
+//        val swipeMenuCreator = SwipeMenuCreator { menu ->
+//            var deleteItem = SwipeMenuItem(context)
+//            deleteItem.background = ColorDrawable(Color.RED)
+//            deleteItem.width = dp2px(90)
+//            deleteItem.title = "Delete"
+//            menu.addMenuItem(deleteItem)
+//        }
+//        alertList.setMenuCreator(swipeMenuCreator)
+//        alertList.setOnMenuItemClickListener { position, _, index ->
+//            when (index) {
+//                0 -> {
+//                    val alertAtPos = alerts.toList()[position]
+//                    deleteAlert(alertAtPos)
+//                    alertAdapter.notifyDataSetChanged()
+//                    toast("Item deleted")
+//                }
+//            }
+//            true
+//        }
+//        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
 
-        alertList.setMenuCreator(swipeMenuCreator)
-
-        alertList.setOnMenuItemClickListener { position, _, index ->
-            when (index) {
-                0 -> {
-                    val alertAtPos = alerts.toList()[position]
-                    deleteAlert(alertAtPos)
-
-                    alertAdapter.notifyDataSetChanged()
-                    toast("Item deleted")
-                }
-            }
-            true
-        }
-        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
-
-        alertList.setHeightBasedOnChildren()
+        //alertList.setHeightBasedOnChildren()
 
         return rootView
     }
-
-
+    
     private fun dp2px(dp: Int): Int {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
                 resources.displayMetrics).toInt()
@@ -141,36 +163,38 @@ class AlertsFragment : RefreshFragment() {
 
     private fun setAlert() {
         val price = priceEditText.text.toString().toDoubleOrZero()
-        priceEditText.setText("", TextView.BufferType.EDITABLE)
         val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
+        priceEditText.setText(productPrice.toString())
         val triggerIfAbove = price > productPrice
         val alert = Alert(price, currency, triggerIfAbove)
         alerts.add(alert)
         prefs.addAlert(alert)
         alertAdapter.alerts = alerts.toList()
         alertAdapter.notifyDataSetChanged()
-        alertList.setHeightBasedOnChildren()
     }
 
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
-//        when (currency) {
-//            Currency.BTC -> currencyTabLayout.
-//            Currency.ETH -> radioButtonEth.isChecked = true
-//            Currency.LTC -> radioButtonLtc.isChecked = true
-//            Currency.BCH -> radioButtonLtc.isChecked = true
-//            Currency.USD -> { }
-//        }
+
+        val price = Account.forCurrency(currency)?.product?.price
+        if (price == null) {
+            priceLabelText.text = ""
+            currentPriceText.text = ""
+        } else {
+            priceLabelText.text = "Current " + currency.fullName + " price: "
+            currentPriceText.text = price.fiatFormat()
+        }
+        priceEditText.setText(price.toString())
     }
 
     override fun refresh(onComplete: () -> Unit) {
-        alertAdapter.alerts = alerts.toList()
-        alertAdapter.notifyDataSetChanged()
-        alertList.adapter = alertAdapter
-
+        val prefs = Prefs(activity)
         (activity as MainActivity).updatePrices({ /* fail silently */ }, {
             (activity as MainActivity).loopThroughAlerts()
+            alerts = prefs.alerts.toMutableSet()
+            alertAdapter.alerts = alerts.toList()
+            alertAdapter.notifyDataSetChanged()
             onComplete()
         })
     }

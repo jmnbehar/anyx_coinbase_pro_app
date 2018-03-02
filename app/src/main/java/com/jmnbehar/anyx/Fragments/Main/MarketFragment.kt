@@ -35,9 +35,6 @@ class MarketFragment : RefreshFragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_market, container, false)
-
-        val prefs = Prefs(context)
-
         listView = rootView.list_products
         this.inflater = inflater
 
