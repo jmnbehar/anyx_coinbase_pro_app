@@ -126,11 +126,11 @@ class LoginFragment : Fragment()  {
             //Creating the instance of PopupMenu
             val popup = PopupMenu(activity, btnLoginHelp);
             //Inflating the Popup using xml file
-            popup.getMenuInflater().inflate(R.menu.login_help_menu, popup.getMenu());
+            popup.menuInflater.inflate(R.menu.login_help_menu, popup.menu);
 
             //registering popup with OnMenuItemClickListener
             val intent = Intent(activity, LoginHelpActivity::class.java)
-            popup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item: MenuItem? ->
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
                 when (item?.itemId ?: R.id.login_help_mobile) {
                     R.id.login_help_mobile -> {
                         popup.dismiss()
@@ -143,11 +143,10 @@ class LoginFragment : Fragment()  {
                         startActivity(intent)
                     }
                 }
-
                 true
-            })
+            }
 
-            popup.show();//showing popup menu
+            popup.show()  //showing popup menu
         }
 
         return rootView

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
@@ -13,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_alarm.view.*
  * Created by jmnbehar on 11/12/2017.
  */
 
-class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (Alert) -> Unit) : BaseAdapter() {
+class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (View, Alert) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return alerts.size
@@ -28,7 +29,9 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
     }
 
     internal class ViewHolder {
+        var currencyIcon: ImageView? = null
         var productNameText: TextView? = null
+        var alertSideText: TextView? = null
         var triggerPriceText: TextView? = null
     }
 
@@ -38,9 +41,11 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
         if (convertView == null) {
             viewHolder = ViewHolder()
             outputView = viewGroup.inflate(R.layout.list_row_alarm)
+
+            viewHolder.currencyIcon = outputView.img_alert_currency
             viewHolder.productNameText = outputView.txt_alert_product
             viewHolder.triggerPriceText = outputView.txt_alert_value
-
+            viewHolder.alertSideText = outputView.txt_alert_side
             outputView.tag = viewHolder
 
         } else {
@@ -49,10 +54,16 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
         }
         val alert = alerts[i]
 
+        viewHolder.currencyIcon?.setImageResource(alert.currency.iconId)
         viewHolder.productNameText?.text = alert.currency.toString()
         viewHolder.triggerPriceText?.text = alert.price.fiatFormat()
+        if (alert.triggerIfAbove) {
+            viewHolder.alertSideText?.text = "Above"
+        } else {
+            viewHolder.alertSideText?.text = "Below"
+        }
 
-        outputView.setOnClickListener { onClick(alert) }
+        outputView.setOnClickListener { onClick(outputView, alert) }
 
         return outputView
     }

@@ -107,7 +107,8 @@ class PriceChart : LineChart {
         axisLeft.setDrawGridLines(false)
         axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
 
-        axisRight.showOnlyMinMaxValues = true
+        //axisRight.showOnlyMinMaxValues = true
+        axisRight.setDrawLabels(false)
         axisRight.setDrawGridLines(false)
         axisRight.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
 
