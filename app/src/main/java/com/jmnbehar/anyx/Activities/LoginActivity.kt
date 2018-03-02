@@ -128,7 +128,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             toast("Error!: ${result.error}")
         }, {
             progressDialog?.dismiss()
-            toast("Success! logging in")
+            //toast("Success! logging in")
             var prefs = Prefs(this)
             prefs.shouldAutologin = prefs.isLoggedIn
             val intent = MainActivity.newIntent(this)

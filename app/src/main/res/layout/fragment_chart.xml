@@ -214,6 +214,7 @@
                     android:id="@+id/txt_chart_ticker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:text="Bitcoin"
                     android:textSize="24sp" />
 
