@@ -37,7 +37,7 @@ class OnboardActivity : AppCompatActivity() {
     var lastLeftValue = 0
 
     internal var currentPage = 0   //  to track page position
-    val pageCount = 4
+    val pageCount = 5
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -58,11 +58,12 @@ class OnboardActivity : AppCompatActivity() {
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
         var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
-        var color2 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
+        var color2 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
         var color3 = ResourcesCompat.getColor(resources, R.color.gray_bg, null)
         var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
+        var color5 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
 
-        var colorList = intArrayOf(color1, color2, color3, color4)
+        var colorList = intArrayOf(color1, color2, color3, color4, color5)
 
         indicators = listOf(intro_indicator_0, intro_indicator_1, intro_indicator_2, intro_indicator_3, intro_indicator_4, intro_indicator_5, intro_indicator_6, intro_indicator_7)
 
@@ -116,10 +117,6 @@ class OnboardActivity : AppCompatActivity() {
                 }
                 val imageIndicator = indicators[position]
                 imageIndicator.setImageResource(R.drawable.white)
-//                imageIndicator.setColorFilter(Color.WHITE)
-//
-//                imageIndicator.setImageResource(R.drawable.anyx_logo)
-//                intro_indicator_1.setColorFilter(Color.WHITE)
 
                 nextBtn?.visibility = View.GONE // if (position == pageCount - 1) View.GONE else View.VISIBLE
                 if (position == pageCount - 1) {
@@ -192,19 +189,21 @@ class OnboardActivity : AppCompatActivity() {
      */
     class PlaceholderFragment : Fragment() {
 
-        val textColors: Array<Int> = arrayOf(Color.BLACK, Color.WHITE, Color.WHITE, Color.BLACK)
+        val textColors: Array<Int> = arrayOf(Color.BLACK, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE)
         val pageTitles: Array<String> = arrayOf(
                 "Welcome to AnyX!",
+                "Track Prices",
                 "Your account",
                 "Notifications",
                 "The future")
         val pageStrings: Array<String> = arrayOf(
-                "With this app you can keep up to date on crypto prices on the GDAX exchange",
+                "The best Android app for GDAX",
+                "With this app you can keep up to date on Bitcoin, Ethereum, Litecoin, and Bitcoin Cash prices",
                 "Create an API Key on the GDAX website to log in to this app. Once you're in, you'll be able to track your personal account.",
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
                 "If you're still not impressed, stay tuned because full trading features will be added soon.",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.accounts_screenshots, R.drawable.accounts_screenshots, R.drawable.the_future)
+        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.coin_pile, R.drawable.chart, R.drawable.icon_alert_spaced, R.drawable.the_future)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
