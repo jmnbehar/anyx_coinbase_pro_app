@@ -36,9 +36,9 @@ class HistoryListFragment() : Fragment() {
         return HistoryListFragment()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.list_view, container, false)
+        val rootView = inflater.inflate(R.layout.list_view, container, false)
         historyList = rootView.list_view
         if (isOrderList) {
             historyList.adapter = HistoryListViewAdapter(isOrderList, orders, resources, orderOnClick =  { order -> onOrderClick(order)})

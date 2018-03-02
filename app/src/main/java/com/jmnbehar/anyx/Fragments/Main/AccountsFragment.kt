@@ -41,9 +41,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_accounts, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_accounts, container, false)
 
         listView = rootView.list_accounts
 
@@ -88,7 +88,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         valueText.text = entry.y.toDouble().fiatFormat()
         val candle = accountTotalCandles[entry.x.toInt()]
         percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
 
         percentChangeText.textColor = if (prefs.isDarkModeOn) {
             Color.WHITE
@@ -168,7 +168,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: () -> Unit) {
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
         if (prefs.isLoggedIn) {
 
             setValueAndPercentChangeTexts()

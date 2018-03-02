@@ -76,12 +76,12 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_trade, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_trade, container, false)
 
         this.inflater = inflater
-
+        val activity = activity!!
         titleText = rootView.txt_trade_name
 
         amountLabelText = rootView.txt_trade_amount_label
@@ -143,7 +143,7 @@ class TradeFragment : RefreshFragment() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
 
-        val tabAccentColor = account.currency.colorAccent(context)
+        val tabAccentColor = account.currency.colorAccent(activity)
         tradeSideTabLayout = rootView.tabl_trade_side
         tradeSideTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
         tradeSideTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -278,7 +278,7 @@ class TradeFragment : RefreshFragment() {
                         horizontalLayout("Total ${localCurrency}:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
                         horizontalLayout("Estimated fees:", feeEstimate.fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again").onCheckedChange { _, isChecked ->
-                            val prefs = Prefs(activity)
+                            val prefs = Prefs(activity!!)
                             prefs.shouldShowTradeConfirmModal = !isChecked
                         }
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
@@ -303,10 +303,10 @@ class TradeFragment : RefreshFragment() {
 
         fun onComplete(result: Result<ByteArray, FuelError>) {
             toast("success")
-            activity.onBackPressed()
+            activity!!.onBackPressed()
 
             if (devFee > 0.0) {
-                val prefs = Prefs(context)
+                val prefs = Prefs(context!!)
                 if (devFee > account.currency.minSendAmount) {
                     payFee(devFee)
                 } else if (prefs.addUnpaidFee(devFee, account.currency)) {

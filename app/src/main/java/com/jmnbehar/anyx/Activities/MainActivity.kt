@@ -1,5 +1,6 @@
 package com.jmnbehar.anyx.Activities
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.ProgressDialog
@@ -7,10 +8,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.ColorFilter
 import android.media.RingtoneManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.NavigationView
 import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
@@ -288,12 +291,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notificationBuilder = NotificationCompat.Builder(this)
-            .setContentText(notificationString)
-            .setAutoCancel(true)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setSound(defaultSoundUri)
-            .setContentIntent(pendingIntent)
+        val CHANNEL_ID = "Price_Alerts"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel, but only on API 26+ because
+            // the NotificationChannel class is new and not in the support library
+            val CHANNEL_ID = "Price_Alerts"
+            val name = getString(R.string.channel_name)
+            val description = getString(R.string.channel_description)
+            val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance)
+            channel.description = description
+            // Register the channel with the system
+            var  notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            channel.description = "Channel description"
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.anyx_fg)
+                .setContentTitle("Title")
+                .setContentText(notificationString)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+//        NotificationCompat.Builder(this)
+//            .setContentText(notificationString)
+//            .setAutoCancel(true)
+//            .setSmallIcon(R.mipmap.ic_launcher)
+//            .setSound(defaultSoundUri)
+//            .setContentIntent(pendingIntent)
 
         notificationManager?.notify(0, notificationBuilder.build())
     }

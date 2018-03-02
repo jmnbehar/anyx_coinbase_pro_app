@@ -36,9 +36,9 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_settings, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
 
         titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
@@ -50,7 +50,7 @@ class SettingsFragment : RefreshFragment() {
         disclaimerButton.visibility = View.INVISIBLE
         showDarkMode(rootView)
 
-        val prefs = Prefs(activity)
+        val prefs = Prefs(activity!!)
 
         if (prefs.isLoggedIn) {
             logoutButton.text = "Log Out"
@@ -66,7 +66,7 @@ class SettingsFragment : RefreshFragment() {
             prefs.stashOrders(null)
             prefs.stashFills(null)
             startActivity(intent)
-            activity.finishAffinity()
+            activity!!.finishAffinity()
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal

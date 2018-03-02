@@ -196,7 +196,7 @@ class LoginHelpActivity : AppCompatActivity() {
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
-            val position = arguments.getInt(ARG_SECTION_NUMBER) - 1
+            val position = arguments?.getInt(ARG_SECTION_NUMBER) ?: 0 - 1
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
             if ((activity as LoginHelpActivity).isMobileHelpPage) {
