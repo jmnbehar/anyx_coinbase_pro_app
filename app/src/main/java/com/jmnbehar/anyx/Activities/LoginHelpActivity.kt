@@ -18,7 +18,6 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import com.jmnbehar.anyx.Classes.Constants
-import com.jmnbehar.anyx.Classes.Prefs
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 

@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.view.GravityCompat
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -22,8 +21,6 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import com.jmnbehar.anyx.Classes.Prefs
-import com.jmnbehar.anyx.Classes.RefreshFragment
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.textColor
