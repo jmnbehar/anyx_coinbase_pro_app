@@ -302,10 +302,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val channel = NotificationChannel(CHANNEL_ID, name, importance)
             channel.description = description
             // Register the channel with the system
-            var  notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             channel.description = "Channel description"
-            notificationManager.createNotificationChannel(channel)
+            notificationManager?.createNotificationChannel(channel)
         }
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
