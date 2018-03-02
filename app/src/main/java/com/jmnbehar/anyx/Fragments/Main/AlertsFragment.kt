@@ -71,7 +71,7 @@ class AlertsFragment : RefreshFragment() {
 
         alertList = rootView.list_alerts
 
-        titleText.text = currency.toString()
+        titleText.text = "Alerts"
 
 //        switchCurrency(this.currency)
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

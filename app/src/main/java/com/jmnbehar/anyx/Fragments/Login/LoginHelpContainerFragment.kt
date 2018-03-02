@@ -37,17 +37,15 @@ class LoginHelpContainerFragment() : Fragment() {
         val thisFragment = this
         mobileBtn.onClick {
             activity.supportFragmentManager.beginTransaction().remove(thisFragment).commit()
-//            intent.putExtra(Constants.isMobileLoginHelp, true)
-//            startActivity(intent)
+            intent.putExtra(Constants.isMobileLoginHelp, true)
+            startActivity(intent)
         }
         computerBtn.onClick {
             //            activity.supportFragmentManager.beginTransaction().remove(thisFragment).commit()
-            activity.onBackPressed()
-//            intent.putExtra(Constants.isMobileLoginHelp, false)
-//            startActivity(intent)
+            intent.putExtra(Constants.isMobileLoginHelp, false)
+            startActivity(intent)
+//            activity.onBackPressed()
         }
-
-
         return rootView
     }
 
