@@ -25,9 +25,9 @@ class WebviewFragment : RefreshFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_webview, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_webview, container, false)
 
         webView = rootView.web_view
 

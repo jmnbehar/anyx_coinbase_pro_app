@@ -60,9 +60,9 @@ class AlertsFragment : RefreshFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_alerts, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_alerts, container, false)
 
         this.inflater = inflater
 
@@ -148,7 +148,7 @@ class AlertsFragment : RefreshFragment() {
 
         return rootView
     }
-    
+
     private fun dp2px(dp: Int): Int {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
                 resources.displayMetrics).toInt()
@@ -189,7 +189,7 @@ class AlertsFragment : RefreshFragment() {
     }
 
     override fun refresh(onComplete: () -> Unit) {
-        val prefs = Prefs(activity)
+        val prefs = Prefs(context!!)
         (activity as MainActivity).updatePrices({ /* fail silently */ }, {
             (activity as MainActivity).loopThroughAlerts()
             alerts = prefs.alerts.toMutableSet()

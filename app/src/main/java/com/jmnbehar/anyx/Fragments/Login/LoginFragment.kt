@@ -42,11 +42,11 @@ class LoginFragment : Fragment()  {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_login, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_login, container, false)
 
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
 
         apiKeyEditText = rootView.etxt_login_api_key
         apiSecretEditText = rootView.etxt_login_secret
@@ -153,7 +153,7 @@ class LoginFragment : Fragment()  {
     }
 
     private fun signIn() {
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
 
         //TODO: is this necesary?
         prefs.shouldSaveApiInfo = saveApiInfoCheckBox.isChecked

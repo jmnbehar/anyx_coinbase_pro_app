@@ -66,9 +66,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_chart, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_chart, container, false)
 
         showDarkMode(rootView)
 
@@ -91,6 +91,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         timespanButtonAll = rootView.rbtn_chart_timespan_all
 
         val account = account
+        val activity = activity!!
         if (account == null) {
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
@@ -362,7 +363,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         account?. let { account ->
             val candle = account.product.candles[entry.x.toInt()]
             percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
-            val prefs = Prefs(context)
+            val prefs = Prefs(context!!)
             if (prefs.isDarkModeOn) {
                 percentChangeText.textColor = Color.WHITE
             } else {
@@ -424,7 +425,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val onFailure = { result: Result.Failure<String, FuelError> ->
             toast("Error!: ${result.error}")
             println("error!" )}
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
         account?. let { account ->
             if (prefs.isLoggedIn) {
                 GdaxApi.account(account.id).executeRequest(onFailure) { result ->

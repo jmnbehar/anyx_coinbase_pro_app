@@ -26,11 +26,11 @@ class HomeFragment : RefreshFragment() {
         var viewPager: LockableViewPager? = null
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_home, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
 
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
         val tabLayout = rootView.home_tab_layout
 
         if (prefs.isDarkModeOn) {

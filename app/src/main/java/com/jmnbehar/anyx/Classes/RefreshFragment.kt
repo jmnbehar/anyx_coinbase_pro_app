@@ -36,13 +36,16 @@ open class RefreshFragment: Fragment() {
 
     fun showDarkMode(newView: View? = null) {
         val backgroundView = newView ?: view
-        val prefs = Prefs(context)
-        if (prefs.isDarkModeOn) {
-            backgroundView?.backgroundColor = Color.TRANSPARENT
-            activity.setTheme(R.style.AppThemeDark)
-        } else {
-            backgroundView?.backgroundColor = Color.WHITE
-            activity.setTheme(R.style.AppThemeLight)
+        val activity = activity
+        if (activity != null) {
+            val prefs = Prefs(activity)
+            if (prefs.isDarkModeOn) {
+                backgroundView?.backgroundColor = Color.TRANSPARENT
+                activity.setTheme(R.style.AppThemeDark)
+            } else {
+                backgroundView?.backgroundColor = Color.WHITE
+                activity.setTheme(R.style.AppThemeLight)
+            }
         }
     }
 

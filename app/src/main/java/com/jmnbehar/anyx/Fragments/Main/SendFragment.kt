@@ -47,9 +47,9 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_send, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_send, container, false)
 
         this.inflater = inflater
 
@@ -98,7 +98,7 @@ class SendFragment : RefreshFragment() {
 //            switchCurrency(Currency.LTC)
 //        }
 
-        val prefs = Prefs(context)
+        val prefs = Prefs(context!!)
 
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
@@ -152,7 +152,7 @@ class SendFragment : RefreshFragment() {
         } else {
             toast("error! Trying to send less than minimum which is $min")
 //            TransferHub.getFromPayment(10.0, Currency.USD)
-            GdaxApi.testApiKey(context) { didSucceed ->
+            GdaxApi.testApiKey(context!!) { didSucceed ->
                 println(didSucceed)
             }
         }
