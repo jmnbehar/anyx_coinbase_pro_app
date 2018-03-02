@@ -10,7 +10,6 @@ import android.view.Menu
 import android.view.MenuItem
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Login.LoginFragment
-import com.jmnbehar.anyx.Fragments.Login.LoginHelpContainerFragment
 import com.jmnbehar.anyx.Fragments.Login.WebviewFragment
 import com.jmnbehar.anyx.R
 import org.jetbrains.anko.indeterminateProgressDialog
@@ -89,8 +88,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     enum class LoginFragmentType {
         Login,
-        WebView,
-        Help;
+        WebView;
     }
 
     fun goToFragment(loginFragmentType: LoginFragmentType, url: String? = null) {
@@ -104,10 +102,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             LoginFragmentType.WebView -> {
                 tag = "Webview"
                 WebviewFragment.newInstance(url)
-            }
-            LoginFragmentType.Help -> {
-                tag = "Help"
-                LoginHelpContainerFragment.newInstance()
             }
         }
 

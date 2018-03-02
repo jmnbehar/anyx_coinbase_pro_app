@@ -16,7 +16,6 @@ import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.android.synthetic.main.fragment_login.view.*
-import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.toast
 import se.simbio.encryption.Encryption
 
@@ -122,11 +121,6 @@ class LoginFragment : Fragment()  {
         btnSkipLogin.setOnClickListener { _ ->
             (activity as LoginActivity).loginWithCredentials(null)
         }
-
-        btnLoginHelp.setOnClickListener { _ ->
-            (activity as LoginActivity).goToFragment(LoginActivity.LoginFragmentType.Help)
-        }
-
 
         btnLoginHelp.setOnClickListener {
             //Creating the instance of PopupMenu
