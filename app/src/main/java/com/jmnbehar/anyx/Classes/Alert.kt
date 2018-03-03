@@ -14,6 +14,25 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
         }
     }
 
+    override fun hashCode(): Int {
+        val triggerCode = if (triggerIfAbove) {
+            0
+        } else {
+            1
+        }
+        val currencyCode = when (currency) {
+            Currency.USD -> 0
+            Currency.LTC -> 1
+            Currency.ETH -> 2
+            Currency.BCH -> 3
+            Currency.BTC -> 4
+        }
+        val priceCode = (price * 100).toInt()
+        val hashCodeInt = (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
+        println(hashCodeInt)
+        return hashCodeInt
+    }
+
     override fun toString(): String {
         var alertString = price.toString() + '\n'
         alertString += currency.toString() + '\n'

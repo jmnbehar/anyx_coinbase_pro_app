@@ -137,6 +137,5 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
         }
 
         return vi
-
     }
 }

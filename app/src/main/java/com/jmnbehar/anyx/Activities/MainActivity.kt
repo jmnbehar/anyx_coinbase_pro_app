@@ -26,6 +26,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.jmnbehar.anyx.Adapters.AlertListViewAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Main.*
 import com.jmnbehar.anyx.R
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
    // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {
         loopThroughAlerts()
-        runAlarms()
+        runAlerts()
         goToFragment(FragmentType.HOME)
     }
 
@@ -198,10 +199,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
 
                 currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
-
-
-
-                //currentFragment?.refresh { currentFragment?.endRefresh() }
             } else {
 //                val intent = Intent(this, LoginActivity::class.java)
 //                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -246,19 +243,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun runAlarms() {
+    private fun runAlerts() {
         val handler = Handler()
 
         val runnable = Runnable {
             updatePrices( { /* do nothing*/ }, {
                 loopThroughAlerts()
-                runAlarms()
+                runAlerts()
+                if (currentFragment is AlertsFragment) {
+                    val prefs = Prefs(this)
+                    (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
+                    (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
+                }
             })
         }
 
         //TODO: add variable time checking
         //TODO: (ideally run on system launch)
-        handler.postDelayed(runnable, (TimeInSeconds.oneMinute * 1000).toLong())
+        handler.postDelayed(runnable, (TimeInSeconds.halfMinute * 1000))
     }
 
     fun loopThroughAlerts() {
@@ -277,54 +279,53 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun triggerAlert(alert: Alert) {
-        val prefs = Prefs(this)
-        prefs.removeAlert(alert)
+        val CHANNEL_ID = "Price_Alerts"
+        if (notificationManager == null) {
+            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Create the NotificationChannel, but only on API 26+ because
+                // the NotificationChannel class is new and not in the support library
+                val name = getString(R.string.channel_name)
+                val description = getString(R.string.channel_description)
+                val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
+                val channel = NotificationChannel(CHANNEL_ID, name, importance)
+                channel.description = description
+                // Register the channel with the system
+                notificationManager?.createNotificationChannel(channel)
+            }
+        }
+
 
         val overUnder = when(alert.triggerIfAbove) {
             true  -> "over"
             false -> "under"
         }
-        val notificationString = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
         val intent = Intent(this, this.javaClass)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val CHANNEL_ID = "Price_Alerts"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Create the NotificationChannel, but only on API 26+ because
-            // the NotificationChannel class is new and not in the support library
-            val CHANNEL_ID = "Price_Alerts"
-            val name = getString(R.string.channel_name)
-            val description = getString(R.string.channel_description)
-            val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance)
-            channel.description = description
-            // Register the channel with the system
-            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            channel.description = "Channel description"
-            notificationManager?.createNotificationChannel(channel)
-        }
+        val notificationTitle = "${alert.currency.fullName} price alert"
+        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
+        val priceAlertGroupTag = "PriceAlert"
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.anyx_fg)
-                .setContentTitle("Title")
-                .setContentText(notificationString)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationText)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setGroup(priceAlertGroupTag)
+//                .setSound(defaultSoundUri)
 
-//        NotificationCompat.Builder(this)
-//            .setContentText(notificationString)
-//            .setAutoCancel(true)
-//            .setSmallIcon(R.mipmap.ic_launcher)
-//            .setSound(defaultSoundUri)
-//            .setContentIntent(pendingIntent)
+        val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
+        notificationManager?.notify(notificationTag, 0, notificationBuilder.build())
 
-        notificationManager?.notify(0, notificationBuilder.build())
+        val prefs = Prefs(this)
+        prefs.removeAlert(alert)
     }
-
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.

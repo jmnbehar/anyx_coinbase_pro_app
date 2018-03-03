@@ -102,6 +102,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val currency = account.currency
             setupSwipeRefresh(rootView)
 
+            historyPager = rootView.history_view_pager
             lineChart = rootView.chart
             lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
                 swipeRefreshLayout?.isEnabled = false
@@ -121,11 +122,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 iconView.setImageResource(currency.iconId)
                 balanceText.text = "${account.balance.btcFormat()} $currency"
                 valueText.text = account.value.fiatFormat()
+
+                historyPager.visibility = View.VISIBLE
             } else {
                 tickerText.visibility = View.GONE
                 iconView.visibility = View.GONE
                 balanceText.visibility = View.GONE
                 valueText.visibility = View.GONE
+
+                historyPager.visibility = View.INVISIBLE
             }
 
             val buyButton = rootView.btn_chart_buy
@@ -199,7 +204,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
-            historyPager = rootView.history_view_pager
             historyPager.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyPager.setOnTouchListener(this)
@@ -221,10 +225,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         //TODO: don't replace adapter, simply update what it holds
                         //TODO: investigate crash onbackpressed
-                        (historyPager.adapter as HistoryPagerAdapter)?.orders = filteredOrders
-                        (historyPager.adapter as HistoryPagerAdapter)?.fills = filteredFills
-
-                        history_view_pager
+                        (historyPager.adapter as HistoryPagerAdapter).orders = filteredOrders
+                        (historyPager.adapter as HistoryPagerAdapter).fills = filteredFills
+                        (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
                     }
                 }
             }
