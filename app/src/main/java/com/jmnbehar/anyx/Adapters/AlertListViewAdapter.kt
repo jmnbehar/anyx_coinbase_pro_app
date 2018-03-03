@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
-import kotlinx.android.synthetic.main.list_row_alarm.view.*
+import kotlinx.android.synthetic.main.list_row_alert.view.*
 
 /**
  * Created by jmnbehar on 11/12/2017.
@@ -41,7 +41,7 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
         val outputView: View
         if (convertView == null) {
             viewHolder = ViewHolder()
-            outputView = viewGroup.inflate(R.layout.list_row_alarm)
+            outputView = viewGroup.inflate(R.layout.list_row_alert)
 
             viewHolder.currencyIcon = outputView.img_alert_currency
             viewHolder.productNameText = outputView.txt_alert_product
