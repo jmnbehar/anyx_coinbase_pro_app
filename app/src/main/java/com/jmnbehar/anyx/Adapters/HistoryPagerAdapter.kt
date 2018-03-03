@@ -34,6 +34,15 @@ class HistoryPagerAdapter(fm: FragmentManager, var orders: List<ApiOrder>, var f
         }
     }
 
+    override fun getItemPosition(`object`: Any): Int {
+        val f = `object` as HistoryListFragment
+
+        (f.historyList.adapter as HistoryListViewAdapter).orders = orders
+        (f.historyList.adapter as HistoryListViewAdapter).fills  = fills
+        (f.historyList.adapter as HistoryListViewAdapter).notifyDataSetChanged()
+        return super.getItemPosition(`object`)
+    }
+
     override fun getCount(): Int {
         return 2
     }

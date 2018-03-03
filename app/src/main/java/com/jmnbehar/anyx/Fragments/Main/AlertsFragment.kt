@@ -43,8 +43,8 @@ class AlertsFragment : RefreshFragment() {
 
     private lateinit var setButton: Button
 
-    private lateinit var alertList: SwipeMenuListView
-    private lateinit var alertAdapter: AlertListViewAdapter
+    lateinit var alertList: SwipeMenuListView
+    var alertAdapter: AlertListViewAdapter? = null
 
     var currency = Currency.BTC
 
@@ -110,6 +110,7 @@ class AlertsFragment : RefreshFragment() {
             val popup = PopupMenu(activity, view)
             //Inflating the Popup using xml file
             popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
+            
             popup.setOnMenuItemClickListener { item: MenuItem? ->
                 when (item?.itemId ?: R.id.delete_alert) {
                     R.id.delete_alert -> {
@@ -156,8 +157,8 @@ class AlertsFragment : RefreshFragment() {
     private fun deleteAlert(alert: Alert) {
         alerts.removeAlert(alert)
         prefs.alerts = alerts
-        alertAdapter.alerts = alerts.toList()
-        alertAdapter.notifyDataSetChanged()
+        alertAdapter?.alerts = alerts.toList()
+        alertAdapter?.notifyDataSetChanged()
         alertList.adapter = alertAdapter
     }
 
@@ -169,10 +170,9 @@ class AlertsFragment : RefreshFragment() {
         val alert = Alert(price, currency, triggerIfAbove)
         alerts.add(alert)
         prefs.addAlert(alert)
-        alertAdapter.alerts = alerts.toList()
-        alertAdapter.notifyDataSetChanged()
+        alertAdapter?.alerts = alerts.toList()
+        alertAdapter?.notifyDataSetChanged()
     }
-
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
@@ -193,8 +193,8 @@ class AlertsFragment : RefreshFragment() {
         (activity as MainActivity).updatePrices({ /* fail silently */ }, {
             (activity as MainActivity).loopThroughAlerts()
             alerts = prefs.alerts.toMutableSet()
-            alertAdapter.alerts = alerts.toList()
-            alertAdapter.notifyDataSetChanged()
+            alertAdapter?.alerts = alerts.toList()
+            alertAdapter?.notifyDataSetChanged()
             onComplete()
         })
     }
