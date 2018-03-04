@@ -154,8 +154,6 @@ class LoginFragment : Fragment()  {
 
     private fun signIn() {
         val prefs = Prefs(context!!)
-
-        //TODO: is this necesary?
         prefs.shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         prefs.shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 

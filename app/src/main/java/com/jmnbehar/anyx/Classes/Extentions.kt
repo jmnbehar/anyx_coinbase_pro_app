@@ -106,7 +106,7 @@ fun Date.timeInSeconds() : Long {
  */
 
 fun String.isValidAddress(currency: Currency): Boolean {
-    //TODO: this
+    //TODO: use this to help if someone puts in invalid info here
     return if ((this.length < 25)  || (this.length > 36)) {
         false
     } else if (this.contains('0', true)) {
