@@ -119,7 +119,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             }
         }
 
-        imageView.backgroundColor = when (tradeSide) {  //TODO: change to Ellie Approved Colors
+        imageView.backgroundColor = when (tradeSide) {
             TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
 
             TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)

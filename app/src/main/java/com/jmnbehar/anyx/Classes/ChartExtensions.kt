@@ -158,11 +158,7 @@ class PriceChart : LineChart {
             //axisRight.showSpecificLabels(floatArrayOf(close), false)
             axisRight.setDrawPartialAxis(close)
         }
-
-//        //TODO: center
-//       "
-
-        description.isEnabled = true
+        description.isEnabled = false
 
         //TODO: fill in missing entries
 //        val dates = candles.map { c -> c.time }.toDoubleArray()
