@@ -69,15 +69,19 @@ class SettingsFragment : RefreshFragment() {
             activity!!.finishAffinity()
         }
 
-        showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
-        showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-            prefs.shouldShowTradeConfirmModal = isChecked
-        }
+        //Reenable once verification is working:
+        showTradeConfirmCheckBox.visibility = View.GONE
+        showSendConfirmCheckBox.visibility = View.GONE
 
-        showSendConfirmCheckBox.isChecked = prefs.shouldShowSendConfirmModal
-        showSendConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-            prefs.shouldShowSendConfirmModal = isChecked
-        }
+//        showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
+//        showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+//            prefs.shouldShowTradeConfirmModal = isChecked
+//        }
+//
+//        showSendConfirmCheckBox.isChecked = prefs.shouldShowSendConfirmModal
+//        showSendConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+//            prefs.shouldShowSendConfirmModal = isChecked
+//        }
 
         darkModeCheckBox.isChecked = prefs.isDarkModeOn
         darkModeCheckBox.setOnCheckedChangeListener {  _, isChecked ->
