@@ -28,6 +28,10 @@ open class RefreshFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
+        swipeRefreshLayout?.isEnabled = false
+        refresh {
+            swipeRefreshLayout?.isEnabled = true
+        }
         showDarkMode()
         if (activity is MainActivity) {
             (activity as MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)

@@ -210,28 +210,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val historyTabList = rootView.history_tab_layout
             val color = currency.colorPrimary(activity)
             historyTabList.setSelectedTabIndicatorColor(color)
-
-            if (prefs.isLoggedIn) {
-                val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
-                GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { orderResult ->
-                    prefs.stashOrders(orderResult.value)
-                    val gson = Gson()
-                    val apiOrderList: List<ApiOrder> = gson.fromJson(orderResult.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    val filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                    //TODO: instead of filtering these, fix the api requests, this shit is wasteful
-                    GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { fillResult ->
-                        prefs.stashFills(fillResult.value)
-                        val apiFillList: List<ApiFill> = gson.fromJson(fillResult.value, object : TypeToken<List<ApiFill>>() {}.type)
-                        val filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                        //TODO: don't replace adapter, simply update what it holds
-                        //TODO: investigate crash onbackpressed
-                        (historyPager.adapter as HistoryPagerAdapter).orders = filteredOrders
-                        (historyPager.adapter as HistoryPagerAdapter).fills = filteredFills
-                        (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
-                    }
-                }
-            }
-
         }
         return rootView
     }

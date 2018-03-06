@@ -10,7 +10,13 @@ class Product(var currency: Currency, var id: String, var candles: List<Candle>)
             : this(Currency.fromString(apiProduct.base_currency), apiProduct.id, candles)
 
     var price = candles.lastOrNull()?.close ?: 0.0
+
+    var hourCandles = candles
     var dayCandles = candles
+    var weekCandles = candles
+    var monthCandles = candles
+    //var yearCandles = candles
+    var allTimeCandles = candles
     var candlesTimespan = TimeInSeconds.oneDay
 
     override fun toString(): String {

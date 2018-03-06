@@ -55,9 +55,9 @@ class MarketFragment : RefreshFragment() {
         super.onResume()
         autoRefresh = Runnable {
             refresh({ })
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000).toLong())
+        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
     }
 
     override fun onPause() {
