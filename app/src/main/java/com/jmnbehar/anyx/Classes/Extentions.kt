@@ -101,9 +101,17 @@ fun Date.timeInSeconds() : Long {
     return floatSeconds
 }
 
-/**
- * Created by josephbehar on 1/30/18.
- */
+fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {
+
+    val now = Calendar.getInstance()
+    val nowInSeconds = now.timeInSeconds()
+    val timespanStart = nowInSeconds - timespan
+
+    val firstInTimespan = this.indexOfFirst { candle -> candle.time >= timespanStart }
+    val trimmedList = this.subList(firstInTimespan, this.lastIndex).toMutableList()
+    trimmedList.addAll(newList)
+
+}
 
 fun String.isValidAddress(currency: Currency): Boolean {
     //TODO: use this to help if someone puts in invalid info here

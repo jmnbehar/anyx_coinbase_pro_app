@@ -167,6 +167,7 @@ class PriceChart : LineChart {
         val lineData = LineData(dataSet)
         this.data = lineData
         this.invalidate()
+//        this.animateY(500)
     }
 
 }

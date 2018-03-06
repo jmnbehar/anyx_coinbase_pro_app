@@ -73,7 +73,7 @@ class MarketFragment : RefreshFragment() {
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
-            account.updateCandles(time, { _ -> toast("error!") }, { didUpdate ->
+            account.product.updateCandles(time, { _ -> toast("error!") }, { didUpdate ->
                 if (didUpdate) {
                     productsUpdated++
                     if (productsUpdated == accountListSize) {

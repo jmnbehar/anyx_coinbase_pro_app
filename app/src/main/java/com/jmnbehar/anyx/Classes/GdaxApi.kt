@@ -173,7 +173,6 @@ sealed class GdaxApi: FuelRouting {
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
                     GdaxApi.candles(product.id, time, null, 0).getCandles(onFailure, { candleList ->
-                        product.candles = candleList
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)

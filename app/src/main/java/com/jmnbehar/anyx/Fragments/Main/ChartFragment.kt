@@ -26,7 +26,6 @@ import android.view.MotionEvent
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
-import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -57,6 +56,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var timespanButtonAll: RadioButton
 
     private var chartTimeSpan = TimeInSeconds.oneDay
+    private var candles = listOf<Candle>()
 
     companion object {
         var account: Account? = null
@@ -97,14 +97,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             val prefs = Prefs(activity)
 
-            val candles = account.product.candles
-            val timeRange = TimeInSeconds.oneDay
+            checkTimespanButton()
+            candles = account.product.candlesForTimespan(chartTimeSpan)
             val currency = account.currency
             setupSwipeRefresh(rootView)
 
             historyPager = rootView.history_view_pager
             lineChart = rootView.chart
-            lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  timeRange,true) {
+            lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan,true) {
                 swipeRefreshLayout?.isEnabled = false
             }
             lineChart.setOnChartValueSelectedListener(this)
@@ -168,14 +168,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            when (chartTimeSpan) {
-                TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
-                TimeInSeconds.oneDay  -> timespanButtonDay.isChecked = true
-                TimeInSeconds.oneWeek -> timespanButtonWeek.isChecked = true
-                TimeInSeconds.oneMonth -> timespanButtonMonth.isChecked = true
-                TimeInSeconds.oneYear -> timespanButtonYear.isChecked = true
-                currency.lifetimeInSeconds -> timespanButtonAll.isChecked = true
-            }
             timespanButtonHour.setText("1H")
             timespanButtonHour.setOnClickListener {
                 setChartTimespan(TimeInSeconds.oneHour)
@@ -233,13 +225,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPause()
     }
 
+    private fun checkTimespanButton() {
+        val lifetimeInSeconds = account?.currency?.lifetimeInSeconds ?: 0.0
+        when (chartTimeSpan) {
+            TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
+            TimeInSeconds.oneDay  -> timespanButtonDay.isChecked = true
+            TimeInSeconds.oneWeek -> timespanButtonWeek.isChecked = true
+            TimeInSeconds.oneMonth -> timespanButtonMonth.isChecked = true
+            TimeInSeconds.oneYear -> timespanButtonYear.isChecked = true
+            lifetimeInSeconds -> timespanButtonAll.isChecked = true
+        }
+    }
+
     private fun setChartTimespan(timespan: Long) {
+      //  MainActivity.progressDialog?.show()
+        checkTimespanButton()
         chartTimeSpan = timespan
-        MainActivity.progressDialog?.show()
         miniRefresh({
             toast("Error updating chart time")
             MainActivity.progressDialog?.dismiss()
         }, {
+            checkTimespanButton()
             MainActivity.progressDialog?.dismiss()
         })
     }
@@ -342,7 +348,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onValueSelected(entry: Entry, h: Highlight) {
         priceText.text = entry.y.toDouble().fiatFormat()
         account?. let { account ->
-            val candle = account.product.candles[entry.x.toInt()]
+            val candle = candles[entry.x.toInt()]
             percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
             val prefs = Prefs(context!!)
             if (prefs.isDarkModeOn) {
@@ -357,7 +363,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val account = account
         if (account != null) {
             val price = account.product.price
-            val open = account.product.candles.first().open
+            val open = candles.first().open
             priceText.text = price.fiatFormat()
             setPercentChangeText(price, open)
             lineChart.highlightValues(arrayOf<Highlight>())
@@ -457,7 +463,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         account?. let { account ->
-            account.updateCandles(chartTimeSpan, onFailure, { _ ->
+            account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
                 GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
@@ -468,9 +474,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     priceText.text = account.product.price.fiatFormat()
                     valueText.text = account.value.fiatFormat()
 
-                    setPercentChangeText(account.product.price, account.product.candles.first().open)
+                    candles = account.product.candlesForTimespan(chartTimeSpan)
+                    setPercentChangeText(account.product.price, candles.first().open)
 
-                    lineChart.addCandles(account.product.candles, account.currency, chartTimeSpan)
+                    lineChart.addCandles(candles, account.currency, chartTimeSpan)
                     onComplete()
                 }
             })
