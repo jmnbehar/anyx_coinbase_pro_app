@@ -464,6 +464,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         account?. let { account ->
             account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
+
+                candles = account.product.candlesForTimespan(chartTimeSpan)
+                lineChart.addCandles(candles, account.currency, chartTimeSpan)
+                setPercentChangeText(account.product.price, candles.first().open)
+
                 GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
@@ -474,10 +479,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     priceText.text = account.product.price.fiatFormat()
                     valueText.text = account.value.fiatFormat()
 
-                    candles = account.product.candlesForTimespan(chartTimeSpan)
                     setPercentChangeText(account.product.price, candles.first().open)
-
-                    lineChart.addCandles(candles, account.currency, chartTimeSpan)
                     onComplete()
                 }
             })
