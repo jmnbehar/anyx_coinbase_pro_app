@@ -11,6 +11,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.YAxis
 import android.view.VelocityTracker
+import java.sql.Time
 import kotlin.math.absoluteValue
 
 
@@ -85,7 +86,7 @@ class PriceChart : LineChart {
         }
     }
 
-    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timeRange: Long, isTimeChangable: Boolean, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timespan: Timespan, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         var noDescription = Description()
@@ -118,13 +119,13 @@ class PriceChart : LineChart {
         isDoubleTapToZoomEnabled = false
 
 
-        addCandles(candles, currency, timeRange)
+        addCandles(candles, currency, timespan)
     }
 
-    fun addCandles(candles: List<Candle>, currency: Currency, timeRange: Long) {
+    fun addCandles(candles: List<Candle>, currency: Currency, timespan: Timespan) {
         val entries = if (candles.isEmpty()) {
             val blankEntry = Entry(0.0f, 0.0f)
-            listOf<Entry>(blankEntry, blankEntry)
+            listOf(blankEntry, blankEntry)
         } else {
             candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
         }
@@ -162,7 +163,7 @@ class PriceChart : LineChart {
 
         //TODO: fill in missing entries
 //        val dates = candles.map { c -> c.time }.toDoubleArray()
-//        xAxis.valueFormatter = XAxisDateFormatter(dates, timeRange)
+//        xAxis.valueFormatter = XAxisDateFormatter(dates, timespan)
         dataSet.setDrawCircles(false)
         val lineData = LineData(dataSet)
         this.data = lineData
@@ -176,6 +177,6 @@ class PriceChart : LineChart {
 //class XAxisDateFormatter(private val values: DoubleArray, var timeRange: Int) : IAxisValueFormatter {
 //    override fun getFormattedValue(value: Float, axis: AxisBase): String {
 //        val dateDouble = values[value.toInt()]
-//        return dateDouble.toStringWithTimeRange(timeRange)
+//        return dateDouble.toStringWithTimespan(timeRange)
 //    }
 //}

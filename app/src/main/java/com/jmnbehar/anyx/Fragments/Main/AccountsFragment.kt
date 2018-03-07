@@ -32,7 +32,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private lateinit var titleText: TextView
     private lateinit var accountList: ListView
 
-    private var chartTimeSpan = TimeInSeconds.oneDay
+    private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
 
     companion object {
@@ -87,7 +87,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onValueSelected(entry: Entry, h: Highlight) {
         valueText.text = entry.y.toDouble().fiatFormat()
         val candle = accountTotalCandles[entry.x.toInt()]
-        percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
+        percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
         val prefs = Prefs(context!!)
 
         percentChangeText.textColor = if (prefs.isDarkModeOn) {
@@ -173,7 +173,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
             setValueAndPercentChangeTexts()
 
-            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, TimeInSeconds.oneDay,true) {
+            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
                 swipeRefreshLayout?.isEnabled = false
                 LockableViewPager.isLocked = true
             }

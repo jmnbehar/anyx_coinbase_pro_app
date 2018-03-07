@@ -9,17 +9,17 @@ data class Candle(
         val volume: Double) {
 
      companion object {
-         fun granularityForTimespan(timespan: Long) : Long {
+         fun granularityForTimespan(timespan: Timespan) : Long {
              return when (timespan) {
-                 TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
-                 TimeInSeconds.oneHour -> TimeInSeconds.oneMinute
-                 TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
-                 TimeInSeconds.oneDay -> TimeInSeconds.fiveMinutes
-                 TimeInSeconds.oneWeek -> TimeInSeconds.oneHour
-                 TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
-                 TimeInSeconds.oneMonth -> TimeInSeconds.sixHours
-                 TimeInSeconds.oneYear -> TimeInSeconds.oneDay
-                 else -> TimeInSeconds.oneDay
+                 Timespan.HOUR -> TimeInSeconds.oneMinute
+                 Timespan.DAY -> TimeInSeconds.fiveMinutes
+                 Timespan.WEEK -> TimeInSeconds.oneHour
+                 Timespan.MONTH -> TimeInSeconds.sixHours
+                 Timespan.YEAR -> TimeInSeconds.oneDay
+                 Timespan.ALL -> TimeInSeconds.oneDay
+//                 TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
+//                 TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
+//                 TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour
              }
          }
      }

@@ -55,7 +55,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var timespanButtonYear: RadioButton
     private lateinit var timespanButtonAll: RadioButton
 
-    private var chartTimeSpan = TimeInSeconds.oneDay
+    private var chartTimeSpan = Timespan.DAY
     private var candles = listOf<Candle>()
 
     companion object {
@@ -104,7 +104,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             historyPager = rootView.history_view_pager
             lineChart = rootView.chart
-            lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan,true) {
+            lineChart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan) {
                 swipeRefreshLayout?.isEnabled = false
             }
             lineChart.setOnChartValueSelectedListener(this)
@@ -170,28 +170,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             timespanButtonHour.setText("1H")
             timespanButtonHour.setOnClickListener {
-                setChartTimespan(TimeInSeconds.oneHour)
+                setChartTimespan(Timespan.HOUR)
             }
             timespanButtonDay.setText("1D")
             timespanButtonDay.setOnClickListener {
-                setChartTimespan(TimeInSeconds.oneDay)
+                setChartTimespan(Timespan.DAY)
             }
             timespanButtonWeek.setText("1W")
             timespanButtonWeek.setOnClickListener {
-                setChartTimespan(TimeInSeconds.oneWeek)
+                setChartTimespan(Timespan.WEEK)
             }
             timespanButtonMonth.setText("1M")
             timespanButtonMonth.setOnClickListener {
-                setChartTimespan(TimeInSeconds.oneMonth)
+                setChartTimespan(Timespan.MONTH)
             }
             timespanButtonYear.setText("1Y")
             timespanButtonYear.setOnClickListener {
-                setChartTimespan(TimeInSeconds.oneYear)
+                setChartTimespan(Timespan.YEAR)
             }
             timespanButtonAll.setText("ALL")
             timespanButtonAll.setOnClickListener {
-                //TODO: fix this
-                setChartTimespan(currency.lifetimeInSeconds)
+                setChartTimespan(Timespan.ALL)
             }
 
             val stashedFills = prefs.getStashedFills(account.product.id)
@@ -228,16 +227,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun checkTimespanButton() {
         val lifetimeInSeconds = account?.currency?.lifetimeInSeconds ?: 0.0
         when (chartTimeSpan) {
-            TimeInSeconds.oneHour -> timespanButtonHour.isChecked = true
-            TimeInSeconds.oneDay  -> timespanButtonDay.isChecked = true
-            TimeInSeconds.oneWeek -> timespanButtonWeek.isChecked = true
-            TimeInSeconds.oneMonth -> timespanButtonMonth.isChecked = true
-            TimeInSeconds.oneYear -> timespanButtonYear.isChecked = true
-            lifetimeInSeconds -> timespanButtonAll.isChecked = true
+            Timespan.HOUR -> timespanButtonHour.isChecked = true
+            Timespan.DAY ->  timespanButtonDay.isChecked = true
+            Timespan.WEEK -> timespanButtonWeek.isChecked = true
+            Timespan.MONTH -> timespanButtonMonth.isChecked = true
+            Timespan.YEAR -> timespanButtonYear.isChecked = true
+            Timespan.ALL -> timespanButtonAll.isChecked = true
         }
     }
 
-    private fun setChartTimespan(timespan: Long) {
+    private fun setChartTimespan(timespan: Timespan) {
       //  MainActivity.progressDialog?.show()
         checkTimespanButton()
         chartTimeSpan = timespan
@@ -349,7 +348,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceText.text = entry.y.toDouble().fiatFormat()
         account?. let { account ->
             val candle = candles[entry.x.toInt()]
-            percentChangeText.text = candle.time.toStringWithTimeRange(chartTimeSpan)
+            percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
             val prefs = Prefs(context!!)
             if (prefs.isDarkModeOn) {
                 percentChangeText.textColor = Color.WHITE

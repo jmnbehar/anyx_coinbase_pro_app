@@ -69,7 +69,7 @@ class MarketFragment : RefreshFragment() {
     override fun refresh(onComplete: () -> Unit) {
         var productsUpdated = 0
         var accountListSize = Account.list.size
-        val time = TimeInSeconds.oneDay
+        val time = Timespan.DAY
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {

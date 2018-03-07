@@ -109,7 +109,7 @@ sealed class GdaxApi: FuelRouting {
 
     override val basePath = Companion.basePath
 
-    class candles(val productId: String, val timespan: Long = TimeInSeconds.oneDay, var granularity: Long, var timeOffset: Long) : GdaxApi() {
+    class candles(val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var granularity = granularity
             var currentTimespan: Long
@@ -164,14 +164,15 @@ sealed class GdaxApi: FuelRouting {
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
             var prefs = Prefs(context)
-            val timespan = TimeInSeconds.oneDay
+            val timespan = Timespan.DAY
+            val timespanValue = timespan.value()
             val granularity = Candle.granularityForTimespan(timespan)
 
             var productList: MutableList<Product> = mutableListOf()
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    GdaxApi.candles(product.id, timespan, granularity, 0).getCandles(onFailure, { candleList ->
+                    GdaxApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
@@ -188,7 +189,7 @@ sealed class GdaxApi: FuelRouting {
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        GdaxApi.candles(product.id, timespan, granularity, 0).getCandles(onFailure, { candleList ->
+                        GdaxApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
@@ -398,11 +399,6 @@ sealed class GdaxApi: FuelRouting {
 
                     paramList.add(Pair("start", formatter.format(start)))
                     paramList.add(Pair("end", formatter.format(nowLong * 1000)))
-
-                    //TODO: dumb this down, the granularity smarts live elsewhere
-                    if (granularity == null) {
-                        granularity = Candle.granularityForTimespan(timespan)
-                    }
                     paramList.add(Pair("granularity", granularity.toString()))
                     return paramList.toList()
                 }

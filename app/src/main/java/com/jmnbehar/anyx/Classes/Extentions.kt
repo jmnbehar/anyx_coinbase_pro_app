@@ -1,6 +1,5 @@
 package com.jmnbehar.anyx.Classes
 
-import android.content.Context
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -75,15 +74,15 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
     return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
 }
 
-fun Double.toStringWithTimeRange(timeRange: Long) : String {
+fun Double.toStringWithTimespan(timespan: Timespan) : String {
     val locale = Locale.getDefault()
-    val formatter = when (timeRange) {
-        TimeInSeconds.oneHour -> SimpleDateFormat("h:mma", locale)
-        TimeInSeconds.oneDay -> SimpleDateFormat("h:mma M/d", locale)
-        TimeInSeconds.oneWeek -> SimpleDateFormat("h:mma M/d", locale)
-        TimeInSeconds.oneMonth -> SimpleDateFormat("h:mma M/d", locale)
-        TimeInSeconds.oneYear -> SimpleDateFormat("M/d/YYYY", locale)
-        else -> SimpleDateFormat("M/d/YYYY", locale) //This is most likely all
+    val formatter = when (timespan) {
+        Timespan.HOUR  -> SimpleDateFormat("h:mma", locale)
+        Timespan.DAY   -> SimpleDateFormat("h:mma M/d", locale)
+        Timespan.WEEK  -> SimpleDateFormat("h:mma M/d", locale)
+        Timespan.MONTH -> SimpleDateFormat("h:mma M/d", locale)
+        Timespan.YEAR  -> SimpleDateFormat("M/d/YYYY", locale)
+        Timespan.ALL   -> SimpleDateFormat("M/d/YYYY", locale)
     }
     val itemLong = (this * 1000).toLong()
     val itemDate = Date(itemLong)

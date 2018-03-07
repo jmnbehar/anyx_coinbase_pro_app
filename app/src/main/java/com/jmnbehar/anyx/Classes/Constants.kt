@@ -40,28 +40,27 @@ enum class Timespan {
 
     override fun toString() : String {
         return when (this) {
-            HOUR -> "buy"
-            DAY -> "buy"
-            WEEK -> "buy"
-            MONTH -> "buy"
-            YEAR -> "buy"
-            ALL -> "buy"
+            HOUR -> "HOUR"
+            DAY -> "DAY"
+            WEEK -> "WEEK"
+            MONTH -> "MONTH"
+            YEAR -> "YEAR"
+            ALL -> "ALL"
         }
     }
 
-    fun value() : Long {
+    fun value(currency: Currency = Currency.USD) : Long {
         return when (this) {
             HOUR -> TimeInSeconds.oneHour
             DAY -> TimeInSeconds.oneDay
             WEEK -> TimeInSeconds.oneWeek
             MONTH -> TimeInSeconds.oneMonth
             YEAR -> TimeInSeconds.oneYear
-            ALL -> -1
+            ALL -> currency.lifetimeInSeconds
         }
     }
 
     companion object {
-
         fun fromLong(value: Long) : Timespan {
             return when (value) {
                 TimeInSeconds.oneHour -> HOUR

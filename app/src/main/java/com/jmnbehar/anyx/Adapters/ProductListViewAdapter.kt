@@ -98,7 +98,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         viewHolder.priceText?.text = currentPrice.fiatFormat()
 
-        viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical,  TimeInSeconds.oneDay, false) {}
+        viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
 
         outputView.setOnClickListener { onClick(account.product) }
 
