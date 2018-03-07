@@ -166,11 +166,7 @@ class LoginFragment : Fragment()  {
         if (passphraseEditText.text.toString() != "*****") {
             passphrase = passphraseEditText.text.toString()
         }
-
-        apiKey = "cca2fdeedb74b9c66c38a55e5207d1b5"
-        apiSecret = "CcUt7rxMAf3Vq+R56dkenBz4U2r3fzdBGTlAQx4SZBt1KYRFacKmeqpLv8VqnpAXndbSky273SjL3w/kLW6NTw=="
-        passphrase = "gdaxBeta"
-
+        
         if (prefs.shouldSaveApiInfo) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
