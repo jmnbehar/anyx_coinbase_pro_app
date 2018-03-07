@@ -3,6 +3,7 @@ package com.jmnbehar.anyx.Adapters
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.TextView
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
@@ -36,7 +37,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
         }
         if(i < accounts.size) {
             val account = accounts[i]
-            vi.txt_account_name.text = account.currency.toString()
+           // vi.txt_account_name.text = account.currency.toString()
             if (account.currency != Currency.USD) {
                 vi.txt_account_balance.text = account.balance.btcFormat() + " " + account.currency.toString()
                 vi.setOnClickListener { onClick(account) }
@@ -50,18 +51,24 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
                     0.0
                 }
                 val change = currentPrice - open
+
                 val weightedChange: Double = (change / open)
                 val percentChange: Double = weightedChange * 100.0
                 if (account.value > 0) {
                     vi.txt_account_value.text = account.value.fiatFormat()
-                    vi.txt_account_percent_change.text = percentChange.percentFormat()
+
+                    val accountChange = change * account.balance
+                    val sign = if (change >= 0) { "+" } else { "" }
+                    vi.txt_account_percent_change.text = percentChange.percentFormat() + " ($sign${accountChange.fiatFormat()})"
+
                 } else {
                     vi.txt_account_value.visibility = View.INVISIBLE
                     vi.txt_account_percent_change.visibility = View.INVISIBLE
                 }
             } else {
                 vi.txt_account_value.text = account.value.fiatFormat()
-                vi.txt_account_balance.visibility = View.INVISIBLE
+                vi.txt_account_balance.text = account.currency.toString()
+                vi.txt_account_balance.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
 //                vi.txt_account_percent_change.visibility = View.INVISIBLE
                 vi.txt_account_percent_change.text = ""
             }

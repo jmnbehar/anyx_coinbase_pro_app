@@ -19,6 +19,7 @@ import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
+import kotlin.math.absoluteValue
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -106,7 +107,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val change = price - open
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
-        percentChangeText.text = percentChange.percentFormat()
+        val sign = if (change >= 0) { "+" } else { "" }
+
+        percentChangeText.text = percentChange.percentFormat() + " ($sign${change.fiatFormat()})"
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {

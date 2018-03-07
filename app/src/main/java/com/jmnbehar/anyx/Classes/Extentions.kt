@@ -12,6 +12,7 @@ import org.jetbrains.anko.*
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.absoluteValue
 
 /**
  * Created by josephbehar on 12/28/17.
@@ -62,7 +63,8 @@ fun Double.fiatFormat(): String {
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
-    val output = "$${numberFormat.format(this)}"
+    val sign = if (this >= 0) { "" } else { "-" }
+    val output = "$sign\$${numberFormat.format(this.absoluteValue)}"
     return output
 }
 
