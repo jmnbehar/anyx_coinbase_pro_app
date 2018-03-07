@@ -30,6 +30,52 @@ object TimeInSeconds {
     const val fiveYears: Long = 158112000
 }
 
+enum class Timespan {
+    HOUR,
+    DAY,
+    WEEK,
+    MONTH,
+    YEAR,
+    ALL;
+
+    override fun toString() : String {
+        return when (this) {
+            HOUR -> "buy"
+            DAY -> "buy"
+            WEEK -> "buy"
+            MONTH -> "buy"
+            YEAR -> "buy"
+            ALL -> "buy"
+        }
+    }
+
+    fun value() : Long {
+        return when (this) {
+            HOUR -> TimeInSeconds.oneHour
+            DAY -> TimeInSeconds.oneDay
+            WEEK -> TimeInSeconds.oneWeek
+            MONTH -> TimeInSeconds.oneMonth
+            YEAR -> TimeInSeconds.oneYear
+            ALL -> -1
+        }
+    }
+
+    companion object {
+
+        fun fromLong(value: Long) : Timespan {
+            return when (value) {
+                TimeInSeconds.oneHour -> HOUR
+                TimeInSeconds.oneDay -> DAY
+                TimeInSeconds.oneWeek -> WEEK
+                TimeInSeconds.oneMonth -> MONTH
+                TimeInSeconds.oneYear -> YEAR
+                (-1).toLong() -> ALL
+                else -> DAY
+            }
+        }
+    }
+}
+
 object Granularity {
     const val oneMinute: Long = 60
     const val fiveMinutes: Long = 300

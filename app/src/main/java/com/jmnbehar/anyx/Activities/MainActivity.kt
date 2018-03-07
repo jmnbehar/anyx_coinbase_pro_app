@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val priceAlertGroupTag = "PriceAlert"
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.anyx_fg)
+                .setSmallIcon(R.drawable.anyx_notification_icon)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationText)
                 .setContentIntent(pendingIntent)

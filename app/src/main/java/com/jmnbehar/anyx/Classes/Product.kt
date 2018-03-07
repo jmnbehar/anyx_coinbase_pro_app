@@ -16,28 +16,22 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
 
     var price = candles.lastOrNull()?.close ?: 0.0
 
-    var hourCandles = candles
+    private var hourCandles = candles
     var dayCandles = candles
-    var weekCandles = candles
-    var monthCandles = candles
-    //var yearCandles = candles
-    var allTimeCandles = candles
-    var candlesTimespan = TimeInSeconds.oneDay
+    private var weekCandles = candles
+    private var monthCandles = candles
+    private var yearCandles = candles
+    private var allTimeCandles = candles
+    private var candlesTimespan = TimeInSeconds.oneDay
 
     fun candlesForTimespan(timespan: Long): List<Candle> {
         return when (timespan) {
             TimeInSeconds.oneHour -> hourCandles
             TimeInSeconds.oneWeek -> weekCandles
             TimeInSeconds.oneMonth -> monthCandles
-            TimeInSeconds.oneYear -> {
-                val now = Calendar.getInstance()
-                val nowInSeconds = now.timeInSeconds()
-                val timespanStart = nowInSeconds - timespan
-                val firstInTimespan = allTimeCandles.indexOfFirst { candle -> candle.time >= timespanStart }
-                allTimeCandles.subList(firstInTimespan, allTimeCandles.lastIndex).toMutableList()
-            }
-            currency.lifetimeInSeconds -> allTimeCandles
+            TimeInSeconds.oneYear -> yearCandles
             TimeInSeconds.oneDay -> dayCandles
+            currency.lifetimeInSeconds -> allTimeCandles
             else -> dayCandles
         }
     }
@@ -61,7 +55,7 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
             TimeInSeconds.oneHour -> hourCandles
             TimeInSeconds.oneWeek -> weekCandles
             TimeInSeconds.oneMonth -> monthCandles
-            TimeInSeconds.oneYear -> allTimeCandles
+            TimeInSeconds.oneYear -> yearCandles
             currency.lifetimeInSeconds -> allTimeCandles
             TimeInSeconds.oneDay -> dayCandles
             else -> dayCandles
@@ -80,7 +74,9 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
             if (missingTime > timespan) {
                 missingTime = timespan
             }
-            GdaxApi.candles(id, missingTime, null, 0).getCandles(onFailure, { candleList ->
+
+            val granularity = Candle.granularityForTimespan(timespan)
+            GdaxApi.candles(id, missingTime, granularity, 0).getCandles(onFailure, { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
@@ -89,10 +85,8 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
                         val timespanStart = nowInSeconds - timespan
 
                         if (candles.isNotEmpty()) {
-                            if (timespan != TimeInSeconds.oneYear) {
-                                val firstInTimespan = candles.indexOfFirst { candle -> candle.time >= timespanStart }
-                                candles = candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
-                            }
+                            val firstInTimespan = candles.indexOfFirst { candle -> candle.time >= timespanStart }
+                            candles = candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
                             candles.addAll(candleList)
                         } else {
                             candles = candleList.toMutableList()
@@ -102,7 +96,7 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
                             TimeInSeconds.oneHour -> hourCandles = candles
                             TimeInSeconds.oneWeek -> weekCandles = candles
                             TimeInSeconds.oneMonth -> monthCandles = candles
-                            TimeInSeconds.oneYear -> allTimeCandles = candles
+                            TimeInSeconds.oneYear -> yearCandles = candles
                             currency.lifetimeInSeconds -> allTimeCandles = candles
                             TimeInSeconds.oneDay -> dayCandles = candles
                             else -> dayCandles = candles
