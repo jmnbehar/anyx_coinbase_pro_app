@@ -65,11 +65,6 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(DARK_MODE, true)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
-    //TODO: remove this, move to a GdaxApi setting
-    var isLoggedIn: Boolean
-        get() = prefs.getBoolean(IS_LOGGED_IN, false)
-        set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
-
     var shouldSaveApiInfo: Boolean
         get() = prefs.getBoolean(SAVE_API_INFO, false)
         set(value) {

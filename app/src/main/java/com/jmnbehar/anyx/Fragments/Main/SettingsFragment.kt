@@ -11,6 +11,7 @@ import android.widget.CheckBox
 import android.widget.TextView
 import com.jmnbehar.anyx.Activities.LoginActivity
 import com.jmnbehar.anyx.Classes.Constants
+import com.jmnbehar.anyx.Classes.GdaxApi
 import com.jmnbehar.anyx.Classes.Prefs
 import com.jmnbehar.anyx.Classes.RefreshFragment
 import com.jmnbehar.anyx.R
@@ -51,17 +52,18 @@ class SettingsFragment : RefreshFragment() {
 
         val prefs = Prefs(activity!!)
 
-        if (prefs.isLoggedIn) {
+        if (GdaxApi.isLoggedIn) {
             logoutButton.text = "Log Out"
         } else {
             logoutButton.text = "Log In"
         }
+
         logoutButton.setOnClickListener  {
             val intent = Intent(activity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.putExtra(Constants.logout, true)
             prefs.shouldAutologin = false
-            prefs.isLoggedIn = false
+            GdaxApi.credentials = null
             prefs.stashOrders(null)
             prefs.stashFills(null)
             startActivity(intent)

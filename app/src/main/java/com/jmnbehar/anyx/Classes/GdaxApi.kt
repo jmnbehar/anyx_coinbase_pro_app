@@ -28,6 +28,11 @@ sealed class GdaxApi: FuelRouting {
     companion object {
         //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
+
+        val isLoggedIn: Boolean
+            get() { return  credentials != null }
+
+
         val basePath = "https://api.gdax.com"
 
         init {
@@ -108,6 +113,54 @@ sealed class GdaxApi: FuelRouting {
     }
 
     override val basePath = Companion.basePath
+    private var timeLock = 0
+
+    fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
+        // MainActivity.progressDialog?.show()
+        Fuel.request(this).responseString { _, _, result ->
+            when (result) {
+                is Result.Failure -> {
+                    if (result.error.response.statusCode == ErrorCode.TooManyRequests.code) {
+                        timeLock++
+                        val handler = Handler()
+                        var retry = Runnable { }
+                        retry = Runnable {
+                            timeLock--
+                            if (timeLock <= 0) {
+                                timeLock = 0
+                                executeRequest(onFailure, onSuccess)
+                            } else {
+                                handler.postDelayed(retry, 200.toLong())
+                            }
+                        }
+                        handler.postDelayed(retry, 1000.toLong())
+                    } else if (result.error.response.statusCode == ErrorCode.BadRequest.code) {
+                        credentials = null
+                        onFailure(result)
+                        //logout
+                    } else {
+                        onFailure(result)
+                    }
+                }
+                is Result.Success -> {
+                    onSuccess(result)
+                }
+            }
+        }
+    }
+
+    fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
+        // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
+        Fuel.post(this.request.url.toString())
+                .header(headers)
+                .body(body)
+                .response  { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> onFailure(result)
+                        is Result.Success -> onSuccess(result)
+                    }
+                }
+    }
 
     class candles(val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
@@ -224,8 +277,6 @@ sealed class GdaxApi: FuelRouting {
                             Account.usdAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
                         }
                     }
-                    var prefs = Prefs(context)
-                    prefs.isLoggedIn = true
                     onComplete()
                 }
             }
@@ -278,50 +329,6 @@ sealed class GdaxApi: FuelRouting {
     //add deposits
     //look into reports
 
-    private var timeLock = 0
-
-    fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
-       // MainActivity.progressDialog?.show()
-        Fuel.request(this).responseString { _, _, result ->
-            when (result) {
-                is Result.Failure -> {
-                    if (result.error.response.statusCode == ErrorCode.TooManyRequests.code) {
-                        timeLock++
-                        val handler = Handler()
-                        var retry = Runnable {  }
-                        retry = Runnable {
-                            timeLock--
-                            if (timeLock <= 0) {
-                                timeLock = 0
-                                executeRequest(onFailure, onSuccess)
-                            } else {
-                                handler.postDelayed(retry, 200.toLong())
-                            }
-                        }
-                        handler.postDelayed(retry, 1000.toLong())
-                    } else {
-                        onFailure(result)
-                    }
-                }
-                is Result.Success -> {
-                    onSuccess(result)
-                }
-            }
-        }
-    }
-
-    fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
-       // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
-        Fuel.post(this.request.url.toString())
-                .header(headers)
-                .body(body)
-                .response  { _, _, result ->
-                    when (result) {
-                        is Result.Failure -> onFailure(result)
-                        is Result.Success -> onSuccess(result)
-                    }
-                }
-    }
 
     override val method: Method
         get() {

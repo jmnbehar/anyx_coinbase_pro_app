@@ -26,7 +26,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jmnbehar.anyx.Adapters.AlertListViewAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Main.*
 import com.jmnbehar.anyx.R
@@ -126,6 +125,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
+
         //TODO: show spinner later
         spinnerNav.visibility = View.GONE
 
@@ -171,6 +171,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 progressDialog?.dismiss()
                 returnToLogin()
             }, {
+//                GdaxApi.isLoggedIn = true
                 progressDialog?.dismiss()
                 goHome()
             })

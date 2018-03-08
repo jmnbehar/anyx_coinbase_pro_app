@@ -172,7 +172,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun refresh(onComplete: () -> Unit) {
         val prefs = Prefs(context!!)
-        if (prefs.isLoggedIn) {
+        if (GdaxApi.isLoggedIn) {
 
             setValueAndPercentChangeTexts()
 

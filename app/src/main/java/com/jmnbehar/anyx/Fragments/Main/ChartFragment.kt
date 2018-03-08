@@ -117,7 +117,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             nameText.text = currency.fullName
 
-            if (prefs.isLoggedIn) {
+            if (GdaxApi.isLoggedIn) {
                 tickerText.text = "$currency wallet"
                 iconView.setImageResource(currency.iconId)
                 balanceText.text = "${account.balance.btcFormat()} $currency"
@@ -149,7 +149,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     toast("Validate your account in Settings to buy or sell $currency")
                 } else if (GdaxApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all permissions.")
-                } else if (!prefs.isLoggedIn) {
+                } else if (!GdaxApi.isLoggedIn) {
                     toast("Please log in to buy or sell $currency")
                 } else {
                     (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
@@ -161,7 +161,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     toast("Validate your account in Settings to buy or sell $currency")
                 } else if (GdaxApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all permissions.")
-                } else if (!prefs.isLoggedIn) {
+                } else if (!GdaxApi.isLoggedIn) {
                     toast("Please log in to buy or sell $currency")
                 } else {
                     (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
@@ -413,7 +413,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             println("error!" )}
         val prefs = Prefs(context!!)
         account?. let { account ->
-            if (prefs.isLoggedIn) {
+            if (GdaxApi.isLoggedIn) {
                 GdaxApi.account(account.id).executeRequest(onFailure) { result ->
                     val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                     val newBalance = apiAccount.balance.toDoubleOrZero()
