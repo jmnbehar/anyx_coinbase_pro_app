@@ -47,62 +47,6 @@ class VerificationFragment : RefreshFragment() {
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
 
-        disclaimerButton.visibility = View.INVISIBLE
-        showDarkMode(rootView)
-
-        val prefs = Prefs(activity!!)
-
-        if (prefs.isLoggedIn) {
-            logoutButton.text = "Log Out"
-        } else {
-            logoutButton.text = "Log In"
-        }
-        logoutButton.setOnClickListener  {
-            val intent = Intent(activity, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.putExtra(Constants.logout, true)
-            prefs.shouldAutologin = false
-            prefs.isLoggedIn = false
-            prefs.stashOrders(null)
-            prefs.stashFills(null)
-            startActivity(intent)
-            activity!!.finishAffinity()
-        }
-
-        //Reenable once verification is working:
-        showTradeConfirmCheckBox.visibility = View.GONE
-        showSendConfirmCheckBox.visibility = View.GONE
-
-//        showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
-//        showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-//            prefs.shouldShowTradeConfirmModal = isChecked
-//        }
-//
-//        showSendConfirmCheckBox.isChecked = prefs.shouldShowSendConfirmModal
-//        showSendConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-//            prefs.shouldShowSendConfirmModal = isChecked
-//        }
-
-        darkModeCheckBox.isChecked = prefs.isDarkModeOn
-        darkModeCheckBox.setOnCheckedChangeListener {  _, isChecked ->
-            prefs.isDarkModeOn = isChecked
-            showDarkMode()
-
-            if (isChecked) {
-                darkModeCheckBox.textColor = Color.WHITE
-                showTradeConfirmCheckBox.textColor = Color.WHITE
-                showSendConfirmCheckBox.textColor = Color.WHITE
-                titleText.textColor = Color.WHITE
-            } else {
-                darkModeCheckBox.textColor = Color.BLACK
-                showTradeConfirmCheckBox.textColor = Color.BLACK
-                showSendConfirmCheckBox.textColor = Color.BLACK
-                titleText.textColor = Color.BLACK
-            }
-        }
-        showDarkMode()
-
-
         return rootView
     }
 }

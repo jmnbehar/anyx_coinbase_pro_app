@@ -21,7 +21,6 @@ import javax.crypto.spec.SecretKeySpec
  * Created by jmnbehar on 12/18/2017.
  */
 
-
 sealed class GdaxApi: FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
 

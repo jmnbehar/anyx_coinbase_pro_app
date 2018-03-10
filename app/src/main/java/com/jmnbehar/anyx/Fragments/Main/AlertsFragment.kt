@@ -1,26 +1,19 @@
 package com.jmnbehar.anyx.Fragments.Main
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.baoyz.swipemenulistview.SwipeMenuCreator
-import com.baoyz.swipemenulistview.SwipeMenuItem
 import com.baoyz.swipemenulistview.SwipeMenuListView
 import com.jmnbehar.anyx.Adapters.AlertListViewAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
-import org.jetbrains.anko.support.v4.toast
 import android.util.TypedValue
 import android.view.MenuItem
-import com.jmnbehar.anyx.Activities.LoginHelpActivity
 import com.jmnbehar.anyx.Activities.MainActivity
 
 
@@ -51,11 +44,11 @@ class AlertsFragment : RefreshFragment() {
     companion object {
         lateinit var currency: Currency
         lateinit var prefs: Prefs
-        var alerts: MutableSet<Alert> = mutableSetOf()
+        //var alerts: MutableSet<Alert> = mutableSetOf()
 
         fun newInstance(ctx: Context): AlertsFragment {
             prefs = Prefs(ctx)
-            alerts = prefs.alerts.toMutableSet()
+            //alerts = prefs.alerts.toMutableSet()
             return AlertsFragment()
         }
     }
@@ -106,7 +99,7 @@ class AlertsFragment : RefreshFragment() {
         setButton.text = "Set"
 
 
-        alertAdapter = AlertListViewAdapter(inflater, alerts.toList(), { view, alert ->
+        alertAdapter = AlertListViewAdapter(inflater, sortedAlerts, { view, alert ->
             val popup = PopupMenu(activity, view)
             //Inflating the Popup using xml file
             popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
@@ -155,23 +148,23 @@ class AlertsFragment : RefreshFragment() {
                 resources.displayMetrics).toInt()
     }
     private fun deleteAlert(alert: Alert) {
-        alerts.removeAlert(alert)
-        prefs.alerts = alerts
-        alertAdapter?.alerts = alerts.toList()
+        prefs.removeAlert(alert)
+        alertAdapter?.alerts = sortedAlerts
         alertAdapter?.notifyDataSetChanged()
         alertList.adapter = alertAdapter
     }
 
     private fun setAlert() {
         val price = priceEditText.text.toString().toDoubleOrZero()
-        val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
-        priceEditText.setText(productPrice.toString())
-        val triggerIfAbove = price > productPrice
-        val alert = Alert(price, currency, triggerIfAbove)
-        alerts.add(alert)
-        prefs.addAlert(alert)
-        alertAdapter?.alerts = alerts.toList()
-        alertAdapter?.notifyDataSetChanged()
+        if (price > 0) {
+            val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
+            priceEditText.setText(productPrice.toString())
+            val triggerIfAbove = price > productPrice
+            val alert = Alert(price, currency, triggerIfAbove)
+            prefs.addAlert(alert)
+            alertAdapter?.alerts = sortedAlerts
+            alertAdapter?.notifyDataSetChanged()
+        }
     }
 
     private fun switchCurrency(currency: Currency) {
@@ -185,15 +178,20 @@ class AlertsFragment : RefreshFragment() {
             priceLabelText.text = "Current " + currency.fullName + " price: "
             currentPriceText.text = price.fiatFormat()
         }
-        priceEditText.setText(price.toString())
+        //priceEditText.setText(price.toString())
     }
 
+    private val sortedAlerts : List<Alert>
+        get() {
+            val prefs = Prefs(context!!)
+            val alerts = prefs.alerts
+            return alerts.sortedWith(compareBy({ it.price }))
+        }
+
     override fun refresh(onComplete: () -> Unit) {
-        val prefs = Prefs(context!!)
         (activity as MainActivity).updatePrices({ /* fail silently */ }, {
             (activity as MainActivity).loopThroughAlerts()
-            alerts = prefs.alerts.toMutableSet()
-            alertAdapter?.alerts = alerts.toList()
+            alertAdapter?.alerts = sortedAlerts
             alertAdapter?.notifyDataSetChanged()
             onComplete()
         })
