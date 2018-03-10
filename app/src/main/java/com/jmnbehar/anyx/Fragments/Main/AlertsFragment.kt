@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.baoyz.swipemenulistview.SwipeMenuListView
 import com.jmnbehar.anyx.Adapters.AlertListViewAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
@@ -36,7 +35,7 @@ class AlertsFragment : RefreshFragment() {
 
     private lateinit var setButton: Button
 
-    lateinit var alertList: SwipeMenuListView
+    lateinit var alertList: ListView
     var alertAdapter: AlertListViewAdapter? = null
 
     var currency = Currency.BTC
@@ -158,12 +157,12 @@ class AlertsFragment : RefreshFragment() {
         val price = priceEditText.text.toString().toDoubleOrZero()
         if (price > 0) {
             val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
-            priceEditText.setText(productPrice.toString())
             val triggerIfAbove = price > productPrice
             val alert = Alert(price, currency, triggerIfAbove)
             prefs.addAlert(alert)
             alertAdapter?.alerts = sortedAlerts
             alertAdapter?.notifyDataSetChanged()
+            priceEditText.setText("")
         }
     }
 

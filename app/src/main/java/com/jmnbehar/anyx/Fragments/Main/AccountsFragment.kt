@@ -109,7 +109,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val percentChange: Double = weightedChange * 100.0
         val sign = if (change >= 0) { "+" } else { "" }
 
-        percentChangeText.text = percentChange.percentFormat() + " ($sign${change.fiatFormat()})"
+        percentChangeText.text = percentChange.percentFormat() + "\n($sign${change.fiatFormat()})"
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {

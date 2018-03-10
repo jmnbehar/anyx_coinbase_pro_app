@@ -79,7 +79,11 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
 
                         if (candles.isNotEmpty()) {
                             val firstInTimespan = candles.indexOfFirst { candle -> candle.time >= timespanStart }
-                            candles = candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
+                            candles = if (firstInTimespan >= 0) {
+                                candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
+                            } else {
+                                mutableListOf()
+                            }
                             candles.addAll(candleList)
                         } else {
                             candles = candleList.toMutableList()

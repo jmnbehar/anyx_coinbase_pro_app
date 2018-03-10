@@ -59,7 +59,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
 
                     val accountChange = change * account.balance
                     val sign = if (change >= 0) { "+" } else { "" }
-                    vi.txt_account_percent_change.text = percentChange.percentFormat() + " ($sign${accountChange.fiatFormat()})"
+                    vi.txt_account_percent_change.text = percentChange.percentFormat() + "\n($sign${accountChange.fiatFormat()})"
 
                 } else {
                     vi.txt_account_value.visibility = View.INVISIBLE
