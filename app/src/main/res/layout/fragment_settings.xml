@@ -3,56 +3,74 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="10dp"
-    android:layout_marginLeft="20dp"
-    android:layout_marginRight="20dp"
-    android:layout_marginTop="10dp"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txt_setting_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <CheckBox
-        android:id="@+id/cb_setting_dark_mode"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Dark Mode" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
 
-    <CheckBox
-        android:id="@+id/cb_setting_show_trade_confirm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show confirm popup before buying or selling assets" />
+        <TextView
+            android:id="@+id/txt_setting_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:textSize="30sp"
+            tools:layout_editor_absoluteX="48dp"
+            tools:layout_editor_absoluteY="16dp" />
 
-    <CheckBox
-        android:id="@+id/cb_setting_show_send_confirm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show confirm popup before sending assets" />
+        <CheckBox
+            android:id="@+id/cb_setting_dark_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dark Mode" />
 
-    <CheckBox
-        android:id="@+id/cb_setting_idk"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="idk what will go here"
-        android:visibility="gone" />
+        <CheckBox
+            android:id="@+id/cb_setting_show_trade_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show confirm popup before buying or selling assets" />
 
-    <Button
-        android:id="@+id/btn_setting_show_disclaimer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="read legal disclaimer so i don't get sued" />
+        <CheckBox
+            android:id="@+id/cb_setting_show_send_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show confirm popup before sending assets" />
 
-    <Button
-        android:id="@+id/btn_setting_log_out"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Log out" />
+        <CheckBox
+            android:id="@+id/cb_setting_idk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="idk what will go here"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_setting_show_disclaimer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="read legal disclaimer so i don't get sued" />
+
+        <Button
+            android:id="@+id/btn_setting_verify_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Verify Account" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20" />
+
+        <Button
+            android:id="@+id/btn_setting_log_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log out" />
+
+    </LinearLayout>
 
 </LinearLayout>

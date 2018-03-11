@@ -28,6 +28,12 @@
             android:label="@string/app_name">
         </activity>
 
+        <activity
+            android:name="com.jmnbehar.anyx.Activities.VerifyActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/app_name">
+        </activity>
+
 
         <activity
             android:name="com.jmnbehar.anyx.Activities.MainActivity"

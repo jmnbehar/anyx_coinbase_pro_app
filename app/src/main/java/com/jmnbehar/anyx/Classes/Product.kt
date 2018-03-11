@@ -2,13 +2,11 @@ package com.jmnbehar.anyx.Classes
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import java.sql.Time
 import java.util.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
  */
-
 
 class Product(var currency: Currency, var id: String, candles: List<Candle>) {
     constructor(apiProduct: ApiProduct, candles: List<Candle>)

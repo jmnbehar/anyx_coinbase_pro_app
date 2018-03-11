@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import com.jmnbehar.anyx.Activities.LoginActivity
+import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.Constants
 import com.jmnbehar.anyx.Classes.GdaxApi
 import com.jmnbehar.anyx.Classes.Prefs
@@ -32,6 +33,7 @@ class SettingsFragment : RefreshFragment() {
 
     private lateinit var titleText: TextView
     private lateinit var logoutButton: Button
+    private lateinit var verifyButton: Button
     private lateinit var disclaimerButton: Button
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
@@ -43,6 +45,7 @@ class SettingsFragment : RefreshFragment() {
 
         titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
+        verifyButton = rootView.btn_setting_verify_account
         disclaimerButton = rootView.btn_setting_show_disclaimer
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
@@ -68,6 +71,12 @@ class SettingsFragment : RefreshFragment() {
             prefs.stashFills(null)
             startActivity(intent)
             activity!!.finishAffinity()
+        }
+
+        verifyButton.setOnClickListener  {
+            val intent = Intent(activity, VerifyActivity::class.java)
+            //intent.putExtra(Constants.isMobileLoginHelp, true)
+            startActivity(intent)
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
