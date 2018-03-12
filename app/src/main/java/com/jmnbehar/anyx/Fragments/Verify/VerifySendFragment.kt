@@ -6,32 +6,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.Currency
 import com.jmnbehar.anyx.Classes.btcFormat
 import com.jmnbehar.anyx.R
-import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 
 /**
  * Created by josephbehar on 1/20/18.
  */
 
-class VerififySendFragment : Fragment() {
+class VerifySendFragment : Fragment() {
     companion object {
         var email = ""
-        var amount = 0.0001
-        var currency = Currency.BTC
+        var amount = 0.0
+        var currency: Currency? = null
 
-        fun newInstance(email: String, amount: Double, currency: Currency): VerififySendFragment
+        fun newInstance(email: String, amount: Double, currency: Currency?): VerifySendFragment
         {
             this.email = email
             this.amount = amount
             this.currency = currency
-            return VerififySendFragment()
+            return VerifySendFragment()
         }
     }
 
@@ -75,9 +73,16 @@ class VerififySendFragment : Fragment() {
 
     fun updateViews() {
         getDataFromActivity()
-        sendInfoText.text = "To verify your account we will send"
-        sendAmountText.text = "${Companion.amount.btcFormat()} ${Companion.currency}"
-        sendInfo2Text.text = "to AnyX, which we will send right back to your coinbase account with email ${Companion.email}."
-        progressBar.visibility = View.GONE
+        if (currency == null) {
+            sendInfoText.text = "To verify your account we will buy "
+            sendAmountText.text = "${Companion.amount.btcFormat()} ${Currency.BTC} for PRICE"
+            sendInfo2Text.text = "and send it to AnyX, which we will send right back to your Coinbase account with email ${Companion.email}."
+            progressBar.visibility = View.GONE
+        } else {
+            sendInfoText.text = "To verify your account we will send"
+            sendAmountText.text = "${Companion.amount.btcFormat()} ${Companion.currency}"
+            sendInfo2Text.text = "to AnyX, which we will send right back to your Coinbase account with email ${Companion.email}."
+            progressBar.visibility = View.GONE
+        }
     }
 }

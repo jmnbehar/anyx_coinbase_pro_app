@@ -61,7 +61,7 @@ sealed class AnyxApi : FuelRouting {
                         onComplete(false)
                     } else {
                         val currency = nonEmptyAccount.currency
-                        AnyxApi.Verify(credentials.apiKey, currency, email).executeRequest({
+                        AnyxApi.Verify(credentials.apiKey, currency).executeRequest({
                             onComplete(false)
                         }, {
                             GdaxApi.sendCrypto(currency.minSendAmount, currency, GdaxApi.developerAddress(currency)).executeRequest({
@@ -134,7 +134,8 @@ sealed class AnyxApi : FuelRouting {
     override val basePath = Companion.basePath
 
     class IsVerfied(val apiKey: String) : AnyxApi()
-    class Verify(val apiKey: String, val currency: Currency, val email: String) : AnyxApi()
+    class Verify(val apiKey: String, val currency: Currency) : AnyxApi()
+    class VerificationSent(val apiKey: String, val email: String) : AnyxApi()
 
 
     override val method: Method
@@ -142,6 +143,7 @@ sealed class AnyxApi : FuelRouting {
             return when (this) {
                 is IsVerfied -> Method.GET
                 is Verify -> Method.POST
+                is VerificationSent -> Method.POST
             }
         }
 
@@ -150,6 +152,7 @@ sealed class AnyxApi : FuelRouting {
             return when (this) {
                 is IsVerfied -> "/verify"
                 is Verify -> "/verify"
+                is VerificationSent -> "/verify/sent"
             }
         }
 
@@ -173,6 +176,12 @@ sealed class AnyxApi : FuelRouting {
 
                     json.put("apiKey", apiKey)
                     json.put("currency", currency.toString())
+                    return json.toString()
+                }
+                is VerificationSent -> {
+                    val json = JSONObject()
+
+                    json.put("apiKey", apiKey)
                     json.put("email", email)
                     return json.toString()
                 }

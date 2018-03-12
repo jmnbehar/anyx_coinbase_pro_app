@@ -5,11 +5,12 @@ package com.jmnbehar.anyx.Classes
  */
 
 object Constants {
-    val exit = "EXIT"
-    val logout = "LOGOUT"
-    val alertChannelId = "com.jmnbehar.gdax.alerts"
-    val salt = "GdaxApp"
-    val isMobileLoginHelp = "LOGIN_HELP_TYPE"
+    const val exit = "EXIT"
+    const val logout = "LOGOUT"
+    const val alertChannelId = "com.jmnbehar.gdax.alerts"
+    const val salt = "GdaxApp"
+    const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
+    const val verifyAmount = "VERIFY_AMOUNT"
 }
 
 

@@ -17,11 +17,11 @@ import com.jmnbehar.anyx.Activities.VerifyActivity
  * Created by josephbehar on 1/20/18.
  */
 
-class VerififyEmailFragment : Fragment() {
+class VerifyEmailFragment : Fragment() {
     companion object {
-        fun newInstance(): VerififyEmailFragment
+        fun newInstance(): VerifyEmailFragment
         {
-            return VerififyEmailFragment()
+            return VerifyEmailFragment()
         }
     }
 

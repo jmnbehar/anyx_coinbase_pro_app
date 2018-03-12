@@ -11,12 +11,10 @@ import android.widget.CheckBox
 import android.widget.TextView
 import com.jmnbehar.anyx.Activities.LoginActivity
 import com.jmnbehar.anyx.Activities.VerifyActivity
-import com.jmnbehar.anyx.Classes.Constants
-import com.jmnbehar.anyx.Classes.GdaxApi
-import com.jmnbehar.anyx.Classes.Prefs
-import com.jmnbehar.anyx.Classes.RefreshFragment
+import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 /**
@@ -74,8 +72,39 @@ class SettingsFragment : RefreshFragment() {
         }
 
         verifyButton.setOnClickListener  {
+//            var currency: Currency? = null
+//            if (Account.list.isNotEmpty()) {
+//                val nonEmptyAccounts = Account.list.filter { account -> account.balance >= account.currency.minSendAmount }
+//                var verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
+//                if (verifyAccount == null) {
+//                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
+//                }
+//                if (verifyAccount == null) {
+//                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
+//                }
+//                if (verifyAccount == null) {
+//                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.LTC }
+//                }
+//                currency = if (verifyAccount == null) {
+//                    null
+//                } else {
+//                    verifyAccount.currency
+//                }
+//            }
+//            val credentials = GdaxApi.credentials
+//            if (credentials != null) {
+//                AnyxApi.Verify(credentials.apiKey, currency ?: Currency.BTC).executeRequest({
+//                     toast("Cannot access AnyX servers.")
+//                }, {
+//                    result ->
+//                    val intent = Intent(activity, VerifyActivity::class.java)
+//                    intent.putExtra(Constants.verifyAmount, 0.00011234)
+//                    startActivity(intent)
+//                })
+//            }
+
             val intent = Intent(activity, VerifyActivity::class.java)
-            //intent.putExtra(Constants.isMobileLoginHelp, true)
+//            intent.putExtra(Constants.isMobileLoginHelp, true)
             startActivity(intent)
         }
 

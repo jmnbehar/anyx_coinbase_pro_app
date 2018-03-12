@@ -11,11 +11,11 @@ import com.jmnbehar.anyx.R
  * Created by josephbehar on 1/20/18.
  */
 
-class VerififyIntroFragment : Fragment() {
+class VerifyIntroFragment : Fragment() {
     companion object {
-        fun newInstance(): VerififyIntroFragment
+        fun newInstance(): VerifyIntroFragment
         {
-            return VerififyIntroFragment()
+            return VerifyIntroFragment()
         }
     }
 

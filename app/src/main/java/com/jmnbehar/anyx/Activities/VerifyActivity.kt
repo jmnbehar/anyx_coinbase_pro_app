@@ -12,11 +12,10 @@ import android.view.View
 import com.jmnbehar.anyx.R
 
 import android.widget.Button
-import com.jmnbehar.anyx.Classes.Constants
-import com.jmnbehar.anyx.Classes.Currency
-import com.jmnbehar.anyx.Fragments.Verify.VerififyEmailFragment
-import com.jmnbehar.anyx.Fragments.Verify.VerififyIntroFragment
-import com.jmnbehar.anyx.Fragments.Verify.VerififySendFragment
+import com.jmnbehar.anyx.Classes.*
+import com.jmnbehar.anyx.Fragments.Verify.VerifyEmailFragment
+import com.jmnbehar.anyx.Fragments.Verify.VerifyIntroFragment
+import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
 import kotlinx.android.synthetic.main.activity_verify.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.toast
@@ -36,7 +35,7 @@ class VerifyActivity : AppCompatActivity() {
 
     var email = ""
     var amount = 0.0
-    var currency = Currency.BTC
+    var currency: Currency? = null
 
 
     /**
@@ -64,6 +63,8 @@ class VerifyActivity : AppCompatActivity() {
 
         isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
 
+        amount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
+
         // Set up the ViewPager with the sections adapter.
         viewPager = verify_view_pager
         viewPager.adapter = mSectionsPagerAdapter
@@ -85,6 +86,8 @@ class VerifyActivity : AppCompatActivity() {
                     nextBtn?.visibility = View.GONE
                     if (!emailConfirmed) {
                         toast("Emails don't match")
+                    } else if (amount <= 0) {
+                        toast("Server Error")
                     }
                     // nextBtn?.text = "Done"
                 } else {
@@ -94,10 +97,10 @@ class VerifyActivity : AppCompatActivity() {
         })
 
         nextBtn?.onClick {
-            if (currentPage == 0 && amount == 0.0) {
+            if (currentPage == 1 && !emailConfirmed) {
                 toast("Emails don't match")
-            } else if (currentPage == 1 && !emailConfirmed) {
-                toast("Emails don't match")
+            } else if (currentPage == 1 && amount <= 0) {
+                toast("Server Error")
             } else {
                 currentPage += 1
                 viewPager.setCurrentItem(currentPage, true)
@@ -153,17 +156,17 @@ class VerifyActivity : AppCompatActivity() {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             return when (position) {
-                0 -> VerififyIntroFragment.newInstance()
-                1 -> VerififyEmailFragment.newInstance()
-                2 -> VerififySendFragment.newInstance(email, amount, currency)
-                else -> VerififyIntroFragment.newInstance()
+                0 -> VerifyIntroFragment.newInstance()
+                1 -> VerifyEmailFragment.newInstance()
+                2 -> VerifySendFragment.newInstance(email, amount, currency)
+                else -> VerifyIntroFragment.newInstance()
             }
         }
 
         override fun getItemPosition(`object`: Any): Int {
-            if (`object` is VerififySendFragment) {
-                val verififySendFragment = `object` as VerififySendFragment
-                verififySendFragment.updateViews()
+            if (`object` is VerifySendFragment) {
+                val verifySendFragment = `object` as VerifySendFragment
+                verifySendFragment.updateViews()
             }
             return super.getItemPosition(`object`)
         }
