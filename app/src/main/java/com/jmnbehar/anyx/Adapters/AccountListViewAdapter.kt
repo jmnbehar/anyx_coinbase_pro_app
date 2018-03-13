@@ -46,7 +46,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
                 val candles = account.product.dayCandles
                 val currentPrice = account.product.price
                 val open = if (candles.isNotEmpty()) {
-                    candles.first().open
+                    candles.first().close
                 } else {
                     0.0
                 }

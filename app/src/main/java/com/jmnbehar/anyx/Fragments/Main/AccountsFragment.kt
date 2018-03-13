@@ -123,7 +123,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         valueText.text = totalValue.fiatFormat()
 
         val open = if (accountTotalCandles.isNotEmpty()) {
-            accountTotalCandles.first().open
+            accountTotalCandles.first().close
         } else {
             0.0
         }

@@ -19,12 +19,12 @@
     <color name="btc_dk">#f9c800</color>
     <color name="eth_dk">#7086fd</color>
     <color name="bch_dk">#25bb7a</color>
-    <color name="ltc_dk">#ccd0da</color>
+    <color name="ltc_dk">#aeb4c0</color>
 
     <color name="btc_accent">#c6b800</color>
     <color name="eth_accent">#8c9fea</color>
-    <color name="bch_accent">#60e1da</color>
-    <color name="ltc_accent">#ebedf2</color>
+    <color name="bch_accent">#25bb7a</color>
+    <color name="ltc_accent">#ccd0da</color>
 
     <color name="transparent">#00000000</color>
 

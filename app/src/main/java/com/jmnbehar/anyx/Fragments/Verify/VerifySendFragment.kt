@@ -1,5 +1,6 @@
 package com.jmnbehar.anyx.Fragments.Verify
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -8,9 +9,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.jmnbehar.anyx.Activities.LoginActivity
 import com.jmnbehar.anyx.Activities.VerifyActivity
-import com.jmnbehar.anyx.Classes.Currency
-import com.jmnbehar.anyx.Classes.btcFormat
+import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 
@@ -53,8 +54,27 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-        updateViews()
+        verifySendButton.setOnClickListener  {
+            progressBar.visibility = View.VISIBLE
+            val currency = currency ?: Currency.BTC
 
+            //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
+            GdaxApi.sendCrypto(amount, currency, GdaxApi.developerAddress(currency)).executeRequest({
+                (activity as VerifyActivity).verificationComplete(false)
+
+            }, {
+                progressBar.visibility = View.INVISIBLE
+                (activity as VerifyActivity).verificationComplete(true)
+                val apiKey = GdaxApi.credentials!!.apiKey
+                AnyxApi.VerificationSent(apiKey, email).executePost({
+                    //TODO: create a queue
+
+                }, {
+                    /* succeed silently */
+                })
+            })
+        }
+        updateViews()
         return rootView
     }
 

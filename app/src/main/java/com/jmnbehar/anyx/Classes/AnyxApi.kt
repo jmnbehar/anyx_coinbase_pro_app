@@ -23,63 +23,13 @@ import javax.crypto.spec.SecretKeySpec
 
 
 sealed class AnyxApi : FuelRouting {
-    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
-
     companion object {
-        //TODO: delete creds if api key becomes invalid
         val basePath = "https://any-x.com"
-
-        init {
-            FuelManager.instance.basePath = basePath
-        }
-
-        fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
-            val errorCode = AnyxApi.ErrorCode.withCode(result.error.response.statusCode)
-
-            return when (errorCode) {
-                AnyxApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
-                AnyxApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
-                AnyxApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
-                AnyxApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
-                AnyxApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
-                AnyxApi.ErrorCode.ServerError -> { "Sorry, Gdax Servers are encountering problems right now" }
-                AnyxApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
-                else -> ""
-            }
-        }
-
-
-        fun testApiKey(email: String, context: Context, onComplete: (Boolean) -> Unit) {
-            val credentials = GdaxApi.credentials
-            if (credentials != null) {
-                val prefs = Prefs(context)
-                if (Account.list.isNotEmpty()) {
-//                    val nonEmptyAccount = Account.list.find { account -> account.balance >= account.currency.minSendAmount }
-                    val nonEmptyAccount = Account.list.find { account -> account.currency == Currency.BTC }
-                    if (nonEmptyAccount == null) {
-                        //Buy the smallest amount possible over the min send amount and send it
-                        onComplete(false)
-                    } else {
-                        val currency = nonEmptyAccount.currency
-                        AnyxApi.Verify(credentials.apiKey, currency).executeRequest({
-                            onComplete(false)
-                        }, {
-                            GdaxApi.sendCrypto(currency.minSendAmount, currency, GdaxApi.developerAddress(currency)).executeRequest({
-                                onComplete(false)
-                        }, {
-                                onComplete(true)
-                            })
-                        })
-                    }
-                } else {
-                    onComplete(false)
-                }
-            }
-        }
     }
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
         // MainActivity.progressDialog?.show()
+        FuelManager.instance.basePath = Companion.basePath
         Fuel.request(this).responseString { _, _, result ->
             when (result) {
                 is Result.Failure -> {
@@ -93,17 +43,26 @@ sealed class AnyxApi : FuelRouting {
     }
 
     fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
-        // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
+        FuelManager.instance.basePath = Companion.basePath
         Fuel.post(this.request.url.toString())
                 .header(headers)
                 .body(body)
                 .response  { _, _, result ->
                     when (result) {
-                        is Result.Failure -> onFailure(result)
+                        is Result.Failure -> {
+                            if (retryAttempt < 5) {
+                                retryAttempt++
+                                executePost(onFailure, onSuccess)
+                            } else {
+                                onFailure(result)
+                            }
+                        }
                         is Result.Success -> onSuccess(result)
                     }
                 }
     }
+
+
 
     enum class ErrorCode(val code: Int) {
         BadRequest(400), //Invalid request format
@@ -132,6 +91,7 @@ sealed class AnyxApi : FuelRouting {
     }
 
     override val basePath = Companion.basePath
+    var retryAttempt = 0
 
     class IsVerfied(val apiKey: String) : AnyxApi()
     class Verify(val apiKey: String, val currency: Currency) : AnyxApi()

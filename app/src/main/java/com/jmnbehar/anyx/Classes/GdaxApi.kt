@@ -34,10 +34,6 @@ sealed class GdaxApi: FuelRouting {
 
         val basePath = "https://api.gdax.com"
 
-        init {
-            FuelManager.instance.basePath = basePath
-        }
-
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
 
@@ -61,26 +57,6 @@ sealed class GdaxApi: FuelRouting {
                 Currency.BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
                 Currency.LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
                 Currency.USD -> "my irl address?"
-            }
-        }
-
-        fun testApiKey(context: Context, onComplete: (Boolean) -> Unit) {
-            val credentials = credentials
-            if (credentials != null) {
-                val prefs = Prefs(context)
-                if (Account.list.isNotEmpty()) {
-//                    val nonEmptyAccount = Account.list.find { account -> account.balance >= account.currency.minSendAmount }
-                    val nonEmptyAccount = Account.list.find { account -> account.currency == Currency.BTC }
-                    if (nonEmptyAccount == null) {
-                        //Buy the smallest amount possible over the min send amount and send it
-                        onComplete(false)
-                    } else {
-                        val currency = nonEmptyAccount.currency
-//                        GdaxApi.sendCrypto(currency.minSendAmount, currency, developerAddress(currency)).executeRequest({
-//                        }, { })
-                    }
-                }
-
             }
         }
     }
@@ -116,6 +92,7 @@ sealed class GdaxApi: FuelRouting {
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
         // MainActivity.progressDialog?.show()
+        FuelManager.instance.basePath = AnyxApi.basePath
         Fuel.request(this).responseString { _, _, result ->
             when (result) {
                 is Result.Failure -> {
@@ -136,7 +113,7 @@ sealed class GdaxApi: FuelRouting {
                     } else if (result.error.response.statusCode == ErrorCode.BadRequest.code) {
                         credentials = null
                         onFailure(result)
-                        //logout
+                        //TODO: logout
                     } else {
                         onFailure(result)
                     }
@@ -150,6 +127,7 @@ sealed class GdaxApi: FuelRouting {
 
     fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
         // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
+        FuelManager.instance.basePath = AnyxApi.basePath
         Fuel.post(this.request.url.toString())
                 .header(headers)
                 .body(body)
@@ -297,7 +275,15 @@ sealed class GdaxApi: FuelRouting {
     class fills(val orderId: String = "all", val productId: String = "all") : GdaxApi()
     //add position?
     class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : GdaxApi()
-    class coinbaseAccounts() : GdaxApi()
+    class coinbaseAccounts() : GdaxApi() {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
+            this.executeRequest(onFailure) {result ->
+                val apiCBAccountString = result.value
+                val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
+                onComplete(apiCBAccountList)
+            }
+        }
+    }
     class paymentMethods() : GdaxApi()
     class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
     class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()

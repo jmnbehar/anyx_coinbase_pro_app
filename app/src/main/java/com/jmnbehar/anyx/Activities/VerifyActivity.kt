@@ -13,6 +13,7 @@ import com.jmnbehar.anyx.R
 
 import android.widget.Button
 import com.jmnbehar.anyx.Classes.*
+import com.jmnbehar.anyx.Fragments.Verify.VerifyCompleteFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyEmailFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyIntroFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
@@ -29,13 +30,14 @@ class VerifyActivity : AppCompatActivity() {
     var isMobileHelpPage = true
 
     internal var currentPage = 0   //  to track page position
-    var pageCount = 1
+    var pageCount = 2
 
     private var emailConfirmed = false
 
     var email = ""
     var amount = 0.0
     var currency: Currency? = null
+    var isVerified = false
 
 
     /**
@@ -77,7 +79,6 @@ class VerifyActivity : AppCompatActivity() {
                 if (position == 1 && positionOffset > 0 && !emailConfirmed) {
                     toast("Emails don't match")
                 }
-                // nextBtn?.text = "Done"
             }
 
             override fun onPageSelected(position: Int) {
@@ -89,9 +90,9 @@ class VerifyActivity : AppCompatActivity() {
                     } else if (amount <= 0) {
                         toast("Server Error")
                     }
-                    // nextBtn?.text = "Done"
                 } else {
                     nextBtn?.visibility = View.VISIBLE
+
                 }
             }
         })
@@ -120,6 +121,22 @@ class VerifyActivity : AppCompatActivity() {
         this.email = ""
         emailConfirmed = false
         pageCount = 2
+        viewPager.adapter?.notifyDataSetChanged()
+    }
+
+    fun verificationComplete(isVerified: Boolean) {
+        this.isVerified = isVerified
+        pageCount = 4
+        currentPage = 3
+        val prefs = Prefs(this)
+        val apiKey = GdaxApi.credentials!!.apiKey
+        if (isVerified) {
+            prefs.approveApiKey(apiKey)
+        } else {
+            prefs.rejectApiKey(apiKey)
+        }
+        viewPager.setCurrentItem(currentPage, true)
+        viewPager.isEnabled = false
         viewPager.adapter?.notifyDataSetChanged()
     }
 
@@ -165,8 +182,10 @@ class VerifyActivity : AppCompatActivity() {
 
         override fun getItemPosition(`object`: Any): Int {
             if (`object` is VerifySendFragment) {
-                val verifySendFragment = `object` as VerifySendFragment
-                verifySendFragment.updateViews()
+                `object`.updateViews()
+            }
+            if (`object` is VerifyCompleteFragment) {
+                `object`.updateText(isVerified)
             }
             return super.getItemPosition(`object`)
         }

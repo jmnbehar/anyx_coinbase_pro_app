@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken
 
 
 object TransferHub {
+    //TODO: get Coinbase accounts ahead of time instead of in each call
     fun sweepCoinbaseAccount(currency: Currency) {
         GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
             println("result")
@@ -37,6 +38,38 @@ object TransferHub {
             if (relevantAccount != null) {
                 val balance = relevantAccount.balance.toDoubleOrZero()
                 GdaxApi.sendToCoinbase(balance, currency, relevantAccount.id).executePost( { result ->
+                    println("failure")
+                }, { result ->
+                    println("success")
+                } )
+            }
+        })
+    }
+    fun sendToCoinbase(amount: Double, currency: Currency) {
+        GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
+            println("result")
+            val gson = Gson()
+            val apiCBAccountString = result.value
+            val apiCBAccountList: List<ApiCoinbaseAccount> = gson.fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
+            val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
+            if (relevantAccount != null) {
+                GdaxApi.getFromCoinbase(amount, currency, relevantAccount.id).executePost( { result ->
+                    println("failure")
+                }, { result ->
+                    println("success")
+                } )
+            }
+        })
+    }
+    fun getFromCoinbase(amount: Double, currency: Currency) {
+        GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
+            println("result")
+            val gson = Gson()
+            val apiCBAccountString = result.value
+            val apiCBAccountList: List<ApiCoinbaseAccount> = gson.fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
+            val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
+            if (relevantAccount != null) {
+                GdaxApi.sendToCoinbase(amount, currency, relevantAccount.id).executePost( { result ->
                     println("failure")
                 }, { result ->
                     println("success")
