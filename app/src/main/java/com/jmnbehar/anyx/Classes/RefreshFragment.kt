@@ -11,6 +11,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.act
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
 
 /**
@@ -36,6 +37,23 @@ open class RefreshFragment: Fragment() {
         if (activity is MainActivity) {
             (activity as MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
         }
+    }
+
+    fun doneLoading() {
+        if (activity is MainActivity) {
+            (activity as MainActivity).dismissProgressBar()
+        }
+    }
+
+
+    fun showPopup(string: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+        alert {
+            title = string
+            positiveButton("OK") { positiveAction() }
+            if (negativeText != null) {
+                negativeButton(negativeText) { negativeAction }
+            }
+        }.show()
     }
 
     fun showDarkMode(newView: View? = null) {

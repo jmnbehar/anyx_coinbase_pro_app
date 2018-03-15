@@ -71,7 +71,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             accountList.adapter = AccountListViewAdapter(selectGroup)
             titleText.visibility = View.GONE
 
-            refresh { /*done refreshing */ }
+            refresh { doneLoading() }
         } else {
             accountList.visibility = View.GONE
             lineChart.visibility = View.GONE
@@ -79,6 +79,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             //TODO: put a login button here
             titleText.visibility = View.VISIBLE
             titleText.text = "Sign in to view account info"
+            doneLoading()
         }
 
         return rootView

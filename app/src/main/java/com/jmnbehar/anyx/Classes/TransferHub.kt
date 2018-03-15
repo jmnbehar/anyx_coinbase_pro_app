@@ -1,7 +1,10 @@
 package com.jmnbehar.anyx.Classes
 
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.jmnbehar.anyx.Activities.MainActivity
 
 
 /**
@@ -10,7 +13,19 @@ import com.google.gson.reflect.TypeToken
 
 
 object TransferHub {
-    //TODO: get Coinbase accounts ahead of time instead of in each call
+    fun linkCoinbaseAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        GdaxApi.coinbaseAccounts().get(onFailure) { coinbaseAccounts ->
+            for (cbAccount in coinbaseAccounts) {
+                val currency = Currency.forString(cbAccount.currency)
+                if (currency != null && cbAccount.active && cbAccount.primary) {
+                    val account = Account.forCurrency(currency)
+                    account?.coinbaseAccount = Account.CoinbaseAccount(cbAccount)
+                }
+            }
+            onComplete()
+        }
+    }
+
     fun sweepCoinbaseAccount(currency: Currency) {
         GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
             println("result")
@@ -45,39 +60,33 @@ object TransferHub {
             }
         })
     }
-    fun sendToCoinbase(amount: Double, currency: Currency) {
-        GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
-            println("result")
-            val gson = Gson()
-            val apiCBAccountString = result.value
-            val apiCBAccountList: List<ApiCoinbaseAccount> = gson.fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
-            val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
-            if (relevantAccount != null) {
-                GdaxApi.getFromCoinbase(amount, currency, relevantAccount.id).executePost( { result ->
-                    println("failure")
-                }, { result ->
-                    println("success")
-                } )
-            }
-        })
+    fun sendToCoinbase(amount: Double, currency: Currency, onFailure: (String?) -> Unit, onComplete: () -> Unit) {
+        val relevantAccount = Account.forCurrency(currency)
+        val cbAccount = relevantAccount?.coinbaseAccount
+        if (cbAccount != null) {
+            GdaxApi.getFromCoinbase(amount, currency, cbAccount.id).executePost( { result ->
+                onFailure(result.error.message)
+            }, {
+                onComplete()
+            } )
+        } else {
+            onFailure("Coinbase account could not be accessed")
+        }
     }
-    fun getFromCoinbase(amount: Double, currency: Currency) {
-        GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
-            println("result")
-            val gson = Gson()
-            val apiCBAccountString = result.value
-            val apiCBAccountList: List<ApiCoinbaseAccount> = gson.fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
-            val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
-            if (relevantAccount != null) {
-                GdaxApi.sendToCoinbase(amount, currency, relevantAccount.id).executePost( { result ->
-                    println("failure")
-                }, { result ->
-                    println("success")
-                } )
-            }
-        })
+    fun getFromCoinbase(amount: Double, currency: Currency, onFailure: (String?) -> Unit, onComplete: () -> Unit) {
+        val relevantAccount = Account.forCurrency(currency)
+        val cbAccount = relevantAccount?.coinbaseAccount
+        if (cbAccount != null) {
+            GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost( { result ->
+                onFailure(result.error.message)
+            }, {
+                onComplete()
+            } )
+        } else {
+            onFailure("")
+        }
     }
-    fun getFromPayment(amount: Double, currency: Currency) {
+    fun getFromPayment(amount: Double, currency: Currency, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.paymentMethods().executeRequest({ println("failure") } , { result->
             println("result")
             val gson = Gson()
@@ -89,15 +98,13 @@ object TransferHub {
                 paymentMethod.currency == currency.toString() && paymentMethod.allow_withdraw
             }
             if (relevantPaymentMethod != null) {
-                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( { result ->
-                    println("failure")
-                }, { result ->
-                    println("success")
+                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
+                    onComplete()
                 } )
             }
         })
     }
-    fun sendToPayment(amount: Double, currency: Currency) {
+    fun sendToPayment(amount: Double, currency: Currency, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.coinbaseAccounts().executeRequest({ println("failure") } , { result->
             println("result")
             val gson = Gson()
@@ -109,10 +116,8 @@ object TransferHub {
                 paymentMethod.currency == currency.toString() && paymentMethod.allow_deposit
             }
             if (relevantPaymentMethod != null) {
-                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( { result ->
-                    println("failure")
-                }, { result ->
-                    println("success")
+                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
+                    onComplete()
                 } )
             }
         })

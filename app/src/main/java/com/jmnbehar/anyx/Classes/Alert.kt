@@ -45,7 +45,7 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
         fun fromString(string: String): Alert {
             val splitString = string.split('\n')
             val price = splitString[0].toDoubleOrZero()
-            val currency = Currency.fromString(splitString[1])
+            val currency = Currency.forString(splitString[1]) ?: Currency.USD
             val triggerIfAbove = splitString[2].toBoolean()
             val hasTriggered = splitString[3].toBoolean()
             return Alert(price, currency, triggerIfAbove, hasTriggered)

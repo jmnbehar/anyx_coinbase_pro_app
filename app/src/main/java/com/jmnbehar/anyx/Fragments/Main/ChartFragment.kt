@@ -217,6 +217,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        doneLoading()
     }
 
     override fun onPause() {
@@ -225,7 +226,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun checkTimespanButton() {
-        val lifetimeInSeconds = account?.currency?.lifetimeInSeconds ?: 0.0
         when (chartTimeSpan) {
             Timespan.HOUR -> timespanButtonHour.isChecked = true
             Timespan.DAY ->  timespanButtonDay.isChecked = true
@@ -237,15 +237,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun setChartTimespan(timespan: Timespan) {
-      //  MainActivity.progressDialog?.show()
         checkTimespanButton()
         chartTimeSpan = timespan
+//        (activity as MainActivity).showProgressBar()
+        //TODO: show spinner on top
         miniRefresh({
             toast("Error updating chart time")
-            MainActivity.progressDialog?.dismiss()
+            (activity as MainActivity).dismissProgressBar()
         }, {
             checkTimespanButton()
-            MainActivity.progressDialog?.dismiss()
+            (activity as MainActivity).dismissProgressBar()
         })
     }
 

@@ -116,6 +116,8 @@ class SendFragment : RefreshFragment() {
             }
         }
 
+        doneLoading()
+
         return rootView
     }
 

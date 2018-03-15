@@ -85,7 +85,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
             amount = unfilledSize
-            currency = Currency.fromString(order.product_id)
+            currency = Currency.forString(order.product_id) ?: Currency.USD
             tradeType = TradeType.fromString(order.type)
             vi.setOnClickListener { orderOnClick(order) }
 
@@ -106,7 +106,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             }
             val fill = fills[i]
             tradeSide = TradeSide.fromString(fill.side)
-            currency = Currency.fromString(fill.product_id)
+            currency = Currency.forString(fill.product_id) ?: Currency.USD
             price = fill.price.toDoubleOrZero()
             amount = fill.size.toDoubleOrZero()
             tradeType = null

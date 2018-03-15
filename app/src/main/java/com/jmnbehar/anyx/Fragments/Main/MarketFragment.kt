@@ -48,6 +48,7 @@ class MarketFragment : RefreshFragment() {
         listView.adapter = ProductListViewAdapter(inflater, selectGroup)
         listView.setHeightBasedOnChildren()
 
+        doneLoading()
         return rootView
     }
 

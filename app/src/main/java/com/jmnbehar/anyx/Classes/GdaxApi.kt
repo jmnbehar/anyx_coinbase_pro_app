@@ -246,7 +246,7 @@ sealed class GdaxApi: FuelRouting {
                 this.executeRequest(onFailure) { result ->
                     val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                     for (apiAccount in apiAccountList) {
-                        val currency = Currency.fromString(apiAccount.currency)
+                        val currency = Currency.forString(apiAccount.currency)
                         val relevantProduct = productList.find { p -> p.currency == currency }
                         if (relevantProduct != null) {
                             Account.list.add(Account(relevantProduct, apiAccount))

@@ -261,6 +261,8 @@ class TradeFragment : RefreshFragment() {
             }
         }
 
+        doneLoading()
+
         return rootView
     }
 

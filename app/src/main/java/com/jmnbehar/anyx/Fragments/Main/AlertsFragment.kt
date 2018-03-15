@@ -138,6 +138,7 @@ class AlertsFragment : RefreshFragment() {
 //        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
 
         //alertList.setHeightBasedOnChildren()
+        doneLoading()
 
         return rootView
     }

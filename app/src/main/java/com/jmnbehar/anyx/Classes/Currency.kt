@@ -171,11 +171,11 @@ enum class Currency {
             val now = Calendar.getInstance(utcTimeZone)
             val nowTime = now.timeInSeconds()
             val startTime = startDate.time / 1000
-            return now.timeInSeconds() - startTime
+            return (nowTime - startTime)
         }
 
     companion object {
-        fun fromString(string: String) : Currency {
+        fun forString(string: String) : Currency? {
             return when (string) {
                 "BTC-USD" -> BTC
                 "BTC" -> BTC
@@ -186,7 +186,7 @@ enum class Currency {
                 "LTC-USD" -> LTC
                 "LTC" -> LTC
                 "USD" -> USD
-                else -> USD
+                else -> null
             }
         }
     }

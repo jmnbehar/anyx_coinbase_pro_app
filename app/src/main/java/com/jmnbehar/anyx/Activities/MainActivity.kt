@@ -3,7 +3,6 @@ package com.jmnbehar.anyx.Activities
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.ColorFilter
@@ -11,9 +10,11 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
@@ -21,6 +22,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
@@ -31,7 +33,7 @@ import com.jmnbehar.anyx.Fragments.Main.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import org.jetbrains.anko.indeterminateProgressDialog
+import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -49,6 +51,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ACCOUNT,
         SEND,
         ALERTS,
+        DEPOSIT,
+        WITHDRAW,
         SETTINGS,
         TRADE,
         HOME,
@@ -64,6 +68,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
+                DEPOSIT -> "DEPOSIT"
+                WITHDRAW -> "WITHDRAW"
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
                 HOME -> "HOME"
@@ -74,24 +80,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     companion object {
-        var currentFragment: RefreshFragment? = null
-
-        var btcChartFragment: ChartFragment? = null
-        var ethChartFragment: ChartFragment? = null
-        var ltcChartFragment: ChartFragment? = null
-        var bchChartFragment: ChartFragment? = null
-
-        var accountsFragment: AccountsFragment? = null
-
-        var sendFragment: SendFragment? = null
-
-        var alertsFragment: AlertsFragment? = null
-
-        var settingsFragment: SettingsFragment? = null
-
-        var marketFragment: MarketFragment? = null
-
-        var progressDialog: ProgressDialog? = null
 
         fun newIntent(context: Context): Intent {
             return Intent(context, MainActivity::class.java)
@@ -99,6 +87,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     }
+
+    var currentFragment: RefreshFragment? = null
+
+    var btcChartFragment: ChartFragment? = null
+    var ethChartFragment: ChartFragment? = null
+    var ltcChartFragment: ChartFragment? = null
+    var bchChartFragment: ChartFragment? = null
+
+    var accountsFragment: AccountsFragment? = null
+
+    var depositFragment: DepositFragment? = null
+    var withdrawFragment: WithdrawFragment? = null
+
+    var sendFragment: SendFragment? = null
+
+    var alertsFragment: AlertsFragment? = null
+
+    var settingsFragment: SettingsFragment? = null
+
+    var marketFragment: MarketFragment? = null
+
+    lateinit var progressBar: ProgressBar
+    lateinit var progressBarLayout: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,17 +122,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        val nullMessage: CharSequence? = null
-        progressDialog = indeterminateProgressDialog(nullMessage)
-        progressDialog?.dismiss()
+
+        progressBarLayout = progress_bar_layout
+        progressBar = progress_bar
 
         spinnerNav = toolbar_spinner
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
         spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as String ?: ""
-                val selectedCurrency = Currency.fromString(selectedItem)
-                goToChartFragment(selectedCurrency)
+                val selectedItem = parent.getItemAtPosition(position) as String
+                val selectedCurrency = Currency.forString(selectedItem)
+                if (selectedCurrency != null) {
+                    goToChartFragment(selectedCurrency)
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
@@ -151,6 +164,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.HOME)
     }
 
+    fun showProgressBar() {
+        progressBarLayout.visibility = View.VISIBLE
+        val prefs = Prefs(this)
+        val color = if (prefs.isDarkModeOn) {
+            ContextCompat.getColor(this, R.color.transparent_light_bg)
+        } else {
+            ContextCompat.getColor(this, R.color.transparent_dark_bg)
+        }
+        progressBar.setBackgroundColor(color)
+    }
+
+    fun dismissProgressBar() {
+        progressBarLayout.visibility = View.GONE
+    }
+
 
     private fun signIn() {
         val prefs = Prefs(this)
@@ -165,14 +193,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
             val isApiKeyValid = prefs.isApiKeyValid(apiKey)
             GdaxApi.credentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-            progressDialog?.show()
+            showProgressBar()
             GdaxApi.accounts().getAllAccountInfo(this, { _ ->
                 toast("Error!")
-                progressDialog?.dismiss()
+                dismissProgressBar()
                 returnToLogin()
             }, {
 //                GdaxApi.isLoggedIn = true
-                progressDialog?.dismiss()
+                dismissProgressBar()
                 goHome()
             })
         } else {
@@ -333,6 +361,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
+            R.id.nav_deposit -> FragmentType.DEPOSIT
+            R.id.nav_withdraw -> FragmentType.WITHDRAW
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
@@ -340,6 +370,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentFragmentType = when (currentFragment) {
             is SendFragment -> FragmentType.SEND
             is AlertsFragment -> FragmentType.ALERTS
+            is DepositFragment -> FragmentType.DEPOSIT
+            is WithdrawFragment -> FragmentType.WITHDRAW
             is SettingsFragment -> FragmentType.SETTINGS
             is HomeFragment -> FragmentType.HOME
             is ChartFragment -> FragmentType.BTC_CHART  //TODO: refine
@@ -397,6 +429,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
                 AlertsFragment.newInstance(this)
+            }
+            FragmentType.DEPOSIT -> if (depositFragment != null ) { depositFragment } else {
+                DepositFragment.newInstance()
+            }
+            FragmentType.WITHDRAW -> if (withdrawFragment != null ) { withdrawFragment } else {
+                WithdrawFragment.newInstance()
             }
             FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
                 SettingsFragment.newInstance()

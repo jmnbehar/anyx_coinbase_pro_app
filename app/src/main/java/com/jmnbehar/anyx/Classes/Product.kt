@@ -10,7 +10,7 @@ import java.util.*
 
 class Product(var currency: Currency, var id: String, candles: List<Candle>) {
     constructor(apiProduct: ApiProduct, candles: List<Candle>)
-            : this(Currency.fromString(apiProduct.base_currency), apiProduct.id, candles)
+            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id, candles)
 
     var price = candles.lastOrNull()?.close ?: 0.0
 
@@ -107,13 +107,13 @@ class Product(var currency: Currency, var id: String, candles: List<Candle>) {
     companion object {
         fun fromString(string: String): Product {
             val splitString = string.split('\n')
-            val currency = Currency.fromString(splitString[0])
+            val currency = Currency.forString(splitString[0]) ?: Currency.USD
             val id = splitString[1]
 //            val price = splitString[1].toDoubleOrZero()
             return Product(currency, id, listOf())
         }
 
-        fun fiatProduct(currency: String) = Product(Currency.fromString(currency), currency,
+        fun fiatProduct(currency: String) = Product(Currency.forString(currency) ?: Currency.USD, currency,
                 listOf(Candle(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)))
 
     }

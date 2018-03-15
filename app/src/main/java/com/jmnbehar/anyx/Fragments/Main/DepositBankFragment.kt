@@ -18,7 +18,7 @@ import org.jetbrains.anko.support.v4.toast
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class DepositCoinbaseFragment : RefreshFragment() {
+class DepositBankFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
@@ -38,8 +38,8 @@ class DepositCoinbaseFragment : RefreshFragment() {
     private var currency = Currency.USD
 
     companion object {
-        fun newInstance(): DepositCoinbaseFragment {
-            return DepositCoinbaseFragment()
+        fun newInstance(): DepositBankFragment {
+            return DepositBankFragment()
         }
     }
 

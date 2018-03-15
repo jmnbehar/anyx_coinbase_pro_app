@@ -25,6 +25,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var shouldSavePassphrase = false
     private var skipLogin = false
     private var currentFragment: Fragment? = null
+
+    //TODO: nuke this like i nuked it in mainactivity
     var progressDialog: ProgressDialog? = null
 
 

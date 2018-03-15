@@ -22,6 +22,8 @@ class Account(val product: Product, apiAccount: ApiAccount) {
     var currency = product.currency
         get() = product.currency
 
+    var coinbaseAccount: CoinbaseAccount? = null
+
     init {
         value = product.price * balance
         id = apiAccount.id
@@ -103,6 +105,15 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                 onComplete()
             }
         }
+    }
 
+    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) {
+        val id: String = apiCoinbaseAccount.id
+        val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
+        val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
+
+        override fun toString(): String {
+            return "$currency Wallet ($balance $currency)"
+        }
     }
 }

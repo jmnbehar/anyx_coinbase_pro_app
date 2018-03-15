@@ -28,6 +28,9 @@
 
     <color name="transparent">#00000000</color>
 
+    <color name="transparent_light_bg">#64FFFFFF</color>
+    <color name="transparent_dark_bg">#6415181c</color>
+
 
     <!-- General colors -->
     <color name="wild_strawberry">#FF4081</color>
