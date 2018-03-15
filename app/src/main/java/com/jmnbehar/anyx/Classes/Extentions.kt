@@ -58,6 +58,13 @@ fun ListView.setHeightBasedOnChildren(): Int {
 }
 
 fun Double.btcFormat(): String = "%.8f".format(this)
+fun Double.btcFormatShortened(): String {
+    var string = "%.8f".format(this)
+    while (string.last() == '0') {
+        string = string.substring(0, string.lastIndex)
+    }
+    return string
+}
 fun Double.fiatFormat(): String {
     var numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)

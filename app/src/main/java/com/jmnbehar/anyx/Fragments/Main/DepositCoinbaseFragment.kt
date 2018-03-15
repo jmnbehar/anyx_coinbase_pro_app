@@ -8,6 +8,7 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.jmnbehar.anyx.Activities.MainActivity
+import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
@@ -36,6 +37,8 @@ class DepositCoinbaseFragment : RefreshFragment() {
     private lateinit var submitDepositButton: Button
 
     private var currency = Currency.USD
+
+    private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
     companion object {
         fun newInstance(): DepositCoinbaseFragment {
@@ -78,13 +81,16 @@ class DepositCoinbaseFragment : RefreshFragment() {
             }.show()
         }, {
             doneLoading()
+
+            coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            accountsSpinner.adapter = arrayAdapter
             //Success, allow access to fragment
         })
-        var coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        val spinnerList = coinbaseAccounts.map { t -> t.toString() }
-        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        accountsSpinner.adapter = arrayAdapter
+
+
         accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 val selectedItem = coinbaseAccounts[position]

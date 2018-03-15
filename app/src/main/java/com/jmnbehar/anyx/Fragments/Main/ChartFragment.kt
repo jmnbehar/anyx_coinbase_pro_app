@@ -145,9 +145,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                if (GdaxApi.credentials?.isValidated == null) {
+                if (false) { //(GdaxApi.credentials?.isValidated == null) {
                     toast("Validate your account in Settings to buy or sell $currency")
-                } else if (GdaxApi.credentials?.isValidated == false) {
+                } else if (false) { // (GdaxApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all permissions.")
                 } else if (!GdaxApi.isLoggedIn) {
                     toast("Please log in to buy or sell $currency")

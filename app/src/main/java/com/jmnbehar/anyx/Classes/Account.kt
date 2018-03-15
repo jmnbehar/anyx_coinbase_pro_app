@@ -113,7 +113,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
 
         override fun toString(): String {
-            return "$currency Wallet ($balance $currency)"
+            return "$currency Wallet (${balance.btcFormat()} $currency)"
         }
     }
 }

@@ -459,6 +459,7 @@ class TradeFragment : RefreshFragment() {
                         advancedOptionEndTimeSpinner.visibility = View.GONE
                     }
                 }
+
                 val endTimeList = listOf("min", "hour", "day")
                 val endTimeArrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, endTimeList)
                 endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
