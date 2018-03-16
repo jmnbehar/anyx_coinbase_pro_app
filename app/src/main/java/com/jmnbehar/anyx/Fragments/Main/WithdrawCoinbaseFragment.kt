@@ -9,6 +9,7 @@ import com.jmnbehar.anyx.Activities.MainActivity
 import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
+import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
 import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
@@ -21,6 +22,8 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
     private lateinit var inflater: LayoutInflater
 
     private lateinit var titleText: TextView
+
+    private lateinit var withdrawDetailsLayout: LinearLayout
 
     private lateinit var accountsLabelTxt: TextView
     private lateinit var accountsSpinner: Spinner
@@ -53,6 +56,8 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
         val activity = activity!!
         titleText = rootView.txt_withdraw_coinbase_title
 
+        withdrawDetailsLayout = rootView.layout_withdraw_coinbase_details
+
         amountLabelText = rootView.txt_withdraw_coinbase_amount_label
         amountEditText = rootView.etxt_withdraw_coinbase_amount
         amountUnitText = rootView.txt_withdraw_coinbase_amount_unit
@@ -83,15 +88,22 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
                 negativeButton("OK") { activity.onBackPressed() }
             }.show()
         }, {
+            val nonEmptyAccount = Account.list.find { account -> account.balance > 0 }
+            if (nonEmptyAccount == null) {
+                depositDetailsLayout.visibility = View.GONE
+                titleText.text = "All Coinbase accounts are empty"
+            } else {
+
+                coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+                coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> (Account.forCurrency(cbAccount.currency)?.balance ?: 0.0) > 0 }
+                val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                accountsSpinner.adapter = arrayAdapter
+                //Success, allow access to fragment
+            }
             doneLoading()
 
-            coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-            coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> (Account.forCurrency(cbAccount.currency)?.balance ?: 0.0) > 0 }
-            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
-
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            accountsSpinner.adapter = arrayAdapter
-            //Success, allow access to fragment
         })
 
 

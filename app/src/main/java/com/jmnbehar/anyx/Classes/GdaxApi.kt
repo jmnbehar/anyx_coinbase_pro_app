@@ -288,7 +288,8 @@ sealed class GdaxApi: FuelRouting {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiPaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiPaymentMethodsString = result.value
-                val apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(apiPaymentMethodsString, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
+                var apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(apiPaymentMethodsString, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
+                apiPaymentMethodsList = apiPaymentMethodsList.filter { apiPaymentMethod -> apiPaymentMethod.type != "fiat_account" }
                 onComplete(apiPaymentMethodsList)
             }
         }
@@ -372,10 +373,10 @@ sealed class GdaxApi: FuelRouting {
                 is sendCrypto -> "/withdrawals/crypto"
                 is coinbaseAccounts -> "/coinbase-accounts"
                 is paymentMethods -> "/payment-methods"
-                is sendToCoinbase -> "/withdrawals/coinbase-account"
-                is sendToPayment -> "/withdrawals/payment-method"
-                is getFromCoinbase -> "/deposits/coinbase-account"
-                is getFromPayment -> "/deposits/payment-method"
+                is sendToCoinbase -> "/deposits/coinbase-account"
+                is sendToPayment -> "/deposits/payment-method"
+                is getFromCoinbase -> "/withdrawals/coinbase-account"
+                is getFromPayment -> "/withdrawals/payment-method"
                 is createReport -> "/reports"
                 is getReport -> "/reports/$reportId"
             }

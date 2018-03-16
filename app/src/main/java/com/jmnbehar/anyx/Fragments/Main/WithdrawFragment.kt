@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.jmnbehar.anyx.Adapters.HomePagerAdapter
+import com.jmnbehar.anyx.Adapters.WithdrawPagerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
@@ -16,7 +17,7 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 class WithdrawFragment : RefreshFragment() {
 
     lateinit var inflater: LayoutInflater
-    var collectionPagerAdapter: HomePagerAdapter? = null
+    var collectionPagerAdapter: WithdrawPagerAdapter? = null
 
     companion object {
         fun newInstance(): WithdrawFragment
@@ -41,7 +42,7 @@ class WithdrawFragment : RefreshFragment() {
 
         viewPager = rootView.home_view_pager
 
-        collectionPagerAdapter = HomePagerAdapter(childFragmentManager)
+        collectionPagerAdapter = WithdrawPagerAdapter(childFragmentManager)
         viewPager?.adapter = collectionPagerAdapter
 
         return rootView

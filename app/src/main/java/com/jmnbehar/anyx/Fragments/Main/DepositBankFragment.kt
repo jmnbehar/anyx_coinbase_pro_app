@@ -5,15 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import com.jmnbehar.anyx.Activities.MainActivity
-import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
+import com.jmnbehar.anyx.Adapters.PaymentMethodListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
-import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -25,8 +21,12 @@ class DepositBankFragment : RefreshFragment() {
 
     private lateinit var titleText: TextView
 
+    private lateinit var depositDetailsLayout: LinearLayout
+
     private lateinit var accountsLabelTxt: TextView
-    private lateinit var accountsSpinner: Spinner
+    private lateinit var paymentSpinner: Spinner
+
+    private lateinit var depositMaxButton: Button
 
     private lateinit var amountLabelText: TextView
     private lateinit var amountEditText: EditText
@@ -37,6 +37,9 @@ class DepositBankFragment : RefreshFragment() {
     private lateinit var submitDepositButton: Button
 
     private var paymentMethods: List<ApiPaymentMethod> = listOf()
+    private var paymentMethod: ApiPaymentMethod? = null
+
+    var currency = Currency.USD
 
     companion object {
         fun newInstance(): DepositBankFragment {
@@ -52,12 +55,16 @@ class DepositBankFragment : RefreshFragment() {
         val activity = activity!!
         titleText = rootView.txt_deposit_coinbase_title
 
+        depositDetailsLayout = rootView.layout_withdraw_coinbase_details
+
         amountLabelText = rootView.txt_deposit_coinbase_amount_label
         amountEditText = rootView.etxt_deposit_coinbase_amount
         amountUnitText = rootView.txt_deposit_coinbase_amount_unit
 
+        depositMaxButton = rootView.btn_deposit_coinbase_max
+
         accountsLabelTxt = rootView.txt_deposit_coinbase_account_label
-        accountsSpinner = rootView.spinner_deposit_coinbase_accounts
+        paymentSpinner = rootView.spinner_deposit_coinbase_accounts
 
         infoText = rootView.txt_deposit_coinbase_info
 
@@ -66,75 +73,67 @@ class DepositBankFragment : RefreshFragment() {
 //        submitDepositButton.backgroundTintList = buttonColors
 //        val buttonTextColor = account.currency.buttonTextColor(activity)
 //        submitDepositButton.textColor = buttonTextColor
+        titleText.text = "Deposit from Bank Account"
 
-        titleText.text = "Deposit from Payment Method"
+        amountUnitText.text = currency.toString()
 
         (activity as MainActivity).showProgressBar()
 
         GdaxApi.paymentMethods().get({
             doneLoading()
-            showPopup( "Can't access coinbase accounts", { activity.onBackPressed() })
+            showPopup( "Can't access payment methods", { activity.onBackPressed() })
         }, { result ->
-            doneLoading()
-
             //TODO: test this thoroughly
             paymentMethods = result.filter { paymentMethod -> paymentMethod.allow_deposit }
 
-            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+            if (paymentMethods.isEmpty()) {
+                depositDetailsLayout.visibility = View.GONE
+                titleText.text = "No valid bank accounts"
+            } else {
 
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            accountsSpinner.adapter = arrayAdapter
-            //Success, allow access to fragment
-        })
-        TransferHub.linkCoinbaseAccounts({
-            doneLoading()
+                val arrayAdapter = PaymentMethodListAdapter(activity, R.layout.list_row_payment_method, paymentMethods)
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-            alert {
-                title = "Can't access coinbase accounts"
-                negativeButton("OK") { activity.onBackPressed() }
-            }.show()
-        }, {
-            doneLoading()
-            //Success, allow access to fragment
-        })
-        var coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        val spinnerList = coinbaseAccounts.map { t -> t.toString() }
-        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        accountsSpinner.adapter = arrayAdapter
-        accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItem = coinbaseAccounts[position]
-                currency = selectedItem.currency
+                paymentSpinner.adapter = arrayAdapter
+
+                val paymentMethod = paymentSpinner.selectedItem as ApiPaymentMethod
+
+                if (paymentMethod.balance.toDoubleOrNull() != null) {
+                    depositMaxButton.visibility = View.VISIBLE
+                } else {
+                    depositMaxButton.visibility = View.GONE
+                }
+
+                titleText.text = "Deposit from Bank Account"
             }
+            doneLoading()
+        })
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-//                accountsSpinner.visibility = View.GONE
-            }
+        depositMaxButton.visibility = View.GONE
+        depositMaxButton.setOnClickListener {
+            val selectedCoinbaseAccount = paymentSpinner.selectedItem as Account.CoinbaseAccount
+            val amount = selectedCoinbaseAccount.balance
+            amountEditText.setText(amount.fiatFormat())
         }
-
-//        amountEditText.addTextChangedListener(object : TextWatcher {
-//            override fun afterTextChanged(p0: Editable?) {
-//                val amount = p0.toString().toDoubleOrZero()
-//                updateTotalText(amount)
-//            }
-//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//        })
 
         submitDepositButton.setOnClickListener {
             val amountString = amountEditText.text.toString()
             val amount = amountString.toDoubleOrZero()
 
+            val paymentMethod = paymentSpinner.selectedItem as ApiPaymentMethod
+            val currency = Currency.forString(paymentMethod.currency) ?: Currency.USD
+
             if (amount <= 0) {
                 showPopup("Amount is not valid", { })
             } else {
-                TransferHub.getFromCoinbase(amount, currency, { errorString ->
-                    showPopup("Error" + errorString, { })
-                } , {
-                    toast("Received")
+
+                GdaxApi.getFromPayment(amount, currency, paymentMethod.id).executePost( {errorResult ->
+
+                    showPopup("Deposit failed\n Error: ${errorResult.error.message}", { })
+                }, { result ->
+                    toast("Deposit received")
                     amountEditText.setText("")
-                })
+                } )
             }
         }
 

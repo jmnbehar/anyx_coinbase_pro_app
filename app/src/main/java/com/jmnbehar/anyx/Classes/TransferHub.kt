@@ -11,13 +11,14 @@ import com.jmnbehar.anyx.Activities.MainActivity
  * Created by jmnbehar on 12/20/2017.
  */
 
+//TODO: delete this object and portion everything out to gdax api or classes
 
 object TransferHub {
     fun linkCoinbaseAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.coinbaseAccounts().get(onFailure) { coinbaseAccounts ->
             for (cbAccount in coinbaseAccounts) {
                 val currency = Currency.forString(cbAccount.currency)
-                if (currency != null && cbAccount.active && cbAccount.primary) {
+                if (currency != null && cbAccount.active) {
                     val account = Account.forCurrency(currency)
                     account?.coinbaseAccount = Account.CoinbaseAccount(cbAccount)
                 }
@@ -86,7 +87,7 @@ object TransferHub {
             onFailure("")
         }
     }
-    fun getFromPayment(amount: Double, currency: Currency, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: () -> Unit) {
+    fun getFromPayment(amount: Double, currency: Currency,  onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.paymentMethods().executeRequest({ println("failure") } , { result->
             println("result")
             val gson = Gson()

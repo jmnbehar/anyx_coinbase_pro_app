@@ -22,11 +22,12 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
     private lateinit var titleText: TextView
 
+    private lateinit var depositDetailsLayout: LinearLayout
+
     private lateinit var accountsLabelTxt: TextView
     private lateinit var accountsSpinner: Spinner
 
     private lateinit var depositMaxButton: Button
-
 
     private lateinit var amountLabelText: TextView
     private lateinit var amountEditText: EditText
@@ -37,6 +38,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
     private lateinit var submitDepositButton: Button
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
+    private var coinbaseAccount: Account.CoinbaseAccount? = null
 
     companion object {
         fun newInstance(): DepositCoinbaseFragment {
@@ -51,6 +53,8 @@ class DepositCoinbaseFragment : RefreshFragment() {
         this.inflater = inflater
         val activity = activity!!
         titleText = rootView.txt_deposit_coinbase_title
+
+        depositDetailsLayout = rootView.layout_withdraw_coinbase_details
 
         amountLabelText = rootView.txt_deposit_coinbase_amount_label
         amountEditText = rootView.etxt_deposit_coinbase_amount
@@ -71,6 +75,8 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
+        titleText.text = "Deposit from Coinbase"
+
         (activity as MainActivity).showProgressBar()
         TransferHub.linkCoinbaseAccounts({
             doneLoading()
@@ -80,28 +86,39 @@ class DepositCoinbaseFragment : RefreshFragment() {
                 negativeButton("OK") { activity.onBackPressed() }
             }.show()
         }, {
-            doneLoading()
 
             coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
             coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
-            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+            if (coinbaseAccounts.isEmpty()) {
+                depositDetailsLayout.visibility = View.GONE
+                titleText.text = "All Coinbase accounts are empty"
+            } else {
+                depositDetailsLayout.visibility = View.VISIBLE
+                titleText.text = "Deposit from Coinbase"
 
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            accountsSpinner.adapter = arrayAdapter
-            //Success, allow access to fragment
+                val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                accountsSpinner.adapter = arrayAdapter
+                //Success, allow access to fragment
+            }
+            doneLoading()
         })
 
 
-//        accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-//                val selectedItem = coinbaseAccounts[position]
-//                currency = selectedItem.currency
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>) {
-////                accountsSpinner.visibility = View.GONE
-//            }
-//        }
+        accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                coinbaseAccount = coinbaseAccounts[position]
+                val currency = coinbaseAccount?.currency
+                if (currency != null) {
+                    amountUnitText.text = currency.toString()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+//                accountsSpinner.visibility = View.GONE
+            }
+        }
 
 //        amountEditText.addTextChangedListener(object : TextWatcher {
 //            override fun afterTextChanged(p0: Editable?) {
@@ -115,7 +132,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
         depositMaxButton.setOnClickListener {
             val selectedCoinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
             val amount = selectedCoinbaseAccount.balance
-            amountEditText.setText(amount.toString())
+            amountEditText.setText(amount.btcFormatShortened())
         }
 
         submitDepositButton.setOnClickListener {
@@ -131,9 +148,10 @@ class DepositCoinbaseFragment : RefreshFragment() {
                 showPopup("Not enough funds", { })
             } else {
                 TransferHub.getFromCoinbase(amount, currency, { errorString ->
-                    showPopup("Error" + errorString, { })
+                    showPopup("Deposit failed\n Error: $errorString", { })
+
                 } , {
-                    toast("Received")
+                    toast("Deposit received")
                     amountEditText.setText("")
                 })
             }
