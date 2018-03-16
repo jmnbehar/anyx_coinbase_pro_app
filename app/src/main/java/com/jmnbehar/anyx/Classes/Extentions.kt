@@ -63,6 +63,9 @@ fun Double.btcFormatShortened(): String {
     while (string.last() == '0') {
         string = string.substring(0, string.lastIndex)
     }
+    if (string.last() == '.') {
+        string += '0'
+    }
     return string
 }
 fun Double.fiatFormat(): String {

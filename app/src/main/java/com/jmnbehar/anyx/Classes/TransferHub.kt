@@ -65,15 +65,16 @@ object TransferHub {
         val relevantAccount = Account.forCurrency(currency)
         val cbAccount = relevantAccount?.coinbaseAccount
         if (cbAccount != null) {
-            GdaxApi.getFromCoinbase(amount, currency, cbAccount.id).executePost( { result ->
+            GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost( { result ->
                 onFailure(result.error.message)
             }, {
                 onComplete()
             } )
         } else {
-            onFailure("Coinbase account could not be accessed")
+            onFailure("Coinbase accounts could not be accessed")
         }
     }
+
     fun getFromCoinbase(amount: Double, currency: Currency, onFailure: (String?) -> Unit, onComplete: () -> Unit) {
         val relevantAccount = Account.forCurrency(currency)
         val cbAccount = relevantAccount?.coinbaseAccount
@@ -84,9 +85,10 @@ object TransferHub {
                 onComplete()
             } )
         } else {
-            onFailure("")
+            onFailure("Coinbase account could not be accessed")
         }
     }
+
     fun getFromPayment(amount: Double, currency: Currency,  onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.paymentMethods().executeRequest({ println("failure") } , { result->
             println("result")

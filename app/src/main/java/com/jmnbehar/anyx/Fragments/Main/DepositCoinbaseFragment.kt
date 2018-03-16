@@ -54,7 +54,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
         val activity = activity!!
         titleText = rootView.txt_deposit_coinbase_title
 
-        depositDetailsLayout = rootView.layout_withdraw_coinbase_details
+        depositDetailsLayout = rootView.layout_deposit_coinbase_details
 
         amountLabelText = rootView.txt_deposit_coinbase_amount_label
         amountEditText = rootView.etxt_deposit_coinbase_amount
@@ -100,7 +100,12 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 accountsSpinner.adapter = arrayAdapter
-                //Success, allow access to fragment
+
+                coinbaseAccount = coinbaseAccounts.first()
+                val currency = coinbaseAccount?.currency
+                if (currency != null) {
+                    amountUnitText.text = currency.toString()
+                }
             }
             doneLoading()
         })

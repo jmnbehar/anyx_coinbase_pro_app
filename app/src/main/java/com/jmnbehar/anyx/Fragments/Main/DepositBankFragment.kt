@@ -55,7 +55,7 @@ class DepositBankFragment : RefreshFragment() {
         val activity = activity!!
         titleText = rootView.txt_deposit_coinbase_title
 
-        depositDetailsLayout = rootView.layout_withdraw_coinbase_details
+        depositDetailsLayout = rootView.layout_deposit_coinbase_details
 
         amountLabelText = rootView.txt_deposit_coinbase_amount_label
         amountEditText = rootView.etxt_deposit_coinbase_amount

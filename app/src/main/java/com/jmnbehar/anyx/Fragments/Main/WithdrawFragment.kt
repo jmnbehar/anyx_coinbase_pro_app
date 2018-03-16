@@ -48,10 +48,6 @@ class WithdrawFragment : RefreshFragment() {
         return rootView
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//    }
-
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)
         super.onPause()
