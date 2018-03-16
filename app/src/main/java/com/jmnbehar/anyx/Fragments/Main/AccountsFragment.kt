@@ -172,18 +172,17 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: () -> Unit) {
-        val prefs = Prefs(context!!)
         if (GdaxApi.isLoggedIn) {
-
-            setValueAndPercentChangeTexts()
-
-            lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
-                swipeRefreshLayout?.isEnabled = false
-                LockableViewPager.isLocked = true
-            }
-
             Account.updateAllAccounts({ onComplete() }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
+
+                accountTotalCandles = sumAccountCandles()
+                setValueAndPercentChangeTexts()
+
+                lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
+                    swipeRefreshLayout?.isEnabled = false
+                    LockableViewPager.isLocked = true
+                }
                 onComplete()
             }
         } else {
