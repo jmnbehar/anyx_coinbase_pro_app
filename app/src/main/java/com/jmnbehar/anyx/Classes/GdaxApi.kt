@@ -284,7 +284,15 @@ sealed class GdaxApi: FuelRouting {
             }
         }
     }
-    class paymentMethods() : GdaxApi()
+    class paymentMethods() : GdaxApi() {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiPaymentMethod>) -> Unit) {
+            this.executeRequest(onFailure) {result ->
+                val apiPaymentMethodsString = result.value
+                val apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(apiPaymentMethodsString, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
+                onComplete(apiPaymentMethodsList)
+            }
+        }
+    }
     class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
     class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
     class getFromCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()

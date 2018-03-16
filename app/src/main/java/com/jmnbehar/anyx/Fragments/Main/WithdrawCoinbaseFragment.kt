@@ -9,14 +9,14 @@ import com.jmnbehar.anyx.Activities.MainActivity
 import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
-import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
+import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
-class DepositCoinbaseFragment : RefreshFragment() {
+class WithdrawCoinbaseFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
@@ -25,8 +25,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
     private lateinit var accountsLabelTxt: TextView
     private lateinit var accountsSpinner: Spinner
 
-    private lateinit var depositMaxButton: Button
-
+    private lateinit var withdrawMaxButton: Button
 
     private lateinit var amountLabelText: TextView
     private lateinit var amountEditText: EditText
@@ -34,40 +33,44 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
     private lateinit var infoText: TextView
 
-    private lateinit var submitDepositButton: Button
+    private lateinit var gdaxBalanceText: TextView
+
+    private lateinit var submitWithdrawalButton: Button
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
     companion object {
-        fun newInstance(): DepositCoinbaseFragment {
-            return DepositCoinbaseFragment()
+        fun newInstance(): WithdrawCoinbaseFragment {
+            return WithdrawCoinbaseFragment()
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_depost_coinbase, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_withdraw_coinbase, container, false)
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_deposit_coinbase_title
+        titleText = rootView.txt_withdraw_coinbase_title
 
-        amountLabelText = rootView.txt_deposit_coinbase_amount_label
-        amountEditText = rootView.etxt_deposit_coinbase_amount
-        amountUnitText = rootView.txt_deposit_coinbase_amount_unit
+        amountLabelText = rootView.txt_withdraw_coinbase_amount_label
+        amountEditText = rootView.etxt_withdraw_coinbase_amount
+        amountUnitText = rootView.txt_withdraw_coinbase_amount_unit
 
-        depositMaxButton = rootView.btn_deposit_coinbase_max
+        withdrawMaxButton = rootView.btn_withdraw_coinbase_max
 
-        accountsLabelTxt = rootView.txt_deposit_coinbase_account_label
-        accountsSpinner = rootView.spinner_deposit_coinbase_accounts
+        accountsLabelTxt = rootView.txt_withdraw_coinbase_account_label
+        accountsSpinner = rootView.spinner_withdraw_coinbase_accounts
 
-        infoText = rootView.txt_deposit_coinbase_info
+        infoText = rootView.txt_withdraw_coinbase_info
 
-        submitDepositButton = rootView.btn_deposit_coinbase_deposit
+        gdaxBalanceText = rootView.txt_withdraw_coinbase_gdax_account_info
+
+        submitWithdrawalButton = rootView.btn_withdraw_coinbase_withdraw
 //        val buttonColors = account.currency.colorStateList(activity)
-//        submitDepositButton.backgroundTintList = buttonColors
+//        submitWithdrawalButton.backgroundTintList = buttonColors
 //        val buttonTextColor = account.currency.buttonTextColor(activity)
-//        submitDepositButton.textColor = buttonTextColor
+//        submitWithdrawalButton.textColor = buttonTextColor
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
@@ -83,7 +86,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
             doneLoading()
 
             coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-            coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
+            coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> (Account.forCurrency(cbAccount.currency)?.balance ?: 0.0) > 0 }
             val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
 
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -112,22 +115,27 @@ class DepositCoinbaseFragment : RefreshFragment() {
 //            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 //        })
 
-        depositMaxButton.setOnClickListener {
-            val selectedCoinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
-            val amount = selectedCoinbaseAccount.balance
-            amountEditText.setText(amount.toString())
+        withdrawMaxButton.setOnClickListener {
+            val coinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
+            val currency = coinbaseAccount.currency
+            val gdaxAccount = Account.forCurrency(currency)
+            val amount = gdaxAccount?.balance
+            if (amount != null) {
+                amountEditText.setText(amount.toString())
+            }
         }
 
-        submitDepositButton.setOnClickListener {
+        submitWithdrawalButton.setOnClickListener {
             val amountString = amountEditText.text.toString()
             val amount = amountString.toDoubleOrZero()
 
-            val selectedCoinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
-            val currency = selectedCoinbaseAccount.currency
+            val coinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
+            val currency = coinbaseAccount.currency
+            val gdaxAccount = Account.forCurrency(currency)
 
             if (amount <= 0) {
                 showPopup("Amount is not valid", { })
-            } else if (amount > selectedCoinbaseAccount.balance) {
+            } else if (amount > gdaxAccount?.balance ?: 0.0) {
                 showPopup("Not enough funds", { })
             } else {
                 TransferHub.getFromCoinbase(amount, currency, { errorString ->

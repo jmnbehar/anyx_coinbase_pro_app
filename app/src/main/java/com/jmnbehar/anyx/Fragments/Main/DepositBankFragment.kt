@@ -8,6 +8,7 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.jmnbehar.anyx.Activities.MainActivity
+import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
@@ -35,7 +36,7 @@ class DepositBankFragment : RefreshFragment() {
 
     private lateinit var submitDepositButton: Button
 
-    private var currency = Currency.USD
+    private var paymentMethods: List<ApiPaymentMethod> = listOf()
 
     companion object {
         fun newInstance(): DepositBankFragment {
@@ -66,9 +67,25 @@ class DepositBankFragment : RefreshFragment() {
 //        val buttonTextColor = account.currency.buttonTextColor(activity)
 //        submitDepositButton.textColor = buttonTextColor
 
-        //titleText.text = "Buy and Sell " + account.currency.toString()
+        titleText.text = "Deposit from Payment Method"
 
         (activity as MainActivity).showProgressBar()
+
+        GdaxApi.paymentMethods().get({
+            doneLoading()
+            showPopup( "Can't access coinbase accounts", { activity.onBackPressed() })
+        }, { result ->
+            doneLoading()
+
+            //TODO: test this thoroughly
+            paymentMethods = result.filter { paymentMethod -> paymentMethod.allow_deposit }
+
+            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            accountsSpinner.adapter = arrayAdapter
+            //Success, allow access to fragment
+        })
         TransferHub.linkCoinbaseAccounts({
             doneLoading()
 
