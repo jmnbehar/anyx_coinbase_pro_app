@@ -48,6 +48,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
         listView = rootView.list_accounts
 
+        //TODO: add autorefresh
         this.inflater = inflater
         setupSwipeRefresh(rootView)
 
@@ -119,16 +120,23 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     private fun setValueAndPercentChangeTexts() {
-        val usdValue = Account.usdAccount?.value ?: 0.0
-        val totalValue = Account.list.map { a -> a.value }.sum() + usdValue
+        val totalValue = Account.totalValue
         valueText.text = totalValue.fiatFormat()
+
 
         val open = if (accountTotalCandles.isNotEmpty()) {
             accountTotalCandles.first().close
         } else {
             0.0
         }
-        setPercentChangeText(totalValue, open)
+        if (totalValue == 0.0) {
+            valueText.visibility = View.GONE
+            percentChangeText.visibility = View.GONE
+        } else {
+            valueText.visibility = View.VISIBLE
+            percentChangeText.visibility = View.VISIBLE
+            setPercentChangeText(totalValue, open)
+        }
     }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
@@ -179,10 +187,17 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 accountTotalCandles = sumAccountCandles()
                 setValueAndPercentChangeTexts()
 
-                lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
-                    swipeRefreshLayout?.isEnabled = false
-                    LockableViewPager.isLocked = true
+                if (Account.totalValue == 0.0) {
+                    lineChart.visibility = View.GONE
+                } else {
+                    lineChart.visibility = View.VISIBLE
+
+                    lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
+                        swipeRefreshLayout?.isEnabled = false
+                        LockableViewPager.isLocked = true
+                    }
                 }
+
                 onComplete()
             }
         } else {

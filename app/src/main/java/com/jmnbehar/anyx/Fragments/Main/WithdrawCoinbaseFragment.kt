@@ -6,11 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.jmnbehar.anyx.Activities.MainActivity
+import com.jmnbehar.anyx.Adapters.AccountListViewAdapter
 import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
 import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
+import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
@@ -81,6 +83,9 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
         (activity as MainActivity).showProgressBar()
+
+
+
         TransferHub.linkCoinbaseAccounts({
             doneLoading()
 
@@ -167,12 +172,15 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
                     if (amount > gdaxAccount?.balance ?: 0.0) {
                         showPopup("Not enough funds", { })
                     }
-
+                    activity.showProgressBar()
                     GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                         showPopup("Error" + result.error.message, { })
+                        activity.dismissProgressBar()
                     } , {
                         toast("Received")
                         amountEditText.setText("")
+
+                        refresh { activity.dismissProgressBar() }
                     })
                 } else {
                     showPopup("Coinbase account could not be accessed", { })
@@ -183,4 +191,14 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
         return rootView
     }
 
+    override fun refresh(onComplete: () -> Unit) {
+        if (GdaxApi.isLoggedIn) {
+            Account.updateAllAccounts({ onComplete() }) {
+                //TODO: add a refresh here
+                onComplete()
+            }
+        } else {
+            onComplete()
+        }
+    }
 }

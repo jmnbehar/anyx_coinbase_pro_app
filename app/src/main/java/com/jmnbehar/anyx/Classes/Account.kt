@@ -83,7 +83,7 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         var usdAccount: Account? = null
 
         //TODO: use this
-        var totalBalance: Double = 0.0
+        var totalValue: Double = 0.0
             get() = Account.list.map { a -> a.value }.sum() + (Account.usdAccount?.value ?: 0.0)
 
         fun forCurrency(currency: Currency): Account? {
