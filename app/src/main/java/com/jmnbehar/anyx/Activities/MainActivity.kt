@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
@@ -34,6 +35,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -385,12 +387,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             else -> FragmentType.OTHER
         }
         if (fragmentType != currentFragmentType) {
-            if ((fragmentType == FragmentType.SEND) && (GdaxApi.credentials?.isValidated != true)) {
-                //do nothing
-                toast("Please validate your account in Settings to send crypto assets")
-            } else {
-                goToFragment(fragmentType)
-            }
+            goToFragment(fragmentType)
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
@@ -407,7 +404,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
-        val fragment = when (fragmentType) {
+        val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
                 //TODO: confirm account is not null
                 val account = Account.btcAccount!!
@@ -430,28 +427,71 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 AccountsFragment.newInstance()
             }
             FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
-                //TODO: don't go to send frragment if not logged in
-                SendFragment.newInstance()
+                if (!GdaxApi.isLoggedIn) {
+                    //do nothing
+                    toast("Please log in")
+                    null
+                } else if (GdaxApi.credentials?.isValidated != true) {
+                    //do nothing
+                    toast("Please validate your account in Settings to send crypto assets")
+                    null
+                } else {
+                    SendFragment.newInstance()
+                }
             }
             FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
                 AlertsFragment.newInstance(this)
             }
             FragmentType.DEPOSIT -> if (depositFragment != null ) { depositFragment } else {
-                DepositFragment.newInstance()
+                //TODO: get bank data here
+                if (!GdaxApi.isLoggedIn) {
+                    //do nothing
+                    toast("Please log in")
+//                } else if (GdaxApi.credentials?.isValidated != true) {
+//                    //do nothing
+//                    toast("Please validate your account in Settings")
+                } else {
+                    showProgressBar()
+                    TransferHub.linkCoinbaseAccounts({
+                        dismissProgressBar()
+                        toast("Can't access coinbase accounts")
+                    }, {
+                        val depositFragment = DepositFragment.newInstance()
+
+                        val tag = fragmentType.toString()
+                        goToFragment(depositFragment, tag)
+                    })
+                }
+                null
             }
             FragmentType.WITHDRAW -> if (withdrawFragment != null ) { withdrawFragment } else {
-                WithdrawFragment.newInstance()
+                //TODO: get bank data here
+
+                if (!GdaxApi.isLoggedIn) {
+                    //do nothing
+                    toast("Please log in")
+//                } else if (GdaxApi.credentials?.isValidated != true) {
+//                    //do nothing
+//                    toast("Please validate your account in Settings")
+                } else {
+                    showProgressBar()
+                    TransferHub.linkCoinbaseAccounts({
+                        dismissProgressBar()
+                        toast("Can't access coinbase accounts")
+                    }, {
+                        val withdrawFragment = WithdrawFragment.newInstance()
+
+                        val tag = fragmentType.toString()
+                        goToFragment(withdrawFragment, tag)
+                        //dismissProgressBar()
+                    })
+                }
+                null
             }
             FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
                 SettingsFragment.newInstance()
             }
-            FragmentType.HOME -> if (marketFragment != null ) {
-                marketFragment
-            } else {
-                //TODO: think about this
-                //MarketFragment.newInstance()
-                HomeFragment.newInstance()
-            }
+            FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
                 println("Do not use this function for tradeFragments")
                 null

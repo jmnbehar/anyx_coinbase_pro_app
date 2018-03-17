@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.jmnbehar.anyx.Classes.Account
-import com.jmnbehar.anyx.Classes.btcFormat
 import com.jmnbehar.anyx.Classes.inflate
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
@@ -14,8 +13,8 @@ import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
 /**
  * Created by jmnbehar on 3/14/2018.
  */
-class CoinbaseAccountListAdapter(context: Context, var resource: Int, var list: List<Account.CoinbaseAccount>) :
-        ArrayAdapter<Account.CoinbaseAccount>(context, resource, list) {
+class CoinbaseAccountListAdapter(context: Context, var resource: Int, var coinbaseAccountList: List<Account.CoinbaseAccount>) :
+        ArrayAdapter<Account.CoinbaseAccount>(context, resource, coinbaseAccountList) {
 
 
     internal class ViewHolder {
@@ -42,7 +41,7 @@ class CoinbaseAccountListAdapter(context: Context, var resource: Int, var list: 
             outputView = convertView
         }
 
-        val cbAccount = list[position]
+        val cbAccount = coinbaseAccountList[position]
 
         viewHolder.cbAccountNameText?.text = cbAccount.toString() //"${cbAccount.currency} Wallet"
         viewHolder.cbAccountBalanceText?.text = "" //""${cbAccount.balance.btcFormat()} ${cbAccount.currency}"

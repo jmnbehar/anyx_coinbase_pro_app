@@ -50,6 +50,7 @@ class DepositBankFragment : RefreshFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_depost_coinbase, container, false)
+        setupSwipeRefresh(rootView)
 
         this.inflater = inflater
         val activity = activity!!

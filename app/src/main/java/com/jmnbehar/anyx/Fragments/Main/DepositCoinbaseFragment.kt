@@ -49,6 +49,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_depost_coinbase, container, false)
+        setupSwipeRefresh(rootView)
 
         this.inflater = inflater
         val activity = activity!!
@@ -77,38 +78,29 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
         titleText.text = "Deposit from Coinbase"
 
-        (activity as MainActivity).showProgressBar()
-        TransferHub.linkCoinbaseAccounts({
-            doneLoading()
 
-            alert {
-                title = "Can't access coinbase accounts"
-                negativeButton("OK") { activity.onBackPressed() }
-            }.show()
-        }, {
 
-            coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-            coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
-            if (coinbaseAccounts.isEmpty()) {
-                depositDetailsLayout.visibility = View.GONE
-                titleText.text = "All Coinbase accounts are empty"
-            } else {
-                depositDetailsLayout.visibility = View.VISIBLE
-                titleText.text = "Deposit from Coinbase"
+        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
+        if (coinbaseAccounts.isEmpty()) {
+            depositDetailsLayout.visibility = View.GONE
+            titleText.text = "All Coinbase accounts are empty"
+        } else {
+            depositDetailsLayout.visibility = View.VISIBLE
+            titleText.text = "Deposit from Coinbase"
 
-                val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
 
-                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                accountsSpinner.adapter = arrayAdapter
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            accountsSpinner.adapter = arrayAdapter
 
-                coinbaseAccount = coinbaseAccounts.first()
-                val currency = coinbaseAccount?.currency
-                if (currency != null) {
-                    amountUnitText.text = currency.toString()
-                }
+            coinbaseAccount = coinbaseAccounts.first()
+            val currency = coinbaseAccount?.currency
+            if (currency != null) {
+                amountUnitText.text = currency.toString()
             }
-            doneLoading()
-        })
+        }
+        doneLoading()
 
 
         accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
