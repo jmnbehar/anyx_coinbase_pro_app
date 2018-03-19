@@ -6,15 +6,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp">
         <TextView
             android:id="@+id/txt_deposit_coinbase_title"
             android:layout_width="wrap_content"
@@ -124,6 +129,5 @@
 
 
     </LinearLayout>
-
-
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

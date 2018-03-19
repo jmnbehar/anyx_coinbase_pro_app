@@ -456,7 +456,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         dismissProgressBar()
                         toast("Can't access coinbase accounts")
                     }, {
-                        val depositFragment = DepositFragment.newInstance()
+                        //TODO: switch back to regular depositFragment
+//                        val depositFragment = DepositFragment.newInstance()
+                        val depositFragment = DepositCoinbaseFragment.newInstance()
 
                         val tag = fragmentType.toString()
                         goToFragment(depositFragment, tag)
@@ -479,7 +481,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         dismissProgressBar()
                         toast("Can't access coinbase accounts")
                     }, {
-                        val withdrawFragment = WithdrawFragment.newInstance()
+                        //TODO: switch back to regular WithdrawFragment
+//                        val withdrawFragment = WithdrawFragment.newInstance()
+                        val withdrawFragment = WithdrawCoinbaseFragment.newInstance()
 
                         val tag = fragmentType.toString()
                         goToFragment(withdrawFragment, tag)

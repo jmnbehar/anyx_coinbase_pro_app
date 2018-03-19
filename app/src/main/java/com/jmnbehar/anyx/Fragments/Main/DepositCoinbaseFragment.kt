@@ -12,6 +12,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.textColor
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -78,21 +79,16 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
         titleText.text = "Deposit from Coinbase"
 
-
-
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
+
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
             titleText.text = "All Coinbase accounts are empty"
+
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
             titleText.text = "Deposit from Coinbase"
-
-            val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
-
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            accountsSpinner.adapter = arrayAdapter
 
             coinbaseAccount = coinbaseAccounts.first()
             val currency = coinbaseAccount?.currency
@@ -100,6 +96,10 @@ class DepositCoinbaseFragment : RefreshFragment() {
                 amountUnitText.text = currency.toString()
             }
         }
+
+        val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        accountsSpinner.adapter = arrayAdapter
         doneLoading()
 
 
@@ -109,6 +109,15 @@ class DepositCoinbaseFragment : RefreshFragment() {
                 val currency = coinbaseAccount?.currency
                 if (currency != null) {
                     amountUnitText.text = currency.toString()
+
+                    val buttonColors = currency.colorStateList(activity)
+                    val buttonTextColor = currency.buttonTextColor(activity)
+
+                    depositMaxButton.backgroundTintList = buttonColors
+                    submitDepositButton.backgroundTintList = buttonColors
+
+                    depositMaxButton.textColor = buttonTextColor
+                    submitDepositButton.textColor = buttonTextColor
                 }
             }
 
@@ -136,25 +145,88 @@ class DepositCoinbaseFragment : RefreshFragment() {
             val amountString = amountEditText.text.toString()
             val amount = amountString.toDoubleOrZero()
 
-            val selectedCoinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
-            val currency = selectedCoinbaseAccount.currency
 
             if (amount <= 0) {
                 showPopup("Amount is not valid", { })
-            } else if (amount > selectedCoinbaseAccount.balance) {
-                showPopup("Not enough funds", { })
-            } else {
-                TransferHub.getFromCoinbase(amount, currency, { errorString ->
-                    showPopup("Deposit failed\n Error: $errorString", { })
+            } else if (accountsSpinner.selectedItem is Account.CoinbaseAccount) {
+                val coinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
+                val currency = coinbaseAccount.currency
 
-                } , {
-                    toast("Deposit received")
-                    amountEditText.setText("")
-                })
+                if (amount > coinbaseAccount.balance) {
+                    showPopup("Not enough funds", { })
+                } else {
+                    (activity as MainActivity).showProgressBar()
+                    GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        showPopup("Deposit failed\n Error: ${result.error.message}", { })
+                        activity.dismissProgressBar()
+                    } , {
+                        toast("Deposit received")
+                        amountEditText.setText("")
+
+                        refresh { activity.dismissProgressBar() }
+                    })
+                }
+            } else {
+                showPopup("Coinbase account could not be accessed", { })
             }
         }
 
         return rootView
     }
 
+    private var isRefreshing = false
+    override fun refresh(onComplete: () -> Unit) {
+        if (!isRefreshing) {
+            isRefreshing = true
+            var didUpdateGDAX = false
+            var didUpdateCoinbase = false
+            Account.updateAllAccounts({ onComplete()
+                toast("Cannot access GDAX")
+                isRefreshing = false
+            }) {
+                didUpdateGDAX = true
+                if (didUpdateCoinbase) {
+                    completeRefresh(onComplete)
+                    isRefreshing = false
+                }
+            }
+            TransferHub.linkCoinbaseAccounts({
+                toast("Cannot access Coinbase")
+                isRefreshing = false
+            }, {
+                didUpdateCoinbase = true
+                if (didUpdateGDAX) {
+                    completeRefresh(onComplete)
+                    isRefreshing = false
+                }
+            })
+        }
+    }
+
+    private fun completeRefresh(onComplete: () -> Unit) {
+        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> cbAccount.balance > 0 }
+        if (coinbaseAccounts.isEmpty()) {
+            depositDetailsLayout.visibility = View.GONE
+            titleText.text = "All Coinbase accounts are empty"
+        } else {
+            depositDetailsLayout.visibility = View.VISIBLE
+            titleText.text = "Deposit from Coinbase"
+
+
+            (accountsSpinner.adapter as CoinbaseAccountListAdapter).coinbaseAccountList = coinbaseAccounts
+            (accountsSpinner.adapter as CoinbaseAccountListAdapter).notifyDataSetChanged()
+
+            coinbaseAccount = coinbaseAccounts.firstOrNull()
+            val coinbaseAccount = coinbaseAccount
+            if (coinbaseAccount != null) {
+                val currency = coinbaseAccount.currency
+//                val gdaxAccount = Account.forCurrency(currency)
+//                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
+                amountUnitText.text = currency.toString()
+                // gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
+            }
+        }
+        onComplete()
+    }
 }
