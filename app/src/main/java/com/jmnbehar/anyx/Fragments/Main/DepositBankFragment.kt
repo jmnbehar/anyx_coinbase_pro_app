@@ -128,7 +128,7 @@ class DepositBankFragment : RefreshFragment() {
                 showPopup("Amount is not valid", { })
             } else {
 
-                GdaxApi.getFromPayment(amount, currency, paymentMethod.id).executePost( {errorResult ->
+                GdaxApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { errorResult ->
 
                     showPopup("Deposit failed\n Error: ${errorResult.error.message}", { })
                 }, { result ->

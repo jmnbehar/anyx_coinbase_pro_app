@@ -153,7 +153,7 @@ class SendFragment : RefreshFragment() {
                     })
         } else {
             toast("error! Trying to send less than minimum which is $min")
-//            TransferHub.getFromPayment(10.0, Currency.USD)
+//            TransferHub.sendToPayment(10.0, Currency.USD)
         }
     }
 

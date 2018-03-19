@@ -4,7 +4,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jmnbehar.anyx.Activities.MainActivity
 
 
 /**
@@ -36,7 +35,7 @@ object TransferHub {
             val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
             if (relevantAccount != null) {
                 val balance = relevantAccount.balance.toDoubleOrZero()
-                GdaxApi.getFromCoinbase(balance, currency, relevantAccount.id).executePost( { result ->
+                GdaxApi.sendToCoinbase(balance, currency, relevantAccount.id).executePost( { result ->
                     println("failure")
                 }, { result ->
                     println("success")
@@ -53,7 +52,7 @@ object TransferHub {
             val relevantAccount = apiCBAccountList.find { cbAccount -> cbAccount.currency == currency.toString() }
             if (relevantAccount != null) {
                 val balance = relevantAccount.balance.toDoubleOrZero()
-                GdaxApi.sendToCoinbase(balance, currency, relevantAccount.id).executePost( { result ->
+                GdaxApi.getFromCoinbase(balance, currency, relevantAccount.id).executePost( { result ->
                     println("failure")
                 }, { result ->
                     println("success")
@@ -65,7 +64,7 @@ object TransferHub {
         val relevantAccount = Account.forCurrency(currency)
         val cbAccount = relevantAccount?.coinbaseAccount
         if (cbAccount != null) {
-            GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost( { result ->
+            GdaxApi.getFromCoinbase(amount, currency, cbAccount.id).executePost( { result ->
                 onFailure(result.error.message)
             }, {
                 onComplete()
@@ -79,7 +78,7 @@ object TransferHub {
         val relevantAccount = Account.forCurrency(currency)
         val cbAccount = relevantAccount?.coinbaseAccount
         if (cbAccount != null) {
-            GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost( { result ->
+            GdaxApi.getFromCoinbase(amount, currency, cbAccount.id).executePost( { result ->
                 onFailure(result.error.message)
             }, {
                 onComplete()
@@ -101,7 +100,7 @@ object TransferHub {
                 paymentMethod.currency == currency.toString() && paymentMethod.allow_withdraw
             }
             if (relevantPaymentMethod != null) {
-                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
+                GdaxApi.sendToPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
                     onComplete()
                 } )
             }
@@ -119,7 +118,7 @@ object TransferHub {
                 paymentMethod.currency == currency.toString() && paymentMethod.allow_deposit
             }
             if (relevantPaymentMethod != null) {
-                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
+                GdaxApi.sendToPayment(amount, currency, relevantPaymentMethod.id).executePost( onFailure, {
                     onComplete()
                 } )
             }
@@ -140,7 +139,7 @@ object TransferHub {
 //                paymentMethod.currency == currency.toString() && paymentMethod.allow_deposit
 //            }
 //            if (relevantPaymentMethod != null) {
-//                GdaxApi.getFromPayment(amount, currency, relevantPaymentMethod.id).executePost( { result ->
+//                GdaxApi.sendToPayment(amount, currency, relevantPaymentMethod.id).executePost( { result ->
 //                    println("failure")
 //                }, { result ->
 //                    println("success")

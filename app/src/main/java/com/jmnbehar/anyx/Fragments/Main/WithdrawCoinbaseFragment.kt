@@ -6,17 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.jmnbehar.anyx.Activities.MainActivity
-import com.jmnbehar.anyx.Adapters.AccountListViewAdapter
 import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
-import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
 import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
-import org.jetbrains.anko.support.v4.act
-import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
-import org.jetbrains.anko.toast
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -44,7 +39,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
 
     private lateinit var submitWithdrawalButton: Button
 
-    private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
+    private var coinbaseAccounts: MutableList<Account.CoinbaseAccount> = mutableListOf()
     private var coinbaseAccount: Account.CoinbaseAccount? = null
 
     companion object {
@@ -85,8 +80,13 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> (Account.forCurrency(cbAccount.currency)?.balance ?: 0.0) > 0 }
+        var validAccounts = Account.list.filter { account -> account.balance > 0 }.toMutableList()
+        val fiatAccount = Account.usdAccount
+        if (fiatAccount != null) {
+            validAccounts.add(fiatAccount)
+        }
+        coinbaseAccounts = validAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
+
         val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
 
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -101,16 +101,8 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
             withdrawDetailsLayout.visibility = View.VISIBLE
             titleText.text = "Withdraw to Coinbase"
 
-
-            coinbaseAccount = coinbaseAccounts.first()
-            val coinbaseAccount = coinbaseAccount
-            if (coinbaseAccount != null) {
-                val currency = coinbaseAccount.currency
-                val gdaxAccount = Account.forCurrency(currency)
-                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                amountUnitText.text = currency.toString()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
-            }
+            coinbaseAccount = coinbaseAccounts.firstOrNull()
+            updateGdaxAccountText()
         }
         doneLoading()
 
@@ -130,6 +122,8 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
 
                     withdrawMaxButton.textColor = buttonTextColor
                     submitWithdrawalButton.textColor = buttonTextColor
+
+                    updateGdaxAccountText()
                 }
             }
 
@@ -172,7 +166,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
                     showPopup("Not enough funds", { })
                 }
                 (activity as MainActivity).showProgressBar()
-                GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                     showPopup("Error" + result.error.message, { })
                     activity.dismissProgressBar()
                 } , {
@@ -189,6 +183,16 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
         return rootView
     }
 
+    private fun updateGdaxAccountText() {
+        val coinbaseAccount = coinbaseAccount
+        if (coinbaseAccount != null) {
+            val currency = coinbaseAccount.currency
+            val gdaxAccount = Account.forCurrency(currency)
+            val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
+            amountUnitText.text = currency.toString()
+            gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
+        }
+    }
     private var isRefreshing = false
     override fun refresh(onComplete: () -> Unit) {
         if (!isRefreshing) {
@@ -219,9 +223,12 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
     }
 
     private fun completeRefresh(onComplete: () -> Unit) {
-
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        coinbaseAccounts = coinbaseAccounts.filter { cbAccount -> (Account.forCurrency(cbAccount.currency)?.balance ?: 0.0) > 0 }
+        var validAccounts = Account.list.filter { account -> account.balance > 0 }.toMutableList()
+        val fiatAccount = Account.usdAccount
+        if (fiatAccount != null) {
+            validAccounts.add(fiatAccount)
+        }
+        coinbaseAccounts = validAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
         if (coinbaseAccounts.isEmpty()) {
             withdrawDetailsLayout.visibility = View.GONE
             titleText.text = "All GDAX accounts are empty"

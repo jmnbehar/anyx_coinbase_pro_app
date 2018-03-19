@@ -87,7 +87,11 @@ class Account(val product: Product, apiAccount: ApiAccount) {
             get() = Account.list.map { a -> a.value }.sum() + (Account.usdAccount?.value ?: 0.0)
 
         fun forCurrency(currency: Currency): Account? {
-            return list.find { a -> a.product.currency == currency }
+            return if (currency == Currency.USD) {
+                usdAccount
+            } else {
+                list.find { a -> a.product.currency == currency }
+            }
         }
 
         //TODO: move to GdaxApi

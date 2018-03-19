@@ -127,13 +127,14 @@ enum class Currency {
 
     fun colorStateList(context: Context) : ColorStateList {
         val prefs = Prefs(context)
+
         return if (prefs.isDarkModeOn) {
             when (this) {
                 Currency.BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_dark, context.resources.newTheme())
                 Currency.ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
                 Currency.BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
                 Currency.LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
-                Currency.USD -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
+                Currency.USD -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
             }
         } else {
             when (this) {
@@ -141,7 +142,7 @@ enum class Currency {
                 Currency.ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_light, context.resources.newTheme())
                 Currency.BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
                 Currency.LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
-                Currency.USD -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
+                Currency.USD -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
             }
         }
     }
@@ -149,11 +150,11 @@ enum class Currency {
         val prefs = Prefs(context)
         return if (prefs.isDarkModeOn) {
             when (this) {
-                Currency.BTC -> Color.WHITE
+                Currency.BTC -> Color.BLACK
                 Currency.ETH -> Color.WHITE
                 Currency.BCH -> Color.WHITE
                 Currency.LTC -> Color.BLACK
-                Currency.USD -> Color.BLACK
+                Currency.USD -> Color.WHITE
             }
         } else {
             when (this) {
@@ -161,7 +162,7 @@ enum class Currency {
                 Currency.ETH -> Color.WHITE
                 Currency.BCH -> Color.WHITE
                 Currency.LTC -> Color.WHITE
-                Currency.USD -> Color.WHITE
+                Currency.USD -> Color.BLACK
             }
         }
     }

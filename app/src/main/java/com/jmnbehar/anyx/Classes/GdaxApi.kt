@@ -294,10 +294,10 @@ sealed class GdaxApi: FuelRouting {
             }
         }
     }
-    class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
-    class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
     class getFromCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
     class getFromPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
+    class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
+    class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
     class createReport(val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : GdaxApi() {
         fun createAndGetInfo(onComplete: (Boolean) -> Unit) {
             this.executePost({ result ->
@@ -344,10 +344,10 @@ sealed class GdaxApi: FuelRouting {
                 is sendCrypto -> Method.POST
                 is coinbaseAccounts -> Method.GET
                 is paymentMethods -> Method.GET
-                is sendToCoinbase -> Method.POST
-                is sendToPayment -> Method.POST
                 is getFromCoinbase -> Method.POST
                 is getFromPayment -> Method.POST
+                is sendToCoinbase -> Method.POST
+                is sendToPayment -> Method.POST
                 is createReport -> Method.POST
                 is getReport -> Method.GET
             }
@@ -373,10 +373,10 @@ sealed class GdaxApi: FuelRouting {
                 is sendCrypto -> "/withdrawals/crypto"
                 is coinbaseAccounts -> "/coinbase-accounts"
                 is paymentMethods -> "/payment-methods"
-                is sendToCoinbase -> "/deposits/coinbase-account"
-                is sendToPayment -> "/deposits/payment-method"
-                is getFromCoinbase -> "/withdrawals/coinbase-account"
-                is getFromPayment -> "/withdrawals/payment-method"
+                is getFromCoinbase -> "/deposits/coinbase-account"
+                is getFromPayment -> "/deposits/payment-method"
+                is sendToCoinbase -> "/withdrawals/coinbase-account"
+                is sendToPayment -> "/withdrawals/payment-method"
                 is createReport -> "/reports"
                 is getReport -> "/reports/$reportId"
             }
@@ -478,7 +478,7 @@ sealed class GdaxApi: FuelRouting {
                     json.put("crypto_address", cryptoAddress)
                     return json.toString()
                 }
-                is sendToCoinbase -> {
+                is getFromCoinbase -> {
                     val json = JSONObject()
 
                     json.put("amount", amount.btcFormat())
@@ -486,7 +486,7 @@ sealed class GdaxApi: FuelRouting {
                     json.put("coinbase_account_id", accountId)
                     return json.toString()
                 }
-                is sendToPayment -> {
+                is getFromPayment -> {
                     val json = JSONObject()
 
                     json.put("amount", amount.btcFormat())
@@ -494,14 +494,14 @@ sealed class GdaxApi: FuelRouting {
                     json.put("payment_method_id", paymentMethodId)
                     return json.toString()
                 }
-                is getFromCoinbase -> {
+                is sendToCoinbase -> {
                     val json = JSONObject()
                     json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())
                     json.put("coinbase_account_id", accountId)
                     return json.toString()
                 }
-                is getFromPayment -> {
+                is sendToPayment -> {
                     val json = JSONObject()
                     json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())

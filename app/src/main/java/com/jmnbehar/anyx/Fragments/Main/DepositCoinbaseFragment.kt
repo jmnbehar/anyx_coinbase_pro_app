@@ -10,7 +10,6 @@ import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
-import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -156,7 +155,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
                     showPopup("Not enough funds", { })
                 } else {
                     (activity as MainActivity).showProgressBar()
-                    GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                    GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                         showPopup("Deposit failed\n Error: ${result.error.message}", { })
                         activity.dismissProgressBar()
                     } , {
