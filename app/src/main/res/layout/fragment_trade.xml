@@ -3,289 +3,329 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="10dp">
+    android:orientation="vertical">
 
-
-    <TextView
-        android:id="@+id/txt_trade_name"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingTop="10dp"
-        android:text="Trade  Page"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp">
-
-        <TextView
-            android:id="@+id/txt_trade_balances_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Balance" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txt_trade_usd_balance_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="USD" />
-
-                <TextView
-                    android:id="@+id/txt_trade_crypto_balance_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="20%" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txt_trade_usd_balance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="$500"
-                    android:textAlignment="textEnd" />
-
-                <TextView
-                    android:id="@+id/txt_trade_crypto_balance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="20%"
-                    android:textAlignment="textEnd" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabl_trade_side"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="top">
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/rbtn_trade_buy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Buy"/>
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_trade_side_sell"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sell"/>
-    </android.support.design.widget.TabLayout>
-
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabl_trade_type"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="top">
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_trade_type_market"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Market"/>
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_trade_type_limit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Limit"/>
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_trade_type_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop"/>
-    </android.support.design.widget.TabLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_trade_order_details"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_trade_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp">
+
 
             <TextView
-                android:id="@+id/txt_trade_amount_label"
+                android:id="@+id/txt_trade_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Amount" />
+                android:paddingTop="10dp"
+                android:text="Trade  Page"
+                android:textSize="30sp"
+                tools:layout_editor_absoluteX="48dp"
+                tools:layout_editor_absoluteY="16dp" />
+
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etxt_trade_amount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="numberDecimal" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp">
 
                 <TextView
-                    android:id="@+id/txt_trade_amount_unit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="USD" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/layout_trade_limit"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txt_trade_limit_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Limit Price" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etxt_trade_limit"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="numberDecimal" />
-
-                <TextView
-                    android:id="@+id/txt_trade_limit_unit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="USD" />
-            </LinearLayout>
-
-            <CheckBox
-                android:id="@+id/cb_trade_advanced"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Advanced" />
-
-            <LinearLayout
-                android:id="@+id/layout_trade_advanced"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-
-                <LinearLayout
-                    android:id="@+id/layout_trade_advanced_limit"
+                    android:id="@+id/txt_trade_balances_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Balance" />
 
-                    <TextView
-                        android:id="@+id/txt_trade_advanced_time_in_force"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Time In Force" />
+                        android:orientation="vertical">
 
-                    <Spinner
-                        android:id="@+id/spinner_trade_time_in_force"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        <TextView
+                            android:id="@+id/txt_trade_usd_balance_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="USD" />
 
-                    <Spinner
-                        android:id="@+id/spinner_trade_good_til_time"
-                        android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/txt_trade_crypto_balance_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="20%" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:layout_weight="1"
-                        android:paddingTop="20dp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txt_trade_usd_balance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$500"
+                            android:textAlignment="textEnd" />
+
+                        <TextView
+                            android:id="@+id/txt_trade_crypto_balance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="20%"
+                            android:textAlignment="textEnd" />
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
 
+            <RadioGroup
+                android:id="@+id/rbtngroup_trade_buy_sell"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbtn_trade_buy"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/buy_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp"
+                    android:text="BUY"
+                    android:textAlignment="center" />
+
+                <RadioButton
+                    android:id="@+id/rbtn_trade_sell"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/sell_radio_button"
+                    android:button="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp"
+                    android:text="SELL"
+                    android:textAlignment="center" />
+            </RadioGroup>
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabl_trade_type"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="top"
+                android:layout_marginBottom="10dp">
+
+                <android.support.design.widget.TabItem
+                    android:id="@+id/tab_trade_type_market"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Market" />
+
+                <android.support.design.widget.TabItem
+                    android:id="@+id/tab_trade_type_limit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Limit" />
+
+                <android.support.design.widget.TabItem
+                    android:id="@+id/tab_trade_type_stop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stop" />
+            </android.support.design.widget.TabLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_trade_order_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/layout_trade_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_trade_amount_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Amount" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_trade_amount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="numberDecimal" />
+
+                        <TextView
+                            android:id="@+id/txt_trade_amount_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="USD" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/layout_trade_limit"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_trade_limit_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Limit Price" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_trade_limit"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="numberDecimal" />
+
+                        <TextView
+                            android:id="@+id/txt_trade_limit_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="USD" />
+                    </LinearLayout>
+
+                    <CheckBox
+                        android:id="@+id/cb_trade_advanced"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Advanced" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_trade_advanced"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+
+                        <LinearLayout
+                            android:id="@+id/layout_trade_advanced_limit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/txt_trade_advanced_time_in_force"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Time In Force" />
+
+                            <Spinner
+                                android:id="@+id/spinner_trade_time_in_force"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <Spinner
+                                android:id="@+id/spinner_trade_good_til_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:layout_weight="1"
+                                android:paddingTop="20dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:id="@+id/txt_trade_total_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total (BTC) =" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10" />
+
+                <TextView
+                    android:id="@+id/txt_trade_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="A trillion" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_place_order"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Place Order" />
+
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="20dp">
-
-        <TextView
-            android:id="@+id/txt_trade_total_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Total (BTC) =" />
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="10" />
-
-        <TextView
-            android:id="@+id/txt_trade_total"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="A trillion" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_place_order"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Place Order" />
-
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

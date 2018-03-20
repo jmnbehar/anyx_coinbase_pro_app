@@ -17,6 +17,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
+import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 
@@ -37,7 +38,9 @@ class TradeFragment : RefreshFragment() {
     private lateinit var cryptoBalanceLabelText: TextView
 
     private lateinit var tradeTypeTabLayout: TabLayout
-    private lateinit var tradeSideTabLayout: TabLayout
+
+    private lateinit var tradeSideBuyRadioButton : RadioButton
+    private lateinit var tradeSideSellRadioButton: RadioButton
 
     private lateinit var amountEditText: EditText
     private lateinit var amountUnitText: TextView
@@ -82,6 +85,8 @@ class TradeFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
+        setupSwipeRefresh(rootView)
+
         titleText = rootView.txt_trade_name
 
         amountLabelText = rootView.txt_trade_amount_label
@@ -144,28 +149,23 @@ class TradeFragment : RefreshFragment() {
         })
 
         val tabAccentColor = account.currency.colorAccent(activity)
-        tradeSideTabLayout = rootView.tabl_trade_side
-        tradeSideTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
-        tradeSideTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when(tab.position) {
-                    1 -> {  //Sell
-                        switchTradeType(TradeSide.SELL)
-                        if (tradeType != TradeType.LIMIT) {
-                            amountEditText.setText("")
-                        }
-                    }
-                    else -> {  //Buy
-                        switchTradeType(TradeSide.BUY)
-                        if (tradeType != TradeType.LIMIT) {
-                            amountEditText.setText("")
-                        }
-                    }
-                }
+
+        tradeSideBuyRadioButton = rootView.rbtn_trade_buy
+        tradeSideSellRadioButton = rootView.rbtn_trade_sell
+
+        tradeSideBuyRadioButton.onClick {
+            switchTradeType(TradeSide.BUY)
+            if (tradeType != TradeType.LIMIT) {
+                amountEditText.setText("")
             }
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
+        }
+        tradeSideSellRadioButton.onClick {
+            switchTradeType(TradeSide.SELL)
+            if (tradeType != TradeType.LIMIT) {
+                amountEditText.setText("")
+            }
+        }
+
 
         tradeTypeTabLayout = rootView.tabl_trade_type
         tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
@@ -264,6 +264,14 @@ class TradeFragment : RefreshFragment() {
         doneLoading()
 
         return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        when (tradeSide) {
+            TradeSide.BUY -> tradeSideBuyRadioButton.isChecked   = true
+            TradeSide.SELL -> tradeSideSellRadioButton.isChecked = true
+        }
     }
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,

@@ -18,7 +18,7 @@
         <LinearLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical"
@@ -91,10 +91,10 @@
             <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="2dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="2dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
@@ -108,6 +108,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="1H" />
 
                 <RadioButton
@@ -120,6 +122,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="1D" />
 
                 <RadioButton
@@ -132,6 +136,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="1W" />
 
                 <RadioButton
@@ -144,6 +150,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="1M" />
 
                 <RadioButton
@@ -156,6 +164,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="1Y" />
 
                 <RadioButton
@@ -168,6 +178,8 @@
                     android:background="@drawable/timespan_radio_button"
                     android:button="@android:color/transparent"
                     android:gravity="center_horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingTop="3dp"
                     android:text="All" />
             </RadioGroup>
 

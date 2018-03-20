@@ -48,6 +48,15 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/txt_withdraw_coinbase_gdax_account_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="10dp"
+                        android:text="GDAX ETH Wallet Balance: 20.0000000 ETH"
+                        android:textSize="17sp" />
+
+                    <TextView
                         android:id="@+id/txt_withdraw_coinbase_account_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -74,15 +83,6 @@
                     android:layout_marginBottom="5dp"
                     android:layout_marginTop="5dp"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/txt_withdraw_coinbase_gdax_account_info"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="20dp"
-                        android:text="GDAX ETH Wallet Balance: 20.0000000 ETH"
-                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/txt_withdraw_coinbase_amount_label"

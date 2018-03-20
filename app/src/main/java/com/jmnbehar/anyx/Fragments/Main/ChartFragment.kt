@@ -90,6 +90,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         timespanButtonYear = rootView.rbtn_chart_timespan_year
         timespanButtonAll = rootView.rbtn_chart_timespan_all
 
+        setupSwipeRefresh(rootView)
+
         val account = account
         val activity = activity!!
         if (account == null) {
@@ -100,7 +102,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             checkTimespanButton()
             candles = account.product.candlesForTimespan(chartTimeSpan)
             val currency = account.currency
-            setupSwipeRefresh(rootView)
 
             historyPager = rootView.history_view_pager
             lineChart = rootView.chart

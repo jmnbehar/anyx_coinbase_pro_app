@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <item android:state_checked="true" android:state_window_focused="false"
+        android:drawable="@color/anyx_green" />
+    <item android:state_checked="false" android:state_window_focused="false"
+        android:drawable="@color/transparent" />
+
+    <item android:state_checked="true" android:state_pressed="true"
+        android:drawable="@color/anyx_green" />
+    <item android:state_checked="false" android:state_pressed="true"
+        android:drawable="@color/anyx_green_accent" />
+
+    <item android:state_checked="true" android:state_focused="true"
+        android:drawable="@color/anyx_green" />
+    <item android:state_checked="false" android:state_focused="true"
+        android:drawable="@color/transparent" />
+
+    <item android:state_checked="false" android:drawable="@color/transparent" />
+    <item android:state_checked="true" android:drawable="@color/anyx_green" />
+</selector>

@@ -11,6 +11,9 @@
     <color name="anyx_green">#00c46e</color>
     <color name="anyx_red">#ec4419</color>
 
+    <color name="anyx_green_accent">#00ee88</color>
+    <color name="anyx_red_accent">#ea5e3b</color>
+
     <color name="btc_light">#c1b400</color>
     <color name="eth_light">#697be5</color>
     <color name="bch_light">#25bb7a</color>
