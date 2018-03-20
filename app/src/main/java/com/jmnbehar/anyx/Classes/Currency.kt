@@ -64,6 +64,11 @@ enum class Currency {
             Currency.USD -> 0.0
         }
 
+    val isFiat : Boolean
+        get() = when(this) {
+            Currency.USD -> true
+            else -> false
+        }
 
     val minSendAmount : Double
         get() = when (this) {

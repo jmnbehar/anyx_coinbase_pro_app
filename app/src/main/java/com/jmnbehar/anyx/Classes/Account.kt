@@ -98,11 +98,11 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             GdaxApi.accounts().executeRequest(onFailure) { result ->
                 val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                for (account in list) {
-                    val apiAccount = apiAccountList.find { a -> a.currency == account.currency.toString() }
-                    val apiAccountBalance =  apiAccount?.balance?.toDoubleOrNull()
+                for (account in list.plus(usdAccount)) {
+                    val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
+                    val apiAccountBalance = apiAccount?.balance?.toDoubleOrNull()
                     if (apiAccountBalance != null) {
-                        account.balance = apiAccount.balance.toDouble()
+                        account?.balance = apiAccountBalance
                     }
                 }
                 onComplete()
@@ -116,7 +116,11 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
 
         override fun toString(): String {
-            return "$currency Wallet (${balance.btcFormat()} $currency)"
+            return if (currency.isFiat) {
+                "$currency Wallet (${balance.fiatFormat()})"
+            } else {
+                "$currency Wallet (${balance.btcFormat()} $currency)"
+            }
         }
     }
 }

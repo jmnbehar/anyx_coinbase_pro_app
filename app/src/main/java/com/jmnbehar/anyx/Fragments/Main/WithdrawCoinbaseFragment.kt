@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.jmnbehar.anyx.Activities.MainActivity
-import com.jmnbehar.anyx.Adapters.CoinbaseAccountListAdapter
+import com.jmnbehar.anyx.Adapters.CoinbaseAccountSpinnerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
@@ -87,7 +87,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
         }
         coinbaseAccounts = validAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
 
-        val arrayAdapter = CoinbaseAccountListAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        val arrayAdapter = CoinbaseAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
 
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         accountsSpinner.adapter = arrayAdapter
@@ -182,17 +182,6 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
 
         return rootView
     }
-
-    private fun updateGdaxAccountText() {
-        val coinbaseAccount = coinbaseAccount
-        if (coinbaseAccount != null) {
-            val currency = coinbaseAccount.currency
-            val gdaxAccount = Account.forCurrency(currency)
-            val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-            amountUnitText.text = currency.toString()
-            gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
-        }
-    }
     private var isRefreshing = false
     override fun refresh(onComplete: () -> Unit) {
         if (!isRefreshing) {
@@ -236,19 +225,29 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
             withdrawDetailsLayout.visibility = View.VISIBLE
             titleText.text = "Withdraw to Coinbase"
 
-            (accountsSpinner.adapter as CoinbaseAccountListAdapter).coinbaseAccountList = coinbaseAccounts
-            (accountsSpinner.adapter as CoinbaseAccountListAdapter).notifyDataSetChanged()
+            (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
+            (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
+            if (coinbaseAccount == null) {
+                coinbaseAccount = coinbaseAccounts.firstOrNull()
+            }
+            updateGdaxAccountText()
+        }
+        onComplete()
+    }
 
-            coinbaseAccount = coinbaseAccounts.first()
-            val coinbaseAccount = coinbaseAccount
-            if (coinbaseAccount != null) {
-                val currency = coinbaseAccount.currency
-                val gdaxAccount = Account.forCurrency(currency)
+    private fun updateGdaxAccountText() {
+        val coinbaseAccount = coinbaseAccount
+        if (coinbaseAccount != null) {
+            val currency = coinbaseAccount.currency
+            val gdaxAccount = Account.forCurrency(currency)
+            amountUnitText.text = currency.toString()
+            if (currency.isFiat) {
+                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
+                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance"
+            } else {
                 val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                amountUnitText.text = currency.toString()
                 gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
             }
         }
-        onComplete()
     }
 }

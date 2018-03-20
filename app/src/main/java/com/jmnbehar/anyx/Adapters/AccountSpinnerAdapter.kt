@@ -13,8 +13,8 @@ import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
 /**
  * Created by jmnbehar on 3/14/2018.
  */
-class CoinbaseAccountListAdapter(context: Context, var resource: Int, var coinbaseAccountList: List<Account.CoinbaseAccount>) :
-        ArrayAdapter<Account.CoinbaseAccount>(context, resource, coinbaseAccountList) {
+class AccountSpinnerAdapter(context: Context, var resource: Int, var accountList: List<Account>) :
+        ArrayAdapter<Account>(context, resource, accountList) {
 
 
     internal class ViewHolder {
@@ -41,7 +41,7 @@ class CoinbaseAccountListAdapter(context: Context, var resource: Int, var coinba
             outputView = convertView
         }
 
-        val cbAccount = coinbaseAccountList[position]
+        val cbAccount = accountList[position]
 
         viewHolder.cbAccountNameText?.text = cbAccount.toString() //"${cbAccount.currency} Wallet"
         viewHolder.cbAccountBalanceText?.text = "" //""${cbAccount.balance.btcFormat()} ${cbAccount.currency}"
