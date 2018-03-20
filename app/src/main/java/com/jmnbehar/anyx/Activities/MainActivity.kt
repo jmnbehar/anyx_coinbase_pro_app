@@ -380,6 +380,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             is AlertsFragment -> FragmentType.ALERTS
             is DepositFragment -> FragmentType.DEPOSIT
             is WithdrawFragment -> FragmentType.WITHDRAW
+            is DepositCoinbaseFragment -> FragmentType.DEPOSIT
+            is WithdrawCoinbaseFragment -> FragmentType.WITHDRAW
             is SettingsFragment -> FragmentType.SETTINGS
             is HomeFragment -> FragmentType.HOME
             is ChartFragment -> FragmentType.BTC_CHART  //TODO: refine

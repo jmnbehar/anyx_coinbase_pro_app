@@ -132,18 +132,8 @@ class DepositCoinbaseFragment : RefreshFragment() {
             }
         }
 
-//        amountEditText.addTextChangedListener(object : TextWatcher {
-//            override fun afterTextChanged(p0: Editable?) {
-//                val amount = p0.toString().toDoubleOrZero()
-//                updateTotalText(amount)
-//            }
-//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//        })
-
         depositMaxButton.setOnClickListener {
-            val selectedCoinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
-            val amount = selectedCoinbaseAccount.balance
+            val amount = coinbaseAccount?.balance ?: 0.0
             amountEditText.setText(amount.btcFormatShortened())
         }
 
@@ -217,6 +207,12 @@ class DepositCoinbaseFragment : RefreshFragment() {
         }
         coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
 
+        if (coinbaseAccount != null) {
+            coinbaseAccount = coinbaseAccounts.find { account -> account.currency == coinbaseAccount?.currency }
+        } else {
+            coinbaseAccount = coinbaseAccounts.firstOrNull()
+        }
+
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
             titleText.text = "All Coinbase accounts are empty"
@@ -224,13 +220,9 @@ class DepositCoinbaseFragment : RefreshFragment() {
             depositDetailsLayout.visibility = View.VISIBLE
             titleText.text = "Deposit from Coinbase"
 
-
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
 
-            if (coinbaseAccount == null) {
-                coinbaseAccount = coinbaseAccounts.firstOrNull()
-            }
 
             val coinbaseAccount = coinbaseAccount
             if (coinbaseAccount != null) {
