@@ -2,10 +2,9 @@ package com.jmnbehar.anyx.Fragments.Main
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.view.*
-import android.widget.ImageView
-import android.widget.TextView
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
@@ -23,9 +22,11 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
-import android.widget.ArrayAdapter
-import android.widget.RadioButton
+import android.widget.*
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
+import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
+import kotlinx.android.synthetic.main.app_bar_main.*
+import org.jetbrains.anko.support.v4.act
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -54,6 +55,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var timespanButtonMonth: RadioButton
     private lateinit var timespanButtonYear: RadioButton
     private lateinit var timespanButtonAll: RadioButton
+
+    private lateinit var historyTabList: TabLayout
+
+    private lateinit var buyButton: Button
+    private lateinit var sellButton: Button
 
     private var chartTimeSpan = Timespan.DAY
     private var candles = listOf<Candle>()
@@ -111,38 +117,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             lineChart.setOnChartValueSelectedListener(this)
             lineChart.onChartGestureListener = this
 
-            val price = account.product.price
-            priceText.text = price.fiatFormat()
-
-            setPercentChangeText(price, candles.first().open)
-
-            nameText.text = currency.fullName
-
-            if (GdaxApi.isLoggedIn) {
-                tickerText.text = "$currency wallet"
-                iconView.setImageResource(currency.iconId)
-                balanceText.text = "${account.balance.btcFormat()} $currency"
-                valueText.text = account.value.fiatFormat()
-
-                historyPager.visibility = View.VISIBLE
-            } else {
-                tickerText.visibility = View.GONE
-                iconView.visibility = View.GONE
-                balanceText.visibility = View.GONE
-                valueText.visibility = View.GONE
-
-                historyPager.visibility = View.INVISIBLE
-            }
-
-            val buyButton = rootView.btn_chart_buy
-            val sellButton = rootView.btn_chart_sell
-
-            val buttonColors = currency.colorStateList(activity)
-            buyButton.backgroundTintList = buttonColors
-            sellButton.backgroundTintList = buttonColors
-            val buttonTextColor = currency.buttonTextColor(activity)
-            buyButton.textColor = buttonTextColor
-            sellButton.textColor = buttonTextColor
+            buyButton = rootView.btn_chart_buy
+            sellButton = rootView.btn_chart_sell
 
             //TODO: send over more info
             buyButton.setOnClickListener {
@@ -199,9 +175,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             historyPager.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyPager.setOnTouchListener(this)
-            val historyTabList = rootView.history_tab_layout
-            val color = currency.colorPrimary(activity)
-            historyTabList.setSelectedTabIndicatorColor(color)
+            historyTabList = rootView.history_tab_layout
         }
         return rootView
     }
@@ -209,10 +183,64 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onResume() {
         super.onResume()
         val mainActivity = (activity as MainActivity)
+        mainActivity.toolbar.title = ""
         mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
         mainActivity.spinnerNav.isEnabled = true
-        val spinnerStrings = Account.list.map { account -> account.currency.fullName }.toList()
-        mainActivity.spinnerNav.adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, spinnerStrings)
+        mainActivity.spinnerNav.visibility = View.VISIBLE
+        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as Currency
+                account = Account.forCurrency(selectedItem)
+                (activity as MainActivity).showProgressBar()
+//                refresh {(activity as MainActivity).dismissProgressBar()  }
+                onResume()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+
+        val account = account
+        val activity = activity!!
+        if (account == null) {
+            activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
+        } else {
+            val currency = account.currency
+            val price = account.product.price
+            priceText.text = price.fiatFormat()
+
+            setPercentChangeText(price, candles.first().open)
+            nameText.text = currency.fullName
+
+            val buttonColors = currency.colorStateList(activity)
+            buyButton.backgroundTintList = buttonColors
+            sellButton.backgroundTintList = buttonColors
+            val buttonTextColor = currency.buttonTextColor(activity)
+            buyButton.textColor = buttonTextColor
+            sellButton.textColor = buttonTextColor
+            val tabColor = currency.colorPrimary(activity)
+            historyTabList.setSelectedTabIndicatorColor(tabColor)
+
+            if (GdaxApi.isLoggedIn) {
+                tickerText.text = "$currency wallet"
+                iconView.setImageResource(currency.iconId)
+                balanceText.text = "${account.balance.btcFormat()} $currency"
+                valueText.text = account.value.fiatFormat()
+
+                historyPager.visibility = View.VISIBLE
+            } else {
+                tickerText.visibility = View.GONE
+                iconView.visibility = View.GONE
+                balanceText.visibility = View.GONE
+                valueText.visibility = View.GONE
+
+                historyPager.visibility = View.INVISIBLE
+            }
+
+            val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
+            val currentIndex = spinnerList.indexOf(account.currency)
+            mainActivity.spinnerNav.setSelection(currentIndex)
+        }
+        mainActivity.toolbar.title = ""
+
         autoRefresh = Runnable {
             miniRefresh({ }, { })
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))

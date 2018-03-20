@@ -21,8 +21,7 @@
             <Spinner
                 android:id="@+id/toolbar_spinner"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-            </Spinner>
+                android:layout_height="match_parent"></Spinner>
 
         </android.support.v7.widget.Toolbar>
 

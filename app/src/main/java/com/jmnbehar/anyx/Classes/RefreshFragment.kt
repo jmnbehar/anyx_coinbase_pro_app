@@ -8,6 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
 import com.jmnbehar.anyx.Activities.MainActivity
 import com.jmnbehar.anyx.R
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.act
@@ -36,6 +37,8 @@ open class RefreshFragment: Fragment() {
         showDarkMode()
         if (activity is MainActivity) {
             (activity as MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+            (activity as MainActivity).spinnerNav.visibility = View.GONE
+            (activity as MainActivity).toolbar.title = "AnyX"
         }
     }
 

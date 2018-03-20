@@ -180,7 +180,10 @@ enum class Currency {
             return (nowTime - startTime)
         }
 
+
     companion object {
+        val cryptoList = listOf(BTC, ETH, LTC, BCH)
+
         fun forString(string: String) : Currency? {
             return when (string) {
                 "BTC-USD" -> BTC

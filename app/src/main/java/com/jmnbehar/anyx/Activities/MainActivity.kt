@@ -29,6 +29,8 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.jmnbehar.anyx.Adapters.CoinbaseAccountSpinnerAdapter
+import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Main.*
 import com.jmnbehar.anyx.R
@@ -108,8 +110,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     var settingsFragment: SettingsFragment? = null
 
-    var marketFragment: MarketFragment? = null
-
     lateinit var progressBar: ProgressBar
     lateinit var progressBarLayout: ConstraintLayout
 
@@ -130,16 +130,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
-        spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as String
-                val selectedCurrency = Currency.forString(selectedItem)
-                if (selectedCurrency != null) {
-                    goToChartFragment(selectedCurrency)
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
-        }
+
+
+        //TODO: list currencies better
+        val currencies = Currency.cryptoList
+        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
+        spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerNav.adapter = spinnerNavAdapter
 
         //TODO: show spinner later
         spinnerNav.visibility = View.GONE
