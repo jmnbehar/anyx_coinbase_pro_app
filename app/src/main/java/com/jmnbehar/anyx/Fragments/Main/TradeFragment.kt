@@ -186,7 +186,7 @@ class TradeFragment : RefreshFragment() {
             if (isChecked) {
                 advancedOptionsLayout.visibility = View.VISIBLE
             } else {
-                advancedOptionsLayout.visibility = View.INVISIBLE
+                advancedOptionsLayout.visibility = View.GONE
             }
         }
 
@@ -433,14 +433,14 @@ class TradeFragment : RefreshFragment() {
 
         updateTotalText()
 
-        if (advancedOptionsCheckBox.isChecked) {
+        if (advancedOptionsCheckBox.isChecked && tradeType == TradeType.LIMIT) {
             advancedOptionsLayout.visibility = View.VISIBLE
         } else {
             advancedOptionsLayout.visibility = View.GONE
         }
         when (tradeType) {
             TradeType.MARKET -> {
-                limitLayout.visibility = View.GONE
+                limitLayout.visibility = View.INVISIBLE
             }
             TradeType.LIMIT -> {
                 limitUnitText.text = localCurrency
@@ -460,11 +460,11 @@ class TradeFragment : RefreshFragment() {
                         if (selectedItem == GdaxApi.TimeInForce.GoodTilTime) {
                             advancedOptionEndTimeSpinner.visibility = View.VISIBLE
                         } else {
-                            advancedOptionEndTimeSpinner.visibility = View.GONE
+                            advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
                         }
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) {
-                        advancedOptionEndTimeSpinner.visibility = View.GONE
+                        advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
                     }
                 }
 
@@ -478,7 +478,7 @@ class TradeFragment : RefreshFragment() {
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = "Stop Price"
                 advancedOptionsLimitLayout.visibility = View.GONE
-                advancedOptionsCheckBox.visibility = View.GONE
+                advancedOptionsCheckBox.visibility = View.INVISIBLE
             }
         }
         when (tradeSide) {
