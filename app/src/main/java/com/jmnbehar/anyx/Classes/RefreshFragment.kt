@@ -6,12 +6,13 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
+import android.widget.AdapterView
 import com.jmnbehar.anyx.Activities.MainActivity
+import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
-import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
 
@@ -39,6 +40,26 @@ open class RefreshFragment: Fragment() {
             (activity as MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
             (activity as MainActivity).spinnerNav.visibility = View.GONE
             (activity as MainActivity).toolbar.title = "AnyX"
+        }
+    }
+
+    fun showNavSpinner(defaultSelection: Currency?, onItemSelected: (currency: Currency) -> Unit) {
+        val mainActivity = (activity as MainActivity)
+        mainActivity.toolbar.title = ""
+        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+        mainActivity.spinnerNav.isEnabled = true
+        mainActivity.spinnerNav.visibility = View.VISIBLE
+        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as Currency
+                onItemSelected(selectedItem)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        if (defaultSelection != null) {
+            val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
+            val currentIndex = spinnerList.indexOf(defaultSelection)
+            mainActivity.spinnerNav.setSelection(currentIndex)
         }
     }
 

@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
@@ -22,14 +21,12 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jmnbehar.anyx.Adapters.CoinbaseAccountSpinnerAdapter
 import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Main.*
@@ -37,7 +34,6 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 

@@ -24,9 +24,6 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.*
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
-import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
-import kotlinx.android.synthetic.main.app_bar_main.*
-import org.jetbrains.anko.support.v4.act
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -182,20 +179,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onResume() {
         super.onResume()
-        val mainActivity = (activity as MainActivity)
-        mainActivity.toolbar.title = ""
-        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-        mainActivity.spinnerNav.isEnabled = true
-        mainActivity.spinnerNav.visibility = View.VISIBLE
-        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as Currency
-                account = Account.forCurrency(selectedItem)
-                (activity as MainActivity).showProgressBar()
-//                refresh {(activity as MainActivity).dismissProgressBar()  }
-                onResume()
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
+
+        showNavSpinner(account?.currency) {selectedCurrency ->
+            account = Account.forCurrency(selectedCurrency)
+            (activity as MainActivity).showProgressBar()
+//          refresh {(activity as MainActivity).dismissProgressBar()  }
+            onResume()
         }
 
         val account = account
@@ -234,12 +223,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 historyPager.visibility = View.INVISIBLE
             }
-
-            val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-            val currentIndex = spinnerList.indexOf(account.currency)
-            mainActivity.spinnerNav.setSelection(currentIndex)
         }
-        mainActivity.toolbar.title = ""
 
         autoRefresh = Runnable {
             miniRefresh({ }, { })

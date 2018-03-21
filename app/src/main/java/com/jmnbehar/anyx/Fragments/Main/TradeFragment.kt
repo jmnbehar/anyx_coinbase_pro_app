@@ -13,10 +13,8 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.anyx.Activities.MainActivity
-import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
-import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
@@ -271,27 +269,16 @@ class TradeFragment : RefreshFragment() {
 
     override fun onResume() {
         super.onResume()
-        val mainActivity = (activity as MainActivity)
-        mainActivity.toolbar.title = ""
-        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-        mainActivity.spinnerNav.isEnabled = true
-        mainActivity.spinnerNav.visibility = View.VISIBLE
-        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as Currency
-                val selectedAccount = Account.forCurrency(selectedItem)
-                if (selectedAccount != null) {
-                    account = selectedAccount
-                }
-//                refresh { }
+
+        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
+            val selectedAccount = Account.forCurrency(selectedCurrency)
+            if (selectedAccount != null) {
+                account = selectedAccount
+                (activity as MainActivity).showProgressBar()
+//          refresh {(activity as MainActivity).dismissProgressBar()  }
                 onResume()
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
-
-        val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-        val currentIndex = spinnerList.indexOf(account.currency)
-        mainActivity.spinnerNav.setSelection(currentIndex)
 
         when (tradeSide) {
             TradeSide.BUY -> tradeSideBuyRadioButton.isChecked   = true
