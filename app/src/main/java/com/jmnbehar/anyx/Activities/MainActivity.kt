@@ -61,10 +61,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         override fun toString() : String {
             return when (this) {
-                BTC_CHART -> "BTC"
-                BCH_CHART -> "BCH"
-                ETH_CHART -> "ETH"
-                LTC_CHART -> "LTC"
+                BTC_CHART -> "CHART"
+                BCH_CHART -> "CHART"
+                ETH_CHART -> "CHART"
+                LTC_CHART -> "CHART"
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
@@ -89,22 +89,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     var currentFragment: RefreshFragment? = null
-
-    var btcChartFragment: ChartFragment? = null
-    var ethChartFragment: ChartFragment? = null
-    var ltcChartFragment: ChartFragment? = null
-    var bchChartFragment: ChartFragment? = null
-
-    var accountsFragment: AccountsFragment? = null
-
-    var depositFragment: DepositFragment? = null
-    var withdrawFragment: WithdrawFragment? = null
-
-    var sendFragment: SendFragment? = null
-
-    var alertsFragment: AlertsFragment? = null
-
-    var settingsFragment: SettingsFragment? = null
 
     lateinit var progressBar: ProgressBar
     lateinit var progressBarLayout: ConstraintLayout
@@ -397,31 +381,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Currency.USD -> {}
         }
     }
-    fun goToFragment(fragmentType: FragmentType) {
-        val prefs = Prefs(this)
-        val fragment : RefreshFragment? = when (fragmentType) {
-            FragmentType.BTC_CHART -> if (btcChartFragment != null ) { btcChartFragment } else {
-                //TODO: confirm account is not null
-                val account = Account.btcAccount!!
-                ChartFragment.newInstance(account)
-            }
-            FragmentType.BCH_CHART -> if (bchChartFragment != null ) { bchChartFragment } else {
-                val account = Account.bchAccount!!
-                ChartFragment.newInstance(account)
-            }
-            FragmentType.ETH_CHART -> if (ethChartFragment != null ) { ethChartFragment } else {
-                val account = Account.ethAccount!!
-                ChartFragment.newInstance(account)
-            }
+    private fun chartFragment(currency: Currency) : ChartFragment? {
+        val account = Account.forCurrency(currency)
+        return if (account == null) {
+            null
+        } else {
+            ChartFragment.newInstance(account)
+        }
 
-            FragmentType.LTC_CHART -> if (ltcChartFragment != null ) { ltcChartFragment } else {
-                val account = Account.ltcAccount!!
-                ChartFragment.newInstance(account)
+    }
+
+    private fun goToFragment(fragmentType: FragmentType) {
+        val fragment : RefreshFragment? = when (fragmentType) {
+            FragmentType.BTC_CHART -> {
+                chartFragment(Currency.BTC)
             }
-            FragmentType.ACCOUNT -> if (accountsFragment != null ) { accountsFragment } else {
-                AccountsFragment.newInstance()
+            FragmentType.BCH_CHART -> {
+                chartFragment(Currency.BCH)
             }
-            FragmentType.SEND -> if (sendFragment != null ) { sendFragment } else {
+            FragmentType.ETH_CHART -> {
+                chartFragment(Currency.ETH)
+            }
+            FragmentType.LTC_CHART -> {
+                chartFragment(Currency.LTC)
+            }
+            FragmentType.ACCOUNT -> AccountsFragment.newInstance()
+            FragmentType.SEND -> {
                 if (!GdaxApi.isLoggedIn) {
                     //do nothing
                     toast("Please log in")
@@ -434,10 +419,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     SendFragment.newInstance()
                 }
             }
-            FragmentType.ALERTS -> if (alertsFragment != null ) { alertsFragment } else {
-                AlertsFragment.newInstance(this)
-            }
-            FragmentType.DEPOSIT -> if (depositFragment != null ) { depositFragment } else {
+            FragmentType.ALERTS -> AlertsFragment.newInstance(this)
+            FragmentType.DEPOSIT -> {
                 //TODO: get bank data here
                 if (!GdaxApi.isLoggedIn) {
                     //do nothing
@@ -461,7 +444,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                 null
             }
-            FragmentType.WITHDRAW -> if (withdrawFragment != null ) { withdrawFragment } else {
+            FragmentType.WITHDRAW -> {
                 //TODO: get bank data here
 
                 if (!GdaxApi.isLoggedIn) {
@@ -487,9 +470,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                 null
             }
-            FragmentType.SETTINGS -> if (settingsFragment != null ) { settingsFragment } else {
-                SettingsFragment.newInstance()
-            }
+            FragmentType.SETTINGS -> SettingsFragment.newInstance()
             FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
                 println("Do not use this function for tradeFragments")
