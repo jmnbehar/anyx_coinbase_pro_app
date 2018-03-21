@@ -29,6 +29,12 @@
     <color name="bch_accent">#25bb7a</color>
     <color name="ltc_accent">#ccd0da</color>
 
+
+    <color name="btc_transparent">#40c1b400</color>
+    <color name="eth_transparent">#40697be5</color>
+    <color name="bch_transparent">#4025bb7a</color>
+    <color name="ltc_transparent">#40aeb4c0</color>
+
     <color name="transparent">#00000000</color>
 
     <color name="transparent_light_bg">#64FFFFFF</color>

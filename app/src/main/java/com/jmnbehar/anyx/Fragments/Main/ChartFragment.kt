@@ -62,6 +62,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var chartTimeSpan = Timespan.DAY
     private var candles = listOf<Candle>()
 
+    private var tradeFragment: TradeFragment? = null
+
     companion object {
         var account: Account? = null
         fun newInstance(account: Account): ChartFragment {
@@ -127,7 +129,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 } else if (!GdaxApi.isLoggedIn) {
                     toast("Please log in to buy or sell $currency")
                 } else {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.BUY), "Trade: Buy")
+                    if (tradeFragment == null) {
+                        tradeFragment = TradeFragment.newInstance(account, TradeSide.BUY)
+                    } else {
+                        tradeFragment?.tradeSide = TradeSide.BUY
+                    }
+                    (activity as MainActivity).goToFragment(tradeFragment!!, "Trade: Buy")
                 }
             }
 
@@ -139,7 +146,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 } else if (!GdaxApi.isLoggedIn) {
                     toast("Please log in to buy or sell $currency")
                 } else {
-                    (activity as MainActivity).goToFragment(TradeFragment.newInstance(account, TradeSide.SELL), "Trade: Sell")
+                    if (tradeFragment == null) {
+                        tradeFragment = TradeFragment.newInstance(account, TradeSide.SELL)
+                    } else {
+                        tradeFragment?.tradeSide = TradeSide.SELL
+                    }
+                    (activity as MainActivity).goToFragment(tradeFragment!!, "Trade: Sell")
                 }
             }
 
@@ -196,9 +208,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setPercentChangeText(price, candles.first().open)
             nameText.text = currency.fullName
             setButtonsAndBalanceText(account)
-            (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
-            (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
-            (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+            updateHistoryListAdapter(stashedOrders, stashedFills)
         } else {
             activity.showProgressBar()
             miniRefresh({   //onfailure
@@ -217,9 +227,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         nameText.text = currency.fullName
                         activity.dismissProgressBar()
                         setButtonsAndBalanceText(account)
-                        (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
-                        (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
-                        (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+
+                        updateHistoryListAdapter(stashedOrders, stashedFills)
                     })
                 } else {
                     toast("Error")
@@ -232,9 +241,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 nameText.text = currency.fullName
                 setButtonsAndBalanceText(account)
                 activity.dismissProgressBar()
-                (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
-                (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
-                (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+                updateHistoryListAdapter(stashedOrders, stashedFills)
             })
         }
     }
@@ -276,7 +283,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->
                 switchAccount(account)
-                TradeFragment.account = account
             }
         }
 
@@ -423,15 +429,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         priceText.text = entry.y.toDouble().fiatFormat()
-        account?. let { account ->
-            val candle = candles[entry.x.toInt()]
-            percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
-            val prefs = Prefs(context!!)
-            if (prefs.isDarkModeOn) {
-                percentChangeText.textColor = Color.WHITE
-            } else {
-                percentChangeText.textColor = Color.BLACK
-            }
+        val candle = candles[entry.x.toInt()]
+        percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
+        val prefs = Prefs(context!!)
+        if (prefs.isDarkModeOn) {
+            percentChangeText.textColor = Color.WHITE
+        } else {
+            percentChangeText.textColor = Color.BLACK
         }
     }
 

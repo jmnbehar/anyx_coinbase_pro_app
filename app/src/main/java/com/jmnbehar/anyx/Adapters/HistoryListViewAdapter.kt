@@ -27,7 +27,6 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
     }
 
     override fun getCount(): Int {
-
         return if (isOrderList) {
             if (orders.isEmpty()) {
                 1
@@ -68,7 +67,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
         val imageView = vi.img_history_icon
 
 
-        if (isOrderList == true) {
+        if (isOrderList) {
             if (orders.isEmpty()) {
                 imageView.visibility = View.INVISIBLE
                 sideTextView.visibility = View.GONE
