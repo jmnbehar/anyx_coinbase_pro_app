@@ -31,7 +31,6 @@ sealed class GdaxApi: FuelRouting {
         val isLoggedIn: Boolean
             get() { return  credentials != null }
 
-
         val basePath = "https://api.gdax.com"
 
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {

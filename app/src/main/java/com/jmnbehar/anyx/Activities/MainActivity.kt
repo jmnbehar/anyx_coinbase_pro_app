@@ -34,6 +34,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -423,11 +424,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.DEPOSIT -> {
                 //TODO: get bank data here
                 if (!GdaxApi.isLoggedIn) {
-                    //do nothing
                     toast("Please log in")
-//                } else if (GdaxApi.credentials?.isValidated != true) {
-//                    //do nothing
-//                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
                     TransferHub.linkCoinbaseAccounts({
@@ -448,11 +449,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //TODO: get bank data here
 
                 if (!GdaxApi.isLoggedIn) {
-                    //do nothing
                     toast("Please log in")
-//                } else if (GdaxApi.credentials?.isValidated != true) {
-//                    //do nothing
-//                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
                     TransferHub.linkCoinbaseAccounts({

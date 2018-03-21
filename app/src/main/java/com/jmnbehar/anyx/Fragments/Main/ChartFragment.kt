@@ -122,12 +122,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                if (false) { //(GdaxApi.credentials?.isValidated == null) {
-                    toast("Validate your account in Settings to buy or sell $currency")
-                } else if (false) { // (GdaxApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
-                } else if (!GdaxApi.isLoggedIn) {
-                    toast("Please log in to buy or sell $currency")
+                if (!GdaxApi.isLoggedIn) {
+                    toast("Please log in")
+                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all required permissions.")
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.BUY)
@@ -139,12 +139,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             sellButton.setOnClickListener {
-                if (GdaxApi.credentials?.isValidated == null) {
-                    toast("Validate your account in Settings to buy or sell $currency")
-                } else if (GdaxApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
-                } else if (!GdaxApi.isLoggedIn) {
-                    toast("Please log in to buy or sell $currency")
+                if (!GdaxApi.isLoggedIn) {
+                    toast("Please log in")
+                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                    toast("Please validate your account in Settings")
+                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                    toast("Please use an API Key with all required permissions")
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.SELL)
