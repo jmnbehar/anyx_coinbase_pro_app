@@ -6,8 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.jmnbehar.anyx.Activities.MainActivity
+import com.jmnbehar.anyx.Adapters.NavigationSpinnerAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
@@ -156,6 +159,33 @@ class SendFragment : RefreshFragment() {
 //            TransferHub.sendToPayment(10.0, Currency.USD)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        val mainActivity = (activity as MainActivity)
+        mainActivity.toolbar.title = ""
+        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+        mainActivity.spinnerNav.isEnabled = true
+        mainActivity.spinnerNav.visibility = View.VISIBLE
+        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as Currency
+                currency = selectedItem
+
+
+//                refresh { }
+                switchCurrency()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+
+        val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
+        val currentIndex = spinnerList.indexOf(TradeFragment.account.currency)
+        mainActivity.spinnerNav.setSelection(currentIndex)
+
+    }
+
+    //TODO: add refresh
 
     private fun switchCurrency(currency: Currency = this.currency) {
         this.currency = currency
