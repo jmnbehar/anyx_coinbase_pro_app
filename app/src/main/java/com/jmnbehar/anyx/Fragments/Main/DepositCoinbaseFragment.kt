@@ -176,7 +176,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
             isRefreshing = true
             var didUpdateGDAX = false
             var didUpdateCoinbase = false
-            Account.updateAllAccounts({ onComplete()
+            GdaxApi.accounts().updateAllAccounts({ onComplete()
                 toast("Cannot access GDAX")
                 isRefreshing = false
             }) {

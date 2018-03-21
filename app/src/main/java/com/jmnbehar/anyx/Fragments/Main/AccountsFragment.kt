@@ -181,7 +181,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun refresh(onComplete: () -> Unit) {
         if (GdaxApi.isLoggedIn) {
-            Account.updateAllAccounts({ onComplete() }) {
+            GdaxApi.accounts().updateAllAccounts({ onComplete() }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
 
                 accountTotalCandles = sumAccountCandles()

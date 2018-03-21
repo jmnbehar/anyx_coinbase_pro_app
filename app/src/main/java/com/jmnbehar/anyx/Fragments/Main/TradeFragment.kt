@@ -115,18 +115,8 @@ class TradeFragment : RefreshFragment() {
         totalText = rootView.txt_trade_total
 
         submitOrderButton = rootView.btn_place_order
-        val buttonColors = account.currency.colorStateList(activity)
-        submitOrderButton.backgroundTintList = buttonColors
-        val buttonTextColor = account.currency.buttonTextColor(activity)
-        submitOrderButton.textColor = buttonTextColor
 
-        titleText.text = "Buy and Sell " + account.currency.toString()
-
-        usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
-
-        cryptoBalanceLabelText.text = account.currency.toString()
-        cryptoBalanceText.text = account.balance.btcFormat()
-
+        switchAccount(account)
         switchTradeType(tradeSide, tradeType)
 
         amountEditText.addTextChangedListener(object : TextWatcher {
@@ -252,7 +242,7 @@ class TradeFragment : RefreshFragment() {
                         val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {
-                            account.updateAccount(price = price)
+                            account.product.price = price
                             confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
                         }
                     }
@@ -273,10 +263,8 @@ class TradeFragment : RefreshFragment() {
         showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
             val selectedAccount = Account.forCurrency(selectedCurrency)
             if (selectedAccount != null) {
-                account = selectedAccount
-                (activity as MainActivity).showProgressBar()
-//          refresh {(activity as MainActivity).dismissProgressBar()  }
-                onResume()
+                switchAccount(selectedAccount)
+                ChartFragment.account = selectedAccount
             }
         }
 
@@ -284,6 +272,50 @@ class TradeFragment : RefreshFragment() {
             TradeSide.BUY -> tradeSideBuyRadioButton.isChecked   = true
             TradeSide.SELL -> tradeSideSellRadioButton.isChecked = true
         }
+    }
+
+
+    override fun refresh(onComplete: () -> Unit) {
+        val onFailure = { result: Result.Failure<String, FuelError> ->
+            toast("Error!: ${result.error}")
+            println("error!" )}
+        account.update(onFailure) {
+            completeRefresh(onComplete)
+        }
+
+        GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+            val price = ticker.price.toDoubleOrNull()
+            if (price != null) {
+                account.product.price = price
+            }
+            completeRefresh(onComplete)
+        }
+    }
+
+    private fun completeRefresh(onComplete: () -> Unit) {
+        switchAccount(account)
+        onComplete()
+    }
+
+    private fun switchAccount(account: Account) {
+        Companion.account = account
+
+        val buttonColors = account.currency.colorStateList(context!!)
+        val buttonTextColor = account.currency.buttonTextColor(context!!)
+        submitOrderButton.backgroundTintList = buttonColors
+        submitOrderButton.textColor = buttonTextColor
+
+        titleText.text = "Buy and Sell " + account.currency.toString()
+
+        usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
+
+        cryptoBalanceLabelText.text = account.currency.toString()
+        cryptoBalanceText.text = account.balance.btcFormat()
+
+        updateTotalText()
+
+        switchTradeType()
     }
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,

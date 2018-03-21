@@ -178,7 +178,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
-    fun switchAccount(account: Account) {
+    private fun switchAccount(account: Account) {
         Companion.account = account
         val activity = activity as MainActivity
         val currency = account.currency
@@ -276,6 +276,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->
                 switchAccount(account)
+                TradeFragment.account = account
             }
         }
 
@@ -496,7 +497,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     balanceText.text = newBalance.btcFormat() + " " + account.currency
                     valueText.text = account.value.fiatFormat()
                     miniRefresh(onFailure) {
-                        account.updateAccount(newBalance, account.product.price)
+                        account.balance = newBalance
                         onComplete()
                     }
                 }
@@ -521,7 +522,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             } else {
                 miniRefresh(onFailure) {
-                    account.updateAccount(0.0, account.product.price)
+                    account.balance = 0.0
                     onComplete()
                 }
             }

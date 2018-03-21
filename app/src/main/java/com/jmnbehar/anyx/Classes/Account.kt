@@ -13,6 +13,7 @@ import java.util.*
 
 class Account(val product: Product, apiAccount: ApiAccount) {
     var balance: Double = apiAccount.balance.toDoubleOrZero()
+    var availableBalance: Double = balance
 
     var value: Double = 0.0
         get() = balance * product.price
@@ -26,13 +27,16 @@ class Account(val product: Product, apiAccount: ApiAccount) {
     init {
         value = product.price * balance
         id = apiAccount.id
+        availableBalance = apiAccount.available.toDoubleOrZero()
     }
 
-    fun updateAccount(balance: Double = this.balance, price: Double) {
-        product.price = price
-        this.balance = balance
-        value = product.price * balance
-        updateInList()
+    fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        GdaxApi.account(id).executeRequest(onFailure) { result ->
+            val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+            balance = apiAccount.balance.toDoubleOrZero()
+            availableBalance = apiAccount.available.toDoubleOrZero()
+            onComplete()
+        }
     }
 
     private fun updateInList() {
@@ -91,21 +95,6 @@ class Account(val product: Product, apiAccount: ApiAccount) {
                 usdAccount
             } else {
                 list.find { a -> a.product.currency == currency }
-            }
-        }
-
-        //TODO: move to GdaxApi
-        fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            GdaxApi.accounts().executeRequest(onFailure) { result ->
-                val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                for (account in list.plus(usdAccount)) {
-                    val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
-                    val apiAccountBalance = apiAccount?.balance?.toDoubleOrNull()
-                    if (apiAccountBalance != null) {
-                        account?.balance = apiAccountBalance
-                    }
-                }
-                onComplete()
             }
         }
     }

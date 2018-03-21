@@ -232,6 +232,20 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
+        fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                for (account in Account.list.plus(Account.usdAccount)) {
+                    val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
+                    val apiAccountBalance = apiAccount?.balance?.toDoubleOrNull()
+                    if (apiAccountBalance != null) {
+                        account?.balance = apiAccountBalance
+                    }
+                }
+                onComplete()
+            }
+        }
+
         private fun getAccountsWithProductList(context: Context, productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (GdaxApi.credentials == null) {
                 for (product in productList) {
@@ -261,7 +275,19 @@ sealed class GdaxApi: FuelRouting {
 
     }
 
-    class account(val accountId: String) : GdaxApi()
+    class account(val accountId: String) : GdaxApi() {
+        val gson = Gson()
+        fun updateAccount(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                val account = Account.list.find { account -> account.id == accountId }
+                account?.balance = apiAccount.balance.toDoubleOrZero()
+                account?.availableBalance = apiAccount.available.toDoubleOrZero()
+                onComplete()
+            }
+        }
+    }
+
     class accountHistory(val accountId: String) : GdaxApi()
     class products() : GdaxApi()
     class ticker(val productId: String) : GdaxApi()
