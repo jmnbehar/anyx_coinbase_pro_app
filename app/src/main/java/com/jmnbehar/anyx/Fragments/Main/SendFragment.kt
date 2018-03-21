@@ -18,23 +18,23 @@ import org.jetbrains.anko.support.v4.toast
 class SendFragment : RefreshFragment() {
 
 
-    lateinit private var inflater: LayoutInflater
-    lateinit private var titleText: TextView
+    private lateinit var inflater: LayoutInflater
+    private lateinit var titleText: TextView
 
-    lateinit private var currencyTabLayout: TabLayout
+    private lateinit var currencyTabLayout: TabLayout
 
-    lateinit private var amountEditText: EditText
-    lateinit private var amountUnitText: TextView
-    lateinit private var amountLabelText: TextView
+    private lateinit var amountEditText: EditText
+    private lateinit var amountUnitText: TextView
+    private lateinit var amountLabelText: TextView
 
-    lateinit private var destinationEditText: EditText
-    lateinit private var destinationLabelText: TextView
+    private lateinit var destinationEditText: EditText
+    private lateinit var destinationLabelText: TextView
 
-    lateinit private var twoFactorEditText: EditText
-    lateinit private var twoFactorLabelText: TextView
-    lateinit private var twoFactorButton: Button
+    private lateinit var twoFactorEditText: EditText
+    private lateinit var twoFactorLabelText: TextView
+    private lateinit var twoFactorButton: Button
 
-    lateinit private var sendButton: Button
+    private lateinit var sendButton: Button
 
     var currency = Currency.BTC
 

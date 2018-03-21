@@ -24,6 +24,7 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.*
 import com.jmnbehar.anyx.Adapters.HistoryPagerAdapter
+import java.sql.Time
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -177,14 +178,105 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
+    fun switchAccount(account: Account) {
+        Companion.account = account
+        val activity = activity as MainActivity
+        val currency = account.currency
+        val price = account.product.price
+        priceText.text = price.fiatFormat()
+
+        candles = account.product.candlesForTimespan(chartTimeSpan)
+
+        val prefs = Prefs(activity)
+        val stashedFills = prefs.getStashedFills(account.product.id)
+        val stashedOrders = prefs.getStashedOrders(account.product.id)
+        //TODO: set orders/fills
+        if (candles.isNotEmpty()) {
+            lineChart.addCandles(candles, account.currency, chartTimeSpan)
+            setPercentChangeText(price, candles.first().open)
+            nameText.text = currency.fullName
+            setButtonsAndBalanceText(account)
+            (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
+            (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
+            (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+        } else {
+            activity.showProgressBar()
+            miniRefresh({   //onfailure
+                if (chartTimeSpan != Timespan.DAY) {
+                    val backupTimespan = chartTimeSpan
+                    chartTimeSpan = Timespan.DAY
+                    miniRefresh({
+                        toast("Error")
+                        chartTimeSpan = backupTimespan
+                        activity.dismissProgressBar()
+                    }, {
+                        checkTimespanButton()
+                        candles = account.product.candlesForTimespan(chartTimeSpan)
+                        lineChart.addCandles(candles, account.currency, chartTimeSpan)
+                        setPercentChangeText(price, candles.first().open)
+                        nameText.text = currency.fullName
+                        activity.dismissProgressBar()
+                        setButtonsAndBalanceText(account)
+                        (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
+                        (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
+                        (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+                    })
+                } else {
+                    toast("Error")
+                    activity.dismissProgressBar()
+                }
+            }, {    //success
+                candles = account.product.candlesForTimespan(chartTimeSpan)
+                lineChart.addCandles(candles, account.currency, chartTimeSpan)
+                setPercentChangeText(price, candles.first().open)
+                nameText.text = currency.fullName
+                setButtonsAndBalanceText(account)
+                activity.dismissProgressBar()
+                (historyPager.adapter as HistoryPagerAdapter).fills = stashedFills
+                (historyPager.adapter as HistoryPagerAdapter).orders = stashedOrders
+                (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+            })
+        }
+    }
+
+
+    fun setButtonsAndBalanceText(account: Account) {
+        val activity = activity as MainActivity
+        val currency = account.currency
+        val buttonColors = currency.colorStateList(activity)
+        buyButton.backgroundTintList = buttonColors
+        sellButton.backgroundTintList = buttonColors
+        val buttonTextColor = currency.buttonTextColor(activity)
+        buyButton.textColor = buttonTextColor
+        sellButton.textColor = buttonTextColor
+        val tabColor = currency.colorPrimary(activity)
+        historyTabList.setSelectedTabIndicatorColor(tabColor)
+
+        if (GdaxApi.isLoggedIn) {
+            tickerText.text = "$currency wallet"
+            iconView.setImageResource(currency.iconId)
+            balanceText.text = "${account.balance.btcFormat()} $currency"
+            valueText.text = account.value.fiatFormat()
+
+            historyPager.visibility = View.VISIBLE
+        } else {
+            tickerText.visibility = View.GONE
+            iconView.visibility = View.GONE
+            balanceText.visibility = View.GONE
+            valueText.visibility = View.GONE
+
+            historyPager.visibility = View.INVISIBLE
+        }
+    }
+
     override fun onResume() {
         super.onResume()
 
         showNavSpinner(account?.currency) {selectedCurrency ->
             account = Account.forCurrency(selectedCurrency)
-            (activity as MainActivity).showProgressBar()
-//          refresh {(activity as MainActivity).dismissProgressBar()  }
-            onResume()
+            account?. let { account ->
+                switchAccount(account)
+            }
         }
 
         val account = account
@@ -192,37 +284,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account == null) {
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
-            val currency = account.currency
-            val price = account.product.price
-            priceText.text = price.fiatFormat()
-
-            setPercentChangeText(price, candles.first().open)
-            nameText.text = currency.fullName
-
-            val buttonColors = currency.colorStateList(activity)
-            buyButton.backgroundTintList = buttonColors
-            sellButton.backgroundTintList = buttonColors
-            val buttonTextColor = currency.buttonTextColor(activity)
-            buyButton.textColor = buttonTextColor
-            sellButton.textColor = buttonTextColor
-            val tabColor = currency.colorPrimary(activity)
-            historyTabList.setSelectedTabIndicatorColor(tabColor)
-
-            if (GdaxApi.isLoggedIn) {
-                tickerText.text = "$currency wallet"
-                iconView.setImageResource(currency.iconId)
-                balanceText.text = "${account.balance.btcFormat()} $currency"
-                valueText.text = account.value.fiatFormat()
-
-                historyPager.visibility = View.VISIBLE
-            } else {
-                tickerText.visibility = View.GONE
-                iconView.visibility = View.GONE
-                balanceText.visibility = View.GONE
-                valueText.visibility = View.GONE
-
-                historyPager.visibility = View.INVISIBLE
-            }
+            switchAccount(account)
         }
 
         autoRefresh = Runnable {
@@ -459,7 +521,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             } else {
                 miniRefresh(onFailure) {
-                    account.updateAccount(0.0, account.product?.price)
+                    account.updateAccount(0.0, account.product.price)
                     onComplete()
                 }
             }
