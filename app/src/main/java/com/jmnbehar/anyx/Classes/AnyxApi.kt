@@ -15,7 +15,8 @@ import org.json.JSONObject
 
 sealed class AnyxApi : FuelRouting {
     companion object {
-        val basePath = "https://any-x.com"
+//        val basePath = "https://any-x.com"
+        val basePath = "http://192.168.1.239/api/v1"
     }
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
@@ -33,6 +34,8 @@ sealed class AnyxApi : FuelRouting {
         }
     }
 
+    var retryAttempt = 0
+    val maxRetries = 1
     fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
         FuelManager.instance.basePath = Companion.basePath
         Fuel.post(this.request.url.toString())
@@ -41,7 +44,7 @@ sealed class AnyxApi : FuelRouting {
                 .response  { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
-                            if (retryAttempt < 5) {
+                            if (retryAttempt < maxRetries) {
                                 retryAttempt++
                                 executePost(onFailure, onSuccess)
                             } else {
@@ -82,7 +85,6 @@ sealed class AnyxApi : FuelRouting {
     }
 
     override val basePath = Companion.basePath
-    var retryAttempt = 0
 
     class IsVerfied(val apiKey: String) : AnyxApi()
     class Verify(val apiKey: String, val currency: Currency) : AnyxApi()
@@ -112,7 +114,7 @@ sealed class AnyxApi : FuelRouting {
             val paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is IsVerfied -> {
-                    paramList.add(Pair("apiKey", apiKey))
+                    paramList.add(Pair("api_key", apiKey))
                     return paramList.toList()
                 }
                 else -> return null
@@ -125,14 +127,14 @@ sealed class AnyxApi : FuelRouting {
                 is Verify -> {
                     val json = JSONObject()
 
-                    json.put("apiKey", apiKey)
-                    json.put("currency", currency.toString())
+                    json.put("api_key", apiKey)
+                    json.put("coin", currency.toString().toLowerCase())
                     return json.toString()
                 }
                 is VerificationSent -> {
                     val json = JSONObject()
 
-                    json.put("apiKey", apiKey)
+                    json.put("api_key", apiKey)
                     json.put("email", email)
                     return json.toString()
                 }
@@ -149,6 +151,4 @@ sealed class AnyxApi : FuelRouting {
             }
             return headers
         }
-
-
 }

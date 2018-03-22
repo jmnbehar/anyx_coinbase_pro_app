@@ -50,6 +50,14 @@ enum class TradeType {
     }
 }
 
+data class AnyXVerify(
+        val data: AnyXVerifyInner
+)
+
+data class AnyXVerifyInner(
+        val amount: String
+)
+
 data class ApiProduct(
         val id: String,
         val base_currency: String,

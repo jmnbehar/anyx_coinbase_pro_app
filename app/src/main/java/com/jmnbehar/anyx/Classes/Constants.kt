@@ -11,6 +11,7 @@ object Constants {
     const val salt = "GdaxApp"
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
     const val verifyAmount = "VERIFY_AMOUNT"
+    const val verifyCurrency = "VERIFY_CURRENCY"
 }
 
 
