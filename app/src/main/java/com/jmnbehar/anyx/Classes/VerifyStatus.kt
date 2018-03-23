@@ -19,10 +19,10 @@ enum class VerificationStatus {
 
     override fun toString(): String {
         return when (this) {
-            Success ->"\n\nYour account is verified, and your ${VerifySendFragment.amount} ${VerifySendFragment.currency} will be returned to your Coinbase Account with email ${VerifySendFragment.email} within two days."
-            RepayErrorEmailed -> "\n\nYour account is verified, we will review the email you sent us and your ${VerifySendFragment.amount} ${VerifySendFragment.currency} will be returned to your Coinbase Account with email ${VerifySendFragment.email}."
+            Success ->"\n\nYour account is verified, and your ${VerifySendFragment.amount.btcFormatShortened()} ${VerifySendFragment.currency} will be returned to your Coinbase Account with email ${VerifySendFragment.email} within two days."
+            RepayErrorEmailed -> "\n\nYour account is verified, we will review the email you sent us and your ${VerifySendFragment.amount.btcFormatShortened()} ${VerifySendFragment.currency} will be returned to your Coinbase Account with email ${VerifySendFragment.email}."
             RepayError -> "Your account is verified, but there was a problem with our servers so you may not be automatically repaid. " +
-                    "\n\nIf you don't receive your ${VerifySendFragment.amount} ${VerifySendFragment.currency} in your Coinbase Account within two days, please reach out to our verification support at anyx.verify@gmail.com"
+                    "\n\nIf you don't receive your ${VerifySendFragment.amount.btcFormatShortened()} ${VerifySendFragment.currency} in your Coinbase Account within two days, please reach out to our verification support at anyx.verify@gmail.com"
             NoTransferPermission -> missingPermissionString("Transfer")
             NoTradePermission -> missingPermissionString("Trade")
             NoTwoFactorPermission -> missingPermissionString("Bypass Two-Factor Auth")

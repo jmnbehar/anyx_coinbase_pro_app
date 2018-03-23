@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.VerificationStatus
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_complete.view.*
@@ -36,6 +37,16 @@ class VerifyCompleteFragment : Fragment() {
         statusImageView = rootView.img_verify_complete_status
 
         return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (activity is VerifyActivity) {
+            val verifyStatus = (activity as VerifyActivity).verifyStatus
+            if (verifyStatus != null) {
+                updateText(verifyStatus)
+            }
+        }
     }
 
     fun updateText(verifyStatus: VerificationStatus) {
