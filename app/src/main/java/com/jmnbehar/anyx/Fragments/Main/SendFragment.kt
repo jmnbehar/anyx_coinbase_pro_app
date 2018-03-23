@@ -101,7 +101,7 @@ class SendFragment : RefreshFragment() {
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
             //val destination = destinationEditText.text.toString()
-            val destination = GdaxApi.developerAddress(currency)
+            val destination = currency.developerAddress
             if (prefs.shouldShowSendConfirmModal) {
                 alert {
                     title = "Send $amount $currency to $destination"

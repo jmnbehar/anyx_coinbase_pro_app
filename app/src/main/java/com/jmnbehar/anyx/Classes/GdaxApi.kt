@@ -47,17 +47,6 @@ sealed class GdaxApi: FuelRouting {
                 else -> ""
             }
         }
-
-        fun developerAddress(currency: Currency) : String {
-            return when (currency) {
-                //paper wallets: (Messiah)
-                Currency.BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-                Currency.ETH -> "0xAA75018336e91f3b621205b8cbdf020304052b5a"
-                Currency.BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-                Currency.LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
-                Currency.USD -> "my irl address?"
-            }
-        }
     }
 
     enum class ErrorCode(val code: Int) {

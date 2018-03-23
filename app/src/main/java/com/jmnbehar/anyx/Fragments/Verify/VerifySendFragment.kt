@@ -1,6 +1,7 @@
 package com.jmnbehar.anyx.Fragments.Verify
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -9,11 +10,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.jmnbehar.anyx.Activities.LoginActivity
 import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
+import org.jetbrains.anko.support.v4.alert
+import com.jmnbehar.anyx.Classes.Currency
+import java.util.*
+
 
 /**
  * Created by josephbehar on 1/20/18.
@@ -54,28 +58,75 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
+
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
             val currency = currency ?: Currency.BTC
+            val prefs = Prefs(context!!)
+            val apiKey = GdaxApi.credentials!!.apiKey
 
             //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
-            GdaxApi.sendCrypto(amount, currency, GdaxApi.developerAddress(currency)).executeRequest({
-                (activity as VerifyActivity).verificationComplete(false)
-
+            GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executeRequest({
+                prefs.approveApiKey(apiKey)
+                goToVerificationComplete(VerificationStatus.NoTransferPermission)
             }, {
+                prefs.rejectApiKey(apiKey)
                 progressBar.visibility = View.INVISIBLE
-                (activity as VerifyActivity).verificationComplete(true)
-                val apiKey = GdaxApi.credentials!!.apiKey
-                AnyxApi.VerificationSent(apiKey, email).executePost({
-                    //TODO: create a queue
 
-                }, {
-                    /* succeed silently */
-                })
+                val timestamp = (Date().timeInSeconds()).toString()
+                //TODO: add spinner to verification activity
+                AnyxApi.VerificationSent(apiKey, email).executePost({ error ->
+                    showPopup("Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+                        sendVerificationEmail(timestamp)
+                        goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+                    }, "Cancel", {
+                        showPopup("Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+                                "OK", {
+                                    goToVerificationComplete(VerificationStatus.RepayError)
+                                },
+                                "Send Email", {
+                                    sendVerificationEmail(timestamp)
+                                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+                                })
+                    })
+                }, { result ->
+                    goToVerificationComplete(VerificationStatus.Success)
+                }, 3)
             })
         }
         updateViews()
         return rootView
+    }
+
+    private fun goToVerificationComplete(verificationStatus: VerificationStatus) {
+        val prefs = Prefs(context!!)
+        val apiKey = GdaxApi.credentials!!.apiKey
+        if (verificationStatus.isVerified) {
+            prefs.approveApiKey(apiKey)
+        } else {
+            prefs.rejectApiKey(apiKey)
+        }
+        (activity as VerifyActivity).verificationComplete(verificationStatus)
+    }
+
+    fun showPopup(string: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+        alert {
+            title = string
+            positiveButton(positiveText) { positiveAction() }
+            if (negativeText != null) {
+                negativeButton(negativeText) { negativeAction }
+            }
+        }.show()
+    }
+
+    fun sendVerificationEmail(timestamp: String) {
+        val credentials = GdaxApi.credentials!!.apiKey
+        val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto", "anyx.verification@gmail.com", null))
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "AnyX Verification")
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "AnyX Account was properly verified, but we had trouble with our repayment system. Please do not edit the details in this email or we will not be able to process repayment. " +
+                "Do not edit: Sent $amount $currency at $timestamp from $credentials, repay to $email")
+        startActivity(Intent.createChooser(emailIntent, "Send email..."))
     }
 
     override fun onResume() {

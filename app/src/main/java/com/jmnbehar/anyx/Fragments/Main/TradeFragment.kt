@@ -407,7 +407,7 @@ class TradeFragment : RefreshFragment() {
 //            return
 //        }
         account?.currency?.let { currency ->
-            val destination = GdaxApi.developerAddress(currency)
+            val destination = currency.developerAddress
             GdaxApi.sendCrypto(amount, currency, destination).executePost(
                     { _ ->
                         /*  fail silently   */

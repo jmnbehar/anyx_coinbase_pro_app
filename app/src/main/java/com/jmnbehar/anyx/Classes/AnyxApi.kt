@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.core.Method
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
+import java.util.*
 
 /**
  * Created by jmnbehar on 12/18/2017.
@@ -34,10 +35,13 @@ sealed class AnyxApi : FuelRouting {
         }
     }
 
-    var retryAttempt = 0
-    val maxRetries = 1
-    fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
+    private var retryAttempt = 0
+    private var maxRetries = 0
+    fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit, setMaxRetries: Int? = null) {
         FuelManager.instance.basePath = Companion.basePath
+        if (setMaxRetries != null) {
+            maxRetries = setMaxRetries
+        }
         Fuel.post(this.request.url.toString())
                 .header(headers)
                 .body(body)
@@ -105,7 +109,7 @@ sealed class AnyxApi : FuelRouting {
             return when (this) {
                 is IsVerfied -> "/verify"
                 is Verify -> "/verify"
-                is VerificationSent -> "/verify/sent"
+                is VerificationSent -> "/sent"
             }
         }
 
@@ -136,6 +140,10 @@ sealed class AnyxApi : FuelRouting {
 
                     json.put("api_key", apiKey)
                     json.put("email", email)
+
+                    var timestamp = (Date().timeInSeconds()).toString()
+                    json.put("timestamp", timestamp)
+
                     return json.toString()
                 }
                 else -> return ""

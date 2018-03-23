@@ -9,7 +9,9 @@ import android.widget.EditText
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_email.view.*
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Patterns
 import com.jmnbehar.anyx.Activities.VerifyActivity
 
 
@@ -38,12 +40,17 @@ class VerifyEmailFragment : Fragment() {
         val emailTextWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (activity is VerifyActivity){
+                    val activity = (activity as VerifyActivity)
                     val email = emailEditText.text.toString()
                     val emailConfirm = emailConfirmEditText.text.toString()
-                    if (email == emailConfirm) {
-                        (activity as VerifyActivity).confirmEmail(email)
+
+                    val isValidEmail = (!TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                    if (!isValidEmail) {
+                        activity.blankEmail("Email is not valid")
+                    } else if (email != emailConfirm) {
+                        activity.blankEmail("Emails don't match")
                     } else {
-                        (activity as VerifyActivity).blankEmail()
+                        activity.confirmEmail(email)
                     }
                 }
             }
@@ -56,4 +63,5 @@ class VerifyEmailFragment : Fragment() {
         emailConfirmEditText.addTextChangedListener(emailTextWatcher)
         return rootView
     }
+
 }

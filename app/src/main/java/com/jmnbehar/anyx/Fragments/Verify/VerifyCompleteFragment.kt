@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.jmnbehar.anyx.Classes.VerificationStatus
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_complete.view.*
 
@@ -21,8 +22,6 @@ class VerifyCompleteFragment : Fragment() {
             return VerifyCompleteFragment()
         }
     }
-
-
 
     private lateinit var statusText: TextView
     private lateinit var infoText: TextView
@@ -39,17 +38,15 @@ class VerifyCompleteFragment : Fragment() {
         return rootView
     }
 
-    fun updateText(isVerified: Boolean) {
-        if (isVerified) {
+    fun updateText(verifyStatus: VerificationStatus) {
+        if (verifyStatus.isVerified) {
             statusText.text = "Success!"
             statusImageView.setImageResource(R.drawable.success_icon)
-            infoText.text = "Now that your account is verified, you will be able to buy, sell, and send cryptocurrencies right in this app!"
         } else {
-            statusText.text = "Failure"
+            statusText.text = "Bummer"
             statusImageView.setImageResource(R.drawable.fail_icon)
-            infoText.text = "Your API Key is missing at least one required permission. " +
-                    "\nPlease create a new GDAX API Key with View, Transfer, Bypass Two-Factor Auth, and Trade permissions and enter it into AnyX."
-
         }
+        infoText.text = verifyStatus.toString()
+
     }
 }

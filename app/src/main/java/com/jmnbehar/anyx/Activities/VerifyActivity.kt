@@ -34,10 +34,12 @@ class VerifyActivity : AppCompatActivity() {
 
     private var emailConfirmed = false
 
+    var emailFailMessage = "Email is not valid"
+
     var email = ""
     var amount = 0.0
     var currency: Currency? = null
-    var isVerified = false
+    var verifyStatus: VerificationStatus? = null
 
 
     /**
@@ -65,7 +67,21 @@ class VerifyActivity : AppCompatActivity() {
 
         isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
 
-        amount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
+        val verifyExtraAmount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
+        val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
+        currency = Currency.forString(currencyStr) ?: Currency.BTC
+
+        currency?.let { currency ->
+            val minSendAmount = currency.minSendAmount
+            val extraAmountMultiplier: Double = when (currency) {
+                Currency.BTC -> 0.00000001
+                Currency.ETH -> 0.0000001
+                Currency.BCH -> 0.0000001
+                Currency.LTC -> 0.00001
+                Currency.USD -> 0.01
+            }
+            amount =  minSendAmount + (verifyExtraAmount * extraAmountMultiplier)
+        }
 
         // Set up the ViewPager with the sections adapter.
         viewPager = verify_view_pager
@@ -99,7 +115,7 @@ class VerifyActivity : AppCompatActivity() {
 
         nextBtn?.onClick {
             if (currentPage == 1 && !emailConfirmed) {
-                toast("Emails don't match")
+                toast(emailFailMessage)
             } else if (currentPage == 1 && amount <= 0) {
                 toast("Server Error")
             } else {
@@ -113,28 +129,22 @@ class VerifyActivity : AppCompatActivity() {
     fun confirmEmail(email: String) {
         this.email = email
         emailConfirmed = true
+        emailFailMessage = ""
         pageCount = 3
         viewPager.adapter?.notifyDataSetChanged()
     }
 
-    fun blankEmail() {
+    fun blankEmail(failMessage: String) {
         this.email = ""
         emailConfirmed = false
+        emailFailMessage = failMessage
         pageCount = 2
         viewPager.adapter?.notifyDataSetChanged()
     }
 
-    fun verificationComplete(isVerified: Boolean) {
-        this.isVerified = isVerified
+    fun verificationComplete(verificationStatus: VerificationStatus) {
         pageCount = 4
         currentPage = 3
-        val prefs = Prefs(this)
-        val apiKey = GdaxApi.credentials!!.apiKey
-        if (isVerified) {
-            prefs.approveApiKey(apiKey)
-        } else {
-            prefs.rejectApiKey(apiKey)
-        }
         viewPager.setCurrentItem(currentPage, true)
         viewPager.isEnabled = false
         viewPager.adapter?.notifyDataSetChanged()
@@ -176,6 +186,7 @@ class VerifyActivity : AppCompatActivity() {
                 0 -> VerifyIntroFragment.newInstance()
                 1 -> VerifyEmailFragment.newInstance()
                 2 -> VerifySendFragment.newInstance(email, amount, currency)
+                2 -> VerifyCompleteFragment.newInstance()
                 else -> VerifyIntroFragment.newInstance()
             }
         }
@@ -184,8 +195,8 @@ class VerifyActivity : AppCompatActivity() {
             if (`object` is VerifySendFragment) {
                 `object`.updateViews()
             }
-            if (`object` is VerifyCompleteFragment) {
-                `object`.updateText(isVerified)
+            if (`object` is VerifyCompleteFragment && verifyStatus != null) {
+                `object`.updateText(verifyStatus!!)
             }
             return super.getItemPosition(`object`)
         }

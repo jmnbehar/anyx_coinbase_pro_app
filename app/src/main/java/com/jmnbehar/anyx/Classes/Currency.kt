@@ -151,6 +151,7 @@ enum class Currency {
             }
         }
     }
+
     fun buttonTextColor(context: Context) : Int {
         val prefs = Prefs(context)
         return if (prefs.isDarkModeOn) {
@@ -171,6 +172,27 @@ enum class Currency {
             }
         }
     }
+
+    val developerAddress : String
+        get() = when (this) {
+        //paper wallets: (Messiah)
+            Currency.BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
+            Currency.ETH -> "0xAA75018336e91f3b621205b8cbdf020304052b5a"
+            Currency.BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
+            Currency.LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
+            Currency.USD -> "my irl address?"
+        }
+
+    val verificationAddress : String
+        get() = when (this) {
+        //paper wallets: (Messiah)
+            Currency.BTC -> "3QYWtcfgu8W8p43rmJAufiGABhYtq7b8F2"
+            Currency.ETH -> "0x497125cf15da8F397cc33693434125Db50D659bc"
+            Currency.BCH -> "qzqj4dxr2m20ys99x2jkuyq90d4q9q6jzq985ey2j7"
+            Currency.LTC -> "MHs6LbL1jdJLWVMEq7vjX1HzA2W2iChSvw"
+            Currency.USD -> "my irl address?"
+        }
+
     val lifetimeInSeconds : Long
         get() {
             val utcTimeZone = TimeZone.getTimeZone("UTC")
