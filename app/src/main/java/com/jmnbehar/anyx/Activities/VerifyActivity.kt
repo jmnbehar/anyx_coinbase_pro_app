@@ -143,11 +143,12 @@ class VerifyActivity : AppCompatActivity() {
     }
 
     fun verificationComplete(verificationStatus: VerificationStatus) {
+        verifyStatus = verificationStatus
         pageCount = 4
         currentPage = 3
+        viewPager.adapter?.notifyDataSetChanged()
         viewPager.setCurrentItem(currentPage, true)
         viewPager.isEnabled = false
-        viewPager.adapter?.notifyDataSetChanged()
     }
 
     override fun onBackPressed() {
@@ -186,7 +187,7 @@ class VerifyActivity : AppCompatActivity() {
                 0 -> VerifyIntroFragment.newInstance()
                 1 -> VerifyEmailFragment.newInstance()
                 2 -> VerifySendFragment.newInstance(email, amount, currency)
-                2 -> VerifyCompleteFragment.newInstance()
+                3 -> VerifyCompleteFragment.newInstance()
                 else -> VerifyIntroFragment.newInstance()
             }
         }

@@ -66,11 +66,12 @@ class VerifySendFragment : Fragment() {
             val apiKey = GdaxApi.credentials!!.apiKey
 
             //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
-            GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executeRequest({
-                prefs.approveApiKey(apiKey)
+            GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executePost({
+                progressBar.visibility = View.INVISIBLE
+                prefs.rejectApiKey(apiKey)
                 goToVerificationComplete(VerificationStatus.NoTransferPermission)
             }, {
-                prefs.rejectApiKey(apiKey)
+                prefs.approveApiKey(apiKey)
                 progressBar.visibility = View.INVISIBLE
 
                 val timestamp = (Date().timeInSeconds()).toString()
@@ -114,7 +115,7 @@ class VerifySendFragment : Fragment() {
             title = string
             positiveButton(positiveText) { positiveAction() }
             if (negativeText != null) {
-                negativeButton(negativeText) { negativeAction }
+                negativeButton(negativeText) { negativeAction() }
             }
         }.show()
     }
