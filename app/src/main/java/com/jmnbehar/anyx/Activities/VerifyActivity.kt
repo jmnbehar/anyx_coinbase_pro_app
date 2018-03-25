@@ -72,7 +72,9 @@ class VerifyActivity : AppCompatActivity() {
 
         val verifyExtraAmount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
         val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
+        val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
         currency = Currency.forString(currencyStr) ?: Currency.BTC
+        verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 
         val minSendAmount = currency.minSendAmount
         val extraAmountMultiplier: Double = when (currency) {

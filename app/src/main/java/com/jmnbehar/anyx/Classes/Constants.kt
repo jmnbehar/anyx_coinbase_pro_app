@@ -12,6 +12,8 @@ object Constants {
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
     const val verifyAmount = "VERIFY_AMOUNT"
     const val verifyCurrency = "VERIFY_CURRENCY"
+    const val verifyFundSource = "VERIFY_SOURCE"
+
 }
 
 

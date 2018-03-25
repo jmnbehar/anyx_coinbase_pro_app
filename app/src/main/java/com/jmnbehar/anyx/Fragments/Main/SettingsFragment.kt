@@ -90,9 +90,9 @@ class SettingsFragment : RefreshFragment() {
             }, {
                 if (Account.list.isNotEmpty()) {
                     val nonEmptyAccounts = Account.list.filter { account -> account.balance >= account.currency.maxVerifyAmount }
-                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
+                    verifyAccount     = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
                     if (verifyAccount == null) {
-                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
+                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
                     }
                     if (verifyAccount == null) {
                         verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
@@ -110,10 +110,9 @@ class SettingsFragment : RefreshFragment() {
                     }, {
                         val cbAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
                         val nonEmptyCBAccounts = cbAccounts.filter { cbAccount -> cbAccount.balance > cbAccount.currency.maxVerifyAmount }
-                        var verifyCBAccount: Account.CoinbaseAccount? = null
-                        verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BTC }
+                        var verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.ETH }
                         if (verifyCBAccount == null) {
-                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.ETH }
+                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BTC }
                         }
                         if (verifyCBAccount == null) {
                             verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BCH }
@@ -191,7 +190,8 @@ class SettingsFragment : RefreshFragment() {
                     val amount = dataAmount.data.amount.toDoubleOrNull()
                     if (amount != null) {
                         intent.putExtra(Constants.verifyAmount, amount)
-                        intent.putExtra(Constants.verifyCurrency, currency)
+                        intent.putExtra(Constants.verifyCurrency, currency.toString())
+                        intent.putExtra(Constants.verifyFundSource, verificationFundSource.toString())
                         startActivity(intent)
                     } else {
                         toast("Error")

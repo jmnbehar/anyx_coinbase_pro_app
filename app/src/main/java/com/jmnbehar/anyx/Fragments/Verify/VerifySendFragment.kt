@@ -94,15 +94,16 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
+        //TODO: don't crash here
         val verifyAccount = Account.forCurrency(currency)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
             when (verificationFundSource!!) {
                 VerificationFundSource.GDAX -> {
-                    //TODO: don't crash here
                     val productId = verifyAccount.product.id
                     GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0, timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result ->
                         //TODO: check the error, check up on this
+                        //TODO: handle if no payment methods are available
                         goToVerificationComplete(VerificationStatus.NoTradePermission)
                     }, { result ->
                         sendCryptoToVerify()
@@ -127,14 +128,10 @@ class VerifySendFragment : Fragment() {
                     })
                 }
             }
-            //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
         }
+
         updateViews()
         return rootView
-    }
-
-    private fun verifyWithSource(verificationFundSource: VerificationFundSource) {
-
     }
 
     private fun sendCryptoToVerify() {
