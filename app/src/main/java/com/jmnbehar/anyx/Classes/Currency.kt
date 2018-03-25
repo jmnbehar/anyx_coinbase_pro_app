@@ -79,6 +79,15 @@ enum class Currency {
             else -> 100.0
         }
 
+    val maxVerifyAmount : Double
+        get() = when (this) {
+            Currency.BTC -> .00012
+            Currency.ETH -> .0012
+            Currency.BCH -> .0012
+            Currency.LTC -> .12
+            else -> 100.0
+        }
+
     private val startDate : Date
         get() = when (this) {
             Currency.BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time

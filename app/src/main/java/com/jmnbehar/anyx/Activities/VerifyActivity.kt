@@ -13,12 +13,14 @@ import com.jmnbehar.anyx.R
 
 import android.widget.Button
 import com.jmnbehar.anyx.Classes.*
+import com.jmnbehar.anyx.Fragments.Main.DepositCoinbaseFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyCompleteFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyEmailFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyIntroFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
 import kotlinx.android.synthetic.main.activity_verify.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 
@@ -38,7 +40,8 @@ class VerifyActivity : AppCompatActivity() {
 
     var email = ""
     var amount = 0.0
-    var currency: Currency? = null
+    var currency: Currency = Currency.BTC
+    var verificationFundSource: VerificationFundSource? = null
     var verifyStatus: VerificationStatus? = null
 
 
@@ -71,17 +74,15 @@ class VerifyActivity : AppCompatActivity() {
         val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
         currency = Currency.forString(currencyStr) ?: Currency.BTC
 
-        currency?.let { currency ->
-            val minSendAmount = currency.minSendAmount
-            val extraAmountMultiplier: Double = when (currency) {
-                Currency.BTC -> 0.00000001
-                Currency.ETH -> 0.0000001
-                Currency.BCH -> 0.0000001
-                Currency.LTC -> 0.00001
-                Currency.USD -> 0.01
-            }
-            amount =  minSendAmount + (verifyExtraAmount * extraAmountMultiplier)
+        val minSendAmount = currency.minSendAmount
+        val extraAmountMultiplier: Double = when (currency) {
+            Currency.BTC -> 0.00000001
+            Currency.ETH -> 0.0000001
+            Currency.BCH -> 0.0000001
+            Currency.LTC -> 0.00001
+            Currency.USD -> 0.01
         }
+        amount =  minSendAmount + (verifyExtraAmount * extraAmountMultiplier)
 
         // Set up the ViewPager with the sections adapter.
         viewPager = verify_view_pager
@@ -128,6 +129,7 @@ class VerifyActivity : AppCompatActivity() {
         }
 
     }
+
 
     fun confirmEmail(email: String) {
         this.email = email
@@ -189,7 +191,7 @@ class VerifyActivity : AppCompatActivity() {
             return when (position) {
                 0 -> VerifyIntroFragment.newInstance()
                 1 -> VerifyEmailFragment.newInstance()
-                2 -> VerifySendFragment.newInstance(email, amount, currency)
+                2 -> VerifySendFragment.newInstance()
                 3 -> VerifyCompleteFragment.newInstance()
                 else -> VerifyIntroFragment.newInstance()
             }

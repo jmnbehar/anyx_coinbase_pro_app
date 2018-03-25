@@ -48,3 +48,9 @@ enum class VerificationStatus {
                 "\n\nPlease create a new API Key with View, Transfer, Bypass Two-Factor Auth, and Trade permissions."
     }
 }
+
+enum class VerificationFundSource {
+    GDAX,
+    Coinbase,
+    Buy;
+}

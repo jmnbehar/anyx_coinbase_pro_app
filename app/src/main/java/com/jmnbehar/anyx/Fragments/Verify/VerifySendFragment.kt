@@ -16,6 +16,10 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import com.jmnbehar.anyx.Classes.Currency
+import com.jmnbehar.anyx.Fragments.Main.DepositCoinbaseFragment
+import org.jetbrains.anko.support.v4.act
+import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 import java.util.*
 
 
@@ -25,15 +29,8 @@ import java.util.*
 
 class VerifySendFragment : Fragment() {
     companion object {
-        var email = ""
-        var amount = 0.0
-        var currency: Currency? = null
-
-        fun newInstance(email: String, amount: Double, currency: Currency?): VerifySendFragment
+        fun newInstance(): VerifySendFragment
         {
-            this.email = email
-            this.amount = amount
-            this.currency = currency
             return VerifySendFragment()
         }
     }
@@ -46,6 +43,45 @@ class VerifySendFragment : Fragment() {
 
     private lateinit var verifySendButton: Button
 
+    private val email: String
+        get() {
+            return if (activity is VerifyActivity) {
+                val activity = (activity as VerifyActivity)
+                activity.email
+            } else {
+                ""
+            }
+        }
+
+    private val amount: Double
+        get() {
+            return if (activity is VerifyActivity) {
+                val activity = (activity as VerifyActivity)
+                activity.amount
+            } else {
+                0.0
+            }
+        }
+
+    private val currency: Currency
+        get() {
+            return if (activity is VerifyActivity) {
+                val activity = (activity as VerifyActivity)
+                activity.currency
+            } else {
+                Currency.BTC
+            }
+        }
+
+    private val verificationFundSource: VerificationFundSource?
+        get() {
+            return if (activity is VerifyActivity) {
+                val activity = (activity as VerifyActivity)
+                activity.verificationFundSource
+            } else {
+                null
+            }
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -58,47 +94,82 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-
+        val verifyAccount = Account.forCurrency(currency)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
-            val currency = currency ?: Currency.BTC
-            val prefs = Prefs(context!!)
-            val apiKey = GdaxApi.credentials!!.apiKey
-
-            //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
-            GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executePost({
-                progressBar.visibility = View.INVISIBLE
-                prefs.rejectApiKey(apiKey)
-                goToVerificationComplete(VerificationStatus.NoTransferPermission)
-            }, {
-                prefs.approveApiKey(apiKey)
-                progressBar.visibility = View.INVISIBLE
-
-                val timestamp = (Date().timeInSeconds()).toString()
-                //TODO: add spinner to verification activity
-                AnyxApi.VerificationSent(apiKey, email).executePost({ error ->
-                    showPopup("Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
-                        sendVerificationEmail(timestamp)
-                        goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
-                    }, "Cancel", {
-                        showPopup("Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
-                                "OK", {
-                                    goToVerificationComplete(VerificationStatus.RepayError)
-                                },
-                                "Send Email", {
-                                    sendVerificationEmail(timestamp)
-                                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
-                                })
+            when (verificationFundSource!!) {
+                VerificationFundSource.GDAX -> {
+                    //TODO: don't crash here
+                    val productId = verifyAccount.product.id
+                    GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0, timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result ->
+                        //TODO: check the error, check up on this
+                        goToVerificationComplete(VerificationStatus.NoTradePermission)
+                    }, { result ->
+                        sendCryptoToVerify()
                     })
-                }, { result ->
-                    goToVerificationComplete(VerificationStatus.Success)
-                }, 3)
-            })
+                }
+                VerificationFundSource.Coinbase -> {
+                    val coinbaseAccount = verifyAccount.coinbaseAccount!!
+                    GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        toast("Coinbase Error")
+                    } , {
+                        sendCryptoToVerify()
+                    })
+                }
+                VerificationFundSource.Buy -> {
+                    //TODO: don't crash here
+                    val productId = verifyAccount.product.id
+                    GdaxApi.orderMarket(TradeSide.BUY, productId, size = null, funds = amount).executePost({
+                        //TODO: check the error, check up on this
+                        goToVerificationComplete(VerificationStatus.NoTradePermission)
+                    }, {
+                        sendCryptoToVerify()
+                    })
+                }
+            }
+            //TODO: Test Buy/Sell permission by creating an order for 1 BTC for 1 USD and then cancelling it
         }
         updateViews()
         return rootView
     }
 
+    private fun verifyWithSource(verificationFundSource: VerificationFundSource) {
+
+    }
+
+    private fun sendCryptoToVerify() {
+        val prefs = Prefs(context!!)
+        val apiKey = GdaxApi.credentials!!.apiKey
+
+        GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executePost({
+            progressBar.visibility = View.INVISIBLE
+            prefs.rejectApiKey(apiKey)
+            goToVerificationComplete(VerificationStatus.NoTransferPermission)
+        }, {
+            prefs.approveApiKey(apiKey)
+            progressBar.visibility = View.INVISIBLE
+
+            val timestamp = (Date().timeInSeconds()).toString()
+            //TODO: add spinner to verification activity
+            AnyxApi.VerificationSent(apiKey, email).executePost({ error ->
+                showPopup("Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+                    sendVerificationEmail(timestamp)
+                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+                }, "Cancel", {
+                    showPopup("Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+                            "OK", {
+                        goToVerificationComplete(VerificationStatus.RepayError)
+                    },
+                            "Send Email", {
+                        sendVerificationEmail(timestamp)
+                        goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+                    })
+                })
+            }, { result ->
+                goToVerificationComplete(VerificationStatus.Success)
+            }, 3)
+        })
+    }
     private fun goToVerificationComplete(verificationStatus: VerificationStatus) {
         val prefs = Prefs(context!!)
         val apiKey = GdaxApi.credentials!!.apiKey
@@ -135,26 +206,32 @@ class VerifySendFragment : Fragment() {
         super.onResume()
     }
 
-    private fun getDataFromActivity() {
-        if (activity is VerifyActivity) {
-            Companion.email = (activity as VerifyActivity).email
-            Companion.amount = (activity as VerifyActivity).amount
-            Companion.currency = (activity as VerifyActivity).currency
-        }
-    }
 
     fun updateViews() {
-        getDataFromActivity()
-        if (currency == null) {
-            sendInfoText.text = "To verify your account we will buy "
-            sendAmountText.text = "${Companion.amount.btcFormat()} ${Currency.BTC} for PRICE"
-            sendInfo2Text.text = "and send it to AnyX, which we will send right back to your Coinbase account with email ${Companion.email}."
-            progressBar.visibility = View.GONE
-        } else {
-            sendInfoText.text = "To verify your account we will send"
-            sendAmountText.text = "${Companion.amount.btcFormat()} ${Companion.currency}"
-            sendInfo2Text.text = "to AnyX, which we will send right back to your Coinbase account with email ${Companion.email}."
-            progressBar.visibility = View.GONE
+        val price = "PRICE"
+        when (verificationFundSource) {
+            VerificationFundSource.GDAX -> {
+                sendInfoText.text = "To verify your account we will send"
+                sendAmountText.text = "${amount.btcFormat()} $currency"
+                sendInfo2Text.text = "to AnyX, which we will send right back to your Coinbase account with email $email."
+                progressBar.visibility = View.GONE
+            }
+            VerificationFundSource.Coinbase -> {
+                sendInfoText.text = "To verify your account we will transfer "
+                sendAmountText.text = "${amount.btcFormat()} $currency from your Coinbase account to your GDAX account,"
+                sendInfo2Text.text = "and then send it to AnyX, which we will send right back to your Coinbase account with email $email."
+                progressBar.visibility = View.GONE
+            }
+            VerificationFundSource.Buy -> {
+                sendInfoText.text = "To verify your account we will buy "
+                sendAmountText.text = "${amount.btcFormat()} $currency for $price"
+                sendInfo2Text.text = "and send it to AnyX, which we will send right back to your Coinbase account with email $email."
+                progressBar.visibility = View.GONE
+            }
+            else -> {
+                //TODO: handle this error
+                assert(false)
+            }
         }
     }
 }
