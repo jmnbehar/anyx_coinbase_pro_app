@@ -23,18 +23,18 @@ import org.jetbrains.anko.toast
 
 
 class VerifyActivity : AppCompatActivity() {
-    lateinit var viewPager: ViewPager
+    private lateinit var viewPager: LockableViewPager
 
     var nextBtn:Button? = null
 
-    var isMobileHelpPage = true
+    private var isMobileHelpPage = true
 
     internal var currentPage = 0   //  to track page position
     var pageCount = 2
 
     private var emailConfirmed = false
 
-    var emailFailMessage = "Email is not valid"
+    private var emailFailMessage = "Email is not valid"
 
     var email = ""
     var amount = 0.0
@@ -106,9 +106,12 @@ class VerifyActivity : AppCompatActivity() {
                     } else if (amount <= 0) {
                         toast("Server Error")
                     }
+                } else if (position == 3) {
+                    nextBtn?.visibility = View.VISIBLE
+                    nextBtn?.text = "Done"
+                    nextBtn?.onClick { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
                 } else {
                     nextBtn?.visibility = View.VISIBLE
-
                 }
             }
         })
@@ -148,7 +151,7 @@ class VerifyActivity : AppCompatActivity() {
         currentPage = 3
         viewPager.adapter?.notifyDataSetChanged()
         viewPager.setCurrentItem(currentPage, true)
-        viewPager.isEnabled = false
+        viewPager.isLocked = true
     }
 
     override fun onBackPressed() {

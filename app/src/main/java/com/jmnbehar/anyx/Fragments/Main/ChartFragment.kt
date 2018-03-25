@@ -354,7 +354,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
 //                System.out.println(date)
-                val outputFormat = SimpleDateFormat("HH: mm MM/dd/yyyy")
+                val outputFormat = SimpleDateFormat("HH:mm MM/dd/yyyy")
                 outputFormat.format(date)
 
             } catch (e: ParseException) {
@@ -402,7 +402,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
 //                System.out.println(date)
-                val outputFormat = SimpleDateFormat("hh:mm, MM/dd/yyyy")
+                val outputFormat = SimpleDateFormat("HH:mm, MM/dd/yyyy")
                 outputFormat.format(date)
 
             } catch (e: ParseException) {

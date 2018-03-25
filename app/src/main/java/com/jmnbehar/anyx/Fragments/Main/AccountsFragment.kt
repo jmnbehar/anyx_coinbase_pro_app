@@ -18,6 +18,8 @@ import com.jmnbehar.anyx.Adapters.AccountListViewAdapter
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
+import kotlinx.android.synthetic.main.fragment_home.*
+import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.textColor
 import kotlin.math.absoluteValue
 
@@ -142,12 +144,12 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
-        LockableViewPager.isLocked = false
+        HomeFragment.viewPager?.isLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
-        LockableViewPager.isLocked = true
+        HomeFragment.viewPager?.isLocked = false
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
@@ -194,7 +196,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
                     lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
                         swipeRefreshLayout?.isEnabled = false
-                        LockableViewPager.isLocked = true
+                        HomeFragment.viewPager?.isLocked = false
                     }
                 }
 

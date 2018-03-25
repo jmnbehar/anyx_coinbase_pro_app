@@ -80,7 +80,6 @@ sealed class GdaxApi: FuelRouting {
     private var timeLock = 0
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
-        // MainActivity.progressDialog?.show()
         FuelManager.instance.basePath = AnyxApi.basePath
         Fuel.request(this).responseString { _, _, result ->
             when (result) {
@@ -115,7 +114,6 @@ sealed class GdaxApi: FuelRouting {
     }
 
     fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
-        // Fuel.post(this.request.url.toString()).body(paramsToBody()).header(headers).response  { request, _, result ->
         FuelManager.instance.basePath = AnyxApi.basePath
         Fuel.post(this.request.url.toString())
                 .header(headers)

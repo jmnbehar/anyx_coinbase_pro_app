@@ -75,6 +75,13 @@ class SettingsFragment : RefreshFragment() {
             activity!!.finishAffinity()
         }
 
+        //TODO: uncomment this when done testing verification
+//        if (!GdaxApi.isLoggedIn || GdaxApi.credentials?.isValidated == true) {
+//            verifyButton.visibility = View.GONE
+//        } else {
+//            verifyButton.visibility = View.VISIBLE
+//        }
+
         verifyButton.setOnClickListener  {
             var currency: Currency? = null
             if (Account.list.isNotEmpty()) {

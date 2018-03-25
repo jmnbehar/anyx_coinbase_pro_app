@@ -110,7 +110,7 @@ class VerifySendFragment : Fragment() {
         (activity as VerifyActivity).verificationComplete(verificationStatus)
     }
 
-    fun showPopup(string: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+    private fun showPopup(string: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
         alert {
             title = string
             positiveButton(positiveText) { positiveAction() }
@@ -120,7 +120,7 @@ class VerifySendFragment : Fragment() {
         }.show()
     }
 
-    fun sendVerificationEmail(timestamp: String) {
+    private fun sendVerificationEmail(timestamp: String) {
         val credentials = GdaxApi.credentials!!.apiKey
         val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.fromParts(
                 "mailto", "anyx.verification@gmail.com", null))

@@ -10,9 +10,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 
 class LockableViewPager : ViewPager {
-    companion object {
-        var isLocked = false
-    }
+    var isLocked = false
 
     constructor(context: Context) : super(context) {
         setMyScroller()
