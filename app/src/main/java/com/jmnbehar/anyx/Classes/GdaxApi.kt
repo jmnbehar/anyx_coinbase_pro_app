@@ -12,6 +12,7 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
@@ -166,7 +167,7 @@ sealed class GdaxApi: FuelRouting {
                     //TODO: edit chart library so it doesn't show below 0
                     candles = candles.reversed()
                     allCandles = allCandles.addingCandles(candles)
-                    if (pagesReceived == pages) {
+                    if (pagesReceived == pages && allCandles.isNotEmpty()) {
                         if (pages > 1) {
                             allCandles = allCandles.sorted()
                         }
@@ -557,12 +558,20 @@ sealed class GdaxApi: FuelRouting {
                 println("timestamp:")
                 println(timestamp)
 
-                val secretDecoded = Base64.decode(credentials.apiSecret, 0)
-                val sha256HMAC = Mac.getInstance("HmacSHA256")
-                val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
-                sha256HMAC.init(secretKey)
 
-                val hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
+                var hash = ""
+                try {
+                    val secretDecoded: ByteArray? = Base64.decode(credentials.apiSecret, 0)
+
+                    val sha256HMAC = Mac.getInstance("HmacSHA256")
+                    val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
+                    sha256HMAC.init(secretKey)
+                    hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
+
+                } catch (e: Exception) {
+                    println("api secret error")
+                }
+
                 println("hash:")
                 println(hash)
 
