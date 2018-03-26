@@ -186,7 +186,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             }
-            TransferHub.linkCoinbaseAccounts({
+            GdaxApi.coinbaseAccounts().linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
             }, {

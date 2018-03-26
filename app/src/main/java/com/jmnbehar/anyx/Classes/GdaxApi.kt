@@ -296,6 +296,19 @@ sealed class GdaxApi: FuelRouting {
                 onComplete(apiCBAccountList)
             }
         }
+
+        fun linkToAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+           this.get(onFailure) { coinbaseAccounts ->
+                for (cbAccount in coinbaseAccounts) {
+                    val currency = Currency.forString(cbAccount.currency)
+                    if (currency != null && cbAccount.active) {
+                        val account = Account.forCurrency(currency)
+                        account?.coinbaseAccount = Account.CoinbaseAccount(cbAccount)
+                    }
+                }
+                onComplete()
+            }
+        }
     }
     class paymentMethods() : GdaxApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiPaymentMethod>) -> Unit) {

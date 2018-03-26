@@ -153,7 +153,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
                     } else {
                         (activity as MainActivity).showProgressBar()
                         GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                            showPopup("Transfer failed\n Error: ${result.error.message}", { })
+                            showPopup("Transfer failed\n Error: ${result.errorMessage}", { })
                             activity.dismissProgressBar()
                         } , {
                             toast("Transfer received")
@@ -186,7 +186,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             }
-            TransferHub.linkCoinbaseAccounts({
+            GdaxApi.coinbaseAccounts().linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
             }, {

@@ -431,7 +431,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    TransferHub.linkCoinbaseAccounts({
+                    GdaxApi.coinbaseAccounts().linkToAccounts({
                         dismissProgressBar()
                         toast("Can't access coinbase accounts")
                     }, {
@@ -456,7 +456,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    TransferHub.linkCoinbaseAccounts({
+                    GdaxApi.coinbaseAccounts().linkToAccounts({
                         dismissProgressBar()
                         toast("Can't access coinbase accounts")
                     }, {

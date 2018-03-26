@@ -104,7 +104,7 @@ class SettingsFragment : RefreshFragment() {
                     val currency = verifyAccount!!.currency
                     launchVerificationActivity(currency, VerificationFundSource.GDAX)
                 } else {
-                    TransferHub.linkCoinbaseAccounts({ result ->
+                    GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
                         launchVerificationActivity(Currency.BTC, VerificationFundSource.Buy)
                     }, {
                         val cbAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
