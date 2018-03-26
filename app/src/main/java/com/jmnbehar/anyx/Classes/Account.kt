@@ -106,9 +106,9 @@ class Account(val product: Product, apiAccount: ApiAccount) {
 
         override fun toString(): String {
             return if (currency.isFiat) {
-                "$currency Wallet (${balance.fiatFormat()})"
+                "Coinbase $currency Wallet: ${balance.fiatFormat()}"
             } else {
-                "$currency Wallet (${balance.btcFormat()} $currency)"
+                "Coinbase $currency Wallet: ${balance.btcFormatShortened()} $currency"
             }
         }
     }

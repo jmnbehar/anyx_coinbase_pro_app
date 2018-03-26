@@ -78,7 +78,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
-        titleText.text = "Deposit from Coinbase"
+        titleText.text = "Transfer from Coinbase"
 
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
@@ -93,7 +93,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
 
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Deposit from Coinbase"
+            titleText.text = "Transfer from Coinbase"
 
             coinbaseAccount = coinbaseAccounts.first()
             val currency = coinbaseAccount?.currency
@@ -153,10 +153,10 @@ class DepositCoinbaseFragment : RefreshFragment() {
                     } else {
                         (activity as MainActivity).showProgressBar()
                         GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                            showPopup("Deposit failed\n Error: ${result.error.message}", { })
+                            showPopup("Transfer failed\n Error: ${result.error.message}", { })
                             activity.dismissProgressBar()
                         } , {
-                            toast("Deposit received")
+                            toast("Transfer received")
                             amountEditText.setText("")
 
                             refresh { activity.dismissProgressBar() }
@@ -218,7 +218,7 @@ class DepositCoinbaseFragment : RefreshFragment() {
             titleText.text = "All Coinbase accounts are empty"
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Deposit from Coinbase"
+            titleText.text = "Transfer from Coinbase"
 
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
@@ -242,10 +242,10 @@ class DepositCoinbaseFragment : RefreshFragment() {
             amountUnitText.text = currency.toString()
             if (currency.isFiat) {
                 val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance"
+                gdaxBalanceText.text = "GDAX $currency Wallet ($gdaxAccountBalance)"
             } else {
                 val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
+                gdaxBalanceText.text = "GDAX $currency Wallet ($gdaxAccountBalance $currency)"
             }
         }
     }

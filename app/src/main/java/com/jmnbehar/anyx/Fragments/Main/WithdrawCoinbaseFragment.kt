@@ -99,7 +99,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
             titleText.text = "All GDAX accounts are empty"
         } else {
             withdrawDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Withdraw to Coinbase"
+            titleText.text = "Transfer to Coinbase"
 
             coinbaseAccount = coinbaseAccounts.firstOrNull()
             updateGdaxAccountText()
@@ -170,7 +170,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
                     showPopup("Error" + result.error.message, { })
                     activity.dismissProgressBar()
                 } , {
-                    toast("Withdrawal Sent")
+                    toast("Transfer Sent")
                     amountEditText.setText("")
 
                     refresh { activity.dismissProgressBar() }
@@ -223,7 +223,7 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
             titleText.text = "All GDAX accounts are empty"
         } else {
             withdrawDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Withdraw to Coinbase"
+            titleText.text = "Transfer to Coinbase"
 
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()

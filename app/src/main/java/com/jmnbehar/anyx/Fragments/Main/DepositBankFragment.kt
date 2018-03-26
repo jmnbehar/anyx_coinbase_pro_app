@@ -74,7 +74,7 @@ class DepositBankFragment : RefreshFragment() {
 //        submitDepositButton.backgroundTintList = buttonColors
 //        val buttonTextColor = account.currency.buttonTextColor(activity)
 //        submitDepositButton.textColor = buttonTextColor
-        titleText.text = "Deposit from Bank Account"
+        titleText.text = "Transfer from Bank Account"
 
         amountUnitText.text = currency.toString()
 
@@ -105,7 +105,7 @@ class DepositBankFragment : RefreshFragment() {
                     depositMaxButton.visibility = View.GONE
                 }
 
-                titleText.text = "Deposit from Bank Account"
+                titleText.text = "Transfer from Bank Account"
             }
             doneLoading()
         })
@@ -130,9 +130,9 @@ class DepositBankFragment : RefreshFragment() {
 
                 GdaxApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { errorResult ->
 
-                    showPopup("Deposit failed\n Error: ${errorResult.error.message}", { })
+                    showPopup("Transfer failed\n Error: ${errorResult.error.message}", { })
                 }, { result ->
-                    toast("Deposit received")
+                    toast("Transfer received")
                     amountEditText.setText("")
                 } )
             }

@@ -21,11 +21,11 @@
             <item
                 android:id="@+id/nav_deposit"
                 android:icon="@drawable/deposit"
-                android:title="Deposit" />
+                android:title="Transfer in" />
             <item
                 android:id="@+id/nav_withdraw"
                 android:icon="@drawable/withdrawal"
-                android:title="Withdraw" />
+                android:title="Transfer out" />
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_menu_manage"

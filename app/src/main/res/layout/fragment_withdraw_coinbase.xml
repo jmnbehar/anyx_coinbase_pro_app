@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Withdraw to Coinbase"
+                android:text="Transfer to Coinbase"
                 android:textSize="30sp"
                 tools:layout_editor_absoluteX="48dp"
                 tools:layout_editor_absoluteY="16dp" />
@@ -46,6 +46,12 @@
                     android:layout_marginBottom="5dp"
                     android:layout_marginTop="5dp"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_withdraw_coinbase_source_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Source" />
 
                     <TextView
                         android:id="@+id/txt_withdraw_coinbase_gdax_account_info"
@@ -132,7 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="Withdraw funds" />
+                    android:text="Transfer funds" />
 
             </LinearLayout>
 

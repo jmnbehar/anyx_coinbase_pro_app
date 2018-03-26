@@ -17,10 +17,9 @@ import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
-import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
-import org.jetbrains.anko.toast
+
 
 /**
  * Created by josephbehar on 1/20/18.
