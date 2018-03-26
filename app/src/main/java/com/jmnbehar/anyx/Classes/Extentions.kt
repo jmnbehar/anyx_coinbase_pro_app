@@ -89,11 +89,17 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
     return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
 }
 
-val Result.Failure<ByteArray, FuelError>.errorMessage : String
+val Result.Failure<Any, FuelError>.errorMessage : String
     get() {
         val errorData = JSONObject(String(error.response.data))
         return (errorData["message"] as? String) ?: error.response.responseMessage
     }
+
+//val Result.Failure<String, FuelError>.errorMessage : String
+//    get() {
+//        val errorData = JSONObject(String(error.response.data))
+//        return (errorData["message"] as? String) ?: error.response.responseMessage
+//    }
 
 fun Double.toStringWithTimespan(timespan: Timespan) : String {
     val locale = Locale.getDefault()

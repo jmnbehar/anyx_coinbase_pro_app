@@ -153,7 +153,12 @@ class DepositCoinbaseFragment : RefreshFragment() {
                     } else {
                         (activity as MainActivity).showProgressBar()
                         GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                            showPopup("Transfer failed\n Error: ${result.errorMessage}", { })
+                            val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                            if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
+                                showPopup("Error: Amount too low", { })
+                            } else {
+                                showPopup("Error: " + result.errorMessage, { })
+                            }
                             activity.dismissProgressBar()
                         } , {
                             toast("Transfer received")

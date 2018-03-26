@@ -622,10 +622,21 @@ sealed class GdaxApi: FuelRouting {
     }
 
     enum class ErrorMessage {
+        //Log in:
+        Forbidden,
+        InvalidApiKey,
+        InvalidApiSignature,
+        InvalidPassphrase,
+
+        //Cb withdraw/deposit:
         TransferAmountTooLow;
 
         override fun toString(): String {
             return when (this) {
+                Forbidden -> "Forbidden"
+                InvalidApiKey -> "Invalid API Key"
+                InvalidPassphrase -> "Invalid Passphrase"
+                InvalidApiSignature -> "CB-ACCESS-SIGN header is required"
                 TransferAmountTooLow -> "amount must be a positive number"
             }
         }

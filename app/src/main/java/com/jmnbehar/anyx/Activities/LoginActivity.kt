@@ -127,7 +127,26 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         GdaxApi.credentials = credentials
         progressDialog?.show()
         GdaxApi.accounts().getAllAccountInfo(this, { result ->
-            toast("Error!: ${result.error}")
+            val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+            when (errorMessage) {
+                GdaxApi.ErrorMessage.Forbidden -> {
+                    //TODO: show popup instead of toast
+                    toast("Error: Forbidden" +
+                            "\nMake sure your API Key has all required permissions")
+                }
+                GdaxApi.ErrorMessage.InvalidApiKey-> {
+                    toast("Error: ${result.errorMessage}")
+                }
+                GdaxApi.ErrorMessage.InvalidApiSignature -> {
+                    toast("Error: Invalid API Secret")
+                }
+                GdaxApi.ErrorMessage.InvalidPassphrase -> {
+                    toast("Error: ${result.errorMessage}")
+                }
+                else -> toast("Error: ${result.errorMessage}")
+            }
+            progressDialog?.dismiss()
+
         }, {
             progressDialog?.dismiss()
             //toast("Success! logging in")
