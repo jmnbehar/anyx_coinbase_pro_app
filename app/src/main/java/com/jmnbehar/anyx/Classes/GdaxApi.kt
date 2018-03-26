@@ -608,4 +608,20 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
+    enum class ErrorMessage {
+        TransferAmountTooLow;
+
+        override fun toString(): String {
+            return when (this) {
+                TransferAmountTooLow -> "amount must be a positive number"
+            }
+        }
+
+        companion object {
+            fun forString(string: String) : ErrorMessage? {
+                return ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
+            }
+        }
+    }
+
 }

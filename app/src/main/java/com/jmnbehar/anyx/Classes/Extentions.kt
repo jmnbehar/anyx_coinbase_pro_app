@@ -8,7 +8,10 @@ import android.view.View.MeasureSpec
 import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import org.jetbrains.anko.*
+import org.json.JSONObject
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -85,6 +88,12 @@ fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
 fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
     return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
 }
+
+val Result.Failure<ByteArray, FuelError>.errorMessage : String
+    get() {
+        val errorData = JSONObject(String(error.response.data))
+        return (errorData["message"] as? String) ?: error.response.responseMessage
+    }
 
 fun Double.toStringWithTimespan(timespan: Timespan) : String {
     val locale = Locale.getDefault()

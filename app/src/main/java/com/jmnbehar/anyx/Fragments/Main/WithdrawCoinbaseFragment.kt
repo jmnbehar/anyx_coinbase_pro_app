@@ -12,6 +12,9 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
+import org.json.JSONObject
+
+
 
 /**
  * Created by jmnbehar on 11/5/2017.
@@ -167,7 +170,12 @@ class WithdrawCoinbaseFragment : RefreshFragment() {
                 }
                 (activity as MainActivity).showProgressBar()
                 GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                    showPopup("Error" + result.error.message, { })
+                    val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                    if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
+                        showPopup("Error: Amount too low", { })
+                    } else {
+                        showPopup("Error: " + result.errorMessage, { })
+                    }
                     activity.dismissProgressBar()
                 } , {
                     toast("Transfer Sent")
