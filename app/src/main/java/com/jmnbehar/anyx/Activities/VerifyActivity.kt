@@ -77,13 +77,7 @@ class VerifyActivity : AppCompatActivity() {
         verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 
         val minSendAmount = currency.minSendAmount
-        val extraAmountMultiplier: Double = when (currency) {
-            Currency.BTC -> 0.00000001
-            Currency.ETH -> 0.0000001
-            Currency.BCH -> 0.0000001
-            Currency.LTC -> 0.00001
-            Currency.USD -> 0.01
-        }
+        val extraAmountMultiplier = 0.00000001
         amount =  minSendAmount + (verifyExtraAmount * extraAmountMultiplier)
 
         // Set up the ViewPager with the sections adapter.

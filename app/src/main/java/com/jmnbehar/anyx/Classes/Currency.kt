@@ -73,9 +73,9 @@ enum class Currency {
     val minBuyAmount : Double
         get() = when (this) {
             Currency.BTC -> .001
-            Currency.ETH -> .00001
-            Currency.BCH -> .00001
-            Currency.LTC -> .00001
+            Currency.ETH -> .01
+            Currency.BCH -> .01
+            Currency.LTC -> .1
             else -> 1.0
         }
 
