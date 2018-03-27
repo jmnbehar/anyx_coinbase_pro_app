@@ -21,13 +21,14 @@ import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import android.text.InputFilter
+
+
 
 /**
  * Created by jmnbehar on 11/5/2017.
  */
 class TradeFragment : RefreshFragment() {
-
-    val DEV_FEE_PERCENTAGE : Double = 0.001
 
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
@@ -130,6 +131,7 @@ class TradeFragment : RefreshFragment() {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
+        amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
 
         limitEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -139,6 +141,8 @@ class TradeFragment : RefreshFragment() {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
+        limitEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(5, 2))
+
 
 
         tradeSideBuyRadioButton = rootView.rbtn_trade_buy
@@ -322,17 +326,26 @@ class TradeFragment : RefreshFragment() {
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         val currencyString = account?.currency.toString() ?: ""
+        val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
+            "less than 0.01"
+        } else {
+            feeEstimate.fiatFormat()
+        }
         alert {
             title = "Alert"
             customView {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            horizontalLayout("$currencyString price:", updatedTicker.fiatFormat()).lparams(width = matchParent) {}
+                            horizontalLayout("$currencyString price:", "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
                         }
-                        horizontalLayout("Total $currencyString:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
-                        horizontalLayout("Total ${localCurrency}:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
-                        horizontalLayout("Estimated fees:", feeEstimate.fiatFormat()).lparams(width = matchParent) {}
+                        when (tradeSide) {
+                            TradeSide.BUY -> horizontalLayout("$currencyString to buy:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                            TradeSide.SELL -> horizontalLayout("$currencyString to sell:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                        }
+                        horizontalLayout("$localCurrency Cost:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("Estimated fees:", feeEstimateString).lparams(width = matchParent) {}
+                        horizontalLayout("Total $localCurrency Cost:", (dollarTotal + feeEstimate).fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again").onCheckedChange { _, isChecked ->
                             val prefs = Prefs(activity!!)
                             prefs.shouldShowTradeConfirmModal = !isChecked
@@ -341,7 +354,6 @@ class TradeFragment : RefreshFragment() {
                 }
             }
             positiveButton("Confirm") {
-                //TODO: actually submit order dont just pay fee thats dumb wut r u doin sdjkdfjkhdsk
                 submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
             }
             negativeButton("Cancel") { }
@@ -351,9 +363,11 @@ class TradeFragment : RefreshFragment() {
     private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
-            when (errorCode) {
-                GdaxApi.ErrorCode.BadRequest -> {toast("400 Error: Missing something from the request")}
-                else -> GdaxApi.defaultPostFailure(result)
+            val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+            if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
+                showPopup("Error: Amount too low", { })
+            } else {
+                showPopup("Error: " + result.errorMessage, { })
             }
         }
 
@@ -465,16 +479,16 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
-    private fun feeEstimate(amount: Double, limitPrice: Double?) : Double {
+    private fun feeEstimate(amount: Double, limit: Double) : Double {
         val price = account?.product?.price
         if (price != null) {
             when (tradeType) {
                 TradeType.MARKET -> {
                 }
-                TradeType.LIMIT -> if ((limitPrice != null) && (limitPrice >= price)) {
+                TradeType.LIMIT -> if (limit <= price) {
                     return 0.0
                 }
-                TradeType.STOP -> if ((limitPrice != null) && (limitPrice <= price)) {
+                TradeType.STOP -> if (limit >= price) {
                     return 0.0
                 }
             }

@@ -153,7 +153,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             prefs.shouldAutologin = GdaxApi.isLoggedIn
             val intent = MainActivity.newIntent(this)
             startActivity(intent)
-            finish()
+            if (GdaxApi.isLoggedIn) {
+                finish()
+            }
         })
     }
 

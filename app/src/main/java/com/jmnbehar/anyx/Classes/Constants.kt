@@ -17,6 +17,11 @@ object Constants {
 }
 
 
+val DEV_FEE_PERCENTAGE : Double
+    get() {
+        return 0.001
+    }
+
 object TimeInSeconds {
     const val halfMinute: Long = 30
     const val oneMinute: Long = 60

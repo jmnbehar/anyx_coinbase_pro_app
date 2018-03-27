@@ -41,9 +41,12 @@ class CoinbaseAccountSpinnerAdapter(context: Context, var resource: Int, var coi
             outputView = convertView
         }
 
-        val cbAccount = coinbaseAccountList[position]
-
-        viewHolder.cbAccountNameText?.text = cbAccount.toString() //"${cbAccount.currency} Wallet"
+        if (coinbaseAccountList.size > position) {
+            val cbAccount = coinbaseAccountList[position]
+            viewHolder.cbAccountNameText?.text = cbAccount.toString() //"${cbAccount.currency} Wallet"
+        } else {
+            viewHolder.cbAccountNameText?.text = "" //"${cbAccount.currency} Wallet"
+        }
         viewHolder.cbAccountBalanceText?.text = "" //""${cbAccount.balance.btcFormat()} ${cbAccount.currency}"
 
         return outputView
