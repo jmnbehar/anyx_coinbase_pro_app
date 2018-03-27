@@ -5,10 +5,8 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import com.jmnbehar.anyx.Classes.RefreshFragment
-import com.jmnbehar.anyx.Fragments.Main.AccountsFragment
-import com.jmnbehar.anyx.Fragments.Main.DepositBankFragment
-import com.jmnbehar.anyx.Fragments.Main.DepositCoinbaseFragment
-import com.jmnbehar.anyx.Fragments.Main.MarketFragment
+import com.jmnbehar.anyx.Fragments.Main.TransferInBankFragment
+import com.jmnbehar.anyx.Fragments.Main.TransferInCoinbaseFragment
 
 
 /**
@@ -22,14 +20,14 @@ class DepositPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     override fun getItem(i: Int): Fragment {
         when (i) {
             0 -> {
-                val fragment = DepositCoinbaseFragment()
+                val fragment = TransferInCoinbaseFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
                 return fragment
             }
             1 -> {
-                val fragment = DepositBankFragment()
+                val fragment = TransferInBankFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
@@ -37,7 +35,7 @@ class DepositPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
             }
             else -> {
                 //do something here
-                val fragment = DepositCoinbaseFragment()
+                val fragment = TransferInCoinbaseFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args

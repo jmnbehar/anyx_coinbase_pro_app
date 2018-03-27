@@ -16,10 +16,7 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import com.jmnbehar.anyx.Classes.Currency
-import com.jmnbehar.anyx.Fragments.Main.DepositCoinbaseFragment
-import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 import java.util.*
 
 
@@ -223,20 +220,20 @@ class VerifySendFragment : Fragment() {
         when (verificationFundSource) {
             VerificationFundSource.GDAX -> {
                 sendInfoText.text = "To verify your account we will send"
-                sendAmountText.text = "${amount.btcFormat()} $currency"
+                sendAmountText.text = "${amount.btcFormatShortened()} $currency"
                 sendInfo2Text.text = "to AnyX, which we will send right back to your Coinbase account with email $email."
                 progressBar.visibility = View.GONE
             }
             VerificationFundSource.Coinbase -> {
                 sendInfoText.text = "To verify your account we will transfer "
-                sendAmountText.text = "${amount.btcFormat()} $currency from your Coinbase account to your GDAX account,"
+                sendAmountText.text = "${amount.btcFormatShortened()} $currency from your Coinbase account to your GDAX account,"
                 sendInfo2Text.text = "and then send it to AnyX, which we will send right back to your Coinbase account with email $email."
                 progressBar.visibility = View.GONE
             }
             VerificationFundSource.Buy -> {
-                sendInfoText.text = "To verify your account we will buy "
-                sendAmountText.text = "${amount.btcFormat()} $currency for $price"
-                sendInfo2Text.text = "and send it to AnyX, which we will send right back to your Coinbase account with email $email."
+                sendInfoText.text = "To verify your account we will buy ${currency.minBuyAmount.btcFormatShortened()} $currency (Gdax's minimum purchase amount) for market price, about $price."
+                sendAmountText.text = ""
+                sendInfo2Text.text = "We will then send ${amount.btcFormatShortened()} $currency to AnyX, which we will send right back to your Coinbase account with email $email."
                 progressBar.visibility = View.GONE
             }
             else -> {

@@ -13,14 +13,12 @@ import com.jmnbehar.anyx.R
 
 import android.widget.Button
 import com.jmnbehar.anyx.Classes.*
-import com.jmnbehar.anyx.Fragments.Main.DepositCoinbaseFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyCompleteFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyEmailFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifyIntroFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
 import kotlinx.android.synthetic.main.activity_verify.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 

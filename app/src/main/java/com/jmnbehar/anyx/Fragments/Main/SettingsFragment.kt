@@ -124,9 +124,6 @@ class SettingsFragment : RefreshFragment() {
                             launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
                         } else {
                             launchVerificationActivity(verifyCBAccount.currency, VerificationFundSource.Coinbase)
-
-                            //For testing only:
-//                            launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
                         }
                     })
                 }

@@ -19,14 +19,14 @@ class WithdrawPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) 
     override fun getItem(i: Int): Fragment {
         when (i) {
             0 -> {
-                val fragment = WithdrawCoinbaseFragment()
+                val fragment = TransferOutCoinbaseFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
                 return fragment
             }
             1 -> {
-                val fragment = DepositBankFragment()
+                val fragment = TransferInBankFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
@@ -34,7 +34,7 @@ class WithdrawPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) 
             }
             else -> {
                 //do something here
-                val fragment = DepositCoinbaseFragment()
+                val fragment = TransferInCoinbaseFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args

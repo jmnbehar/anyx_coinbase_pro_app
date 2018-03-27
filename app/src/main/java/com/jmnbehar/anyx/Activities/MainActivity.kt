@@ -34,7 +34,6 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -356,10 +355,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentFragmentType = when (currentFragment) {
             is SendFragment -> FragmentType.SEND
             is AlertsFragment -> FragmentType.ALERTS
-            is DepositFragment -> FragmentType.DEPOSIT
-            is WithdrawFragment -> FragmentType.WITHDRAW
-            is DepositCoinbaseFragment -> FragmentType.DEPOSIT
-            is WithdrawCoinbaseFragment -> FragmentType.WITHDRAW
+            is TransferInFragment -> FragmentType.DEPOSIT
+            is TransferOutFragment -> FragmentType.WITHDRAW
+            is TransferInCoinbaseFragment -> FragmentType.DEPOSIT
+            is TransferOutCoinbaseFragment -> FragmentType.WITHDRAW
             is SettingsFragment -> FragmentType.SETTINGS
             is HomeFragment -> FragmentType.HOME
             is ChartFragment -> FragmentType.BTC_CHART  //TODO: refine
@@ -436,8 +435,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         toast("Can't access coinbase accounts")
                     }, {
                         //TODO: switch back to regular depositFragment
-//                        val depositFragment = DepositFragment.newInstance()
-                        val depositFragment = DepositCoinbaseFragment.newInstance()
+//                        val depositFragment = TransferInFragment.newInstance()
+                        val depositFragment = TransferInCoinbaseFragment.newInstance()
 
                         val tag = fragmentType.toString()
                         goToFragment(depositFragment, tag)
@@ -460,9 +459,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         dismissProgressBar()
                         toast("Can't access coinbase accounts")
                     }, {
-                        //TODO: switch back to regular WithdrawFragment
-//                        val withdrawFragment = WithdrawFragment.newInstance()
-                        val withdrawFragment = WithdrawCoinbaseFragment.newInstance()
+                        //TODO: switch back to regular TransferOutFragment
+//                        val withdrawFragment = TransferOutFragment.newInstance()
+                        val withdrawFragment = TransferOutCoinbaseFragment.newInstance()
 
                         val tag = fragmentType.toString()
                         goToFragment(withdrawFragment, tag)
