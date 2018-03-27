@@ -142,6 +142,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 //            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 //        })
 
+        //TODO: think about holds, adjust max accordingly
         withdrawMaxButton.setOnClickListener {
             val coinbaseAccount = accountsSpinner.selectedItem as Account.CoinbaseAccount
             val currency = coinbaseAccount.currency

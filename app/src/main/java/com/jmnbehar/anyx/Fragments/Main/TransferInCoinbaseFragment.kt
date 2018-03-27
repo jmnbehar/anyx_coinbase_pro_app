@@ -228,12 +228,19 @@ class TransferInCoinbaseFragment : RefreshFragment() {
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
             (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
 
-
-            val coinbaseAccount = coinbaseAccount
             if (coinbaseAccount != null) {
-                val currency = coinbaseAccount.currency
-                amountUnitText.text = currency.toString()
-                updateGdaxAccountText()
+                if (coinbaseAccount!!.balance > 0) {
+                    val currency = coinbaseAccount!!.currency
+                    amountUnitText.text = currency.toString()
+                    updateGdaxAccountText()
+                } else {
+                    this.coinbaseAccount = coinbaseAccounts.firstOrNull()
+                    accountsSpinner.setSelection(0)
+                    val currency = coinbaseAccount?.currency
+                    amountUnitText.text = currency.toString()
+                    updateGdaxAccountText()
+
+                }
             }
         }
         onComplete()
