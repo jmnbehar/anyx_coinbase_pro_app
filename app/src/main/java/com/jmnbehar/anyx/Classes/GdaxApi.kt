@@ -626,6 +626,7 @@ sealed class GdaxApi: FuelRouting {
         Forbidden,
         InvalidApiKey,
         InvalidApiSignature,
+        MissingApiSignature,
         InvalidPassphrase,
 
         //Cb withdraw/deposit:
@@ -636,7 +637,8 @@ sealed class GdaxApi: FuelRouting {
                 Forbidden -> "Forbidden"
                 InvalidApiKey -> "Invalid API Key"
                 InvalidPassphrase -> "Invalid Passphrase"
-                InvalidApiSignature -> "CB-ACCESS-SIGN header is required"
+                InvalidApiSignature -> "invalid signature"
+                MissingApiSignature -> "CB-ACCESS-SIGN header is required"
                 TransferAmountTooLow -> "amount must be a positive number"
             }
         }

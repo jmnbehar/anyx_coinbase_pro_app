@@ -137,7 +137,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 GdaxApi.ErrorMessage.InvalidApiKey-> {
                     toast("Error: ${result.errorMessage}")
                 }
-                GdaxApi.ErrorMessage.InvalidApiSignature -> {
+                GdaxApi.ErrorMessage.InvalidApiSignature, GdaxApi.ErrorMessage.MissingApiSignature-> {
                     toast("Error: Invalid API Secret")
                 }
                 GdaxApi.ErrorMessage.InvalidPassphrase -> {
