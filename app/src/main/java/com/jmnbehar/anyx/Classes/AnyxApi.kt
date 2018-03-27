@@ -17,7 +17,7 @@ import java.util.*
 sealed class AnyxApi : FuelRouting {
     companion object {
 //        val basePath = "https://any-x.com"
-        val basePath = "http://192.168.1.13/api/v1"
+        val basePath = "http://192.168.1.239/api/v1"
     }
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {

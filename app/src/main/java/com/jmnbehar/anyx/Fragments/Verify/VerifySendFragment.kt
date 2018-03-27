@@ -104,6 +104,7 @@ class VerifySendFragment : Fragment() {
                     GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0, timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result ->
                         //TODO: check the error, check up on this
                         //TODO: handle if no payment methods are available
+                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                         goToVerificationComplete(VerificationStatus.NoTradePermission)
                     }, { result ->
                         sendCryptoToVerify()
@@ -112,6 +113,7 @@ class VerifySendFragment : Fragment() {
                 VerificationFundSource.Coinbase -> {
                     val coinbaseAccount = verifyAccount.coinbaseAccount!!
                     GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                         toast("Coinbase Error")
                     } , {
                         sendCryptoToVerify()
@@ -120,9 +122,21 @@ class VerifySendFragment : Fragment() {
                 VerificationFundSource.Buy -> {
                     //TODO: don't crash here
                     val productId = verifyAccount.product.id
-                    GdaxApi.orderMarket(TradeSide.BUY, productId, size = null, funds = amount).executePost({
+                    val buyAmount = currency.minBuyAmount
+                    GdaxApi.orderMarket(TradeSide.BUY, productId, size = buyAmount, funds = null).executePost({ result ->
                         //TODO: check the error, check up on this
-                        goToVerificationComplete(VerificationStatus.NoTradePermission)
+                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                        when (errorMessage) {
+                            GdaxApi.ErrorMessage.BuyAmountTooSmallBtc,
+                            GdaxApi.ErrorMessage.BuyAmountTooSmallEth,
+                            GdaxApi.ErrorMessage.BuyAmountTooSmallBch,
+                            GdaxApi.ErrorMessage.BuyAmountTooSmallLtc  -> assert(false)
+                            GdaxApi.ErrorMessage.InsufficientFunds -> {
+                                //TODO: distinguish between payment methods and insufficient funds
+                                goToVerificationComplete(VerificationStatus.NoPaymentMethods)
+                            }
+                            else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
+                        }
                     }, {
                         sendCryptoToVerify()
                     })

@@ -92,12 +92,12 @@ class SettingsFragment : RefreshFragment() {
                     verifyAccount     = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
                     if (verifyAccount == null) {
                         verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
-                    }
-                    if (verifyAccount == null) {
-                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
-                    }
-                    if (verifyAccount == null) {
-                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.LTC }
+                        if (verifyAccount == null) {
+                            verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
+                            if (verifyAccount == null) {
+                                verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.LTC }
+                            }
+                        }
                     }
                 }
                 if (verifyAccount != null) {
@@ -105,24 +105,28 @@ class SettingsFragment : RefreshFragment() {
                     launchVerificationActivity(currency, VerificationFundSource.GDAX)
                 } else {
                     GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
-                        launchVerificationActivity(Currency.BTC, VerificationFundSource.Buy)
+                        launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
                     }, {
                         val cbAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
                         val nonEmptyCBAccounts = cbAccounts.filter { cbAccount -> cbAccount.balance > cbAccount.currency.maxVerifyAmount }
                         var verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.ETH }
                         if (verifyCBAccount == null) {
                             verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BTC }
+                            if (verifyCBAccount == null) {
+                                verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BCH }
+                                if (verifyCBAccount == null) {
+                                    verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.LTC }
+                                }
+                            }
                         }
                         if (verifyCBAccount == null) {
-                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BCH }
-                        }
-                        if (verifyCBAccount == null) {
-                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.LTC }
-                        }
-                        if (verifyCBAccount == null) {
-                            launchVerificationActivity(Currency.BTC, VerificationFundSource.Buy)
+                            //TODO: check on payment methods, consider moving cash from coinbase
+                            launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
                         } else {
                             launchVerificationActivity(verifyCBAccount.currency, VerificationFundSource.Coinbase)
+
+                            //For testing only:
+//                            launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
                         }
                     })
                 }

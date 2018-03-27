@@ -629,6 +629,13 @@ sealed class GdaxApi: FuelRouting {
         MissingApiSignature,
         InvalidPassphrase,
 
+        //Trade:
+        BuyAmountTooSmallBtc,
+        BuyAmountTooSmallEth,
+        BuyAmountTooSmallBch,
+        BuyAmountTooSmallLtc,
+        InsufficientFunds,
+
         //Cb withdraw/deposit:
         TransferAmountTooLow;
 
@@ -640,6 +647,11 @@ sealed class GdaxApi: FuelRouting {
                 InvalidApiSignature -> "invalid signature"
                 MissingApiSignature -> "CB-ACCESS-SIGN header is required"
                 TransferAmountTooLow -> "amount must be a positive number"
+                BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
+                BuyAmountTooSmallEth -> ""
+                BuyAmountTooSmallBch -> ""
+                BuyAmountTooSmallLtc -> ""
+                InsufficientFunds -> "Insufficient funds"
             }
         }
 
