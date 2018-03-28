@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jmnbehar.anyx.Activities.MainActivity
 import com.jmnbehar.anyx.Classes.*
+import com.jmnbehar.anyx.Classes.GdaxApi.ErrorMessage
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
@@ -171,6 +172,8 @@ class TradeFragment : RefreshFragment() {
                     2 -> switchTradeType(newTradeType =  TradeType.STOP)
                     else -> switchTradeType(newTradeType =  TradeType.MARKET)
                 }
+                amountEditText.setText("")
+                limitEditText.setText("")
             }
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
@@ -269,6 +272,8 @@ class TradeFragment : RefreshFragment() {
             val selectedAccount = Account.forCurrency(selectedCurrency)
             if (selectedAccount != null) {
                 ChartFragment.account = selectedAccount
+                amountEditText.setText("")
+                limitEditText.setText("")
                 updateButtonsAndText()
             }
         }
@@ -315,7 +320,8 @@ class TradeFragment : RefreshFragment() {
 
             usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
 
-            cryptoBalanceLabelText.text = account.currency.toString()
+            usdBalanceLabelText.text = "USD Wallet Balance:"
+            cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
             cryptoBalanceText.text = account.balance.btcFormat()
         }
         updateTotalText()
@@ -360,14 +366,54 @@ class TradeFragment : RefreshFragment() {
         }.show()
     }
 
+    private fun tradeAmountSizeError(errorMessage: GdaxApi.ErrorMessage) : String {
+        var currency: Currency = when (errorMessage) {
+            ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
+            ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
+            ErrorMessage.BuyAmountTooSmallBch, ErrorMessage.BuyAmountTooLargeBch -> Currency.BCH
+            ErrorMessage.BuyAmountTooSmallLtc, ErrorMessage.BuyAmountTooLargeLtc -> Currency.LTC
+            else -> Currency.USD
+        }
+        var limit = when (errorMessage) {
+            ErrorMessage.BuyAmountTooSmallBtc -> "0.001"
+            ErrorMessage.BuyAmountTooSmallEth -> "0.01"
+            ErrorMessage.BuyAmountTooSmallBch -> "0.01"
+            ErrorMessage.BuyAmountTooSmallLtc -> "0.1"
+            ErrorMessage.BuyAmountTooLargeBtc -> "70"
+            ErrorMessage.BuyAmountTooLargeEth -> "700"
+            ErrorMessage.BuyAmountTooLargeBch -> "350"
+            ErrorMessage.BuyAmountTooLargeLtc -> "4000"
+            else -> "0"
+        }
+        return when (errorMessage) {
+            ErrorMessage.BuyAmountTooSmallBtc,
+            ErrorMessage.BuyAmountTooSmallEth,
+            ErrorMessage.BuyAmountTooSmallBch,
+            ErrorMessage.BuyAmountTooSmallLtc -> "Error: Amount too small. Minimum $currency buy amount is $limit"
+            ErrorMessage.BuyAmountTooLargeBtc,
+            ErrorMessage.BuyAmountTooLargeEth,
+            ErrorMessage.BuyAmountTooLargeBch,
+            ErrorMessage.BuyAmountTooLargeLtc ->  "Error: Amount too large. Maximum $currency buy amount is $limit"
+            else -> ""
+        }
+    }
+
     private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
-            val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
             val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-            if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
-                showPopup("Error: Amount too low", { })
-            } else {
-                showPopup("Error: " + result.errorMessage, { })
+            when (errorMessage) {
+                ErrorMessage.BuyAmountTooSmallBtc,
+                ErrorMessage.BuyAmountTooSmallEth,
+                ErrorMessage.BuyAmountTooSmallBch,
+                ErrorMessage.BuyAmountTooSmallLtc,
+                ErrorMessage.BuyAmountTooLargeBtc,
+                ErrorMessage.BuyAmountTooLargeEth,
+                ErrorMessage.BuyAmountTooLargeBch,
+                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage), { })
+
+                ErrorMessage.PriceTooAccurate,
+                ErrorMessage.InsufficientFunds -> showPopup("Error: " + result.errorMessage, { })
+                else -> showPopup("Error: " + result.errorMessage, { })
             }
         }
 
@@ -517,11 +563,14 @@ class TradeFragment : RefreshFragment() {
         when (tradeType) {
             TradeType.MARKET -> {
                 val marketTab = tradeTypeTabLayout.getTabAt(0)
+                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
+
                 marketTab?.select()
                 limitLayout.visibility = View.INVISIBLE
             }
             TradeType.LIMIT -> {
                 val limitTab = tradeTypeTabLayout.getTabAt(1)
+                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 limitTab?.select()
                 limitUnitText.text = localCurrency
                 limitLayout.visibility = View.VISIBLE
@@ -555,6 +604,7 @@ class TradeFragment : RefreshFragment() {
                 advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
             }
             TradeType.STOP -> {
+                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 val stopTab = tradeTypeTabLayout.getTabAt(2)
                 stopTab?.select()
                 limitUnitText.text = localCurrency

@@ -5,7 +5,7 @@
     <item android:state_checked="true" android:state_window_focused="false"
         android:drawable="@color/anyx_green" />
     <item android:state_checked="false" android:state_window_focused="false"
-        android:drawable="@color/transparent" />
+        android:drawable="@color/anyx_green_transparent" />
 
     <item android:state_checked="true" android:state_pressed="true"
         android:drawable="@color/anyx_green" />
@@ -15,8 +15,8 @@
     <item android:state_checked="true" android:state_focused="true"
         android:drawable="@color/anyx_green" />
     <item android:state_checked="false" android:state_focused="true"
-        android:drawable="@color/transparent" />
+        android:drawable="@color/anyx_green_transparent" />
 
-    <item android:state_checked="false" android:drawable="@color/transparent" />
+    <item android:state_checked="false" android:drawable="@color/anyx_green_transparent" />
     <item android:state_checked="true" android:drawable="@color/anyx_green" />
 </selector>

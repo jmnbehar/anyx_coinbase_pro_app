@@ -658,10 +658,10 @@ sealed class GdaxApi: FuelRouting {
                 BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"
                 BuyAmountTooSmallBch -> "size is too small. Minimum size is 0.01"
                 BuyAmountTooSmallLtc -> "size is too small. Minimum size is 0.1"
-                BuyAmountTooLargeBtc -> "size is too large. Maximum size is "
+                BuyAmountTooLargeBtc -> "size is too large. Maximum size is 70"
                 BuyAmountTooLargeEth -> "size is too large. Maximum size is 700"
-                BuyAmountTooLargeBch -> "size is too large. Maximum size is "
-                BuyAmountTooLargeLtc -> "size is too large. Maximum size is "
+                BuyAmountTooLargeBch -> "size is too large. Maximum size is 350"
+                BuyAmountTooLargeLtc -> "size is too large. Maximum size is 4000"
                 PriceTooAccurate  -> "price is too accurate. Smallest unit is 0.01000000"
                 InsufficientFunds -> "Insufficient funds"
             }

@@ -336,7 +336,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
         notificationManager?.notify(notificationTag, 0, notificationBuilder.build())
-
         val prefs = Prefs(this)
         prefs.removeAlert(alert)
     }
@@ -346,8 +345,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-//            R.id.nav_deposit -> FragmentType.DEPOSIT
-//            R.id.nav_withdraw -> FragmentType.WITHDRAW
+            R.id.nav_deposit -> FragmentType.DEPOSIT
+            R.id.nav_withdraw -> FragmentType.WITHDRAW
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME

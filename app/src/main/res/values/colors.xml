@@ -11,6 +11,9 @@
     <color name="anyx_green">#00c46e</color>
     <color name="anyx_red">#ec4419</color>
 
+    <color name="anyx_green_transparent">#4000c46e</color>
+    <color name="anyx_red_transparent">#40ec4419</color>
+
     <color name="anyx_green_accent">#00ee88</color>
     <color name="anyx_red_accent">#ea5e3b</color>
 

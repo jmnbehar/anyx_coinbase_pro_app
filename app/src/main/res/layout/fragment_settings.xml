@@ -49,10 +49,17 @@
             android:visibility="gone" />
 
         <Button
-            android:id="@+id/btn_setting_show_disclaimer"
+            android:id="@+id/btn_setting_show_gdax_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="read legal disclaimer so i don't get sued" />
+            android:text="Read Coinbase/Gdax EULA" />
+
+        <Button
+            android:id="@+id/btn_setting_show_anyx_eula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Read AnyX EULA"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_setting_verify_account"

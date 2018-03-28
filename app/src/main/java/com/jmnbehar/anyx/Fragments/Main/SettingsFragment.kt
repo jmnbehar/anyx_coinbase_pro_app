@@ -48,7 +48,7 @@ class SettingsFragment : RefreshFragment() {
         titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
         verifyButton = rootView.btn_setting_verify_account
-        disclaimerButton = rootView.btn_setting_show_disclaimer
+        disclaimerButton = rootView.btn_setting_show_gdax_eula
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
@@ -178,7 +178,7 @@ class SettingsFragment : RefreshFragment() {
 
             AnyxApi.Verify(credentials.apiKey, currency ?: Currency.BTC).executePost({
                 doneLoading()
-                toast("Cannot access AnyX servers.")
+                toast("Account verification not available right now. Try again later.")
             }, { result ->
                 doneLoading()
                 val intent = Intent(activity, VerifyActivity::class.java)
