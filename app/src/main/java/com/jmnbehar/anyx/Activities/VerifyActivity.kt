@@ -43,6 +43,8 @@ class VerifyActivity : AppCompatActivity() {
     var verificationFundSource: VerificationFundSource? = null
     var verifyStatus: VerificationStatus? = null
 
+    var blockBackButton = false
+
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -69,11 +71,11 @@ class VerifyActivity : AppCompatActivity() {
 
         isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
 
-        val verifyExtraAmount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
+        amountString = intent.getStringExtra(Constants.verifyAmount) ?: "0.0"
         val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
         val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
 
-        amountString = verifyExtraAmount.toString()
+        val verifyExtraAmount = amountString.toDouble()
         currency = Currency.forString(currencyStr) ?: Currency.BTC
         verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 
@@ -151,14 +153,17 @@ class VerifyActivity : AppCompatActivity() {
         viewPager.adapter?.notifyDataSetChanged()
         viewPager.setCurrentItem(currentPage, true)
         viewPager.isLocked = true
+        blockBackButton = true
     }
 
     override fun onBackPressed() {
-        if (currentPage > 0) {
-            currentPage -= 1
-            viewPager.setCurrentItem(currentPage, true)
-        } else {
-            super.onBackPressed()
+        if (!blockBackButton) {
+            if (currentPage > 0) {
+                currentPage -= 1
+                viewPager.setCurrentItem(currentPage, true)
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 

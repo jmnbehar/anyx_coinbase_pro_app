@@ -194,15 +194,10 @@ class SettingsFragment : RefreshFragment() {
                 if (byteArray != null) {
                     val responseString = String(byteArray)
                     val dataAmount: AnyXVerify = Gson().fromJson(responseString, object : TypeToken<AnyXVerify>() {}.type)
-                    val amount = dataAmount.data.amount.toDoubleOrNull()
-                    if (amount != null) {
-                        intent.putExtra(Constants.verifyAmount, amount)
-                        intent.putExtra(Constants.verifyCurrency, currency.toString())
-                        intent.putExtra(Constants.verifyFundSource, verificationFundSource.toString())
-                        startActivity(intent)
-                    } else {
-                        toast("Error")
-                    }
+                    intent.putExtra(Constants.verifyAmount, dataAmount.data.amount)
+                    intent.putExtra(Constants.verifyCurrency, currency.toString())
+                    intent.putExtra(Constants.verifyFundSource, verificationFundSource.toString())
+                    startActivity(intent)
                 } else {
                     toast("Error")
                 }
