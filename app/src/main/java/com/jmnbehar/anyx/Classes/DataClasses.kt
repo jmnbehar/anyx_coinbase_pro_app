@@ -58,6 +58,11 @@ data class AnyXVerifyInner(
         val amount: String
 )
 
+data class AnyXIsVerified (
+        val verified: Boolean,
+        val status: String?
+)
+
 data class ApiProduct(
         val id: String,
         val base_currency: String,

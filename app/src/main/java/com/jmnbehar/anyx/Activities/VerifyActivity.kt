@@ -38,6 +38,7 @@ class VerifyActivity : AppCompatActivity() {
 
     var email = ""
     var amount = 0.0
+    var amountString = ""
     var currency: Currency = Currency.BTC
     var verificationFundSource: VerificationFundSource? = null
     var verifyStatus: VerificationStatus? = null
@@ -71,6 +72,8 @@ class VerifyActivity : AppCompatActivity() {
         val verifyExtraAmount = intent.getDoubleExtra(Constants.verifyAmount, 0.0)
         val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
         val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
+
+        amountString = verifyExtraAmount.toString()
         currency = Currency.forString(currencyStr) ?: Currency.BTC
         verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 

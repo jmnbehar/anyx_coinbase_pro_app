@@ -80,6 +80,16 @@ class VerifySendFragment : Fragment() {
             }
         }
 
+    private val verifyAmountString: String
+        get() {
+            return if (activity is VerifyActivity) {
+                val activity = (activity as VerifyActivity)
+                activity.amountString
+            } else {
+                ""
+            }
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_verify_send, container, false)
@@ -159,12 +169,12 @@ class VerifySendFragment : Fragment() {
 
             val timestamp = (Date().timeInSeconds()).toString()
             //TODO: add spinner to verification activity
-            AnyxApi.VerificationSent(apiKey, email).executePost({ error ->
-                showPopup("Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+            AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
+                showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
                     sendVerificationEmail(timestamp)
                     goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
                 }, "Cancel", {
-                    showPopup("Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+                    showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
                             "OK", {
                         goToVerificationComplete(VerificationStatus.RepayError)
                     },
@@ -177,6 +187,25 @@ class VerifySendFragment : Fragment() {
                 goToVerificationComplete(VerificationStatus.Success)
             }, 3)
         })
+
+//        val timestamp = (Date().timeInSeconds()).toString()
+//        AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
+//            showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+//                sendVerificationEmail(timestamp)
+//                goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//            }, "Cancel", {
+//                showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+//                        "OK", {
+//                    goToVerificationComplete(VerificationStatus.RepayError)
+//                },
+//                        "Send Email", {
+//                    sendVerificationEmail(timestamp)
+//                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//                })
+//            })
+//        }, { result ->
+//            goToVerificationComplete(VerificationStatus.Success)
+//        }, 3)
     }
     private fun goToVerificationComplete(verificationStatus: VerificationStatus) {
         val prefs = Prefs(context!!)
@@ -189,9 +218,10 @@ class VerifySendFragment : Fragment() {
         (activity as VerifyActivity).verificationComplete(verificationStatus)
     }
 
-    private fun showPopup(string: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+    private fun showPopup(titleString: String, messageString: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
         alert {
-            title = string
+            title = titleString
+            message = messageString
             positiveButton(positiveText) { positiveAction() }
             if (negativeText != null) {
                 negativeButton(negativeText) { negativeAction() }
@@ -204,8 +234,8 @@ class VerifySendFragment : Fragment() {
         val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.fromParts(
                 "mailto", "anyx.verification@gmail.com", null))
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "AnyX Verification")
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "AnyX Account was properly verified, but we had trouble with our repayment system. Please do not edit the details in this email or we will not be able to process repayment. " +
-                "Do not edit: Sent $amount $currency at $timestamp from $credentials, repay to $email")
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Your AnyX Account was properly verified, but we had trouble with our repayment system. Please do not edit the details in this email or we will not be able to process repayment. " +
+                "\n\nDo not edit: Sent $amount $currency at $timestamp from $credentials, repay to $email")
         startActivity(Intent.createChooser(emailIntent, "Send email..."))
     }
 
@@ -216,22 +246,41 @@ class VerifySendFragment : Fragment() {
 
 
     fun updateViews() {
-        val price = "PRICE"
+        val account = Account.forCurrency(currency)
+        val price = account?.product?.price
         when (verificationFundSource) {
             VerificationFundSource.GDAX -> {
                 sendInfoText.text = "To verify your account we will send"
-                sendAmountText.text = "${amount.btcFormatShortened()} $currency"
+                var amountString = "${amount.btcFormatShortened()} $currency"
+                if (price != null) {
+                    val value = price * amount
+                    amountString += ", about ${value.fiatFormat()},"
+                }
+                sendAmountText.text = amountString
                 sendInfo2Text.text = "to AnyX, which we will send right back to your Coinbase account with email $email."
                 progressBar.visibility = View.GONE
             }
             VerificationFundSource.Coinbase -> {
                 sendInfoText.text = "To verify your account we will transfer "
-                sendAmountText.text = "${amount.btcFormatShortened()} $currency from your Coinbase account to your GDAX account,"
-                sendInfo2Text.text = "and then send it to AnyX, which we will send right back to your Coinbase account with email $email."
+
+                var amountString = "${amount.btcFormatShortened()} $currency"
+                if (price != null) {
+                    val value = price * amount
+                    amountString += "(${value.fiatFormat()})"
+                }
+                sendAmountText.text = amountString
+                sendAmountText.text = "${amount.btcFormatShortened()} $currency from your Coinbase account to your GDAX account, " +
+                        "and then send it to AnyX, which we will send right back to your Coinbase account with email $email."
+                sendInfo2Text.text = ""
                 progressBar.visibility = View.GONE
             }
             VerificationFundSource.Buy -> {
-                sendInfoText.text = "To verify your account we will buy ${currency.minBuyAmount.btcFormatShortened()} $currency (Gdax's minimum purchase amount) for market price, about $price."
+                var amountString = "To verify your account we will buy ${currency.minBuyAmount.btcFormatShortened()} $currency (Gdax's minimum purchase amount) for market price"
+                if (price != null) {
+                    val value = price * amount
+                    amountString += ", about ${value.fiatFormat()}."
+                }
+                sendInfoText.text = amountString
                 sendAmountText.text = ""
                 sendInfo2Text.text = "We will then send ${amount.btcFormatShortened()} $currency to AnyX, which we will send right back to your Coinbase account with email $email."
                 progressBar.visibility = View.GONE
