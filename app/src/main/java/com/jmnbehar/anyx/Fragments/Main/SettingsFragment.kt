@@ -2,6 +2,7 @@ package com.jmnbehar.anyx.Fragments.Main
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -89,7 +91,7 @@ class SettingsFragment : RefreshFragment() {
             }, {
                 if (Account.list.isNotEmpty()) {
                     val nonEmptyAccounts = Account.list.filter { account -> account.balance >= account.currency.maxVerifyAmount }
-                    verifyAccount     = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
+                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
                     if (verifyAccount == null) {
                         verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
                         if (verifyAccount == null) {
@@ -135,6 +137,11 @@ class SettingsFragment : RefreshFragment() {
 ////            intent.putExtra(Constants.isMobileLoginHelp, true)
 //
 //            startActivity(intent)
+        }
+
+        disclaimerButton.onClick {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
+            startActivity(browserIntent)
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal

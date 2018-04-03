@@ -11,8 +11,8 @@
     <color name="anyx_green">#00c46e</color>
     <color name="anyx_red">#ec4419</color>
 
-    <color name="anyx_green_transparent">#4000c46e</color>
-    <color name="anyx_red_transparent">#40ec4419</color>
+    <color name="anyx_green_transparent">#3000c46e</color>
+    <color name="anyx_red_transparent">#30ec4419</color>
 
     <color name="anyx_green_accent">#00ee88</color>
     <color name="anyx_red_accent">#ea5e3b</color>
@@ -192,7 +192,6 @@
     <color name="black">#000000</color>
     <color name="light_green">#2ecc71</color>
     <color name="deep_purple">#9b59b6</color>
-    <color name="dark_grey">#34495e</color>
     <color name="deep_green">#27ae60</color>
     <color name="deep_blue">#2980b9</color>
     <color name="light_red">#e74c3c</color>

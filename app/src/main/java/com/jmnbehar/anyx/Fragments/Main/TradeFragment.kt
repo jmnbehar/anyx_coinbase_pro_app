@@ -1,5 +1,6 @@
 package com.jmnbehar.anyx.Fragments.Main
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.text.Editable
