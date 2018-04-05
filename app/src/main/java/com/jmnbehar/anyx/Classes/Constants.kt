@@ -22,6 +22,8 @@ val DEV_FEE_PERCENTAGE : Double
         return 0.001
     }
 
+val defaultVerificationCurrency = Currency.ETH
+
 object TimeInSeconds {
     const val halfMinute: Long = 30
     const val oneMinute: Long = 60

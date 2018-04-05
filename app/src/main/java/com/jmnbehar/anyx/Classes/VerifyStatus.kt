@@ -10,7 +10,6 @@ import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
 enum class VerificationStatus {
     Success,
     RepayError,
-    RepayErrorEmailed,
     NoTransferPermission,
     NoTradePermission,
     NoTwoFactorPermission,
@@ -22,7 +21,6 @@ enum class VerificationStatus {
     val isVerified: Boolean
         get() = when (this) {
                 VerificationStatus.Success           -> true
-                VerificationStatus.RepayErrorEmailed -> true
                 VerificationStatus.RepayError        -> true
                 VerificationStatus.NoTransferPermission  -> false
                 VerificationStatus.NoTradePermission     -> false

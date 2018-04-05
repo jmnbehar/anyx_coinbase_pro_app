@@ -34,6 +34,9 @@ import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -502,5 +505,96 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    fun launchVerificationActivity() {
+        var verifyAccount: Account? = null
+        GdaxApi.accounts().updateAllAccounts({ result ->
+            toast("Gdax Server Error")
+        }, {
+            if (Account.list.isNotEmpty()) {
+                val nonEmptyAccounts = Account.list.filter { account -> account.balance >= account.currency.maxVerifyAmount }
+                verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
+                if (verifyAccount == null) {
+                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
+                    if (verifyAccount == null) {
+                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
+                        if (verifyAccount == null) {
+                            verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.LTC }
+                        }
+                    }
+                }
+            }
+            if (verifyAccount != null) {
+                val currency = verifyAccount!!.currency
+                launchVerificationActivity(currency, VerificationFundSource.GDAX)
+            } else {
+                GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
+                    checkFundsForVerification()
+                }, {
+                    val cbAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+                    val nonEmptyCBAccounts = cbAccounts.filter { cbAccount -> cbAccount.balance > cbAccount.currency.maxVerifyAmount }
+                    var verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.ETH }
+                    if (verifyCBAccount == null) {
+                        verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BTC }
+                        if (verifyCBAccount == null) {
+                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BCH }
+                            if (verifyCBAccount == null) {
+                                verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.LTC }
+                            }
+                        }
+                    }
+                    if (verifyCBAccount == null) {
+                        checkFundsForVerification()
+                    } else {
+                        launchVerificationActivity(verifyCBAccount.currency, VerificationFundSource.Coinbase)
+                    }
+                })
+            }
+        })
+    }
+
+    private fun checkFundsForVerification() {
+        val fiatBalance = Account.usdAccount?.balance
+        val defaultProductPrice = Account.forCurrency(defaultVerificationCurrency)?.product?.price ?: 9999999.0
+        val minBuyValue = defaultVerificationCurrency.minBuyAmount * defaultProductPrice
+
+        //TODO: convert this to popup
+        if (fiatBalance == null) {
+            showPopup("Error","Your account cannot be verified because it currently has no funds.", "OK", { })
+        } else if (fiatBalance == 0.0) {
+            showPopup("Error","Your account cannot be verified because it currently has no funds.", "OK", { })
+        } else if (fiatBalance < minBuyValue)  {
+            val balanceDifference = minBuyValue - fiatBalance + 1.0
+            showPopup("Error","Your account cannot be verified because it currently has insufficient funds. Please add at least ${balanceDifference.fiatFormat()}.", "OK", { })
+        } else {
+            launchVerificationActivity(defaultVerificationCurrency, VerificationFundSource.Buy)
+        }
+//        GdaxApi.paymentMethods().get({
+//            toast("Please add payment methods to verify")
+//        }, {   paymentMethods ->
+//            if (paymentMethods.isNotEmpty()) {
+//                launchVerificationActivity(defaultVerificationCurrency, VerificationFundSource.Buy)
+//            } else {
+//                toast("Please add payment methods to verify")
+//            }
+//        })
+    }
+
+    private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+        alert {
+            title = titleString
+            message = messageString
+            positiveButton(positiveText) { positiveAction() }
+            if (negativeText != null) {
+                negativeButton(negativeText) { negativeAction() }
+            }
+        }.show()
+    }
+
+    private fun launchVerificationActivity(currency: Currency?, verificationFundSource: VerificationFundSource) {
+        val intent = Intent(this, VerifyActivity::class.java)
+        intent.putExtra(Constants.verifyCurrency, currency.toString())
+        intent.putExtra(Constants.verifyFundSource, verificationFundSource.toString())
+        startActivity(intent)
+    }
 
 }

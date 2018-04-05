@@ -646,8 +646,9 @@ sealed class GdaxApi: FuelRouting {
         PriceTooAccurate,
         InsufficientFunds,
 
-        //Cb withdraw/deposit:
-        TransferAmountTooLow;
+        //Transfer:
+        TransferAmountTooLow,
+        InvalidCryptoAddress;
 
         override fun toString(): String {
             return when (this) {
@@ -672,6 +673,7 @@ sealed class GdaxApi: FuelRouting {
                 InsufficientFunds -> "Insufficient funds"
 
                 TransferAmountTooLow -> "amount must be a positive number"
+                InvalidCryptoAddress -> "invalid crypto_address"
             }
         }
 

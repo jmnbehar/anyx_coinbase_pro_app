@@ -76,6 +76,18 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1" />
+
+                            <TextView
+                                android:text=""
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <TextView
+                                android:id="@+id/txt_trade_crypto_current_price_label"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
                         </LinearLayout>
 
                         <Space
@@ -97,6 +109,20 @@
 
                             <TextView
                                 android:id="@+id/txt_trade_crypto_balance"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAlignment="textEnd" />
+
+                            <TextView
+                                android:text=""
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAlignment="textEnd" />
+
+                            <TextView
+                                android:id="@+id/txt_trade_crypto_current_price"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"

@@ -40,6 +40,8 @@ class TradeFragment : RefreshFragment() {
     private lateinit var usdBalanceLabelText: TextView
     private lateinit var cryptoBalanceText: TextView
     private lateinit var cryptoBalanceLabelText: TextView
+    private lateinit var currentPriceLabelText: TextView
+    private lateinit var currentPriceText: TextView
 
     private lateinit var tradeTypeTabLayout: TabLayout
 
@@ -110,6 +112,8 @@ class TradeFragment : RefreshFragment() {
         usdBalanceLabelText = rootView.txt_trade_usd_balance_label
         cryptoBalanceText = rootView.txt_trade_crypto_balance
         cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
+        currentPriceLabelText = rootView.txt_trade_crypto_current_price_label
+        currentPriceText = rootView.txt_trade_crypto_current_price
 
         advancedOptionsCheckBox = rootView.cb_trade_advanced
         advancedOptionsLayout = rootView.layout_trade_advanced
@@ -324,6 +328,9 @@ class TradeFragment : RefreshFragment() {
             usdBalanceLabelText.text = "USD Wallet Balance:"
             cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
             cryptoBalanceText.text = account.balance.btcFormat()
+
+            currentPriceLabelText.text = "Current ${account.currency} Price:"
+            currentPriceText.text = account.product.price.fiatFormat()
         }
         updateTotalText()
 

@@ -30,26 +30,6 @@ class VerifyCompleteFragment : Fragment() {
     private lateinit var infoText: TextView
     private lateinit var statusImageView: ImageView
 
-    private val email: String
-        get() {
-            return if (activity is VerifyActivity) {
-                val activity = (activity as VerifyActivity)
-                activity.email
-            } else {
-                ""
-            }
-        }
-
-    private val amount: Double
-        get() {
-            return if (activity is VerifyActivity) {
-                val activity = (activity as VerifyActivity)
-                activity.amount
-            } else {
-                0.0
-            }
-        }
-
     private val currency: Currency
         get() {
             return if (activity is VerifyActivity) {
@@ -90,10 +70,8 @@ class VerifyCompleteFragment : Fragment() {
             statusImageView.setImageResource(R.drawable.fail_icon)
         }
         infoText.text = when (verifyStatus) {
-            VerificationStatus.Success -> "\n\nYour account is verified, and your ${amount.btcFormatShortened()} $currency will be returned to your Coinbase Account with email $email within two days."
-            VerificationStatus.RepayErrorEmailed -> "\n\nYour account is verified, we will review the email you sent us and your ${amount.btcFormatShortened()} $currency will be returned to your Coinbase Account with email $email."
-            VerificationStatus.RepayError -> "Your account is verified, but there was a problem with our servers so you may not be automatically repaid. " +
-                    "\n\nIf you don't receive your ${amount.btcFormatShortened()} $currency in your Coinbase Account within two days, please reach out to our verification support at anyx.verify@gmail.com"
+            VerificationStatus.Success -> "Woohoo!\nYour account is verified"
+            VerificationStatus.RepayError -> "Due to an unknown error, you may have lost a very small quantity of $currency. Please reach out to our verification support at anyx.verify@gmail.com"
             VerificationStatus.NoTransferPermission -> missingPermissionString("Transfer")
             VerificationStatus.NoTradePermission -> missingPermissionString("Trade")
             VerificationStatus.NoTwoFactorPermission -> missingPermissionString("Bypass Two-Factor Auth")

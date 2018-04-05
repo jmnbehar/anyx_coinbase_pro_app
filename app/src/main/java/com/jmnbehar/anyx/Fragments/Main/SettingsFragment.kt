@@ -85,58 +85,7 @@ class SettingsFragment : RefreshFragment() {
 //        }
 
         verifyButton.setOnClickListener  {
-            var verifyAccount: Account? = null
-            GdaxApi.accounts().updateAllAccounts({ result ->
-                toast("Gdax Server Error")
-            }, {
-                if (Account.list.isNotEmpty()) {
-                    val nonEmptyAccounts = Account.list.filter { account -> account.balance >= account.currency.maxVerifyAmount }
-                    verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.ETH }
-                    if (verifyAccount == null) {
-                        verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BTC }
-                        if (verifyAccount == null) {
-                            verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.BCH }
-                            if (verifyAccount == null) {
-                                verifyAccount = nonEmptyAccounts.find { account -> account.currency == Currency.LTC }
-                            }
-                        }
-                    }
-                }
-                if (verifyAccount != null) {
-                    val currency = verifyAccount!!.currency
-                    launchVerificationActivity(currency, VerificationFundSource.GDAX)
-                } else {
-                    GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
-                        launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
-                    }, {
-                        val cbAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-                        val nonEmptyCBAccounts = cbAccounts.filter { cbAccount -> cbAccount.balance > cbAccount.currency.maxVerifyAmount }
-                        var verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.ETH }
-                        if (verifyCBAccount == null) {
-                            verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BTC }
-                            if (verifyCBAccount == null) {
-                                verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.BCH }
-                                if (verifyCBAccount == null) {
-                                    verifyCBAccount = nonEmptyCBAccounts.find { account -> account.currency == Currency.LTC }
-                                }
-                            }
-                        }
-                        if (verifyCBAccount == null) {
-                            //TODO: check on payment methods, consider moving cash from coinbase
-                            launchVerificationActivity(Currency.ETH, VerificationFundSource.Buy)
-                        } else {
-                            launchVerificationActivity(verifyCBAccount.currency, VerificationFundSource.Coinbase)
-                        }
-                    })
-                }
-
-
-            })
-
-//            val intent = Intent(activity, VerifyActivity::class.java)
-////            intent.putExtra(Constants.isMobileLoginHelp, true)
-//
-//            startActivity(intent)
+            (activity as MainActivity).launchVerificationActivity()
         }
 
         disclaimerButton.onClick {
@@ -177,31 +126,4 @@ class SettingsFragment : RefreshFragment() {
         return rootView
     }
 
-
-    fun launchVerificationActivity(currency: Currency?, verificationFundSource: VerificationFundSource) {
-        val credentials = GdaxApi.credentials
-        (activity as MainActivity).showProgressBar()
-        if (credentials != null) {
-
-            AnyxApi.Verify(credentials.apiKey, currency ?: Currency.BTC).executePost({
-                doneLoading()
-                toast("Account verification not available right now. Try again later.")
-            }, { result ->
-                doneLoading()
-                val intent = Intent(activity, VerifyActivity::class.java)
-
-                val byteArray = result.component1()
-                if (byteArray != null) {
-                    val responseString = String(byteArray)
-                    val dataAmount: AnyXVerify = Gson().fromJson(responseString, object : TypeToken<AnyXVerify>() {}.type)
-                    intent.putExtra(Constants.verifyAmount, dataAmount.data.amount)
-                    intent.putExtra(Constants.verifyCurrency, currency.toString())
-                    intent.putExtra(Constants.verifyFundSource, verificationFundSource.toString())
-                    startActivity(intent)
-                } else {
-                    toast("Error")
-                }
-            })
-        }
-    }
 }
