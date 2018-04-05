@@ -14,9 +14,11 @@ import com.jmnbehar.anyx.R
 import android.widget.Button
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.Fragments.Verify.VerifyCompleteFragment
+import com.jmnbehar.anyx.Fragments.Verify.VerifyIntroFragment
 import com.jmnbehar.anyx.Fragments.Verify.VerifySendFragment
 import kotlinx.android.synthetic.main.activity_verify.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.toast
 
 
 class VerifyActivity : AppCompatActivity() {
@@ -25,7 +27,7 @@ class VerifyActivity : AppCompatActivity() {
     var nextBtn:Button? = null
 
     internal var currentPage = 0   //  to track page position
-    var pageCount = 1
+    var pageCount = 2
 
     var currency: Currency = Currency.BTC
     var verificationFundSource: VerificationFundSource? = null
@@ -33,15 +35,8 @@ class VerifyActivity : AppCompatActivity() {
 
     var blockBackButton = false
 
+    var isEulaAccepted = false
 
-    /**
-     * The [android.support.v4.view.PagerAdapter] that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * [android.support.v4.app.FragmentStatePagerAdapter].
-     */
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,12 +49,13 @@ class VerifyActivity : AppCompatActivity() {
 
         nextBtn = btn_verify_next
 
-        nextBtn?.visibility = View.GONE
+        nextBtn?.visibility = View.VISIBLE
+        nextBtn?.text = "Next"
 
-        val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: "BTC"
+        val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: ""
         val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
 
-        currency = Currency.forString(currencyStr) ?: Currency.BTC
+        currency = Currency.forString(currencyStr) ?: defaultVerificationCurrency
         verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 
         // Set up the ViewPager with the sections adapter.
@@ -71,13 +67,17 @@ class VerifyActivity : AppCompatActivity() {
             override fun onPageScrollStateChanged(state: Int) {}
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+                if (!isEulaAccepted && position == 1 && positionOffset > 0) {
+                    toast("Please accept agreement")
+                }
             }
 
             override fun onPageSelected(position: Int) {
                 currentPage = position
                 when (position) {
-                    0 -> nextBtn?.visibility = View.GONE
-                    1 -> {
+                    0 -> nextBtn?.visibility = View.VISIBLE
+                    1 -> nextBtn?.visibility = View.GONE
+                    2 -> {
                         nextBtn?.visibility = View.VISIBLE
                         nextBtn?.text = "Done"
                         nextBtn?.onClick { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
@@ -90,24 +90,12 @@ class VerifyActivity : AppCompatActivity() {
             currentPage += 1
             viewPager.setCurrentItem(currentPage, true)
         }
-
-    }
-
-
-    fun confirmEmail(email: String) {
-        pageCount = 1
-        viewPager.adapter?.notifyDataSetChanged()
-    }
-
-    fun blankEmail(failMessage: String) {
-        pageCount = 1
-        viewPager.adapter?.notifyDataSetChanged()
     }
 
     fun verificationComplete(verificationStatus: VerificationStatus) {
         verifyStatus = verificationStatus
-        pageCount = 2
-        currentPage = 1
+        pageCount = 3
+        currentPage = (pageCount - 1)
         viewPager.adapter?.notifyDataSetChanged()
         viewPager.setCurrentItem(currentPage, true)
         viewPager.isLocked = true
@@ -125,27 +113,21 @@ class VerifyActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-
         if (id == R.id.action_settings) {
             return true
         }
-
         return super.onOptionsItemSelected(item)
     }
 
-
-    /**
-     * A [FragmentPagerAdapter] that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             return when (position) {
-                0 -> VerifySendFragment.newInstance()
-                1 -> VerifyCompleteFragment.newInstance()
+                0 -> VerifyIntroFragment.newInstance()
+                1 -> VerifySendFragment.newInstance()
+                2 -> VerifyCompleteFragment.newInstance()
                 else -> VerifySendFragment.newInstance()
             }
         }

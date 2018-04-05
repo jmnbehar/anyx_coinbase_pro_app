@@ -38,6 +38,6 @@
             android:id="@+id/btn_verify_send"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send" />
+            android:text="Verify" />
     </LinearLayout>
 </LinearLayout>

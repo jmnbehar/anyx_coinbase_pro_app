@@ -208,7 +208,7 @@ class VerifySendFragment : Fragment() {
         val account = Account.forCurrency(currency)
         val price = account?.product?.price
         //TODO: overhaul this text
-        val amount = currency.minSendAmount //TODO: change to min CB send amount
+        val amount = currency.minSendAmount
         when (verificationFundSource) {
             VerificationFundSource.GDAX -> {
                 sendInfoText.text = "To verify your account we will test to ensure that your API Key has all required permissions." +
@@ -227,9 +227,9 @@ class VerifySendFragment : Fragment() {
             }
             VerificationFundSource.Buy -> {
                 var amountString =  "To verify your account we will test to ensure that your API Key has all required permissions." +
-                        "\n\nTo do this we will send a small amount of Cryptocurrency to your own Coinbase account and then send it right back. " +
-                        "\n\nBecause your account currently does not hold any crypto assets, we will buy ${currency.minBuyAmount.btcFormatShortened()}" +
-                        " $currency (Gdax's minimum purchase amount) for market price"
+                        "\n\nTo do this we will send a small amount of cryptocurrency to your own Coinbase account and then send it right back. " +
+                        "\n\nBecause your account currently does not hold any crypto assets, we will buy ${currency.minBuyAmount.btcFormatShortened()} " +
+                        "$currency (Gdax's minimum purchase amount) for market price"
                 if (price != null) {
                     val value = price * amount
                     amountString += ", about ${value.fiatFormat()},"
@@ -239,8 +239,7 @@ class VerifySendFragment : Fragment() {
                 progressBar.visibility = View.INVISIBLE
             }
             else -> {
-                //TODO: handle this error
-                assert(false)
+                goToVerificationComplete(VerificationStatus.UnknownError)
             }
         }
     }

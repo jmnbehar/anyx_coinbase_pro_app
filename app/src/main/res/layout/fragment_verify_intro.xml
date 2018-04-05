@@ -29,5 +29,17 @@
             android:text="In order to buy, sell, or send crypto assets you need to verify that your account has the proper permissions.
             \nTo do this, we'll test sending a small amount to AnyX, and if it goes through we will send it right back.
             \nDue to limitations with the GDAX API, we'll have to send it to your Coinbase account, which you can easily retreive to your GDAX account using the Withdraw/Deposit feature in AnyX." />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="20" />
+
+        <CheckBox
+            android:id="@+id/cb_accept_eula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="I accept"
+            android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>
