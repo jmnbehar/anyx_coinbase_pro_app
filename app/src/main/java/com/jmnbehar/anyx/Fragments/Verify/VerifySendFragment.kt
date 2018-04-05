@@ -247,15 +247,16 @@ class VerifySendFragment : Fragment() {
 
 //        val timestamp = (Date().timeInSeconds()).toString()
 //        AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
+//            (activity as VerifyActivity).blockBackButton = true
 //            showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
 //                sendVerificationEmail(timestamp)
 //                goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
 //            }, "Cancel", {
-//                showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
-//                        "OK", {
+//                showPopup("Are you sure?", "Are you sure you don't want to send an email? Your ${amount.btcFormatShortened()} $currency might not be repaid.",
+//                "OK", {
 //                    goToVerificationComplete(VerificationStatus.RepayError)
 //                },
-//                        "Send Email", {
+//                "Send Email", {
 //                    sendVerificationEmail(timestamp)
 //                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
 //                })
@@ -292,7 +293,7 @@ class VerifySendFragment : Fragment() {
                 "mailto", "anyx.verification@gmail.com", null))
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "AnyX Verification")
         emailIntent.putExtra(Intent.EXTRA_TEXT, "Your AnyX Account was properly verified, but we had trouble with our repayment system. Please do not edit the details in this email or we will not be able to process repayment. " +
-                "\n\nDo not edit: Sent $amount $currency at $timestamp from $credentials, repay to $email")
+                "\n\nDo not edit: Sent ${amount.btcFormatShortened()} $currency at $timestamp from $credentials, repay to $email")
         startActivity(Intent.createChooser(emailIntent, "Send email..."))
     }
 
