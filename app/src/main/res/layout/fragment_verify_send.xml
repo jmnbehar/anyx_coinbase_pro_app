@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="To verify your account we will send "
-            android:textSize="23sp" />
+            android:textSize="20sp" />
 
         <ProgressBar
             android:id="@+id/progress_bar_verify_send"

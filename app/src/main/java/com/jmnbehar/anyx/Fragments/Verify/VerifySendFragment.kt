@@ -139,7 +139,7 @@ class VerifySendFragment : Fragment() {
                 toast("Unknown Error: Try again later")
             } else {
 
-                val transferAmount = currency.minSendAmount //TODO: change to min CB send amount
+                val transferAmount = currency.minSendAmount
                 GdaxApi.sendToCoinbase(transferAmount, currency, coinbaseAccount.id).executePost( { result ->
                     val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
@@ -169,7 +169,6 @@ class VerifySendFragment : Fragment() {
                         goToVerificationComplete(VerificationStatus.Success)
                         GdaxApi.getFromCoinbase(transferAmount, currency, coinbaseAccount.id).executePost({},{})
                     })
-
                     //TODO: add spinner to verification activity
                     //TODO: consider shooting off a request to the AnyX server
                 })
@@ -209,36 +208,35 @@ class VerifySendFragment : Fragment() {
         val account = Account.forCurrency(currency)
         val price = account?.product?.price
         //TODO: overhaul this text
-
         val amount = currency.minSendAmount //TODO: change to min CB send amount
         when (verificationFundSource) {
             VerificationFundSource.GDAX -> {
-                sendInfoText.text = "To verify your account we will send"
+                sendInfoText.text = "To verify your account we will test to ensure that your API Key has all required permissions." +
+                        "\n\nTo do this we will send a small amount of $currency to your own Coinbase account and then send it right back."
                 var amountString = "${amount.btcFormatShortened()} $currency"
                 if (price != null) {
                     val value = price * amount
                     amountString += ", about ${value.fiatFormat()},"
                 }
-                progressBar.visibility = View.GONE
+                progressBar.visibility = View.INVISIBLE
             }
             VerificationFundSource.Coinbase -> {
-                sendInfoText.text = "To verify your account we will transfer "
-
-                var amountString = "${amount.btcFormatShortened()} $currency"
-                if (price != null) {
-                    val value = price * amount
-                    amountString += "(${value.fiatFormat()})"
-                }
-                progressBar.visibility = View.GONE
+                sendInfoText.text = "To verify your account we will test to ensure that your API Key has all required permissions." +
+                        "\n\nTo do this we will send a small amount of $currency to your own Coinbase account and then send it right back."
+                progressBar.visibility = View.INVISIBLE
             }
             VerificationFundSource.Buy -> {
-                var amountString = "To verify your account we will buy ${currency.minBuyAmount.btcFormatShortened()} $currency (Gdax's minimum purchase amount) for market price"
+                var amountString =  "To verify your account we will test to ensure that your API Key has all required permissions." +
+                        "\n\nTo do this we will send a small amount of Cryptocurrency to your own Coinbase account and then send it right back. " +
+                        "\n\nBecause your account currently does not hold any crypto assets, we will buy ${currency.minBuyAmount.btcFormatShortened()}" +
+                        " $currency (Gdax's minimum purchase amount) for market price"
                 if (price != null) {
                     val value = price * amount
-                    amountString += ", about ${value.fiatFormat()}."
+                    amountString += ", about ${value.fiatFormat()},"
                 }
+                amountString += " so we can send it to your Coinbase account and back."
                 sendInfoText.text = amountString
-                progressBar.visibility = View.GONE
+                progressBar.visibility = View.INVISIBLE
             }
             else -> {
                 //TODO: handle this error

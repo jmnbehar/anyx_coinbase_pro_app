@@ -39,50 +39,20 @@ class Account(val product: Product, apiAccount: ApiAccount) {
         }
     }
 
-    private fun updateInList() {
-        list.remove(forCurrency(currency))
-        list.add(this)
-    }
-
 
     companion object {
-
         var list = mutableListOf<Account>()
-        var btcAccount: Account?
+        val btcAccount: Account?
             get() = forCurrency(Currency.BTC)
-            set(value) {
-                list.remove(btcAccount)
-                if (value != null) {
-                    list.add(value)
-                }
-            }
 
-        var ltcAccount: Account?
+        val ltcAccount: Account?
             get() = forCurrency(Currency.LTC)
-            set(value) {
-                list.remove(ltcAccount)
-                if (value != null) {
-                    list.add(value)
-                }
-            }
 
-        var ethAccount: Account?
+        val ethAccount: Account?
             get() = forCurrency(Currency.ETH)
-            set(value) {
-                list.remove(ethAccount)
-                if (value != null) {
-                    list.add(value)
-                }
-            }
 
-        var bchAccount: Account?
+        val bchAccount: Account?
             get() = forCurrency(Currency.BCH)
-            set(value) {
-                list.remove(bchAccount)
-                if (value != null) {
-                    list.add(value)
-                }
-            }
 
         var usdAccount: Account? = null
 

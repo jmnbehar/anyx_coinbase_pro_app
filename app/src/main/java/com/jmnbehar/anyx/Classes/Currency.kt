@@ -90,10 +90,10 @@ enum class Currency {
 
     val maxVerifyAmount : Double
         get() = when (this) {
-            Currency.BTC -> .00012
-            Currency.ETH -> .0012
-            Currency.BCH -> .0012
-            Currency.LTC -> .12
+            Currency.BTC -> .000101
+            Currency.ETH -> .001001
+            Currency.BCH -> .001001
+            Currency.LTC -> .120001
             else -> 100.0
         }
 
