@@ -156,37 +156,94 @@ class VerifySendFragment : Fragment() {
     }
 
     private fun sendCryptoToVerify() {
-        val prefs = Prefs(context!!)
         val apiKey = GdaxApi.credentials!!.apiKey
 
-        GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executePost({
-            progressBar.visibility = View.INVISIBLE
-            prefs.rejectApiKey(apiKey)
-            goToVerificationComplete(VerificationStatus.NoTransferPermission)
+        GdaxApi.coinbaseAccounts().linkToAccounts({
+            toast("Failure")
         }, {
-            prefs.approveApiKey(apiKey)
-            progressBar.visibility = View.INVISIBLE
+            val gdaxAccount = Account.forCurrency(currency)
+            var coinbaseAccount = gdaxAccount?.coinbaseAccount
+            if (coinbaseAccount == null) {
+                toast("errorrrrr")
+            } else {
 
-            val timestamp = (Date().timeInSeconds()).toString()
-            //TODO: add spinner to verification activity
-            AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
-                showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
-                    sendVerificationEmail(timestamp)
-                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
-                }, "Cancel", {
-                    showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
-                            "OK", {
-                        goToVerificationComplete(VerificationStatus.RepayError)
-                    },
-                            "Send Email", {
-                        sendVerificationEmail(timestamp)
-                        goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+                GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                    val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                    progressBar.visibility = View.INVISIBLE
+
+                    when (errorMessage) {
+                        GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
+                        else -> goToVerificationComplete(VerificationStatus.UnknownError)
+                    }
+                } , {
+                    progressBar.visibility = View.INVISIBLE
+
+
+                    GdaxApi.sendCrypto(0.000001, Currency.BTC, currency.verificationAddress).executePost({ result ->
+                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                        progressBar.visibility = View.INVISIBLE
+                        when (errorMessage) {
+                            GdaxApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
+                            GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
+                            else -> goToVerificationComplete(VerificationStatus.UnknownError)
+                        }
+                    }, {
+                        //TODO: we should never get here
+                        goToVerificationComplete(VerificationStatus.Success)
                     })
+
+                    val timestamp = (Date().timeInSeconds()).toString()
+                    //TODO: add spinner to verification activity
+//                    AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
+//                        showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+//                            sendVerificationEmail(timestamp)
+//                            goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//                        }, "Cancel", {
+//                            showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+//                                    "OK", {
+//                                goToVerificationComplete(VerificationStatus.RepayError)
+//                            },
+//                                    "Send Email", {
+//                                sendVerificationEmail(timestamp)
+//                                goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//                            })
+//                        })
+//                    }, { result ->
+//                        goToVerificationComplete(VerificationStatus.Success)
+//                    }, 3)
                 })
-            }, { result ->
-                goToVerificationComplete(VerificationStatus.Success)
-            }, 3)
+            }
         })
+
+
+//        GdaxApi.sendCrypto(amount, currency, currency.verificationAddress).executePost({
+//            progressBar.visibility = View.INVISIBLE
+//            prefs.rejectApiKey(apiKey)
+//            goToVerificationComplete(VerificationStatus.NoTransferPermission)
+//        }, {
+//            prefs.approveApiKey(apiKey)
+//            progressBar.visibility = View.INVISIBLE
+//
+//            val timestamp = (Date().timeInSeconds()).toString()
+//            //TODO: add spinner to verification activity
+//            AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->
+//                showPopup("Error", "Your account is verified, but we had a problem with our servers. To ensure repayment, press OK to send an email with your verification details", "OK",  {
+//                    sendVerificationEmail(timestamp)
+//                    goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//                }, "Cancel", {
+//                    showPopup("Are you sure?", "Are you sure you don't want to send an email? Your $amount $currency might not be repaid.",
+//                            "OK", {
+//                        goToVerificationComplete(VerificationStatus.RepayError)
+//                    },
+//                            "Send Email", {
+//                        sendVerificationEmail(timestamp)
+//                        goToVerificationComplete(VerificationStatus.RepayErrorEmailed)
+//                    })
+//                })
+//            }, { result ->
+//                goToVerificationComplete(VerificationStatus.Success)
+//            }, 3)
+//        })
 
 //        val timestamp = (Date().timeInSeconds()).toString()
 //        AnyxApi.VerificationSent(apiKey, email, verifyAmountString).executePost({ error ->

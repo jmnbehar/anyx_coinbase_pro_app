@@ -16,7 +16,8 @@ enum class VerificationStatus {
     NoTwoFactorPermission,
     NoViewPermission,
     NoPaymentMethods,
-    GdaxError;
+    GdaxError,
+    UnknownError;
 
     val isVerified: Boolean
         get() = when (this) {
@@ -29,6 +30,7 @@ enum class VerificationStatus {
                 VerificationStatus.NoViewPermission      -> false
                 VerificationStatus.NoPaymentMethods      -> false
                 VerificationStatus.GdaxError             -> false
+                VerificationStatus.UnknownError          -> false
             }
 
 }

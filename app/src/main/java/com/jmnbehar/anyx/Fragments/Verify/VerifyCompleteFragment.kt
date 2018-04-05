@@ -99,7 +99,8 @@ class VerifyCompleteFragment : Fragment() {
             VerificationStatus.NoTwoFactorPermission -> missingPermissionString("Bypass Two-Factor Auth")
             VerificationStatus.NoViewPermission -> missingPermissionString("View")
             VerificationStatus.NoPaymentMethods -> "Could not verify at this time because your account is unfunded and has no payment methods. \n\nPlease add funds or a payment method to verify your account."
-            VerificationStatus.GdaxError -> missingPermissionString("Transfer")
+            VerificationStatus.GdaxError -> "An unknown error occurred. Try again later."
+            VerificationStatus.UnknownError -> "An unknown error occurred. Try again later."
         }
     }
 

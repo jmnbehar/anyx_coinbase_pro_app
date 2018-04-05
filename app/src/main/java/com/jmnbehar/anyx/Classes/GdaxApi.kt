@@ -625,9 +625,12 @@ sealed class GdaxApi: FuelRouting {
         //Log in:
         Forbidden,
         InvalidApiKey,
+        InvalidPassphrase,
         InvalidApiSignature,
         MissingApiSignature,
-        InvalidPassphrase,
+
+        //Permissions:
+        Missing2FactorBypass,
 
         //Trade:
         BuyAmountTooSmallBtc,
@@ -653,7 +656,9 @@ sealed class GdaxApi: FuelRouting {
                 InvalidPassphrase -> "Invalid Passphrase"
                 InvalidApiSignature -> "invalid signature"
                 MissingApiSignature -> "CB-ACCESS-SIGN header is required"
-                TransferAmountTooLow -> "amount must be a positive number"
+
+                Missing2FactorBypass -> "Two factor authentication is enabled, CB-2FA-TOKEN header is required"
+
                 BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
                 BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"
                 BuyAmountTooSmallBch -> "size is too small. Minimum size is 0.01"
@@ -662,14 +667,23 @@ sealed class GdaxApi: FuelRouting {
                 BuyAmountTooLargeEth -> "size is too large. Maximum size is 700"
                 BuyAmountTooLargeBch -> "size is too large. Maximum size is 350"
                 BuyAmountTooLargeLtc -> "size is too large. Maximum size is 4000"
+
                 PriceTooAccurate  -> "price is too accurate. Smallest unit is 0.01000000"
                 InsufficientFunds -> "Insufficient funds"
+
+                TransferAmountTooLow -> "amount must be a positive number"
             }
         }
 
         companion object {
             fun forString(string: String) : ErrorMessage? {
-                return ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
+                var errorMessage = ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
+                if (errorMessage == null) {
+                    if (string.contains("Amount is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
+                        return TransferAmountTooLow
+                    }
+                }
+                return errorMessage
             }
         }
     }
