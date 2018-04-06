@@ -102,6 +102,18 @@ class VerifyActivity : AppCompatActivity() {
         blockBackButton = true
     }
 
+    fun acceptEula(isAccepted: Boolean) {
+        if (isAccepted) {
+            pageCount = 2
+            viewPager.isLocked = false
+        } else {
+            pageCount = 1
+            currentPage = 0
+            viewPager.isLocked = true
+        }
+        viewPager.adapter?.notifyDataSetChanged()
+    }
+
     override fun onBackPressed() {
         if (!blockBackButton) {
             super.onBackPressed()

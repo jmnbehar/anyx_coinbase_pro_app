@@ -8,10 +8,36 @@
     android:orientation="vertical"
     tools:openDrawer="start">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="20"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/txt_verify_intro_eula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="In order to buy, sell, or send crypto assets you need to verify that your account has the proper permissions.
+            \nTo do this, we'll test sending a small amount to AnyX, and if it goes through we will send it right back.
+            \nDue to limitations with the GDAX API, we'll have to send it to your Coinbase account, which you can easily retreive to your GDAX account using the Withdraw/Deposit feature in AnyX."
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btn_verify_intro_gdax_eula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
+    </ScrollView>
+
     <LinearLayout
         android:id="@+id/layout_verify"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -20,20 +46,6 @@
         android:orientation="vertical"
         android:screenOrientation="portrait"
         tools:openDrawer="start">
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="In order to buy, sell, or send crypto assets you need to verify that your account has the proper permissions.
-            \nTo do this, we'll test sending a small amount to AnyX, and if it goes through we will send it right back.
-            \nDue to limitations with the GDAX API, we'll have to send it to your Coinbase account, which you can easily retreive to your GDAX account using the Withdraw/Deposit feature in AnyX." />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="20" />
 
         <CheckBox
             android:id="@+id/cb_accept_eula"
