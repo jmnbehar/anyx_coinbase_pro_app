@@ -195,15 +195,15 @@ class OnboardActivity : AppCompatActivity() {
                 "Track Prices",
                 "Your account",
                 "Notifications",
-                "The future")
+                "Buy and Sell Cryptocurrency")
         val pageStrings: Array<String> = arrayOf(
                 "The best Android app for GDAX",
                 "With this app you can keep up to date on Bitcoin, Ethereum, Litecoin, and Bitcoin Cash prices",
                 "Create an API Key on the GDAX website to log in to this app. Once you're in, you'll be able to track your personal account.",
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
-                "If you're still not impressed, stay tuned because full trading features will be added soon.",
+                "Buy or sell any cryptocurrencies available on GDAX. You can make market, limit, or stop orders. Maker orders pay no fees!",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the GDAX website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.coin_pile, R.drawable.chart, R.drawable.icon_alert_spaced, R.drawable.the_future)
+        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.coin_pile, R.drawable.chart, R.drawable.icon_alert_spaced, R.drawable.exchange)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
