@@ -10,16 +10,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.jmnbehar.anyx.Activities.LoginActivity
 import com.jmnbehar.anyx.Activities.MainActivity
-import com.jmnbehar.anyx.Activities.VerifyActivity
 import com.jmnbehar.anyx.Classes.*
 import com.jmnbehar.anyx.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 
@@ -38,7 +34,8 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var titleText: TextView
     private lateinit var logoutButton: Button
     private lateinit var verifyButton: Button
-    private lateinit var disclaimerButton: Button
+    private lateinit var gdaxEulaButton: Button
+    private lateinit var anyxEulaButton: Button
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
@@ -50,7 +47,8 @@ class SettingsFragment : RefreshFragment() {
         titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
         verifyButton = rootView.btn_setting_verify_account
-        disclaimerButton = rootView.btn_setting_show_gdax_eula
+        gdaxEulaButton = rootView.btn_setting_show_gdax_eula
+        anyxEulaButton = rootView.btn_setting_show_anyx_eula
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
@@ -94,10 +92,16 @@ class SettingsFragment : RefreshFragment() {
         verifyButton.setOnClickListener  {
             (activity as MainActivity).launchVerificationActivity()
         }
-
-        disclaimerButton.onClick {
+        
+        gdaxEulaButton.onClick {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
+        }
+
+        //TODO: fix this
+        anyxEulaButton.visibility = View.GONE
+        anyxEulaButton.onClick {
+            //TODO: launch AnyX Eula fragment
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
