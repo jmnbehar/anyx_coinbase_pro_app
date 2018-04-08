@@ -101,8 +101,6 @@ class LoginFragment : Fragment()  {
         }
 
         btnLogin.setOnClickListener { view ->
-            btn_login.text = "Logging In"
-
             signIn()
         }
 

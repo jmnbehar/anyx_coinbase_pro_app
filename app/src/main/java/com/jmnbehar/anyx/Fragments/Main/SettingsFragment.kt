@@ -75,24 +75,19 @@ class SettingsFragment : RefreshFragment() {
             activity!!.finishAffinity()
         }
 
-        //TODO: uncomment this when done testing verification
-//        if (!GdaxApi.isLoggedIn || GdaxApi.credentials?.isValidated == true) {
-//            verifyButton.visibility = View.GONE
-//        } else {
-//            verifyButton.visibility = View.VISIBLE
-//        }
-
         val apiKey = GdaxApi.credentials?.apiKey
         if (apiKey == null) {
             verifyButton.visibility = View.GONE
         } else if (prefs.isApiKeyValid(apiKey) == true) {
             verifyButton.visibility = View.GONE
+        } else {
+            verifyButton.visibility = View.VISIBLE
         }
 
         verifyButton.setOnClickListener  {
             (activity as MainActivity).launchVerificationActivity()
         }
-        
+
         gdaxEulaButton.onClick {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
