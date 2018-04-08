@@ -66,7 +66,7 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
     var shouldSaveApiInfo: Boolean
-        get() = prefs.getBoolean(SAVE_API_INFO, false)
+        get() = prefs.getBoolean(SAVE_API_INFO, true)
         set(value) {
             prefs.edit().putBoolean(SAVE_API_INFO, value).apply()
             if (!value) {
@@ -75,7 +75,7 @@ class Prefs (var context: Context) {
         }
 
     var shouldSavePassphrase: Boolean
-        get() = prefs.getBoolean(SAVE_PASSPHRASE, false)
+        get() = prefs.getBoolean(SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<Alert>
@@ -86,20 +86,19 @@ class Prefs (var context: Context) {
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
-    fun addUnpaidFee(unpaidFee: Double, currency: Currency): Boolean {
+    fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
         /* Keeps track of unpaid fees, returns true if unpaid fees total over the minimum fee.
          * If total unpaid fees are over the minimum send amount, send only the minimum send
          * amount to keep things consistant and then reset unpaid fees to 0.0
          */
         var totalUnpaidFees = prefs.getFloat(UNPAID_FEES + currency.toString(), 0.0f)
         totalUnpaidFees += unpaidFee.toFloat()
-        if (totalUnpaidFees > currency.minSendAmount) {
-            prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
-            return true
-        } else {
-            prefs.edit().putFloat(UNPAID_FEES + currency.toString(), totalUnpaidFees).apply()
-            return false
-        }
+        prefs.edit().putFloat(UNPAID_FEES + currency.toString(), totalUnpaidFees).apply()
+        return totalUnpaidFees.toDouble()
+    }
+
+    fun wipeUnpaidFees(currency: Currency) {
+        prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
     }
 
     fun stashOrders(orderListString: String?) {

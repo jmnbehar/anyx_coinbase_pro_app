@@ -10,6 +10,7 @@ import android.view.ViewManager
 import android.widget.LinearLayout
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
+import com.google.gson.JsonObject
 import org.jetbrains.anko.*
 import org.json.JSONObject
 import java.text.NumberFormat
@@ -91,8 +92,12 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
 
 val Result.Failure<Any, FuelError>.errorMessage : String
     get() {
-        val errorData = JSONObject(String(error.response.data))
-        return (errorData["message"] as? String) ?: error.response.responseMessage
+        return if (error.response.data.isNotEmpty()) {
+            val errorData = JSONObject(String(error.response.data))
+            (errorData["message"] as? String) ?: error.response.responseMessage
+        } else {
+            ""
+        }
     }
 
 //val Result.Failure<String, FuelError>.errorMessage : String

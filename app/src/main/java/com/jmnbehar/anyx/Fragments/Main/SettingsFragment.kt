@@ -84,6 +84,13 @@ class SettingsFragment : RefreshFragment() {
 //            verifyButton.visibility = View.VISIBLE
 //        }
 
+        val apiKey = GdaxApi.credentials?.apiKey
+        if (apiKey == null) {
+            verifyButton.visibility = View.GONE
+        } else if (prefs.isApiKeyValid(apiKey) == true) {
+            verifyButton.visibility = View.GONE
+        }
+
         verifyButton.setOnClickListener  {
             (activity as MainActivity).launchVerificationActivity()
         }

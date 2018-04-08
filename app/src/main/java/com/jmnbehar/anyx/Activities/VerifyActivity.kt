@@ -35,8 +35,6 @@ class VerifyActivity : AppCompatActivity() {
 
     var blockBackButton = false
 
-    var isEulaAccepted = false
-
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +48,14 @@ class VerifyActivity : AppCompatActivity() {
         nextBtn = btn_verify_next
 
         nextBtn?.visibility = View.VISIBLE
-        nextBtn?.text = "Next"
+        nextBtn?.text = "I Accept"
+        nextBtn?.onClick {
+            currentPage += 1
+            viewPager.setCurrentItem(currentPage, true)
+            nextBtn?.visibility = View.GONE
+            viewPager.isLocked = false
+        }
+
 
         val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: ""
         val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
@@ -62,14 +67,16 @@ class VerifyActivity : AppCompatActivity() {
         viewPager = verify_view_pager
         viewPager.adapter = mSectionsPagerAdapter
 
+        viewPager.isLocked = true
+
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
             override fun onPageScrollStateChanged(state: Int) {}
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                if (!isEulaAccepted && position == 1 && positionOffset > 0) {
-                    toast("Please accept agreement")
-                }
+//                if (!isEulaAccepted && position == 1 && positionOffset > 0) {
+//                    toast("Please accept agreement")
+//                }
             }
 
             override fun onPageSelected(position: Int) {
@@ -85,11 +92,6 @@ class VerifyActivity : AppCompatActivity() {
                 }
             }
         })
-
-        nextBtn?.onClick {
-            currentPage += 1
-            viewPager.setCurrentItem(currentPage, true)
-        }
     }
 
     fun verificationComplete(verificationStatus: VerificationStatus) {
@@ -102,17 +104,19 @@ class VerifyActivity : AppCompatActivity() {
         blockBackButton = true
     }
 
-    fun acceptEula(isAccepted: Boolean) {
-        if (isAccepted) {
-            pageCount = 2
-            viewPager.isLocked = false
-        } else {
-            pageCount = 1
-            currentPage = 0
-            viewPager.isLocked = true
-        }
-        viewPager.adapter?.notifyDataSetChanged()
-    }
+//    fun acceptEula() {
+//        viewPager.adapter?.notifyDataSetChanged()
+//
+//        nextBtn?.visibility = View.VISIBLE
+//        nextBtn?.text = "I Accept"
+//
+//        nextBtn?.onClick {
+//            pageCount = 2
+//            currentPage += 1
+//            viewPager.setCurrentItem(currentPage, true)
+//            nextBtn?.visibility = View.GONE
+//        }
+//    }
 
     override fun onBackPressed() {
         if (!blockBackButton) {

@@ -8,4 +8,20 @@
 
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
+
+
+    <string name="anyx_eula_header">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
+
+    <string name="anyx_eula_title">AnyX User Agreement and Privacy Policy</string>
+    <string name="anyx_eula_section_1_title">User Agreement</string>
+    <string name="anyx_eula_1_1">AnyX can only be used to view and track, transfer, and manage supported Digital Currencies using GDAX’s services.</string>
+    <string name="anyx_eula_1_2">AnyX does not take responsibility for any failed transactions of any time.</string>
+    <string name="anyx_eula_1_3">AnyX does not take responsibility for any Digital Currency Transactions sent to the wrong recipient. You should verify all transaction information prior to submitting instructions to AnyX</string>
+    <string name="anyx_eula_1_4">When you place an order which is not immediately matched by an existing order, you will not have to pay fees. However, when you place an order at the market price that gets filled immediately, you will pay AnyX a fee of 0.1% on top of fees charged by GDAX. Due to the way these fees are processed, sometimes you will not pay that fee immediately but it will be added on to the next fee you incur. AnyX reserves the right to change fee pricing at a later date.</string>
+
+    <string name="anyx_eula_1_5">By using AnyX, you also agree to Coinbase’s User Agreement, found here:\nhttps://www.coinbase.com/legal/user_agreement</string>
+    <string name="anyx_eula_1_6">The risk of loss in trading or holding Digital Currency can be substantial. You should therefore carefully consider whether trading or holding Digital Currency is suitable for you in light of your financial condition.</string>
+
+    <string name="anyx_eula_section_2_title">Privacy Policy</string>
+    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
 </resources>

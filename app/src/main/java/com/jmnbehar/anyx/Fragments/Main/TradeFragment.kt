@@ -218,6 +218,7 @@ class TradeFragment : RefreshFragment() {
                     TradeSide.SELL -> {
                         amount -= devFee
                         //don't sell the devFee because it will be deducted by sending fees
+                        //amount is always in crypto for sell orders
                     }
                     TradeSide.BUY -> {
                         //should never need to change amount here, just buy it all and then deduct a bit
@@ -429,12 +430,13 @@ class TradeFragment : RefreshFragment() {
             toast("success")
             activity!!.onBackPressed()
             account?.let { account ->
+                val currency = account.currency
                 if (devFee > 0.0) {
                     val prefs = Prefs(context!!)
-                    if (devFee > account.currency.minSendAmount) {
-                        payFee(devFee)
-                    } else if (prefs.addUnpaidFee(devFee, account.currency)) {
-                        payFee(account.currency.minSendAmount)
+                    val unpaidFees = prefs.addUnpaidFee(devFee, currency)
+                    if (unpaidFees > currency.minSendAmount) {
+                        payFee(unpaidFees)
+                        prefs.wipeUnpaidFees(currency)
                     }
                 }
             }
