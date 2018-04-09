@@ -314,24 +314,26 @@ class TradeFragment : RefreshFragment() {
 
     private fun updateButtonsAndText() {
         account?.let { account ->
-            val buttonColors = account.currency.colorStateList(context!!)
-            val buttonTextColor = account.currency.buttonTextColor(context!!)
-            submitOrderButton.backgroundTintList = buttonColors
-            submitOrderButton.textColor = buttonTextColor
+            context?.let { context ->
+                val buttonColors = account.currency.colorStateList(context)
+                val buttonTextColor = account.currency.buttonTextColor(context)
+                submitOrderButton.backgroundTintList = buttonColors
+                submitOrderButton.textColor = buttonTextColor
 
-            val tabAccentColor = account.currency.colorAccent(activity!!)
-            tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+                val tabAccentColor = account.currency.colorAccent(activity!!)
+                tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-            titleText.text = "Buy and Sell " + account.currency.toString()
+                titleText.text = "Buy and Sell " + account.currency.toString()
 
-            usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
+                usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
 
-            usdBalanceLabelText.text = "USD Wallet Balance:"
-            cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
-            cryptoBalanceText.text = account.balance.btcFormat()
+                usdBalanceLabelText.text = "USD Wallet Balance:"
+                cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
+                cryptoBalanceText.text = account.balance.btcFormat()
 
-            currentPriceLabelText.text = "Current ${account.currency} Price:"
-            currentPriceText.text = account.product.price.fiatFormat()
+                currentPriceLabelText.text = "Current ${account.currency} Price:"
+                currentPriceText.text = account.product.price.fiatFormat()
+            }
         }
         updateTotalText()
 

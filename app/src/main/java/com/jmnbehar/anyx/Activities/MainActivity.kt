@@ -142,7 +142,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
    // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {
         loopThroughAlerts()
-        runAlerts()
         goToFragment(FragmentType.HOME)
     }
 
@@ -260,26 +259,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun runAlerts() {
-        val handler = Handler()
-
-        val runnable = Runnable {
-            updatePrices( { /* do nothing*/ }, {
-                loopThroughAlerts()
-                runAlerts()
-                if (currentFragment is AlertsFragment) {
-                    val prefs = Prefs(this)
-                    (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
-                    (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
-                }
-            })
-        }
-
-        //TODO: add variable time checking
-        //TODO: (ideally run on system launch)
-        handler.postDelayed(runnable, (TimeInSeconds.halfMinute * 1000))
-    }
-
     fun loopThroughAlerts() {
         val prefs = Prefs(this)
         val alerts = prefs.alerts
@@ -292,6 +271,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     triggerAlert(alert)
                 }
             }
+        }
+        if (currentFragment is AlertsFragment) {
+            val prefs = Prefs(this)
+            (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
+            (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
         }
     }
 

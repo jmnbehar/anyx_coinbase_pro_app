@@ -156,10 +156,10 @@ class LoginFragment : Fragment()  {
         prefs.shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
         if (apiKeyEditText.text.toString() != "*****") {
-            apiKey = apiKeyEditText.text.toString()
+            apiKey = apiKeyEditText.text.toString().trimEnd()
         }
         if (apiSecretEditText.text.toString() != "*****") {
-            apiSecret = apiSecretEditText.text.toString()
+            apiSecret = apiSecretEditText.text.toString().trimEnd()
         }
         if (passphraseEditText.text.toString() != "*****") {
             passphrase = passphraseEditText.text.toString()
