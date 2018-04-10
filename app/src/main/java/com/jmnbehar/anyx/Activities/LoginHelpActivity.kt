@@ -47,7 +47,7 @@ class LoginHelpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_onboard)
+        setContentView(R.layout.fragment_login_help)
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
