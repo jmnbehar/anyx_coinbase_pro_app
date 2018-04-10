@@ -79,7 +79,7 @@
             </LinearLayout>
 
 
-            <com.jmnbehar.anyx.Classes.PriceChart
+            <com.anyexchange.anyx.Classes.PriceChart
                 android:id="@+id/chart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

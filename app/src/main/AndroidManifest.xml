@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jmnbehar.anyx">
+    package="com.anyexchange.anyx">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 
@@ -26,32 +26,32 @@
         </service>
 
         <activity
-            android:name="com.jmnbehar.anyx.Activities.LoginActivity"
+            android:name="com.anyexchange.anyx.Activities.LoginActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.jmnbehar.anyx.Activities.OnboardActivity"
+            android:name="com.anyexchange.anyx.Activities.OnboardActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.jmnbehar.anyx.Activities.LoginHelpActivity"
+            android:name="com.anyexchange.anyx.Activities.LoginHelpActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.jmnbehar.anyx.Activities.VerifyActivity"
+            android:name="com.anyexchange.anyx.Activities.VerifyActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
 
         <activity
-            android:name="com.jmnbehar.anyx.Activities.MainActivity"
+            android:name="com.anyexchange.anyx.Activities.MainActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name"
             android:theme="@style/AppThemeDark.NoActionBar">
