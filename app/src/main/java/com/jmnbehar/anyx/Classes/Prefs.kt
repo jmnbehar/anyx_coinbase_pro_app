@@ -29,6 +29,7 @@ class Prefs (var context: Context) {
     private val UNPAID_FEES = "unpaid_fees_"
     private val APPROVED_API_KEYS = "approved_api_keys"
     private val REJECTED_API_KEYS = "rejected_api_keys"
+    private val RAPID_PRICE_MOVES = "rapid_price_movement"
 
 
     private val prefs: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
@@ -85,6 +86,21 @@ class Prefs (var context: Context) {
     var stashedProducts: List<Product>
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
+
+    fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
+        var tempRapidMovementAlerts = rapidMovementAlerts.toMutableSet()
+        if (!isActive && rapidMovementAlerts.contains(currency)) {
+            tempRapidMovementAlerts.remove(currency)
+        } else if (isActive && !rapidMovementAlerts.contains(currency)) {
+            tempRapidMovementAlerts.add(currency)
+        }
+        rapidMovementAlerts = tempRapidMovementAlerts
+    }
+
+    var rapidMovementAlerts: Set<Currency>
+        get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>()).mapNotNull { string -> Currency.forString(string) }.toSet()
+        set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
+
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
         /* Keeps track of unpaid fees, returns true if unpaid fees total over the minimum fee.

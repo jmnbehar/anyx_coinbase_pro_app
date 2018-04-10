@@ -41,6 +41,7 @@
             android:layout_height="wrap_content"
             android:text="Show confirm popup before sending assets" />
 
+
         <CheckBox
             android:id="@+id/cb_setting_idk"
             android:layout_width="match_parent"

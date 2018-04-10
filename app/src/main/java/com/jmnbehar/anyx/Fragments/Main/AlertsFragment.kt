@@ -92,7 +92,7 @@ class AlertsFragment : RefreshFragment() {
         })
 
         priceUnitText.text = ""
-        triggerLabelText.text = "New alert at: "
+        triggerLabelText.text = "New custom alert at: "
 
         setButton.setOnClickListener { setAlert() }
         setButton.text = "Set"

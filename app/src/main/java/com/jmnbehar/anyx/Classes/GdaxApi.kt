@@ -155,7 +155,15 @@ sealed class GdaxApi: FuelRouting {
                     val gson = Gson()
                     val apiCandles = result.value
                     val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-                    var candles = candleDoubleList.map { Candle(it[0], it[1], it[2], it[3], it[4], it[5]) }
+
+                    var candles = candleDoubleList.map {
+                        val time = (it[0] as? Double) ?: 0.0
+                        val low = (it[1] as? Double) ?: 0.0
+                        val high = (it[2] as? Double) ?: 0.0
+                        val open = (it[3] as? Double) ?: 0.0
+                        val close = (it[4] as? Double) ?: 0.0
+                        val volume = (it[5] as? Double) ?: 0.0
+                        Candle(time, low, high, open, close, volume) }
                     var now = Calendar.getInstance()
 
                     var start = now.timeInSeconds() - timespan - 30
