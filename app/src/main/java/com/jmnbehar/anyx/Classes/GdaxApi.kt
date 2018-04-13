@@ -232,9 +232,8 @@ sealed class GdaxApi: FuelRouting {
                 val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                 for (account in Account.list.plus(Account.usdAccount)) {
                     val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
-                    val apiAccountBalance = apiAccount?.balance?.toDoubleOrNull()
-                    if (apiAccountBalance != null) {
-                        account?.balance = apiAccountBalance
+                    apiAccount?.let { apiAccount ->
+                        account?.apiAccount = apiAccount
                     }
                 }
                 onComplete()
@@ -276,8 +275,7 @@ sealed class GdaxApi: FuelRouting {
             this.executeRequest(onFailure) { result ->
                 val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                 val account = Account.list.find { account -> account.id == accountId }
-                account?.balance = apiAccount.balance.toDoubleOrZero()
-                account?.availableBalance = apiAccount.available.toDoubleOrZero()
+                account?.apiAccount = apiAccount
                 onComplete()
             }
         }

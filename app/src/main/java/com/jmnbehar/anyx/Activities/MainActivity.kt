@@ -98,6 +98,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onRestoreInstanceState(savedInstanceState)
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
@@ -135,6 +137,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    val GDAX_API_KEY = "GDAX_API_KEY"
+    val GDAX_API_PASS = "GDAX_API_PASS"
+    val GDAX_API_SECRET = "GDAX_API_SECRET"
+    val ACCOUNT_LIST = "ACCOUNT_LIST"
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        val gdaxApiKey = savedInstanceState?.getString(GDAX_API_KEY)
+        val gdaxApiSecret = savedInstanceState?.getString(GDAX_API_SECRET)
+        val gdaxApiPass = savedInstanceState?.getString(GDAX_API_PASS)
+        if(gdaxApiKey != null && gdaxApiSecret != null && gdaxApiPass != null) {
+            if (GdaxApi.credentials == null) {
+                val prefs = Prefs(this)
+                val isApiKeyValid = prefs.isApiKeyValid(gdaxApiKey)
+
+                GdaxApi.credentials = GdaxApi.ApiCredentials(gdaxApiKey, gdaxApiSecret, gdaxApiPass, isApiKeyValid)
+            }
+        }
+        val accountList = savedInstanceState?.getParcelableArray(ACCOUNT_LIST) as? Array<Account>?
+        if (accountList != null && accountList.isNotEmpty()) {
+            Account.list = accountList.toMutableList()
+        }
+
+    }
+
+    // invoked when the activity may be temporarily destroyed, save the instance state here
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.run {
+            putString(GDAX_API_KEY, GdaxApi.credentials?.apiKey)
+            putString(GDAX_API_SECRET, GdaxApi.credentials?.apiSecret)
+            putString(GDAX_API_PASS, GdaxApi.credentials?.apiPassPhrase)
+            putParcelableArray(ACCOUNT_LIST, Account.list.toTypedArray() )
+        }
+        // call superclass to save any view hierarchy
+        super.onSaveInstanceState(outState)
+    }
 //    override fun onResume() {
 //        super.onResume()
 //    }

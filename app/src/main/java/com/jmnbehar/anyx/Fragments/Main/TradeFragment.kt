@@ -327,8 +327,8 @@ class TradeFragment : RefreshFragment() {
 
                 usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
 
-                usdBalanceLabelText.text = "USD Wallet Balance:"
-                cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
+                usdBalanceLabelText.text = "Available USD Balance:"
+                cryptoBalanceLabelText.text = "Available ${account.currency} Balance:"
                 cryptoBalanceText.text = account.balance.btcFormat()
 
                 currentPriceLabelText.text = "Current ${account.currency} Price:"

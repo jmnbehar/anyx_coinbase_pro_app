@@ -92,7 +92,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onValueSelected(entry: Entry, h: Highlight) {
         valueText.text = entry.y.toDouble().fiatFormat()
         val candle = accountTotalCandles[entry.x.toInt()]
-        percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
+        var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
+        timeString = timeString.replace(" ", "\n")
+        percentChangeText.text = timeString
         val prefs = Prefs(context!!)
 
         percentChangeText.textColor = if (prefs.isDarkModeOn) {
@@ -196,7 +198,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
                     lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
                         swipeRefreshLayout?.isEnabled = false
-                        HomeFragment.viewPager?.isLocked = false
+                        HomeFragment.viewPager?.isLocked = true
                     }
                 }
 

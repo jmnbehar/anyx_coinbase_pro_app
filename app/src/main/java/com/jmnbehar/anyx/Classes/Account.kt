@@ -1,40 +1,47 @@
 package com.jmnbehar.anyx.Classes
 
+import android.annotation.SuppressLint
+import android.os.Parcelable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.*
+import kotlinx.android.parcel.IgnoredOnParcel
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Created by jmnbehar on 12/20/2017.
  */
 
+@SuppressLint("ParcelCreator")
+@Parcelize
+class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
+    val balance: Double
+        get() = apiAccount.balance.toDoubleOrZero()
 
-class Account(val product: Product, apiAccount: ApiAccount) {
-    var balance: Double = apiAccount.balance.toDoubleOrZero()
-    var availableBalance: Double = balance
+    val availableBalance: Double
+        get() {
+//        val holds = apiAccount.holds.toDoubleOrZero()
+//        return balance - holds
+        return apiAccount.available.toDoubleOrZero()
+        }
 
-    var value: Double = 0.0
+    val value: Double
         get() = balance * product.price
 
-    var id: String
-    var currency = product.currency
+    val id: String
+        get() = apiAccount.id
+
+    val currency: Currency
         get() = product.currency
 
+    @IgnoredOnParcel
     var coinbaseAccount: CoinbaseAccount? = null
-
-    init {
-        value = product.price * balance
-        id = apiAccount.id
-        availableBalance = apiAccount.available.toDoubleOrZero()
-    }
 
     fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         GdaxApi.account(id).executeRequest(onFailure) { result ->
             val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-            balance = apiAccount.balance.toDoubleOrZero()
-            availableBalance = apiAccount.available.toDoubleOrZero()
+            this.apiAccount = apiAccount
             onComplete()
         }
     }
