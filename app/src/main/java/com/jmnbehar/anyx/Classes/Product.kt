@@ -1,19 +1,14 @@
 package com.jmnbehar.anyx.Classes
 
-import android.annotation.SuppressLint
-import android.os.Parcelable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 /**
  * Created by jmnbehar on 12/20/2017.
  */
 
-@SuppressLint("ParcelCreator")
-@Parcelize
-class Product(var currency: Currency, var id: String, val candles: List<Candle>) : Parcelable {
+class Product(var currency: Currency, var id: String, candles: List<Candle>) {
     constructor(apiProduct: ApiProduct, candles: List<Candle>)
             : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id, candles)
 

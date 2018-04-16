@@ -53,8 +53,6 @@ class MarketFragment : RefreshFragment() {
     }
 
     override fun onResume() {
-        //be smarter about only showing this when necesary, and maybe only refresh when encesary as well
-        swipeRefreshLayout?.isRefreshing = true
         super.onResume()
         autoRefresh = Runnable {
             refresh({ })

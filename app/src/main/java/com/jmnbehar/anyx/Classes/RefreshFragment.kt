@@ -31,8 +31,9 @@ open class RefreshFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
+        swipeRefreshLayout?.isEnabled = false
         refresh {
-            endRefresh()
+            swipeRefreshLayout?.isEnabled = true
         }
         showDarkMode()
         if (activity is MainActivity) {

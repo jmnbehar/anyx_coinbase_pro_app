@@ -1,18 +1,12 @@
 package com.jmnbehar.anyx.Classes
 
-import android.annotation.SuppressLint
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class Candle (
+data class Candle(
         val time: Double,
         val low: Double,
         val high: Double,
         val open: Double,
         val close: Double,
-        val volume: Double) : Parcelable  {
+        val volume: Double) {
 
      companion object {
          fun granularityForTimespan(timespan: Timespan) : Long {
