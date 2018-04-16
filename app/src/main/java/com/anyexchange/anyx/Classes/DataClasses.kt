@@ -1,5 +1,9 @@
 package com.anyexchange.anyx.Classes
 
+import android.annotation.SuppressLint
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 
 /**
  * Created by anyexchange on 12/19/2017.
@@ -130,13 +134,15 @@ data class ApiTime(
         val iso: String,
         val epoch: String)
 
+@SuppressLint("ParcelCreator")
+@Parcelize
 data class ApiAccount(
         val id: String,
         val currency: String,
         val balance: String,
         val holds: String,
         val available: String,
-        val profile_id: String)
+        val profile_id: String) : Parcelable
 
 data class ApiCoinbaseAccount(
         val id: String,

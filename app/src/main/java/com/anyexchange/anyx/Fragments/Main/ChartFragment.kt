@@ -501,7 +501,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     balanceText.text = newBalance.btcFormat() + " " + account.currency
                     valueText.text = account.value.fiatFormat()
                     miniRefresh(onFailure) {
-                        account.balance = newBalance
+                        account.apiAccount = apiAccount
                         onComplete()
                     }
                 }
@@ -526,7 +526,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             } else {
                 miniRefresh(onFailure) {
-                    account.balance = 0.0
+//                    account.balance = 0.0
                     onComplete()
                 }
             }

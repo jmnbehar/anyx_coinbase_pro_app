@@ -89,16 +89,27 @@ class PriceChart : LineChart {
     fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, timespan: Timespan, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
-        var noDescription = Description()
-        noDescription.text = ""
-        description = noDescription
+        if (touchEnabled) {
+            var noDescription = Description()
+            noDescription.text = ""
+            description = noDescription
+            description.isEnabled = false
+        } else {
+            var timespanDescription = Description()
+            timespanDescription.text = "24h"
+            timespanDescription.textSize = 18f
+            timespanDescription.yOffset = 5f
+            timespanDescription.xOffset = 5f
+            description = timespanDescription
+            description.isEnabled = true
+        }
+
         this.defaultDragDirection = defaultDragDirection
         when (defaultDragDirection) {
             DefaultDragDirection.Horizontal -> onSideDrag   = onDefaultDrag
             DefaultDragDirection.Vertical -> onVerticalDrag = onDefaultDrag
         }
 
-        description = noDescription
         legend.isEnabled = false
         xAxis.setDrawGridLines(false)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -117,7 +128,6 @@ class PriceChart : LineChart {
 
         setScaleEnabled(false)
         isDoubleTapToZoomEnabled = false
-
 
         addCandles(candles, currency, timespan)
     }
@@ -159,7 +169,6 @@ class PriceChart : LineChart {
             //axisRight.showSpecificLabels(floatArrayOf(close), false)
             axisRight.setDrawPartialAxis(close)
         }
-        description.isEnabled = false
 
         //TODO: fill in missing entries
 //        val dates = candles.map { c -> c.time }.toDoubleArray()

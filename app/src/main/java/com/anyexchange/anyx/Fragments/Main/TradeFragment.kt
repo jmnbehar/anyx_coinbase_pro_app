@@ -325,11 +325,12 @@ class TradeFragment : RefreshFragment() {
 
                 titleText.text = "Buy and Sell " + account.currency.toString()
 
-                usdBalanceText.text = Account.usdAccount?.balance?.fiatFormat()
+                usdBalanceText.text = Account.usdAccount?.availableBalance?.fiatFormat()
 
-                usdBalanceLabelText.text = "USD Wallet Balance:"
-                cryptoBalanceLabelText.text = "${account.currency} Wallet Balance:"
-                cryptoBalanceText.text = account.balance.btcFormat()
+                usdBalanceLabelText.text = "Available USD Balance:"
+                cryptoBalanceLabelText.text = "Available ${account.currency} Balance:"
+
+                cryptoBalanceText.text = account.availableBalance.btcFormat()
 
                 currentPriceLabelText.text = "Current ${account.currency} Price:"
                 currentPriceText.text = account.product.price.fiatFormat()
