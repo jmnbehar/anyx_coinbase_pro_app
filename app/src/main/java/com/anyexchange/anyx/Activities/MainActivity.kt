@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
@@ -103,8 +104,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        var toggle = object : ActionBarDrawerToggle(
+                this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+
+            override fun onDrawerClosed(drawerView: View) {
+                super.onDrawerClosed(drawerView)
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+                super.onDrawerOpened(drawerView)
+                hideSoftKeyboard()
+            }
+        }
+
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
@@ -597,6 +609,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //                toast("Please add payment methods to verify")
 //            }
 //        })
+    }
+
+    fun hideSoftKeyboard() {
+        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        if (currentFocus != null && inputManager != null) {
+            inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
+            inputManager.hideSoftInputFromInputMethod(currentFocus.windowToken, 0)
+        }
     }
 
     private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
