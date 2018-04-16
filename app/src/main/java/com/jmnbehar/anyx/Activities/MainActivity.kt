@@ -154,10 +154,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 GdaxApi.credentials = GdaxApi.ApiCredentials(gdaxApiKey, gdaxApiSecret, gdaxApiPass, isApiKeyValid)
             }
         }
-//        val accountList = savedInstanceState?.getParcelableArray(ACCOUNT_LIST) as? Array<Account>?
-//        if (accountList != null && accountList.isNotEmpty()) {
-//            Account.list = accountList.toMutableList()
-//        }
+        val accountList = savedInstanceState?.getParcelableArray(ACCOUNT_LIST) as? Array<Account>?
+        if (accountList != null && accountList.isNotEmpty()) {
+            Account.list = accountList.toMutableList()
+        }
 
     }
 
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             putString(GDAX_API_KEY, GdaxApi.credentials?.apiKey)
             putString(GDAX_API_SECRET, GdaxApi.credentials?.apiSecret)
             putString(GDAX_API_PASS, GdaxApi.credentials?.apiPassPhrase)
-//            putParcelableArray(ACCOUNT_LIST, Account.list.toTypedArray() )
+            putParcelableArray(ACCOUNT_LIST, Account.list.toTypedArray() )
         }
         // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState)
