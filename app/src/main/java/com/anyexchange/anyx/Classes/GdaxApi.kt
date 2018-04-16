@@ -58,7 +58,8 @@ sealed class GdaxApi: FuelRouting {
         TooManyRequests(429),
         ServerError(500), //Problem with our server
         ServiceUnavailable(503), //Problem with our server
-        UnknownError(999);
+        UnknownError(999),
+        NoInternet(-1);
 
         companion object {
             fun withCode(code: Int): ErrorCode {
@@ -84,26 +85,27 @@ sealed class GdaxApi: FuelRouting {
         Fuel.request(this).responseString { _, _, result ->
             when (result) {
                 is Result.Failure -> {
-                    if (result.error.response.statusCode == ErrorCode.TooManyRequests.code) {
-                        timeLock++
-                        val handler = Handler()
-                        var retry = Runnable { }
-                        retry = Runnable {
-                            timeLock--
-                            if (timeLock <= 0) {
-                                timeLock = 0
-                                executeRequest(onFailure, onSuccess)
-                            } else {
-                                handler.postDelayed(retry, 200.toLong())
+                    when (result.error.response.statusCode) {
+                        ErrorCode.TooManyRequests.code -> {
+                            timeLock++
+                            val handler = Handler()
+                            var retry = Runnable { }
+                            retry = Runnable {
+                                timeLock--
+                                if (timeLock <= 0) {
+                                    timeLock = 0
+                                    executeRequest(onFailure, onSuccess)
+                                } else {
+                                    handler.postDelayed(retry, 200.toLong())
+                                }
                             }
+                            handler.postDelayed(retry, 1000.toLong())
                         }
-                        handler.postDelayed(retry, 1000.toLong())
-                    } else if (result.error.response.statusCode == ErrorCode.BadRequest.code) {
-                        credentials = null
-                        onFailure(result)
-                        //TODO: logout
-                    } else {
-                        onFailure(result)
+                        ErrorCode.BadRequest.code -> {
+                            credentials = null
+                            onFailure(result)
+                        }
+                        else -> onFailure(result)
                     }
                 }
                 is Result.Success -> {

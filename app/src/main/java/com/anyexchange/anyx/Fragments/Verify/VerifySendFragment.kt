@@ -16,6 +16,8 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import com.anyexchange.anyx.Classes.Currency
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 
@@ -74,18 +76,20 @@ class VerifySendFragment : Fragment() {
             when (verificationFundSource!!) {
                 VerificationFundSource.GDAX -> {
                     val productId = verifyAccount.product.id
-                    GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0, timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result ->
-                        //TODO: check the error, check up on this
-                        //TODO: handle if no payment methods are available
+                    GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
+                            timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
                         val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        goToVerificationComplete(VerificationStatus.NoTradePermission)
-                    }, { result ->
+                        when (errorMessage) {
+                            GdaxApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
+                            else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
+                        }
+                    }, { _ ->
                         sendCryptoToVerify()
                     })
                 }
                 VerificationFundSource.Coinbase -> {
                     val coinbaseAccount = verifyAccount.coinbaseAccount!!
-                    val amount = currency.minSendAmount //TODO: change to min CB send amount
+                    val amount = currency.minSendAmount
                     GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                         val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                         when (errorMessage) {
@@ -101,17 +105,15 @@ class VerifySendFragment : Fragment() {
                     })
                 }
                 VerificationFundSource.Buy -> {
-                    //TODO: don't crash here
                     val productId = verifyAccount.product.id
                     val buyAmount = currency.minBuyAmount
                     GdaxApi.orderMarket(TradeSide.BUY, productId, size = buyAmount, funds = null).executePost({ result ->
-                        //TODO: check the error, check up on this
                         val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                         when (errorMessage) {
                             GdaxApi.ErrorMessage.BuyAmountTooSmallBtc,
                             GdaxApi.ErrorMessage.BuyAmountTooSmallEth,
                             GdaxApi.ErrorMessage.BuyAmountTooSmallBch,
-                            GdaxApi.ErrorMessage.BuyAmountTooSmallLtc  -> assert(false)
+                            GdaxApi.ErrorMessage.BuyAmountTooSmallLtc -> goToVerificationComplete(VerificationStatus.UnknownError)
                             GdaxApi.ErrorMessage.InsufficientFunds -> {
                                 //TODO: distinguish between payment methods and insufficient funds
                                 goToVerificationComplete(VerificationStatus.NoPaymentMethods)

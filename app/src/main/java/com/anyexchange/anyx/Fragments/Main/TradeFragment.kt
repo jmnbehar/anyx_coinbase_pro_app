@@ -631,6 +631,7 @@ class TradeFragment : RefreshFragment() {
         account?.let { account ->
             when (tradeSide) {
                 TradeSide.BUY -> {
+                    submitOrderButton.text = "Submit Buy Order"
                     tradeSideBuyRadioButton.isChecked = true
                     when (tradeType) {
                         TradeType.MARKET -> {
@@ -649,6 +650,7 @@ class TradeFragment : RefreshFragment() {
                     }
                 }
                 TradeSide.SELL -> {
+                    submitOrderButton.text = "Submit Sell Order"
                     tradeSideSellRadioButton.isChecked = true
                     when (tradeType) {
                         TradeType.MARKET -> {

@@ -57,12 +57,6 @@ class SettingsFragment : RefreshFragment() {
 
         val prefs = Prefs(activity!!)
 
-        if (GdaxApi.isLoggedIn) {
-            logoutButton.text = "Log Out"
-        } else {
-            logoutButton.text = "Log In"
-        }
-
         logoutButton.setOnClickListener  {
             val intent = Intent(activity, com.anyexchange.anyx.Activities.LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -73,15 +67,6 @@ class SettingsFragment : RefreshFragment() {
             prefs.stashFills(null)
             startActivity(intent)
             activity!!.finishAffinity()
-        }
-
-        val apiKey = GdaxApi.credentials?.apiKey
-        if (apiKey == null) {
-            verifyButton.visibility = View.GONE
-        } else if (prefs.isApiKeyValid(apiKey) == true) {
-            verifyButton.visibility = View.GONE
-        } else {
-            verifyButton.visibility = View.VISIBLE
         }
 
         verifyButton.setOnClickListener  {
@@ -128,8 +113,27 @@ class SettingsFragment : RefreshFragment() {
         }
         showDarkMode()
 
-
         return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = Prefs(activity!!)
+        val apiKey = GdaxApi.credentials?.apiKey
+        if (apiKey == null) {
+            verifyButton.visibility = View.GONE
+        } else if (prefs.isApiKeyValid(apiKey) == true) {
+            verifyButton.visibility = View.GONE
+        } else {
+            verifyButton.visibility = View.VISIBLE
+        }
+
+        if (GdaxApi.isLoggedIn) {
+            logoutButton.text = "Log Out"
+        } else {
+            logoutButton.text = "Log In"
+        }
+
     }
 
 }

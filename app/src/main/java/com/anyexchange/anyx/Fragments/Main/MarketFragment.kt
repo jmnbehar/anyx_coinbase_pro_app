@@ -74,7 +74,7 @@ class MarketFragment : RefreshFragment() {
         var productsUpdated = 0
         var accountListSize = Account.list.size
         val time = Timespan.DAY
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
             account.product.updateCandles(time, { _ -> toast("error!") }, { didUpdate ->
