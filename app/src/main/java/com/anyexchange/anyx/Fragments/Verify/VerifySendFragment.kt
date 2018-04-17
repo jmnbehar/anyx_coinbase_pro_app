@@ -50,16 +50,6 @@ class VerifySendFragment : Fragment() {
             }
         }
 
-    private val verificationFundSource: VerificationFundSource?
-        get() {
-            return if (activity is VerifyActivity) {
-                val activity = (activity as VerifyActivity)
-                activity.verificationFundSource
-            } else {
-                null
-            }
-        }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_verify_send, container, false)
@@ -69,62 +59,20 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-        //TODO: don't crash here
         val verifyAccount = Account.forCurrency(currency)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
-            when (verificationFundSource!!) {
-                VerificationFundSource.GDAX -> {
-                    val productId = verifyAccount.product.id
-                    GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
-                            timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        when (errorMessage) {
-                            GdaxApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
-                            else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
-                        }
-                    }, { _ ->
-                        sendCryptoToVerify()
-                    })
+            val productId = verifyAccount.product.id
+            GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
+                    timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
+                val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                when (errorMessage) {
+                    GdaxApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
+                    else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
                 }
-                VerificationFundSource.Coinbase -> {
-                    val coinbaseAccount = verifyAccount.coinbaseAccount!!
-                    val amount = currency.minSendAmount
-                    GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        when (errorMessage) {
-                            GdaxApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
-                            GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
-                            GdaxApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.UnknownError)//TODO: change this
-                            GdaxApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
-                            else -> goToVerificationComplete(VerificationStatus.UnknownError)
-                        }//TODO: transfer funds back from coinbase
-                        toast("Coinbase Error")
-                    } , {
-                        sendCryptoToVerify()
-                    })
-                }
-                VerificationFundSource.Buy -> {
-                    val productId = verifyAccount.product.id
-                    val buyAmount = currency.minBuyAmount
-                    GdaxApi.orderMarket(TradeSide.BUY, productId, size = buyAmount, funds = null).executePost({ result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        when (errorMessage) {
-                            GdaxApi.ErrorMessage.BuyAmountTooSmallBtc,
-                            GdaxApi.ErrorMessage.BuyAmountTooSmallEth,
-                            GdaxApi.ErrorMessage.BuyAmountTooSmallBch,
-                            GdaxApi.ErrorMessage.BuyAmountTooSmallLtc -> goToVerificationComplete(VerificationStatus.UnknownError)
-                            GdaxApi.ErrorMessage.InsufficientFunds -> {
-                                //TODO: distinguish between payment methods and insufficient funds
-                                goToVerificationComplete(VerificationStatus.NoPaymentMethods)
-                            }
-                            else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
-                        }
-                    }, {
-                        sendCryptoToVerify()
-                    })
-                }
-            }
+            }, { _ ->
+                sendCryptoToVerify()
+            })
         }
 
         updateViews()
@@ -141,38 +89,21 @@ class VerifySendFragment : Fragment() {
                 toast("Unknown Error: Try again later")
             } else {
 
-                val transferAmount = currency.minSendAmount
-                GdaxApi.sendToCoinbase(transferAmount, currency, coinbaseAccount.id).executePost( { result ->
+                val sendAmount = 0.000001
+                GdaxApi.sendCrypto(sendAmount, currency, currency.verificationAddress).executePost({ result ->
                     val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
-
                     when (errorMessage) {
+                        GdaxApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
                         GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
+                        GdaxApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.Success)
+                        GdaxApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
+                        GdaxApi.ErrorMessage.Missing2FactorBypass -> goToVerificationComplete(VerificationStatus.NoTwoFactorPermission)
                         else -> goToVerificationComplete(VerificationStatus.UnknownError)
                     }
-                } , {
-                    progressBar.visibility = View.INVISIBLE
-
-                    val sendAmount = 0.000001
-                    GdaxApi.sendCrypto(sendAmount, currency, currency.verificationAddress).executePost({ result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        progressBar.visibility = View.INVISIBLE
-                        when (errorMessage) {
-                            GdaxApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
-                            GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
-                            GdaxApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.UnknownError)//TODO: change this
-                            GdaxApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
-                            else -> goToVerificationComplete(VerificationStatus.UnknownError)
-                        }
-                        val returnAmount = transferAmount
-                        GdaxApi.getFromCoinbase(returnAmount, currency, coinbaseAccount.id).executePost({},{})
-                    }, {
-                        //we should never get here
-                        goToVerificationComplete(VerificationStatus.Success)
-                        GdaxApi.getFromCoinbase(transferAmount, currency, coinbaseAccount.id).executePost({},{})
-                    })
-                    //TODO: add spinner to verification activity
-                    //TODO: consider shooting off a request to the AnyX server
+                }, {
+                    //we should never get here
+                    goToVerificationComplete(VerificationStatus.Success)
                 })
             }
         })

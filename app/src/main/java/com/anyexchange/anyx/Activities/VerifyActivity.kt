@@ -30,7 +30,7 @@ class VerifyActivity : AppCompatActivity() {
     var pageCount = 2
 
     var currency: Currency = Currency.BTC
-    var verificationFundSource: VerificationFundSource? = null
+    var verificationFundSource: VerificationFundSource? = null  //not currently in use
     var verifyStatus: VerificationStatus? = null
 
     var blockBackButton = false

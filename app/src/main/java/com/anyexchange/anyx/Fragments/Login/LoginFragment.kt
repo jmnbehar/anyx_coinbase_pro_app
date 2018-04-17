@@ -57,10 +57,6 @@ class LoginFragment : Fragment()  {
         val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
 
-
-        prefs.apiKey = "0cd8d5fdb7f7e5de3737762dda34a7b5"
-        prefs.apiSecret = "x9kBirydFcE/2pYXFTdj09iDpBibpfqOeUdnK14Xzqb3zjPg0qcH90p9V38AI41hBEymAMkpC7FXpoMPyK3j3w=="
-
         if(prefs.apiKey != null) {
             apiKey = prefs.apiKey
             apiKeyEditText.setText(apiKey)
