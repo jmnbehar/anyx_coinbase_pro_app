@@ -12,6 +12,7 @@ import android.widget.CheckBox
 import android.widget.TextView
 import com.anyexchange.anyx.Activities.LoginActivity
 import com.anyexchange.anyx.Activities.MainActivity
+import com.anyexchange.anyx.Activities.VerifyActivity
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
@@ -70,7 +71,8 @@ class SettingsFragment : RefreshFragment() {
         }
 
         verifyButton.setOnClickListener  {
-            (activity as com.anyexchange.anyx.Activities.MainActivity).launchVerificationActivity()
+            val intent = Intent(activity, VerifyActivity::class.java)
+            startActivity(intent)
         }
 
         gdaxEulaButton.onClick {

@@ -29,8 +29,8 @@ class VerifyActivity : AppCompatActivity() {
     internal var currentPage = 0   //  to track page position
     var pageCount = 2
 
-    var currency: Currency = Currency.BTC
-    var verificationFundSource: VerificationFundSource? = null  //not currently in use
+    var currency: Currency = defaultVerificationCurrency
+
     var verifyStatus: VerificationStatus? = null
 
     var blockBackButton = false
@@ -55,13 +55,6 @@ class VerifyActivity : AppCompatActivity() {
             nextBtn?.visibility = View.GONE
             viewPager.isLocked = false
         }
-
-
-        val currencyStr = intent.getStringExtra(Constants.verifyCurrency) ?: ""
-        val fundSourceStr = intent.getStringExtra(Constants.verifyFundSource) ?: ""
-
-        currency = Currency.forString(currencyStr) ?: defaultVerificationCurrency
-        verificationFundSource = VerificationFundSource.fromString(fundSourceStr)
 
         // Set up the ViewPager with the sections adapter.
         viewPager = verify_view_pager
