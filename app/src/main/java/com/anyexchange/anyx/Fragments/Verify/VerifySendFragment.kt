@@ -139,41 +139,13 @@ class VerifySendFragment : Fragment() {
 
     fun updateViews() {
         val account = Account.forCurrency(currency)
-        val price = account?.product?.price
-        //TODO: overhaul this text
-        val amount = currency.minSendAmount
-        when (verificationFundSource) {
-            VerificationFundSource.GDAX -> {
-                sendInfoText.text = "To verify your account we will test to ensure that your API Key has all required permissions." +
-                        "\n\nTo do this we will send a small amount of $currency to your own Coinbase account and then send it right back."
-                var amountString = "${amount.btcFormatShortened()} $currency"
-                if (price != null) {
-                    val value = price * amount
-                    amountString += ", about ${value.fiatFormat()},"
-                }
-                progressBar.visibility = View.INVISIBLE
-            }
-            VerificationFundSource.Coinbase -> {
-                sendInfoText.text = "To verify your account we will test to ensure that your API Key has all required permissions." +
-                        "\n\nTo do this we will send a small amount of $currency to your own Coinbase account and then send it right back."
-                progressBar.visibility = View.INVISIBLE
-            }
-            VerificationFundSource.Buy -> {
-                var amountString =  "To verify your account we will test to ensure that your API Key has all required permissions." +
-                        "\n\nTo do this we will send a small amount of cryptocurrency to your own Coinbase account and then send it right back. " +
-                        "\n\nBecause your account currently does not hold any crypto assets, we will buy ${currency.minBuyAmount.btcFormatShortened()} " +
-                        "$currency (Gdax's minimum purchase amount) for market price"
-                if (price != null) {
-                    val value = price * amount
-                    amountString += ", about ${value.fiatFormat()},"
-                }
-                amountString += " so we can send it to your Coinbase account and back."
-                sendInfoText.text = amountString
-                progressBar.visibility = View.INVISIBLE
-            }
-            else -> {
-                goToVerificationComplete(VerificationStatus.UnknownError)
-            }
+
+        var explanationText = "To verify your account we will test to ensure that your API Key has all required permissions."
+        if (account?.balance ?: 0.0 > 0.0) {
+            explanationText += "\n\nA very small amount of $currency may get sent to your Coinbase account."
         }
+        sendInfoText.text = explanationText
+
+        progressBar.visibility = View.INVISIBLE
     }
 }
