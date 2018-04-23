@@ -11,6 +11,7 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.textColor
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -100,9 +101,12 @@ class SendFragment : RefreshFragment() {
 
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
-            //val destination = destinationEditText.text.toString()
-            val destination = currency.developerAddress
-            if (prefs.shouldShowSendConfirmModal) {
+            val destination = destinationEditText.text.toString()
+            if (amount.isBlank()) {
+                toast("Please enter amount to send")
+            } else if (destination.isBlank()) {
+                toast("Please enter destination address")
+            } else if (prefs.shouldShowSendConfirmModal) {
                 alert {
                     title = "Send $amount $currency to $destination"
 
@@ -155,14 +159,14 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
-            currency = selectedCurrency
-//                refresh { }
-            switchCurrency()
-        }
-    }
+//    override fun onResume() {
+//        super.onResume()
+////        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
+////            currency = selectedCurrency
+//////                refresh { }
+////            switchCurrency()
+////        }
+//    }
 
     //TODO: add refresh
 
@@ -172,6 +176,15 @@ class SendFragment : RefreshFragment() {
         amountUnitText.text = currency.toString()
         destinationLabelText.text = "Destination ($currency address)"
 
+        context?.let { context ->
+            val buttonColors = currency.colorStateList(context)
+            val buttonTextColor = currency.buttonTextColor(context)
+            sendButton.backgroundTintList = buttonColors
+            sendButton.textColor = buttonTextColor
+
+            val tabAccentColor = currency.colorAccent(activity!!)
+            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+        }
     }
 
 }

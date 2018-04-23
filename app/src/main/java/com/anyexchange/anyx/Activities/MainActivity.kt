@@ -36,6 +36,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.contentView
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
@@ -123,7 +124,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNav = toolbar_spinner
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
-
         //TODO: list currencies better
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (Account.list.size > 0) {
             goHome()
+            setDrawerMenu()
         } else if (!prefs.shouldAutologin) {
             returnToLogin()
         } else {
@@ -149,6 +150,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     val GDAX_API_SECRET = "GDAX_API_SECRET"
     val ACCOUNT_LIST = "ACCOUNT_LIST"
 
+    private fun setDrawerMenu() {
+        nav_view.menu.clear()
+        if (GdaxApi.isLoggedIn) {
+            nav_view.inflateMenu(R.menu.activity_main_drawer)
+        } else {
+            nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
+        }
+
+    }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         val gdaxApiKey = savedInstanceState?.getString(GDAX_API_KEY)
         val gdaxApiSecret = savedInstanceState?.getString(GDAX_API_SECRET)
@@ -230,8 +240,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 dismissProgressBar()
                 returnToLogin()
             }, {
-//                GdaxApi.isLoggedIn = true
                 dismissProgressBar()
+                setDrawerMenu()
                 goHome()
             })
         } else {
@@ -375,8 +385,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-            R.id.nav_deposit -> FragmentType.DEPOSIT
-            R.id.nav_withdraw -> FragmentType.WITHDRAW
+//            R.id.nav_deposit -> FragmentType.DEPOSIT
+//            R.id.nav_withdraw -> FragmentType.WITHDRAW
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
