@@ -540,15 +540,30 @@ class TradeFragment : RefreshFragment() {
 
     private fun feeEstimate(amount: Double, limit: Double) : Double {
         val price = account?.product?.price
+
         if (price != null) {
-            when (tradeType) {
-                TradeType.MARKET -> {
+            when (tradeSide) {
+                TradeSide.BUY -> {
+                    when (tradeType) {
+                        TradeType.MARKET -> { }
+                        TradeType.LIMIT -> if (limit <= price) {
+                            return 0.0
+                        }
+                        TradeType.STOP -> if (limit >= price) {
+                            return 0.0
+                        }
+                    }
                 }
-                TradeType.LIMIT -> if (limit <= price) {
-                    return 0.0
-                }
-                TradeType.STOP -> if (limit >= price) {
-                    return 0.0
+                TradeSide.SELL -> {
+                    when (tradeType) {
+                        TradeType.MARKET -> { }
+                        TradeType.LIMIT -> if (limit >= price) {
+                            return 0.0
+                        }
+                        TradeType.STOP -> if (limit <= price) {
+                            return 0.0
+                        }
+                    }
                 }
             }
         }
