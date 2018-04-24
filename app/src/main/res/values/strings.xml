@@ -24,4 +24,16 @@
 
     <string name="anyx_eula_section_2_title">Privacy Policy</string>
     <string name="anyx_eula_2_1">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
+
+    <string name="send_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your GDAX trading account. BCH transfers are free and fast.</string>
+    <string name="send_warning_2_bch">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin Cash (BCH) address. </string>
+
+    <string name="send_warning_1_btc">Enter a BTC address and the amount you wish to transfer from your GDAX trading account. BTC transfers are free and fast.</string>
+    <string name="send_warning_2_btc">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin (BTC) address. </string>
+
+    <string name="send_warning_1_eth">Enter a ETH address and the amount you wish to transfer from your GDAX trading account. ETH transfers are free and fast.</string>
+    <string name="send_warning_2_eth">Warning: Do not send ETH from GDAX directly to an Ethereum contract. Sending to a contract may result in lost ETH. Read more here:\nhttps://support.gdax.com/customer/en/portal/articles/2430150</string>
+
+    <string name="send_warning_1_ltc">Enter a LTC address and the amount you wish to transfer from your GDAX trading account. LTC transfers are free and fast.</string>
+    <string name="send_warning_2_ltc">Warning: Please double check the destination address before sending. </string>
 </resources>

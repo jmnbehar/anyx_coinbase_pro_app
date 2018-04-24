@@ -12,6 +12,9 @@
         android:layout_height="wrap_content"
         android:text="Send Page"
         android:textSize="30sp"
+        android:paddingTop="5dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         tools:layout_editor_absoluteX="48dp"
         tools:layout_editor_absoluteY="16dp" />
 
@@ -51,7 +54,17 @@
         android:id="@+id/layout_send_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/txt_send_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="Enter a, address and the amount you wish to transfer from your GDAX trading account. Transfers are free and fast." />
 
         <LinearLayout
             android:id="@+id/layout_send_amount_layout"
@@ -111,6 +124,13 @@
                     android:layout_weight="20"
                     android:inputType="text" />
 
+                <ImageButton
+                    android:id="@+id/btn_send_destination_camera"
+                    android:layout_width="35dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_menu_camera" />
+
             </LinearLayout>
 
         </LinearLayout>
@@ -121,7 +141,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:visibility="invisible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/txt_send_two_factor_label"
@@ -151,6 +171,15 @@
             </LinearLayout>
 
         </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/txt_send_warning_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp" />
 
     </LinearLayout>
 

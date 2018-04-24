@@ -1,14 +1,21 @@
 package com.anyexchange.anyx.Fragments.Main
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.anyexchange.anyx.Activities.ScanActivity
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
+import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
@@ -34,6 +41,11 @@ class SendFragment : RefreshFragment() {
     private lateinit var twoFactorEditText: EditText
     private lateinit var twoFactorLabelText: TextView
     private lateinit var twoFactorButton: Button
+
+    private lateinit var scanButton: ImageButton
+
+    private lateinit var warning1TextView: TextView
+    private lateinit var warning2TextView: TextView
 
     private lateinit var sendButton: Button
 
@@ -67,6 +79,11 @@ class SendFragment : RefreshFragment() {
         twoFactorEditText = rootView.etxt_send_two_factor
         twoFactorButton = rootView.btn_send_two_factor
 
+        scanButton = rootView.btn_send_destination_camera
+
+        warning1TextView = rootView.txt_send_warning
+        warning2TextView = rootView.txt_send_warning_2
+
         sendButton = rootView.btn_send
 
         titleText.text = "Send" //currency.toString()
@@ -85,6 +102,8 @@ class SendFragment : RefreshFragment() {
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
+
+        scanButton.onClick { getAddressFromCamera() }
 
 //        radioButtonBtc.isChecked = true
 //        radioButtonBtc.setOnClickListener {
@@ -170,6 +189,34 @@ class SendFragment : RefreshFragment() {
 
     //TODO: add refresh
 
+    private fun getAddressFromCamera() {
+        activity?.let { activity ->
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(activity,
+                        arrayOf(Manifest.permission.READ_CONTACTS),
+                        420)
+                // Permission is not granted
+                // Ask for camera permission
+            } else {
+                val intent = Intent(activity, ScanActivity::class.java)
+                startActivityForResult(intent, 2)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        var barcode = data.extras.getString("BarCode")
+
+        if (barcode.equals("")) {
+            toast("Address not found")
+        } else {
+            //TODO: parse more advanced qr codes
+            destinationEditText.setText(barcode)
+        }
+    }
+
     private fun switchCurrency(currency: Currency = this.currency) {
         this.currency = currency
 
@@ -184,6 +231,25 @@ class SendFragment : RefreshFragment() {
 
             val tabAccentColor = currency.colorAccent(activity!!)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+
+            when (currency) {
+                Currency.BTC -> {
+                    warning1TextView.setText(R.string.send_warning_1_btc)
+                    warning2TextView.setText(R.string.send_warning_2_btc)
+                }
+                Currency.ETH -> {
+                    warning1TextView.setText(R.string.send_warning_1_eth)
+                    warning2TextView.setText(R.string.send_warning_2_eth)
+                }
+                Currency.BCH -> {
+                    warning1TextView.setText(R.string.send_warning_1_bch)
+                    warning2TextView.setText(R.string.send_warning_2_bch)
+                }
+                Currency.LTC -> {
+                    warning1TextView.setText(R.string.send_warning_1_ltc)
+                    warning2TextView.setText(R.string.send_warning_2_ltc)
+                }
+            }
         }
     }
 
