@@ -193,12 +193,11 @@ class SendFragment : RefreshFragment() {
         activity?.let { activity ->
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(activity,
-                        arrayOf(Manifest.permission.READ_CONTACTS),
-                        420)
                 // Permission is not granted
                 // Ask for camera permission
+                ActivityCompat.requestPermissions(activity,
+                        arrayOf(Manifest.permission.CAMERA),
+                        666)
             } else {
                 val intent = Intent(activity, ScanActivity::class.java)
                 startActivityForResult(intent, 2)
