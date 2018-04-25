@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import android.util.TypedValue
 import android.view.MenuItem
 import com.anyexchange.anyx.Activities.MainActivity
+import org.jetbrains.anko.textColor
 
 
 /**
@@ -178,7 +179,16 @@ class AlertsFragment : RefreshFragment() {
             priceLabelText.text = "Current " + currency.fullName + " price: "
             currentPriceText.text = price.fiatFormat()
         }
-        //priceEditText.setText(price.toString())
+        activity?.let { activity ->
+            val tabAccentColor = currency.colorAccent(activity)
+            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+
+            val buttonColors = currency.colorStateList(activity)
+            val buttonTextColor = currency.buttonTextColor(activity)
+            setButton.backgroundTintList = buttonColors
+            setButton.textColor = buttonTextColor
+        }
+
     }
 
     private val sortedAlerts : List<Alert>

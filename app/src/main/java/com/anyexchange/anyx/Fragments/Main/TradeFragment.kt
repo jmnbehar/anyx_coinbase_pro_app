@@ -349,21 +349,18 @@ class TradeFragment : RefreshFragment() {
         } else {
             feeEstimate.fiatFormat()
         }
+        val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
             title = "Alert"
             customView {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            horizontalLayout("$currencyString price:", "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
+                            horizontalLayout("Current $currencyString price:", "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
                         }
-                        when (tradeSide) {
-                            TradeSide.BUY -> horizontalLayout("$currencyString to buy:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
-                            TradeSide.SELL -> horizontalLayout("$currencyString to sell:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
-                        }
-                        horizontalLayout("$localCurrency Cost:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("$currencyString to $buySell:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout("Estimated fees:", feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout("Total $localCurrency Cost:", (dollarTotal + feeEstimate).fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout("Total $localCurrency:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
                         checkBox("Don't show this again").onCheckedChange { _, isChecked ->
                             val prefs = Prefs(activity!!)
                             prefs.shouldShowTradeConfirmModal = !isChecked
