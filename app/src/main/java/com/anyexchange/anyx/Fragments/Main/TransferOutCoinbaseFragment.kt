@@ -5,11 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.Activities.MainActivity
 import com.anyexchange.anyx.Adapters.CoinbaseAccountSpinnerAdapter
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.fragment_withdraw_coinbase.view.*
+import kotlinx.android.synthetic.main.fragment_transfer_out.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -51,7 +50,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_withdraw_coinbase, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_transfer_out, container, false)
         setupSwipeRefresh(rootView)
 
         this.inflater = inflater

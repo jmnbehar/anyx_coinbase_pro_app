@@ -19,6 +19,8 @@
     <string name="login_help_btn">Help</string>
     <string name="login_login_btn">Log in</string>
 
+    <string name="login_disclaimer">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
+
     <string name="login_error_missing_api_key">Missing Api Key</string>
     <string name="login_error_missing_api_secret">Missing Api Secret</string>
     <string name="login_error_missing_passphrase">Missing Passphrase</string>
@@ -97,7 +99,8 @@ You're good to go!</item>
     <string name="anyx_eula_1_6">The risk of loss in trading or holding Digital Currency can be substantial. You should therefore carefully consider whether trading or holding Digital Currency is suitable for you in light of your financial condition.</string>
 
     <string name="anyx_eula_section_2_title">Privacy Policy</string>
-    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
+    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.
+        \nWe do not save any pictures taken with the camera. </string>
 
     <string name="send_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your GDAX trading account. BCH transfers are free and fast.</string>
     <string name="send_warning_2_bch">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin Cash (BCH) address. </string>
