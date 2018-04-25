@@ -42,7 +42,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="BTC"
+                        android:text=""
                         android:textSize="30sp"
                         tools:layout_editor_absoluteX="48dp"
                         tools:layout_editor_absoluteY="16dp" />
@@ -52,7 +52,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="500"
+                        android:text=""
                         android:textAlignment="textEnd"
                         android:textSize="30sp"
                         tools:layout_editor_absoluteX="48dp"
@@ -69,7 +69,7 @@
                         android:id="@+id/txt_chart_change_or_date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="20%"
+                        android:text=""
                         android:textAlignment="textEnd"
                         android:textSize="18sp"
                         tools:layout_editor_absoluteX="48dp"
@@ -110,7 +110,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="1H" />
+                    android:text="@string/chart_timespan_1h" />
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_day"
@@ -124,7 +124,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="1D" />
+                    android:text="@string/chart_timespan_1d" />
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_week"
@@ -138,7 +138,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="1W" />
+                    android:text="@string/chart_timespan_1w" />
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_month"
@@ -152,7 +152,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="1M" />
+                    android:text="@string/chart_timespan_1m" />
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_year"
@@ -166,7 +166,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="1Y" />
+                    android:text="@string/chart_timespan_1y" />
 
                 <RadioButton
                     android:id="@+id/rbtn_chart_timespan_all"
@@ -180,7 +180,7 @@
                     android:gravity="center_horizontal"
                     android:paddingBottom="3dp"
                     android:paddingTop="3dp"
-                    android:text="All" />
+                    android:text="@string/chart_timespan_all" />
             </RadioGroup>
 
             <LinearLayout
@@ -197,14 +197,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Buy" />
+                    android:text="@string/chart_buy_btn" />
 
                 <Button
                     android:id="@+id/btn_chart_sell"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Sell" />
+                    android:text="@string/chart_sel_btn" />
             </LinearLayout>
 
             <LinearLayout
@@ -227,7 +227,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:text="Bitcoin"
+                    android:text="@string/chart_default_account"
                     android:textSize="24sp" />
 
                 <android.support.v4.widget.Space
@@ -245,7 +245,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="$A Billion"
+                        android:text="@string/chart_default_balance"
                         android:textAlignment="textEnd" />
 
                     <TextView
@@ -253,7 +253,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="20"
+                        android:text="@string/chart_default_balance"
                         android:textAlignment="textEnd" />
 
                 </LinearLayout>

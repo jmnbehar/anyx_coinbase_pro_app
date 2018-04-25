@@ -52,7 +52,6 @@ class LoginFragment : Fragment()  {
         apiSecretEditText = rootView.etxt_login_secret
         passphraseEditText = rootView.etxt_login_passphrase
         val btnLogin = rootView.btn_login
-        val btnNewApiKey = rootView.btn_login_new_apikey
         val btnNewAccount = rootView.btn_login_new_acccount
         val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
@@ -102,11 +101,6 @@ class LoginFragment : Fragment()  {
 
         btnLogin.setOnClickListener { view ->
             signIn()
-        }
-
-        btnNewApiKey.setOnClickListener { _ ->
-            val newApiKeyUrl = "https://www.gdax.com/settings/api"
-            (activity as com.anyexchange.anyx.Activities.LoginActivity).goToFragment(com.anyexchange.anyx.Activities.LoginActivity.LoginFragmentType.WebView, newApiKeyUrl)
         }
 
         btnNewAccount.setOnClickListener { _ ->
@@ -180,11 +174,15 @@ class LoginFragment : Fragment()  {
         val apiSecretVal = apiSecret ?: ""
         val passphraseVal = passphrase ?: ""
 
-        if((apiKeyVal != "") && (apiSecretVal != "") && (passphraseVal != "")) {
+        if (apiKeyVal.isBlank()) {
+            toast(R.string.login_error_missing_api_key)
+        } else if (apiSecretVal.isBlank()) {
+            toast(R.string.login_error_missing_api_secret)
+        } else if (passphraseVal.isBlank()) {
+            toast(R.string.login_error_missing_passphrase)
+        } else {
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
             (activity as com.anyexchange.anyx.Activities.LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
-        } else {
-            toast("Invalid Api Key, Secret, or Passphrase")
         }
     }
 }

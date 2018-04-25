@@ -9,6 +9,80 @@
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
 
+    <string name="login_fragment_title">Login with GDAX Api Key</string>
+    <string name="login_api_key_label">Api Key</string>
+    <string name="login_api_secret_label">Api Secret</string>
+    <string name="login_passphrase_label">Passphrase</string>
+    <string name="login_save_info_label">Save API key and secret</string>
+    <string name="login_save_passphrase_label">Also save passphrase</string>
+    <string name="login_skip_btn">Skip login</string>
+    <string name="login_help_btn">Help</string>
+    <string name="login_login_btn">Log in</string>
+
+    <string name="login_error_missing_api_key">Missing Api Key</string>
+    <string name="login_error_missing_api_secret">Missing Api Secret</string>
+    <string name="login_error_missing_passphrase">Missing Passphrase</string>
+
+    <string name="login_help_finish_btn">Done</string>
+    <string name="login_help_gdax_link">https://www.gdax.com/settings/api</string>
+    <string name="login_help_skip_btn">Skip</string>
+
+
+    <string name="home_market_tab">Market</string>
+    <string name="home_account_tab">Account</string>
+
+    <string name="chart_timespan_1h">1H</string>
+    <string name="chart_timespan_1d">1D</string>
+    <string name="chart_timespan_1w">1W</string>
+    <string name="chart_timespan_1m">1M</string>
+    <string name="chart_timespan_1y">1Y</string>
+    <string name="chart_timespan_all">All</string>
+
+    <string name="chart_buy_btn">Buy</string>
+    <string name="chart_sel_btn">Sell</string>
+
+    <string name="chart_default_account">Account</string>
+    <string name="chart_default_balance">0.0</string>
+
+    <string-array name="login_help_mobile_titles">
+        <item>Create a new API Key on your phone</item>
+        <item>Open Menu</item>
+        <item>Open API Page</item>
+        <item>Create API Key</item>
+        <item>Enter Info To AnyX</item>
+    </string-array>
+
+    <string-array name="login_help_mobile_text">
+        <item> </item>
+        <item>On the GDAX mobile site, click the menu icon in the upper right hand corner.</item>
+        <item>Select API from the menu.</item>
+        <item>On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase.
+        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
+        <item>Copy the API key and API secret into AnyX\'s login screen. Save these in the app so you don\'t have to go through this process again.
+You're good to go!</item>
+    </string-array>
+
+
+    <string-array name="login_help_desktop_titles">
+        <item>Create a new API Key on your computer</item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+        <item> </item>
+    </string-array>
+
+    <string-array name="login_help_desktop_text">
+        <item> </item>
+        <item>Log in to the GDAX website and click the menu icon in the upper right hand corner.</item>
+        <item>Choose API from the right hand menu.</item>
+        <item>On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase.
+        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
+        <item>Copy down the info into the AnyX login screen. Make sure you do not send this info on any unencrypted channels to prevent someone from hacking your account</item>
+    </string-array>
+
+    <string name="login_help_"></string>
+
 
     <string name="anyx_eula_header">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
 
@@ -36,4 +110,8 @@
 
     <string name="send_warning_1_ltc">Enter a LTC address and the amount you wish to transfer from your GDAX trading account. LTC transfers are free and fast.</string>
     <string name="send_warning_2_ltc">Warning: Please double check the destination address before sending. </string>
+
+
+
+
 </resources>

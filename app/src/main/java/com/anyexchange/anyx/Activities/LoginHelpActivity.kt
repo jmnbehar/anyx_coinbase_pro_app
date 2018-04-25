@@ -23,10 +23,10 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 
 
 class LoginHelpActivity : AppCompatActivity() {
-    lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager
 
     var nextBtn: ImageButton? = null
-    var skipBtn: Button? = null
+    private var skipBtn: Button? = null
     var finishBtn:Button? = null
 
     var indicators: List<ImageView> = listOf()
@@ -60,14 +60,13 @@ class LoginHelpActivity : AppCompatActivity() {
             indicators[i].visibility = View.GONE
         }
 
-        val imageIndicator = indicators[0]
         indicators[0].setImageResource(R.drawable.white)
         nextBtn = intro_btn_next
         skipBtn = intro_btn_skip
         finishBtn = intro_btn_finish
 
         finishBtn?.visibility = View.VISIBLE
-        finishBtn?.text = "Skip"
+        finishBtn?.text = getString(R.string.login_help_skip_btn)
 
         isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
 
@@ -97,7 +96,7 @@ class LoginHelpActivity : AppCompatActivity() {
                 nextBtn?.visibility = View.GONE // if (position == pageCount - 1) View.GONE else View.VISIBLE
                 finishBtn?.visibility = View.VISIBLE
                 if (position == pageCount - 1) {
-                    finishBtn?.text = "Done"
+                    finishBtn?.text = getString(R.string.login_help_finish_btn)
                 }
             }
         })
@@ -163,39 +162,24 @@ class LoginHelpActivity : AppCompatActivity() {
      * A placeholder fragment containing a simple view.
      */
     class PlaceholderFragment : Fragment() {
-        val mobileTitles: Array<String> = arrayOf(
-                "Create a new API Key on your phone",
-                "Open Menu",
-                "Open API Page",
-                "Create API Key",
-                "Enter Info To AnyX")
-        val mobileStrings: Array<String> = arrayOf(
-                " ",
-                "On the GDAX mobile site, click the menu icon in the upper right hand corner.",
-                "Select API from the menu.",
-                "On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase." +
-                        "\nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.",
-                "Copy the API key and API secret into AnyX's login screen. Save these in the app so you don't have to go through this process again. \nYou're ready to go!")
-        val mobileImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_mobile_1, R.drawable.login_help_mobile_2, R.drawable.login_help_mobile_4, R.drawable.login_help_mobile_5)
+        private var mobileTitles = arrayOf<String>()
+        private var mobileStrings = arrayOf<String>()
+        private val mobileImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_mobile_1,
+                R.drawable.login_help_mobile_2, R.drawable.login_help_mobile_4, R.drawable.login_help_mobile_5)
 
-        val desktopTitles: Array<String> = arrayOf(
-                "Create a new API Key on your computer",
-                " ",
-                " ",
-                " ",
-                " ",
-                " ")
-        val desktopStrings: Array<String> = arrayOf(
-                " ",
-                "Log in to the GDAX website and click the menu icon in the upper right hand corner.",
-                "Choose API from the right hand menu.",
-                "On the API Page, select View, Transfer, Bypass Two-Factor Auth, and Trade permissions. You may also set your own Passphrase.\n" +
-                        "As long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.",
-                "Copy down the info into the AnyX login screen. Make sure you do not send this info on any unencrypted channels, because ")
-        val desktopImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_desktop_1, R.drawable.login_help_desktop_2, R.drawable.login_help_desktop_3, R.drawable.login_help_desktop_4)
+        private var desktopTitles = arrayOf<String>()
+        private var desktopStrings = arrayOf<String>()
+        private val desktopImages: Array<Int> = arrayOf(R.drawable.gdax_512, R.drawable.login_help_desktop_1,
+                R.drawable.login_help_desktop_2, R.drawable.login_help_desktop_3, R.drawable.login_help_desktop_4)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
+            desktopTitles = resources.getStringArray(R.array.login_help_desktop_titles)
+            desktopStrings = resources.getStringArray(R.array.login_help_desktop_text)
+
+            mobileTitles = resources.getStringArray(R.array.login_help_mobile_titles)
+            mobileStrings = resources.getStringArray(R.array.login_help_mobile_text)
+
             val position = (arguments?.getInt(ARG_SECTION_NUMBER) ?: 1) - 1
             val rootView = inflater.inflate(R.layout.fragment_onboard, container, false)
 //            textView.text = getString(R.string.section_format, arguments.getInt(ARG_SECTION_NUMBER))
@@ -216,7 +200,7 @@ class LoginHelpActivity : AppCompatActivity() {
              * The fragment argument representing the section number for this
              * fragment.
              */
-            private val ARG_SECTION_NUMBER = "section_number"
+            private const val ARG_SECTION_NUMBER = "section_number"
 
             /**
              * Returns a new instance of this fragment for the given section

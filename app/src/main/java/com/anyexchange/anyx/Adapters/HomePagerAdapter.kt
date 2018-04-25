@@ -50,6 +50,7 @@ class HomePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
+            //TODO: consider using string resources
             0 -> "Market"
             1 -> "Account"
             else -> "Screen " + (position + 1)
