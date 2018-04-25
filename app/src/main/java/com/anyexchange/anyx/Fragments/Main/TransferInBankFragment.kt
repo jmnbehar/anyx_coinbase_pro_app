@@ -5,11 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.Activities.MainActivity
 import com.anyexchange.anyx.Adapters.PaymentMethodListAdapter
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.fragment_depost_coinbase.view.*
+import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -49,7 +48,7 @@ class TransferInBankFragment : RefreshFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_depost_coinbase, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_transfer_in, container, false)
         setupSwipeRefresh(rootView)
 
         this.inflater = inflater

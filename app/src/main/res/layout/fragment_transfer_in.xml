@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txt_deposit_coinbase_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:text="Transfer From Coinbase"
+            android:textSize="26sp"
+            tools:layout_editor_absoluteX="48dp"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabl_transfer_currency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top">
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_transfer_usd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USD" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_transfer_btc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BTC" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_transfer_eth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ETH" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_transfer_bch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BCH" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_transfer_ltc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LTC" />
+        </android.support.design.widget.TabLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layout_deposit_coinbase_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp">
+
+            <LinearLayout
+                android:id="@+id/layout_deposit_coinbase_source"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_account_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Source" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Spinner
+                        android:id="@+id/spinner_deposit_coinbase_accounts"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_account_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Coinbase Balance"
+                    android:textSize="17sp"
+                    android:visibility="visible" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_deposit_coinbase_amount_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_destination_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Destination" />
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_gdax_account_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="10dp"
+                    android:text="GDAX  Balance"
+                    android:textSize="17sp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/layout_transfer_in_interactive_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_amount_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Amount" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etxt_deposit_coinbase_amount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="20"
+                        android:inputType="numberDecimal" />
+
+                    <TextView
+                        android:id="@+id/txt_deposit_coinbase_amount_unit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="BTC" />
+
+                    <Button
+                        android:id="@+id/btn_deposit_coinbase_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_weight="0"
+                        android:text="max" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_deposit_coinbase_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TextView"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/btn_deposit_coinbase_deposit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Transfer funds" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>

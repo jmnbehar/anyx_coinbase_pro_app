@@ -6,14 +6,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.ColorFilter
-import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -93,10 +90,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-    var currentFragment: RefreshFragment? = null
+    private var currentFragment: RefreshFragment? = null
 
-    lateinit var progressBar: ProgressBar
-    lateinit var progressBarLayout: ConstraintLayout
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBarLayout: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -317,7 +314,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                var currentPrice = Account.forCurrency(alert.currency)?.product?.price
+                val currentPrice = Account.forCurrency(alert.currency)?.product?.price
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     triggerAlert(alert)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
@@ -326,14 +323,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         if (currentFragment is AlertsFragment) {
-            val prefs = Prefs(this)
             (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
             (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
         }
     }
 
     private fun triggerAlert(alert: Alert) {
-        val CHANNEL_ID = "Price_Alerts"
+        val channelId = "Price_Alerts"
         if (notificationManager == null) {
             notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -342,8 +338,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 // the NotificationChannel class is new and not in the support library
                 val name = getString(R.string.channel_name)
                 val description = getString(R.string.channel_description)
-                val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
-                val channel = NotificationChannel(CHANNEL_ID, name, importance)
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
+                val channel = NotificationChannel(channelId, name, importance)
                 channel.description = description
                 // Register the channel with the system
                 notificationManager?.createNotificationChannel(channel)
@@ -358,13 +354,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val intent = Intent(this, this.javaClass)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationTitle = "${alert.currency.fullName} price alert"
         val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
         val priceAlertGroupTag = "PriceAlert"
 
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.anyx_notification_icon)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationText)
@@ -551,15 +547,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
-        alert {
-            title = titleString
-            message = messageString
-            positiveButton(positiveText) { positiveAction() }
-            if (negativeText != null) {
-                negativeButton(negativeText) { negativeAction() }
-            }
-        }.show()
-    }
+//    private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+//        alert {
+//            title = titleString
+//            message = messageString
+//            positiveButton(positiveText) { positiveAction() }
+//            if (negativeText != null) {
+//                negativeButton(negativeText) { negativeAction() }
+//            }
+//        }.show()
+//    }
 
 }
