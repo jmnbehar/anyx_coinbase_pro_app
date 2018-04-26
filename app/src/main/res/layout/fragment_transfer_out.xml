@@ -19,21 +19,21 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txt_withdraw_coinbase_title"
+                android:id="@+id/txt_transfer_out_coinbase_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Transfer to Coinbase"
-                android:textSize="30sp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingTop="10dp"
+                android:text="Transfer to Coinbase"
+                android:textSize="30sp"
                 tools:layout_editor_absoluteX="48dp"
                 tools:layout_editor_absoluteY="16dp" />
 
 
             <android.support.design.widget.TabLayout
-                android:id="@+id/tabl_transfer_currency"
+                android:id="@+id/tabl_transfer_out_currency"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top">
@@ -70,7 +70,7 @@
             </android.support.design.widget.TabLayout>
 
             <LinearLayout
-                android:id="@+id/layout_withdraw_coinbase_details"
+                android:id="@+id/layout_transfer_out_coinbase_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -80,7 +80,7 @@
                 android:paddingTop="10dp">
 
                 <LinearLayout
-                    android:id="@+id/layout_withdraw_coinbase_destination"
+                    android:id="@+id/txt_transfer_out_coinbase_destination"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
@@ -88,13 +88,13 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_source_label"
+                        android:id="@+id/txt_transfer_out_coinbase_source_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Source" />
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_gdax_account_info"
+                        android:id="@+id/txt_transfer_out_coinbase_gdax_account_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
@@ -103,13 +103,13 @@
                         android:textSize="17sp" />
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_account_label"
+                        android:id="@+id/txt_transfer_out_coinbase_account_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Destination" />
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_account_info"
+                        android:id="@+id/txt_transfer_out_coinbase_account_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
@@ -117,23 +117,20 @@
                         android:text="Coinbase Wallet Balance"
                         android:textSize="17sp" />
 
-                    <LinearLayout
+                    <Spinner
+                        android:id="@+id/spinner_transfer_out_coinbase_accounts"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/spinner_withdraw_coinbase_accounts"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:visibility="gone" />
-
-                    </LinearLayout>
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginEnd="-5dp"
+                        android:layout_marginStart="-5dp"
+                        android:layout_marginTop="10dp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/layout_withdraw_coinbase_amount_layout"
+                    android:id="@+id/layout_transfer_out_coinbase_amount_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="5dp"
@@ -141,7 +138,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_amount_label"
+                        android:id="@+id/txt_transfer_out_coinbase_amount_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Amount" />
@@ -152,21 +149,21 @@
                         android:orientation="horizontal">
 
                         <EditText
-                            android:id="@+id/etxt_withdraw_coinbase_amount"
+                            android:id="@+id/etxt_transfer_out_coinbase_amount"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="20"
                             android:inputType="numberDecimal" />
 
                         <TextView
-                            android:id="@+id/txt_withdraw_coinbase_amount_unit"
+                            android:id="@+id/txt_transfer_out_coinbase_amount_unit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="BTC" />
 
                         <Button
-                            android:id="@+id/btn_withdraw_coinbase_max"
+                            android:id="@+id/btn_transfer_out_coinbase_max"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="5dp"
@@ -175,13 +172,14 @@
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/txt_withdraw_coinbase_info"
+                        android:id="@+id/txt_transfer_out_coinbase_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="TextView"
+                        android:textSize="18sp" />
 
                     <Button
-                        android:id="@+id/btn_withdraw_coinbase_withdraw"
+                        android:id="@+id/btn_transfer_out_coinbase_transfer_out"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"

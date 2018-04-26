@@ -53,23 +53,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_deposit_coinbase_title
 
-        depositDetailsLayout = rootView.layout_deposit_coinbase_details
-
-        amountLabelText = rootView.txt_deposit_coinbase_amount_label
-        amountEditText = rootView.etxt_deposit_coinbase_amount
-        amountUnitText = rootView.txt_deposit_coinbase_amount_unit
-
-        depositMaxButton = rootView.btn_deposit_coinbase_max
-
-        accountsLabelTxt = rootView.txt_deposit_coinbase_account_label
-        accountsSpinner = rootView.spinner_deposit_coinbase_accounts
-
-        infoText = rootView.txt_deposit_coinbase_info
-        gdaxBalanceText = rootView.txt_deposit_coinbase_gdax_account_info
-
-        submitDepositButton = rootView.btn_deposit_coinbase_deposit
 //        val buttonColors = account.currency.colorStateList(activity)
 //        submitDepositButton.backgroundTintList = buttonColors
 //        val buttonTextColor = account.currency.buttonTextColor(activity)

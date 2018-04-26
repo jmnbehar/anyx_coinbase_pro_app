@@ -26,7 +26,7 @@ class TransferInCoinbaseFragment : RefreshFragment() {
 
     private lateinit var interactiveLayout: LinearLayout
 
-    private lateinit var transferTabLayout: TabLayout
+    private lateinit var currencyTabLayout: TabLayout
 
     private lateinit var cbAccountsLabelTxt: TextView
     private lateinit var cbAccountsSpinner: Spinner
@@ -60,29 +60,29 @@ class TransferInCoinbaseFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_deposit_coinbase_title
+        titleText = rootView.txt_transfer_in_coinbase_title
 
-        depositDetailsLayout = rootView.layout_deposit_coinbase_details
+        depositDetailsLayout = rootView.layout_transfer_in_coinbase_details
         interactiveLayout = rootView.layout_transfer_in_interactive_layout
 
-        transferTabLayout = rootView.tabl_transfer_currency
+        currencyTabLayout = rootView.tabl_transfer_in_currency
 
-        amountLabelText = rootView.txt_deposit_coinbase_amount_label
-        amountEditText = rootView.etxt_deposit_coinbase_amount
-        amountUnitText = rootView.txt_deposit_coinbase_amount_unit
+        amountLabelText = rootView.txt_transfer_in_coinbase_amount_label
+        amountEditText = rootView.etxt_transfer_in_coinbase_amount
+        amountUnitText = rootView.txt_transfer_in_coinbase_amount_unit
 
-        depositMaxButton = rootView.btn_deposit_coinbase_max
+        depositMaxButton = rootView.btn_transfer_in_coinbase_max
 
-        cbAccountsLabelTxt = rootView.txt_deposit_coinbase_account_label
-        cbAccountsSpinner = rootView.spinner_deposit_coinbase_accounts
-        cbAccountText = rootView.txt_deposit_coinbase_account_info
+        cbAccountsLabelTxt = rootView.txt_transfer_in_coinbase_account_label
+        cbAccountsSpinner = rootView.spinner_transfer_in_coinbase_accounts
+        cbAccountText = rootView.txt_transfer_in_coinbase_account_info
 
-        infoText = rootView.txt_deposit_coinbase_info
-        gdaxBalanceText = rootView.txt_deposit_coinbase_gdax_account_info
+        infoText = rootView.txt_transfer_in_coinbase_info
+        gdaxBalanceText = rootView.txt_transfer_in_coinbase_gdax_account_info
 
-        submitDepositButton = rootView.btn_deposit_coinbase_deposit
+        submitDepositButton = rootView.btn_transfer_in_coinbase_transfer_in
 
-        transferTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
                     0 -> switchCurrency(Currency.USD)
@@ -99,6 +99,8 @@ class TransferInCoinbaseFragment : RefreshFragment() {
         titleText.text = "Transfer from Coinbase"
 
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
+
         val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
@@ -251,11 +253,12 @@ class TransferInCoinbaseFragment : RefreshFragment() {
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
         amountEditText.setText("")
-        var relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency }
+        val relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }
+
         when (relevantAccounts.size) {
             0 -> {
                 coinbaseAccount = null
-                cbAccountText.text = "Coinbase $currency Wallet is Empty"
+                cbAccountText.text = "Coinbase $currency wallet is Empty"
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
                 interactiveLayout.visibility = View.INVISIBLE
@@ -270,19 +273,12 @@ class TransferInCoinbaseFragment : RefreshFragment() {
             else -> {
                 coinbaseAccount = relevantAccounts.first()
 
-                (cbAccountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = relevantAccounts
-                (cbAccountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
+                (cbAccountsSpinner.adapter as? CoinbaseAccountSpinnerAdapter)?.coinbaseAccountList = relevantAccounts
+                (cbAccountsSpinner.adapter as? CoinbaseAccountSpinnerAdapter)?.notifyDataSetChanged()
 
                 cbAccountText.visibility = View.GONE
                 cbAccountsSpinner.visibility = View.VISIBLE
                 interactiveLayout.visibility = View.VISIBLE
-
-                activity?.let {activity ->
-                    //TODO: show spinner
-                    val arrayAdapter = CoinbaseAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
-                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    cbAccountsSpinner.adapter = arrayAdapter
-                }
             }
         }
         activity?.let {activity ->
@@ -298,7 +294,7 @@ class TransferInCoinbaseFragment : RefreshFragment() {
             submitDepositButton.textColor = buttonTextColor
 
             val tabAccentColor = currency.colorAccent(activity)
-            transferTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
             updateGdaxAccountText()
         }
@@ -307,12 +303,12 @@ class TransferInCoinbaseFragment : RefreshFragment() {
     private fun updateGdaxAccountText() {
         val gdaxAccount = Account.forCurrency(currency)
         amountUnitText.text = currency.toString()
-        if (currency.isFiat) {
-            val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
-            gdaxBalanceText.text = "GDAX $currency Wallet ($gdaxAccountBalance)"
+
+        val gdaxAccountBalanceString = if (currency.isFiat) {
+            "${(gdaxAccount?.balance ?: 0.0).fiatFormat()} $currency"
         } else {
-            val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-            gdaxBalanceText.text = "GDAX $currency Wallet ($gdaxAccountBalance $currency)"
+            "${(gdaxAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
+        gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalanceString"
     }
 }

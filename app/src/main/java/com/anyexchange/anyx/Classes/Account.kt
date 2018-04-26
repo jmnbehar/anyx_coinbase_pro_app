@@ -86,9 +86,9 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
 
         override fun toString(): String {
             return if (currency.isFiat) {
-                "Coinbase $currency Wallet: ${balance.fiatFormat()}"
+                "Coinbase $currency Balance: ${balance.fiatFormat()}"
             } else {
-                "Coinbase $currency Wallet: ${balance.btcFormatShortened()} $currency"
+                "Coinbase $currency Balance: ${balance.btcFormatShortened()} $currency"
             }
         }
     }

@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -102,12 +103,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         setSupportActionBar(toolbar)
 
-        var toggle = object : ActionBarDrawerToggle(
+        val toggle = object : ActionBarDrawerToggle(
                 this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             override fun onDrawerOpened(drawerView: View) {
                 super.onDrawerOpened(drawerView)
                 hideSoftKeyboard()
             }
+        }
+
+        toolbar.setNavigationOnClickListener {
+            drawer_layout.openDrawer(Gravity.START, true)
         }
 
         drawer_layout.addDrawerListener(toggle)
@@ -149,6 +154,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun setDrawerMenu() {
         nav_view.menu.clear()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         if (GdaxApi.isLoggedIn) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
         } else {
@@ -390,8 +396,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentFragmentType = when (currentFragment) {
             is SendFragment -> FragmentType.SEND
             is AlertsFragment -> FragmentType.ALERTS
-            is TransferInFragment -> FragmentType.DEPOSIT
-            is TransferOutFragment -> FragmentType.WITHDRAW
             is TransferInCoinbaseFragment -> FragmentType.DEPOSIT
             is TransferOutCoinbaseFragment -> FragmentType.WITHDRAW
             is SettingsFragment -> FragmentType.SETTINGS
