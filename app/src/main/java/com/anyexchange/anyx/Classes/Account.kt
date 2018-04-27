@@ -66,7 +66,6 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
 
         var usdAccount: Account? = null
 
-        //TODO: use this
         var totalValue: Double = 0.0
             get() = Account.list.map { a -> a.value }.sum() + (Account.usdAccount?.value ?: 0.0)
 
@@ -79,10 +78,16 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
         }
     }
 
-    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) {
-        val id: String = apiCoinbaseAccount.id
-        val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
-        val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
+    abstract class RelatedAccount {
+        abstract val id: String
+        abstract val balance: Double?
+        abstract val currency: Currency
+    }
+
+    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : RelatedAccount() {
+        override val id: String = apiCoinbaseAccount.id
+        override val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
+        override val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
 
         override fun toString(): String {
             return if (currency.isFiat) {
@@ -90,6 +95,16 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
             } else {
                 "Coinbase $currency Balance: ${balance.btcFormatShortened()} $currency"
             }
+        }
+    }
+
+    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : RelatedAccount() {
+        override val id: String = apiPaymentMethod.id
+        override val balance = apiPaymentMethod.balance?.toDoubleOrNull()
+        override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD
+
+        override fun toString(): String {
+            return "Payment Method: ${apiPaymentMethod.name}"
         }
     }
 }

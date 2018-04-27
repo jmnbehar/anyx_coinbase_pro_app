@@ -32,7 +32,7 @@ sealed class GdaxApi: FuelRouting {
         val isLoggedIn: Boolean
             get() { return  credentials != null }
 
-        val basePath = "https://api.gdax.com"
+        const val basePath = "https://api.gdax.com"
 
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
@@ -81,7 +81,7 @@ sealed class GdaxApi: FuelRouting {
     private var timeLock = 0
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
-        FuelManager.instance.basePath = AnyxApi.basePath
+        FuelManager.instance.basePath = basePath
         Fuel.request(this).responseString { _, _, result ->
             when (result) {
                 is Result.Failure -> {
@@ -116,7 +116,7 @@ sealed class GdaxApi: FuelRouting {
     }
 
     fun executePost(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (result: Result<ByteArray, FuelError>) -> Unit) {
-        FuelManager.instance.basePath = AnyxApi.basePath
+        FuelManager.instance.basePath = basePath
         Fuel.post(this.request.url.toString())
                 .header(headers)
                 .body(body)
@@ -319,12 +319,13 @@ sealed class GdaxApi: FuelRouting {
         }
     }
     class paymentMethods() : GdaxApi() {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiPaymentMethod>) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiPaymentMethodsString = result.value
                 var apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(apiPaymentMethodsString, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
                 apiPaymentMethodsList = apiPaymentMethodsList.filter { apiPaymentMethod -> apiPaymentMethod.type != "fiat_account" }
-                onComplete(apiPaymentMethodsList)
+                val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
+                onComplete(paymentMethodsList)
             }
         }
     }

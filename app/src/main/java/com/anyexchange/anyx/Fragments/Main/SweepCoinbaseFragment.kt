@@ -5,10 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.Adapters.CoinbaseAccountSpinnerAdapter
+import com.anyexchange.anyx.Adapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -86,7 +85,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
         }
         updateGdaxAccountText()
 
-        val arrayAdapter = CoinbaseAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         accountsSpinner.adapter = arrayAdapter
         doneLoading()
@@ -203,8 +202,8 @@ class SweepCoinbaseFragment : RefreshFragment() {
             depositDetailsLayout.visibility = View.VISIBLE
             titleText.text = "Transfer from Coinbase"
 
-            (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).coinbaseAccountList = coinbaseAccounts
-            (accountsSpinner.adapter as CoinbaseAccountSpinnerAdapter).notifyDataSetChanged()
+            (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).relatedAccountList = coinbaseAccounts
+            (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).notifyDataSetChanged()
 
 
             val coinbaseAccount = coinbaseAccount

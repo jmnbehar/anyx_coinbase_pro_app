@@ -159,7 +159,7 @@ data class ApiPaymentMethod(
         val type: String,
         val name: String,
         val currency: String,
-        val balance: String,
+        val balance: String?,
         val primary_buy: Boolean,
         val primary_sell: Boolean,
         val allow_deposit: Boolean,

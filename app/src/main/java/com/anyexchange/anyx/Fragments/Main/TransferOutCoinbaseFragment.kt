@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.Adapters.CoinbaseAccountSpinnerAdapter
+import com.anyexchange.anyx.Adapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.Classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer_out.view.*
@@ -46,7 +46,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
     private lateinit var currencyTabLayout: TabLayout
 
     private var coinbaseAccounts: MutableList<Account.CoinbaseAccount> = mutableListOf()
-    private var coinbaseAccount: Account.CoinbaseAccount? = null
+    private var destinationAccount: Account.CoinbaseAccount? = null
     private var currency: Currency = Currency.USD
 
     companion object {
@@ -97,7 +97,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        val arrayAdapter = CoinbaseAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         cbAccountsSpinner.adapter = arrayAdapter
 
@@ -108,8 +108,8 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
 //        accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 //            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-//                coinbaseAccount = coinbaseAccounts[position]
-//                val currency = coinbaseAccount?.currency
+//                destinationAccount = coinbaseAccounts[position]
+//                val currency = destinationAccount?.currency
 //                if (currency != null) {
 //                    amountUnitText.text = currency.toString()
 //
@@ -134,7 +134,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
         //TODO: think about holds, adjust max accordingly
         withdrawMaxButton.setOnClickListener {
             val gdaxAccount = Account.forCurrency(currency)
-            val amount = gdaxAccount?.balance
+            val amount = gdaxAccount?.availableBalance
             if (amount != null) {
                 amountEditText.setText(amount.btcFormatShortened())
             }
@@ -149,11 +149,11 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
             } else {
                 val gdaxAccount = Account.forCurrency(currency)
 
-                if (amount > gdaxAccount?.balance ?: 0.0) {
+                if (amount > gdaxAccount?.availableBalance ?: 0.0) {
                     showPopup("Not enough funds", { })
                 }
                 (activity as com.anyexchange.anyx.Activities.MainActivity).showProgressBar()
-                coinbaseAccount?.let { cbAccount ->
+                destinationAccount?.let { cbAccount ->
                     GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost({ result ->
                         val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
                         if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
@@ -225,7 +225,7 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
         when (relevantAccounts.size) {
             0 -> {
-                coinbaseAccount = null
+                destinationAccount = null
                 val cbAccountBalance = if (currency.isFiat) {
                      0.0.fiatFormat()
                 } else {
@@ -237,15 +237,15 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
                 cbAccountsSpinner.visibility = View.GONE
             }
             1 -> {
-                coinbaseAccount = relevantAccounts.first()
-                cbAccountText.text = coinbaseAccount.toString()
+                destinationAccount = relevantAccounts.first()
+                cbAccountText.text = destinationAccount.toString()
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
             }
             else -> {
-                coinbaseAccount = relevantAccounts.first()
+                destinationAccount = relevantAccounts.first()
 
-                val arrayAdapter = CoinbaseAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, relevantAccounts)
+                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, relevantAccounts)
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 cbAccountsSpinner.adapter = arrayAdapter
 
@@ -255,19 +255,19 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
         }
 
         val gdaxAccount = Account.forCurrency(currency)
-        if ((gdaxAccount?.balance ?: 0.0) > 0.0) {
+        if ((gdaxAccount?.availableBalance ?: 0.0) > 0.0) {
             interactiveLayout.visibility = View.VISIBLE
         } else {
             interactiveLayout.visibility = View.INVISIBLE
         }
         amountUnitText.text = currency.toString()
-        if ((gdaxAccount?.balance ?: 0.0) > 0) {
+        if ((gdaxAccount?.availableBalance ?: 0.0) > 0) {
             if (currency.isFiat) {
-                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance"
+                val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).fiatFormat()
+                gdaxBalanceText.text = "Available GDAX $currency Balance: $gdaxAccountBalance"
             } else {
-                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
+                val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).btcFormatShortened()
+                gdaxBalanceText.text = "Available GDAX $currency Balance: $gdaxAccountBalance $currency"
             }
         } else {
             gdaxBalanceText.text = "GDAX $currency wallet is empty"
