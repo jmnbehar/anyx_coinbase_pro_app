@@ -156,25 +156,32 @@ sealed class GdaxApi: FuelRouting {
                     pagesReceived ++
                     val gson = Gson()
                     val apiCandles = result.value
-                    val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
 
-                    var candles = candleDoubleList.map {
-                        val time = (it[0] as? Double) ?: 0.0
-                        val low = (it[1] as? Double) ?: 0.0
-                        val high = (it[2] as? Double) ?: 0.0
-                        val open = (it[3] as? Double) ?: 0.0
-                        val close = (it[4] as? Double) ?: 0.0
-                        val volume = (it[5] as? Double) ?: 0.0
-                        Candle(time, low, high, open, close, volume) }
-                    var now = Calendar.getInstance()
+                    try {
+                        val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
 
-                    var start = now.timeInSeconds() - timespan - 30
+                        var candles = candleDoubleList.map {
+                            val time = (it[0] as? Double) ?: 0.0
+                            val low = (it[1] as? Double) ?: 0.0
+                            val high = (it[2] as? Double) ?: 0.0
+                            val open = (it[3] as? Double) ?: 0.0
+                            val close = (it[4] as? Double) ?: 0.0
+                            val volume = (it[5] as? Double) ?: 0.0
+                            Candle(time, low, high, open, close, volume)
+                        }
+                        val now = Calendar.getInstance()
 
-                    candles = candles.filter { it.time >=  start }
+                        val start = now.timeInSeconds() - timespan - 30
 
-                    //TODO: edit chart library so it doesn't show below 0
-                    candles = candles.reversed()
-                    allCandles = allCandles.addingCandles(candles)
+                        candles = candles.filter { it.time >= start }
+
+                        //TODO: edit chart library so it doesn't show below 0
+                        candles = candles.reversed()
+                        allCandles = allCandles.addingCandles(candles)
+                    } catch (exception: Exception) {
+                        //Do nothing
+                    }
+
                     if (pagesReceived == pages && allCandles.isNotEmpty()) {
                         if (pages > 1) {
                             allCandles = allCandles.sorted()
