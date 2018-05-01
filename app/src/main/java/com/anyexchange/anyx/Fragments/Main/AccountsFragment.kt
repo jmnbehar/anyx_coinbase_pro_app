@@ -185,9 +185,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
 
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         if (GdaxApi.isLoggedIn) {
-            GdaxApi.accounts().updateAllAccounts({ onComplete() }) {
+            GdaxApi.accounts().updateAllAccounts({ onComplete(false) }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
 
                 accountTotalCandles = sumAccountCandles()
@@ -204,10 +204,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                     }
                 }
 
-                onComplete()
+                onComplete(true)
             }
         } else {
-            onComplete()
+            onComplete(true)
         }
     }
 }

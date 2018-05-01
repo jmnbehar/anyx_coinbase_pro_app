@@ -153,12 +153,13 @@ class SweepCoinbaseFragment : RefreshFragment() {
     }
 
     private var isRefreshing = false
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
             var didUpdateGDAX = false
             var didUpdateCoinbase = false
-            GdaxApi.accounts().updateAllAccounts({ onComplete()
+            GdaxApi.accounts().updateAllAccounts({
+                onComplete(false)
                 toast("Cannot access GDAX")
                 isRefreshing = false
             }) {
@@ -181,7 +182,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
         }
     }
 
-    private fun completeRefresh(onComplete: () -> Unit) {
+    private fun completeRefresh(onComplete: (Boolean) -> Unit) {
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
@@ -213,7 +214,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                 updateGdaxAccountText()
             }
         }
-        onComplete()
+        onComplete(true)
     }
 
     private fun updateGdaxAccountText() {

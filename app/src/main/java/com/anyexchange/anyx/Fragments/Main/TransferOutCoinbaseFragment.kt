@@ -45,8 +45,12 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
     private lateinit var currencyTabLayout: TabLayout
 
-    private var coinbaseAccounts: MutableList<Account.CoinbaseAccount> = mutableListOf()
-    private var destinationAccount: Account.CoinbaseAccount? = null
+
+    private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
+    private var paymentMethods: List<Account.PaymentMethod> = listOf()
+    private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
+
+    private var destinationAccount: Account.RelatedAccount? = null
     private var currency: Currency = Currency.USD
 
     companion object {
@@ -97,46 +101,31 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         cbAccountsSpinner.adapter = arrayAdapter
 
-        completeRefresh {  }
+        switchCurrency(currency)
 
         doneLoading()
 
 
-//        accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-//                destinationAccount = coinbaseAccounts[position]
-//                val currency = destinationAccount?.currency
-//                if (currency != null) {
-//                    amountUnitText.text = currency.toString()
-//
-//                    val buttonColors = currency.colorStateList(activity)
-//                    val buttonTextColor = currency.buttonTextColor(activity)
-//
-//                    withdrawMaxButton.backgroundTintList = buttonColors
-//                    submitWithdrawalButton.backgroundTintList = buttonColors
-//
-//                    withdrawMaxButton.textColor = buttonTextColor
-//                    submitWithdrawalButton.textColor = buttonTextColor
-//
-//                    updateGdaxAccountText()
-//                }
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>) {
-////                accountsSpinner.visibility = View.GONE
-//            }
-//        }
+        cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (relevantAccounts.size > position) {
+                    destinationAccount = relevantAccounts[position]
+                }
+            }
 
-        //TODO: think about holds, adjust max accordingly
+            override fun onNothingSelected(parent: AdapterView<*>) {
+//                accountsSpinner.visibility = View.GONE
+            }
+        }
+
         withdrawMaxButton.setOnClickListener {
             val gdaxAccount = Account.forCurrency(currency)
-            val amount = gdaxAccount?.availableBalance
-            if (amount != null) {
-                amountEditText.setText(amount.btcFormatShortened())
+            gdaxAccount?.balance?.let { balance ->
+                amountEditText.setText(balance.btcFormatShortened())
             }
         }
 
@@ -146,21 +135,16 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
             if (amount <= 0) {
                 showPopup("Amount is not valid", { })
-            } else {
+            } else if (destinationAccount is Account.CoinbaseAccount) {
+                val coinbaseAccount = destinationAccount as Account.CoinbaseAccount
                 val gdaxAccount = Account.forCurrency(currency)
 
                 if (amount > gdaxAccount?.availableBalance ?: 0.0) {
                     showPopup("Not enough funds", { })
-                }
-                (activity as com.anyexchange.anyx.Activities.MainActivity).showProgressBar()
-                destinationAccount?.let { cbAccount ->
-                    GdaxApi.sendToCoinbase(amount, currency, cbAccount.id).executePost({ result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
-                            showPopup("Error: Amount too low", { })
-                        } else {
-                            showPopup("Error: " + result.errorMessage, { })
-                        }
+                } else {
+                    (activity as com.anyexchange.anyx.Activities.MainActivity).showProgressBar()
+                    GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost({ result ->
+                        showPopup("Error: " + result.errorMessage, { })
                         activity.dismissProgressBar()
                     }, {
                         toast("Transfer Sent")
@@ -169,34 +153,71 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
                         refresh { activity.dismissProgressBar() }
                     })
                 }
+            } else if (destinationAccount is Account.PaymentMethod) {
+                val paymentMethod = destinationAccount as Account.PaymentMethod
+                if (paymentMethod.balance != null && amount > paymentMethod.balance) {
+                    showPopup("Not enough funds", { })
+                } else {
+                    (activity as com.anyexchange.anyx.Activities.MainActivity).showProgressBar()
+                    GdaxApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { result ->
+                        showPopup("Error: " + result.errorMessage, { })
+                        activity.dismissProgressBar()
+                    }, {
+                        toast("Transfer Sent")
+                        amountEditText.setText("")
+                        refresh { activity.dismissProgressBar() }
+                    })
+                }
+            } else {
+                toast("Error")
             }
         }
 
         return rootView
     }
     private var isRefreshing = false
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
             var didUpdateGDAX = false
             var didUpdateCoinbase = false
+            var didUpdatePaymentMethods = false
+
             GdaxApi.accounts().updateAllAccounts({ result ->
-                onComplete()
+                onComplete(false)
                 toast("Cannot access GDAX")
                 isRefreshing = false
             }) {
                 didUpdateGDAX = true
-                if (didUpdateCoinbase) {
+                if (didUpdateCoinbase && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             }
             GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
-            toast("Cannot access Coinbase")
+                toast("Cannot access Coinbase")
+                onComplete(false)
                 isRefreshing = false
             }, {
+                val gdaxAccounts = Account.list.toMutableList()
+                val fiatAccount = Account.usdAccount
+                if (fiatAccount != null) {
+                    gdaxAccounts.add(fiatAccount)
+                }
+                coinbaseAccounts = gdaxAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
                 didUpdateCoinbase = true
-                if (didUpdateGDAX) {
+                if (didUpdateGDAX && didUpdatePaymentMethods) {
+                    completeRefresh(onComplete)
+                    isRefreshing = false
+                }
+            })
+            GdaxApi.paymentMethods().get({
+                toast("Error")
+                onComplete(false)
+            }, { result ->
+                paymentMethods = result
+                didUpdatePaymentMethods = true
+                if (didUpdateGDAX && didUpdateCoinbase) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
@@ -204,15 +225,11 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
         }
     }
 
-    private fun completeRefresh(onComplete: () -> Unit) {
-        val gdaxAccounts = Account.list.toMutableList()
-        val fiatAccount = Account.usdAccount
-        if (fiatAccount != null) {
-            gdaxAccounts.add(fiatAccount)
+    private fun completeRefresh(onComplete: (Boolean) -> Unit) {
+        if (isVisible) {
+            switchCurrency()
         }
-        coinbaseAccounts = gdaxAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
-        switchCurrency()
-        onComplete()
+        onComplete(true)
     }
 
     private fun switchCurrency(newCurrency: Currency? = null) {
@@ -221,7 +238,11 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
         }
         amountEditText.setText("")
 
-        val relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency }
+        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
+        if (currency.isFiat) {
+            val relevantPaymentMethods = paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_deposit && pm.apiPaymentMethod.currency == currency.toString() }
+            relevantAccounts.addAll(relevantPaymentMethods)
+        }
 
         when (relevantAccounts.size) {
             0 -> {

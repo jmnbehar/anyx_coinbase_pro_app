@@ -198,12 +198,12 @@ class AlertsFragment : RefreshFragment() {
             return alerts.sortedWith(compareBy({ it.price }))
         }
 
-    override fun refresh(onComplete: () -> Unit) {
-        (activity as com.anyexchange.anyx.Activities.MainActivity).updatePrices({ /* fail silently */ }, {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
+        (activity as com.anyexchange.anyx.Activities.MainActivity).updatePrices({ onComplete(false) }, {
             (activity as com.anyexchange.anyx.Activities.MainActivity).loopThroughAlerts()
             alertAdapter?.alerts = sortedAlerts
             alertAdapter?.notifyDataSetChanged()
-            onComplete()
+            onComplete(true)
         })
     }
 }

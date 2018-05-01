@@ -45,6 +45,9 @@ class TransferInCoinbaseFragment : RefreshFragment() {
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
     private var paymentMethods: List<Account.PaymentMethod> = listOf()
+
+    private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
+
     private var currency: Currency = Currency.USD
     private var sourceAccount: Account.RelatedAccount? = null
 
@@ -109,40 +112,35 @@ class TransferInCoinbaseFragment : RefreshFragment() {
 
         amountUnitText.text = currency.toString()
 
-        switchCurrency(currency)
-
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
+        if (currency.isFiat) {
+            relevantAccounts.addAll(paymentMethods)
+        }
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         cbAccountsSpinner.adapter = arrayAdapter
+
+        switchCurrency(currency)
+
         doneLoading()
 
 
-//        cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-//                sourceAccount = coinbaseAccounts[position]
-//                val currency = sourceAccount?.currency
-//                if (currency != null) {
-//                    amountUnitText.text = currency.toString()
-//
-//                    val buttonColors = currency.colorStateList(activity)
-//                    val buttonTextColor = currency.buttonTextColor(activity)
-//
-//                    depositMaxButton.backgroundTintList = buttonColors
-//                    submitDepositButton.backgroundTintList = buttonColors
-//
-//                    depositMaxButton.textColor = buttonTextColor
-//                    submitDepositButton.textColor = buttonTextColor
-//                }
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>) {
-////                cbAccountsSpinner.visibility = View.GONE
-//            }
-//        }
+        cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (relevantAccounts.size > position) {
+                    sourceAccount = relevantAccounts[position]
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+//                cbAccountsSpinner.visibility = View.GONE
+            }
+        }
 
         depositMaxButton.setOnClickListener {
-            val amount = sourceAccount?.balance ?: 0.0
-            amountEditText.setText(amount.btcFormatShortened())
+            sourceAccount?.balance?.let { balance ->
+                amountEditText.setText(balance.btcFormatShortened())
+            }
         }
 
         submitDepositButton.setOnClickListener {
@@ -179,15 +177,10 @@ class TransferInCoinbaseFragment : RefreshFragment() {
                 } else {
                     (activity as com.anyexchange.anyx.Activities.MainActivity).showProgressBar()
                     GdaxApi.getFromPayment(amount, currency, paymentMethod.id).executePost( { result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
-                            showPopup("Error: Amount too low", { })
-                        } else {
-                            showPopup("Error: " + result.errorMessage, { })
-                        }
+                        showPopup("Error: " + result.errorMessage, { })
                         activity.dismissProgressBar()
                     } , {
-                        toast("Transfer received")
+                        toast("Transfer Received")
                         amountEditText.setText("")
 
                         refresh { activity.dismissProgressBar() }
@@ -202,15 +195,16 @@ class TransferInCoinbaseFragment : RefreshFragment() {
     }
 
     private var isRefreshing = false
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
             var didUpdateGDAX = false
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
-            GdaxApi.accounts().updateAllAccounts({ onComplete()
+            GdaxApi.accounts().updateAllAccounts({
                 toast("Cannot access GDAX")
                 isRefreshing = false
+                onComplete(false)
             }) {
                 didUpdateGDAX = true
                 if (didUpdateCoinbase && didUpdatePaymentMethods) {
@@ -221,6 +215,7 @@ class TransferInCoinbaseFragment : RefreshFragment() {
             GdaxApi.coinbaseAccounts().linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
+                onComplete(false)
             }, {
                 coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
                 val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
@@ -234,8 +229,9 @@ class TransferInCoinbaseFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             })
-            GdaxApi.paymentMethods().get({result ->
+            GdaxApi.paymentMethods().get({
                 paymentMethods = listOf()
+                onComplete(false)
             }, { result ->
                 paymentMethods = result
                 didUpdatePaymentMethods = true
@@ -247,21 +243,23 @@ class TransferInCoinbaseFragment : RefreshFragment() {
         }
     }
 
-    private fun completeRefresh(onComplete: () -> Unit) {
-        depositDetailsLayout.visibility = View.VISIBLE
+    private fun completeRefresh(onComplete: (Boolean) -> Unit) {
+        if (isVisible) {
+            depositDetailsLayout.visibility = View.VISIBLE
+            amountUnitText.text = currency.toString()
 
-        amountUnitText.text = currency.toString()
-
-        switchCurrency(currency)
-        onComplete()
+            switchCurrency(currency)
+        }
+        onComplete(true)
     }
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
         amountEditText.setText("")
-        val relevantAccounts: MutableList<Account.RelatedAccount> = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
+        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
         if (currency.isFiat) {
-            relevantAccounts.addAll(paymentMethods)
+            val relevantPaymentMethods = paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() }
+            relevantAccounts.addAll(relevantPaymentMethods)
         }
 
         when (relevantAccounts.size) {

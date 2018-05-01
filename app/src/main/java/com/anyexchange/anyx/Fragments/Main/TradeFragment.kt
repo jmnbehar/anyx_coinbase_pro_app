@@ -288,12 +288,13 @@ class TradeFragment : RefreshFragment() {
     }
 
 
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure = { result: Result.Failure<String, FuelError> ->
             toast("Error!: ${result.error}")
             println("error!" )}
         account?.update(onFailure) {
-            completeRefresh(onComplete)
+            updateButtonsAndText()
+            onComplete(false)
         }
         account?.let { account ->
             GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
@@ -302,14 +303,10 @@ class TradeFragment : RefreshFragment() {
                 if (price != null) {
                     account.product.price = price
                 }
-                completeRefresh(onComplete)
+                updateButtonsAndText()
+                onComplete(true)
             }
         }
-    }
-
-    private fun completeRefresh(onComplete: () -> Unit) {
-        updateButtonsAndText()
-        onComplete()
     }
 
     private fun updateButtonsAndText() {

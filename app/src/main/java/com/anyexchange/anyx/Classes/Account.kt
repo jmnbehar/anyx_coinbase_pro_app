@@ -104,7 +104,7 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
         override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD
 
         override fun toString(): String {
-            return "Payment Method: ${apiPaymentMethod.name}"
+            return apiPaymentMethod.name
         }
     }
 }

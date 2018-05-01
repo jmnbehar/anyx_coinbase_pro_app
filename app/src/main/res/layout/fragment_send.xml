@@ -28,25 +28,25 @@
             android:id="@+id/tab_send_btc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BTC"/>
+            android:text="BTC" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tab_send_eth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ETH"/>
+            android:text="ETH" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tab_send_bch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BCH"/>
+            android:text="BCH" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tab_send_ltc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LTC"/>
+            android:text="LTC" />
     </android.support.design.widget.TabLayout>
 
 

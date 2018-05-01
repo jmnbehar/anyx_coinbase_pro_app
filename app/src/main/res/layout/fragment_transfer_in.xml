@@ -21,7 +21,6 @@
             android:id="@+id/txt_transfer_in_coinbase_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="10dp"
@@ -33,7 +32,7 @@
         <android.support.design.widget.TabLayout
             android:id="@+id/tabl_transfer_in_currency"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_gravity="top">
 
             <android.support.design.widget.TabItem
@@ -96,6 +95,8 @@
                     android:id="@+id/spinner_transfer_in_coinbase_accounts"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
+                    android:layout_marginLeft="-10dp"
+                    android:layout_marginRight="-10dp"
                     android:visibility="gone" />
 
                 <TextView

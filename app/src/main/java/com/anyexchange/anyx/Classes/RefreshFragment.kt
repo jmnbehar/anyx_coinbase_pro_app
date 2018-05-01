@@ -24,6 +24,7 @@ open class RefreshFragment: Fragment() {
     val handler = Handler()
     var autoRefresh: Runnable? = null
     var swipeRefreshLayout: SwipeRefreshLayout? = null
+    var skipNextRefresh: Boolean = false
 
     companion object {
         val ARG_OBJECT = "object"
@@ -31,9 +32,12 @@ open class RefreshFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        refresh {
-            endRefresh()
+        if (!skipNextRefresh) {
+            refresh {
+                endRefresh()
+            }
         }
+        skipNextRefresh = false
         showDarkMode()
         if (activity is com.anyexchange.anyx.Activities.MainActivity) {
             (activity as com.anyexchange.anyx.Activities.MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
@@ -113,8 +117,9 @@ open class RefreshFragment: Fragment() {
 //    }
 
 
-    open fun refresh(onComplete: () -> Unit) {
-        onComplete()
+    open fun refresh(onComplete: (Boolean) -> Unit) {   //The boolean indicates whether or not refresh was successful
+        skipNextRefresh = false
+        onComplete(true)
     }
 
     fun endRefresh() {

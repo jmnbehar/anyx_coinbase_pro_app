@@ -70,19 +70,22 @@ class MarketFragment : RefreshFragment() {
     }
 
 
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
         var accountListSize = Account.list.size
         val time = Timespan.DAY
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
-            account.product.updateCandles(time, { _ -> toast("error!") }, { didUpdate ->
+            account.product.updateCandles(time, {
+                toast("Error")
+                onComplete(false)
+            }, { didUpdate ->
                 if (didUpdate) {
                     productsUpdated++
                     if (productsUpdated == accountListSize) {
                         (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                        onComplete()
+                        onComplete(true)
                     }
                 } else {
                     GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
@@ -94,7 +97,7 @@ class MarketFragment : RefreshFragment() {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
                             (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                            onComplete()
+                            onComplete(true)
                         }
                     }
                 }

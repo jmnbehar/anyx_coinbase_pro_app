@@ -487,11 +487,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onChartScale(me: MotionEvent, scaleX: Float, scaleY: Float) { }
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
-    override fun refresh(onComplete: () -> Unit) {
+    override fun refresh(onComplete: (Boolean) -> Unit) {
         val gson = Gson()
         val onFailure = { result: Result.Failure<String, FuelError> ->
             toast("Error!: ${result.error}")
-            println("error!" )}
+            println("error!" )
+            onComplete(false)
+        }
         val prefs = Prefs(context!!)
         account?. let { account ->
             if (GdaxApi.isLoggedIn) {
@@ -502,7 +504,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     valueText.text = account.value.fiatFormat()
                     miniRefresh(onFailure) {
                         account.apiAccount = apiAccount
-                        onComplete()
+                        onComplete(true)
                     }
                 }
 
@@ -527,7 +529,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } else {
                 miniRefresh(onFailure) {
 //                    account.balance = 0.0
-                    onComplete()
+                    onComplete(true)
                 }
             }
         }

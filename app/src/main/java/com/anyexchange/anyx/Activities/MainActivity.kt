@@ -469,23 +469,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    GdaxApi.coinbaseAccounts().linkToAccounts({
-                        dismissProgressBar()
-                        toast("Can't access coinbase accounts")
-                    }, {
-                        //TODO: switch back to regular depositFragment
-//                        val depositFragment = TransferInFragment.newInstance()
-                        val depositFragment = TransferInCoinbaseFragment.newInstance()
-
-                        val tag = fragmentType.toString()
-                        goToFragment(depositFragment, tag)
-                    })
+                    val depositFragment = TransferInCoinbaseFragment.newInstance()
+                    depositFragment.refresh {didSucceed ->
+                        if (didSucceed) {
+                            val tag = fragmentType.toString()
+                            depositFragment.skipNextRefresh = true
+                            goToFragment(depositFragment, tag)
+                        } else {
+                            toast("Error")
+                        }
+                    }
                 }
                 null
             }
             FragmentType.WITHDRAW -> {
                 //TODO: get bank data here
-
                 if (!GdaxApi.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
@@ -494,18 +492,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    GdaxApi.coinbaseAccounts().linkToAccounts({
-                        dismissProgressBar()
-                        toast("Can't access coinbase accounts")
-                    }, {
-                        //TODO: switch back to regular TransferOutFragment
-//                        val withdrawFragment = TransferOutFragment.newInstance()
-                        val withdrawFragment = TransferOutCoinbaseFragment.newInstance()
-
-                        val tag = fragmentType.toString()
-                        goToFragment(withdrawFragment, tag)
-                        //dismissProgressBar()
-                    })
+                    val withdrawFragment = TransferOutCoinbaseFragment.newInstance()
+                    withdrawFragment.refresh {didSucceed ->
+                        if (didSucceed) {
+                            val tag = fragmentType.toString()
+                            withdrawFragment.skipNextRefresh = true
+                            goToFragment(withdrawFragment, tag)
+                        } else {
+                            toast("Error")
+                        }
+                    }
                 }
                 null
             }
