@@ -141,26 +141,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBar = progress_bar
 
         spinnerNav = toolbar_spinner
-        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
-        //TODO: list currencies better
-        val currencies = Currency.cryptoList
-        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
-        spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerNav.adapter = spinnerNavAdapter
+        if (savedInstanceState == null) {
+            defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+            val currencies = Currency.cryptoList
+            val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
+            spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerNav.adapter = spinnerNavAdapter
 
-        //TODO: show spinner later
-        spinnerNav.visibility = View.GONE
+            spinnerNav.visibility = View.GONE
 
-        val prefs = Prefs(this)
-
-        if (Account.list.size > 0) {
-            goHome()
-            setDrawerMenu()
-        } else if (!prefs.shouldAutologin) {
-            returnToLogin()
-        } else {
-            signIn()
+            val prefs = Prefs(this)
+            if (Account.list.size > 0) {
+                goHome()
+                setDrawerMenu()
+            } else if (!prefs.shouldAutologin) {
+                returnToLogin()
+            } else {
+                signIn()
+            }
         }
     }
 
