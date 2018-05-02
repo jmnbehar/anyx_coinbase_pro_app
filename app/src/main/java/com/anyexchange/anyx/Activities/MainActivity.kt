@@ -33,10 +33,6 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.contentView
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -54,8 +50,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ACCOUNT,
         SEND,
         ALERTS,
-        DEPOSIT,
-        WITHDRAW,
+        TRANSFER_IN,
+        TRANSFER_OUT,
         SETTINGS,
         TRADE,
         HOME,
@@ -71,8 +67,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
-                DEPOSIT -> "DEPOSIT"
-                WITHDRAW -> "WITHDRAW"
+                TRANSFER_IN -> "DEPOSIT"
+                TRANSFER_OUT -> "WITHDRAW"
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
                 HOME -> "HOME"
@@ -80,15 +76,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
+        companion object {
+            fun fromFragment(fragment: RefreshFragment?) : FragmentType {
+                return when (fragment) {
+                    is ChartFragment -> {
+                        when (ChartFragment.account?.currency ?: Currency.BTC) {
+                            Currency.BTC -> BTC_CHART
+                            Currency.BCH -> BCH_CHART
+                            Currency.ETH -> ETH_CHART
+                            Currency.LTC -> LTC_CHART
+                            Currency.USD -> BTC_CHART   //error
+                        }
+                    }
+                    is AccountsFragment -> ACCOUNT
+                    is SendFragment -> SEND
+                    is AlertsFragment -> ALERTS
+                    is TransferInFragment -> TRANSFER_IN
+                    is TransferOutFragment -> TRANSFER_OUT
+                    is SettingsFragment -> SETTINGS
+                    is TradeFragment -> TRADE
+                    is HomeFragment -> HOME
+                    else -> OTHER
+                }
+            }
+        }
     }
 
     companion object {
-
         fun newIntent(context: Context): Intent {
             return Intent(context, MainActivity::class.java)
         }
-
-
     }
 
     private var currentFragment: RefreshFragment? = null
@@ -387,23 +404,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-            R.id.nav_deposit -> FragmentType.DEPOSIT
-            R.id.nav_withdraw -> FragmentType.WITHDRAW
+            R.id.nav_deposit -> FragmentType.TRANSFER_IN
+            R.id.nav_withdraw -> FragmentType.TRANSFER_OUT
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
         }
-        val currentFragmentType = when (currentFragment) {
-            is SendFragment -> FragmentType.SEND
-            is AlertsFragment -> FragmentType.ALERTS
-            is TransferInCoinbaseFragment -> FragmentType.DEPOSIT
-            is TransferOutCoinbaseFragment -> FragmentType.WITHDRAW
-            is SettingsFragment -> FragmentType.SETTINGS
-            is HomeFragment -> FragmentType.HOME
-            is ChartFragment -> FragmentType.BTC_CHART  //TODO: refine
-            is TradeFragment -> FragmentType.TRADE
-            else -> FragmentType.OTHER
-        }
+        val currentFragmentType = FragmentType.fromFragment(currentFragment)
+
         if (fragmentType != currentFragmentType) {
             goToFragment(fragmentType)
         }
@@ -459,8 +467,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance(this)
-            FragmentType.DEPOSIT -> {
-                //TODO: get bank data here
+            FragmentType.TRANSFER_IN -> {
                 if (!GdaxApi.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
@@ -469,7 +476,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    val depositFragment = TransferInCoinbaseFragment.newInstance()
+                    val depositFragment = TransferInFragment.newInstance()
                     depositFragment.refresh {didSucceed ->
                         if (didSucceed) {
                             val tag = fragmentType.toString()
@@ -482,8 +489,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                 null
             }
-            FragmentType.WITHDRAW -> {
-                //TODO: get bank data here
+            FragmentType.TRANSFER_OUT -> {
                 if (!GdaxApi.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
@@ -492,7 +498,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
-                    val withdrawFragment = TransferOutCoinbaseFragment.newInstance()
+                    val withdrawFragment = TransferOutFragment.newInstance()
                     withdrawFragment.refresh {didSucceed ->
                         if (didSucceed) {
                             val tag = fragmentType.toString()

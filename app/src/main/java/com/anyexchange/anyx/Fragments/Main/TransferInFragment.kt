@@ -16,7 +16,7 @@ import org.jetbrains.anko.textColor
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class TransferInCoinbaseFragment : RefreshFragment() {
+class TransferInFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
@@ -52,8 +52,8 @@ class TransferInCoinbaseFragment : RefreshFragment() {
     private var sourceAccount: Account.RelatedAccount? = null
 
     companion object {
-        fun newInstance(): TransferInCoinbaseFragment {
-            return TransferInCoinbaseFragment()
+        fun newInstance(): TransferInFragment {
+            return TransferInFragment()
         }
     }
 
@@ -86,6 +86,10 @@ class TransferInCoinbaseFragment : RefreshFragment() {
 
         submitDepositButton = rootView.btn_transfer_in_coinbase_transfer_in
 
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        cbAccountsSpinner.adapter = arrayAdapter
+
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
@@ -99,30 +103,6 @@ class TransferInCoinbaseFragment : RefreshFragment() {
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
-
-        titleText.text = "Transfer into GDAX"
-
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
-
-        val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
-        if (fiatCoinbaseAccount != null) {
-            coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
-        }
-
-        amountUnitText.text = currency.toString()
-
-        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
-        if (currency.isFiat) {
-            relevantAccounts.addAll(paymentMethods)
-        }
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        cbAccountsSpinner.adapter = arrayAdapter
-
-        switchCurrency(currency)
-
-        doneLoading()
 
 
         cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -192,6 +172,31 @@ class TransferInCoinbaseFragment : RefreshFragment() {
         }
 
         return rootView
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        titleText.text = "Transfer into GDAX"
+
+        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
+
+        val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
+        if (fiatCoinbaseAccount != null) {
+            coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
+        }
+
+        amountUnitText.text = currency.toString()
+
+        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
+        if (currency.isFiat) {
+            relevantAccounts.addAll(paymentMethods)
+        }
+
+        switchCurrency(currency)
+
+        doneLoading()
     }
 
     private var isRefreshing = false

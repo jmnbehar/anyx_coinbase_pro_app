@@ -17,7 +17,7 @@ import org.jetbrains.anko.textColor
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class TransferOutCoinbaseFragment : RefreshFragment() {
+class TransferOutFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
@@ -54,8 +54,8 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
     private var currency: Currency = Currency.USD
 
     companion object {
-        fun newInstance(): TransferOutCoinbaseFragment {
-            return TransferOutCoinbaseFragment()
+        fun newInstance(): TransferOutFragment {
+            return TransferOutFragment()
         }
     }
 
@@ -104,11 +104,6 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         cbAccountsSpinner.adapter = arrayAdapter
-
-        switchCurrency(currency)
-
-        doneLoading()
-
 
         cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -175,6 +170,15 @@ class TransferOutCoinbaseFragment : RefreshFragment() {
 
         return rootView
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        switchCurrency(currency)
+
+        doneLoading()
+    }
+
     private var isRefreshing = false
     override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
