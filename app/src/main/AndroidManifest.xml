@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeDark">
 
-        <receiver android:name=".Classes.AutoStart"
+        <receiver android:name=".classes.AutoStart"
             android:enabled="true"
             android:exported="false" >
             <intent-filter>
@@ -21,44 +21,44 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".Classes.AlertJobService"
+        <service android:name=".classes.AlertJobService"
             android:label="Alerts"
             android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.LoginActivity"
+            android:name="com.anyexchange.anyx.activities.LoginActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.ScanActivity"
+            android:name="com.anyexchange.anyx.activities.ScanActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.OnboardActivity"
+            android:name="com.anyexchange.anyx.activities.OnboardActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.LoginHelpActivity"
+            android:name="com.anyexchange.anyx.activities.LoginHelpActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.VerifyActivity"
+            android:name="com.anyexchange.anyx.activities.VerifyActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name">
         </activity>
 
 
         <activity
-            android:name="com.anyexchange.anyx.Activities.MainActivity"
+            android:name="com.anyexchange.anyx.activities.MainActivity"
             android:screenOrientation="sensorPortrait"
             android:label="@string/app_name"
             android:theme="@style/AppThemeDark.NoActionBar">

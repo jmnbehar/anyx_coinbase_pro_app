@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.anyexchange.anyx.Classes.LockableScrollView
+    <com.anyexchange.anyx.classes.LockableScrollView
         android:id="@+id/lockable_scrollview_market"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -35,5 +35,5 @@
 
         </LinearLayout>
 
-    </com.anyexchange.anyx.Classes.LockableScrollView>
+    </com.anyexchange.anyx.classes.LockableScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

@@ -9,7 +9,7 @@
     android:layout_marginRight="20dp"
     android:layout_marginTop="10dp"
     android:orientation="vertical"
-    tools:context="com.anyexchange.anyx.Activities.OnboardActivity$PlaceholderFragment">
+    tools:context="com.anyexchange.anyx.activities.OnboardActivity$PlaceholderFragment">
 
     <TextView
         android:id="@+id/section_title"
