@@ -157,23 +157,26 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartScale(me: MotionEvent, scaleX: Float, scaleY: Float) { }
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
-    fun sumAccountCandles() : List<Candle> {
+    private fun sumAccountCandles() : List<Candle> {
         val btcAccount = Account.btcAccount?.product
         if (btcAccount != null) {
             var accountTotalCandleList: MutableList<Candle> = mutableListOf()
             for (i in 0..(btcAccount.dayCandles.size - 1)) {
-                var totalCandleValue = Account.usdAccount?.value ?: 0.0
-                val time = btcAccount.dayCandles[i].time
-                for (account in Account.list) {
-                    val accountCandleValue = if (account.product.dayCandles.size > i) {
-                        account.product.dayCandles[i].close
-                    } else {
-                        1.0
+                var usdAccountValue = Account.usdAccount?.value
+                usdAccountValue?.let { usdAccountValue ->
+                    var totalCandleValue = usdAccountValue
+                    val time = btcAccount.dayCandles[i].time
+                    for (account in Account.list) {
+                        val accountCandleValue = if (account.product.dayCandles.size > i) {
+                            account.product.dayCandles[i].close
+                        } else {
+                            1.0
+                        }
+                        totalCandleValue += (accountCandleValue * account.balance)
                     }
-                    totalCandleValue += (accountCandleValue * account.balance)
+                    val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0)
+                    accountTotalCandleList.add(newCandle)
                 }
-                val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0)
-                accountTotalCandleList.add(newCandle)
             }
             return accountTotalCandleList
         }
