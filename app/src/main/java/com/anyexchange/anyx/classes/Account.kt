@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
+import org.json.JSONObject
 
 /**
  * Created by anyexchange on 12/20/2017.
@@ -49,7 +50,6 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
         }
     }
 
-
     companion object {
         var list = mutableListOf<Account>()
         val btcAccount: Account?
@@ -76,6 +76,11 @@ class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
                 list.find { a -> a.product.currency == currency }
             }
         }
+    }
+
+    fun toJson() : String {
+        val gson = Gson()
+        return gson.toJson(Account)
     }
 
     abstract class RelatedAccount {
