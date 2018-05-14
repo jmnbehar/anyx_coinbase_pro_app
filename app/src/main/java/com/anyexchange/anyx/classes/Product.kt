@@ -52,11 +52,6 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
         return alertString
     }
 
-    fun toGsonString() : String {
-        val gson = Gson()
-        return gson.toJson(this)
-    }
-
 
     fun toJson() : JSONObject {
         val json = JSONObject()

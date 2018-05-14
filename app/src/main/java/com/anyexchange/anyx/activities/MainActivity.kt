@@ -110,6 +110,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var currentFragment: RefreshFragment? = null
 
+    private var dataFragment: DataFragment? = null
+
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarLayout: ConstraintLayout
 
@@ -127,6 +129,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 hideSoftKeyboard()
             }
         }
+
+        dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as DataFragment
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = DataFragment.newInstance()
+            supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
+        }
+
+        dataFragment?.restoreData()
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
@@ -152,6 +165,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             spinnerNav.visibility = View.GONE
 
             val prefs = Prefs(this)
+            Account.list = prefs.stashedAccountList
             if (Account.list.size > 0) {
                 goHome()
                 setDrawerMenu()
@@ -182,85 +196,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        savedInstanceState?.let { savedInstanceState ->
-            val gdaxApiKey = savedInstanceState.getString(GDAX_API_KEY)
-            val gdaxApiSecret = savedInstanceState.getString(GDAX_API_SECRET)
-            val gdaxApiPass = savedInstanceState.getString(GDAX_API_PASS)
-            if (gdaxApiKey != null && gdaxApiSecret != null && gdaxApiPass != null) {
-                if (GdaxApi.credentials == null) {
-                    val prefs = Prefs(this)
-                    val isApiKeyValid = prefs.isApiKeyValid(gdaxApiKey)
-
-                    GdaxApi.credentials = GdaxApi.ApiCredentials(gdaxApiKey, gdaxApiSecret, gdaxApiPass, isApiKeyValid)
-                }
-            }
-
-            val btcAccountRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.BTC.toString() + "_account")
-            val ethAccountRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.ETH.toString() + "_account")
-            val bchAccountRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.BCH.toString() + "_account")
-            val ltcAccountRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.LTC.toString() + "_account")
-
-            val btcProductRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.BTC.toString() + "_product")
-            val ethProductRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.ETH.toString() + "_product")
-            val bchProductRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.BCH.toString() + "_product")
-            val ltcProductRaw = savedInstanceState.getString(ACCOUNT_LIST + "_" + Currency.LTC.toString() + "_product")
-
-            val gson = Gson()
-
-            val btcApiAccount = gson.fromJson(btcAccountRaw, ApiAccount::class.java)
-            val ethApiAccount = gson.fromJson(ethAccountRaw, ApiAccount::class.java)
-            val bchApiAccount = gson.fromJson(bchAccountRaw, ApiAccount::class.java)
-            val ltcApiAccount = gson.fromJson(ltcAccountRaw, ApiAccount::class.java)
-
-            val btcProduct = gson.fromJson(btcProductRaw, Product::class.java)
-            val ethProduct = gson.fromJson(ethProductRaw, Product::class.java)
-            val bchProduct = gson.fromJson(bchProductRaw, Product::class.java)
-            val ltcProduct = gson.fromJson(ltcProductRaw, Product::class.java)
-
-            val btcAccount = Account(btcProduct, btcApiAccount)
-            val ethAccount = Account(ethProduct, ethApiAccount)
-            val bchAccount = Account(bchProduct, bchApiAccount)
-            val ltcAccount = Account(ltcProduct, ltcApiAccount)
-
-            Account.list = listOf(btcAccount, ethAccount, bchAccount, ltcAccount).mapNotNull { a -> a }.toMutableList()
-        }
+        dataFragment?.restoreData()
     }
 
-    // invoked when the activity may be temporarily destroyed, save the instance state here
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.run {
-            putString(GDAX_API_KEY, GdaxApi.credentials?.apiKey)
-            putString(GDAX_API_SECRET, GdaxApi.credentials?.apiSecret)
-            putString(GDAX_API_PASS, GdaxApi.credentials?.apiPassPhrase)
-
-            putString("Current Fragment", currentFragment.toString())
-
-            val gson = Gson()
-            val btcAccountJson = gson.toJson(Account.btcAccount?.apiAccount) ?: ""
-            val ethAccountJson = gson.toJson(Account.ethAccount?.apiAccount) ?: ""
-            val bchAccountJson = gson.toJson(Account.bchAccount?.apiAccount) ?: ""
-            val ltcAccountJson = gson.toJson(Account.ltcAccount?.apiAccount) ?: ""
-            putString(ACCOUNT_LIST + "_" + Currency.BTC.toString() + "_account", btcAccountJson)
-            putString(ACCOUNT_LIST + "_" + Currency.ETH.toString() + "_account", ethAccountJson)
-            putString(ACCOUNT_LIST + "_" + Currency.BCH.toString() + "_account", bchAccountJson)
-            putString(ACCOUNT_LIST + "_" + Currency.LTC.toString() + "_account", ltcAccountJson)
-
-            val btcProductJson = Account.btcAccount?.product?.toGsonString()
-            val ethProductJson = Account.ethAccount?.product?.toGsonString()
-            val bchProductJson = Account.bchAccount?.product?.toGsonString()
-            val ltcProductJson = Account.ltcAccount?.product?.toGsonString()
-            putString(ACCOUNT_LIST + "_" + Currency.BTC.toString() + "_product", btcProductJson)
-            putString(ACCOUNT_LIST + "_" + Currency.ETH.toString() + "_product", ethProductJson)
-            putString(ACCOUNT_LIST + "_" + Currency.BCH.toString() + "_product", bchProductJson)
-            putString(ACCOUNT_LIST + "_" + Currency.LTC.toString() + "_product", ltcProductJson)
-        }
-        // call superclass to save any view hierarchy
-        super.onSaveInstanceState(outState)
+    override fun onDestroy() {
+        super.onDestroy()
+        dataFragment?.backupData()
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//    }
 
    // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {
