@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as DataFragment
+        dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
 
         // create the fragment and data the first time
         if (dataFragment == null) {
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
         }
 
-        dataFragment?.restoreData()
+        dataFragment?.restoreData(this)
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
@@ -165,12 +165,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             spinnerNav.visibility = View.GONE
 
             val prefs = Prefs(this)
-            Account.list = prefs.stashedAccountList
-            if (Account.list.size > 0) {
+
+            if (!prefs.shouldAutologin) {
+                returnToLogin()
+            } else if (Account.list.size > 0) {
                 goHome()
                 setDrawerMenu()
-            } else if (!prefs.shouldAutologin) {
-                returnToLogin()
             } else {
                 signIn()
             }
@@ -196,7 +196,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        dataFragment?.restoreData()
+        dataFragment?.restoreData(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        dataFragment?.backupData()
     }
 
     override fun onDestroy() {
