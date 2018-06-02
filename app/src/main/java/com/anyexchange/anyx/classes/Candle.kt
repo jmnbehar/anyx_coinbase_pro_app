@@ -22,7 +22,7 @@ data class Candle(
                  Timespan.WEEK -> TimeInSeconds.oneHour
                  Timespan.MONTH -> TimeInSeconds.sixHours
                  Timespan.YEAR -> TimeInSeconds.oneDay
-                 Timespan.ALL -> TimeInSeconds.oneDay
+//                 Timespan.ALL -> TimeInSeconds.oneDay
 //                 TimeInSeconds.halfHour -> TimeInSeconds.oneMinute
 //                 TimeInSeconds.sixHours -> TimeInSeconds.fiveMinutes
 //                 TimeInSeconds.twoWeeks -> TimeInSeconds.oneHour

@@ -168,19 +168,6 @@
                     android:paddingTop="3dp"
                     android:text="@string/chart_timespan_1y" />
 
-                <RadioButton
-                    android:id="@+id/rbtn_chart_timespan_all"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/timespan_radio_button"
-                    android:button="@android:color/transparent"
-                    android:gravity="center_horizontal"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="3dp"
-                    android:text="@string/chart_timespan_all" />
             </RadioGroup>
 
             <LinearLayout

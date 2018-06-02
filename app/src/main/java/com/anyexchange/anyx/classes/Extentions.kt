@@ -117,7 +117,7 @@ fun Double.toStringWithTimespan(timespan: Timespan) : String {
         Timespan.WEEK  -> SimpleDateFormat("h:mma M/d", locale)
         Timespan.MONTH -> SimpleDateFormat("h:mma M/d", locale)
         Timespan.YEAR  -> SimpleDateFormat("M/d/YYYY", locale)
-        Timespan.ALL   -> SimpleDateFormat("M/d/YYYY", locale)
+//        Timespan.ALL   -> SimpleDateFormat("M/d/YYYY", locale)
     }
     val itemLong = (this * 1000).toLong()
     val itemDate = Date(itemLong)

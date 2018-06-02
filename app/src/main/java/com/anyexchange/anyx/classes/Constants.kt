@@ -44,8 +44,7 @@ enum class Timespan {
     DAY,
     WEEK,
     MONTH,
-    YEAR,
-    ALL;
+    YEAR;
 
     override fun toString() : String {
         return when (this) {
@@ -54,18 +53,17 @@ enum class Timespan {
             WEEK -> "WEEK"
             MONTH -> "MONTH"
             YEAR -> "YEAR"
-            ALL -> "ALL"
+//            ALL -> "ALL"
         }
     }
 
-    fun value(currency: Currency = Currency.USD) : Long {
+    fun value() : Long {
         return when (this) {
             HOUR -> TimeInSeconds.oneHour
             DAY -> TimeInSeconds.oneDay
             WEEK -> TimeInSeconds.oneWeek
             MONTH -> TimeInSeconds.oneMonth
             YEAR -> TimeInSeconds.oneYear
-            ALL -> currency.lifetimeInSeconds
         }
     }
 
@@ -77,7 +75,7 @@ enum class Timespan {
                 TimeInSeconds.oneWeek -> WEEK
                 TimeInSeconds.oneMonth -> MONTH
                 TimeInSeconds.oneYear -> YEAR
-                (-1).toLong() -> ALL
+//                (-1).toLong() -> ALL
                 else -> DAY
             }
         }

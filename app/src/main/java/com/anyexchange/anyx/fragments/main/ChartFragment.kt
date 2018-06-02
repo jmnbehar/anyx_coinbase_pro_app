@@ -25,6 +25,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -50,7 +51,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var timespanButtonWeek: RadioButton
     private lateinit var timespanButtonMonth: RadioButton
     private lateinit var timespanButtonYear: RadioButton
-    private lateinit var timespanButtonAll: RadioButton
+//    private lateinit var timespanButtonAll: RadioButton
 
     private lateinit var historyTabList: TabLayout
 
@@ -92,7 +93,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         timespanButtonWeek = rootView.rbtn_chart_timespan_week
         timespanButtonMonth = rootView.rbtn_chart_timespan_month
         timespanButtonYear = rootView.rbtn_chart_timespan_year
-        timespanButtonAll = rootView.rbtn_chart_timespan_all
+//        timespanButtonAll = rootView.rbtn_chart_timespan_all
 
         setupSwipeRefresh(rootView)
 
@@ -173,10 +174,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             timespanButtonYear.setOnClickListener {
                 setChartTimespan(Timespan.YEAR)
             }
-            timespanButtonAll.setText("ALL")
-            timespanButtonAll.setOnClickListener {
-                setChartTimespan(Timespan.ALL)
-            }
+//            timespanButtonAll.setText("ALL")
+//            timespanButtonAll.setOnClickListener {
+//                setChartTimespan(Timespan.ALL)
+//            }
 
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
@@ -201,7 +202,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val stashedFills = prefs.getStashedFills(account.product.id)
         val stashedOrders = prefs.getStashedOrders(account.product.id)
         //TODO: set orders/fills
-        if (candles.isNotEmpty()) {
+
+        val now = Calendar.getInstance()
+        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
+        var nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(chartTimeSpan)
+        val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
+
+        if (areCandlesUpToDate) {
             lineChart.addCandles(candles, account.currency, chartTimeSpan)
             setPercentChangeText(price, candles.first().open)
             nameText.text = currency.fullName
@@ -312,7 +319,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             Timespan.WEEK -> timespanButtonWeek.isChecked = true
             Timespan.MONTH -> timespanButtonMonth.isChecked = true
             Timespan.YEAR -> timespanButtonYear.isChecked = true
-            Timespan.ALL -> timespanButtonAll.isChecked = true
+//            Timespan.ALL -> timespanButtonAll.isChecked = true
         }
     }
 
@@ -545,9 +552,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         account?. let { account ->
             account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
                 candles = account.product.candlesForTimespan(chartTimeSpan)
-                lineChart.addCandles(candles, account.currency, chartTimeSpan)
-                setPercentChangeText(account.product.price, candles.firstOrNull()?.open ?: 0.0)
-                checkTimespanButton()
 
                 GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
@@ -555,11 +559,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (price != null) {
                         account.product.price = price
                     }
-
                     priceText.text = account.product.price.fiatFormat()
                     valueText.text = account.value.fiatFormat()
-
+                    
+                    lineChart.addCandles(candles, account.currency, chartTimeSpan)
                     setPercentChangeText(account.product.price, candles.firstOrNull()?.open ?: 0.0)
+                    checkTimespanButton()
                     onComplete()
                 }
             })

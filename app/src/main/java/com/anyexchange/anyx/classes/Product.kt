@@ -26,12 +26,13 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
 
     var price = candles.lastOrNull()?.close ?: 0.0
 
-    private var hourCandles = listOf(blankCandle, blankCandle)
+    private var hourCandles = listOf<Candle>()
     var dayCandles = candles
-    private var weekCandles = listOf(blankCandle, blankCandle)
-    private var monthCandles = listOf(blankCandle, blankCandle)
-    private var yearCandles = listOf(blankCandle, blankCandle)
-    private var allTimeCandles = listOf(blankCandle, blankCandle)
+    private var weekCandles = listOf<Candle>()
+    private var monthCandles = listOf<Candle>()
+    private var yearCandles = listOf<Candle>()
+//    private var allTimeCandles = listOf<Candle>()
+
     private var candlesTimespan = Timespan.DAY
 
     fun candlesForTimespan(timespan: Timespan): List<Candle> {
@@ -41,7 +42,7 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
             Timespan.WEEK -> weekCandles
             Timespan.MONTH -> monthCandles
             Timespan.YEAR -> yearCandles
-            Timespan.ALL -> allTimeCandles
+//            Timespan.ALL -> allTimeCandles
         }
     }
 
@@ -76,8 +77,8 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
         val yearCandlesElement = gson.toJsonTree(yearCandles, object : TypeToken<List<Candle>>() { }.type)
         val yearCandlesJsonArray = yearCandlesElement
 
-        val allCandlesElement = gson.toJsonTree(allTimeCandles, object : TypeToken<List<Candle>>() { }.type)
-        val allCandlesJsonArray = allCandlesElement
+//        val allCandlesElement = gson.toJsonTree(allTimeCandles, object : TypeToken<List<Candle>>() { }.type)
+//        val allCandlesJsonArray = allCandlesElement
 
         if (hourCandles.isNotEmpty()) {
             json.put("hourCandles", hourCandlesJsonArray)
@@ -94,13 +95,12 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
         if (yearCandles.isNotEmpty()) {
             json.put("yearCandles", yearCandlesJsonArray)
         }
-        if (allTimeCandles.isNotEmpty()) {
-            json.put("allCandles", allCandlesJsonArray)
-        }
+//        if (allTimeCandles.isNotEmpty()) {
+//            json.put("allCandles", allCandlesJsonArray)
+//        }
         return json
     }
 
-    //TODO: move this code to product?
     fun updateCandles(timespan: Timespan, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
@@ -121,7 +121,7 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
         if (nextCandleTime < nowInSeconds) {
             var missingTime = nowInSeconds - lastCandleTime
 
-            val timespanLong = timespan.value(currency)
+            val timespanLong = timespan.value()
             if (missingTime > timespanLong) {
                 missingTime = timespanLong
             }
@@ -153,7 +153,7 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
                             Timespan.WEEK -> weekCandles = candles
                             Timespan.MONTH -> monthCandles = candles
                             Timespan.YEAR -> yearCandles = candles
-                            Timespan.ALL -> allTimeCandles = candles
+//                            Timespan.ALL -> allTimeCandles = candles
                         }
                         price = candles.last().close
                     }
@@ -206,7 +206,7 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
                 product.weekCandles = weekCandles
                 product.monthCandles = monthCandles
                 product.yearCandles = yearCandles
-                product.allTimeCandles = allCandles
+//                product.allTimeCandles = allCandles
 
                 return product
             }
@@ -216,7 +216,7 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
         fun fiatProduct(currency: String) = Product(Currency.forString(currency) ?: Currency.USD, currency, listOf(fiatCandle))
 
         private val fiatCandle  = Candle(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
-        private val blankCandle = Candle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        //private val blankCandle = Candle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     }
 
 }
