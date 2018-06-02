@@ -1,26 +1,18 @@
 package com.anyexchange.anyx.classes
 
-import android.annotation.SuppressLint
-import android.os.Parcelable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 import java.util.*
 import com.google.gson.reflect.TypeToken
-import com.google.gson.JsonElement
-
 
 
 /**
  * Created by anyexchange on 12/20/2017.
  */
 
-@SuppressLint("ParcelCreator")
-@Parcelize
-class Product(var currency: Currency, var id: String, val candles: List<Candle>) : Parcelable {
+class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
     constructor(apiProduct: ApiProduct, candles: List<Candle>)
             : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id, candles)
 

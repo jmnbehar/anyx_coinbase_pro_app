@@ -16,9 +16,7 @@ import org.json.JSONObject
  */
 
 
-@SuppressLint("ParcelCreator")
-@Parcelize
-class Account(val product: Product, var apiAccount: ApiAccount) : Parcelable {
+class Account(val product: Product, var apiAccount: ApiAccount) {
     val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 

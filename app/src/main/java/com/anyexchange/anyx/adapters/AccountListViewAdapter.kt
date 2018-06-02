@@ -38,7 +38,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
         }
         if(i < accounts.size) {
             val account = accounts[i]
-           // vi.txt_account_name.text = account.currency.toString()
+
             if (account.currency != Currency.USD) {
                 vi.txt_account_balance.text = account.balance.btcFormat() + " " + account.currency.toString()
                 vi.setOnClickListener { onClick(account) }
