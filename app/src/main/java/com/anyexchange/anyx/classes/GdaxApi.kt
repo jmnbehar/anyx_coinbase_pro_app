@@ -210,7 +210,7 @@ sealed class GdaxApi: FuelRouting {
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
                         if (productList.size == stashedProductList.size) {
-                            getAccountsWithProductList(context, productList, onFailure, onComplete)
+                            getAccountsWithProductList(productList, onFailure, onComplete)
                         }
                     })
                 }
@@ -227,7 +227,7 @@ sealed class GdaxApi: FuelRouting {
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
                                 prefs.stashedProducts = productList
-                                getAccountsWithProductList(context, productList, onFailure, onComplete)
+                                getAccountsWithProductList(productList, onFailure, onComplete)
                             }
                         })
                     }
@@ -248,7 +248,7 @@ sealed class GdaxApi: FuelRouting {
             }
         }
 
-        private fun getAccountsWithProductList(context: Context, productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (GdaxApi.credentials == null) {
                 for (product in productList) {
                     val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")

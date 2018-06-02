@@ -19,6 +19,7 @@ class DataFragment : Fragment() {
 
     private var backupCredentials: GdaxApi.ApiCredentials? = null
     private var backupAccountList: MutableList<Account> = mutableListOf()
+    private var backupFiatAccount: Account? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,15 +36,16 @@ class DataFragment : Fragment() {
         activity?.let { activity ->
             val prefs = Prefs(activity)
             prefs.stashedAccountList = Account.list
+            prefs.stashedFiatAccount = Account.usdAccount
         }
     }
 
     fun restoreData(context: Context) {
+        val prefs = Prefs(context)
         if ( GdaxApi.credentials == null || GdaxApi.credentials?.apiKey?.isEmpty() == true) {
             if (backupCredentials != null) {
                 GdaxApi.credentials = backupCredentials
             } else {
-                val prefs = Prefs(context)
 
                 val apiKey = prefs.apiKey
                 val apiSecret = prefs.apiSecret
@@ -61,13 +63,18 @@ class DataFragment : Fragment() {
         if (backupAccountList.isNotEmpty()) {
             Account.list = backupAccountList
         } else if (Account.list.isEmpty()){
-            val prefs = Prefs(context)
             Account.list = prefs.stashedAccountList
+        }
+        if (backupFiatAccount != null) {
+            Account.usdAccount = backupFiatAccount
+        } else if (Account.usdAccount == null){
+            Account.usdAccount = prefs.stashedFiatAccount
         }
     }
 
     fun destroyData() {
         backupCredentials = null
         backupAccountList = mutableListOf()
+        backupFiatAccount = null
     }
 }

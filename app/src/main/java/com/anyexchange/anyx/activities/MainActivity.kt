@@ -140,6 +140,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         dataFragment?.restoreData(this)
+        if (Account.usdAccount == null) {
+            GdaxApi.accounts().getAllAccountInfo(this, { }, { })
+        }
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)

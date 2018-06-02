@@ -101,6 +101,27 @@ class Prefs (var context: Context) {
         rapidMovementAlerts = tempRapidMovementAlerts
     }
 
+    var stashedFiatAccount: Account?
+        get() {
+            val gson = Gson()
+            val fiatString = Currency.USD.toString()
+            val accountString = prefs.getString(ACCOUNT + fiatString, "")
+            if (accountString.isNotBlank()) {
+                val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
+                val product = Product.fiatProduct(fiatString)
+                return Account(product, apiAccount)
+            }
+            return null
+        }
+        set(value) {
+            val gson = Gson()
+            Account.usdAccount?.let { account ->
+                val accountJson = gson.toJson(account.apiAccount) ?: ""
+                prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
+            }
+        }
+
+
     var stashedAccountList: MutableList<Account>
         get() {
             val gson = Gson()
