@@ -72,23 +72,13 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             return outputView
         }
 
-        val candles = account.product.dayCandles
-        val currentPrice = account.product.price
-        val open = if (candles.isNotEmpty()) {
-            candles.first().open
-        } else {
-            0.0
-        }
-        val change = currentPrice - open
-        val weightedChange: Double = (change / open)
-        val percentChange: Double = weightedChange * 100.0
-
 
         //TODO: someday add ability to select values here
         viewHolder.productIcon?.setImageResource(account.currency.iconId)
 
         viewHolder.productNameText?.text = account.product.currency.toString()
 
+        val percentChange = account.product.percentChange(Timespan.DAY)
         viewHolder.percentChangeText?.text = percentChange.percentFormat()
         viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -96,9 +86,9 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = currentPrice.fiatFormat()
+        viewHolder.priceText?.text = account.product.price.fiatFormat()
 
-        viewHolder.lineChart?.configure(candles, account.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
+        viewHolder.lineChart?.configure(account.product.dayCandles, account.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
 
         outputView.setOnClickListener { onClick(account.product) }
 

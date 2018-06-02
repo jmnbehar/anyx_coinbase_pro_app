@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
+import kotlinx.coroutines.experimental.channels.produce
 
 /**
  * Created by anyexchange on 11/12/2017.
@@ -42,25 +43,14 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
                 vi.txt_account_balance.text = account.balance.btcFormat() + " " + account.currency.toString()
                 vi.setOnClickListener { onClick(account) }
 
+                val percentChange = account.product.percentChange(Timespan.DAY)
 
-                val candles = account.product.dayCandles
-                val currentPrice = account.product.price
-                val open = if (candles.isNotEmpty()) {
-                    candles.first().close
-                } else {
-                    0.0
-                }
-                val change = currentPrice - open
-
-                val weightedChange: Double = (change / open)
-                val percentChange: Double = weightedChange * 100.0
                 if (account.value > 0) {
                     vi.txt_account_value.text = account.value.fiatFormat()
 
-                    val accountChange = change * account.balance
-                    val sign = if (change >= 0) { "+" } else { "" }
+                    val accountChange = (percentChange * account.value) / 100
+                    val sign = if (percentChange >= 0) { "+" } else { "" }
                     vi.txt_account_percent_change.text = percentChange.percentFormat() + "\n($sign${accountChange.fiatFormat()})"
-
                 } else {
                     vi.txt_account_value.visibility = View.INVISIBLE
                     vi.txt_account_percent_change.visibility = View.INVISIBLE

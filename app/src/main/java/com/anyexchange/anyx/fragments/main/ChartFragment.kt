@@ -210,7 +210,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         if (areCandlesUpToDate) {
             lineChart.addCandles(candles, account.currency, chartTimeSpan)
-            setPercentChangeText(price, candles.first().open)
+            setPercentChangeText(chartTimeSpan)
             nameText.text = currency.fullName
             setButtonsAndBalanceText(account)
             updateHistoryListAdapter(stashedOrders, stashedFills)
@@ -228,7 +228,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         checkTimespanButton()
                         candles = account.product.candlesForTimespan(chartTimeSpan)
                         lineChart.addCandles(candles, account.currency, chartTimeSpan)
-                        setPercentChangeText(price, candles.first().open)
+                        setPercentChangeText(chartTimeSpan)
                         nameText.text = currency.fullName
                         activity.dismissProgressBar()
                         setButtonsAndBalanceText(account)
@@ -242,7 +242,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }, {    //success
                 candles = account.product.candlesForTimespan(chartTimeSpan)
                 lineChart.addCandles(candles, account.currency, chartTimeSpan)
-                setPercentChangeText(price, candles.first().open)
+                setPercentChangeText(chartTimeSpan)
                 nameText.text = currency.fullName
                 setButtonsAndBalanceText(account)
                 activity.dismissProgressBar()
@@ -337,15 +337,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         })
     }
 
-    private fun setPercentChangeText(price: Double, open: Double) {
-        val change = price - open
-        val weightedChange: Double = (change / open)
-        val percentChange: Double = weightedChange * 100.0
-        percentChangeText.text = percentChange.percentFormat()
-        percentChangeText.textColor = if (percentChange >= 0) {
-            Color.GREEN
-        } else {
-            Color.RED
+    private fun setPercentChangeText(timespan: Timespan) {
+        account?.let { account ->
+            val percentChange = account.product.percentChange(timespan)
+            percentChangeText.text = percentChange.percentFormat()
+            percentChangeText.textColor = if (percentChange >= 0) {
+                Color.GREEN
+            } else {
+                Color.RED
+            }
         }
     }
 
@@ -447,10 +447,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onNothingSelected() {
         val account = account
         if (account != null) {
-            val price = account.product.price
-            val open = candles.first().open
-            priceText.text = price.fiatFormat()
-            setPercentChangeText(price, open)
+            priceText.text = account.product.price.fiatFormat()
+            setPercentChangeText(chartTimeSpan)
             lineChart.highlightValues(arrayOf<Highlight>())
         }
     }
@@ -563,7 +561,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     valueText.text = account.value.fiatFormat()
                     
                     lineChart.addCandles(candles, account.currency, chartTimeSpan)
-                    setPercentChangeText(account.product.price, candles.firstOrNull()?.open ?: 0.0)
+                    setPercentChangeText(chartTimeSpan)
                     checkTimespanButton()
                     onComplete()
                 }

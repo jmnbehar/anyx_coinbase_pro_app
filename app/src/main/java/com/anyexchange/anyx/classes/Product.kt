@@ -35,6 +35,20 @@ class Product(var currency: Currency, var id: String, val candles: List<Candle>)
 
     private var candlesTimespan = Timespan.DAY
 
+    fun percentChange(timespan: Timespan) : Double {
+        val currentPrice = price
+        val candles = candlesForTimespan(timespan)
+        val open = if (candles.isNotEmpty()) {
+            candles.first().close
+        } else {
+            0.0
+        }
+        val change = currentPrice - open
+
+        val weightedChange: Double = (change / open)
+        return weightedChange * 100.0
+    }
+
     fun candlesForTimespan(timespan: Timespan): List<Candle> {
         return when (timespan) {
             Timespan.HOUR -> hourCandles
