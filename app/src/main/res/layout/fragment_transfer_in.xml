@@ -24,7 +24,7 @@
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="10dp"
-            android:text="Transfer From Coinbase"
+            android:text="@string/transfer_in_title"
             android:textSize="30sp"
             tools:layout_editor_absoluteX="48dp"
             tools:layout_editor_absoluteY="16dp" />
@@ -94,7 +94,7 @@
                 <Spinner
                     android:id="@+id/spinner_transfer_in_coinbase_accounts"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="43dp"
                     android:layout_marginLeft="-10dp"
                     android:layout_marginRight="-10dp"
                     android:visibility="gone" />

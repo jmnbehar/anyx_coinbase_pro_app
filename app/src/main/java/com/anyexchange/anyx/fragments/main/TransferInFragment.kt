@@ -285,8 +285,10 @@ class TransferInFragment : RefreshFragment() {
             else -> {
                 sourceAccount = relevantAccounts.first()
 
-                (cbAccountsSpinner.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = relevantAccounts
-                (cbAccountsSpinner.adapter as? RelatedAccountSpinnerAdapter)?.notifyDataSetChanged()
+
+                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, relevantAccounts)
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                cbAccountsSpinner.adapter = arrayAdapter
 
                 cbAccountText.visibility = View.GONE
                 cbAccountsSpinner.visibility = View.VISIBLE

@@ -47,7 +47,6 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
 
                 if (account.value > 0) {
                     vi.txt_account_value.text = account.value.fiatFormat()
-
                     val accountChange = (percentChange * account.value) / 100
                     val sign = if (percentChange >= 0) { "+" } else { "" }
                     vi.txt_account_percent_change.text = percentChange.percentFormat() + "\n($sign${accountChange.fiatFormat()})"
@@ -59,7 +58,6 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
                 vi.txt_account_value.text = account.value.fiatFormat()
                 vi.txt_account_balance.text = account.currency.toString()
                 vi.txt_account_balance.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-//                vi.txt_account_percent_change.visibility = View.INVISIBLE
                 vi.txt_account_percent_change.text = ""
             }
             vi.img_account_icon.setImageResource(account.currency.iconId)

@@ -25,7 +25,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingTop="10dp"
-                android:text="Transfer out of GDAX"
+                android:text="@string/transfer_out_title"
                 android:textSize="30sp"
                 tools:layout_editor_absoluteX="48dp"
                 tools:layout_editor_absoluteY="16dp" />
