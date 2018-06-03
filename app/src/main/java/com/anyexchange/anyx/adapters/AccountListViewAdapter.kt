@@ -7,7 +7,6 @@ import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
-import kotlinx.coroutines.experimental.channels.produce
 
 /**
  * Created by anyexchange on 11/12/2017.

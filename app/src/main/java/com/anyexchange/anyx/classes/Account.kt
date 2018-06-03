@@ -36,7 +36,6 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
     val currency: Currency
         get() = product.currency
 
-
     @IgnoredOnParcel
     var coinbaseAccount: CoinbaseAccount? = null
 

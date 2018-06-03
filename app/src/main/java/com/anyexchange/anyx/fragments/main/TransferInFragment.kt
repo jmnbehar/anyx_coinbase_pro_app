@@ -109,6 +109,11 @@ class TransferInFragment : RefreshFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 if (relevantAccounts.size > position) {
                     sourceAccount = relevantAccounts[position]
+                    if (sourceAccount is Account.CoinbaseAccount) {
+                        infoText.setText(R.string.transfer_coinbase_info)
+                    } else {
+                        infoText.setText(R.string.transfer_bank_info)
+                    }
                 }
             }
 
@@ -285,7 +290,6 @@ class TransferInFragment : RefreshFragment() {
             else -> {
                 sourceAccount = relevantAccounts.first()
 
-
                 val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, relevantAccounts)
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 cbAccountsSpinner.adapter = arrayAdapter
@@ -294,6 +298,11 @@ class TransferInFragment : RefreshFragment() {
                 cbAccountsSpinner.visibility = View.VISIBLE
                 interactiveLayout.visibility = View.VISIBLE
             }
+        }
+        if (sourceAccount is Account.CoinbaseAccount) {
+            infoText.setText(R.string.transfer_coinbase_info)
+        } else {
+            infoText.setText(R.string.transfer_bank_info)
         }
         activity?.let {activity ->
             amountUnitText.text = currency.toString()

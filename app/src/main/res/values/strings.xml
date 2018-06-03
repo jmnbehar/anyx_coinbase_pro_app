@@ -48,7 +48,10 @@
 
     <string name="transfer_in_title">Transfer into GDAX</string>
     <string name="transfer_out_title">Transfer out of GDAX</string>
-    
+
+    <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
+    <string name="transfer_bank_info">Bank wire transfers take one business day to process.</string>
+
     <string-array name="login_help_mobile_titles">
         <item>Create a new API Key on your phone</item>
         <item>Open Menu</item>

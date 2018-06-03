@@ -109,6 +109,11 @@ class TransferOutFragment : RefreshFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 if (relevantAccounts.size > position) {
                     destinationAccount = relevantAccounts[position]
+                    if (destinationAccount is Account.CoinbaseAccount) {
+                        infoText.setText(R.string.transfer_coinbase_info)
+                    } else {
+                        infoText.setText(R.string.transfer_bank_info)
+                    }
                 }
             }
 
@@ -277,6 +282,11 @@ class TransferOutFragment : RefreshFragment() {
                 cbAccountText.visibility = View.GONE
                 cbAccountsSpinner.visibility = View.VISIBLE
             }
+        }
+        if (destinationAccount is Account.CoinbaseAccount) {
+            infoText.setText(R.string.transfer_coinbase_info)
+        } else {
+            infoText.setText(R.string.transfer_bank_info)
         }
 
         val gdaxAccount = Account.forCurrency(currency)

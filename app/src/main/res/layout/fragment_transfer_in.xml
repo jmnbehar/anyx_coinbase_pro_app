@@ -185,7 +185,7 @@
                     android:id="@+id/txt_transfer_in_coinbase_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="TextView"
+                    android:text="@string/transfer_coinbase_info"
                     android:textSize="18sp" />
 
                 <Button
