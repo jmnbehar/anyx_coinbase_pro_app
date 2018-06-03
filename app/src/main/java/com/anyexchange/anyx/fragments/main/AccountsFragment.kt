@@ -87,14 +87,14 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         valueText.text = entry.y.toDouble().fiatFormat()
-        val candle = accountTotalCandles[entry.x.toInt()]
+        if (accountTotalCandles.size > entry.x) {
+            val candle = accountTotalCandles[entry.x.toInt()]
 
-        var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
-        timeString = timeString.replace(" ", "\n")
-        percentChangeText.text = timeString
-
+            var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
+            timeString = timeString.replace(" ", "\n")
+            percentChangeText.text = timeString
+        }
         val prefs = Prefs(context!!)
-
         percentChangeText.textColor = if (prefs.isDarkModeOn) {
             Color.WHITE
         } else {
