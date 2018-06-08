@@ -693,7 +693,7 @@ sealed class GdaxApi: FuelRouting {
             fun forString(string: String) : ErrorMessage? {
                 var errorMessage = ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
                 if (errorMessage == null) {
-                    if (string.contains("Amount is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
+                    if (string.contains("is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
                         return TransferAmountTooLow
                     }
                 }
