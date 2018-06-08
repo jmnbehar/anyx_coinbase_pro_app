@@ -220,6 +220,17 @@ enum class Currency {
             return (nowTime - startTime)
         }
 
+    val orderValue : Int
+        get() {
+            return when (this) {
+                BTC -> 4
+                ETH -> 3
+                LTC -> 2
+                BCH -> 1
+                else -> 0
+            }
+        }
+
 
     companion object {
         val cryptoList = listOf(BTC, ETH, LTC, BCH)

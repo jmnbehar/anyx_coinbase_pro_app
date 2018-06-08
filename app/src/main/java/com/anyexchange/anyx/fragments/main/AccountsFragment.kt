@@ -56,7 +56,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountList = rootView.list_accounts
         titleText = rootView.account_text
 
-        if (GdaxApi.credentials != null) {
+        val context = context
+        if (context!= null && Prefs(context).isLoggedIn) {
             rootView.layout_accounts_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_accounts_label.text = "All accounts"
@@ -125,7 +126,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val totalValue = Account.totalValue
         valueText.text = totalValue.fiatFormat()
 
-
         val open = if (accountTotalCandles.isNotEmpty()) {
             accountTotalCandles.first().close
         } else {
@@ -170,7 +170,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                         val accountCandleValue = if (account.product.dayCandles.size > i) {
                             account.product.dayCandles[i].close
                         } else {
-                            1.0
+                            account.product.dayCandles.last().close
                         }
                         totalCandleValue += (accountCandleValue * account.balance)
                     }
@@ -185,7 +185,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        if (GdaxApi.isLoggedIn) {
+        val context = context
+        if (context != null && Prefs(context).isLoggedIn) {
             GdaxApi.accounts().updateAllAccounts({ onComplete(false) }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
 

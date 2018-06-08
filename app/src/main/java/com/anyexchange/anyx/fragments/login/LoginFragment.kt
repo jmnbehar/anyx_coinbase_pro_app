@@ -116,7 +116,6 @@ class LoginFragment : Fragment()  {
             val popup = PopupMenu(activity, btnLoginHelp);
             //Inflating the Popup using xml file
             popup.menuInflater.inflate(R.menu.login_help_menu, popup.menu);
-
             //registering popup with OnMenuItemClickListener
             val intent = Intent(activity, com.anyexchange.anyx.activities.LoginHelpActivity::class.java)
             popup.setOnMenuItemClickListener { item: MenuItem? ->
@@ -134,7 +133,6 @@ class LoginFragment : Fragment()  {
                 }
                 true
             }
-
             popup.show()  //showing popup menu
         }
 

@@ -139,6 +139,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
         }
 
+
         dataFragment?.restoreData(this)
         if (Account.usdAccount == null) {
             GdaxApi.accounts().getAllAccountInfo(this, { }, { })
@@ -183,15 +184,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    val GDAX_API_KEY = "GDAX_API_KEY"
-    val GDAX_API_PASS = "GDAX_API_PASS"
-    val GDAX_API_SECRET = "GDAX_API_SECRET"
-    val ACCOUNT_LIST = "ACCOUNT_LIST"
-
     private fun setDrawerMenu() {
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (GdaxApi.isLoggedIn) {
+        val prefs = Prefs(this)
+        if (prefs.isLoggedIn) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
@@ -438,6 +435,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun goToFragment(fragmentType: FragmentType) {
+        val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.BTC_CHART -> {
                 chartFragment(Currency.BTC)
@@ -453,7 +451,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
             FragmentType.SEND -> {
-                if (!GdaxApi.isLoggedIn) {
+                if (!prefs.isLoggedIn) {
                     //do nothing
                     toast("Please log in")
                     null
@@ -467,7 +465,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance(this)
             FragmentType.TRANSFER_IN -> {
-                if (!GdaxApi.isLoggedIn) {
+                if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
@@ -489,7 +487,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 null
             }
             FragmentType.TRANSFER_OUT -> {
-                if (!GdaxApi.isLoggedIn) {
+                if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")

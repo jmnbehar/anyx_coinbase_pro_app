@@ -31,6 +31,12 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         return i.toLong()
     }
 
+    private val sortedProductList: List<Product>
+        get() {
+            val sortedAccounts = Account.list.sortedWith(compareBy({ it.value }, { it.currency.orderValue })).reversed()
+            return sortedAccounts.map { a -> a.product }
+        }
+
     internal class ViewHolder {
         var productNameText: TextView? = null
         var percentChangeText: TextView? = null
@@ -68,17 +74,18 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             3 -> Account.bchAccount
             else -> Account.list[i]
         }
-        if (account == null) {
+
+        if (i >= sortedProductList.size) {
             return outputView
         }
-
+        val product = sortedProductList[i]
 
         //TODO: someday add ability to select values here
-        viewHolder.productIcon?.setImageResource(account.currency.iconId)
+        viewHolder.productIcon?.setImageResource(product.currency.iconId)
 
-        viewHolder.productNameText?.text = account.product.currency.toString()
+        viewHolder.productNameText?.text = product.currency.toString()
 
-        val percentChange = account.product.percentChange(Timespan.DAY)
+        val percentChange = product.percentChange(Timespan.DAY)
         viewHolder.percentChangeText?.text = percentChange.percentFormat()
         viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -86,11 +93,11 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = account.product.price.fiatFormat()
+        viewHolder.priceText?.text = product.price.fiatFormat()
 
-        viewHolder.lineChart?.configure(account.product.dayCandles, account.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
+        viewHolder.lineChart?.configure(product.dayCandles, product.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
 
-        outputView.setOnClickListener { onClick(account.product) }
+        outputView.setOnClickListener { onClick(product) }
 
         return outputView
     }

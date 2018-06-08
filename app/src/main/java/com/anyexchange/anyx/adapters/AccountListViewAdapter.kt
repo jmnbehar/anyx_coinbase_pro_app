@@ -27,14 +27,20 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
         return i.toLong()
     }
 
+    private val sortedAccountList: List<Account>
+        get() {
+            val sortedAccounts = Account.list.sortedWith(compareBy({ it.value }, { it.currency.orderValue })).reversed().toMutableList()
+            val usdAccount = Account.usdAccount
+            if (usdAccount != null) {
+                sortedAccounts.add(usdAccount)
+            }
+            return sortedAccounts
+        }
+
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
         //TODO: quash this warning
         val vi = viewGroup.inflate(R.layout.list_row_account)
-        val accounts = Account.list.toMutableList()
-        val usdAccount = Account.usdAccount
-        if (usdAccount != null) {
-            accounts.add(usdAccount)
-        }
+        val accounts = sortedAccountList
         if(i < accounts.size) {
             val account = accounts[i]
 

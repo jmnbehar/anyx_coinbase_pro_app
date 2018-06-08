@@ -121,7 +121,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             //TODO: send over more info
             buyButton.setOnClickListener {
-                if (!GdaxApi.isLoggedIn) {
+                if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
@@ -138,7 +138,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             sellButton.setOnClickListener {
-                if (!GdaxApi.isLoggedIn) {
+                if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
@@ -263,8 +263,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         sellButton.textColor = buttonTextColor
         val tabColor = currency.colorPrimary(activity)
         historyTabList.setSelectedTabIndicatorColor(tabColor)
-
-        if (GdaxApi.isLoggedIn) {
+        val prefs = Prefs(activity)
+        if (prefs.isLoggedIn) {
             tickerText.text = "$currency wallet"
             iconView.setImageResource(currency.iconId)
             balanceText.text = "${account.balance.btcFormat()} $currency"
@@ -499,7 +499,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
         val prefs = Prefs(context!!)
         account?. let { account ->
-            if (GdaxApi.isLoggedIn) {
+            if (prefs.isLoggedIn) {
                 GdaxApi.account(account.id).executeRequest(onFailure) { result ->
                     val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                     val newBalance = apiAccount.balance.toDoubleOrZero()

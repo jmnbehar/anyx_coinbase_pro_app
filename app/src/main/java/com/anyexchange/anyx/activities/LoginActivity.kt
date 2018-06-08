@@ -12,6 +12,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.login.LoginFragment
 import com.anyexchange.anyx.fragments.login.WebviewFragment
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.fragments.main.DataFragment
 import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
@@ -148,12 +149,22 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             progressDialog?.dismiss()
 
         }, {
+            if (credentials == null) {
+                val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
+                dataFragment?.destroyData(this)
+                prefs.stashedAccountList = mutableListOf()
+                prefs.stashedFiatAccount = null
+
+                prefs.isLoggedIn = false
+            } else {
+                prefs.isLoggedIn = true
+            }
             progressDialog?.dismiss()
             //toast("Success! logging in")
-            prefs.shouldAutologin = GdaxApi.isLoggedIn
+            prefs.shouldAutologin = true
             val intent = com.anyexchange.anyx.activities.MainActivity.newIntent(this)
             startActivity(intent)
-            if (GdaxApi.isLoggedIn) {
+            if (prefs.isLoggedIn) {
                 finish()
             }
         })

@@ -46,7 +46,6 @@ class DataFragment : Fragment() {
             if (backupCredentials != null) {
                 GdaxApi.credentials = backupCredentials
             } else {
-
                 val apiKey = prefs.apiKey
                 val apiSecret = prefs.apiSecret
                 val passphraseEncrypted = prefs.passphrase
@@ -72,9 +71,17 @@ class DataFragment : Fragment() {
         }
     }
 
-    fun destroyData() {
+    fun destroyData(context: Context) {
         backupCredentials = null
         backupAccountList = mutableListOf()
         backupFiatAccount = null
+
+        val prefs = Prefs(context)
+        prefs.apiKey = null
+        prefs.apiSecret = null
+        prefs.passphrase = null
+        prefs.stashedAccountList = mutableListOf()
+        prefs.stashedFiatAccount = null
+
     }
 }

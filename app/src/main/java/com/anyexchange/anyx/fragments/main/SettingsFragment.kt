@@ -62,6 +62,7 @@ class SettingsFragment : RefreshFragment() {
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.putExtra(Constants.logout, true)
             prefs.shouldAutologin = false
+            prefs.isLoggedIn = false
             GdaxApi.credentials = null
             prefs.stashOrders(null)
             prefs.stashFills(null)
@@ -129,7 +130,7 @@ class SettingsFragment : RefreshFragment() {
             verifyButton.visibility = View.VISIBLE
         }
 
-        if (GdaxApi.isLoggedIn) {
+        if (prefs.isLoggedIn) {
             logoutButton.text = "Log Out"
         } else {
             logoutButton.text = "Log In"

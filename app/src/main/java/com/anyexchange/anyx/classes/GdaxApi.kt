@@ -28,9 +28,6 @@ sealed class GdaxApi: FuelRouting {
         //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
 
-        val isLoggedIn: Boolean
-            get() { return  credentials != null }
-
         const val basePath = "https://api.gdax.com"
 
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
