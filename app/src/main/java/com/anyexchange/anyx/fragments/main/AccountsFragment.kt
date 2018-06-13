@@ -163,8 +163,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             var accountTotalCandleList: MutableList<Candle> = mutableListOf()
             for (i in 0..(btcAccount.dayCandles.size - 1)) {
                 var usdAccountValue = Account.usdAccount?.value
-                usdAccountValue?.let { usdAccountValue ->
-                    var totalCandleValue = usdAccountValue
+                usdAccountValue?.let {
+                    var totalCandleValue = it
                     val time = btcAccount.dayCandles[i].time
                     for (account in Account.list) {
                         val accountCandleValue = if (account.product.dayCandles.size > i) {

@@ -338,7 +338,7 @@ class TradeFragment : RefreshFragment() {
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
-        val currencyString = account?.currency.toString() ?: ""
+        val currencyString = account?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
             "less than 0.01"
         } else {

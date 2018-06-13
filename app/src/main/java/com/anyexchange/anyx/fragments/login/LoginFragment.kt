@@ -96,7 +96,7 @@ class LoginFragment : Fragment()  {
             prefs.shouldSavePassphrase = isChecked
         }
 
-        btnLogin.setOnClickListener { view ->
+        btnLogin.setOnClickListener {
             signIn()
         }
 

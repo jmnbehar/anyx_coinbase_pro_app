@@ -67,14 +67,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             outputView = convertView
         }
 
-        val account = when (i) {
-            0 -> Account.btcAccount
-            1 -> Account.ethAccount
-            2 -> Account.ltcAccount
-            3 -> Account.bchAccount
-            else -> Account.list[i]
-        }
-
         if (i >= sortedProductList.size) {
             return outputView
         }

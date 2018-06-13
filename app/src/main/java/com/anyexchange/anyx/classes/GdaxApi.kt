@@ -126,9 +126,8 @@ sealed class GdaxApi: FuelRouting {
 
     class candles(val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : GdaxApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
-            var granularity = granularity
             var currentTimespan: Long
-            var coveredTimespan: Long = 0
+            var coveredTimespan: Long
             var nextCoveredTimespan: Long = 0
             var remainingTimespan: Long = timespan
             var pages = 1
@@ -237,8 +236,8 @@ sealed class GdaxApi: FuelRouting {
                 val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                 for (account in Account.list.plus(Account.usdAccount)) {
                     val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
-                    apiAccount?.let { apiAccount ->
-                        account?.apiAccount = apiAccount
+                    apiAccount?.let {
+                        account?.apiAccount = it
                     }
                 }
                 onComplete()
