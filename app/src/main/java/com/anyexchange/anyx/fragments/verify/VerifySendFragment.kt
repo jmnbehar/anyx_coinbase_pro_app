@@ -93,7 +93,6 @@ class VerifySendFragment : Fragment() {
                         GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
                         GdaxApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.Success)
                         GdaxApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
-                        GdaxApi.ErrorMessage.Missing2FactorBypass -> goToVerificationComplete(VerificationStatus.NoTwoFactorPermission)
                         else -> goToVerificationComplete(VerificationStatus.UnknownError)
                     }
                 }, {

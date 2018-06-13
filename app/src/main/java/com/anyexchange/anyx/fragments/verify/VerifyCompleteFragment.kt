@@ -73,7 +73,6 @@ class VerifyCompleteFragment : Fragment() {
             VerificationStatus.RepayError -> "Due to an unknown error, you may have lost a very small quantity of $currency. Please reach out to our verification support at anyx.verify@gmail.com"
             VerificationStatus.NoTransferPermission -> missingPermissionString("Transfer")
             VerificationStatus.NoTradePermission -> missingPermissionString("Trade")
-            VerificationStatus.NoTwoFactorPermission -> missingPermissionString("Bypass Two-Factor Auth")
             VerificationStatus.NoViewPermission -> missingPermissionString("View")
             VerificationStatus.NoPaymentMethods -> "Could not verify at this time because your account is unfunded. \n\nPlease add funds and try again."
             VerificationStatus.GdaxError -> "An unknown error occurred. Try again later."

@@ -10,7 +10,6 @@ enum class VerificationStatus {
     RepayError,
     NoTransferPermission,
     NoTradePermission,
-    NoTwoFactorPermission,
     NoViewPermission,
     NoPaymentMethods,
     GdaxError,
@@ -22,7 +21,6 @@ enum class VerificationStatus {
                 VerificationStatus.RepayError        -> true
                 VerificationStatus.NoTransferPermission  -> false
                 VerificationStatus.NoTradePermission     -> false
-                VerificationStatus.NoTwoFactorPermission -> false
                 VerificationStatus.NoViewPermission      -> false
                 VerificationStatus.NoPaymentMethods      -> false
                 VerificationStatus.GdaxError             -> false

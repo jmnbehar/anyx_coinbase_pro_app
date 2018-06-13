@@ -642,7 +642,6 @@ sealed class GdaxApi: FuelRouting {
         MissingApiSignature,
 
         //Permissions:
-        Missing2FactorBypass,
 
         //Trade:
         BuyAmountTooSmallBtc,
@@ -669,8 +668,6 @@ sealed class GdaxApi: FuelRouting {
                 InvalidPassphrase -> "Invalid Passphrase"
                 InvalidApiSignature -> "invalid signature"
                 MissingApiSignature -> "CB-ACCESS-SIGN header is required"
-
-                Missing2FactorBypass -> "Two factor authentication is enabled, CB-2FA-TOKEN header is required"
 
                 BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
                 BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"
