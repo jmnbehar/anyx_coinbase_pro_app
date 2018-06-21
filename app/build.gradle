@@ -16,8 +16,8 @@ android {
         applicationId "com.anyexchange.anyx"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 7
+        versionName "1.0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
