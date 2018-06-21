@@ -23,6 +23,7 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
+import kotlinx.android.synthetic.main.fragment_accounts.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -154,23 +155,23 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            timespanButtonHour.setText("1H")
+            timespanButtonHour.text = "1H"
             timespanButtonHour.setOnClickListener {
                 setChartTimespan(Timespan.HOUR)
             }
-            timespanButtonDay.setText("1D")
+            timespanButtonDay.text = "1D"
             timespanButtonDay.setOnClickListener {
                 setChartTimespan(Timespan.DAY)
             }
-            timespanButtonWeek.setText("1W")
+            timespanButtonWeek.text = "1W"
             timespanButtonWeek.setOnClickListener {
                 setChartTimespan(Timespan.WEEK)
             }
-            timespanButtonMonth.setText("1M")
+            timespanButtonMonth.text = "1M"
             timespanButtonMonth.setOnClickListener {
                 setChartTimespan(Timespan.MONTH)
             }
-            timespanButtonYear.setText("1Y")
+            timespanButtonYear.text = "1Y"
             timespanButtonYear.setOnClickListener {
                 setChartTimespan(Timespan.YEAR)
             }
@@ -189,6 +190,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
+
     private fun switchAccount(account: Account) {
         Companion.account = account
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
@@ -205,7 +207,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val now = Calendar.getInstance()
         val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
-        var nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(chartTimeSpan)
+        val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(chartTimeSpan)
         val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
 
         if (areCandlesUpToDate) {
@@ -250,41 +252,41 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             })
         }
     }
+    
+    private fun setButtonsAndBalanceText(account: Account) {
+        (activity as? com.anyexchange.anyx.activities.MainActivity)?.let { activity ->
+            val currency = account.currency
+            val buttonColors = currency.colorStateList(activity)
+            buyButton.backgroundTintList = buttonColors
+            sellButton.backgroundTintList = buttonColors
+            val buttonTextColor = currency.buttonTextColor(activity)
+            buyButton.textColor = buttonTextColor
+            sellButton.textColor = buttonTextColor
+            val tabColor = currency.colorPrimary(activity)
+            historyTabList.setSelectedTabIndicatorColor(tabColor)
+            val prefs = Prefs(activity)
+            if (prefs.isLoggedIn) {
+                tickerText.text = "$currency wallet"
+                iconView.setImageResource(currency.iconId)
+                balanceText.text = "${account.balance.btcFormat()} $currency"
+                valueText.text = account.value.fiatFormat()
 
+                historyPager.visibility = View.VISIBLE
+            } else {
+                tickerText.visibility = View.GONE
+                iconView.visibility = View.GONE
+                balanceText.visibility = View.GONE
+                valueText.visibility = View.GONE
 
-    fun setButtonsAndBalanceText(account: Account) {
-        val activity = activity as com.anyexchange.anyx.activities.MainActivity
-        val currency = account.currency
-        val buttonColors = currency.colorStateList(activity)
-        buyButton.backgroundTintList = buttonColors
-        sellButton.backgroundTintList = buttonColors
-        val buttonTextColor = currency.buttonTextColor(activity)
-        buyButton.textColor = buttonTextColor
-        sellButton.textColor = buttonTextColor
-        val tabColor = currency.colorPrimary(activity)
-        historyTabList.setSelectedTabIndicatorColor(tabColor)
-        val prefs = Prefs(activity)
-        if (prefs.isLoggedIn) {
-            tickerText.text = "$currency wallet"
-            iconView.setImageResource(currency.iconId)
-            balanceText.text = "${account.balance.btcFormat()} $currency"
-            valueText.text = account.value.fiatFormat()
-
-            historyPager.visibility = View.VISIBLE
-        } else {
-            tickerText.visibility = View.GONE
-            iconView.visibility = View.GONE
-            balanceText.visibility = View.GONE
-            valueText.visibility = View.GONE
-
-            historyPager.visibility = View.INVISIBLE
+                historyPager.visibility = View.INVISIBLE
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
 
-        showNavSpinner(account?.currency) {selectedCurrency ->
+        showNavSpinner(account?.currency) { selectedCurrency ->
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->
                 switchAccount(account)
@@ -433,14 +435,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        priceText.text = entry.y.toDouble().fiatFormat()
-        val candle = candles[entry.x.toInt()]
-        percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
-        val prefs = Prefs(context!!)
-        if (prefs.isDarkModeOn) {
-            percentChangeText.textColor = Color.WHITE
-        } else {
-            percentChangeText.textColor = Color.BLACK
+        val index = entry.x.toInt()
+        if (candles.size > index) {
+            priceText.text = entry.y.toDouble().fiatFormat()
+            val candle = candles[index]
+            percentChangeText.text = candle.time.toStringWithTimespan(chartTimeSpan)
+            val prefs = Prefs(context!!)
+            if (prefs.isDarkModeOn) {
+                percentChangeText.textColor = Color.WHITE
+            } else {
+                percentChangeText.textColor = Color.BLACK
+            }
         }
     }
 
@@ -452,7 +457,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             lineChart.highlightValues(arrayOf<Highlight>())
         }
     }
-
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (view) {
@@ -547,7 +551,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        account?. let { account ->
+        val account = account
+        if (account == null) {
+            onComplete()
+        } else {
             account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
                 candles = account.product.candlesForTimespan(chartTimeSpan)
 

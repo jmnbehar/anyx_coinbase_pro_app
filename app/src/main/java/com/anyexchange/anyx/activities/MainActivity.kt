@@ -36,7 +36,6 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
-
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var notificationManager: NotificationManager? = null
     lateinit var spinnerNav: Spinner
@@ -463,7 +462,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     SendFragment.newInstance()
                 }
             }
-            FragmentType.ALERTS -> AlertsFragment.newInstance(this)
+            FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER_IN -> {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")

@@ -600,6 +600,7 @@ class TradeFragment : RefreshFragment() {
 
                 val timeInForceList = GdaxApi.TimeInForce.values()
                 val spinnerList = timeInForceList.map { t -> t.label() }
+                //TODO: don't use simple_spinner_item
                 val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 advancedOptionTimeInForceSpinner.adapter = arrayAdapter
