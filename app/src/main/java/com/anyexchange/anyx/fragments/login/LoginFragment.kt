@@ -49,7 +49,7 @@ class LoginFragment : Fragment()  {
         apiSecretEditText = rootView.etxt_login_secret
         passphraseEditText = rootView.etxt_login_passphrase
         val btnLogin = rootView.btn_login
-        val btnNewAccount = rootView.btn_login_new_acccount
+        val btnNewAccount = rootView.btn_login_new_account
         val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
 
@@ -101,9 +101,7 @@ class LoginFragment : Fragment()  {
         }
 
         btnNewAccount.setOnClickListener { _ ->
-            //            val newAccountUrl = "https://www.coinbase.com/users/oauth_signup?client_id=2e7433cc0730d8cb8c77dd30e04b5658aacbf7612b2bad8aa7bb97b87fc0f876&meta%5Baccount%5D=all&redirect_uri=https%3A%2F%2Fwww.gdax.com%2Foauth_redirect&response_type=code"
-//            val newAccountUrl = "https://www.coinbase.com/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URL&state=SECURE_RANDOM&scope=wallet:accounts:read"
-            val newAccountUrl = "https://www.gdax.com/trade/BTC-USD"
+            val newAccountUrl = "https://www.gdax.com"
             (activity as com.anyexchange.anyx.activities.LoginActivity).goToFragment(com.anyexchange.anyx.activities.LoginActivity.LoginFragmentType.WebView, newAccountUrl)
         }
 
@@ -113,9 +111,9 @@ class LoginFragment : Fragment()  {
 
         btnLoginHelp.setOnClickListener {
             //Creating the instance of PopupMenu
-            val popup = PopupMenu(activity, btnLoginHelp);
+            val popup = PopupMenu(activity, btnLoginHelp)
             //Inflating the Popup using xml file
-            popup.menuInflater.inflate(R.menu.login_help_menu, popup.menu);
+            popup.menuInflater.inflate(R.menu.login_help_menu, popup.menu)
             //registering popup with OnMenuItemClickListener
             val intent = Intent(activity, com.anyexchange.anyx.activities.LoginHelpActivity::class.java)
             popup.setOnMenuItemClickListener { item: MenuItem? ->

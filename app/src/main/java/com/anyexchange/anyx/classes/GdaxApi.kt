@@ -39,7 +39,7 @@ sealed class GdaxApi: FuelRouting {
                 GdaxApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
                 GdaxApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
                 GdaxApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
-                GdaxApi.ErrorCode.ServerError -> { "Sorry, Gdax Servers are encountering problems right now" }
+                GdaxApi.ErrorCode.ServerError -> { "Sorry, Coinbase Pro Servers are encountering problems right now" }
                 GdaxApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
                 else -> ""
             }

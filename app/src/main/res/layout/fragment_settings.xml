@@ -18,7 +18,7 @@
             android:id="@+id/txt_setting_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="@string/settings_title"
             android:textSize="30sp"
             tools:layout_editor_absoluteX="48dp"
             tools:layout_editor_absoluteY="16dp" />
@@ -27,52 +27,45 @@
             android:id="@+id/cb_setting_dark_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dark Mode" />
+            android:text="@string/settings_dark_mode" />
 
         <CheckBox
             android:id="@+id/cb_setting_show_trade_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Show confirm popup before buying or selling assets" />
+            android:text="@string/settings_show_trade_confirm" />
 
         <CheckBox
             android:id="@+id/cb_setting_show_send_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Show confirm popup before sending assets" />
+            android:text="@string/settings_show_send_confirm" />
 
 
         <CheckBox
             android:id="@+id/cb_setting_idk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="idk what will go here"
+            android:text="@string/settings_unknown"
             android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_setting_show_gdax_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Read Coinbase/Gdax EULA" />
+            android:text="@string/settings_coinbase_pro_eula" />
 
         <Button
             android:id="@+id/btn_setting_show_anyx_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Read AnyX User Agreement" />
-
-        <Button
-            android:id="@+id/btn_setting_show_anyx_eula"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Read AnyX EULA"
-            android:visibility="gone" />
+            android:text="@string/settings_anyx_eula" />
 
         <Button
             android:id="@+id/btn_setting_verify_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Verify Account" />
+            android:text="@string/settings_verify" />
 
         <Space
             android:layout_width="match_parent"
@@ -83,7 +76,7 @@
             android:id="@+id/btn_setting_log_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Log out" />
+            android:text="@string/settings_log_out" />
 
     </LinearLayout>
 

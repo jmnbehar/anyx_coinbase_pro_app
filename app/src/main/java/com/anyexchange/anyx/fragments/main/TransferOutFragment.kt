@@ -194,7 +194,7 @@ class TransferOutFragment : RefreshFragment() {
 
             GdaxApi.accounts().updateAllAccounts({ result ->
                 onComplete(false)
-                toast("Cannot access GDAX")
+                toast("Cannot access Coinbase Pro")
                 isRefreshing = false
             }) {
                 didUpdateGDAX = true
@@ -261,7 +261,7 @@ class TransferOutFragment : RefreshFragment() {
                 } else {
                     0.0.btcFormatShortened()
                 }
-                gdaxBalanceText.text = "GDAX $currency Balance: $cbAccountBalance"
+                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $cbAccountBalance"
 
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
@@ -299,13 +299,13 @@ class TransferOutFragment : RefreshFragment() {
         if ((gdaxAccount?.availableBalance ?: 0.0) > 0) {
             if (currency.isFiat) {
                 val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "Available GDAX $currency Balance: $gdaxAccountBalance"
+                gdaxBalanceText.text = "Available Coinbase Pro $currency Balance: $gdaxAccountBalance"
             } else {
                 val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "Available GDAX $currency Balance: $gdaxAccountBalance $currency"
+                gdaxBalanceText.text = "Available Coinbase Pro $currency Balance: $gdaxAccountBalance $currency"
             }
         } else {
-            gdaxBalanceText.text = "GDAX $currency wallet is empty"
+            gdaxBalanceText.text = "Coinbase Pro $currency wallet is empty"
         }
 
         activity?.let {activity ->

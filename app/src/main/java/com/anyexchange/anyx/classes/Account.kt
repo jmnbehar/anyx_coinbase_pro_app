@@ -1,21 +1,15 @@
 package com.anyexchange.anyx.classes
 
 
-import android.annotation.SuppressLint
-import android.os.Parcelable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Created by anyexchange on 12/20/2017.
  */
-
-
 class Account(val product: Product, var apiAccount: ApiAccount) {
     val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()

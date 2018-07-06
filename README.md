@@ -1,1 +1,1 @@
-GDAX
+AnyX

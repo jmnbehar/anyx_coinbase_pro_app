@@ -96,7 +96,7 @@ val Result.Failure<Any, FuelError>.errorMessage : String
             (errorData["message"] as? String) ?: error.response.responseMessage
         } else {
             if (error.response.statusCode == GdaxApi.ErrorCode.NoInternet.code) {
-                "Can't access GDAX"
+                "Can't access Coinbase Pro"
             } else {
                 ""
             }

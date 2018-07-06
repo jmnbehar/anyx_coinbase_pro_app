@@ -182,7 +182,7 @@ class TransferInFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
 
-        titleText.text = "Transfer into GDAX"
+        titleText.text = getString(R.string.transfer_in_title)
 
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
@@ -212,7 +212,7 @@ class TransferInFragment : RefreshFragment() {
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
             GdaxApi.accounts().updateAllAccounts({
-                toast("Cannot access GDAX")
+                toast("Cannot access Coinbase Pro")
                 isRefreshing = false
                 onComplete(false)
             }) {
@@ -332,6 +332,6 @@ class TransferInFragment : RefreshFragment() {
         } else {
             "${(gdaxAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
-        gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalanceString"
+        gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalanceString"
     }
 }

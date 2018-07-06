@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -39,31 +38,31 @@
                 android:id="@+id/tab_transfer_usd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="USD" />
+                android:text="@string/currency_USD" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tab_transfer_btc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BTC" />
+                android:text="@string/currency_BTC" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tab_transfer_eth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ETH" />
+                android:text="@string/currency_ETH" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tab_transfer_bch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BCH" />
+                android:text="@string/currency_BCH" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tab_transfer_ltc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LTC" />
+                android:text="@string/currency_LTC" />
         </android.support.design.widget.TabLayout>
 
 
@@ -89,7 +88,7 @@
                     android:id="@+id/txt_transfer_in_coinbase_account_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Source" />
+                    android:text="@string/transfer_source" />
 
                 <Spinner
                     android:id="@+id/spinner_transfer_in_coinbase_accounts"
@@ -105,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
-                    android:text="Coinbase Balance"
+                    android:text="@string/transfer_cb_wallet_balance"
                     android:textSize="17sp"
                     android:visibility="visible" />
 
@@ -125,7 +124,7 @@
                     android:id="@+id/txt_transfer_in_coinbase_destination_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Destination" />
+                    android:text="@string/transfer_destination" />
 
                 <TextView
                     android:id="@+id/txt_transfer_in_coinbase_gdax_account_info"
@@ -133,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
                     android:layout_marginTop="10dp"
-                    android:text="GDAX  Balance"
+                    android:text="@string/transfer_pro_wallet_balance"
                     android:textSize="17sp" />
 
             </LinearLayout>
@@ -151,7 +150,7 @@
                     android:id="@+id/txt_transfer_in_coinbase_amount_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Amount" />
+                    android:text="@string/transfer_amount" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -170,15 +169,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="BTC" />
+                        android:text="@string/currency_BTC" />
 
                     <Button
                         android:id="@+id/btn_transfer_in_coinbase_max"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="0"
-                        android:text="max" />
+                        android:text="@string/transfer_max" />
                 </LinearLayout>
 
                 <TextView
@@ -193,7 +192,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="Transfer funds" />
+                    android:text="@string/transfer_transfer_btn" />
             </LinearLayout>
 
         </LinearLayout>

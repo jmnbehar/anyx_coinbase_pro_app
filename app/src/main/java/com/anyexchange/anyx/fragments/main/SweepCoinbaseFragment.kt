@@ -60,7 +60,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
-        titleText.text = "Transfer from Coinbase"
+        titleText.text =  getText(R.string.transfer_in_title)
 
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
@@ -71,11 +71,11 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
-            titleText.text = "All Coinbase accounts are empty"
+            titleText.text =  getText(R.string.transfer_cb_accounts_empty)
 
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Transfer from Coinbase"
+            titleText.text = getText(R.string.transfer_in_title)
 
             coinbaseAccount = coinbaseAccounts.first()
             val currency = coinbaseAccount?.currency
@@ -159,7 +159,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
             var didUpdateCoinbase = false
             GdaxApi.accounts().updateAllAccounts({
                 onComplete(false)
-                toast("Cannot access GDAX")
+                toast("Cannot access Coinbase Pro")
                 isRefreshing = false
             }) {
                 didUpdateGDAX = true
@@ -189,18 +189,18 @@ class SweepCoinbaseFragment : RefreshFragment() {
         }
         coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
 
-        if (coinbaseAccount != null) {
-            coinbaseAccount = coinbaseAccounts.find { account -> account.currency == coinbaseAccount?.currency }
+        coinbaseAccount = if (coinbaseAccount != null) {
+            coinbaseAccounts.find { account -> account.currency == coinbaseAccount?.currency }
         } else {
-            coinbaseAccount = coinbaseAccounts.firstOrNull()
+            coinbaseAccounts.firstOrNull()
         }
 
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
-            titleText.text = "All Coinbase accounts are empty"
+            titleText.text = getText(R.string.transfer_cb_accounts_empty)
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = "Transfer from Coinbase"
+            titleText.text = getText(R.string.transfer_in_title)
 
             (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).relatedAccountList = coinbaseAccounts
             (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).notifyDataSetChanged()
@@ -224,10 +224,10 @@ class SweepCoinbaseFragment : RefreshFragment() {
             amountUnitText.text = currency.toString()
             if (currency.isFiat) {
                 val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance"
+                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalance"
             } else {
                 val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "GDAX $currency Balance: $gdaxAccountBalance $currency"
+                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalance $currency"
             }
         }
     }

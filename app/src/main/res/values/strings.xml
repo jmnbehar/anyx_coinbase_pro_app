@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">AnyX</string>
+    <string name="coinbase_pro">Coinbase Pro</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -9,7 +10,7 @@
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
 
-    <string name="login_fragment_title">Login with GDAX Api Key</string>
+    <string name="login_fragment_title">Login with Coinbase Pro Api Key</string>
     <string name="login_api_key_label">Api Key</string>
     <string name="login_api_secret_label">Api Secret</string>
     <string name="login_passphrase_label">Passphrase</string>
@@ -19,7 +20,7 @@
     <string name="login_help_btn">Help</string>
     <string name="login_login_btn">Log in</string>
 
-    <string name="login_disclaimer">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
+    <string name="login_disclaimer">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
 
     <string name="login_error_missing_api_key">Missing Api Key</string>
     <string name="login_error_missing_api_secret">Missing Api Secret</string>
@@ -28,6 +29,15 @@
     <string name="login_help_finish_btn">Done</string>
     <string name="login_help_gdax_link">https://www.gdax.com/settings/api</string>
     <string name="login_help_skip_btn">Skip</string>
+    <string name="login_help_new_account">New Coinbase Pro account</string>
+
+
+    <string name="currency_USD">USD</string>
+    <string name="currency_BTC">BTC</string>
+    <string name="currency_ETH">ETH</string>
+    <string name="currency_BCH">BCH</string>
+    <string name="currency_LTC">LTC</string>
+    <string name="currency_ETC">ETC</string>
 
 
     <string name="home_market_tab">Market</string>
@@ -46,8 +56,27 @@
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
 
-    <string name="transfer_in_title">Transfer into GDAX</string>
-    <string name="transfer_out_title">Transfer out of GDAX</string>
+    <string name="transfer_in_title">Transfer into Coinbase Pro</string>
+    <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
+    <string name="transfer_pro_wallet_balance">Coinbase Pro Wallet Balance</string>
+    <string name="transfer_cb_wallet_balance">Coinbase Wallet Balance</string>
+    <string name="transfer_destination">Destination</string>
+    <string name="transfer_source">Source</string>
+    <string name="transfer_amount">Amount</string>
+    <string name="transfer_max">Max</string>
+    <string name="transfer_transfer_btn">Transfer funds</string>
+    <string name="transfer_cb_accounts_empty">All Coinbase accounts are empty</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_show_trade_confirm">Show confirm popup before buying or selling assets</string>
+    <string name="settings_show_send_confirm">Show confirm popup before sending assets</string>
+    <string name="settings_unknown"> </string>
+    <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
+    <string name="settings_anyx_eula">Read AnyX User Agreement</string>
+    <string name="settings_verify">Verify Account</string>
+    <string name="settings_log_out">Log Out</string>
+
 
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
     <string name="transfer_bank_info">Bank wire transfers take one business day to process.</string>
@@ -62,7 +91,7 @@
 
     <string-array name="login_help_mobile_text">
         <item> </item>
-        <item>On the GDAX mobile site, click the menu icon in the upper right hand corner.</item>
+        <item>On the Coinbase Pro mobile site, click the menu icon in the upper right hand corner.</item>
         <item>Select API from the menu.</item>
         <item>On the API Page, select View, Transfer, and Trade permissions. You may also set your own Passphrase.
         \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
@@ -82,45 +111,51 @@ You're good to go!</item>
 
     <string-array name="login_help_desktop_text">
         <item> </item>
-        <item>Log in to the GDAX website and click the menu icon in the upper right hand corner.</item>
+        <item>Log in to the Coinbase Pro website and click the menu icon in the upper right hand corner.</item>
         <item>Choose API from the right hand menu.</item>
         <item>On the API Page, select View, Transfer, and Trade permissions. You may also set your own Passphrase.
         \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
         <item>Copy down the info into the AnyX login screen. Make sure you do not send this info on any unencrypted channels to prevent someone from hacking your account</item>
     </string-array>
 
-    <string name="login_help_"></string>
-
 
     <string name="anyx_eula_header">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
 
     <string name="anyx_eula_title">AnyX User Agreement and Privacy Policy</string>
     <string name="anyx_eula_section_1_title">User Agreement</string>
-    <string name="anyx_eula_1_1">AnyX can only be used to view and track, transfer, and manage supported Digital Currencies using GDAX’s services.</string>
+    <string name="anyx_eula_1_1">AnyX can only be used to view and track, transfer, and manage supported Digital Currencies using Coinbase Pro’s services.</string>
     <string name="anyx_eula_1_2">AnyX does not take responsibility for any failed transactions of any time.</string>
     <string name="anyx_eula_1_3">AnyX does not take responsibility for any Digital Currency Transactions sent to the wrong recipient. You should verify all transaction information prior to submitting instructions to AnyX</string>
-    <string name="anyx_eula_1_4">When you place an order which is not immediately matched by an existing order, you will not have to pay fees. However, when you place an order at the market price that gets filled immediately, you will pay AnyX a fee of 0.1% on top of fees charged by GDAX. Due to the way these fees are processed, sometimes you will not pay that fee immediately but it will be added on to the next fee you incur. AnyX reserves the right to change fee pricing at a later date.</string>
+    <string name="anyx_eula_1_4">When you place an order which is not immediately matched by an existing order, you will not have to pay fees. However, when you place an order at the market price that gets filled immediately, you will pay AnyX a fee of 0.1% on top of fees charged by Coinbase Pro. Due to the way these fees are processed, sometimes you will not pay that fee immediately but it will be added on to the next fee you incur. AnyX reserves the right to change fee pricing at a later date.</string>
 
     <string name="anyx_eula_1_5">By using AnyX, you also agree to Coinbase’s User Agreement, found here:\nhttps://www.coinbase.com/legal/user_agreement</string>
     <string name="anyx_eula_1_6">The risk of loss in trading or holding Digital Currency can be substantial. You should therefore carefully consider whether trading or holding Digital Currency is suitable for you in light of your financial condition.</string>
 
     <string name="anyx_eula_section_2_title">Privacy Policy</string>
-    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your GDAX Api Key, Api Secret, and Passphrase are only stored locally on your device.
-        \nWe do not save any pictures taken with the camera. </string>
+    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.
+        \nWe do not save any pictures taken with the camera, they are only used to capture QR codes. </string>
 
-    <string name="send_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your GDAX trading account. BCH transfers are free and fast.</string>
+
+    <string name="send_title">Send</string>
+    <string name="send_send_btn">Send</string>
+    <string name="send_destination">Destination</string>
+    <string name="send_amount">Amount</string>
+    <string name="send_camera_btn">Camera Button</string>
+
+    <string name="send_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your Coinbase Pro trading account. BCH transfers are free and fast.</string>
     <string name="send_warning_2_bch">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin Cash (BCH) address. </string>
 
-    <string name="send_warning_1_btc">Enter a BTC address and the amount you wish to transfer from your GDAX trading account. BTC transfers are free and fast.</string>
+    <string name="send_warning_1_btc">Enter a BTC address and the amount you wish to transfer from your Coinbase Pro trading account. BTC transfers are free and fast.</string>
     <string name="send_warning_2_btc">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin (BTC) address. </string>
 
-    <string name="send_warning_1_eth">Enter a ETH address and the amount you wish to transfer from your GDAX trading account. ETH transfers are free and fast.</string>
-    <string name="send_warning_2_eth">Warning: Do not send ETH from GDAX directly to an Ethereum contract. Sending to a contract may result in lost ETH. Read more here:\nhttps://support.gdax.com/customer/en/portal/articles/2430150</string>
+    <string name="send_warning_1_eth">Enter a ETH address and the amount you wish to transfer from your Coinbase Pro trading account. ETH transfers are free and fast.</string>
+    <string name="send_warning_2_eth">Warning: Do not send ETH from Coinbase Pro directly to an Ethereum contract. Sending to a contract may result in lost ETH. Read more here:\nhttps://support.Coinbase Pro.com/customer/en/portal/articles/2430150</string>
 
-    <string name="send_warning_1_ltc">Enter a LTC address and the amount you wish to transfer from your GDAX trading account. LTC transfers are free and fast.</string>
+    <string name="send_warning_1_ltc">Enter a LTC address and the amount you wish to transfer from your Coinbase Pro trading account. LTC transfers are free and fast.</string>
     <string name="send_warning_2_ltc">Warning: Please double check the destination address before sending. </string>
 
 
+    <string name="verify_email_help">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
 
 
 </resources>

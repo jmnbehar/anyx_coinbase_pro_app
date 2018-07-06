@@ -75,10 +75,10 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_login_new_acccount"
+            android:id="@+id/btn_login_new_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New GDAX account"
+            android:text="@string/login_help_new_account"
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"

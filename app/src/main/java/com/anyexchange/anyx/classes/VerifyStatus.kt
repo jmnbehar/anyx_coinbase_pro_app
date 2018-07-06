@@ -30,13 +30,13 @@ enum class VerificationStatus {
 }
 
 enum class VerificationFundSource {
-    GDAX,
+    Pro,
     Coinbase,
     Buy;
 
     override fun toString(): String {
         return when (this) {
-            GDAX -> "gdax"
+            Pro -> "pro"
             Coinbase -> "coinbase"
             Buy -> "buy"
         }
@@ -45,7 +45,7 @@ enum class VerificationFundSource {
     companion object {
         fun fromString(string: String) : VerificationFundSource? {
             return when (string) {
-                "gdax" -> GDAX
+                "pro" -> Pro
                 "coinbase" -> Coinbase
                 "buy" -> Buy
                 else -> null
