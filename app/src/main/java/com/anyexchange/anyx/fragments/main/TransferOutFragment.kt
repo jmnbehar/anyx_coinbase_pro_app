@@ -37,7 +37,7 @@ class TransferOutFragment : RefreshFragment() {
 
     private lateinit var infoText: TextView
 
-    private lateinit var gdaxBalanceText: TextView
+    private lateinit var cbproBalanceText: TextView
 
     private lateinit var submitWithdrawalButton: Button
 
@@ -66,25 +66,26 @@ class TransferOutFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_transfer_out_coinbase_title
+        titleText = rootView.txt_transfer_out_title
 
-        withdrawDetailsLayout = rootView.layout_transfer_out_coinbase_details
+        withdrawDetailsLayout = rootView.layout_transfer_out_details
 
-        amountLabelText = rootView.txt_transfer_out_coinbase_amount_label
-        amountEditText = rootView.etxt_transfer_out_coinbase_amount
-        amountUnitText = rootView.txt_transfer_out_coinbase_amount_unit
+        amountLabelText = rootView.txt_transfer_out_amount_label
+        amountEditText = rootView.etxt_transfer_out_amount
+        amountUnitText = rootView.txt_transfer_out_amount_unit
 
-        withdrawMaxButton = rootView.btn_transfer_out_coinbase_max
+        withdrawMaxButton = rootView.btn_transfer_out_max
 
-        cbAccountsLabelTxt = rootView.txt_transfer_out_coinbase_account_label
-        cbAccountsSpinner = rootView.spinner_transfer_out_coinbase_accounts
-        cbAccountText = rootView.txt_transfer_out_coinbase_account_info
+        cbAccountsLabelTxt = rootView.txt_transfer_out_account_label
+        cbAccountsSpinner = rootView.spinner_transfer_out_accounts
+        cbAccountText = rootView.txt_transfer_out_account_info
+        cbAccountText = rootView.txt_transfer_out_account_info
 
-        infoText = rootView.txt_transfer_out_coinbase_info
+        infoText = rootView.txt_transfer_out_info
 
-        gdaxBalanceText = rootView.txt_transfer_out_coinbase_gdax_account_info
-        interactiveLayout = rootView.layout_transfer_out_coinbase_amount_layout
-        submitWithdrawalButton = rootView.btn_transfer_out_coinbase_transfer_out
+        cbproBalanceText = rootView.txt_transfer_out_cbpro_account_info
+        interactiveLayout = rootView.layout_transfer_out_amount_layout
+        submitWithdrawalButton = rootView.btn_transfer_out_transfer_out
 
         currencyTabLayout = rootView.tabl_transfer_out_currency
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -123,8 +124,8 @@ class TransferOutFragment : RefreshFragment() {
         }
 
         withdrawMaxButton.setOnClickListener {
-            val gdaxAccount = Account.forCurrency(currency)
-            gdaxAccount?.balance?.let { balance ->
+            val cbproAccount = Account.forCurrency(currency)
+            cbproAccount?.balance?.let { balance ->
                 amountEditText.setText(balance.btcFormatShortened())
             }
         }
@@ -137,13 +138,13 @@ class TransferOutFragment : RefreshFragment() {
                 showPopup("Amount is not valid", { })
             } else if (destinationAccount is Account.CoinbaseAccount) {
                 val coinbaseAccount = destinationAccount as Account.CoinbaseAccount
-                val gdaxAccount = Account.forCurrency(currency)
+                val cbproAccount = Account.forCurrency(currency)
 
-                if (amount > gdaxAccount?.availableBalance ?: 0.0) {
+                if (amount > cbproAccount?.availableBalance ?: 0.0) {
                     showPopup("Not enough funds", { })
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
-                    GdaxApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost({ result ->
+                    CBProApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost({ result ->
                         showPopup("Error: " + result.errorMessage, { })
                         activity.dismissProgressBar()
                     }, {
@@ -159,7 +160,7 @@ class TransferOutFragment : RefreshFragment() {
                     showPopup("Not enough funds", { })
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
-                    GdaxApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { result ->
+                    CBProApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { result ->
                         showPopup("Error: " + result.errorMessage, { })
                         activity.dismissProgressBar()
                     }, {
@@ -188,45 +189,45 @@ class TransferOutFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
-            var didUpdateGDAX = false
+            var didUpdateCBPro = false
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
 
-            GdaxApi.accounts().updateAllAccounts({ result ->
+            CBProApi.accounts().updateAllAccounts({ result ->
                 onComplete(false)
                 toast("Cannot access Coinbase Pro")
                 isRefreshing = false
             }) {
-                didUpdateGDAX = true
+                didUpdateCBPro = true
                 if (didUpdateCoinbase && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             }
-            GdaxApi.coinbaseAccounts().linkToAccounts({ result ->
+            CBProApi.coinbaseAccounts().linkToAccounts({ result ->
                 toast("Cannot access Coinbase")
                 onComplete(false)
                 isRefreshing = false
             }, {
-                val gdaxAccounts = Account.list.toMutableList()
+                val cbproAccounts = Account.list.toMutableList()
                 val fiatAccount = Account.usdAccount
                 if (fiatAccount != null) {
-                    gdaxAccounts.add(fiatAccount)
+                    cbproAccounts.add(fiatAccount)
                 }
-                coinbaseAccounts = gdaxAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
+                coinbaseAccounts = cbproAccounts.mapNotNull { account -> account.coinbaseAccount }.toMutableList()
                 didUpdateCoinbase = true
-                if (didUpdateGDAX && didUpdatePaymentMethods) {
+                if (didUpdateCBPro && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             })
-            GdaxApi.paymentMethods().get({
+            CBProApi.paymentMethods().get({
                 toast("Error")
                 onComplete(false)
             }, { result ->
                 paymentMethods = result
                 didUpdatePaymentMethods = true
-                if (didUpdateGDAX && didUpdateCoinbase) {
+                if (didUpdateCBPro && didUpdateCoinbase) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
@@ -261,7 +262,7 @@ class TransferOutFragment : RefreshFragment() {
                 } else {
                     0.0.btcFormatShortened()
                 }
-                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $cbAccountBalance"
+                cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbAccountBalance"
 
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
@@ -289,23 +290,23 @@ class TransferOutFragment : RefreshFragment() {
             infoText.setText(R.string.transfer_bank_info)
         }
 
-        val gdaxAccount = Account.forCurrency(currency)
-        if ((gdaxAccount?.availableBalance ?: 0.0) > 0.0) {
+        val cbproAccount = Account.forCurrency(currency)
+        if ((cbproAccount?.availableBalance ?: 0.0) > 0.0) {
             interactiveLayout.visibility = View.VISIBLE
         } else {
             interactiveLayout.visibility = View.INVISIBLE
         }
         amountUnitText.text = currency.toString()
-        if ((gdaxAccount?.availableBalance ?: 0.0) > 0) {
+        if ((cbproAccount?.availableBalance ?: 0.0) > 0) {
             if (currency.isFiat) {
-                val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "Available Coinbase Pro $currency Balance: $gdaxAccountBalance"
+                val cbproAccountBalance = (cbproAccount?.availableBalance ?: 0.0).fiatFormat()
+                cbproBalanceText.text = "Available Coinbase Pro $currency Balance: $cbproAccountBalance"
             } else {
-                val gdaxAccountBalance = (gdaxAccount?.availableBalance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "Available Coinbase Pro $currency Balance: $gdaxAccountBalance $currency"
+                val cbproAccountBalance = (cbproAccount?.availableBalance ?: 0.0).btcFormatShortened()
+                cbproBalanceText.text = "Available Coinbase Pro $currency Balance: $cbproAccountBalance $currency"
             }
         } else {
-            gdaxBalanceText.text = "Coinbase Pro $currency wallet is empty"
+            cbproBalanceText.text = "Coinbase Pro $currency wallet is empty"
         }
 
         activity?.let {activity ->

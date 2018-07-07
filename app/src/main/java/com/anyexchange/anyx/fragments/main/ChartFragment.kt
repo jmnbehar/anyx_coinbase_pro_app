@@ -23,7 +23,6 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
-import kotlinx.android.synthetic.main.fragment_accounts.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -124,9 +123,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             buyButton.setOnClickListener {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
-                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
-                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all required permissions.")
                 } else {
                     if (tradeFragment == null) {
@@ -141,9 +140,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             sellButton.setOnClickListener {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
-                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
-                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all required permissions")
                 } else {
                     if (tradeFragment == null) {
@@ -388,7 +387,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             positiveButton("OK") {  }
             negativeButton("Cancel Order") {
-                GdaxApi.cancelOrder(order.id).executeRequest({ }) {
+                CBProApi.cancelOrder(order.id).executeRequest({ }) {
                     var orders = (historyPager.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
                     (historyPager.adapter as HistoryPagerAdapter).orders = orders
@@ -504,7 +503,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val prefs = Prefs(context!!)
         account?. let { account ->
             if (prefs.isLoggedIn) {
-                GdaxApi.account(account.id).executeRequest(onFailure) { result ->
+                CBProApi.account(account.id).executeRequest(onFailure) { result ->
                     val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                     val newBalance = apiAccount.balance.toDoubleOrZero()
                     balanceText.text = newBalance.btcFormat() + " " + account.currency
@@ -517,7 +516,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
-                GdaxApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+                CBProApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
                     prefs.stashOrders(result.value)
                     val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
                     filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
@@ -525,7 +524,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
                     }
                 }
-                GdaxApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                CBProApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
                     prefs.stashFills(result.value)
                     val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                     filteredFills = apiFillList.filter { it.product_id == account.product.id }
@@ -558,7 +557,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
                 candles = account.product.candlesForTimespan(chartTimeSpan)
 
-                GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
                     if (price != null) {

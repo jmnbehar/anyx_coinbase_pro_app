@@ -58,11 +58,11 @@ class VerifySendFragment : Fragment() {
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
             val productId = verifyAccount.product.id
-            GdaxApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
-                    timeInForce = GdaxApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
-                val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+            CBProApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
+                    timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
+                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                 when (errorMessage) {
-                    GdaxApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
+                    CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
                     else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
                 }
             }, { _ ->
@@ -75,24 +75,23 @@ class VerifySendFragment : Fragment() {
     }
 
     private fun sendCryptoToVerify() {
-        GdaxApi.coinbaseAccounts().linkToAccounts({
+        CBProApi.coinbaseAccounts().linkToAccounts({
             toast("Unknown Error: Try again later")
         }, {
-            val gdaxAccount = Account.forCurrency(currency)
-            var coinbaseAccount = gdaxAccount?.coinbaseAccount
+            val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
             if (coinbaseAccount == null) {
                 toast("Unknown Error: Try again later")
             } else {
 
                 val sendAmount = 0.000001
-                GdaxApi.sendCrypto(sendAmount, currency, currency.verificationAddress).executePost({ result ->
-                    val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+                CBProApi.sendCrypto(sendAmount, currency, currency.verificationAddress).executePost({ result ->
+                    val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {
-                        GdaxApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
-                        GdaxApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
-                        GdaxApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.Success)
-                        GdaxApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
+                        CBProApi.ErrorMessage.TransferAmountTooLow -> goToVerificationComplete(VerificationStatus.Success)
+                        CBProApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
+                        CBProApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.Success)
+                        CBProApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
                         else -> goToVerificationComplete(VerificationStatus.UnknownError)
                     }
                 }, {
@@ -105,7 +104,7 @@ class VerifySendFragment : Fragment() {
     }
     private fun goToVerificationComplete(verificationStatus: VerificationStatus) {
         val prefs = Prefs(context!!)
-        val apiKey = GdaxApi.credentials!!.apiKey
+        val apiKey = CBProApi.credentials!!.apiKey
         if (verificationStatus.isVerified) {
             prefs.approveApiKey(apiKey)
         } else {

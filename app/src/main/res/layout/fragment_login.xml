@@ -14,6 +14,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="12dp"
         android:text="@string/login_fragment_title"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="48dp"
@@ -33,9 +34,9 @@
         android:layout_height="wrap_content"
         android:hint="@string/login_api_secret_label"
         android:inputType="textMultiLine"
-        android:maxLines ="6"
-        android:minLines="4"
-        android:lines="4"
+        android:lines="2"
+        android:maxLines="6"
+        android:minLines="2"
         android:singleLine="false" />
 
     <EditText

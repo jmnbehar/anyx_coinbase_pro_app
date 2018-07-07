@@ -50,7 +50,7 @@
             android:visibility="gone" />
 
         <Button
-            android:id="@+id/btn_setting_show_gdax_eula"
+            android:id="@+id/btn_setting_show_cbpro_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/settings_coinbase_pro_eula" />

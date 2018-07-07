@@ -13,7 +13,7 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.GdaxApi.ErrorMessage
+import com.anyexchange.anyx.classes.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
@@ -198,7 +198,7 @@ class TradeFragment : RefreshFragment() {
             var amount = amountEditText.text.toString().toDoubleOrZero()
             val limit = limitEditText.text.toString().toDoubleOrZero()
 
-            var timeInForce: GdaxApi.TimeInForce? = null
+            var timeInForce: CBProApi.TimeInForce? = null
             var cancelAfter: String? = null
 
             val cryptoTotal = totalInCrypto(amount, limit)
@@ -230,8 +230,8 @@ class TradeFragment : RefreshFragment() {
                 when (tradeType) {
                     TradeType.LIMIT -> {
                         val tifIndex = advancedOptionTimeInForceSpinner.selectedItemPosition
-                        timeInForce = GdaxApi.TimeInForce.values()[tifIndex]
-                        if (timeInForce == GdaxApi.TimeInForce.GoodTilTime) {
+                        timeInForce = CBProApi.TimeInForce.values()[tifIndex]
+                        if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
                             cancelAfter = advancedOptionEndTimeSpinner.selectedItem as String
                         }
                     }
@@ -249,7 +249,7 @@ class TradeFragment : RefreshFragment() {
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
                     account?.let { account ->
-                        GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                        CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                             val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                             val price = ticker.price.toDoubleOrNull()
                             if (price != null) {
@@ -295,7 +295,7 @@ class TradeFragment : RefreshFragment() {
             onComplete(false)
         }
         account?.let { account ->
-            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                 val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                 val price = ticker.price.toDoubleOrNull()
                 if (price != null) {
@@ -336,7 +336,7 @@ class TradeFragment : RefreshFragment() {
         switchTradeType()
     }
 
-    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce?, cancelAfter: String?,
+    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         val currencyString = account?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
@@ -370,7 +370,7 @@ class TradeFragment : RefreshFragment() {
         }.show()
     }
 
-    private fun tradeAmountSizeError(errorMessage: GdaxApi.ErrorMessage) : String {
+    private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         var currency: Currency = when (errorMessage) {
             ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
             ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
@@ -402,9 +402,9 @@ class TradeFragment : RefreshFragment() {
         }
     }
 
-    private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: GdaxApi.TimeInForce? = null, cancelAfter: String?) {
+    private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: CBProApi.TimeInForce? = null, cancelAfter: String?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
-            val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+            val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
             when (errorMessage) {
                 ErrorMessage.BuyAmountTooSmallBtc,
                 ErrorMessage.BuyAmountTooSmallEth,
@@ -444,18 +444,18 @@ class TradeFragment : RefreshFragment() {
             when(tradeType) {
                 TradeType.MARKET -> {
                     when (tradeSide) {
-                        TradeSide.BUY ->  GdaxApi.orderMarket(tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> GdaxApi.orderMarket(tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderMarket(tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderMarket(tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
                 TradeType.LIMIT -> {
-                    GdaxApi.orderLimit(tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
+                    CBProApi.orderLimit(tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
                 }
                 TradeType.STOP -> {
                     val stopPrice = limitPrice
                     when (tradeSide) {
-                        TradeSide.BUY ->  GdaxApi.orderStop(tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> GdaxApi.orderStop(tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderStop(tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderStop(tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
             }
@@ -473,7 +473,7 @@ class TradeFragment : RefreshFragment() {
 //        }
         account?.currency?.let { currency ->
             val destination = currency.developerAddress
-            GdaxApi.sendCrypto(amount, currency, destination).executePost(
+            CBProApi.sendCrypto(amount, currency, destination).executePost(
                     { _ ->
                         /*  fail silently   */
                         println("failure")
@@ -559,9 +559,9 @@ class TradeFragment : RefreshFragment() {
                 }
             }
         }
-        val gdaxFee = amount * (account?.currency?.feePercentage ?: 0.005)
+        val cbproFee = amount * (account?.currency?.feePercentage ?: 0.005)
         val devFee  = amount * DEV_FEE_PERCENTAGE
-        return (devFee + gdaxFee)
+        return (devFee + cbproFee)
     }
 
 
@@ -598,7 +598,7 @@ class TradeFragment : RefreshFragment() {
                 advancedOptionsLimitLayout.visibility = View.VISIBLE
                 advancedOptionsCheckBox.visibility = View.VISIBLE
 
-                val timeInForceList = GdaxApi.TimeInForce.values()
+                val timeInForceList = CBProApi.TimeInForce.values()
                 val spinnerList = timeInForceList.map { t -> t.label() }
                 //TODO: don't use simple_spinner_item
                 val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
@@ -607,7 +607,7 @@ class TradeFragment : RefreshFragment() {
                 advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                         val selectedItem = timeInForceList[position]
-                        if (selectedItem == GdaxApi.TimeInForce.GoodTilTime) {
+                        if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
                             advancedOptionEndTimeSpinner.visibility = View.VISIBLE
                         } else {
                             advancedOptionEndTimeSpinner.visibility = View.INVISIBLE

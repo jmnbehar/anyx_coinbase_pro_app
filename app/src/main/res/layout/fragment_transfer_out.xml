@@ -18,7 +18,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txt_transfer_out_coinbase_title"
+                android:id="@+id/txt_transfer_out_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
@@ -68,7 +68,7 @@
             </android.support.design.widget.TabLayout>
 
             <LinearLayout
-                android:id="@+id/layout_transfer_out_coinbase_details"
+                android:id="@+id/layout_transfer_out_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -78,7 +78,7 @@
                 android:paddingTop="10dp">
 
                 <LinearLayout
-                    android:id="@+id/txt_transfer_out_coinbase_destination"
+                    android:id="@+id/txt_transfer_out_destination"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
@@ -86,13 +86,13 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_source_label"
+                        android:id="@+id/txt_transfer_out_source_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/transfer_source" />
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_gdax_account_info"
+                        android:id="@+id/txt_transfer_out_cbpro_account_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
@@ -101,13 +101,13 @@
                         android:textSize="17sp" />
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_account_label"
+                        android:id="@+id/txt_transfer_out_account_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/transfer_destination" />
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_account_info"
+                        android:id="@+id/txt_transfer_out_account_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
@@ -116,7 +116,7 @@
                         android:textSize="17sp" />
 
                     <Spinner
-                        android:id="@+id/spinner_transfer_out_coinbase_accounts"
+                        android:id="@+id/spinner_transfer_out_accounts"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginBottom="5dp"
@@ -127,7 +127,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/layout_transfer_out_coinbase_amount_layout"
+                    android:id="@+id/layout_transfer_out_amount_layout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="5dp"
@@ -135,7 +135,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_amount_label"
+                        android:id="@+id/txt_transfer_out_amount_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/transfer_amount" />
@@ -146,21 +146,21 @@
                         android:orientation="horizontal">
 
                         <EditText
-                            android:id="@+id/etxt_transfer_out_coinbase_amount"
+                            android:id="@+id/etxt_transfer_out_amount"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="20"
                             android:inputType="numberDecimal" />
 
                         <TextView
-                            android:id="@+id/txt_transfer_out_coinbase_amount_unit"
+                            android:id="@+id/txt_transfer_out_amount_unit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/currency_BTC" />
 
                         <Button
-                            android:id="@+id/btn_transfer_out_coinbase_max"
+                            android:id="@+id/btn_transfer_out_max"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
@@ -169,14 +169,14 @@
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/txt_transfer_out_coinbase_info"
+                        android:id="@+id/txt_transfer_out_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text=""
                         android:textSize="18sp" />
 
                     <Button
-                        android:id="@+id/btn_transfer_out_coinbase_transfer_out"
+                        android:id="@+id/btn_transfer_out_transfer_out"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"

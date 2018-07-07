@@ -39,7 +39,7 @@ class TransferInFragment : RefreshFragment() {
     private lateinit var amountUnitText: TextView
 
     private lateinit var infoText: TextView
-    private lateinit var gdaxBalanceText: TextView
+    private lateinit var cbproBalanceText: TextView
 
     private lateinit var submitDepositButton: Button
 
@@ -64,27 +64,27 @@ class TransferInFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_transfer_in_coinbase_title
+        titleText = rootView.txt_transfer_in_title
 
-        depositDetailsLayout = rootView.layout_transfer_in_coinbase_details
+        depositDetailsLayout = rootView.layout_transfer_in_details
         interactiveLayout = rootView.layout_transfer_in_interactive_layout
 
         currencyTabLayout = rootView.tabl_transfer_in_currency
 
-        amountLabelText = rootView.txt_transfer_in_coinbase_amount_label
-        amountEditText = rootView.etxt_transfer_in_coinbase_amount
-        amountUnitText = rootView.txt_transfer_in_coinbase_amount_unit
+        amountLabelText = rootView.txt_transfer_in_amount_label
+        amountEditText = rootView.etxt_transfer_in_amount
+        amountUnitText = rootView.txt_transfer_in_amount_unit
 
-        depositMaxButton = rootView.btn_transfer_in_coinbase_max
+        depositMaxButton = rootView.btn_transfer_in_max
 
-        cbAccountsLabelTxt = rootView.txt_transfer_in_coinbase_account_label
-        cbAccountsSpinner = rootView.spinner_transfer_in_coinbase_accounts
-        cbAccountText = rootView.txt_transfer_in_coinbase_account_info
+        cbAccountsLabelTxt = rootView.txt_transfer_in_account_label
+        cbAccountsSpinner = rootView.spinner_transfer_in_accounts
+        cbAccountText = rootView.txt_transfer_in_account_info
 
-        infoText = rootView.txt_transfer_in_coinbase_info
-        gdaxBalanceText = rootView.txt_transfer_in_coinbase_gdax_account_info
+        infoText = rootView.txt_transfer_in_info
+        cbproBalanceText = rootView.txt_transfer_in_cbpro_account_info
 
-        submitDepositButton = rootView.btn_transfer_in_coinbase_transfer_in
+        submitDepositButton = rootView.btn_transfer_in_transfer_in
 
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -140,9 +140,9 @@ class TransferInFragment : RefreshFragment() {
                     showPopup("Not enough funds", { })
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
-                    GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
-                        val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
-                        if (amount > 0 && errorMessage == GdaxApi.ErrorMessage.TransferAmountTooLow) {
+                    CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                        if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
                             showPopup("Error: Amount too low", { })
                         } else {
                             showPopup("Error: " + result.errorMessage, { })
@@ -161,7 +161,7 @@ class TransferInFragment : RefreshFragment() {
                     showPopup("Not enough funds", { })
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
-                    GdaxApi.getFromPayment(amount, currency, paymentMethod.id).executePost( { result ->
+                    CBProApi.getFromPayment(amount, currency, paymentMethod.id).executePost( { result ->
                         showPopup("Error: " + result.errorMessage, { })
                         activity.dismissProgressBar()
                     } , {
@@ -208,21 +208,21 @@ class TransferInFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
-            var didUpdateGDAX = false
+            var didUpdateCBPro = false
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
-            GdaxApi.accounts().updateAllAccounts({
+            CBProApi.accounts().updateAllAccounts({
                 toast("Cannot access Coinbase Pro")
                 isRefreshing = false
                 onComplete(false)
             }) {
-                didUpdateGDAX = true
+                didUpdateCBPro = true
                 if (didUpdateCoinbase && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             }
-            GdaxApi.coinbaseAccounts().linkToAccounts({
+            CBProApi.coinbaseAccounts().linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
                 onComplete(false)
@@ -234,18 +234,18 @@ class TransferInFragment : RefreshFragment() {
                 }
                 coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
                 didUpdateCoinbase = true
-                if (didUpdateGDAX && didUpdatePaymentMethods) {
+                if (didUpdateCBPro && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             })
-            GdaxApi.paymentMethods().get({
+            CBProApi.paymentMethods().get({
                 paymentMethods = listOf()
                 onComplete(false)
             }, { result ->
                 paymentMethods = result
                 didUpdatePaymentMethods = true
-                if (didUpdateGDAX && didUpdateCoinbase) {
+                if (didUpdateCBPro && didUpdateCoinbase) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
@@ -319,19 +319,19 @@ class TransferInFragment : RefreshFragment() {
             val tabAccentColor = currency.colorAccent(activity)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-            updateGdaxAccountText()
+            updateCBProAccountText()
         }
     }
 
-    private fun updateGdaxAccountText() {
-        val gdaxAccount = Account.forCurrency(currency)
+    private fun updateCBProAccountText() {
+        val cbproAccount = Account.forCurrency(currency)
         amountUnitText.text = currency.toString()
 
-        val gdaxAccountBalanceString = if (currency.isFiat) {
-            "${(gdaxAccount?.balance ?: 0.0).fiatFormat()} $currency"
+        val cbproAccountBalanceString = if (currency.isFiat) {
+            "${(cbproAccount?.balance ?: 0.0).fiatFormat()} $currency"
         } else {
-            "${(gdaxAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
+            "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
-        gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalanceString"
+        cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 }

@@ -75,10 +75,6 @@ class SendFragment : RefreshFragment() {
         destinationLabelText = rootView.txt_send_destination_label
         destinationEditText = rootView.etxt_send_destination
 
-        twoFactorLabelText = rootView.txt_send_two_factor_label
-        twoFactorEditText = rootView.etxt_send_two_factor
-        twoFactorButton = rootView.btn_send_two_factor
-
         scanButton = rootView.btn_send_destination_camera
 
         warning1TextView = rootView.txt_send_warning
@@ -149,7 +145,7 @@ class SendFragment : RefreshFragment() {
         val min = currency.minSendAmount
 
         if (amount >= min) {
-            GdaxApi.sendCrypto(amount, currency, destination).executePost(
+            CBProApi.sendCrypto(amount, currency, destination).executePost(
                     { result -> //failure
                         val response = result.error.response.data
 
@@ -165,7 +161,7 @@ class SendFragment : RefreshFragment() {
                         responseDataStr = responseDataStr.removeSuffix("\"}")
                         val errorString = when(responseDataStr) {
                             "invalid crypto_address" -> "Error: Invalid $currency address"
-                            else -> GdaxApi.defaultPostFailure(result)
+                            else -> CBProApi.defaultPostFailure(result)
                         }
                         toast (errorString)
                     },
@@ -248,6 +244,7 @@ class SendFragment : RefreshFragment() {
                     warning1TextView.setText(R.string.send_warning_1_ltc)
                     warning2TextView.setText(R.string.send_warning_2_ltc)
                 }
+                Currency.USD -> { /* how tho */ }
             }
         }
     }

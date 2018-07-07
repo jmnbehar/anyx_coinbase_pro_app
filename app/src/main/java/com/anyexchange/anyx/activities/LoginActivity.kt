@@ -37,14 +37,14 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val apiSecret = prefs.apiSecret
             var passphrase = prefs.passphrase
 
-            val salt = "GdaxApp"
+            val salt = "GdaxApp"    //Do not rename
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(passphrase, salt, iv)
 
             passphrase = encryption.decryptOrNull(passphrase)
             if((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
                 val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                var apiCredentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                var apiCredentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 loginWithCredentials(apiCredentials)
                 return true
             }
@@ -124,24 +124,24 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
-    fun loginWithCredentials(credentials: GdaxApi.ApiCredentials?) {
-        GdaxApi.credentials = credentials
+    fun loginWithCredentials(credentials: CBProApi.ApiCredentials?) {
+        CBProApi.credentials = credentials
         progressDialog?.show()
-        GdaxApi.accounts().getAllAccountInfo(this, { result ->
-            val errorMessage = GdaxApi.ErrorMessage.forString(result.errorMessage)
+        CBProApi.accounts().getAllAccountInfo(this, { result ->
+            val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
             when (errorMessage) {
-                GdaxApi.ErrorMessage.Forbidden -> {
+                CBProApi.ErrorMessage.Forbidden -> {
                     //TODO: show popup instead of toast
                     toast("Error: Forbidden" +
                             "\nMake sure your API Key has all required permissions")
                 }
-                GdaxApi.ErrorMessage.InvalidApiKey-> {
+                CBProApi.ErrorMessage.InvalidApiKey-> {
                     toast("Error: ${result.errorMessage}")
                 }
-                GdaxApi.ErrorMessage.InvalidApiSignature, GdaxApi.ErrorMessage.MissingApiSignature-> {
+                CBProApi.ErrorMessage.InvalidApiSignature, CBProApi.ErrorMessage.MissingApiSignature-> {
                     toast("Error: Invalid API Secret")
                 }
-                GdaxApi.ErrorMessage.InvalidPassphrase -> {
+                CBProApi.ErrorMessage.InvalidPassphrase -> {
                     toast("Error: ${result.errorMessage}")
                 }
                 else -> toast("Error: ${result.errorMessage}")

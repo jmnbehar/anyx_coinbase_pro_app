@@ -87,7 +87,7 @@ class MarketFragment : RefreshFragment() {
                         onComplete(true)
                     }
                 } else {
-                    GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                    CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                         val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                         val price = ticker.price.toDoubleOrNull()
                         if (price != null) {

@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         dataFragment?.restoreData(this)
         if (Account.usdAccount == null) {
-            GdaxApi.accounts().getAllAccountInfo(this, { }, { })
+            CBProApi.accounts().getAllAccountInfo(this, { }, { })
         }
 
         toolbar.setNavigationOnClickListener {
@@ -248,9 +248,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val passphrase = encryption.decryptOrNull(passphraseEncrypted)
         if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
             val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-            GdaxApi.credentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
             showProgressBar()
-            GdaxApi.accounts().getAllAccountInfo(this, { _ ->
+            CBProApi.accounts().getAllAccountInfo(this, { _ ->
                 toast("Error!")
                 dismissProgressBar()
                 returnToLogin()
@@ -313,7 +313,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
-            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                 val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                 val price = ticker.price.toDoubleOrNull()
                 if (price != null) {
@@ -454,7 +454,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     //do nothing
                     toast("Please log in")
                     null
-                } else if (GdaxApi.credentials?.isValidated != true) {
+                } else if (CBProApi.credentials?.isValidated != true) {
                     //do nothing
                     toast("Please validate your account in Settings to send crypto assets")
                     null
@@ -466,9 +466,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRANSFER_IN -> {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
-                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
-                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()
@@ -488,9 +488,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRANSFER_OUT -> {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
-                } else if (GdaxApi.credentials?.isValidated == null) { //(GdaxApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
                     toast("Please validate your account in Settings")
-                } else if (GdaxApi.credentials?.isValidated == false) { // (GdaxApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
                     toast("Please use an API Key with all permissions.")
                 } else {
                     showProgressBar()

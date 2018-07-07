@@ -9,7 +9,7 @@ import com.google.gson.reflect.TypeToken
  * Created by josephbehar on 12/28/17.
  */
 
-private const val FILE_NAME = "com.anyexchange.gdax.prefs"
+private const val FILE_NAME = "com.anyexchange.gdax.prefs"  //do not rename
 private const val PASSPHRASE = "passphrase"
 private const val API_KEY = "api_key"
 private const val API_SECRET = "api_secret"
@@ -213,16 +213,16 @@ class Prefs (var context: Context) {
         val apiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(APPROVED_API_KEYS, apiKeys).apply()
-        if (GdaxApi.credentials?.apiKey == apiKey) {
-            GdaxApi.credentials?.isValidated = true
+        if (CBProApi.credentials?.apiKey == apiKey) {
+            CBProApi.credentials?.isValidated = true
         }
     }
     fun rejectApiKey(apiKey: String) {
         val apiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(REJECTED_API_KEYS, apiKeys).apply()
-        if (GdaxApi.credentials?.apiKey == apiKey) {
-            GdaxApi.credentials?.isValidated = false
+        if (CBProApi.credentials?.apiKey == apiKey) {
+            CBProApi.credentials?.isValidated = false
         }
     }
 

@@ -21,26 +21,26 @@ import javax.crypto.spec.SecretKeySpec
  * Created by anyexchange on 12/18/2017.
  */
 
-sealed class GdaxApi: FuelRouting {
+sealed class CBProApi : FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
 
     companion object {
         //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
 
-        const val basePath = "https://api.gdax.com"
+        const val basePath = "https://api.pro.coinbase.com"
 
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
-            val errorCode = GdaxApi.ErrorCode.withCode(result.error.response.statusCode)
+            val errorCode = CBProApi.ErrorCode.withCode(result.error.response.statusCode)
 
             return when (errorCode) {
-                GdaxApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
-                GdaxApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
-                GdaxApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
-                GdaxApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
-                GdaxApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
-                GdaxApi.ErrorCode.ServerError -> { "Sorry, Coinbase Pro Servers are encountering problems right now" }
-                GdaxApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
+                CBProApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
+                CBProApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
+                CBProApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
+                CBProApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
+                CBProApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
+                CBProApi.ErrorCode.ServerError -> { "Sorry, Coinbase Pro Servers are encountering problems right now" }
+                CBProApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
                 else -> ""
             }
         }
@@ -124,7 +124,7 @@ sealed class GdaxApi: FuelRouting {
                 }
     }
 
-    class candles(val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : GdaxApi() {
+    class candles(val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : CBProApi() {
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var currentTimespan: Long
             var coveredTimespan: Long
@@ -147,7 +147,7 @@ sealed class GdaxApi: FuelRouting {
                     remainingTimespan = 0
                 }
 
-                GdaxApi.candles(productId, currentTimespan, granularity, coveredTimespan).executeRequest(onFailure) { result ->
+                CBProApi.candles(productId, currentTimespan, granularity, coveredTimespan).executeRequest(onFailure) { result ->
                     pagesReceived ++
                     val gson = Gson()
                     val apiCandles = result.value
@@ -189,7 +189,7 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
-    class accounts() : GdaxApi() {
+    class accounts() : CBProApi() {
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
             var prefs = Prefs(context)
@@ -201,7 +201,7 @@ sealed class GdaxApi: FuelRouting {
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    GdaxApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
+                    CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
@@ -211,14 +211,14 @@ sealed class GdaxApi: FuelRouting {
                     })
                 }
             } else {
-                GdaxApi.products().executeRequest(onFailure = onFailure) { result ->
+                CBProApi.products().executeRequest(onFailure = onFailure) { result ->
                     val gson = Gson()
                     val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     val apiProductList = unfilteredApiProductList.filter { s ->
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        GdaxApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
+                        CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
@@ -245,7 +245,7 @@ sealed class GdaxApi: FuelRouting {
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            if (GdaxApi.credentials == null) {
+            if (CBProApi.credentials == null) {
                 for (product in productList) {
                     val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
                     Account.list.add(Account(product, apiAccount))
@@ -273,7 +273,7 @@ sealed class GdaxApi: FuelRouting {
 
     }
 
-    class account(val accountId: String) : GdaxApi() {
+    class account(val accountId: String) : CBProApi() {
         val gson = Gson()
         fun updateAccount(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             this.executeRequest(onFailure) { result ->
@@ -285,20 +285,20 @@ sealed class GdaxApi: FuelRouting {
         }
     }
 
-    class accountHistory(val accountId: String) : GdaxApi()
-    class products() : GdaxApi()
-    class ticker(val productId: String) : GdaxApi()
-    class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : GdaxApi()
-    class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : GdaxApi()
-    class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : GdaxApi()
-    class cancelOrder(val orderId: String) : GdaxApi()
-    class cancelAllOrders() : GdaxApi()
-    class listOrders(val status: String = "all", val productId: String?) : GdaxApi()
-    class getOrder(val orderId: String) : GdaxApi()
-    class fills(val orderId: String = "all", val productId: String = "all") : GdaxApi()
+    class accountHistory(val accountId: String) : CBProApi()
+    class products() : CBProApi()
+    class ticker(val productId: String) : CBProApi()
+    class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : CBProApi()
+    class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : CBProApi()
+    class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi()
+    class cancelOrder(val orderId: String) : CBProApi()
+    class cancelAllOrders() : CBProApi()
+    class listOrders(val status: String = "all", val productId: String?) : CBProApi()
+    class getOrder(val orderId: String) : CBProApi()
+    class fills(val orderId: String = "all", val productId: String = "all") : CBProApi()
     //add position?
-    class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : GdaxApi()
-    class coinbaseAccounts() : GdaxApi() {
+    class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi()
+    class coinbaseAccounts() : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiCBAccountString = result.value
@@ -320,7 +320,7 @@ sealed class GdaxApi: FuelRouting {
             }
         }
     }
-    class paymentMethods() : GdaxApi() {
+    class paymentMethods() : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiPaymentMethodsString = result.value
@@ -331,11 +331,11 @@ sealed class GdaxApi: FuelRouting {
             }
         }
     }
-    class getFromCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
-    class getFromPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
-    class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : GdaxApi()
-    class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : GdaxApi()
-    class createReport(val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : GdaxApi() {
+    class getFromCoinbase(val amount: Double, val currency: Currency, val accountId: String) : CBProApi()
+    class getFromPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi()
+    class sendToCoinbase(val amount: Double, val currency: Currency, val accountId: String) : CBProApi()
+    class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi()
+    class createReport(val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : CBProApi() {
         fun createAndGetInfo(onComplete: (Boolean) -> Unit) {
             this.executePost({ result ->
                 println(result)
@@ -348,7 +348,7 @@ sealed class GdaxApi: FuelRouting {
                     ""
                 }
                 val apiReportInfo: ApiReportInfo = Gson().fromJson(responseString, object : TypeToken<ApiReportInfo>() {}.type)
-                GdaxApi.getReport(apiReportInfo.id).executeRequest({ result ->
+                CBProApi.getReport(apiReportInfo.id).executeRequest({ result ->
                     println(result)
                 }, { result ->
                     println(result.value)
@@ -356,7 +356,7 @@ sealed class GdaxApi: FuelRouting {
             })
         }
     }
-    class getReport(val reportId: String) : GdaxApi()
+    class getReport(val reportId: String) : CBProApi()
     //add deposits
     //look into reports
 
@@ -575,8 +575,8 @@ sealed class GdaxApi: FuelRouting {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
             if (credentials != null) {
-                var timestamp = (Date().timeInSeconds()).toString()
-                var message = timestamp + method + path + body
+                val timestamp = (Date().timeInSeconds()).toString()
+                val message = timestamp + method + path + body
                 println("timestamp:")
                 println(timestamp)
 
@@ -687,7 +687,7 @@ sealed class GdaxApi: FuelRouting {
 
         companion object {
             fun forString(string: String) : ErrorMessage? {
-                var errorMessage = ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
+                val errorMessage = ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
                 if (errorMessage == null) {
                     if (string.contains("is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
                         return TransferAmountTooLow

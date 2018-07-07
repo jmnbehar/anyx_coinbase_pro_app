@@ -12,7 +12,7 @@ enum class VerificationStatus {
     NoTradePermission,
     NoViewPermission,
     NoPaymentMethods,
-    GdaxError,
+    CBProError,
     UnknownError;
 
     val isVerified: Boolean
@@ -23,7 +23,7 @@ enum class VerificationStatus {
                 VerificationStatus.NoTradePermission     -> false
                 VerificationStatus.NoViewPermission      -> false
                 VerificationStatus.NoPaymentMethods      -> false
-                VerificationStatus.GdaxError             -> false
+                VerificationStatus.CBProError            -> false
                 VerificationStatus.UnknownError          -> false
             }
 

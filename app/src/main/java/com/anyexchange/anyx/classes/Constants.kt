@@ -7,8 +7,7 @@ package com.anyexchange.anyx.classes
 object Constants {
     const val exit = "EXIT"
     const val logout = "LOGOUT"
-    const val alertChannelId = "com.anyexchange.gdax.alerts"
-    const val salt = "GdaxApp"
+    const val salt = "GdaxApp"  //DO NOT RENAME
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
 
     const val dataFragmentTag = "data"

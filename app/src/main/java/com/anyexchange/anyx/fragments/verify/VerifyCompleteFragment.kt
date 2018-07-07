@@ -75,7 +75,7 @@ class VerifyCompleteFragment : Fragment() {
             VerificationStatus.NoTradePermission -> missingPermissionString("Trade")
             VerificationStatus.NoViewPermission -> missingPermissionString("View")
             VerificationStatus.NoPaymentMethods -> "Could not verify at this time because your account is unfunded. \n\nPlease add funds and try again."
-            VerificationStatus.GdaxError -> "An unknown error occurred. Try again later."
+            VerificationStatus.CBProError -> "An unknown error occurred. Try again later."
             VerificationStatus.UnknownError -> "An unknown error occurred. Try again later."
         }
     }

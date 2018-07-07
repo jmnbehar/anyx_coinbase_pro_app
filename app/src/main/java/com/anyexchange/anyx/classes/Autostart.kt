@@ -101,7 +101,7 @@ class RapidMovementJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (Account.list.isEmpty()) {
-            GdaxApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
+            CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
                 checkPriceChanges()
             })
         } else {
@@ -193,7 +193,7 @@ class AlertJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (Account.list.isEmpty()) {
-            GdaxApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
+            CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
                 loopThroughAlerts()
             })
         } else {
@@ -218,7 +218,7 @@ class AlertJobService : JobService() {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
-            GdaxApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                 val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                 val price = ticker.price.toDoubleOrNull()
                 if (price != null) {

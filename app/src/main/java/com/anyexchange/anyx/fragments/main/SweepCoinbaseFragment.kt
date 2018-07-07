@@ -32,7 +32,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
     private lateinit var amountUnitText: TextView
 
     private lateinit var infoText: TextView
-    private lateinit var gdaxBalanceText: TextView
+    private lateinit var cbproBalanceText: TextView
 
     private lateinit var submitDepositButton: Button
 
@@ -83,7 +83,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                 amountUnitText.text = currency.toString()
             }
         }
-        updateGdaxAccountText()
+        updateCBProAccountText()
 
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -133,7 +133,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                         showPopup("Not enough funds", { })
                     } else {
                         (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
-                        GdaxApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                             showPopup("Transfer failed\n Error: ${result.error.message}", { })
                             activity.dismissProgressBar()
                         } , {
@@ -155,25 +155,25 @@ class SweepCoinbaseFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         if (!isRefreshing) {
             isRefreshing = true
-            var didUpdateGDAX = false
+            var didUpdateCBPro = false
             var didUpdateCoinbase = false
-            GdaxApi.accounts().updateAllAccounts({
+            CBProApi.accounts().updateAllAccounts({
                 onComplete(false)
                 toast("Cannot access Coinbase Pro")
                 isRefreshing = false
             }) {
-                didUpdateGDAX = true
+                didUpdateCBPro = true
                 if (didUpdateCoinbase) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
             }
-            GdaxApi.coinbaseAccounts().linkToAccounts({
+            CBProApi.coinbaseAccounts().linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
             }, {
                 didUpdateCoinbase = true
-                if (didUpdateGDAX) {
+                if (didUpdateCBPro) {
                     completeRefresh(onComplete)
                     isRefreshing = false
                 }
@@ -210,24 +210,24 @@ class SweepCoinbaseFragment : RefreshFragment() {
             if (coinbaseAccount != null) {
                 val currency = coinbaseAccount.currency
                 amountUnitText.text = currency.toString()
-                updateGdaxAccountText()
+                updateCBProAccountText()
             }
         }
         onComplete(true)
     }
 
-    private fun updateGdaxAccountText() {
+    private fun updateCBProAccountText() {
         val coinbaseAccount = coinbaseAccount
         if (coinbaseAccount != null) {
             val currency = coinbaseAccount.currency
-            val gdaxAccount = Account.forCurrency(currency)
+            val cbproAccount = Account.forCurrency(currency)
             amountUnitText.text = currency.toString()
             if (currency.isFiat) {
-                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).fiatFormat()
-                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalance"
+                val cbproAccountBalance = (cbproAccount?.balance ?: 0.0).fiatFormat()
+                cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbproAccountBalance"
             } else {
-                val gdaxAccountBalance = (gdaxAccount?.balance ?: 0.0).btcFormatShortened()
-                gdaxBalanceText.text = "Coinbase Pro $currency Balance: $gdaxAccountBalance $currency"
+                val cbproAccountBalance = (cbproAccount?.balance ?: 0.0).btcFormatShortened()
+                cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbproAccountBalance $currency"
             }
         }
     }

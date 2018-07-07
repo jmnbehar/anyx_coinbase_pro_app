@@ -187,7 +187,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
-            GdaxApi.accounts().updateAllAccounts({ onComplete(false) }) {
+            CBProApi.accounts().updateAllAccounts({ onComplete(false) }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
 
                 accountTotalCandles = sumAccountCandles()

@@ -101,7 +101,7 @@ class LoginFragment : Fragment()  {
         }
 
         btnNewAccount.setOnClickListener { _ ->
-            val newAccountUrl = "https://www.gdax.com"
+            val newAccountUrl = "https://pro.coinbase.com"
             (activity as com.anyexchange.anyx.activities.LoginActivity).goToFragment(com.anyexchange.anyx.activities.LoginActivity.LoginFragmentType.WebView, newAccountUrl)
         }
 
@@ -175,7 +175,7 @@ class LoginFragment : Fragment()  {
             toast(R.string.login_error_missing_passphrase)
         } else {
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
-            (activity as com.anyexchange.anyx.activities.LoginActivity).loginWithCredentials(GdaxApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
+            (activity as com.anyexchange.anyx.activities.LoginActivity).loginWithCredentials(CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
         }
     }
 }

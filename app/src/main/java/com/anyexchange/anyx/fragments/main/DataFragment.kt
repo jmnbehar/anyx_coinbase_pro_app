@@ -17,7 +17,7 @@ class DataFragment : Fragment() {
         }
     }
 
-    private var backupCredentials: GdaxApi.ApiCredentials? = null
+    private var backupCredentials: CBProApi.ApiCredentials? = null
     private var backupAccountList: MutableList<Account> = mutableListOf()
     private var backupFiatAccount: Account? = null
 
@@ -28,8 +28,8 @@ class DataFragment : Fragment() {
     }
 
     fun backupData() {
-        if (GdaxApi.credentials != null) {
-            backupCredentials = GdaxApi.credentials
+        if (CBProApi.credentials != null) {
+            backupCredentials = CBProApi.credentials
         }   //TODO: wipe this backup on log out
 
         backupAccountList = Account.list
@@ -42,9 +42,9 @@ class DataFragment : Fragment() {
 
     fun restoreData(context: Context) {
         val prefs = Prefs(context)
-        if ( GdaxApi.credentials == null || GdaxApi.credentials?.apiKey?.isEmpty() == true) {
+        if ( CBProApi.credentials == null || CBProApi.credentials?.apiKey?.isEmpty() == true) {
             if (backupCredentials != null) {
-                GdaxApi.credentials = backupCredentials
+                CBProApi.credentials = backupCredentials
             } else {
                 val apiKey = prefs.apiKey
                 val apiSecret = prefs.apiSecret
@@ -54,8 +54,8 @@ class DataFragment : Fragment() {
                 val passphrase = encryption.decryptOrNull(passphraseEncrypted)
                 if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
                     val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                    backupCredentials = GdaxApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-                    GdaxApi.credentials = backupCredentials
+                    backupCredentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                    CBProApi.credentials = backupCredentials
                 }
             }
         }

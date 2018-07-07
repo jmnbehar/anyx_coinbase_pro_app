@@ -34,7 +34,7 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
     var coinbaseAccount: CoinbaseAccount? = null
 
     fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        GdaxApi.account(id).executeRequest(onFailure) { result ->
+        CBProApi.account(id).executeRequest(onFailure) { result ->
             val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
             this.apiAccount = apiAccount
             onComplete()

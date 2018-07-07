@@ -10,7 +10,7 @@
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
 
-    <string name="login_fragment_title">Login with Coinbase Pro Api Key</string>
+    <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
     <string name="login_api_key_label">Api Key</string>
     <string name="login_api_secret_label">Api Secret</string>
     <string name="login_passphrase_label">Passphrase</string>
@@ -27,7 +27,7 @@
     <string name="login_error_missing_passphrase">Missing Passphrase</string>
 
     <string name="login_help_finish_btn">Done</string>
-    <string name="login_help_gdax_link">https://www.gdax.com/settings/api</string>
+    <string name="login_help_cbpro_link">https://www.pro.coinbase.com/settings/api</string>
     <string name="login_help_skip_btn">Skip</string>
     <string name="login_help_new_account">New Coinbase Pro account</string>
 

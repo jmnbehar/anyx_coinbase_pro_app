@@ -13,7 +13,6 @@ import android.widget.TextView
 import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.textColor
@@ -34,7 +33,7 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var titleText: TextView
     private lateinit var logoutButton: Button
     private lateinit var verifyButton: Button
-    private lateinit var gdaxEulaButton: Button
+    private lateinit var cbproEulaButton: Button
     private lateinit var anyxEulaButton: Button
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
@@ -47,7 +46,7 @@ class SettingsFragment : RefreshFragment() {
         titleText = rootView.txt_setting_title
         logoutButton = rootView.btn_setting_log_out
         verifyButton = rootView.btn_setting_verify_account
-        gdaxEulaButton = rootView.btn_setting_show_gdax_eula
+        cbproEulaButton = rootView.btn_setting_show_cbpro_eula
         anyxEulaButton = rootView.btn_setting_show_anyx_eula
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
@@ -63,7 +62,7 @@ class SettingsFragment : RefreshFragment() {
             intent.putExtra(Constants.logout, true)
             prefs.shouldAutologin = false
             prefs.isLoggedIn = false
-            GdaxApi.credentials = null
+            CBProApi.credentials = null
             prefs.stashOrders(null)
             prefs.stashFills(null)
             startActivity(intent)
@@ -75,7 +74,7 @@ class SettingsFragment : RefreshFragment() {
             startActivity(intent)
         }
 
-        gdaxEulaButton.onClick {
+        cbproEulaButton.onClick {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
         }
@@ -121,7 +120,7 @@ class SettingsFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
         val prefs = Prefs(activity!!)
-        val apiKey = GdaxApi.credentials?.apiKey
+        val apiKey = CBProApi.credentials?.apiKey
         if (apiKey == null) {
             verifyButton.visibility = View.GONE
         } else if (prefs.isApiKeyValid(apiKey) == true) {
