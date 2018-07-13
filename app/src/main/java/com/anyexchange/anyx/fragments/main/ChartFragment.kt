@@ -327,7 +327,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun setChartTimespan(timespan: Timespan) {
         checkTimespanButton()
         chartTimeSpan = timespan
-//        (activity as MainActivity).showProgressBar()
         //TODO: show spinner on top
         miniRefresh({
             toast("Error updating chart time")

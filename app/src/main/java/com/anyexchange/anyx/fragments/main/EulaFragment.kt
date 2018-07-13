@@ -1,28 +1,17 @@
-package com.anyexchange.anyx.fragments.verify
+package com.anyexchange.anyx.fragments.main
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.RefreshFragment
 import kotlinx.android.synthetic.main.fragment_verify_intro.view.*
 
-typealias LinearLayout = Any
 
-/**
- * Created by josephbehar on 1/20/18.
- */
-
-class VerifyIntroFragment : Fragment() {
-    companion object {
-        fun newInstance(): VerifyIntroFragment
-        {
-            return VerifyIntroFragment()
-        }
-    }
-
+class EulaFragment : RefreshFragment() {
     private lateinit var eulaScrollView: ScrollView
     private lateinit var eulaLinearLayout: LinearLayout
 
@@ -33,6 +22,8 @@ class VerifyIntroFragment : Fragment() {
 
         eulaScrollView = rootView.scrollview_eula
         eulaLinearLayout = rootView.layout_verify_intro_eula
+
+        rootView.txt_verify_intro_eula_header.visibility = View.GONE
 
         return rootView
     }

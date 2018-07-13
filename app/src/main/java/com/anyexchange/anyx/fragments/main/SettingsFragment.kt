@@ -13,6 +13,7 @@ import android.widget.TextView
 import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.textColor
@@ -79,10 +80,12 @@ class SettingsFragment : RefreshFragment() {
             startActivity(browserIntent)
         }
 
-        //TODO: fix this
         anyxEulaButton.visibility = View.GONE
-        anyxEulaButton.onClick {
-            //TODO: launch AnyX Eula fragment
+        activity?.let { activity ->
+            anyxEulaButton.visibility = View.VISIBLE
+            anyxEulaButton.onClick {
+                (activity as? MainActivity)?.goToFragment(EulaFragment(), "EULA")
+            }
         }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal

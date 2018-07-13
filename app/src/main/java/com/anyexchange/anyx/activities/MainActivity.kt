@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.HOME)
     }
 
-    var progressBarCount = 0
+    private var progressBarCount = 0
     fun showProgressBar() {
         progressBarCount++
         progressBarLayout.visibility = View.VISIBLE
@@ -228,11 +228,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun dismissProgressBar() {
-        progressBarCount--
-        if (progressBarCount <= 0) {
-            progressBarCount = 0
-            progressBarLayout.visibility = View.GONE
-        }
+//        progressBarCount--
+//        if (progressBarCount <= 0) {
+//            progressBarCount = 0
+//            progressBarLayout.visibility = View.GONE
+//        }
+        progressBarLayout.visibility = View.GONE
     }
 
 
