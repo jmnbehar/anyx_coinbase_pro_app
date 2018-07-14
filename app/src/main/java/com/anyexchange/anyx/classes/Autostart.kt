@@ -214,15 +214,17 @@ class AlertJobService : JobService() {
     }
 
 
-    fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+    private fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
             CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                val price = ticker.price.toDoubleOrNull()
-                if (price != null) {
-                    account.product.price = price
+                if (result.value.isNotEmpty()) {
+                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val price = ticker.price.toDoubleOrNull()
+                    if (price != null) {
+                        account.product.price = price
+                    }
                 }
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
