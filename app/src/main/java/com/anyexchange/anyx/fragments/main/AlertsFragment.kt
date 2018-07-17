@@ -66,7 +66,7 @@ class AlertsFragment : RefreshFragment() {
 
         this.inflater = inflater
 
-        setupSwipeRefresh(rootView)
+        setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         titleText = rootView.txt_alert_name
 

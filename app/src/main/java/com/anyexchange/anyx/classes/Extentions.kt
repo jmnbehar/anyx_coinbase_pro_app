@@ -136,7 +136,6 @@ fun Date.timeInSeconds() : Long {
 }
 
 fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {
-
     val now = Calendar.getInstance()
     val nowInSeconds = now.timeInSeconds()
     val timespanStart = nowInSeconds - timespan
@@ -144,26 +143,4 @@ fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {
     val firstInTimespan = this.indexOfFirst { candle -> candle.time >= timespanStart }
     val trimmedList = this.subList(firstInTimespan, this.lastIndex).toMutableList()
     trimmedList.addAll(newList)
-
-}
-
-fun String.isValidAddress(currency: Currency): Boolean {
-    //TODO: use this to help if someone puts in invalid info here
-    return if ((this.length < 25)  || (this.length > 36)) {
-        false
-    } else if (this.contains('0', true)) {
-        false
-    } else if (this.contains('O', true)) {
-        false
-//    } else if (this.contains('1', true)) {
-//        false
-    } else if (this.contains('I', true)) {
-        false
-    } else {
-        return when (currency) {
-            Currency.BTC -> (this[0] == '1')
-            Currency.ETH -> (this[0] == '0' && this[0] == '0')
-            else -> true
-        }
-    }
 }

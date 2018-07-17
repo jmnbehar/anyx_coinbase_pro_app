@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.os.Bundle
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,7 @@ class MarketFragment : RefreshFragment() {
         listView = rootView.list_products
         this.inflater = inflater
 
-        setupSwipeRefresh(rootView)
+        setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         val selectGroup = lambda@ { product: Product ->
             currentProduct = product

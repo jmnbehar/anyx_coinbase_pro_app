@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
@@ -95,7 +96,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         timespanButtonYear = rootView.rbtn_chart_timespan_year
 //        timespanButtonAll = rootView.rbtn_chart_timespan_all
 
-        setupSwipeRefresh(rootView)
+        setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         val account = account
         val activity = activity!!
@@ -119,7 +120,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             buyButton = rootView.btn_chart_buy
             sellButton = rootView.btn_chart_sell
 
-            //TODO: send over more info
             buyButton.setOnClickListener {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
@@ -202,7 +202,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(account.product.id)
         val stashedOrders = prefs.getStashedOrders(account.product.id)
-        //TODO: set orders/fills
 
         val now = Calendar.getInstance()
         val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
@@ -214,9 +213,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setPercentChangeText(chartTimeSpan)
             nameText.text = currency.fullName
             setButtonsAndBalanceText(account)
-            updateHistoryListAdapter(stashedOrders, stashedFills)
+            updateHistoryPagerAdapter(stashedOrders, stashedFills)
         } else {
-            activity.showProgressBar()
+//            activity.showProgressBar()
             miniRefresh({   //onfailure
                 if (chartTimeSpan != Timespan.DAY) {
                     val backupTimespan = chartTimeSpan
@@ -224,21 +223,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     miniRefresh({
                         toast("Error")
                         chartTimeSpan = backupTimespan
-                        activity.dismissProgressBar()
+//                        activity.dismissProgressBar()
                     }, {
                         checkTimespanButton()
                         candles = account.product.candlesForTimespan(chartTimeSpan)
                         lineChart.addCandles(candles, account.currency, chartTimeSpan)
                         setPercentChangeText(chartTimeSpan)
                         nameText.text = currency.fullName
-                        activity.dismissProgressBar()
+//                        activity.dismissProgressBar()
                         setButtonsAndBalanceText(account)
 
-                        updateHistoryListAdapter(stashedOrders, stashedFills)
+                        updateHistoryPagerAdapter(stashedOrders, stashedFills)
                     })
                 } else {
                     toast("Error")
-                    activity.dismissProgressBar()
+//                    activity.dismissProgressBar()
                 }
             }, {    //success
                 candles = account.product.candlesForTimespan(chartTimeSpan)
@@ -246,8 +245,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 setPercentChangeText(chartTimeSpan)
                 nameText.text = currency.fullName
                 setButtonsAndBalanceText(account)
-                activity.dismissProgressBar()
-                updateHistoryListAdapter(stashedOrders, stashedFills)
+//                activity.dismissProgressBar()
+                updateHistoryPagerAdapter(stashedOrders, stashedFills)
             })
         }
     }
@@ -327,7 +326,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun setChartTimespan(timespan: Timespan) {
         checkTimespanButton()
         chartTimeSpan = timespan
-        //TODO: show spinner on top
         miniRefresh({
             toast("Error updating chart time")
             (activity as? com.anyexchange.anyx.activities.MainActivity)?.dismissProgressBar()
@@ -355,11 +353,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val layoutWidth = 1000
             val createdTimeRaw = order.created_at
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'")
+            val locale = Locale.getDefault()
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
 //                System.out.println(date)
-                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy")
+                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
                 outputFormat.format(date)
 
             } catch (e: ParseException) {
@@ -389,8 +388,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 CBProApi.cancelOrder(order.id).executeRequest({ }) {
                     var orders = (historyPager.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
-                    (historyPager.adapter as HistoryPagerAdapter).orders = orders
-                    (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+                    updateHistoryPagerAdapter(orders)
                     toast("Order cancelled")
                 }
             }
@@ -403,11 +401,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val layoutWidth = 1000
             val createdTimeRaw = fill.created_at
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'")
+            val locale = Locale.getDefault()
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
 //                System.out.println(date)
-                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy")
+                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
                 outputFormat.format(date)
 
             } catch (e: ParseException) {
@@ -520,7 +519,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
                     filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                     if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
                     }
                 }
                 CBProApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
@@ -528,7 +527,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                     filteredFills = apiFillList.filter { it.product_id == account.product.id }
                     if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryListAdapter(filteredOrders!!, filteredFills!!)
+                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
                     }
                 }
             } else {
@@ -540,10 +539,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    //TODO: rename
-    private fun updateHistoryListAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>) {
+    private fun updateHistoryPagerAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>? = null) {
         (historyPager.adapter as HistoryPagerAdapter).orders = orderList
-        (historyPager.adapter as HistoryPagerAdapter).fills  = fillList
+        fillList?.let {
+            (historyPager.adapter as HistoryPagerAdapter).fills = it
+        }
         (historyPager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
         //historyList.setHeightBasedOnChildren()
     }

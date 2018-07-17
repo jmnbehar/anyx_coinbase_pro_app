@@ -48,7 +48,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
         //TODO: add autorefresh
         this.inflater = inflater
-        setupSwipeRefresh(rootView)
+        setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         lineChart = rootView.chart_accounts
         valueText = rootView.txt_accounts_total_value

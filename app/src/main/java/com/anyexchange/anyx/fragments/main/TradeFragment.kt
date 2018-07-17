@@ -93,7 +93,7 @@ class TradeFragment : RefreshFragment() {
 
         this.inflater = inflater
         val activity = activity!!
-        setupSwipeRefresh(rootView)
+        setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         titleText = rootView.txt_trade_name
 
@@ -210,18 +210,13 @@ class TradeFragment : RefreshFragment() {
                 //half fees for limit orders that are fuckin up? consider this later
                 devFee = cryptoTotal * DEV_FEE_PERCENTAGE
 
-                //TODO: change this to an if, but only if this holds true after testing
-                when (tradeSide) {
-                //always deduct the amount the user specified, even if its not all bought/sold
-                    TradeSide.SELL -> {
-                        amount -= devFee
-                        //don't sell the devFee because it will be deducted by sending fees
-                        //amount is always in crypto for sell orders
-                    }
-                    TradeSide.BUY -> {
-                        //should never need to change amount here, just buy it all and then deduct a bit
-                    }
+                //TODO: test this more
+                if (tradeSide == TradeSide.SELL) {
+                    amount -= devFee
+                    //don't sell the devFee because it will be deducted by sending fees
+                    //amount is always in crypto for sell orders
                 }
+                //should never need to change amount here, just buy it all and then deduct a bit
             } else {
                 devFee = 0.0
             }
@@ -463,14 +458,6 @@ class TradeFragment : RefreshFragment() {
     }
 
     private fun payFee(amount: Double) {
-        //TODO: activate promo
-//        val sdf = SimpleDateFormat("YYYY-MM-dd")
-//        val freeTilDate = sdf.parse("2018-05-01")
-//        val now = Date()
-//        if (freeTilDate > now) {
-//            //Don't process fees until may :)
-//            return
-//        }
         account?.currency?.let { currency ->
             val destination = currency.developerAddress
             CBProApi.sendCrypto(amount, currency, destination).executePost(

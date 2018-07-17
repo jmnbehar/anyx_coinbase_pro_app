@@ -228,12 +228,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun dismissProgressBar() {
-//        progressBarCount--
-//        if (progressBarCount <= 0) {
-//            progressBarCount = 0
-//            progressBarLayout.visibility = View.GONE
-//        }
-        progressBarLayout.visibility = View.GONE
+        progressBarCount--
+        if (progressBarCount <= 0) {
+            progressBarCount = 0
+            progressBarLayout.visibility = View.GONE
+        }
     }
 
 

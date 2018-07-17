@@ -55,7 +55,6 @@ class PriceChart : LineChart {
                 val xVelocity = velocityTracker?.xVelocity?.absoluteValue ?: 0.0.toFloat()
                 val yVelocity = velocityTracker?.yVelocity?.absoluteValue ?: 0.0.toFloat()
 
-                //TODO: this code is messy, due for a refactor:
                 val xCoefficient = if (defaultDragDirection == DefaultDragDirection.Horizontal) { 5.toFloat() } else { 1.25.toFloat() }
                 val yCoefficient = if (defaultDragDirection == DefaultDragDirection.Vertical)   { 5.toFloat() } else { 1.25.toFloat() }
 
