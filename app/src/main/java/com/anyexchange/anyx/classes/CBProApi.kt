@@ -286,7 +286,7 @@ sealed class CBProApi : FuelRouting {
     }
 
     class accountHistory(val accountId: String) : CBProApi()
-    class products() : CBProApi()
+    class products : CBProApi()
     class ticker(val productId: String) : CBProApi()
     class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : CBProApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : CBProApi()
@@ -298,7 +298,7 @@ sealed class CBProApi : FuelRouting {
     class fills(val orderId: String = "all", val productId: String = "all") : CBProApi()
     //add position?
     class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi()
-    class coinbaseAccounts() : CBProApi() {
+    class coinbaseAccounts : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiCBAccountString = result.value
@@ -320,7 +320,7 @@ sealed class CBProApi : FuelRouting {
             }
         }
     }
-    class paymentMethods() : CBProApi() {
+    class paymentMethods : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 val apiPaymentMethodsString = result.value

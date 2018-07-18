@@ -5,8 +5,11 @@ import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
+import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import kotlinx.android.synthetic.main.list_row_account.view.*
 import kotlinx.android.synthetic.main.list_row_history.view.*
 import org.jetbrains.anko.backgroundColor
 
@@ -51,31 +54,52 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
         return i.toLong()
     }
 
+
+    internal class ViewHolder {
+        var colorView: ImageView? = null
+        var sideText: TextView? = null
+        var amountText: TextView? = null
+        var currencyText: TextView? = null
+        var priceText: TextView? = null
+        var tradeTypeText: TextView? = null
+    }
+
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
+        val viewHolder: ViewHolder?
+        val outputView: View
+        if (convertView == null) {
+            viewHolder = ViewHolder()
+
+            val vi = viewGroup.inflate(R.layout.list_row_product)
+
+            viewHolder.colorView = vi.img_account_icon
+            viewHolder.sideText = vi.txt_history_side
+            viewHolder.amountText = vi.txt_history_amount
+            viewHolder.priceText = vi.txt_history_price
+            viewHolder.currencyText = vi.txt_history_currency
+            viewHolder.tradeTypeText = vi.txt_history_trade_type
+
+            vi.tag = viewHolder
+            outputView = vi
+        } else {
+            viewHolder = convertView.tag as ViewHolder
+            outputView = convertView
+        }
+
         val tradeSide: TradeSide
         val price: Double
         val amount: Double
         val tradeType: TradeType?
         val currency: Currency
-
-        val vi = viewGroup.inflate(R.layout.list_row_history)
-        val sideTextView = vi.txt_history_side
-        val amountTextView = vi.txt_history_amount
-        val priceTextView = vi.txt_history_price
-        val currencyTextView = vi.txt_history_currency
-        val tradeTypeTextView = vi.txt_history_trade_type
-        val imageView = vi.img_history_icon
-
-
         if (isOrderList) {
             if (orders.isEmpty()) {
-                imageView.visibility = View.INVISIBLE
-                sideTextView.visibility = View.GONE
-                amountTextView.text = "You have no open orders"
-                priceTextView.visibility = View.GONE
-                currencyTextView.visibility = View.GONE
-                tradeTypeTextView.visibility = View.GONE
-                return vi
+                viewHolder.colorView?.visibility = View.INVISIBLE
+                viewHolder.sideText?.visibility = View.GONE
+                viewHolder.amountText?.text = "You have no open orders"
+                viewHolder.priceText?.visibility = View.GONE
+                viewHolder.currencyText?.visibility = View.GONE
+                viewHolder.tradeTypeText?.visibility = View.GONE
+                return outputView
             }
             val order = orders[i]
             tradeSide = TradeSide.fromString(order.side)
@@ -86,22 +110,22 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             amount = unfilledSize
             currency = Currency.forString(order.product_id) ?: Currency.USD
             tradeType = TradeType.fromString(order.type)
-            vi.setOnClickListener { orderOnClick(order) }
+            outputView.setOnClickListener { orderOnClick(order) }
 
 
-            sideTextView.text = when (tradeSide) {
+            viewHolder.sideText?.text = when (tradeSide) {
                 TradeSide.BUY -> "Buying "
                 TradeSide.SELL -> "Selling "
             }
         } else {
             if (fills.isEmpty()) {
-                imageView.visibility = View.INVISIBLE
-                sideTextView.visibility = View.GONE
-                amountTextView.text = "You have no filled orders"
-                priceTextView.visibility = View.GONE
-                currencyTextView.visibility = View.GONE
-                tradeTypeTextView.visibility = View.GONE
-                return vi
+                viewHolder.colorView?.visibility = View.INVISIBLE
+                viewHolder.sideText?.visibility = View.GONE
+                viewHolder.amountText?.text = "You have no filled orders"
+                viewHolder.priceText?.visibility = View.GONE
+                viewHolder.currencyText?.visibility = View.GONE
+                viewHolder.tradeTypeText?.visibility = View.GONE
+                return outputView
             }
             val fill = fills[i]
             tradeSide = TradeSide.fromString(fill.side)
@@ -109,32 +133,32 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             price = fill.price.toDoubleOrZero()
             amount = fill.size.toDoubleOrZero()
             tradeType = null
-            vi.setOnClickListener { fillOnClick(fill) }
+            outputView.setOnClickListener { fillOnClick(fill) }
 
 
-            sideTextView.text = when (tradeSide) {
+            viewHolder.sideText?.text = when (tradeSide) {
                 TradeSide.BUY -> "Bought "
                 TradeSide.SELL -> "Sold "
             }
         }
 
-        imageView.backgroundColor = when (tradeSide) {
+        viewHolder.colorView?.backgroundColor = when (tradeSide) {
             TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
 
             TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
         }
 //        vi.img_history_icon.setImageResource(currency.iconId)
 
-        amountTextView.text = amount.btcFormat()
-        currencyTextView.text = " $currency at "
-        priceTextView.text = price.fiatFormat()
+        viewHolder.amountText?.text = amount.btcFormat()
+        viewHolder.currencyText?.text = " $currency at "
+        viewHolder.priceText?.text = price.fiatFormat()
         if (tradeType == null) {
-            tradeTypeTextView.visibility = View.GONE
+            viewHolder.tradeTypeText?.visibility = View.GONE
         } else {
-            tradeTypeTextView.visibility = View.VISIBLE
-            tradeTypeTextView.text = "($tradeType order)"
+            viewHolder.tradeTypeText?.visibility = View.VISIBLE
+            viewHolder.tradeTypeText?.text = "($tradeType order)"
         }
 
-        return vi
+        return outputView
     }
 }
