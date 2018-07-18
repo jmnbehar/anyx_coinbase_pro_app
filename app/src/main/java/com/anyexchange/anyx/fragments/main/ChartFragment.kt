@@ -564,7 +564,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }
                     priceText.text = account.product.price.fiatFormat()
                     valueText.text = account.value.fiatFormat()
-                    
+
+                    //TODO: use ktx to prevent a crash here:
                     lineChart.addCandles(candles, account.currency, chartTimeSpan)
                     setPercentChangeText(chartTimeSpan)
                     checkTimespanButton()
