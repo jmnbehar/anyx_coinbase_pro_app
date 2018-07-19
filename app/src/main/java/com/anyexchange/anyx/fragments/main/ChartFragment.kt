@@ -2,6 +2,7 @@ package com.anyexchange.anyx.fragments.main
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v4.view.ViewPager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
 import com.github.kittinunf.result.Result
@@ -32,6 +33,8 @@ import java.util.*
 class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener {
     private lateinit var inflater: LayoutInflater
 
+    private var historyPager: ViewPager? = null
+
     private var chartTimeSpan = Timespan.DAY
     private var candles = listOf<Candle>()
 
@@ -52,6 +55,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         showDarkMode(rootView)
 
         this.inflater = inflater
+        historyPager = rootView.history_view_pager
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
@@ -61,18 +65,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
             val prefs = Prefs(activity)
-
-            checkTimespanButton()
             candles = account.product.candlesForTimespan(chartTimeSpan)
             val currency = account.currency
 
-            chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan) {
+            rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan) {
                 swipeRefreshLayout?.isEnabled = false
             }
-            chart_fragment_chart.setOnChartValueSelectedListener(this)
-            chart_fragment_chart.onChartGestureListener = this
-            
-            btn_chart_buy.setOnClickListener {
+            rootView.chart_fragment_chart.setOnChartValueSelectedListener(this)
+            rootView.chart_fragment_chart.onChartGestureListener = this
+
+            rootView.btn_chart_buy.setOnClickListener {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
@@ -89,7 +91,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            btn_chart_sell.setOnClickListener {
+            rootView.btn_chart_sell.setOnClickListener {
                 if (!prefs.isLoggedIn) {
                     toast("Please log in")
                 } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
@@ -105,25 +107,25 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, "Trade: Sell")
                 }
             }
-            
-            rbtn_chart_timespan_hour.text = "1H"
-            rbtn_chart_timespan_hour.setOnClickListener {
+
+            rootView.rbtn_chart_timespan_hour.text = "1H"
+            rootView.rbtn_chart_timespan_hour.setOnClickListener {
                 setChartTimespan(Timespan.HOUR)
             }
-            rbtn_chart_timespan_day.text = "1D"
-            rbtn_chart_timespan_day.setOnClickListener {
+            rootView.rbtn_chart_timespan_day.text = "1D"
+            rootView.rbtn_chart_timespan_day.setOnClickListener {
                 setChartTimespan(Timespan.DAY)
             }
-            rbtn_chart_timespan_week.text = "1W"
-            rbtn_chart_timespan_week.setOnClickListener {
+            rootView.rbtn_chart_timespan_week.text = "1W"
+            rootView.rbtn_chart_timespan_week.setOnClickListener {
                 setChartTimespan(Timespan.WEEK)
             }
-            rbtn_chart_timespan_month.text = "1M"
-            rbtn_chart_timespan_month.setOnClickListener {
+            rootView.rbtn_chart_timespan_month.text = "1M"
+            rootView.rbtn_chart_timespan_month.setOnClickListener {
                 setChartTimespan(Timespan.MONTH)
             }
-            rbtn_chart_timespan_year.text = "1Y"
-            rbtn_chart_timespan_year.setOnClickListener {
+            rootView.rbtn_chart_timespan_year.text = "1Y"
+            rootView.rbtn_chart_timespan_year.setOnClickListener {
                 setChartTimespan(Timespan.YEAR)
             }
 //            timespanButtonAll.setText("ALL")
@@ -133,9 +135,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
-            history_view_pager.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
+            historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-            history_view_pager.setOnTouchListener(this)
+            historyPager?.setOnTouchListener(this)
         }
         return rootView
     }
@@ -220,21 +222,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 txt_chart_account_balance.text = "${account.balance.btcFormat()} $currency"
                 txt_chart_account_value.text = account.value.fiatFormat()
 
-                history_view_pager.visibility = View.VISIBLE
+                historyPager?.visibility = View.VISIBLE
             } else {
                 txt_chart_ticker.visibility = View.GONE
                 img_chart_account_icon.visibility = View.GONE
                 txt_chart_account_balance.visibility = View.GONE
                 txt_chart_account_value.visibility = View.GONE
 
-                history_view_pager.visibility = View.INVISIBLE
+                historyPager?.visibility = View.INVISIBLE
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-
+        checkTimespanButton()
         showNavSpinner(account?.currency) { selectedCurrency ->
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->
@@ -337,7 +339,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             positiveButton("OK") {  }
             negativeButton("Cancel Order") {
                 CBProApi.cancelOrder(order.id).executeRequest({ }) {
-                    var orders = (history_view_pager.adapter as HistoryPagerAdapter).orders
+                    var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                     orders = orders.filter { o -> o.id != order.id }
                     updateHistoryPagerAdapter(orders)
                     toast("Order cancelled")
@@ -408,7 +410,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (view) {
-            history_view_pager -> {
+            historyPager -> {
                 when (motionEvent.action){
                     MotionEvent.ACTION_MOVE -> {
                         swipeRefreshLayout?.isEnabled = false
@@ -491,11 +493,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateHistoryPagerAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>? = null) {
-        (history_view_pager.adapter as HistoryPagerAdapter).orders = orderList
+        (historyPager?.adapter as HistoryPagerAdapter).orders = orderList
         fillList?.let {
-            (history_view_pager.adapter as HistoryPagerAdapter).fills = it
+            (historyPager?.adapter as HistoryPagerAdapter).fills = it
         }
-        (history_view_pager.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+        (historyPager?.adapter as HistoryPagerAdapter).notifyDataSetChanged()
         //historyList.setHeightBasedOnChildren()
     }
 
