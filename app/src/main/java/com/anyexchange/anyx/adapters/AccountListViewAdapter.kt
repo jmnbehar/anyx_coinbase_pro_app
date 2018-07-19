@@ -52,7 +52,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
         if (convertView == null) {
             viewHolder = ViewHolder()
 
-            val vi = viewGroup.inflate(R.layout.list_row_product)
+            val vi = viewGroup.inflate(R.layout.list_row_account)
 
             viewHolder.iconView = vi.img_account_icon
             viewHolder.balanceText = vi.txt_account_balance

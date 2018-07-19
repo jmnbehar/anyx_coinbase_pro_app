@@ -70,9 +70,9 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
         if (convertView == null) {
             viewHolder = ViewHolder()
 
-            val vi = viewGroup.inflate(R.layout.list_row_product)
+            val vi = viewGroup.inflate(R.layout.list_row_history)
 
-            viewHolder.colorView = vi.img_account_icon
+            viewHolder.colorView = vi.img_history_icon
             viewHolder.sideText = vi.txt_history_side
             viewHolder.amountText = vi.txt_history_amount
             viewHolder.priceText = vi.txt_history_price
@@ -144,7 +144,6 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
 
         viewHolder.colorView?.backgroundColor = when (tradeSide) {
             TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
-
             TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
         }
 //        vi.img_history_icon.setImageResource(currency.iconId)
