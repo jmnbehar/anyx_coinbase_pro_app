@@ -54,7 +54,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun onResume() {
-        //be smarter about only showing this when necessary, and maybe only refresh when encesary as well
+        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
         swipeRefreshLayout?.isRefreshing = true
 
         super.onResume()

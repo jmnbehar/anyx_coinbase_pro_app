@@ -460,6 +460,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             if (prefs.isLoggedIn) {
                 CBProApi.account(account.id).executeRequest( onFailure) { result ->
                     if (lifecycle.isCreatedOrResumed) {
+                        //TODO: why does this sometimes get a jsonArray instead of a JSON
                         val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                         val newBalance = apiAccount.balance.toDoubleOrZero()
                         txt_chart_account_balance.text = newBalance.btcFormat() + " " + account.currency

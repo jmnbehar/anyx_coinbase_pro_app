@@ -34,7 +34,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
 
-    private lateinit var balancesLayout: LinearLayout
     private lateinit var usdBalanceText: TextView
     private lateinit var usdBalanceLabelText: TextView
     private lateinit var cryptoBalanceText: TextView
@@ -61,7 +60,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private lateinit var advancedOptionsCheckBox: CheckBox
     private lateinit var advancedOptionsLayout: LinearLayout
-    private lateinit var advancedOptionsLimitLayout: LinearLayout
 
     private lateinit var advancedOptionTimeInForceSpinner: Spinner
     private lateinit var advancedOptionEndTimeSpinner: Spinner
@@ -70,20 +68,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     var tradeType: TradeType = TradeType.MARKET
 
-    var tradeSide: TradeSide = Companion.tradeType
+    var tradeSide: TradeSide = Companion.tradeSide
     val account: Account?
         get() {
             return ChartFragment.account
         }
 
     companion object {
-        var tradeType = TradeSide.BUY
+        var tradeSide = TradeSide.BUY
         var localCurrency = "USD"
 
         private var account: Account? = null
         fun newInstance(accountIn: Account, tradeSideIn: TradeSide): TradeFragment {
             account = accountIn
-            tradeType = tradeSideIn
+            tradeSide = tradeSideIn
             return TradeFragment()
         }
     }
@@ -116,7 +114,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         advancedOptionsCheckBox = rootView.cb_trade_advanced
         advancedOptionsLayout = rootView.layout_trade_advanced
-        advancedOptionsLimitLayout = rootView.layout_trade_advanced_limit
 
         advancedOptionTimeInForceSpinner = rootView.spinner_trade_time_in_force
         advancedOptionEndTimeSpinner = rootView.spinner_trade_good_til_time
@@ -316,16 +313,16 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 val tabAccentColor = account.currency.colorAccent(activity!!)
                 tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-                titleText.text = "Buy and Sell " + account.currency.toString()
+                titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
                 usdBalanceText.text = Account.usdAccount?.availableBalance?.fiatFormat()
 
-                usdBalanceLabelText.text = "Available USD Balance:"
-                cryptoBalanceLabelText.text = "Available ${account.currency} Balance:"
+                usdBalanceLabelText.text = resources.getString(R.string.trade_balance_label, Currency.USD.toString())
+                cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
 
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
 
-                currentPriceLabelText.text = "Current ${account.currency} Price:"
+                currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
                 currentPriceText.text = account.product.price.fiatFormat()
             }
         }
@@ -369,14 +366,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
-        var currency: Currency = when (errorMessage) {
+        val currency: Currency = when (errorMessage) {
             ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
             ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
             ErrorMessage.BuyAmountTooSmallBch, ErrorMessage.BuyAmountTooLargeBch -> Currency.BCH
             ErrorMessage.BuyAmountTooSmallLtc, ErrorMessage.BuyAmountTooLargeLtc -> Currency.LTC
             else -> Currency.USD
         }
-        var limit = when (errorMessage) {
+        val limit = when (errorMessage) {
             ErrorMessage.BuyAmountTooSmallBtc -> "0.001"
             ErrorMessage.BuyAmountTooSmallEth -> "0.01"
             ErrorMessage.BuyAmountTooSmallBch -> "0.01"
@@ -584,8 +581,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 limitTab?.select()
                 limitUnitText.text = localCurrency
                 limitLayout.visibility = View.VISIBLE
-                limitLabelText.text = "Limit Price"
-                advancedOptionsLimitLayout.visibility = View.VISIBLE
+                limitLabelText.text = resources.getString(R.string.trade_limit_label)
+
                 advancedOptionsCheckBox.visibility = View.VISIBLE
 
                 val timeInForceList = CBProApi.TimeInForce.values()
@@ -620,8 +617,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 stopTab?.select()
                 limitUnitText.text = localCurrency
                 limitLayout.visibility = View.VISIBLE
-                limitLabelText.text = "Stop Price"
-                advancedOptionsLimitLayout.visibility = View.GONE
+                limitLabelText.text = resources.getString(R.string.trade_stop_label)
                 advancedOptionsCheckBox.visibility = View.INVISIBLE
             }
         }
@@ -629,41 +625,29 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         account?.let { account ->
             when (tradeSide) {
                 TradeSide.BUY -> {
-                    submitOrderButton.text = "Submit Buy Order"
+                    submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
                     tradeSideBuyRadioButton.isChecked = true
                     when (tradeType) {
                         TradeType.MARKET -> {
                             amountUnitText.text = localCurrency
-                            totalLabelText.text = "Total (${account.currency}) ="
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
                         }
                         TradeType.LIMIT -> {
                             amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = "Total (${localCurrency}) ="
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, localCurrency)
                         }
                         TradeType.STOP -> {
                             amountUnitText.text = localCurrency
-                            totalLabelText.text = "Total (${account.currency}) ="
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
 
                         }
                     }
                 }
                 TradeSide.SELL -> {
-                    submitOrderButton.text = "Submit Sell Order"
+                    submitOrderButton.text =  resources.getString(R.string.trade_sell_order_btn)
                     tradeSideSellRadioButton.isChecked = true
-                    when (tradeType) {
-                        TradeType.MARKET -> {
-                            amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = "Total (${localCurrency}) ="
-                        }
-                        TradeType.LIMIT -> {
-                            amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = "Total (${localCurrency}) ="
-                        }
-                        TradeType.STOP -> {
-                            amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = "Total (${localCurrency}) ="
-                        }
-                    }
+                    amountUnitText.text = account.currency.toString()
+                    totalLabelText.text = resources.getString(R.string.trade_total_label, localCurrency)
                 }
             }
         }

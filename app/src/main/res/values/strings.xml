@@ -31,7 +31,6 @@
     <string name="login_help_skip_btn">Skip</string>
     <string name="login_help_new_account">New Coinbase Pro account</string>
 
-
     <string name="currency_USD">USD</string>
     <string name="currency_BTC">BTC</string>
     <string name="currency_ETH">ETH</string>
@@ -39,23 +38,45 @@
     <string name="currency_LTC">LTC</string>
     <string name="currency_ETC">ETC</string>
 
-
     <string name="home_market_tab">Market</string>
     <string name="home_account_tab">Account</string>
 
+
+    //Chart Fragment
     <string name="chart_timespan_1h">1H</string>
     <string name="chart_timespan_1d">1D</string>
     <string name="chart_timespan_1w">1W</string>
     <string name="chart_timespan_1m">1M</string>
     <string name="chart_timespan_1y">1Y</string>
     <string name="chart_timespan_all">All</string>
-
     <string name="chart_buy_btn">Buy</string>
     <string name="chart_sel_btn">Sell</string>
-
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
 
+    //Trade Fragment
+    <string name="trade_title">Trade</string>
+    <string name="trade_title_for_currency">Trade %s</string>
+    <string name="trade_buy_btn">BUY</string>
+    <string name="trade_sell_btn">SELL</string>
+    <string name="trade_type_market">Market</string>
+    <string name="trade_type_limit">Limit</string>
+    <string name="trade_type_stop">Stop</string>
+    <string name="trade_amount_label">Amount</string>
+    <string name="trade_limit_label">Limit Price</string>
+    <string name="trade_stop_label">Stop Price</string>
+    <string name="trade_advanced_label">Advanced</string>
+    <string name="trade_time_in_force_label">Time In Force</string>
+    <string name="trade_order_btn">Place Order</string>
+    <string name="trade_buy_order_btn">Place Buy Order</string>
+    <string name="trade_sell_order_btn">Place Sell Order</string>
+    <string name="trade_blank_total">Total =</string>
+    <string name="trade_total_label">Total (%s) =</string>
+
+    <string name="trade_balance_label">Available %s Balance:</string>
+    <string name="trade_last_trade_price_label">%s Last Trade</string>
+
+    //Transfer Fragments
     <string name="transfer_in_title">Transfer into Coinbase Pro</string>
     <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
     <string name="transfer_pro_wallet_balance">Coinbase Pro Wallet Balance</string>

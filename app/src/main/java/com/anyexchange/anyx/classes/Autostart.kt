@@ -219,7 +219,7 @@ class AlertJobService : JobService() {
         val accountListSize = Account.list.size
         for (account in Account.list) {
             CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                if (result.value.isNotEmpty()) {
+                if (result.value.isNotBlank()) {
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
                     if (price != null) {

@@ -32,7 +32,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="10dp"
-                    android:text="Buy and Sell"
+                    android:text="@string/trade_title"
                     android:textSize="30sp"
                     tools:layout_editor_absoluteX="48dp"
                     tools:layout_editor_absoluteY="16dp" />
@@ -69,7 +69,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="USD" />
+                                android:text="@string/currency_USD" />
 
                             <TextView
                                 android:id="@+id/txt_trade_crypto_balance_label"
@@ -104,7 +104,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="$0"
+                                android:text=""
                                 android:textAlignment="textEnd" />
 
                             <TextView
@@ -156,7 +156,7 @@
                         android:gravity="center_horizontal"
                         android:paddingBottom="10dp"
                         android:paddingTop="10dp"
-                        android:text="BUY"
+                        android:text="@string/trade_buy_btn"
                         android:textAlignment="center"
                         android:textColor="@color/trade_rbtn_text" />
 
@@ -173,7 +173,7 @@
                         android:gravity="center_horizontal"
                         android:paddingBottom="10dp"
                         android:paddingTop="10dp"
-                        android:text="SELL"
+                        android:text="@string/trade_sell_btn"
                         android:textAlignment="center"
                         android:textColor="@color/trade_rbtn_text" />
                 </RadioGroup>
@@ -189,19 +189,19 @@
                         android:id="@+id/tab_trade_type_market"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Market" />
+                        android:text="@string/trade_type_market" />
 
                     <android.support.design.widget.TabItem
                         android:id="@+id/tab_trade_type_limit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Limit" />
+                        android:text="@string/trade_type_limit" />
 
                     <android.support.design.widget.TabItem
                         android:id="@+id/tab_trade_type_stop"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Stop" />
+                        android:text="@string/trade_type_stop" />
                 </android.support.design.widget.TabLayout>
 
                 <LinearLayout
@@ -220,7 +220,7 @@
                             android:id="@+id/txt_trade_amount_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Amount" />
+                            android:text="@string/trade_amount_label" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -239,7 +239,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="USD" />
+                                android:text="@string/currency_USD" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -255,7 +255,7 @@
                             android:id="@+id/txt_trade_limit_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Limit Price" />
+                            android:text="@string/trade_limit_label" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -274,14 +274,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="USD" />
+                                android:text="@string/currency_USD" />
                         </LinearLayout>
 
                         <CheckBox
                             android:id="@+id/cb_trade_advanced"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Advanced" />
+                            android:text="@string/trade_advanced_label" />
 
                         <LinearLayout
                             android:id="@+id/layout_trade_advanced"
@@ -289,35 +289,26 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
+                            <TextView
+                                android:id="@+id/txt_trade_advanced_time_in_force"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/trade_time_in_force_label" />
 
-                            <LinearLayout
-                                android:id="@+id/layout_trade_advanced_limit"
+                            <Spinner
+                                android:id="@+id/spinner_trade_time_in_force"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:layout_weight="1" />
 
-                                <TextView
-                                    android:id="@+id/txt_trade_advanced_time_in_force"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="Time In Force" />
-
-                                <Spinner
-                                    android:id="@+id/spinner_trade_time_in_force"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1" />
-
-                                <Spinner
-                                    android:id="@+id/spinner_trade_good_til_time"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="3dp"
-                                    android:layout_weight="1"
-                                    android:paddingTop="20dp" />
-
-                            </LinearLayout>
+                            <Spinner
+                                android:id="@+id/spinner_trade_good_til_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:layout_weight="1"
+                                android:paddingTop="20dp" />
 
                         </LinearLayout>
 
@@ -337,7 +328,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="5"
-                        android:text="Total (BTC) ="
+                        android:text="@string/trade_blank_total"
                         android:textAlignment="textEnd"
                         android:textSize="16sp" />
 
@@ -357,7 +348,7 @@
                     android:id="@+id/btn_place_order"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Place Order" />
+                    android:text="@string/trade_order_btn" />
 
             </LinearLayout>
         </com.anyexchange.anyx.classes.LockableScrollView>

@@ -85,7 +85,7 @@ fun Double.fiatFormat(): String {
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
 
-fun String.toDoubleOrZero() = this.toDoubleOrNull() ?: 0.0
+fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0
 
 fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
     return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)

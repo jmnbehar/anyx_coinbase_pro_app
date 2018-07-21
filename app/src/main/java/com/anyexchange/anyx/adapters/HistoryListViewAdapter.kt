@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.list_row_account.view.*
 import kotlinx.android.synthetic.main.list_row_history.view.*
 import org.jetbrains.anko.backgroundColor
 
@@ -104,7 +103,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             val order = orders[i]
             tradeSide = TradeSide.fromString(order.side)
             price = order.price.toDoubleOrZero()
-            val size = (order.size ?: order.specified_funds ?: "0.0").toDoubleOrZero()
+            val size = (order.size ?: order.specified_funds).toDoubleOrZero()
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
             amount = unfilledSize
