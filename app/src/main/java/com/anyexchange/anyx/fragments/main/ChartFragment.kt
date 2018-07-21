@@ -1,5 +1,7 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleOwner
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.view.ViewPager
@@ -30,7 +32,7 @@ import java.util.*
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener {
+class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
 
     private var historyPager: ViewPager? = null
@@ -43,7 +45,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     companion object {
         var account: Account? = null
         fun newInstance(account: Account): ChartFragment {
-            Companion.account = account
+            this.account = account
             return ChartFragment()
         }
     }
@@ -143,18 +145,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
 
-    private fun switchAccount(account: Account) {
-        Companion.account = account
+    private fun switchAccount(newAccount: Account) {
+        account = newAccount
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
-        val currency = account.currency
-        val price = account.product.price
+        val currency = newAccount.currency
+        val price = newAccount.product.price
         txt_chart_price.text = price.fiatFormat()
 
-        candles = account.product.candlesForTimespan(chartTimeSpan)
+        candles = newAccount.product.candlesForTimespan(chartTimeSpan)
 
         val prefs = Prefs(activity)
-        val stashedFills = prefs.getStashedFills(account.product.id)
-        val stashedOrders = prefs.getStashedOrders(account.product.id)
+        val stashedFills = prefs.getStashedFills(newAccount.product.id)
+        val stashedOrders = prefs.getStashedOrders(newAccount.product.id)
 
         val now = Calendar.getInstance()
         val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
@@ -162,10 +164,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
 
         if (areCandlesUpToDate) {
-            chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
+            chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
             setPercentChangeText(chartTimeSpan)
             txt_chart_name.text = currency.fullName
-            setButtonsAndBalanceText(account)
+            setButtonsAndBalanceText(newAccount)
             updateHistoryPagerAdapter(stashedOrders, stashedFills)
         } else {
 //            activity.showProgressBar()
@@ -179,12 +181,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //                        activity.dismissProgressBar()
                     }, {
                         checkTimespanButton()
-                        candles = account.product.candlesForTimespan(chartTimeSpan)
-                        chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
+                        candles = newAccount.product.candlesForTimespan(chartTimeSpan)
+                        chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
                         setPercentChangeText(chartTimeSpan)
                         txt_chart_name.text = currency.fullName
 //                        activity.dismissProgressBar()
-                        setButtonsAndBalanceText(account)
+                        setButtonsAndBalanceText(newAccount)
 
                         updateHistoryPagerAdapter(stashedOrders, stashedFills)
                     })
@@ -193,11 +195,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //                    activity.dismissProgressBar()
                 }
             }, {    //success
-                candles = account.product.candlesForTimespan(chartTimeSpan)
-                chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
+                candles = newAccount.product.candlesForTimespan(chartTimeSpan)
+                chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
-                setButtonsAndBalanceText(account)
+                setButtonsAndBalanceText(newAccount)
 //                activity.dismissProgressBar()
                 updateHistoryPagerAdapter(stashedOrders, stashedFills)
             })
@@ -339,10 +341,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             positiveButton("OK") {  }
             negativeButton("Cancel Order") {
                 CBProApi.cancelOrder(order.id).executeRequest({ }) {
-                    var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
-                    orders = orders.filter { o -> o.id != order.id }
-                    updateHistoryPagerAdapter(orders)
-                    toast("Order cancelled")
+                    if (lifecycle.isCreatedOrResumed) {
+                        var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
+                        orders = orders.filter { o -> o.id != order.id }
+                        updateHistoryPagerAdapter(orders)
+                        toast("Order cancelled")
+                    }
                 }
             }
         }.show()
@@ -454,33 +458,39 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val prefs = Prefs(context!!)
         account?. let { account ->
             if (prefs.isLoggedIn) {
-                CBProApi.account(account.id).executeRequest(onFailure) { result ->
-                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                    val newBalance = apiAccount.balance.toDoubleOrZero()
-                    txt_chart_account_balance.text = newBalance.btcFormat() + " " + account.currency
-                    txt_chart_account_value.text = account.value.fiatFormat()
-                    miniRefresh(onFailure) {
-                        account.apiAccount = apiAccount
-                        onComplete(true)
+                CBProApi.account(account.id).executeRequest( onFailure) { result ->
+                    if (lifecycle.isCreatedOrResumed) {
+                        val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                        val newBalance = apiAccount.balance.toDoubleOrZero()
+                        txt_chart_account_balance.text = newBalance.btcFormat() + " " + account.currency
+                        txt_chart_account_value.text = account.value.fiatFormat()
+                        miniRefresh(onFailure) {
+                            account.apiAccount = apiAccount
+                            onComplete(true)
+                        }
                     }
                 }
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
                 CBProApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
-                    prefs.stashOrders(result.value)
-                    val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    if (lifecycle.isCreatedOrResumed) {
+                        prefs.stashOrders(result.value)
+                        val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                        filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+                        if (filteredOrders != null && filteredFills != null) {
+                            updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                        }
                     }
                 }
                 CBProApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
-                    prefs.stashFills(result.value)
-                    val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                    filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    if (lifecycle.isCreatedOrResumed) {
+                        prefs.stashFills(result.value)
+                        val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                        filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                        if (filteredOrders != null && filteredFills != null) {
+                            updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                        }
                     }
                 }
             } else {
@@ -506,24 +516,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account == null) {
             onComplete()
         } else {
-            account.product.updateCandles(chartTimeSpan, onFailure, { _ ->
-                candles = account.product.candlesForTimespan(chartTimeSpan)
+            account.product.updateCandles(chartTimeSpan, onFailure) { _ ->
+                if (lifecycle.isCreatedOrResumed) {
+                    candles = account.product.candlesForTimespan(chartTimeSpan)
+                    CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                        if (lifecycle.isCreatedOrResumed) {
+                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                            val price = ticker.price.toDoubleOrNull()
+                            if (price != null) {
+                                account.product.price = price
+                            }
+                            txt_chart_price.text = account.product.price.fiatFormat()
+                            txt_chart_account_value.text = account.value.fiatFormat()
 
-                CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
-                    if (price != null) {
-                        account.product.price = price
+                            chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
+                            setPercentChangeText(chartTimeSpan)
+                            checkTimespanButton()
+                            onComplete()
+                        }
                     }
-                    txt_chart_price.text = account.product.price.fiatFormat()
-                    txt_chart_account_value.text = account.value.fiatFormat()
-
-                    chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
-                    setPercentChangeText(chartTimeSpan)
-                    checkTimespanButton()
-                    onComplete()
                 }
-            })
+            }
         }
     }
 }

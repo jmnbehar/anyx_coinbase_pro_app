@@ -133,7 +133,7 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            CBProApi.candles(id, missingTime, granularity, 0).getCandles(onFailure, { candleList ->
+            CBProApi.candles(id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
@@ -165,7 +165,7 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
                     }
                 }
                 onComplete(didGetNewCandle)
-            })
+            }
         } else {
             onComplete(false)
         }

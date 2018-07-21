@@ -192,23 +192,23 @@ sealed class CBProApi : FuelRouting {
     class accounts() : CBProApi() {
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
-            var prefs = Prefs(context)
+            val prefs = Prefs(context)
             val timespan = Timespan.DAY
             val timespanValue = timespan.value()
             val granularity = Candle.granularityForTimespan(timespan)
 
-            var productList: MutableList<Product> = mutableListOf()
+            val productList: MutableList<Product> = mutableListOf()
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
-                    CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
+                    CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
                         product.dayCandles = candleList
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
                         if (productList.size == stashedProductList.size) {
                             getAccountsWithProductList(productList, onFailure, onComplete)
                         }
-                    })
+                    }
                 }
             } else {
                 CBProApi.products().executeRequest(onFailure = onFailure) { result ->
@@ -218,14 +218,14 @@ sealed class CBProApi : FuelRouting {
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
-                        CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure, { candleList ->
+                        CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
                             val newProduct = Product(product, candleList)
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
                                 prefs.stashedProducts = productList
                                 getAccountsWithProductList(productList, onFailure, onComplete)
                             }
-                        })
+                        }
                     }
                 }
             }

@@ -239,7 +239,7 @@ class AlertJobService : JobService() {
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                var currentPrice = Account.forCurrency(alert.currency)?.product?.price
+                val currentPrice = Account.forCurrency(alert.currency)?.product?.price
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     triggerAlert(alert)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {

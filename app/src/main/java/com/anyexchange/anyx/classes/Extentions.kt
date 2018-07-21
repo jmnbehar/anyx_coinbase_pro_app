@@ -1,5 +1,7 @@
 package com.anyexchange.anyx.classes
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleOwner
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -144,3 +146,9 @@ fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {
     val trimmedList = this.subList(firstInTimespan, this.lastIndex).toMutableList()
     trimmedList.addAll(newList)
 }
+
+val Lifecycle.isCreatedOrResumed : Boolean
+    get() = when (currentState) {
+        Lifecycle.State.STARTED, Lifecycle.State.RESUMED -> true
+        else -> false
+    }

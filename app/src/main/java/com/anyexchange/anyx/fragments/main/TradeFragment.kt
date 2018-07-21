@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.LifecycleOwner
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.text.Editable
@@ -28,7 +29,7 @@ import android.text.InputFilter
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class TradeFragment : RefreshFragment() {
+class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
@@ -286,8 +287,10 @@ class TradeFragment : RefreshFragment() {
             toast("Error!: ${result.error}")
             println("error!" )}
         account?.update(onFailure) {
-            updateButtonsAndText()
-            onComplete(false)
+            if (lifecycle.isCreatedOrResumed) {
+                updateButtonsAndText()
+                onComplete(false)
+            }
         }
         account?.let { account ->
             CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->

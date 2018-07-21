@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.LifecycleOwner
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
@@ -19,9 +20,9 @@ import org.jetbrains.anko.support.v4.toast
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class MarketFragment : RefreshFragment() {
+class MarketFragment : RefreshFragment(), LifecycleOwner {
     private var currentProduct: Product? = null
-    private lateinit var listView: ListView
+    private var listView: ListView? = null
 
     lateinit var inflater: LayoutInflater
 
@@ -45,8 +46,8 @@ class MarketFragment : RefreshFragment() {
             (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(product.currency)
         }
 
-        listView.adapter = ProductListViewAdapter(inflater, selectGroup)
-        listView.setHeightBasedOnChildren()
+        listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
+        listView?.setHeightBasedOnChildren()
 
         doneLoading()
         return rootView
@@ -58,7 +59,7 @@ class MarketFragment : RefreshFragment() {
 
         super.onResume()
         autoRefresh = Runnable {
-            refresh({ })
+            refresh() {}
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
@@ -72,36 +73,38 @@ class MarketFragment : RefreshFragment() {
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
-        var accountListSize = Account.list.size
+        val accountListSize = Account.list.size
         val time = Timespan.DAY
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
-            account.product.updateCandles(time, {
+            account.product.updateCandles(time, {//OnFailure
                 toast("Error")
                 onComplete(false)
-            }, { didUpdate ->
-                if (didUpdate) {
-                    productsUpdated++
-                    if (productsUpdated == accountListSize) {
-                        (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                        onComplete(true)
-                    }
-                } else {
-                    CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                        val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                        val price = ticker.price.toDoubleOrNull()
-                        if (price != null) {
-                            account.product.price = price
-                        }
+            }) { didUpdate ->   //OnSuccess
+                if (lifecycle.isCreatedOrResumed) {
+                    if (didUpdate) {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
-                            (listView.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                            (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                             onComplete(true)
+                        }
+                    } else {
+                        CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
+                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                            val price = ticker.price.toDoubleOrNull()
+                            if (price != null) {
+                                account.product.price = price
+                            }
+                            productsUpdated++
+                            if (productsUpdated == accountListSize) {
+                                (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                onComplete(true)
+                            }
                         }
                     }
                 }
-            })
+            }
         }
     }
 }
