@@ -23,7 +23,9 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
+import com.anyexchange.anyx.classes.Currency
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -246,14 +248,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
 
-        val account = account
-        val activity = activity!!
-        if (account == null) {
-            activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
+        if (account != null) {
+            System.out.println("Account not null")
+            switchAccount(account!!)
         } else {
-            switchAccount(account)
+            val mainActivity = activity as? MainActivity
+            val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
+            account = if (selectedCurrency != null) {
+                System.out.println("Account retrieved from Spinner")
+                Account.forCurrency(selectedCurrency)
+            } else {
+                System.out.println("Account reset to BTC")
+                Account.forCurrency(Currency.BTC)
+            }
         }
-
+        
         autoRefresh = Runnable {
             miniRefresh({ }, { })
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
