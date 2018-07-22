@@ -100,16 +100,16 @@ class LoginHelpActivity : AppCompatActivity() {
                 }
             }
         })
-        nextBtn?.onClick {
+        nextBtn?.setOnClickListener {
             currentPage += 1
             viewPager.setCurrentItem(currentPage, true)
         }
 
-        skipBtn?.onClick {
+        skipBtn?.setOnClickListener {
             finish()
         }
 
-        finishBtn?.onClick {
+        finishBtn?.setOnClickListener {
             finish()
         }
 

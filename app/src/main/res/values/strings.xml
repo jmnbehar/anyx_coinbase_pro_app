@@ -72,6 +72,8 @@
     <string name="chart_buy_btn">Buy</string>
     <string name="chart_sel_btn">Sell</string>
     <string name="chart_default_account">Account</string>
+    <string name="chart_default_balance">0.0</string>
+
     <string name="chart_wallet_label">%s wallet</string>
     <string name="chart_balance_text">%s %s</string>
 

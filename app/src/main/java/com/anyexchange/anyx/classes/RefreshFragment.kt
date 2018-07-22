@@ -83,7 +83,7 @@ open class RefreshFragment: Fragment() {
             title = string
             positiveButton(R.string.popup_ok_btn) { positiveAction() }
             if (negativeText != null) {
-                negativeButton(negativeText) { negativeAction }
+                negativeButton(negativeText) { negativeAction() }
             }
         }.show()
     }
