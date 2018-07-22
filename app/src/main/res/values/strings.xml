@@ -10,6 +10,16 @@
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
 
+    <string name="toast_success">Success</string>
+    <string name="toast_error">Error</string>
+    <string name="toast_coinbase_site_error">Cannot access Coinbase</string>
+    <string name="toast_coinbase_pro_site_error">Cannot access Coinbase Pro</string>
+
+    <string name="popup_ok_btn">OK</string>
+
+    <string name="error_generic_message">Error: %s</string>
+
+
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
     <string name="login_api_key_label">Api Key</string>
     <string name="login_api_secret_label">Api Secret</string>
@@ -41,6 +51,16 @@
     <string name="home_market_tab">Market</string>
     <string name="home_account_tab">Account</string>
 
+    //Accounts Fragment
+    <string name="accounts_title">All Accounts</string>
+    <string name="accounts_logged_out_message">Sign in to view account info</string>
+    <string name="accounts_percent_change_text">%s\n(%s%s)</string>
+
+    //Alerts Fragment
+    <string name="alerts_title">Alerts</string>
+    <string name="alerts_new_alert_label">New alert at: </string>
+    <string name="alerts_new_alert_button">Set</string>
+    <string name="alerts_current_price_label">Last %s trade price: </string>
 
     //Chart Fragment
     <string name="chart_timespan_1h">1H</string>
@@ -52,7 +72,38 @@
     <string name="chart_buy_btn">Buy</string>
     <string name="chart_sel_btn">Sell</string>
     <string name="chart_default_account">Account</string>
-    <string name="chart_default_balance">0.0</string>
+    <string name="chart_wallet_label">%s wallet</string>
+    <string name="chart_balance_text">%s %s</string>
+
+    //Send Fragment
+    <string name="send_title">Send</string>
+    <string name="send_send_btn">Send</string>
+    <string name="send_destination_blank_label">Destination</string>
+    <string name="send_destination_label">Destination (%s address)</string>
+    <string name="send_amount_label">Amount</string>
+    <string name="send_camera_btn">Camera Button</string>
+    <string name="send_amount_error">Error! Trying to send less than minimum which is %s</string>
+    <string name="send_invalid_destination_error">Error! Invalid %s address</string>
+
+    <string name="send_enter_amount_warning">Please enter amount to send</string>
+    <string name="send_address_not_found_warning">Address not found</string>
+    <string name="send_enter_destination_warning">Please enter destination address</string>
+    <string name="send_confirm_message">Send %s %s to %s</string>
+    <string name="send_confirm_button">Confirm</string>
+    <string name="send_cancel_button">Cancel</string>
+
+    //Settings Fragment
+    <string name="settings_log_out_btn">Log Out</string>
+    <string name="settings_log_in_btn">Log In</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_show_trade_confirm">Show confirm popup before buying or selling assets</string>
+    <string name="settings_show_send_confirm">Show confirm popup before sending assets</string>
+    <string name="settings_unknown"> </string>
+    <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
+    <string name="settings_anyx_eula">Read AnyX User Agreement</string>
+    <string name="settings_verify">Verify Account</string>
+    <string name="settings_log_out">Log Out</string>
 
     //Trade Fragment
     <string name="trade_title">Trade</string>
@@ -88,15 +139,16 @@
     <string name="transfer_transfer_btn">Transfer funds</string>
     <string name="transfer_cb_accounts_empty">All Coinbase accounts are empty</string>
 
-    <string name="settings_title">Settings</string>
-    <string name="settings_dark_mode">Dark Mode</string>
-    <string name="settings_show_trade_confirm">Show confirm popup before buying or selling assets</string>
-    <string name="settings_show_send_confirm">Show confirm popup before sending assets</string>
-    <string name="settings_unknown"> </string>
-    <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
-    <string name="settings_anyx_eula">Read AnyX User Agreement</string>
-    <string name="settings_verify">Verify Account</string>
-    <string name="settings_log_out">Log Out</string>
+    <string name="transfer_amount_error">Amount is not valid</string>
+    <string name="transfer_funds_error">Not enough funds</string>
+    <string name="transfer_amount_low_error">Error: Amount too low</string>
+
+    <string name="transfer_received_message">Transfer Received</string>
+    <string name="transfer_sent_message">Transfer Sent</string>
+    <string name="transfer_coinbase_account_empty">Coinbase %s Wallet is Empty</string>
+    <string name="transfer_account_empty">Coinbase Pro %s Wallet is Empty</string>
+
+    <string name="transfer_account_balance_text">"Coinbase Pro %s Balance: %s</string>
 
 
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
@@ -156,12 +208,6 @@ You're good to go!</item>
     <string name="anyx_eula_2_1">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.
         \nWe do not save any pictures taken with the camera, they are only used to capture QR codes. </string>
 
-
-    <string name="send_title">Send</string>
-    <string name="send_send_btn">Send</string>
-    <string name="send_destination">Destination</string>
-    <string name="send_amount">Amount</string>
-    <string name="send_camera_btn">Camera Button</string>
 
     <string name="send_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your Coinbase Pro trading account. BCH transfers are free and fast.</string>
     <string name="send_warning_2_bch">Warning: Please double check the destination address before sending, and ensure that it is a Bitcoin Cash (BCH) address. </string>

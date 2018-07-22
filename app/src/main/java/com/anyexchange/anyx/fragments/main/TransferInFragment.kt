@@ -133,23 +133,23 @@ class TransferInFragment : RefreshFragment() {
             val amount = amountString.toDoubleOrZero()
 
             if (amount <= 0) {
-                showPopup("Amount is not valid", { })
+                showPopup(R.string.transfer_amount_error)
             } else if (sourceAccount is Account.CoinbaseAccount) {
                 val coinbaseAccount = sourceAccount as Account.CoinbaseAccount
                 if (amount > coinbaseAccount.balance) {
-                    showPopup("Not enough funds", { })
+                    showPopup(R.string.transfer_funds_error)
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
                     CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                         val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                         if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
-                            showPopup("Error: Amount too low", { })
+                            showPopup(R.string.transfer_amount_low_error)
                         } else {
-                            showPopup("Error: " + result.errorMessage, { })
+                            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         }
                         activity.dismissProgressBar()
                     } , {
-                        toast("Transfer received")
+                        toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
                         refresh { activity.dismissProgressBar() }
@@ -158,21 +158,21 @@ class TransferInFragment : RefreshFragment() {
             } else if (sourceAccount is Account.PaymentMethod) {
                 val paymentMethod = sourceAccount as Account.PaymentMethod
                 if (paymentMethod.balance != null && amount > paymentMethod.balance) {
-                    showPopup("Not enough funds", { })
+                    showPopup(R.string.transfer_funds_error)
                 } else {
                     (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
                     CBProApi.getFromPayment(amount, currency, paymentMethod.id).executePost( { result ->
-                        showPopup("Error: " + result.errorMessage, { })
+                        showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         activity.dismissProgressBar()
                     } , {
-                        toast("Transfer Received")
+                        toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
                         refresh { activity.dismissProgressBar() }
                     })
                 }
             } else {
-                showPopup("Account could not be accessed", { })
+                showPopup(R.string.toast_error)
             }
         }
 
@@ -212,7 +212,7 @@ class TransferInFragment : RefreshFragment() {
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
             CBProApi.accounts().updateAllAccounts({
-                toast("Cannot access Coinbase Pro")
+                toast(R.string.toast_coinbase_pro_site_error)
                 isRefreshing = false
                 onComplete(false)
             }) {
@@ -223,7 +223,7 @@ class TransferInFragment : RefreshFragment() {
                 }
             }
             CBProApi.coinbaseAccounts().linkToAccounts({
-                toast("Cannot access Coinbase")
+                toast(R.string.toast_coinbase_site_error)
                 isRefreshing = false
                 onComplete(false)
             }, {
@@ -275,7 +275,7 @@ class TransferInFragment : RefreshFragment() {
         when (relevantAccounts.size) {
             0 -> {
                 sourceAccount = null
-                cbAccountText.text = "Coinbase $currency wallet is Empty"
+                cbAccountText.text = resources.getText(R.string.transfer_coinbase_account_empty, currency.toString())
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
                 interactiveLayout.visibility = View.INVISIBLE
@@ -332,6 +332,6 @@ class TransferInFragment : RefreshFragment() {
         } else {
             "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
-        cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
+        cbproBalanceText.text = resources.getString(R.string.transfer_account_balance_text, currency.toString(), cbproAccountBalanceString)
     }
 }

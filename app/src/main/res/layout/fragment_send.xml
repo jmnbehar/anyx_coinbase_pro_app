@@ -78,7 +78,7 @@
                 android:id="@+id/txt_send_amount_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/send_amount" />
+                android:text="@string/send_amount_label" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -112,7 +112,7 @@
                 android:id="@+id/txt_send_destination_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/send_destination" />
+                android:text="@string/send_destination_blank_label" />
 
             <LinearLayout
                 android:layout_width="match_parent"

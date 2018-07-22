@@ -112,23 +112,23 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            rootView.rbtn_chart_timespan_hour.text = "1H"
+            rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
             rootView.rbtn_chart_timespan_hour.setOnClickListener {
                 setChartTimespan(Timespan.HOUR)
             }
-            rootView.rbtn_chart_timespan_day.text = "1D"
+            rootView.rbtn_chart_timespan_day.text = resources.getString(R.string.chart_timespan_1d)
             rootView.rbtn_chart_timespan_day.setOnClickListener {
                 setChartTimespan(Timespan.DAY)
             }
-            rootView.rbtn_chart_timespan_week.text = "1W"
+            rootView.rbtn_chart_timespan_week.text = resources.getString(R.string.chart_timespan_1w)
             rootView.rbtn_chart_timespan_week.setOnClickListener {
                 setChartTimespan(Timespan.WEEK)
             }
-            rootView.rbtn_chart_timespan_month.text = "1M"
+            rootView.rbtn_chart_timespan_month.text = resources.getString(R.string.chart_timespan_1m)
             rootView.rbtn_chart_timespan_month.setOnClickListener {
                 setChartTimespan(Timespan.MONTH)
             }
-            rootView.rbtn_chart_timespan_year.text = "1Y"
+            rootView.rbtn_chart_timespan_year.text = resources.getString(R.string.chart_timespan_1y)
             rootView.rbtn_chart_timespan_year.setOnClickListener {
                 setChartTimespan(Timespan.YEAR)
             }
@@ -209,21 +209,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
     
     private fun setButtonsAndBalanceText(account: Account) {
-        (activity as? com.anyexchange.anyx.activities.MainActivity)?.let { activity ->
+        context?.let {
             val currency = account.currency
-            val buttonColors = currency.colorStateList(activity)
+            val buttonColors = currency.colorStateList(it)
             btn_chart_buy.backgroundTintList = buttonColors
             btn_chart_sell.backgroundTintList = buttonColors
-            val buttonTextColor = currency.buttonTextColor(activity)
+            val buttonTextColor = currency.buttonTextColor(it)
             btn_chart_buy.textColor = buttonTextColor
             btn_chart_sell.textColor = buttonTextColor
-            val tabColor = currency.colorPrimary(activity)
+            val tabColor = currency.colorPrimary(it)
             history_tab_layout.setSelectedTabIndicatorColor(tabColor)
-            val prefs = Prefs(activity)
+            val prefs = Prefs(it)
             if (prefs.isLoggedIn) {
-                txt_chart_ticker.text = "$currency wallet"
+                txt_chart_ticker.text = resources.getString(R.string.chart_wallet_label, currency.toString())
                 img_chart_account_icon.setImageResource(currency.iconId)
-                txt_chart_account_balance.text = "${account.balance.btcFormat()} $currency"
+                txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
                 txt_chart_account_value.text = account.value.fiatFormat()
 
                 historyPager?.visibility = View.VISIBLE
@@ -261,8 +261,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 System.out.println("Account reset to BTC")
                 Account.forCurrency(Currency.BTC)
             }
+            switchAccount(account!!)
         }
-        
+
         autoRefresh = Runnable {
             miniRefresh({ }, { })
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
@@ -472,7 +473,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         //TODO: why does this sometimes get a jsonArray instead of a JSON
                         val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                         val newBalance = apiAccount.balance.toDoubleOrZero()
-                        txt_chart_account_balance.text = newBalance.btcFormat() + " " + account.currency
+                        txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
                         txt_chart_account_value.text = account.value.fiatFormat()
                         miniRefresh(onFailure) {
                             account.apiAccount = apiAccount

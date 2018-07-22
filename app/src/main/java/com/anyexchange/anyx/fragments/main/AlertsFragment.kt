@@ -83,7 +83,7 @@ class AlertsFragment : RefreshFragment() {
 
         alertList = rootView.list_alerts
 
-        titleText.text = "Alerts"
+        titleText.text = resources.getString(R.string.alerts_title)
 
         switchCurrency(this.currency)
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -100,13 +100,13 @@ class AlertsFragment : RefreshFragment() {
         })
 
         priceUnitText.text = ""
-        triggerLabelText.text = "New custom alert at: "
+        triggerLabelText.text = resources.getString(R.string.alerts_new_alert_label)
 
         setButton.setOnClickListener { setAlert() }
-        setButton.text = "Set"
+        setButton.text = resources.getString(R.string.alerts_new_alert_label)
 
 
-        alertAdapter = AlertListViewAdapter(inflater, sortedAlerts, { view, alert ->
+        alertAdapter = AlertListViewAdapter(inflater, sortedAlerts) { view, alert ->
             val popup = PopupMenu(activity, view)
             //Inflating the Popup using xml file
             popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
@@ -120,7 +120,7 @@ class AlertsFragment : RefreshFragment() {
                 true
             }
             popup.show()
-        })
+        }
 
         alertList.adapter = alertAdapter
 
@@ -155,6 +155,7 @@ class AlertsFragment : RefreshFragment() {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
                 resources.displayMetrics).toInt()
     }
+
     private fun deleteAlert(alert: Alert) {
         prefs?.removeAlert(alert)
         alertAdapter?.alerts = sortedAlerts
@@ -183,7 +184,7 @@ class AlertsFragment : RefreshFragment() {
             priceLabelText.text = ""
             currentPriceText.text = ""
         } else {
-            priceLabelText.text = "Current " + currency.fullName + " price: "
+            priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
             currentPriceText.text = price.fiatFormat()
         }
         activity?.let { activity ->
@@ -202,7 +203,7 @@ class AlertsFragment : RefreshFragment() {
         get() {
             val prefs = Prefs(context!!)
             val alerts = prefs.alerts
-            return alerts.sortedWith(compareBy({ it.price }))
+            return alerts.sortedWith(compareBy { it.price })
         }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {

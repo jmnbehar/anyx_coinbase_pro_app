@@ -74,10 +74,14 @@ open class RefreshFragment: Fragment() {
     }
 
 
-    fun showPopup(string: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+    fun showPopup(stringTextResource: Int, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+        val string = resources.getString(stringTextResource)
+        showPopup(string, positiveAction, negativeText, negativeAction)
+    }
+    fun showPopup(string: String, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
         alert {
             title = string
-            positiveButton("OK") { positiveAction() }
+            positiveButton(R.string.popup_ok_btn) { positiveAction() }
             if (negativeText != null) {
                 negativeButton(negativeText) { negativeAction }
             }

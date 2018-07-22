@@ -38,10 +38,6 @@ class SendFragment : RefreshFragment() {
     private lateinit var destinationEditText: EditText
     private lateinit var destinationLabelText: TextView
 
-    private lateinit var twoFactorEditText: EditText
-    private lateinit var twoFactorLabelText: TextView
-    private lateinit var twoFactorButton: Button
-
     private lateinit var scanButton: ImageButton
 
     private lateinit var warning1TextView: TextView
@@ -82,7 +78,7 @@ class SendFragment : RefreshFragment() {
 
         sendButton = rootView.btn_send
 
-        titleText.text = "Send" //currency.toString()
+        titleText.text = resources.getText(R.string.send_title)
 
         switchCurrency()
 
@@ -99,18 +95,7 @@ class SendFragment : RefreshFragment() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        scanButton.onClick { getAddressFromCamera() }
-
-//        radioButtonBtc.isChecked = true
-//        radioButtonBtc.setOnClickListener {
-//            switchCurrency(Currency.BTC)
-//        }
-//        radioButtonEth.setOnClickListener {
-//            switchCurrency(Currency.ETH)
-//        }
-//        radioButtonLtc.setOnClickListener {
-//            switchCurrency(Currency.LTC)
-//        }
+        scanButton.setOnClickListener { getAddressFromCamera() }
 
         val prefs = Prefs(context!!)
 
@@ -118,15 +103,14 @@ class SendFragment : RefreshFragment() {
             val amount = amountEditText.text.toString()
             val destination = destinationEditText.text.toString()
             if (amount.isBlank()) {
-                toast("Please enter amount to send")
+                toast(R.string.send_enter_amount_warning)
             } else if (destination.isBlank()) {
-                toast("Please enter destination address")
+                toast(R.string.send_enter_destination_warning)
             } else if (prefs.shouldShowSendConfirmModal) {
                 alert {
-                    title = "Send $amount $currency to $destination"
-
-                    positiveButton("Confirm") { submitSend() }
-                    negativeButton("Cancel") { }
+                    title = resources.getString(R.string.send_confirm_message, amount, currency, destination)
+                    positiveButton(R.string.send_confirm_button) { submitSend() }
+                    negativeButton(R.string.send_cancel_button)  { }
                 }.show()
             } else {
                 submitSend()
@@ -160,16 +144,17 @@ class SendFragment : RefreshFragment() {
                         responseDataStr = responseDataStr.removePrefix("{\"message\":\"")
                         responseDataStr = responseDataStr.removeSuffix("\"}")
                         val errorString = when(responseDataStr) {
-                            "invalid crypto_address" -> "Error: Invalid $currency address"
+                            "invalid crypto_address" -> resources.getText(R.string.send_invalid_destination_error,
+                                    currency.toString())
                             else -> CBProApi.defaultPostFailure(result)
                         }
                         toast (errorString)
                     },
                     { _ -> //success
-                        toast("success")
+                        toast(R.string.toast_success)
                     })
         } else {
-            toast("error! Trying to send less than minimum which is $min")
+            toast(resources.getText(R.string.send_amount_error, min.toString()))
 //            TransferHub.sendToPayment(10.0, Currency.USD)
         }
     }
@@ -202,10 +187,10 @@ class SendFragment : RefreshFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        var barcode = data.extras.getString("BarCode")
+        val barcode = data.extras.getString("BarCode")
 
-        if (barcode.equals("")) {
-            toast("Address not found")
+        if (barcode == "") {
+            toast(R.string.send_address_not_found_warning)
         } else {
             //TODO: parse more advanced qr codes
             destinationEditText.setText(barcode)
@@ -216,7 +201,7 @@ class SendFragment : RefreshFragment() {
         this.currency = currency
 
         amountUnitText.text = currency.toString()
-        destinationLabelText.text = "Destination ($currency address)"
+        destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)
 
         context?.let { context ->
             val buttonColors = currency.colorStateList(context)

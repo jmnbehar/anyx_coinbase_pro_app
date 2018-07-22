@@ -68,20 +68,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     var tradeType: TradeType = TradeType.MARKET
 
-    var tradeSide: TradeSide = Companion.tradeSide
+    var tradeSide: TradeSide = Companion.tradeType
     val account: Account?
         get() {
             return ChartFragment.account
         }
 
     companion object {
-        var tradeSide = TradeSide.BUY
+        var tradeType = TradeSide.BUY
         var localCurrency = "USD"
 
         private var account: Account? = null
         fun newInstance(accountIn: Account, tradeSideIn: TradeSide): TradeFragment {
             account = accountIn
-            tradeSide = tradeSideIn
+            tradeType = tradeSideIn
             return TradeFragment()
         }
     }

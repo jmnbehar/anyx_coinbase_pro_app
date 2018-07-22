@@ -75,7 +75,7 @@ class SettingsFragment : RefreshFragment() {
             startActivity(intent)
         }
 
-        cbproEulaButton.onClick {
+        cbproEulaButton.setOnClickListener {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
         }
@@ -83,7 +83,7 @@ class SettingsFragment : RefreshFragment() {
         anyxEulaButton.visibility = View.GONE
         activity?.let { activity ->
             anyxEulaButton.visibility = View.VISIBLE
-            anyxEulaButton.onClick {
+            anyxEulaButton.setOnClickListener {
                 (activity as? MainActivity)?.goToFragment(EulaFragment(), "EULA")
             }
         }
@@ -133,9 +133,9 @@ class SettingsFragment : RefreshFragment() {
         }
 
         if (prefs.isLoggedIn) {
-            logoutButton.text = "Log Out"
+            logoutButton.text = resources.getText(R.string.settings_log_out_btn)
         } else {
-            logoutButton.text = "Log In"
+            logoutButton.text = resources.getText(R.string.settings_log_in_btn)
         }
 
     }

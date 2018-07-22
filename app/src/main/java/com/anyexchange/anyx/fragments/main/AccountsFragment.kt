@@ -60,7 +60,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         if (context!= null && Prefs(context).isLoggedIn) {
             rootView.layout_accounts_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
-            rootView.txt_all_accounts_label.text = "All accounts"
+            rootView.txt_all_accounts_label.text = resources.getString(R.string.accounts_title)
 
             lineChart.setOnChartValueSelectedListener(this)
             lineChart.onChartGestureListener = this
@@ -78,7 +78,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             rootView.layout_accounts_chart_info.visibility = View.GONE
             //TODO: put a login button here
             titleText.visibility = View.VISIBLE
-            titleText.text = "Sign in to view account info"
+            titleText.text = resources.getString(R.string.accounts_logged_out_message)
             doneLoading()
         }
 
@@ -113,8 +113,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
         val sign = if (change >= 0) { "+" } else { "" }
+        percentChangeText.text = resources.getString(R.string.accounts_percent_change_text,
+                percentChange.percentFormat(), sign, change.fiatFormat())
 
-        percentChangeText.text = percentChange.percentFormat() + "\n($sign${change.fiatFormat()})"
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
@@ -160,9 +161,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private fun sumAccountCandles() : List<Candle> {
         val btcAccount = Account.btcAccount?.product
         if (btcAccount != null) {
-            var accountTotalCandleList: MutableList<Candle> = mutableListOf()
+            val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             for (i in 0..(btcAccount.dayCandles.size - 1)) {
-                var usdAccountValue = Account.usdAccount?.value
+                val usdAccountValue = Account.usdAccount?.value
                 usdAccountValue?.let {
                     var totalCandleValue = it
                     val time = btcAccount.dayCandles[i].time
