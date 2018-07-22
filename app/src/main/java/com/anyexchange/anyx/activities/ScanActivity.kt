@@ -18,7 +18,6 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
     private var mScannerView: ZXingScannerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // TODO Auto-generated method stub
         super.onCreate(savedInstanceState)
         // setContentView(R.layout.redeem_it);
 
@@ -32,13 +31,7 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    override fun onResume() {
-        // TODO Auto-generated method stub
-        super.onResume()
-    }
-
     override fun onPause() {
-        // TODO Auto-generated method stub
         super.onPause()
 
         try {

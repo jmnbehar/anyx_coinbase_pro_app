@@ -434,7 +434,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         val productId = account?.product?.id
         if (productId == null) {
-            toast(R.string.toast_error)
+            errorToast()
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {

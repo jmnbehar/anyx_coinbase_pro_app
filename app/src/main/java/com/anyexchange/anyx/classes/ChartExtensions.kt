@@ -28,11 +28,11 @@ class PriceChart : LineChart {
         Vertical;
     }
 
-    var velocityTracker: VelocityTracker? = null
+    private var velocityTracker: VelocityTracker? = null
     private var isVerticalDrag: Boolean? = null
     private var onSideDrag: () -> Unit = { }
     private var onVerticalDrag: () -> Unit = { }
-    var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
+    private var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked

@@ -86,6 +86,7 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
         override val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
 
         override fun toString(): String {
+            //TODO: use string resources
             return if (currency.isFiat) {
                 "Coinbase $currency Balance: ${balance.fiatFormat()}"
             } else {

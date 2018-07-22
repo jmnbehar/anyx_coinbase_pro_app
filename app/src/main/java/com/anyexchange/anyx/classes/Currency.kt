@@ -19,6 +19,7 @@ enum class Currency {
     USD;
 
     override fun toString() : String {
+        //TODO: use string resources
         return when (this) {
             BTC -> "BTC"
             BCH -> "BCH"

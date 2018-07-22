@@ -142,6 +142,7 @@ class LoginFragment : Fragment()  {
         prefs.shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         prefs.shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
+        //TODO: use string resource
         if (apiKeyEditText.text.toString() != "*****") {
             apiKey = apiKeyEditText.text.toString().trimEnd()
         }

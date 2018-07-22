@@ -79,7 +79,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         //TODO: check in about refreshing product list
         for (account in Account.list) {
             account.product.updateCandles(time, {//OnFailure
-                toast("Error")
+                toast(R.string.toast_error)
                 onComplete(false)
             }) { didUpdate ->   //OnSuccess
                 if (lifecycle.isCreatedOrResumed) {

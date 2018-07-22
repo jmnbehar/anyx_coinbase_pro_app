@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             passphrase = encryption.decryptOrNull(passphrase)
             if((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
                 val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                var apiCredentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                val apiCredentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 loginWithCredentials(apiCredentials)
                 return true
             }
@@ -131,20 +131,15 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
             when (errorMessage) {
                 CBProApi.ErrorMessage.Forbidden -> {
-                    //TODO: show popup instead of toast
-                    toast("Error: Forbidden" +
-                            "\nMake sure your API Key has all required permissions")
-                }
-                CBProApi.ErrorMessage.InvalidApiKey-> {
-                    toast("Error: ${result.errorMessage}")
+                    toast(R.string.login_forbidden_error)
                 }
                 CBProApi.ErrorMessage.InvalidApiSignature, CBProApi.ErrorMessage.MissingApiSignature-> {
-                    toast("Error: Invalid API Secret")
+                    toast(R.string.login_secret_error)
                 }
-                CBProApi.ErrorMessage.InvalidPassphrase -> {
-                    toast("Error: ${result.errorMessage}")
+                CBProApi.ErrorMessage.InvalidApiKey, CBProApi.ErrorMessage.InvalidPassphrase-> {
+                    toast(resources.getString(R.string.error_generic_message, result.errorMessage))
                 }
-                else -> toast("Error: ${result.errorMessage}")
+                else -> toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             }
             progressDialog?.dismiss()
 
@@ -194,9 +189,9 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

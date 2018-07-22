@@ -67,7 +67,7 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
 
         val gson = Gson()
 
-
+        //TODO: delete some stuff here
         val hourCandlesElement = gson.toJsonTree(hourCandles, object : TypeToken<List<Candle>>() { }.type)
         val hourCandlesJsonArray = hourCandlesElement
 
@@ -117,7 +117,7 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
         var candles = candlesForTimespan(timespan).toMutableList()
 
         val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: longAgoInSeconds
-        var nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
+        val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
 
 //        if (timespan != product.candlesTimespan) {
 //            nextCandleTime = longAgoInSeconds
@@ -177,46 +177,6 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
             val id = splitString[1]
 //            val price = splitString[1].toDoubleOrZero()
             return Product(currency, id, listOf())
-        }
-
-        fun fromJson(jsonObject: JSONObject) : Product? {
-            jsonObject?.let { jsonObject ->
-                val currencyString = jsonObject.getString("currency")
-                val currency = Currency.forString(currencyString) ?: Currency.USD
-
-                val id = jsonObject.getString("id")
-
-                val gson = Gson()
-
-                val hourCandlesJsonArray = jsonObject.get("hourCandles")
-                val hourCandles = gson.fromJson(hourCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val dayCandlesJsonArray = jsonObject.get("dayCandles")
-                val dayCandles = gson.fromJson(dayCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val weekCandlesJsonArray = jsonObject.get("weekCandles")
-                val weekCandles = gson.fromJson(weekCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val monthCandlesJsonArray = jsonObject.get("monthCandles")
-                val monthCandles = gson.fromJson(monthCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val yearCandlesJsonArray = jsonObject.get("yearCandles")
-                val yearCandles = gson.fromJson(yearCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val allCandlesJsonArray = jsonObject.get("allCandles")
-                val allCandles = gson.fromJson(allCandlesJsonArray.toString(), Array<Candle>::class.java).toList()
-
-                val product = Product(currency, id, dayCandles)
-                product.hourCandles = hourCandles
-                product.dayCandles = dayCandles
-                product.weekCandles = weekCandles
-                product.monthCandles = monthCandles
-                product.yearCandles = yearCandles
-//                product.allTimeCandles = allCandles
-
-                return product
-            }
-            return  null
         }
 
         fun fiatProduct(currency: String) = Product(Currency.forString(currency) ?: Currency.USD, currency, listOf(fiatCandle))

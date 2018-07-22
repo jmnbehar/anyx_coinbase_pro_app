@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by anyexchange on 1/15/2018.

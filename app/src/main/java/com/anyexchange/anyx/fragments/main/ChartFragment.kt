@@ -80,11 +80,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             rootView.btn_chart_buy.setOnClickListener {
                 if (!prefs.isLoggedIn) {
-                    toast("Please log in")
-                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
-                    toast("Please validate your account in Settings")
-                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all required permissions.")
+                    toast(R.string.chart_please_login_message)
+                } else if (CBProApi.credentials?.isValidated == null) {
+                    toast(R.string.chart_please_validate_message)
+                } else if (CBProApi.credentials?.isValidated == false) {
+                    toast(R.string.chart_missing_permissions_message)
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.BUY)
@@ -96,12 +96,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             rootView.btn_chart_sell.setOnClickListener {
+                //TODO: merge this code w the buy btn listener
                 if (!prefs.isLoggedIn) {
-                    toast("Please log in")
-                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
-                    toast("Please validate your account in Settings")
-                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all required permissions")
+                    toast(R.string.chart_please_login_message)
+                } else if (CBProApi.credentials?.isValidated == null) {
+                    toast(R.string.chart_please_validate_message)
+                } else if (CBProApi.credentials?.isValidated == false) {
+                    toast(R.string.chart_missing_permissions_message)
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.SELL)
@@ -178,7 +179,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     val backupTimespan = chartTimeSpan
                     chartTimeSpan = Timespan.DAY
                     miniRefresh({
-                        toast("Error")
+                        toast(R.string.toast_error)
                         chartTimeSpan = backupTimespan
 //                        activity.dismissProgressBar()
                     }, {
@@ -193,7 +194,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         updateHistoryPagerAdapter(stashedOrders, stashedFills)
                     })
                 } else {
-                    toast("Error")
+                    toast(R.string.toast_error)
 //                    activity.dismissProgressBar()
                 }
             }, {    //success
@@ -292,7 +293,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         checkTimespanButton()
         chartTimeSpan = timespan
         miniRefresh({
-            toast("Error updating chart time")
+            //TODO: use string resource
+            toast(R.string.chart_update_error)
             (activity as? com.anyexchange.anyx.activities.MainActivity)?.dismissProgressBar()
         }, {
             checkTimespanButton()
@@ -314,8 +316,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun orderOnClick(order: ApiOrder) {
         alert {
-            title = "Order"
-
+            title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
             val createdTimeRaw = order.created_at
             val locale = Locale.getDefault()
@@ -338,6 +339,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             customView {
                 linearLayout {
                     verticalLayout {
+                        //TODO: use string resources
                         horizontalLayout("Side:", order.side).lparams(width = layoutWidth) {}
                         horizontalLayout("Size:", size).lparams(width = layoutWidth) {}
                         horizontalLayout("Filled Size:", filledSize).lparams(width = layoutWidth) {}
@@ -348,14 +350,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
-            positiveButton("OK") {  }
-            negativeButton("Cancel Order") {
+            positiveButton(R.string.popup_ok_btn) {  }
+            negativeButton(R.string.chart_cancel_order) {
                 CBProApi.cancelOrder(order.id).executeRequest({ }) {
                     if (lifecycle.isCreatedOrResumed) {
                         var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
                         updateHistoryPagerAdapter(orders)
-                        toast("Order cancelled")
+                        toast(R.string.chart_order_cancelled)
                     }
                 }
             }
@@ -363,8 +365,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun fillOnClick(fill: ApiFill) {
+        //TODO: use string resource
         alert {
-            title = "Fill"
+            title = resources.getString(R.string.chart_history_fill)
 
             val layoutWidth = 1000
             val createdTimeRaw = fill.created_at
@@ -386,6 +389,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             customView {
                 linearLayout {
                     verticalLayout {
+                        //TODO: use string resources
                         horizontalLayout("Side:  ", fill.side).lparams(width = layoutWidth) {}
                         horizontalLayout("Size:  ", size).lparams(width = layoutWidth) {}
                         horizontalLayout("Price:  ", price).lparams(width = layoutWidth) {}
@@ -394,7 +398,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
-            positiveButton("OK") {  }
+            positiveButton(R.string.popup_ok_btn) {  }
         }.show()
     }
 
@@ -461,8 +465,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val gson = Gson()
         val onFailure = { result: Result.Failure<String, FuelError> ->
-            toast("Error!: ${result.error}")
-            println("error!" )
+            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             onComplete(false)
         }
         val prefs = Prefs(context!!)

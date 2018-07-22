@@ -20,6 +20,7 @@
     <string name="error_generic_message">Error: %s</string>
 
 
+    //Login Strings
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
     <string name="login_api_key_label">Api Key</string>
     <string name="login_api_secret_label">Api Secret</string>
@@ -40,6 +41,10 @@
     <string name="login_help_cbpro_link">https://www.pro.coinbase.com/settings/api</string>
     <string name="login_help_skip_btn">Skip</string>
     <string name="login_help_new_account">New Coinbase Pro account</string>
+
+    <string name="login_forbidden_error">Error: Forbidden\nMake sure your API Key has all required permissions</string>
+    <string name="login_secret_error">Error: Invalid API Secret</string>
+
 
     <string name="currency_USD">USD</string>
     <string name="currency_BTC">BTC</string>
@@ -73,6 +78,18 @@
     <string name="chart_sel_btn">Sell</string>
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
+
+    <string name="chart_please_login_message">Please log in</string>
+    <string name="chart_please_validate_message">Please validate your account in Settings</string>
+    <string name="chart_missing_permissions_message">Please use an API Key with all required permissions.</string>
+
+    <string name="chart_update_error">Error updating chart</string>
+
+    <string name="chart_order_cancelled">Order cancelled</string>
+    <string name="chart_cancel_order">Cancel Order</string>
+
+    <string name="chart_history_order">Order</string>
+    <string name="chart_history_fill">Fill</string>
 
     <string name="chart_wallet_label">%s wallet</string>
     <string name="chart_balance_text">%s %s</string>

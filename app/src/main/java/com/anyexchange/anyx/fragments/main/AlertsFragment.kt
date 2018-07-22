@@ -103,7 +103,7 @@ class AlertsFragment : RefreshFragment() {
         triggerLabelText.text = resources.getString(R.string.alerts_new_alert_label)
 
         setButton.setOnClickListener { setAlert() }
-        setButton.text = resources.getString(R.string.alerts_new_alert_label)
+        setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
 
         alertAdapter = AlertListViewAdapter(inflater, sortedAlerts) { view, alert ->
@@ -138,7 +138,7 @@ class AlertsFragment : RefreshFragment() {
 //                    val alertAtPos = alerts.toList()[position]
 //                    deleteAlert(alertAtPos)
 //                    alertAdapter.notifyDataSetChanged()
-//                    toast("Item deleted")
+//                    toaasdfsdfast("Item deleted")
 //                }
 //            }
 //            true

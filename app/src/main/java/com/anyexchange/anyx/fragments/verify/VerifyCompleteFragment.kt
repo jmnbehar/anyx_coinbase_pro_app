@@ -68,6 +68,8 @@ class VerifyCompleteFragment : Fragment() {
             statusText.text = "Bummer"
             statusImageView.setImageResource(R.drawable.fail_icon)
         }
+
+        //TODO: use string resource
         infoText.text = when (verifyStatus) {
             VerificationStatus.Success -> "Woohoo!\nYour account is verified"
             VerificationStatus.RepayError -> "Due to an unknown error, you may have lost a very small quantity of $currency. Please reach out to our verification support at anyx.verify@gmail.com"
@@ -81,6 +83,7 @@ class VerifyCompleteFragment : Fragment() {
     }
 
     fun missingPermissionString(permission: String) : String {
+        //TODO: use string resource
         return "Your account could not be verified because your API Key does not have the \"$permission\" permission. " +
                 "\n\nPlease create a new API Key with View, Transfer, Bypass Two-Factor Auth, and Trade permissions."
     }

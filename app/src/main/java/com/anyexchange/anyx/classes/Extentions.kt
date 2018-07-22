@@ -74,13 +74,13 @@ fun Double.btcFormatShortened(): String {
     return string
 }
 fun Double.fiatFormat(): String {
-    var numberFormat = NumberFormat.getNumberInstance(Locale.US)
+    val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
     val sign = if (this >= 0) { "" } else { "-" }
-    val output = "$sign\$${numberFormat.format(this.absoluteValue)}"
-    return output
+    //TODO: use string resource
+    return "$sign\$${numberFormat.format(this.absoluteValue)}"
 }
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
@@ -98,6 +98,7 @@ val Result.Failure<Any, FuelError>.errorMessage : String
             (errorData["message"] as? String) ?: error.response.responseMessage
         } else {
             if (error.response.statusCode == CBProApi.ErrorCode.NoInternet.code) {
+                //TODO: use string resource
                 "Can't access Coinbase Pro"
             } else {
                 ""
@@ -133,8 +134,7 @@ fun Calendar.timeInSeconds() : Long {
 
 fun Date.timeInSeconds() : Long {
     val floatMillis = this.time
-    val floatSeconds = floatMillis / 1000
-    return floatSeconds
+    return floatMillis / 1000
 }
 
 fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {

@@ -33,6 +33,7 @@ sealed class CBProApi : FuelRouting {
         fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = CBProApi.ErrorCode.withCode(result.error.response.statusCode)
 
+            //TODO: use string resources
             return when (errorCode) {
                 CBProApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
                 CBProApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
@@ -661,6 +662,7 @@ sealed class CBProApi : FuelRouting {
         InvalidCryptoAddress;
 
         override fun toString(): String {
+            //TODO: use string resources
             return when (this) {
                 Forbidden -> "Forbidden"
                 InvalidApiKey -> "Invalid API Key"

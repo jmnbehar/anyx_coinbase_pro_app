@@ -76,6 +76,8 @@ class VerifySendFragment : Fragment() {
 
     private fun sendCryptoToVerify() {
         CBProApi.coinbaseAccounts().linkToAccounts({
+
+            //TODO: use string resource
             toast("Unknown Error: Try again later")
         }, {
             val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
@@ -133,6 +135,7 @@ class VerifySendFragment : Fragment() {
     fun updateViews() {
         val account = Account.forCurrency(currency)
 
+        //TODO: use string resource
         var explanationText = "To verify your account we will test to ensure that your API Key has all required permissions."
         if (account?.balance ?: 0.0 > 0.0) {
             explanationText += "\n\nA very small amount of $currency may get sent to your Coinbase account."
