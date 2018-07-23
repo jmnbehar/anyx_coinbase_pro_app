@@ -33,6 +33,7 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -251,7 +252,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
             showProgressBar()
             CBProApi.accounts().getAllAccountInfo(this, { _ ->
-                toast("Error!")
+                toast(R.string.toast_error)
                 dismissProgressBar()
                 returnToLogin()
             }, {
@@ -450,13 +451,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
             FragmentType.SEND -> {
+
                 if (!prefs.isLoggedIn) {
-                    //do nothing
-                    toast("Please log in")
+                    toast(R.string.toast_please_login_message)
                     null
-                } else if (CBProApi.credentials?.isValidated != true) {
-                    //do nothing
-                    toast("Please validate your account in Settings to send crypto assets")
+                } else if (CBProApi.credentials?.isValidated == null) {
+                    toast(R.string.toast_please_validate_message)
+                    null
+                } else if (CBProApi.credentials?.isValidated == false) {
+                    toast(R.string.toast_missing_permissions_message)
                     null
                 } else {
                     SendFragment.newInstance()
@@ -465,11 +468,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER_IN -> {
                 if (!prefs.isLoggedIn) {
-                    toast("Please log in")
-                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
-                    toast("Please validate your account in Settings")
-                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
+                    toast(R.string.toast_please_login_message)
+                } else if (CBProApi.credentials?.isValidated == null) {
+                    toast(R.string.toast_please_validate_message)
+                } else if (CBProApi.credentials?.isValidated == false) {
+                    toast(R.string.toast_missing_permissions_message)
                 } else {
                     showProgressBar()
                     val depositFragment = TransferInFragment.newInstance()
@@ -479,7 +482,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             depositFragment.skipNextRefresh = true
                             goToFragment(depositFragment, tag)
                         } else {
-                            toast("Error")
+                            toast(R.string.toast_error)
                         }
                     }
                 }
@@ -487,11 +490,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.TRANSFER_OUT -> {
                 if (!prefs.isLoggedIn) {
-                    toast("Please log in")
-                } else if (CBProApi.credentials?.isValidated == null) { //(CBProApi.credentials?.isValidated == null) {
-                    toast("Please validate your account in Settings")
-                } else if (CBProApi.credentials?.isValidated == false) { // (CBProApi.credentials?.isValidated == false) {
-                    toast("Please use an API Key with all permissions.")
+                    toast(R.string.toast_please_login_message)
+                } else if (CBProApi.credentials?.isValidated == null) {
+                    toast(R.string.toast_please_validate_message)
+                } else if (CBProApi.credentials?.isValidated == false) {
+                    toast(R.string.toast_missing_permissions_message)
                 } else {
                     showProgressBar()
                     val withdrawFragment = TransferOutFragment.newInstance()
@@ -501,7 +504,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             withdrawFragment.skipNextRefresh = true
                             goToFragment(withdrawFragment, tag)
                         } else {
-                            toast("Error")
+                            toast(R.string.toast_error)
                         }
                     }
                 }
@@ -510,7 +513,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.SETTINGS -> SettingsFragment.newInstance()
             FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
-                println("Do not use this function for tradeFragments")
+                System.out.println("Do not use this function for tradeFragments")
                 null
             }
             FragmentType.OTHER -> null
@@ -519,7 +522,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
         } else {
-            println("Error switching fragments")
+            System.out.println("Error switching fragments")
         }
     }
     fun goToFragment(fragment: RefreshFragment, tag: String) {

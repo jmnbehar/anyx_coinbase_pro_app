@@ -41,6 +41,16 @@ fun ViewManager.horizontalLayout(string1: String, string2: String) : LinearLayou
     }
 }
 
+fun ViewManager.horizontalLayout(string1Id: Int, string2: String) : LinearLayout {
+    return linearLayout {
+        val string1 = resources.getString(string1Id)
+        textView(string1).lparams(weight = 1f)
+        space().lparams(weight = 20f)
+        textView(string2).lparams(weight = 1f)
+        padding = dip(3)
+    }
+}
+
 fun ListView.setHeightBasedOnChildren(): Int {
     val listAdapter = adapter ?: return 0
     val bottomPadding = 66

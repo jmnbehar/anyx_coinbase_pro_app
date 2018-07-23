@@ -234,11 +234,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
 
             if (amount <= 0) {
-                toast("Amount is not valid")
+                toast(R.string.trade_invalid_amount)
             } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
-                toast("Limit is not valid")
+                toast(R.string.trade_invalid_limit)
             } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
-                toast("Stop is not valid")
+                toast(R.string.trade_invalid_stop)
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
                     account?.let { account ->
@@ -281,7 +281,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure = { result: Result.Failure<String, FuelError> ->
-            toast("Error!: ${result.error}")
+            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             println("error!" )}
         account?.update(onFailure) {
             if (lifecycle.isCreatedOrResumed) {
@@ -335,12 +335,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         val currencyString = account?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
-            "less than 0.01"
+            "less than $0.01"
         } else {
             feeEstimate.fiatFormat()
         }
         val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
+            //TODO: Use string resources
             title = "Alert"
             customView {
                 linearLayout {
@@ -434,7 +435,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         val productId = account?.product?.id
         if (productId == null) {
-            errorToast()
+            toast(R.string.toast_error)
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {

@@ -148,7 +148,7 @@ class SendFragment : RefreshFragment() {
                                     currency.toString())
                             else -> CBProApi.defaultPostFailure(result)
                         }
-                        toast (errorString)
+                        toast(errorString)
                     },
                     { _ -> //success
                         toast(R.string.toast_success)

@@ -80,11 +80,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             rootView.btn_chart_buy.setOnClickListener {
                 if (!prefs.isLoggedIn) {
-                    toast(R.string.chart_please_login_message)
+                    toast(R.string.toast_please_login_message)
                 } else if (CBProApi.credentials?.isValidated == null) {
-                    toast(R.string.chart_please_validate_message)
+                    toast(R.string.toast_please_validate_message)
                 } else if (CBProApi.credentials?.isValidated == false) {
-                    toast(R.string.chart_missing_permissions_message)
+                    toast(R.string.toast_missing_permissions_message)
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.BUY)
@@ -98,11 +98,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             rootView.btn_chart_sell.setOnClickListener {
                 //TODO: merge this code w the buy btn listener
                 if (!prefs.isLoggedIn) {
-                    toast(R.string.chart_please_login_message)
+                    toast(R.string.toast_please_login_message)
                 } else if (CBProApi.credentials?.isValidated == null) {
-                    toast(R.string.chart_please_validate_message)
+                    toast(R.string.toast_please_validate_message)
                 } else if (CBProApi.credentials?.isValidated == false) {
-                    toast(R.string.chart_missing_permissions_message)
+                    toast(R.string.toast_missing_permissions_message)
                 } else {
                     if (tradeFragment == null) {
                         tradeFragment = TradeFragment.newInstance(account, TradeSide.SELL)
@@ -293,7 +293,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         checkTimespanButton()
         chartTimeSpan = timespan
         miniRefresh({
-            //TODO: use string resource
             toast(R.string.chart_update_error)
             (activity as? com.anyexchange.anyx.activities.MainActivity)?.dismissProgressBar()
         }, {
@@ -339,14 +338,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             customView {
                 linearLayout {
                     verticalLayout {
-                        //TODO: use string resources
-                        horizontalLayout("Side:", order.side).lparams(width = layoutWidth) {}
-                        horizontalLayout("Size:", size).lparams(width = layoutWidth) {}
-                        horizontalLayout("Filled Size:", filledSize).lparams(width = layoutWidth) {}
-                        horizontalLayout("Price:", price).lparams(width = layoutWidth) {}
-                        horizontalLayout("Status:", order.status).lparams(width = layoutWidth) {}
-                        horizontalLayout("Fill fees:", fillFees).lparams(width = layoutWidth) {}
-                        horizontalLayout("Time:", createdTime).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_side_label, order.side).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_time_label, createdTime).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
@@ -365,7 +363,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun fillOnClick(fill: ApiFill) {
-        //TODO: use string resource
         alert {
             title = resources.getString(R.string.chart_history_fill)
 
@@ -389,12 +386,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             customView {
                 linearLayout {
                     verticalLayout {
-                        //TODO: use string resources
-                        horizontalLayout("Side:  ", fill.side).lparams(width = layoutWidth) {}
-                        horizontalLayout("Size:  ", size).lparams(width = layoutWidth) {}
-                        horizontalLayout("Price:  ", price).lparams(width = layoutWidth) {}
-                        horizontalLayout("Fee:  ", fee).lparams(width = layoutWidth) {}
-                        horizontalLayout("Time:  ", createdTime).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_side_label, fill.side).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_fee_label, fee).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_time_label, createdTime).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }

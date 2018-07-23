@@ -10,11 +10,6 @@
     <string name="channel_name">notification-channel</string>
     <string name="channel_description">AnyX price alerts</string>
 
-    <string name="toast_success">Success</string>
-    <string name="toast_error">Error</string>
-    <string name="toast_coinbase_site_error">Cannot access Coinbase</string>
-    <string name="toast_coinbase_pro_site_error">Cannot access Coinbase Pro</string>
-
     <string name="popup_ok_btn">OK</string>
 
     <string name="error_generic_message">Error: %s</string>
@@ -30,6 +25,7 @@
     <string name="login_skip_btn">Skip login</string>
     <string name="login_help_btn">Help</string>
     <string name="login_login_btn">Log in</string>
+    <string name="login_stars">*****</string>
 
     <string name="login_disclaimer">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
 
@@ -56,6 +52,18 @@
     <string name="home_market_tab">Market</string>
     <string name="home_account_tab">Account</string>
 
+    //MainActivity
+    <string name="toast_please_login_message">Please log in</string>
+    <string name="toast_please_validate_message">Please validate your account in Settings</string>
+    <string name="toast_missing_permissions_message">Please use an API Key with all required permissions.</string>
+
+    <string name="toast_success">Success</string>
+    <string name="toast_error">Error</string>
+    <string name="toast_coinbase_site_error">Cannot access Coinbase</string>
+    <string name="toast_coinbase_pro_site_error">Cannot access Coinbase Pro</string>
+
+
+
     //Accounts Fragment
     <string name="accounts_title">All Accounts</string>
     <string name="accounts_logged_out_message">Sign in to view account info</string>
@@ -79,10 +87,6 @@
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
 
-    <string name="chart_please_login_message">Please log in</string>
-    <string name="chart_please_validate_message">Please validate your account in Settings</string>
-    <string name="chart_missing_permissions_message">Please use an API Key with all required permissions.</string>
-
     <string name="chart_update_error">Error updating chart</string>
 
     <string name="chart_order_cancelled">Order cancelled</string>
@@ -90,6 +94,15 @@
 
     <string name="chart_history_order">Order</string>
     <string name="chart_history_fill">Fill</string>
+
+    <string name="chart_history_side_label">Side:  </string>
+    <string name="chart_history_size_label">Size:  </string>
+    <string name="chart_history_filled_size_label">FilledSize:  </string>
+    <string name="chart_history_price_label">Price:  </string>
+    <string name="chart_history_status_label">Status:  </string>
+    <string name="chart_history_filled_fees_label">Filled Fees:  </string>
+    <string name="chart_history_fee_label">Fee:  </string>
+    <string name="chart_history_time_label">Time:  </string>
 
     <string name="chart_wallet_label">%s wallet</string>
     <string name="chart_balance_text">%s %s</string>
@@ -143,6 +156,10 @@
     <string name="trade_blank_total">Total =</string>
     <string name="trade_total_label">Total (%s) =</string>
 
+    <string name="trade_invalid_amount">Invalid Amount</string>
+    <string name="trade_invalid_limit">Invalid Limit Price</string>
+    <string name="trade_invalid_stop">Invalid Stop Price</string>
+
     <string name="trade_balance_label">Available %s Balance:</string>
     <string name="trade_last_trade_price_label">%s Last Trade</string>
 
@@ -172,6 +189,17 @@
 
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
     <string name="transfer_bank_info">Bank wire transfers take one business day to process.</string>
+
+
+    //Verify
+    <string name="verify_email_help">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
+
+    <string name="verify_unknown_error">Unknown Error: Try again later</string>
+
+    <string name="verify_explanation_message_no_risk">To verify your account we will test to ensure that your API Key has all required permissions.</string>
+    <string name="verify_explanation_message">To verify your account we will test to ensure that your API Key has all required permissions.\n\nA very small amount of %s may get sent to your Coinbase account.</string>
+
+
 
     <string-array name="login_help_mobile_titles">
         <item>Create a new API Key on your phone</item>
@@ -241,7 +269,6 @@ You're good to go!</item>
     <string name="send_warning_2_ltc">Warning: Please double check the destination address before sending. </string>
 
 
-    <string name="verify_email_help">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
 
 
 </resources>

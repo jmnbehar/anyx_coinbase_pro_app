@@ -142,14 +142,14 @@ class LoginFragment : Fragment()  {
         prefs.shouldSaveApiInfo = saveApiInfoCheckBox.isChecked
         prefs.shouldSavePassphrase = saveApiInfoCheckBox.isChecked
 
-        //TODO: use string resource
-        if (apiKeyEditText.text.toString() != "*****") {
+        val loginStars = resources.getString(R.string.login_stars)
+        if (apiKeyEditText.text.toString() != loginStars) {
             apiKey = apiKeyEditText.text.toString().trimEnd()
         }
-        if (apiSecretEditText.text.toString() != "*****") {
+        if (apiSecretEditText.text.toString() != loginStars) {
             apiSecret = apiSecretEditText.text.toString().trimEnd()
         }
-        if (passphraseEditText.text.toString() != "*****") {
+        if (passphraseEditText.text.toString() != loginStars) {
             passphrase = passphraseEditText.text.toString()
         }
         
