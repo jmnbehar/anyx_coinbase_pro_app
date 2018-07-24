@@ -41,9 +41,9 @@ class HistoryListFragment() : Fragment() {
         val rootView = inflater.inflate(R.layout.list_view, container, false)
         historyList = rootView.list_view
         if (isOrderList) {
-            historyList.adapter = HistoryListViewAdapter(true, orders, resources, orderOnClick =  { order -> onOrderClick(order)})
+            historyList.adapter = HistoryListViewAdapter(context!!, true, orders, resources, orderOnClick =  { order -> onOrderClick(order)})
         } else {
-            historyList.adapter = HistoryListViewAdapter(false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
+            historyList.adapter = HistoryListViewAdapter(context!!,false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
         }
 //        val listHeight = historyList.setHeightBasedOnChildren()
 //

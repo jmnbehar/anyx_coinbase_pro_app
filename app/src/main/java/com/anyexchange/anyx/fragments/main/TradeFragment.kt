@@ -32,8 +32,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
 
-    private lateinit var usdBalanceText: TextView
-    private lateinit var usdBalanceLabelText: TextView
+    private lateinit var fiatBalanceText: TextView
+    private lateinit var fiatBalanceLabelText: TextView
     private lateinit var cryptoBalanceText: TextView
     private lateinit var cryptoBalanceLabelText: TextView
     private lateinit var currentPriceLabelText: TextView
@@ -66,20 +66,21 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     var tradeType: TradeType = TradeType.MARKET
 
-    var tradeSide: TradeSide = Companion.tradeType
+    var tradeSide: TradeSide = Companion.tradeSide
     val account: Account?
         get() {
             return ChartFragment.account
         }
 
     companion object {
-        var tradeType = TradeSide.BUY
-        var localCurrency = "USD"
+        var tradeSide = TradeSide.BUY
+        var fiatCurrency = Currency.USD
 
         private var account: Account? = null
-        fun newInstance(accountIn: Account, tradeSideIn: TradeSide): TradeFragment {
-            account = accountIn
-            tradeType = tradeSideIn
+        fun newInstance(account: Account, tradeSide: TradeSide, fiatCurrency: Currency): TradeFragment {
+            this.account = account
+            this.tradeSide = tradeSide
+            this.fiatCurrency = fiatCurrency
             return TradeFragment()
         }
     }
@@ -103,8 +104,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         limitEditText = rootView.etxt_trade_limit
         limitUnitText = rootView.txt_trade_limit_unit
 
-        usdBalanceText = rootView.txt_trade_usd_balance
-        usdBalanceLabelText = rootView.txt_trade_usd_balance_label
+        fiatBalanceText = rootView.txt_trade_usd_balance
+        fiatBalanceLabelText = rootView.txt_trade_usd_balance_label
         cryptoBalanceText = rootView.txt_trade_crypto_balance
         cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
         currentPriceLabelText = rootView.txt_trade_crypto_current_price_label
@@ -313,9 +314,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
-                usdBalanceText.text = Account.usdAccount?.availableBalance?.fiatFormat()
+                fiatBalanceText.text = Account.fiatAccount?.availableBalance?.fiatFormat()
 
-                usdBalanceLabelText.text = resources.getString(R.string.trade_balance_label, Currency.USD.toString())
+                fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, Currency.USD.toString())
                 cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
 
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
@@ -573,7 +574,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 val limitTab = tradeTypeTabLayout.getTabAt(1)
                 amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 limitTab?.select()
-                limitUnitText.text = localCurrency
+                limitUnitText.text = fiatCurrency.toString()
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = resources.getString(R.string.trade_limit_label)
 
@@ -609,7 +610,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 val stopTab = tradeTypeTabLayout.getTabAt(2)
                 stopTab?.select()
-                limitUnitText.text = localCurrency
+                limitUnitText.text = fiatCurrency.toString()
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = resources.getString(R.string.trade_stop_label)
                 advancedOptionsCheckBox.visibility = View.INVISIBLE
@@ -622,18 +623,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
                     tradeSideBuyRadioButton.isChecked = true
                     when (tradeType) {
-                        TradeType.MARKET -> {
-                            amountUnitText.text = localCurrency
+                        TradeType.MARKET, TradeType.STOP -> {
+                            amountUnitText.text = fiatCurrency.toString()
                             totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
                         }
                         TradeType.LIMIT -> {
                             amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, localCurrency)
-                        }
-                        TradeType.STOP -> {
-                            amountUnitText.text = localCurrency
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
-
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
                         }
                     }
                 }
@@ -641,7 +637,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     submitOrderButton.text =  resources.getString(R.string.trade_sell_order_btn)
                     tradeSideSellRadioButton.isChecked = true
                     amountUnitText.text = account.currency.toString()
-                    totalLabelText.text = resources.getString(R.string.trade_total_label, localCurrency)
+                    totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
                 }
             }
         }

@@ -71,7 +71,6 @@ class OnboardActivity : AppCompatActivity() {
             indicators[i].visibility = View.GONE
         }
 
-        val imageIndicator = indicators[0]
         indicators[0].setImageResource(R.drawable.white)
         nextBtn = intro_btn_next
         skipBtn = intro_btn_skip
@@ -124,19 +123,19 @@ class OnboardActivity : AppCompatActivity() {
                 }
             }
         })
-        nextBtn?.onClick {
+        nextBtn?.setOnClickListener {
             currentPage += 1
             viewPager.setCurrentItem(currentPage, true)
         }
 
         val prefs = Prefs(this)
 
-        skipBtn?.onClick {
+        skipBtn?.setOnClickListener {
             finish()
             prefs.isFirstTime = false
         }
 
-        finishBtn?.onClick {
+        finishBtn?.setOnClickListener {
             finish()
             prefs.isFirstTime = false
         }

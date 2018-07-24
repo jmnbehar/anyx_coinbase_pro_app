@@ -108,7 +108,6 @@ val Result.Failure<Any, FuelError>.errorMessage : String
             (errorData["message"] as? String) ?: error.response.responseMessage
         } else {
             if (error.response.statusCode == CBProApi.ErrorCode.NoInternet.code) {
-                //TODO: use string resource
                 "Can't access Coinbase Pro"
             } else {
                 ""

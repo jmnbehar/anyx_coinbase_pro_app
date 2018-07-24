@@ -29,6 +29,8 @@ private const val UNPAID_FEES = "unpaid_fees_"
 private const val APPROVED_API_KEYS = "approved_api_keys"
 private const val REJECTED_API_KEYS = "rejected_api_keys"
 private const val RAPID_PRICE_MOVES = "rapid_price_movement"
+private const val PREFERRED_FIAT = "preferred_fiat"
+
 
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
@@ -87,6 +89,12 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
+    var preferredFiat: Currency
+        get() = Currency.forString(prefs.getString(PREFERRED_FIAT, "USD"))?: Currency.USD
+        set(value) = if (value.isFiat) {
+                prefs.edit().putString(SAVE_PASSPHRASE, value.toString()).apply()
+            } else { }
+
     var alerts: Set<Alert>
         get() = prefs.getStringSet(ALERTS, setOf<String>()).map { s -> Alert.fromString(s) }.toSet()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
@@ -96,7 +104,7 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
     fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
-        var tempRapidMovementAlerts = rapidMovementAlerts.toMutableSet()
+        val tempRapidMovementAlerts = rapidMovementAlerts.toMutableSet()
         if (!isActive && rapidMovementAlerts.contains(currency)) {
             tempRapidMovementAlerts.remove(currency)
         } else if (isActive && !rapidMovementAlerts.contains(currency)) {
@@ -108,7 +116,7 @@ class Prefs (var context: Context) {
     var stashedFiatAccount: Account?
         get() {
             val gson = Gson()
-            val fiatString = Currency.USD.toString()
+            val fiatString = prefs.getString(PREFERRED_FIAT, Currency.USD.toString())
             val accountString = prefs.getString(ACCOUNT + fiatString, "")
             if (accountString.isNotBlank()) {
                 val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
@@ -119,9 +127,14 @@ class Prefs (var context: Context) {
         }
         set(value) {
             val gson = Gson()
-            Account.usdAccount?.let { account ->
-                val accountJson = gson.toJson(account.apiAccount) ?: ""
-                prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
+            if (value != null) {
+                val accountJson = gson.toJson(value.apiAccount) ?: ""
+                prefs.edit().putString(ACCOUNT + value.currency.toString(), accountJson).apply()
+            } else {
+                //for each fiat currency:
+                prefs.edit().putString(ACCOUNT + Currency.USD.toString(), null).apply()
+                prefs.edit().putString(ACCOUNT + Currency.EUR.toString(), null).apply()
+
             }
         }
 

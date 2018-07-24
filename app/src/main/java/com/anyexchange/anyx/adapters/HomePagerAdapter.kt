@@ -52,7 +52,6 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
-            //TODO: consider using string resources
             0 -> context.resources.getString(R.string.home_market_tab)
             1 -> context.resources.getString(R.string.home_account_tab)
             else -> context.resources.getString(R.string.home_other_tab, position + 1)

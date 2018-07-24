@@ -9,7 +9,6 @@ import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.list_row_account.view.*
-import kotlinx.android.synthetic.main.list_row_product.view.*
 
 /**
  * Created by anyexchange on 11/12/2017.
@@ -19,7 +18,7 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
 
     override fun getCount(): Int {
         val listSize = Account.list.size
-        return if (Account.usdAccount != null) { listSize + 1 } else { listSize }
+        return if (Account.fiatAccount != null) { listSize + 1 } else { listSize }
     }
 
     override fun getItem(i: Int): Any {
@@ -33,9 +32,9 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
     private val sortedAccountList: List<Account>
         get() {
             val sortedAccounts = Account.list.sortedWith(compareBy({ it.value }, { it.currency.orderValue })).reversed().toMutableList()
-            val usdAccount = Account.usdAccount
-            if (usdAccount != null) {
-                sortedAccounts.add(usdAccount)
+            val fiatAccount = Account.fiatAccount
+            if (fiatAccount != null) {
+                sortedAccounts.add(fiatAccount)
             }
             return sortedAccounts
         }
@@ -71,7 +70,7 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         if(i < accounts.size) {
             val account = accounts[i]
 
-            if (account.currency != Currency.USD) {
+            if (!account.currency.isFiat) {
                 viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
                 outputView.setOnClickListener { onClick(account) }
 

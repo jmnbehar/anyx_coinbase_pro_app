@@ -36,7 +36,7 @@ class DataFragment : Fragment() {
         activity?.let { activity ->
             val prefs = Prefs(activity)
             prefs.stashedAccountList = Account.list
-            prefs.stashedFiatAccount = Account.usdAccount
+            prefs.stashedFiatAccount = Account.fiatAccount
         }
     }
 
@@ -65,9 +65,9 @@ class DataFragment : Fragment() {
             Account.list = prefs.stashedAccountList
         }
         if (backupFiatAccount != null) {
-            Account.usdAccount = backupFiatAccount
-        } else if (Account.usdAccount == null){
-            Account.usdAccount = prefs.stashedFiatAccount
+            Account.fiatAccount = backupFiatAccount
+        } else if (Account.fiatAccount == null){
+            Account.fiatAccount = prefs.stashedFiatAccount
         }
     }
 

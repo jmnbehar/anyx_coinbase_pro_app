@@ -39,10 +39,12 @@ open class RefreshFragment: Fragment() {
         }
         skipNextRefresh = false
         showDarkMode()
+
+        System.out.println("Removing spinner: ")
         if (activity is com.anyexchange.anyx.activities.MainActivity) {
             (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
             (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.visibility = View.GONE
-            (activity as com.anyexchange.anyx.activities.MainActivity).toolbar.title = "AnyX"
+            (activity as com.anyexchange.anyx.activities.MainActivity).toolbar.title = resources.getString(R.string.app_name)
         }
     }
 

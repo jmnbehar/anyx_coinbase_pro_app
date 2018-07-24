@@ -59,54 +59,6 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
         return alertString
     }
 
-
-    fun toJson() : JSONObject {
-        val json = JSONObject()
-        json.put("currency", currency.toString())
-        json.put("id", id)
-
-        val gson = Gson()
-
-        //TODO: delete some stuff here
-        val hourCandlesElement = gson.toJsonTree(hourCandles, object : TypeToken<List<Candle>>() { }.type)
-        val hourCandlesJsonArray = hourCandlesElement
-
-        val dayCandlesElement = gson.toJsonTree(dayCandles, object : TypeToken<List<Candle>>() { }.type)
-        val dayCandlesJsonArray = dayCandlesElement
-
-        val weekCandlesElement = gson.toJsonTree(weekCandles, object : TypeToken<List<Candle>>() { }.type)
-        val weekCandlesJsonArray = weekCandlesElement
-
-        val monthCandlesElement = gson.toJsonTree(monthCandles, object : TypeToken<List<Candle>>() { }.type)
-        val monthCandlesJsonArray = monthCandlesElement
-
-        val yearCandlesElement = gson.toJsonTree(yearCandles, object : TypeToken<List<Candle>>() { }.type)
-        val yearCandlesJsonArray = yearCandlesElement
-
-//        val allCandlesElement = gson.toJsonTree(allTimeCandles, object : TypeToken<List<Candle>>() { }.type)
-//        val allCandlesJsonArray = allCandlesElement
-
-        if (hourCandles.isNotEmpty()) {
-            json.put("hourCandles", hourCandlesJsonArray)
-        }
-        if (dayCandles.isNotEmpty()) {
-            json.put("dayCandles", dayCandlesJsonArray)
-        }
-        if (weekCandles.isNotEmpty()) {
-            json.put("weekCandles", weekCandlesJsonArray)
-        }
-        if (monthCandles.isNotEmpty()) {
-            json.put("monthCandles", monthCandlesJsonArray)
-        }
-        if (yearCandles.isNotEmpty()) {
-            json.put("yearCandles", yearCandlesJsonArray)
-        }
-//        if (allTimeCandles.isNotEmpty()) {
-//            json.put("allCandles", allCandlesJsonArray)
-//        }
-        return json
-    }
-
     fun updateCandles(timespan: Timespan, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()

@@ -93,6 +93,7 @@ class TransferInFragment : RefreshFragment() {
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
+                    //TODO: update for variable Fiat
                     0 -> switchCurrency(Currency.USD)
                     1 -> switchCurrency(Currency.BTC)
                     2 -> switchCurrency(Currency.ETH)
@@ -187,7 +188,7 @@ class TransferInFragment : RefreshFragment() {
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
 
-        val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
+        val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
         }
@@ -228,7 +229,7 @@ class TransferInFragment : RefreshFragment() {
                 onComplete(false)
             }, {
                 coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-                val fiatCoinbaseAccount = Account.usdAccount?.coinbaseAccount
+                val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
                 if (fiatCoinbaseAccount != null) {
                     coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
                 }

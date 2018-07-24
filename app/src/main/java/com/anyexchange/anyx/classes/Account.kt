@@ -55,14 +55,14 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
         val bchAccount: Account?
             get() = forCurrency(Currency.BCH)
 
-        var usdAccount: Account? = null
+        var fiatAccount: Account? = null
 
         var totalValue: Double = 0.0
-            get() = Account.list.map { a -> a.value }.sum() + (Account.usdAccount?.value ?: 0.0)
+            get() = Account.list.map { a -> a.value }.sum() + (Account.fiatAccount?.value ?: 0.0)
 
         fun forCurrency(currency: Currency): Account? {
-            return if (currency == Currency.USD) {
-                usdAccount
+            return if (currency.isFiat) {
+                fiatAccount
             } else {
                 list.find { a -> a.product.currency == currency }
             }

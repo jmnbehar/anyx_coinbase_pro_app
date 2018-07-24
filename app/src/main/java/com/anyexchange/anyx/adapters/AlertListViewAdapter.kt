@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.list_row_alert.view.*
 
 class AlertListViewAdapter(val context: Context, var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (View, Alert) -> Unit) : BaseAdapter() {
 
-    //TODO: use prefs Alerts
     override fun getCount(): Int {
         return alerts.size
     }

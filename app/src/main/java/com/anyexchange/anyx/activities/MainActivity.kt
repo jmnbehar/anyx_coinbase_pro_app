@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             Currency.ETH -> ETH_CHART
                             Currency.LTC -> LTC_CHART
                             Currency.USD -> BTC_CHART   //error
+                            Currency.EUR -> BTC_CHART   //error
                         }
                     }
                     is AccountsFragment -> ACCOUNT
@@ -140,7 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         dataFragment?.restoreData(this)
-        if (Account.usdAccount == null) {
+        if (Account.fiatAccount == null) {
             CBProApi.accounts().getAllAccountInfo(this, { }, { })
         }
 
@@ -420,7 +421,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Currency.BCH -> goToFragment(FragmentType.BCH_CHART)
             Currency.ETH -> goToFragment(FragmentType.ETH_CHART)
             Currency.LTC -> goToFragment(FragmentType.LTC_CHART)
-            Currency.USD -> {}
+            Currency.USD, Currency.EUR -> {}
         }
     }
     private fun chartFragment(currency: Currency) : ChartFragment? {

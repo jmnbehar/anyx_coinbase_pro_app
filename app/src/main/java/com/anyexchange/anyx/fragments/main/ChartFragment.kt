@@ -78,38 +78,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             rootView.chart_fragment_chart.onChartGestureListener = this
 
             rootView.btn_chart_buy.setOnClickListener {
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isValidated == null) {
-                    toast(R.string.toast_please_validate_message)
-                } else if (CBProApi.credentials?.isValidated == false) {
-                    toast(R.string.toast_missing_permissions_message)
-                } else {
-                    if (tradeFragment == null) {
-                        tradeFragment = TradeFragment.newInstance(account, TradeSide.BUY)
-                    } else {
-                        tradeFragment?.tradeSide = TradeSide.BUY
-                    }
-                    (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, "Trade: Buy")
-                }
+                buySellButtonOnClick(prefs.isLoggedIn, account, TradeSide.BUY)
             }
 
             rootView.btn_chart_sell.setOnClickListener {
-                //TODO: merge this code w the buy btn listener
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isValidated == null) {
-                    toast(R.string.toast_please_validate_message)
-                } else if (CBProApi.credentials?.isValidated == false) {
-                    toast(R.string.toast_missing_permissions_message)
-                } else {
-                    if (tradeFragment == null) {
-                        tradeFragment = TradeFragment.newInstance(account, TradeSide.SELL)
-                    } else {
-                        tradeFragment?.tradeSide = TradeSide.SELL
-                    }
-                    (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, "Trade: Sell")
-                }
+                buySellButtonOnClick(prefs.isLoggedIn, account, TradeSide.SELL)
             }
 
             rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
@@ -146,6 +119,23 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
+    private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
+        if (!isLoggedIn) {
+            toast(R.string.toast_please_login_message)
+        } else if (CBProApi.credentials?.isValidated == null) {
+            toast(R.string.toast_please_validate_message)
+        } else if (CBProApi.credentials?.isValidated == false) {
+            toast(R.string.toast_missing_permissions_message)
+        } else {
+            if (tradeFragment == null) {
+                val preferredFiat = Prefs(context!!).preferredFiat
+                tradeFragment = TradeFragment.newInstance(account, tradeSide, preferredFiat)
+            } else {
+                tradeFragment?.tradeSide = tradeSide
+            }
+            (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, "Trade: " + tradeSide.name)
+        }
+    }
 
     private fun switchAccount(newAccount: Account) {
         account = newAccount

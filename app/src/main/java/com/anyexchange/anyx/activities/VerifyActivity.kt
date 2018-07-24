@@ -48,7 +48,7 @@ class VerifyActivity : AppCompatActivity() {
 
         nextBtn?.visibility = View.VISIBLE
         nextBtn?.text = "I Accept"
-        nextBtn?.onClick {
+        nextBtn?.setOnClickListener {
             currentPage += 1
             viewPager.setCurrentItem(currentPage, true)
             nextBtn?.visibility = View.GONE
@@ -79,7 +79,7 @@ class VerifyActivity : AppCompatActivity() {
                     2 -> {
                         nextBtn?.visibility = View.VISIBLE
                         nextBtn?.text = "Done"
-                        nextBtn?.onClick { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
+                        nextBtn?.setOnClickListener { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
                     }
                 }
             }
