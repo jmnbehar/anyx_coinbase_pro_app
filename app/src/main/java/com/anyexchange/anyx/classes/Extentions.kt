@@ -2,6 +2,7 @@ package com.anyexchange.anyx.classes
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.content.res.Resources
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -89,7 +90,6 @@ fun Double.fiatFormat(): String {
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
     val sign = if (this >= 0) { "" } else { "-" }
-    //TODO: use string resource
     return "$sign\$${numberFormat.format(this.absoluteValue)}"
 }
 

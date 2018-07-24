@@ -172,7 +172,7 @@ class TransferInFragment : RefreshFragment() {
                     })
                 }
             } else {
-                showPopup(R.string.toast_error)
+                showPopup(R.string.error_message)
             }
         }
 

@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,7 @@ import kotlinx.android.synthetic.main.list_row_alert.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (View, Alert) -> Unit) : BaseAdapter() {
+class AlertListViewAdapter(val context: Context, var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (View, Alert) -> Unit) : BaseAdapter() {
 
     //TODO: use prefs Alerts
     override fun getCount(): Int {
@@ -59,9 +60,9 @@ class AlertListViewAdapter(var inflater: LayoutInflater?, var alerts: List<Alert
         viewHolder.productNameText?.text = alert.currency.toString()
         viewHolder.triggerPriceText?.text = alert.price.fiatFormat()
         if (alert.triggerIfAbove) {
-            viewHolder.alertSideText?.text = "Above"
+            viewHolder.alertSideText?.text = context.resources.getString(R.string.alert_above)
         } else {
-            viewHolder.alertSideText?.text = "Below"
+            viewHolder.alertSideText?.text = context.resources.getString(R.string.alert_below)
         }
 
         outputView.setOnClickListener { onClick(outputView, alert) }

@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.graphics.Color
 import android.os.Bundle
@@ -179,7 +178,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     val backupTimespan = chartTimeSpan
                     chartTimeSpan = Timespan.DAY
                     miniRefresh({
-                        toast(R.string.toast_error)
+                        toast(R.string.error_message)
                         chartTimeSpan = backupTimespan
 //                        activity.dismissProgressBar()
                     }, {
@@ -194,7 +193,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         updateHistoryPagerAdapter(stashedOrders, stashedFills)
                     })
                 } else {
-                    toast(R.string.toast_error)
+                    toast(R.string.error_message)
 //                    activity.dismissProgressBar()
                 }
             }, {    //success

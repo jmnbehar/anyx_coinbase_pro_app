@@ -33,7 +33,6 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -252,7 +251,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
             showProgressBar()
             CBProApi.accounts().getAllAccountInfo(this, { _ ->
-                toast(R.string.toast_error)
+                toast(R.string.error_message)
                 dismissProgressBar()
                 returnToLogin()
             }, {
@@ -482,7 +481,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             depositFragment.skipNextRefresh = true
                             goToFragment(depositFragment, tag)
                         } else {
-                            toast(R.string.toast_error)
+                            toast(R.string.error_message)
                         }
                     }
                 }
@@ -504,7 +503,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             withdrawFragment.skipNextRefresh = true
                             goToFragment(withdrawFragment, tag)
                         } else {
-                            toast(R.string.toast_error)
+                            toast(R.string.error_message)
                         }
                     }
                 }

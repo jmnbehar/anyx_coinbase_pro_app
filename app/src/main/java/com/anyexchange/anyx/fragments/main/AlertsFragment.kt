@@ -106,7 +106,7 @@ class AlertsFragment : RefreshFragment() {
         setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
 
-        alertAdapter = AlertListViewAdapter(inflater, sortedAlerts) { view, alert ->
+        alertAdapter = AlertListViewAdapter(context!!, inflater, sortedAlerts) { view, alert ->
             val popup = PopupMenu(activity, view)
             //Inflating the Popup using xml file
             popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)

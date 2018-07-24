@@ -2,6 +2,7 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import android.os.Handler
+import com.anyexchange.anyx.R
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
@@ -30,19 +31,21 @@ sealed class CBProApi : FuelRouting {
 
         const val basePath = "https://api.pro.coinbase.com"
 
-        fun defaultPostFailure(result: Result.Failure<ByteArray, FuelError>) : String {
+        fun defaultPostFailure(context: Context?, result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = CBProApi.ErrorCode.withCode(result.error.response.statusCode)
-
-            //TODO: use string resources
-            return when (errorCode) {
-                CBProApi.ErrorCode.BadRequest -> { "400 Error: Missing something from the request" }
-                CBProApi.ErrorCode.Unauthorized -> { "401 Error: You don't have permission to do that" }
-                CBProApi.ErrorCode.Forbidden -> { "403 Error: You don't have permission to do that" }
-                CBProApi.ErrorCode.NotFound -> { "404 Error: Content not found" }
-                CBProApi.ErrorCode.TooManyRequests -> { "Error! Too many requests in a row" }
-                CBProApi.ErrorCode.ServerError -> { "Sorry, Coinbase Pro Servers are encountering problems right now" }
-                CBProApi.ErrorCode.UnknownError -> { "Error!: ${result.error}" }
-                else -> ""
+            return if (context!= null) {
+                when (errorCode) {
+                    CBProApi.ErrorCode.BadRequest -> context.resources.getString(R.string.error_400)
+                    CBProApi.ErrorCode.Unauthorized -> context.resources.getString(R.string.error_401)
+                    CBProApi.ErrorCode.Forbidden -> context.resources.getString(R.string.error_403)
+                    CBProApi.ErrorCode.NotFound -> context.resources.getString(R.string.error_404)
+                    CBProApi.ErrorCode.TooManyRequests -> context.resources.getString(R.string.error_too_many)
+                    CBProApi.ErrorCode.ServerError -> context.resources.getString(R.string.error_server)
+                    CBProApi.ErrorCode.UnknownError -> context.resources.getString(R.string.error_generic_message, result.errorMessage)
+                    else -> ""
+                }
+            } else {
+                ""
             }
         }
     }
@@ -216,6 +219,7 @@ sealed class CBProApi : FuelRouting {
                     val gson = Gson()
                     val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     val apiProductList = unfilteredApiProductList.filter { s ->
+                        //TODO: change this, add euro
                         s.quote_currency == "USD"
                     }
                     for (product in apiProductList) {
@@ -432,8 +436,7 @@ sealed class CBProApi : FuelRouting {
 
                     val start = Date(startInt * 1000)
 
-                    //TODO: this warning
-                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                     formatter.timeZone = utcTimeZone
 
                     paramList.add(Pair("start", formatter.format(start)))
@@ -550,8 +553,7 @@ sealed class CBProApi : FuelRouting {
                     val json = JSONObject()
 
                     val utcTimeZone = TimeZone.getTimeZone("UTC")
-                    //TODO: this warning
-                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                     formatter.timeZone = utcTimeZone
 
                     json.put("type", type)
@@ -662,7 +664,7 @@ sealed class CBProApi : FuelRouting {
         InvalidCryptoAddress;
 
         override fun toString(): String {
-            //TODO: use string resources
+            //TODO: refactor
             return when (this) {
                 Forbidden -> "Forbidden"
                 InvalidApiKey -> "Invalid API Key"

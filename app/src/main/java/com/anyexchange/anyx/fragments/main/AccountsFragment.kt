@@ -68,7 +68,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             val selectGroup = lambda@ { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
-            accountList.adapter = AccountListViewAdapter(selectGroup)
+            accountList.adapter = AccountListViewAdapter(context, selectGroup)
             titleText.visibility = View.GONE
 
             refresh { doneLoading() }

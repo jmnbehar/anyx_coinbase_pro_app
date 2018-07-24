@@ -146,7 +146,7 @@ class SendFragment : RefreshFragment() {
                         val errorString = when(responseDataStr) {
                             "invalid crypto_address" -> resources.getText(R.string.send_invalid_destination_error,
                                     currency.toString())
-                            else -> CBProApi.defaultPostFailure(result)
+                            else -> CBProApi.defaultPostFailure(context, result)
                         }
                         toast(errorString)
                     },

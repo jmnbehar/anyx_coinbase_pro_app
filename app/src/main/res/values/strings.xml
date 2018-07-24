@@ -12,8 +12,6 @@
 
     <string name="popup_ok_btn">OK</string>
 
-    <string name="error_generic_message">Error: %s</string>
-
 
     //Login Strings
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
@@ -49,8 +47,18 @@
     <string name="currency_LTC">LTC</string>
     <string name="currency_ETC">ETC</string>
 
-    <string name="home_market_tab">Market</string>
-    <string name="home_account_tab">Account</string>
+
+    //Errors
+    <string name="error_message">Error</string>
+    <string name="error_generic_message">Error: %s</string>
+    <string name="error_400">400 Error: Missing something from the request</string>
+    <string name="error_401">401 Error: You don\'t have permission to do that</string>
+    <string name="error_403">403 Error: You don\'t have permission to do that</string>
+    <string name="error_404">404 Error: Content not found</string>
+    <string name="error_too_many">Error: Too many requests in a row</string>
+    <string name="error_server">Error: Coinbase Pro Servers are encountering problems right now</string>
+
+
 
     //MainActivity
     <string name="toast_please_login_message">Please log in</string>
@@ -58,7 +66,6 @@
     <string name="toast_missing_permissions_message">Please use an API Key with all required permissions.</string>
 
     <string name="toast_success">Success</string>
-    <string name="toast_error">Error</string>
     <string name="toast_coinbase_site_error">Cannot access Coinbase</string>
     <string name="toast_coinbase_pro_site_error">Cannot access Coinbase Pro</string>
 
@@ -68,12 +75,17 @@
     <string name="accounts_title">All Accounts</string>
     <string name="accounts_logged_out_message">Sign in to view account info</string>
     <string name="accounts_percent_change_text">%s\n(%s%s)</string>
+    <string name="accounts_balance_text">%s %s</string>
+
 
     //Alerts Fragment
     <string name="alerts_title">Alerts</string>
     <string name="alerts_new_alert_label">New alert at: </string>
     <string name="alerts_new_alert_button">Set</string>
     <string name="alerts_current_price_label">Last %s trade price: </string>
+
+    <string name="alert_above">above</string>
+    <string name="alert_below">below</string>
 
     //Chart Fragment
     <string name="chart_timespan_1h">1H</string>
@@ -103,9 +115,25 @@
     <string name="chart_history_filled_fees_label">Filled Fees:  </string>
     <string name="chart_history_fee_label">Fee:  </string>
     <string name="chart_history_time_label">Time:  </string>
+    <string name="chart_history_no_orders">You have no open orders</string>
+    <string name="chart_history_no_fills">You have no filled orders</string>
+
+    <string name="chart_history_order_side_buy">Buying </string>
+    <string name="chart_history_order_side_sell">Selling </string>
+
+    <string name="chart_history_fill_side_buy">Bought </string>
+    <string name="chart_history_fill_side_sell">Sold </string>
+
+    <string name="chart_history_currency_label"> %s at </string>
+    <string name="chart_history_trade_type_label">(%s order)</string>
 
     <string name="chart_wallet_label">%s wallet</string>
     <string name="chart_balance_text">%s %s</string>
+
+    //Home Fragment
+    <string name="home_market_tab">Market</string>
+    <string name="home_account_tab">Account</string>
+    <string name="home_other_tab">Screen #%d</string>
 
     //Send Fragment
     <string name="send_title">Send</string>
@@ -163,6 +191,17 @@
     <string name="trade_balance_label">Available %s Balance:</string>
     <string name="trade_last_trade_price_label">%s Last Trade</string>
 
+    <string name="trade_confirm_popup_title">Confirm</string>
+    <string name="trade_confirm_popup_price_label">Last %s Trade Price:</string>
+    <string name="trade_confirm_popup_currency_label">%s to %s:</string>
+    <string name="trade_confirm_popup_estimated_fees_label">Estimated fees:</string>
+    <string name="trade_confirm_popup_total_label">Total %s:</string>
+    <string name="trade_confirm_popup_confirm_btn">Confirm</string>
+    <string name="trade_confirm_popup_cancel_btn">Cancel</string>
+
+    <string name="trade_amount_buy_min_error_message">Error: Amount too small. Minimum %s buy amount is %s</string>
+    <string name="trade_amount_buy_max_error_message">Error: Amount too small. Maximum %s buy amount is %s</string>
+
     //Transfer Fragments
     <string name="transfer_in_title">Transfer into Coinbase Pro</string>
     <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
@@ -198,6 +237,19 @@
 
     <string name="verify_explanation_message_no_risk">To verify your account we will test to ensure that your API Key has all required permissions.</string>
     <string name="verify_explanation_message">To verify your account we will test to ensure that your API Key has all required permissions.\n\nA very small amount of %s may get sent to your Coinbase account.</string>
+
+
+    <string name="verify_missing_permission_transfer_message">Your account could not be verified because your API Key does not have the \"Transfer\" permission.\n\nPlease create a new API Key with View, Transfer, and Trade permissions.</string>
+    <string name="verify_missing_permission_trade_message">Your account could not be verified because your API Key does not have the \"Trade\" permission.\n\nPlease create a new API Key with View, Transfer, and Trade permissions.</string>
+    <string name="verify_missing_permission_view_message">Your account could not be verified because your API Key does not have the \"View\" permission.\n\nPlease create a new API Key with View, Transfer, and Trade permissions.</string>
+
+    <string name="verify_success">Success!</string>
+    <string name="verify_failure">Bummer</string>
+
+    <string name="verify_success_message">Woohoo!\nYour account is verified</string>
+    <string name="verify_repay_error_message">Due to an unknown error, you may have lost a very small quantity of %s. Please reach out to our verification support at anyx.verify@gmail.com</string>
+    <string name="verify_payment_method_error_message">Could not verify at this time because your account is unfunded.\n\nPlease add funds and try again.</string>
+    <string name="verify_unknown_error_message">An unknown error occurred. Try again later.</string>
 
 
 

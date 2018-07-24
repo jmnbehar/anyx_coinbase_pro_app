@@ -18,8 +18,6 @@ import com.anyexchange.anyx.classes.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
-import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.text.InputFilter
@@ -341,28 +339,23 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
         val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
-            //TODO: Use string resources
-            title = "Alert"
+            title = resources.getString(R.string.trade_confirm_popup_title)
             customView {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            horizontalLayout("Current $currencyString price:", "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
+                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
                         }
-                        horizontalLayout("$currencyString to $buySell:", cryptoTotal.btcFormat()).lparams(width = matchParent) {}
-                        horizontalLayout("Estimated fees:", feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout("Total $localCurrency:", dollarTotal.fiatFormat()).lparams(width = matchParent) {}
-                        checkBox("Don't show this again").setOnCheckedChangeListener { _, isChecked ->
-                            val prefs = Prefs(activity!!)
-                            prefs.shouldShowTradeConfirmModal = !isChecked
-                        }
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label), dollarTotal.fiatFormat()).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
-            positiveButton("Confirm") {
+            positiveButton(R.string.trade_confirm_popup_confirm_btn) {
                 submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
             }
-            negativeButton("Cancel") { }
+            negativeButton(R.string.trade_confirm_popup_cancel_btn) { }
         }.show()
     }
 
@@ -389,11 +382,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             ErrorMessage.BuyAmountTooSmallBtc,
             ErrorMessage.BuyAmountTooSmallEth,
             ErrorMessage.BuyAmountTooSmallBch,
-            ErrorMessage.BuyAmountTooSmallLtc -> "Error: Amount too small. Minimum $currency buy amount is $limit"
+            ErrorMessage.BuyAmountTooSmallLtc -> resources.getString(R.string.trade_amount_buy_min_error_message, currency, limit)
             ErrorMessage.BuyAmountTooLargeBtc,
             ErrorMessage.BuyAmountTooLargeEth,
             ErrorMessage.BuyAmountTooLargeBch,
-            ErrorMessage.BuyAmountTooLargeLtc ->  "Error: Amount too large. Maximum $currency buy amount is $limit"
+            ErrorMessage.BuyAmountTooLargeLtc -> resources.getString(R.string.trade_amount_buy_max_error_message, currency, limit)
             else -> ""
         }
     }
@@ -412,8 +405,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage), { })
 
                 ErrorMessage.PriceTooAccurate,
-                ErrorMessage.InsufficientFunds -> showPopup("Error: " + result.errorMessage, { })
-                else -> showPopup("Error: " + result.errorMessage, { })
+                ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage), { })
+                else -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage), { })
             }
         }
 
@@ -435,7 +428,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         val productId = account?.product?.id
         if (productId == null) {
-            toast(R.string.toast_error)
+            toast(R.string.error_message)
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {

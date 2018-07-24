@@ -1,9 +1,11 @@
 package com.anyexchange.anyx.adapters
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
+import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.RefreshFragment
 import com.anyexchange.anyx.fragments.main.AccountsFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
@@ -15,7 +17,7 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 
 // Since this is an object collection, use a FragmentStatePagerAdapter,
 // and NOT a FragmentPagerAdapter.
-class HomePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     override fun getItem(i: Int): Fragment {
         when (i) {
@@ -51,9 +53,9 @@ class HomePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             //TODO: consider using string resources
-            0 -> "Market"
-            1 -> "Account"
-            else -> "Screen " + (position + 1)
+            0 -> context.resources.getString(R.string.home_market_tab)
+            1 -> context.resources.getString(R.string.home_account_tab)
+            else -> context.resources.getString(R.string.home_other_tab, position + 1)
         }
     }
 }

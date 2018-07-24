@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.adapters
 
+import android.content.Context
 import android.content.res.Resources
 import android.support.v4.content.res.ResourcesCompat
 import android.view.View
@@ -16,7 +17,7 @@ import org.jetbrains.anko.backgroundColor
  * Created by anyexchange on 11/12/2017.
  */
 
-class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
+class HistoryListViewAdapter(val context: Context, private var isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources, private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : BaseAdapter() {
     var orders: List<ApiOrder> = listOf()
     var fills: List<ApiFill> = listOf()
 
@@ -94,7 +95,7 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             if (orders.isEmpty()) {
                 viewHolder.colorView?.visibility = View.INVISIBLE
                 viewHolder.sideText?.visibility = View.GONE
-                viewHolder.amountText?.text = "You have no open orders"
+                viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_orders)
                 viewHolder.priceText?.visibility = View.GONE
                 viewHolder.currencyText?.visibility = View.GONE
                 viewHolder.tradeTypeText?.visibility = View.GONE
@@ -113,14 +114,14 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
 
 
             viewHolder.sideText?.text = when (tradeSide) {
-                TradeSide.BUY -> "Buying "
-                TradeSide.SELL -> "Selling "
+                TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
+                TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
             }
         } else {
             if (fills.isEmpty()) {
                 viewHolder.colorView?.visibility = View.INVISIBLE
                 viewHolder.sideText?.visibility = View.GONE
-                viewHolder.amountText?.text = "You have no filled orders"
+                viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_fills)
                 viewHolder.priceText?.visibility = View.GONE
                 viewHolder.currencyText?.visibility = View.GONE
                 viewHolder.tradeTypeText?.visibility = View.GONE
@@ -134,10 +135,9 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
             tradeType = null
             outputView.setOnClickListener { fillOnClick(fill) }
 
-
             viewHolder.sideText?.text = when (tradeSide) {
-                TradeSide.BUY -> "Bought "
-                TradeSide.SELL -> "Sold "
+                TradeSide.BUY -> context.resources.getString(R.string.chart_history_fill_side_buy)
+                TradeSide.SELL -> context.resources.getString(R.string.chart_history_fill_side_sell)
             }
         }
 
@@ -148,13 +148,13 @@ class HistoryListViewAdapter(private var isOrderList: Boolean, ordersOrFills: Li
 //        vi.img_history_icon.setImageResource(currency.iconId)
 
         viewHolder.amountText?.text = amount.btcFormat()
-        viewHolder.currencyText?.text = " $currency at "
+        viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
         viewHolder.priceText?.text = price.fiatFormat()
         if (tradeType == null) {
             viewHolder.tradeTypeText?.visibility = View.GONE
         } else {
             viewHolder.tradeTypeText?.visibility = View.VISIBLE
-            viewHolder.tradeTypeText?.text = "($tradeType order)"
+            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
         }
 
         return outputView

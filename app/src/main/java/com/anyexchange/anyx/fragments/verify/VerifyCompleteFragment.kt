@@ -62,31 +62,22 @@ class VerifyCompleteFragment : Fragment() {
 
     fun updateText(verifyStatus: VerificationStatus) {
         if (verifyStatus.isVerified) {
-            statusText.text = "Success!"
+            statusText.text = resources.getString(R.string.verify_success)
             statusImageView.setImageResource(R.drawable.success_icon)
         } else {
-            statusText.text = "Bummer"
+            statusText.text = resources.getString(R.string.verify_failure)
             statusImageView.setImageResource(R.drawable.fail_icon)
         }
-
-        //TODO: use string resource
         infoText.text = when (verifyStatus) {
-            VerificationStatus.Success -> "Woohoo!\nYour account is verified"
-            VerificationStatus.RepayError -> "Due to an unknown error, you may have lost a very small quantity of $currency. Please reach out to our verification support at anyx.verify@gmail.com"
-            VerificationStatus.NoTransferPermission -> missingPermissionString("Transfer")
-            VerificationStatus.NoTradePermission -> missingPermissionString("Trade")
-            VerificationStatus.NoViewPermission -> missingPermissionString("View")
-            VerificationStatus.NoPaymentMethods -> "Could not verify at this time because your account is unfunded. \n\nPlease add funds and try again."
-            VerificationStatus.CBProError -> "An unknown error occurred. Try again later."
-            VerificationStatus.UnknownError -> "An unknown error occurred. Try again later."
+            VerificationStatus.Success -> resources.getString(R.string.verify_success_message)
+            VerificationStatus.RepayError -> resources.getString(R.string.verify_repay_error_message, currency.toString())
+            VerificationStatus.NoTransferPermission -> resources.getString(R.string.verify_missing_permission_transfer_message)
+            VerificationStatus.NoTradePermission -> resources.getString(R.string.verify_missing_permission_trade_message)
+            VerificationStatus.NoViewPermission -> resources.getString(R.string.verify_missing_permission_view_message)
+            VerificationStatus.NoPaymentMethods -> resources.getString(R.string.verify_payment_method_error_message)
+            VerificationStatus.CBProError,
+            VerificationStatus.UnknownError -> resources.getString(R.string.verify_unknown_error_message)
         }
     }
-
-    fun missingPermissionString(permission: String) : String {
-        //TODO: use string resource
-        return "Your account could not be verified because your API Key does not have the \"$permission\" permission. " +
-                "\n\nPlease create a new API Key with View, Transfer, Bypass Two-Factor Auth, and Trade permissions."
-    }
-
 
 }

@@ -170,7 +170,7 @@ class TransferOutFragment : RefreshFragment() {
                     })
                 }
             } else {
-                toast(R.string.toast_error)
+                toast(R.string.error_message)
             }
         }
 
@@ -222,7 +222,7 @@ class TransferOutFragment : RefreshFragment() {
                 }
             })
             CBProApi.paymentMethods().get({
-                toast(R.string.toast_error)
+                toast(R.string.error_message)
                 onComplete(false)
             }, { result ->
                 paymentMethods = result

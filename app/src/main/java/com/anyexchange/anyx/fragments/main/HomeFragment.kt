@@ -41,7 +41,7 @@ class HomeFragment : RefreshFragment() {
 
         viewPager = rootView.home_view_pager
 
-        collectionPagerAdapter = HomePagerAdapter(childFragmentManager)
+        collectionPagerAdapter = HomePagerAdapter(context!!, childFragmentManager)
         viewPager?.adapter = collectionPagerAdapter
 
         return rootView

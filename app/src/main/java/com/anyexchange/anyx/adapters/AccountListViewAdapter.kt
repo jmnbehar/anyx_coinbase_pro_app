@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.adapters
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -14,7 +15,7 @@ import kotlinx.android.synthetic.main.list_row_product.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
+class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         val listSize = Account.list.size
@@ -71,7 +72,7 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
             val account = accounts[i]
 
             if (account.currency != Currency.USD) {
-                viewHolder.balanceText?.text = account.balance.btcFormat() + " " + account.currency.toString()
+                viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
                 outputView.setOnClickListener { onClick(account) }
 
                 val percentChange = account.product.percentChange(Timespan.DAY)
@@ -79,8 +80,8 @@ class AccountListViewAdapter(var onClick: (Account) -> Unit) : BaseAdapter() {
                 if (account.value > 0) {
                     viewHolder.accountValueText?.text = account.value.fiatFormat()
                     val accountChange = (percentChange * account.value) / 100
-                    val sign = if (percentChange >= 0) { "+" } else { "" }
-                    viewHolder.percentChangeText?.text = percentChange.percentFormat() + "\n($sign${accountChange.fiatFormat()})"
+                    val sign = if (percentChange >= 0) { "+" } else { "-" }
+                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.fiatFormat())
                 } else {
                     viewHolder.accountValueText?.visibility = View.INVISIBLE
                     viewHolder.percentChangeText?.visibility = View.INVISIBLE
