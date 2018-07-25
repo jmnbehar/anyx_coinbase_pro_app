@@ -10,6 +10,7 @@ import com.anyexchange.anyx.adapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
+import kotlinx.android.synthetic.main.notification_template_lines_media.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -88,13 +89,13 @@ class TransferInFragment : RefreshFragment() {
 
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val fiatCurrency = Account.fiatAccount?.currency ?: Prefs(context!!).preferredFiat
+        currencyTabLayout.tab_transfer_fiat.text.text = fiatCurrency.toString()
         cbAccountsSpinner.adapter = arrayAdapter
-
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
-                    //TODO: update for variable Fiat
-                    0 -> switchCurrency(Currency.USD)
+                    0 -> switchCurrency(fiatCurrency)
                     1 -> switchCurrency(Currency.BTC)
                     2 -> switchCurrency(Currency.ETH)
                     3 -> switchCurrency(Currency.BCH)

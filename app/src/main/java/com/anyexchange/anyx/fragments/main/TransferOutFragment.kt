@@ -10,6 +10,7 @@ import com.anyexchange.anyx.adapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer_out.view.*
+import kotlinx.android.synthetic.main.notification_template_lines_media.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -87,11 +88,13 @@ class TransferOutFragment : RefreshFragment() {
         interactiveLayout = rootView.layout_transfer_out_amount_layout
         submitWithdrawalButton = rootView.btn_transfer_out_transfer_out
 
+        val fiatCurrency = Account.fiatAccount?.currency ?: Prefs(context!!).preferredFiat
+        currencyTabLayout.tab_transfer_fiat.text.text = fiatCurrency.toString()
         currencyTabLayout = rootView.tabl_transfer_out_currency
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
-                    0 -> switchCurrency(Currency.USD)
+                    0 -> switchCurrency(fiatCurrency)
                     1 -> switchCurrency(Currency.BTC)
                     2 -> switchCurrency(Currency.ETH)
                     3 -> switchCurrency(Currency.BCH)

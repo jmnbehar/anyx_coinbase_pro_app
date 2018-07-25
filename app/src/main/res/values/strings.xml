@@ -12,7 +12,6 @@
 
     <string name="popup_ok_btn">OK</string>
 
-
     //Login Strings
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
     <string name="login_api_key_label">Api Key</string>
@@ -41,6 +40,7 @@
 
 
     <string name="currency_USD">USD</string>
+    <string name="currency_EUR">EUR</string>
     <string name="currency_BTC">BTC</string>
     <string name="currency_ETH">ETH</string>
     <string name="currency_BCH">BCH</string>
@@ -121,8 +121,8 @@
     <string name="chart_history_order_side_buy">Buying </string>
     <string name="chart_history_order_side_sell">Selling </string>
 
-    <string name="chart_history_fill_side_buy">Bought </string>
-    <string name="chart_history_fill_side_sell">Sold </string>
+    <string name="chart_history_fill_side_buy">Bought</string>
+    <string name="chart_history_fill_side_sell">Sold</string>
 
     <string name="chart_history_currency_label"> %s at </string>
     <string name="chart_history_trade_type_label">(%s order)</string>

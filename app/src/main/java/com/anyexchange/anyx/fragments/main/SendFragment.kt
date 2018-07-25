@@ -155,7 +155,6 @@ class SendFragment : RefreshFragment() {
                     })
         } else {
             toast(resources.getText(R.string.send_amount_error, min.toString()))
-//            TransferHub.sendToPayment(10.0, Currency.USD)
         }
     }
 

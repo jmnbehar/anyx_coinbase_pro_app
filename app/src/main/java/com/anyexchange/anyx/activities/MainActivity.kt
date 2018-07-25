@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             Currency.BCH -> BCH_CHART
                             Currency.ETH -> ETH_CHART
                             Currency.LTC -> LTC_CHART
-                            Currency.USD -> BTC_CHART   //error
+                            Currency.USD,
                             Currency.EUR -> BTC_CHART   //error
                         }
                     }

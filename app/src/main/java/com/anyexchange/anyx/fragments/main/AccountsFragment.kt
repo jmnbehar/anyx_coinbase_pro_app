@@ -163,8 +163,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         if (btcAccount != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             for (i in 0..(btcAccount.dayCandles.size - 1)) {
-                val usdAccountValue = Account.fiatAccount?.value
-                usdAccountValue?.let {
+                Account.fiatAccount?.value?.let {
                     var totalCandleValue = it
                     val time = btcAccount.dayCandles[i].time
                     for (account in Account.list) {
@@ -198,13 +197,12 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                     lineChart.visibility = View.GONE
                 } else {
                     lineChart.visibility = View.VISIBLE
-
+                    //doesn't matter which fiat currency you use here:
                     lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
                         swipeRefreshLayout?.isEnabled = false
                         HomeFragment.viewPager?.isLocked = true
                     }
                 }
-
                 onComplete(true)
             }
         } else {

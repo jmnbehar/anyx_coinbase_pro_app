@@ -104,8 +104,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         limitEditText = rootView.etxt_trade_limit
         limitUnitText = rootView.txt_trade_limit_unit
 
-        fiatBalanceText = rootView.txt_trade_usd_balance
-        fiatBalanceLabelText = rootView.txt_trade_usd_balance_label
+        fiatBalanceText = rootView.txt_trade_fiat_balance
+        fiatBalanceLabelText = rootView.txt_trade_fiat_balance_label
         cryptoBalanceText = rootView.txt_trade_crypto_balance
         cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
         currentPriceLabelText = rootView.txt_trade_crypto_current_price_label
@@ -314,9 +314,10 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
-                fiatBalanceText.text = Account.fiatAccount?.availableBalance?.fiatFormat()
-
-                fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, Currency.USD.toString())
+                val fiatAccount = Account.fiatAccount
+                fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat()
+                val fiatCurrency = Account.fiatAccount?.currency ?: Prefs(context).preferredFiat
+                fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, fiatCurrency.toString())
                 cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
 
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
