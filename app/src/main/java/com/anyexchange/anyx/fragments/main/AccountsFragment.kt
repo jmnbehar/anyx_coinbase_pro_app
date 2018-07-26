@@ -87,7 +87,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        valueText.text = entry.y.toDouble().fiatFormat()
+        valueText.text = entry.y.toDouble().fiatFormat(Account.fiatCurrency)
         if (accountTotalCandles.size > entry.x) {
             val candle = accountTotalCandles[entry.x.toInt()]
 
@@ -114,7 +114,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val percentChange: Double = weightedChange * 100.0
         val sign = if (change >= 0) { "+" } else { "" }
         percentChangeText.text = resources.getString(R.string.accounts_percent_change_text,
-                percentChange.percentFormat(), sign, change.fiatFormat())
+                percentChange.percentFormat(), sign, change.fiatFormat(Account.fiatCurrency))
 
         percentChangeText.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -125,7 +125,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private fun setValueAndPercentChangeTexts() {
         val totalValue = Account.totalValue
-        valueText.text = totalValue.fiatFormat()
+        valueText.text = totalValue.fiatFormat(Account.fiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
             accountTotalCandles.first().close

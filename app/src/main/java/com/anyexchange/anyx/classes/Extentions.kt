@@ -84,13 +84,14 @@ fun Double.btcFormatShortened(): String {
     }
     return string
 }
-fun Double.fiatFormat(): String {
+fun Double.fiatFormat(currency: Currency): String {
     val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
     val sign = if (this >= 0) { "" } else { "-" }
-    return "$sign\$${numberFormat.format(this.absoluteValue)}"
+    val currencySymbol = currency.symbol
+    return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
 }
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"

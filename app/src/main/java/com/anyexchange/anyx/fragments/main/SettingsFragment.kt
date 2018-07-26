@@ -7,9 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.TextView
+import android.widget.*
 import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
@@ -36,6 +34,7 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var verifyButton: Button
     private lateinit var cbproEulaButton: Button
     private lateinit var anyxEulaButton: Button
+    private lateinit var preferredFiatSpinner: Spinner
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
@@ -52,6 +51,7 @@ class SettingsFragment : RefreshFragment() {
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
+        preferredFiatSpinner = rootView.spinner_setting_preferred_fiat
 
         showDarkMode(rootView)
 
@@ -87,6 +87,21 @@ class SettingsFragment : RefreshFragment() {
                 (activity as? MainActivity)?.goToFragment(EulaFragment(), "EULA")
             }
         }
+
+
+//        val fiatList = Currency.fiatList
+//        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, fiatList)
+//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        preferredFiatSpinner.adapter = arrayAdapter
+//        preferredFiatSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+//                val selectedItem = fiatList[position]
+//            }
+//
+//            override fun onNothingSelected(parent: AdapterView<*>) {
+//            }
+//        }
+
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
         showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->

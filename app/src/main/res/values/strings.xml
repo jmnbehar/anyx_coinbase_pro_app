@@ -163,6 +163,13 @@
     <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
     <string name="settings_anyx_eula">Read AnyX User Agreement</string>
     <string name="settings_verify">Verify Account</string>
+    <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
+
+    <string-array name="fiat_currencies">
+        <item>USD</item>
+        <item>EUR</item>
+    </string-array>
+
     <string name="settings_log_out">Log Out</string>
 
     //Trade Fragment

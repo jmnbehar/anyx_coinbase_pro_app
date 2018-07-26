@@ -255,11 +255,12 @@ class AlertJobService : JobService() {
             true  -> "over"
             false -> "under"
         }
-        val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
+        val currency = alert.currency
+        val notificationTitle = "${currency.fullName} price alert"
+        val notificationText = "$currency is $overUnder ${alert.price.fiatFormat(Account.fiatCurrency)}"
         val priceAlertGroupTag = "PriceAlert"
 
-        val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
+        val notificationTag = "PriceAlert_" + currency.toString() + "_" + alert.price
 
         AlertUtil.postNotification(notificationTitle, notificationText, priceAlertGroupTag, notificationTag, this)
         val prefs = Prefs(this)

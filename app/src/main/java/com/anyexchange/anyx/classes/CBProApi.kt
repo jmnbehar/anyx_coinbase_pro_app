@@ -203,7 +203,6 @@ sealed class CBProApi : FuelRouting {
 
             val productList: MutableList<Product> = mutableListOf()
             val stashedProductList = prefs.stashedProducts
-            val preferredFiat = prefs.preferredFiat
             if (stashedProductList.isNotEmpty()) {
                 for (product in stashedProductList) {
                     CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
@@ -211,17 +210,18 @@ sealed class CBProApi : FuelRouting {
                         product.price = candleList.lastOrNull()?.close  ?: 0.0
                         productList.add(product)
                         if (productList.size == stashedProductList.size) {
-                            getAccountsWithProductList(preferredFiat, productList, onFailure, onComplete)
+                            getAccountsWithProductList(productList, onFailure, onComplete)
                         }
                     }
                 }
             } else {
                 CBProApi.products().executeRequest(onFailure = onFailure) { result ->
+                    //TODO: investigate this:
+                    val fiatCurrency = Account.fiatCurrency
                     val gson = Gson()
                     val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     val apiProductList = unfilteredApiProductList.filter { s ->
-                        //TODO: change this, add euro
-                        s.quote_currency == preferredFiat.toString()
+                        s.quote_currency == fiatCurrency.toString()
                     }
                     for (product in apiProductList) {
                         CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
@@ -229,7 +229,7 @@ sealed class CBProApi : FuelRouting {
                             productList.add(newProduct)
                             if (productList.size == apiProductList.size) {
                                 prefs.stashedProducts = productList
-                                getAccountsWithProductList(preferredFiat, productList, onFailure, onComplete)
+                                getAccountsWithProductList(productList, onFailure, onComplete)
                             }
                         }
                     }
@@ -250,13 +250,13 @@ sealed class CBProApi : FuelRouting {
             }
         }
 
-        private fun getAccountsWithProductList(preferredFiat: Currency, productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (CBProApi.credentials == null) {
                 for (product in productList) {
                     val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
                     Account.list.add(Account(product, apiAccount))
                 }
-                val fiatString = preferredFiat.toString()
+                val fiatString = Currency.USD.toString()
                 val fiatAccount = ApiAccount("", fiatString, "0.0", "", "0.0", "")
                 Account.fiatAccount = Account(Product.fiatProduct(fiatString), fiatAccount)
                 onComplete()
@@ -269,6 +269,7 @@ sealed class CBProApi : FuelRouting {
                         if (relevantProduct != null) {
                             Account.list.add(Account(relevantProduct, apiAccount))
                         } else if (currency?.isFiat == true) {
+                            //TODO: if Fiat is NOT USD , may need to get more info
                             Account.fiatAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
                         }
                     }

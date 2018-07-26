@@ -88,7 +88,7 @@ class TransferOutFragment : RefreshFragment() {
         interactiveLayout = rootView.layout_transfer_out_amount_layout
         submitWithdrawalButton = rootView.btn_transfer_out_transfer_out
 
-        val fiatCurrency = Account.fiatAccount?.currency ?: Prefs(context!!).preferredFiat
+        val fiatCurrency = Account.fiatCurrency
         currencyTabLayout.tab_transfer_fiat.text.text = fiatCurrency.toString()
         currencyTabLayout = rootView.tabl_transfer_out_currency
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -295,7 +295,7 @@ class TransferOutFragment : RefreshFragment() {
         amountUnitText.text = currency.toString()
         if ((cbproAccount?.availableBalance ?: 0.0) > 0) {
             val cbproAccountBalance = if (currency.isFiat) {
-                (cbproAccount?.availableBalance ?: 0.0).fiatFormat()
+                (cbproAccount?.availableBalance ?: 0.0).fiatFormat(Account.fiatCurrency)
             } else {
                 (cbproAccount?.availableBalance ?: 0.0).btcFormatShortened()
             }

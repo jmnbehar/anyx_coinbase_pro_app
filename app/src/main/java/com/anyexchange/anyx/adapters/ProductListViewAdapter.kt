@@ -85,7 +85,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = product.price.fiatFormat()
+        viewHolder.priceText?.text = product.price.fiatFormat(Account.fiatCurrency)
 
         viewHolder.lineChart?.configure(product.dayCandles, product.currency, false, PriceChart.DefaultDragDirection.Vertical, Timespan.DAY) {}
 

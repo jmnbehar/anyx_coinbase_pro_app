@@ -74,13 +74,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     companion object {
         var tradeSide = TradeSide.BUY
-        var fiatCurrency = Currency.USD
 
         private var account: Account? = null
-        fun newInstance(account: Account, tradeSide: TradeSide, fiatCurrency: Currency): TradeFragment {
+        fun newInstance(account: Account, tradeSide: TradeSide): TradeFragment {
             this.account = account
             this.tradeSide = tradeSide
-            this.fiatCurrency = fiatCurrency
             return TradeFragment()
         }
     }
@@ -315,15 +313,16 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
                 val fiatAccount = Account.fiatAccount
-                fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat()
-                val fiatCurrency = Account.fiatAccount?.currency ?: Prefs(context).preferredFiat
+                val fiatCurrency = Account.fiatCurrency
+                fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat(fiatCurrency)
+
                 fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, fiatCurrency.toString())
                 cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
 
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
 
                 currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
-                currentPriceText.text = account.product.price.fiatFormat()
+                currentPriceText.text = account.product.price.fiatFormat(fiatCurrency)
             }
         }
         updateTotalText()
@@ -333,11 +332,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
+        val fiatCurrency = Account.fiatCurrency
         val currencyString = account?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
             "less than $0.01"
         } else {
-            feeEstimate.fiatFormat()
+            feeEstimate.fiatFormat(fiatCurrency)
         }
         val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
@@ -346,11 +346,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.fiatFormat()}").lparams(width = matchParent) {}
+                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.fiatFormat(fiatCurrency)}").lparams(width = matchParent) {}
                         }
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label), dollarTotal.fiatFormat()).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
@@ -469,16 +469,17 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
+        val fiatCurrency = Account.fiatCurrency
         totalText.text = when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
-                TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat()
+                TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
                 TradeType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
             }
             TradeSide.SELL -> when (tradeType) {
-                TradeType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat()
-                TradeType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat()
-                TradeType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat()
+                TradeType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
+                TradeType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
+                TradeType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
             }
         }
     }
@@ -563,6 +564,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             advancedOptionsLayout.visibility = View.GONE
         }
+        val fiatCurrency = Account.fiatCurrency
         when (tradeType) {
             TradeType.MARKET -> {
                 val marketTab = tradeTypeTabLayout.getTabAt(0)

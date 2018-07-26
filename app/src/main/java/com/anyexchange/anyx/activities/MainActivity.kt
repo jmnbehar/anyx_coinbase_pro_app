@@ -159,6 +159,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
+        val prefs0 = Prefs(this)
+        prefs0.shouldSavePassphrase = true
+
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
@@ -278,7 +281,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             //super.onBackPressed()
-
             if (supportFragmentManager.backStackEntryCount > 1) {
                 supportFragmentManager.popBackStack()
                 val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
@@ -376,7 +378,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat()}"
+        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.fiatCurrency)}"
         val priceAlertGroupTag = "PriceAlert"
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)

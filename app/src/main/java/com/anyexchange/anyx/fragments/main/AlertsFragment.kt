@@ -185,7 +185,7 @@ class AlertsFragment : RefreshFragment() {
             currentPriceText.text = ""
         } else {
             priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
-            currentPriceText.text = price.fiatFormat()
+            currentPriceText.text = price.fiatFormat(Account.fiatCurrency)
         }
         activity?.let { activity ->
             val tabAccentColor = currency.colorAccent(activity)

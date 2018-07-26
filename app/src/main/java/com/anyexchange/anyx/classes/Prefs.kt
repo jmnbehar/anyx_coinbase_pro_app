@@ -89,12 +89,6 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
-    var preferredFiat: Currency
-        get() = Currency.forString(prefs.getString(PREFERRED_FIAT, "USD"))?: Currency.USD
-        set(value) = if (value.isFiat) {
-                prefs.edit().putString(SAVE_PASSPHRASE, value.toString()).apply()
-            } else { }
-
     var alerts: Set<Alert>
         get() = prefs.getStringSet(ALERTS, setOf<String>()).map { s -> Alert.fromString(s) }.toSet()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()

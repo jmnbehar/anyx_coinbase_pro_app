@@ -56,6 +56,7 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
             get() = forCurrency(Currency.BCH)
 
         var fiatAccount: Account? = null
+        val fiatCurrency = fiatAccount?.currency ?: Currency.USD
 
         var totalValue: Double = 0.0
             get() = Account.list.map { a -> a.value }.sum() + (Account.fiatAccount?.value ?: 0.0)
@@ -88,7 +89,7 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
         override fun toString(): String {
             //TODO: use string resources
             return if (currency.isFiat) {
-                "Coinbase $currency Balance: ${balance.fiatFormat()}"
+                "Coinbase $currency Balance: ${balance.fiatFormat(fiatCurrency)}"
             } else {
                 "Coinbase $currency Balance: ${balance.btcFormatShortened()} $currency"
             }

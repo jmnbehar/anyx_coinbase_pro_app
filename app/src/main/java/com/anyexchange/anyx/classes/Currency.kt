@@ -30,6 +30,15 @@ enum class Currency {
         }
     }
 
+    val symbol : String
+        get() {
+            return when (this) {
+                USD -> "$"
+                EUR -> "€"
+                else -> ""
+            }
+        }
+
     val productId : String
         get() = when (this) {
             BTC -> "BTC-USD"
@@ -241,7 +250,8 @@ enum class Currency {
 
 
     companion object {
-        val cryptoList = listOf(BTC, ETH, LTC, BCH)
+        val cryptoList = Currency.values().filter { !it.isFiat }
+        val fiatList = Currency.values().filter { it.isFiat }
 
         fun forString(string: String) : Currency? {
             return when (string) {

@@ -223,7 +223,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
             val cbproAccount = Account.forCurrency(currency)
             amountUnitText.text = currency.toString()
             if (currency.isFiat) {
-                val cbproAccountBalance = (cbproAccount?.balance ?: 0.0).fiatFormat()
+                val cbproAccountBalance = (cbproAccount?.balance ?: 0.0).fiatFormat(Account.fiatCurrency)
                 cbproBalanceText.text = "Coinbase Pro $currency Balance: $cbproAccountBalance"
             } else {
                 val cbproAccountBalance = (cbproAccount?.balance ?: 0.0).btcFormatShortened()
