@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
  * Created by anyexchange on 12/18/2017.
  */
 
+@Suppress("ClassName")
 sealed class CBProApi : FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
 
@@ -193,46 +194,60 @@ sealed class CBProApi : FuelRouting {
         }
     }
 
-    class accounts() : CBProApi() {
+    class accounts : CBProApi() {
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
             val prefs = Prefs(context)
-            val timespan = Timespan.DAY
-            val timespanValue = timespan.value()
-            val granularity = Candle.granularityForTimespan(timespan)
 
             val productList: MutableList<Product> = mutableListOf()
             val stashedProductList = prefs.stashedProducts
             if (stashedProductList.isNotEmpty()) {
-                for (product in stashedProductList) {
-                    CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
-                        product.dayCandles = candleList
-                        product.price = candleList.lastOrNull()?.close  ?: 0.0
-                        productList.add(product)
-                        if (productList.size == stashedProductList.size) {
-                            getAccountsWithProductList(productList, onFailure, onComplete)
-                        }
-                    }
-                }
+                getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
                 CBProApi.products().executeRequest(onFailure = onFailure) { result ->
-                    //TODO: investigate this:
                     val fiatCurrency = Account.fiatCurrency
                     val gson = Gson()
                     val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     val apiProductList = unfilteredApiProductList.filter { s ->
                         s.quote_currency == fiatCurrency.toString()
                     }
-                    for (product in apiProductList) {
-                        CBProApi.candles(product.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
-                            val newProduct = Product(product, candleList)
-                            productList.add(newProduct)
-                            if (productList.size == apiProductList.size) {
-                                prefs.stashedProducts = productList
-                                getAccountsWithProductList(productList, onFailure, onComplete)
-                            }
+                    for (apiProduct in apiProductList) {
+                        val baseCurrency = apiProduct.base_currency
+                        val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { it.id }
+                        val newProduct = Product(apiProduct, relevantProducts)
+                        productList.add(newProduct)
+                    }
+                    getAccountsWithProductList(productList, onFailure, onComplete)
+                }
+            }
+        }
+
+        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            if (CBProApi.credentials == null) {
+                val fiatCurrency = Currency.USD
+                val filteredProductList = productList.filter {
+                    it.quoteCurrency == fiatCurrency
+                }
+                val fiatAccount = ApiAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
+                Account.fiatAccount = Account(Product.fiatProduct(fiatCurrency), fiatAccount)
+                for (product in filteredProductList) {
+                    val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
+                    Account.list.add(Account(product, apiAccount))
+                }
+                Account.updateAllAccountsCandles(onFailure, onComplete)
+            } else {
+                this.executeRequest(onFailure) { result ->
+                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                    for (apiAccount in apiAccountList) {
+                        val currency = Currency.forString(apiAccount.currency)
+                        val relevantProduct = productList.find { p -> p.currency == currency }
+                        if (relevantProduct != null) {
+                            Account.list.add(Account(relevantProduct, apiAccount))
+                        } else if (currency?.isFiat == true) {
+                            Account.fiatAccount = Account(Product.fiatProduct(currency), apiAccount)
                         }
                     }
+                    Account.updateAllAccountsCandles(onFailure, onComplete)
                 }
             }
         }
@@ -247,34 +262,6 @@ sealed class CBProApi : FuelRouting {
                     }
                 }
                 onComplete()
-            }
-        }
-
-        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            if (CBProApi.credentials == null) {
-                for (product in productList) {
-                    val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
-                    Account.list.add(Account(product, apiAccount))
-                }
-                val fiatString = Currency.USD.toString()
-                val fiatAccount = ApiAccount("", fiatString, "0.0", "", "0.0", "")
-                Account.fiatAccount = Account(Product.fiatProduct(fiatString), fiatAccount)
-                onComplete()
-            } else {
-                this.executeRequest(onFailure) { result ->
-                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                    for (apiAccount in apiAccountList) {
-                        val currency = Currency.forString(apiAccount.currency)
-                        val relevantProduct = productList.find { p -> p.currency == currency }
-                        if (relevantProduct != null) {
-                            Account.list.add(Account(relevantProduct, apiAccount))
-                        } else if (currency?.isFiat == true) {
-                            //TODO: if Fiat is NOT USD , may need to get more info
-                            Account.fiatAccount = Account(Product.fiatProduct(currency.toString()), apiAccount)
-                        }
-                    }
-                    onComplete()
-                }
             }
         }
 
@@ -299,7 +286,7 @@ sealed class CBProApi : FuelRouting {
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : CBProApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi()
     class cancelOrder(val orderId: String) : CBProApi()
-    class cancelAllOrders() : CBProApi()
+    class cancelAllOrders : CBProApi()
     class listOrders(val status: String = "all", val productId: String?) : CBProApi()
     class getOrder(val orderId: String) : CBProApi()
     class fills(val orderId: String = "all", val productId: String = "all") : CBProApi()

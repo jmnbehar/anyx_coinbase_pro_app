@@ -12,14 +12,15 @@ import com.google.gson.reflect.TypeToken
  * Created by anyexchange on 12/20/2017.
  */
 
-class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
-    constructor(apiProduct: ApiProduct, candles: List<Candle>)
-            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id, candles)
+class Product(var currency: Currency, var id: String, val quoteCurrency: Currency?, val tradingPairs: List<String>) {
+    constructor(apiProduct: ApiProduct, tradingPairs: List<String>)
+            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
+            Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
 
-    var price = candles.lastOrNull()?.close ?: 0.0
+    var price = 0.0
 
     private var hourCandles = listOf<Candle>()
-    var dayCandles = candles
+    var dayCandles = listOf<Candle>()
     private var weekCandles = listOf<Candle>()
     private var monthCandles = listOf<Candle>()
     private var yearCandles = listOf<Candle>()
@@ -50,13 +51,6 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
             Timespan.YEAR -> yearCandles
 //            Timespan.ALL -> allTimeCandles
         }
-    }
-
-    override fun toString(): String {
-        var alertString = currency.toString() + '\n'
-        alertString += id + '\n'
-//        alertString += price.toString() + '\n'
-        return alertString
     }
 
     fun updateCandles(timespan: Timespan, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
@@ -122,19 +116,28 @@ class Product(var currency: Currency, var id: String,  candles: List<Candle>) {
             onComplete(false)
         }
     }
+
+    override fun toString(): String {
+        var alertString = currency.toString() + '\n'
+        alertString += id + '\n'
+        alertString += quoteCurrency.toString() + '\n'
+        for (tradingPair in tradingPairs) {
+            alertString += tradingPair + '\n'
+        }
+        return alertString
+    }
+
     companion object {
         fun fromString(string: String): Product {
             val splitString = string.split('\n')
             val currency = Currency.forString(splitString[0]) ?: Currency.USD
             val id = splitString[1]
-//            val price = splitString[1].toDoubleOrZero()
-            return Product(currency, id, listOf())
+            val quoteCurrency = if (splitString.size > 2) { Currency.forString(splitString[2]) ?: Currency.USD } else { Currency.USD }
+            val tradingPairs = if (splitString.size > 3) { splitString.subList(3, splitString.size - 1) } else { listOf() }
+            return Product(currency, id, quoteCurrency, tradingPairs)
         }
 
-        fun fiatProduct(currency: String) = Product(Currency.forString(currency) ?: Currency.USD, currency, listOf(fiatCandle))
-
-        private val fiatCandle  = Candle(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
-        //private val blankCandle = Candle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        fun fiatProduct(currency: Currency) = Product(currency, currency.productId, null, listOf())
     }
 
 }

@@ -34,7 +34,6 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var verifyButton: Button
     private lateinit var cbproEulaButton: Button
     private lateinit var anyxEulaButton: Button
-    private lateinit var preferredFiatSpinner: Spinner
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
@@ -51,7 +50,6 @@ class SettingsFragment : RefreshFragment() {
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
-        preferredFiatSpinner = rootView.spinner_setting_preferred_fiat
 
         showDarkMode(rootView)
 

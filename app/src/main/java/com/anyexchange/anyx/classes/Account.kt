@@ -68,11 +68,22 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
                 list.find { a -> a.product.currency == currency }
             }
         }
-    }
 
-    fun toJson() : String {
-        val gson = Gson()
-        return gson.toJson(Account)
+        fun updateAllAccountsCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            val timespan = Timespan.DAY
+            val timespanValue = timespan.value()
+            val granularity = Candle.granularityForTimespan(timespan)
+            var candlesUpdated = 0
+            for (account in list) {
+                CBProApi.candles(account.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
+                    candlesUpdated++
+                    account.product.dayCandles = candleList
+                    if (candlesUpdated == list.size) {
+                        onComplete()
+                    }
+                }
+            }
+        }
     }
 
     abstract class RelatedAccount {

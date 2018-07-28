@@ -72,7 +72,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             candles = account.product.candlesForTimespan(chartTimeSpan)
             val currency = account.currency
 
-            rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal,  chartTimeSpan) {
+            rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
             }
             rootView.chart_fragment_chart.setOnChartValueSelectedListener(this)
@@ -156,7 +156,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
 
         if (areCandlesUpToDate) {
-            chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
+            chart_fragment_chart.addCandles(candles, newAccount.currency)
             setPercentChangeText(chartTimeSpan)
             txt_chart_name.text = currency.fullName
             setButtonsAndBalanceText(newAccount)
@@ -174,7 +174,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }, {
                         checkTimespanButton()
                         candles = newAccount.product.candlesForTimespan(chartTimeSpan)
-                        chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
+                        chart_fragment_chart.addCandles(candles, newAccount.currency)
                         setPercentChangeText(chartTimeSpan)
                         txt_chart_name.text = currency.fullName
 //                        activity.dismissProgressBar()
@@ -188,7 +188,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }, {    //success
                 candles = newAccount.product.candlesForTimespan(chartTimeSpan)
-                chart_fragment_chart.addCandles(candles, newAccount.currency, chartTimeSpan)
+                chart_fragment_chart.addCandles(candles, newAccount.currency)
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
                 setButtonsAndBalanceText(newAccount)
@@ -406,8 +406,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onNothingSelected() {
         val account = account
+        val fiatCurrency = Account.fiatAccount?.currency ?: Currency.USD
         if (account != null) {
-            txt_chart_price.text = account.product.price.fiatFormat(account.currency)
+            txt_chart_price.text = account.product.price.fiatFormat(fiatCurrency)
             setPercentChangeText(chartTimeSpan)
             chart_fragment_chart.highlightValues(arrayOf<Highlight>())
         }
@@ -530,7 +531,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                             txt_chart_price.text = account.product.price.fiatFormat(account.currency)
                             txt_chart_account_value.text = account.value.fiatFormat(account.currency)
 
-                            chart_fragment_chart.addCandles(candles, account.currency, chartTimeSpan)
+                            chart_fragment_chart.addCandles(candles, account.currency)
                             setPercentChangeText(chartTimeSpan)
                             checkTimespanButton()
                             onComplete()

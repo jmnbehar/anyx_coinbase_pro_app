@@ -114,7 +114,8 @@ class Prefs (var context: Context) {
             val accountString = prefs.getString(ACCOUNT + fiatString, "")
             if (accountString.isNotBlank()) {
                 val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                val product = Product.fiatProduct(fiatString)
+                val fiatCurrency = Currency.forString(fiatString) ?: Currency.USD
+                val product = Product.fiatProduct(fiatCurrency)
                 return Account(product, apiAccount)
             }
             return null

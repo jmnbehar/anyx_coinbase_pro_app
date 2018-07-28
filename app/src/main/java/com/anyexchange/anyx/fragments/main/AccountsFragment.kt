@@ -198,7 +198,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 } else {
                     lineChart.visibility = View.VISIBLE
                     //doesn't matter which fiat currency you use here:
-                    lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal, Timespan.DAY) {
+                    lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal) {
                         swipeRefreshLayout?.isEnabled = false
                         HomeFragment.viewPager?.isLocked = true
                     }

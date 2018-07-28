@@ -22,6 +22,7 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
     var fills: List<ApiFill> = listOf()
 
     init {
+        @Suppress("UNCHECKED_CAST")
         if (isOrderList) {
             orders = ordersOrFills as List<ApiOrder>
         } else {

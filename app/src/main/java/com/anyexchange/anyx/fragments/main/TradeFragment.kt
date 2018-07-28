@@ -412,6 +412,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
+        @Suppress("UNUSED_PARAMETER")
         fun onComplete(result: Result<ByteArray, FuelError>) {
             toast(R.string.toast_success)
             activity!!.onBackPressed()
