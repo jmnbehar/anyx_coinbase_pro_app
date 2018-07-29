@@ -22,6 +22,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import android.widget.ArrayAdapter
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
@@ -38,7 +39,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var historyPager: ViewPager? = null
 
+
     private var chartTimeSpan = Timespan.DAY
+    private var tradingPair: TradingPair? = null
     private var candles = listOf<Candle>()
 
     private var tradeFragment: TradeFragment? = null
@@ -69,7 +72,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
             val prefs = Prefs(activity)
-            candles = account.product.candlesForTimespan(chartTimeSpan)
+            candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
             val currency = account.currency
 
             rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal) {
@@ -111,6 +114,30 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //                setChartTimespan(Timespan.ALL)
 //            }
 
+            val tradingPairs = if (account.product.tradingPairs.isNotEmpty()) {
+                account.product.tradingPairs
+            } else {
+                listOf(account.id)
+            }
+            //TODO: don't use simple_spinner_item
+            val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            rootView.spinner_chart_trading_pair.adapter = arrayAdapter
+//            rootView.spinner_chart_trading_pair.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+////                    val tradingPair = if (account.product.tradingPairs.size >= position) {
+////                        account.product.tradingPairs[position]
+////                    } else {
+////                        TradingPair(account.id)
+////                    }
+////                    setTradingPair(tradingPair)
+//                }
+//
+//                override fun onNothingSelected(parent: AdapterView<*>) {
+//                }
+//            }
+
+
             val stashedFills = prefs.getStashedFills(account.product.id)
             val stashedOrders = prefs.getStashedOrders(account.product.id)
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
@@ -138,13 +165,22 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun switchAccount(newAccount: Account) {
+        val oldAccount = account
         account = newAccount
+        if (newAccount.currency != oldAccount?.currency || tradingPair == null) {
+            tradingPair = null
+        }
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
         val currency = newAccount.currency
         val price = newAccount.product.price
         txt_chart_price.text = price.fiatFormat(fiatCurrency)
 
-        candles = newAccount.product.candlesForTimespan(chartTimeSpan)
+        candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+
+        val tradingPairs = account?.product?.tradingPairs ?: listOf()
+        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner_chart_trading_pair.adapter = arrayAdapter
 
         val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(newAccount.product.id)
@@ -162,7 +198,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setButtonsAndBalanceText(newAccount)
             updateHistoryPagerAdapter(stashedOrders, stashedFills)
         } else {
-//            activity.showProgressBar()
+            showProgressSpinner()
             miniRefresh({   //onfailure
                 if (chartTimeSpan != Timespan.DAY) {
                     val backupTimespan = chartTimeSpan
@@ -170,29 +206,29 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     miniRefresh({
                         toast(R.string.error_message)
                         chartTimeSpan = backupTimespan
-//                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                     }, {
                         checkTimespanButton()
-                        candles = newAccount.product.candlesForTimespan(chartTimeSpan)
+                        candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
                         chart_fragment_chart.addCandles(candles, newAccount.currency)
                         setPercentChangeText(chartTimeSpan)
                         txt_chart_name.text = currency.fullName
-//                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                         setButtonsAndBalanceText(newAccount)
 
                         updateHistoryPagerAdapter(stashedOrders, stashedFills)
                     })
                 } else {
                     toast(R.string.error_message)
-//                    activity.dismissProgressBar()
+                    dismissProgressSpinner()
                 }
             }, {    //success
-                candles = newAccount.product.candlesForTimespan(chartTimeSpan)
+                candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
                 chart_fragment_chart.addCandles(candles, newAccount.currency)
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
                 setButtonsAndBalanceText(newAccount)
-//                activity.dismissProgressBar()
+                dismissProgressSpinner()
                 updateHistoryPagerAdapter(stashedOrders, stashedFills)
             })
         }
@@ -232,6 +268,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onResume()
         checkTimespanButton()
         showNavSpinner(account?.currency) { selectedCurrency ->
+//            showProgressSpinner()
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->
                 switchAccount(account)
@@ -259,7 +296,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
-        doneLoading()
+        dismissProgressSpinner()
     }
 
     override fun onPause() {
@@ -281,18 +318,31 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun setChartTimespan(timespan: Timespan) {
         checkTimespanButton()
         chartTimeSpan = timespan
+        showProgressSpinner()
         miniRefresh({
             toast(R.string.chart_update_error)
-            (activity as? com.anyexchange.anyx.activities.MainActivity)?.dismissProgressBar()
+            dismissProgressSpinner()
         }, {
             checkTimespanButton()
-            (activity as? com.anyexchange.anyx.activities.MainActivity)?.dismissProgressBar()
+            dismissProgressSpinner()
+        })
+    }
+
+    private fun setTradingPair(newTradingPair: TradingPair) {
+        tradingPair = newTradingPair
+        showProgressSpinner()
+        miniRefresh({
+            toast(R.string.chart_update_error)
+            dismissProgressSpinner()
+        }, {
+            checkTimespanButton()
+            dismissProgressSpinner()
         })
     }
 
     private fun setPercentChangeText(timespan: Timespan) {
         account?.let { account ->
-            val percentChange = account.product.percentChange(timespan)
+            val percentChange = account.product.percentChange(timespan, tradingPair)
             txt_chart_change_or_date.text = percentChange.percentFormat()
             txt_chart_change_or_date.textColor = if (percentChange >= 0) {
                 Color.GREEN
@@ -433,6 +483,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
         }
+        view.performClick()
         return false
     }
 
@@ -518,9 +569,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account == null) {
             onComplete()
         } else {
-            account.product.updateCandles(chartTimeSpan, onFailure) { _ ->
+            account.product.updateCandles(chartTimeSpan, tradingPair, onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
-                    candles = account.product.candlesForTimespan(chartTimeSpan)
+                    candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
                     CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
                         if (lifecycle.isCreatedOrResumed) {
                             val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)

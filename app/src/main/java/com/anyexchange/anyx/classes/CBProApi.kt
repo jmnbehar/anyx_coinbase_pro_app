@@ -205,15 +205,11 @@ sealed class CBProApi : FuelRouting {
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
                 CBProApi.products().executeRequest(onFailure = onFailure) { result ->
-                    val fiatCurrency = Account.fiatCurrency
                     val gson = Gson()
-                    val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
-                    val apiProductList = unfilteredApiProductList.filter { s ->
-                        s.quote_currency == fiatCurrency.toString()
-                    }
+                    val apiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     for (apiProduct in apiProductList) {
                         val baseCurrency = apiProduct.base_currency
-                        val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { it.id }
+                        val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it.id) }
                         val newProduct = Product(apiProduct, relevantProducts)
                         productList.add(newProduct)
                     }

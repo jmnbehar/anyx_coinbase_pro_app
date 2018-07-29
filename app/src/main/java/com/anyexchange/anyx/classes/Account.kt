@@ -10,7 +10,7 @@ import kotlinx.android.parcel.IgnoredOnParcel
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(val product: Product, var apiAccount: ApiAccount) {
+class Account(var product: Product, var apiAccount: ApiAccount) {
     val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 
@@ -77,12 +77,15 @@ class Account(val product: Product, var apiAccount: ApiAccount) {
             for (account in list) {
                 CBProApi.candles(account.id, timespanValue, granularity, 0).getCandles(onFailure) { candleList ->
                     candlesUpdated++
-                    account.product.dayCandles = candleList
+                    //TODO: verify this
+                    account.product.dayCandles[0] = candleList
                     if (candlesUpdated == list.size) {
                         onComplete()
                     }
                 }
             }
+            //TODO: Do not call this here
+            Product.updateAllProducts(onFailure, {})
         }
     }
 

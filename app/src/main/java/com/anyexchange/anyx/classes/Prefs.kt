@@ -143,7 +143,11 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString.isNotBlank() && productString.isNotBlank()) {
                     val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                    val product = gson.fromJson(productString, Product::class.java)
+                    var product: Product = try {
+                        gson.fromJson(productString, Product::class.java)
+                    } catch (e: Exception) {
+                        gson.fromJson(productString, SimpleFiatProduct::class.java).toProduct()
+                    }
                     val newAccount = Account(product, apiAccount)
                     newAccountList.add(newAccount)
                 }

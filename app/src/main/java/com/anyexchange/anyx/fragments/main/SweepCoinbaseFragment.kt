@@ -88,7 +88,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         accountsSpinner.adapter = arrayAdapter
-        doneLoading()
+        dismissProgressSpinner()
 
 
         accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -132,15 +132,15 @@ class SweepCoinbaseFragment : RefreshFragment() {
                     if (amount > coinbaseAccount.balance) {
                         showPopup("Not enough funds", { })
                     } else {
-                        (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+                        showProgressSpinner()
                         CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                             showPopup("Transfer failed\n Error: ${result.error.message}", { })
-                            activity.dismissProgressBar()
+                            dismissProgressSpinner()
                         } , {
                             toast("Transfer received")
                             amountEditText.setText("")
 
-                            refresh { activity.dismissProgressBar() }
+                            refresh { dismissProgressSpinner() }
                         })
                     }
                 } else {

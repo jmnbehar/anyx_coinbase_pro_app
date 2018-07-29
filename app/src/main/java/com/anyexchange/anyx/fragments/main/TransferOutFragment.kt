@@ -146,15 +146,15 @@ class TransferOutFragment : RefreshFragment() {
                 if (amount > cbproAccount?.availableBalance ?: 0.0) {
                     showPopup(R.string.transfer_funds_error)
                 } else {
-                    (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+                    showProgressSpinner()
                     CBProApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost({ result ->
                         showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                     }, {
                         toast(R.string.transfer_sent_message)
                         amountEditText.setText("")
 
-                        refresh { activity.dismissProgressBar() }
+                        refresh { dismissProgressSpinner() }
                     })
                 }
             } else if (destinationAccount is Account.PaymentMethod) {
@@ -162,14 +162,14 @@ class TransferOutFragment : RefreshFragment() {
                 if (paymentMethod.balance != null && amount > paymentMethod.balance) {
                     showPopup(R.string.transfer_funds_error)
                 } else {
-                    (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+                    showProgressSpinner()
                     CBProApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { result ->
                         showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                     }, {
                         toast(R.string.transfer_sent_message)
                         amountEditText.setText("")
-                        refresh { activity.dismissProgressBar() }
+                        refresh { dismissProgressSpinner() }
                     })
                 }
             } else {
@@ -185,7 +185,7 @@ class TransferOutFragment : RefreshFragment() {
 
         switchCurrency(currency)
 
-        doneLoading()
+        dismissProgressSpinner()
     }
 
     private var isRefreshing = false

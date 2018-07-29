@@ -70,9 +70,15 @@ open class RefreshFragment: Fragment() {
         }
     }
 
-    fun doneLoading() {
+    fun dismissProgressSpinner() {
         if (activity is com.anyexchange.anyx.activities.MainActivity) {
             (activity as com.anyexchange.anyx.activities.MainActivity).dismissProgressBar()
+        }
+    }
+
+    fun showProgressSpinner() {
+        if (activity is com.anyexchange.anyx.activities.MainActivity) {
+            (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
         }
     }
 

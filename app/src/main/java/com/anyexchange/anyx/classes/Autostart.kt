@@ -128,8 +128,8 @@ class RapidMovementJobService : JobService() {
             if (enabledCurrencies.contains(account.currency)) {
                 //TODO: consider switching to hour timespan
                 val timeSpan = Timespan.DAY
-                account.product.updateCandles(timeSpan, { }, { didUpdate ->
-                    val candles = account.product.candlesForTimespan(timeSpan)
+                account.product.updateCandles(timeSpan, null, { }, { didUpdate ->
+                    val candles = account.product.candlesForTimespan(timeSpan, null)
                     if (didUpdate && candles.size > 12) {
                         var alertPercentage = 1.0
                         var alertTime = ""

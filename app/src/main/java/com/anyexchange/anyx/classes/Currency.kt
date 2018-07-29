@@ -248,7 +248,6 @@ enum class Currency {
             }
         }
 
-
     companion object {
         val cryptoList = Currency.values().filter { !it.isFiat }
         val fiatList = Currency.values().filter { it.isFiat }

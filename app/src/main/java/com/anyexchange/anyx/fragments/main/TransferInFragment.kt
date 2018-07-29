@@ -142,7 +142,7 @@ class TransferInFragment : RefreshFragment() {
                 if (amount > coinbaseAccount.balance) {
                     showPopup(R.string.transfer_funds_error)
                 } else {
-                    (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+                    showProgressSpinner()
                     CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
                         val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                         if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
@@ -150,12 +150,12 @@ class TransferInFragment : RefreshFragment() {
                         } else {
                             showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         }
-                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                     } , {
                         toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
-                        refresh { activity.dismissProgressBar() }
+                        refresh { dismissProgressSpinner() }
                     })
                 }
             } else if (sourceAccount is Account.PaymentMethod) {
@@ -163,15 +163,15 @@ class TransferInFragment : RefreshFragment() {
                 if (paymentMethod.balance != null && amount > paymentMethod.balance) {
                     showPopup(R.string.transfer_funds_error)
                 } else {
-                    (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+                    showProgressSpinner()
                     CBProApi.getFromPayment(amount, currency, paymentMethod.id).executePost( { result ->
                         showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                        activity.dismissProgressBar()
+                        dismissProgressSpinner()
                     } , {
                         toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
-                        refresh { activity.dismissProgressBar() }
+                        refresh { dismissProgressSpinner() }
                     })
                 }
             } else {
@@ -204,7 +204,7 @@ class TransferInFragment : RefreshFragment() {
 
         switchCurrency(currency)
 
-        doneLoading()
+        dismissProgressSpinner()
     }
 
     private var isRefreshing = false

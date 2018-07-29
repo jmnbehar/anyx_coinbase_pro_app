@@ -49,7 +49,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
         listView?.setHeightBasedOnChildren()
 
-        doneLoading()
+        dismissProgressSpinner()
         return rootView
     }
 
@@ -75,10 +75,14 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         var productsUpdated = 0
         val accountListSize = Account.list.size
         val time = Timespan.DAY
+
+        //TODO: rewmove
+        Product.updateAllProducts({ }, {})
+
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.list) {
-            account.product.updateCandles(time, {//OnFailure
+            account.product.updateCandles(time, null, {//OnFailure
                 toast(R.string.error_message)
                 onComplete(false)
             }) { didUpdate ->   //OnSuccess

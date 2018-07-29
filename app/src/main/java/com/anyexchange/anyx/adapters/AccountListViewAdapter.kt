@@ -74,12 +74,12 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                 viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
                 outputView.setOnClickListener { onClick(account) }
 
-                val percentChange = account.product.percentChange(Timespan.DAY)
+                val percentChange = account.product.percentChange(Timespan.DAY, null)
 
                 if (account.value > 0) {
                     viewHolder.accountValueText?.text = account.value.fiatFormat(Account.fiatCurrency)
                     val accountChange = (percentChange * account.value) / 100
-                    val sign = if (percentChange >= 0) { "+" } else { "-" }
+                    val sign = if (percentChange >= 0) { "+" } else { "" }
                     viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.fiatFormat(Account.fiatCurrency))
                 } else {
                     viewHolder.accountValueText?.visibility = View.INVISIBLE

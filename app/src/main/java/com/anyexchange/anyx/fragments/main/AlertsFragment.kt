@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
@@ -146,7 +145,7 @@ class AlertsFragment : RefreshFragment() {
 //        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
 
         //alertList.setHeightBasedOnChildren()
-        doneLoading()
+        dismissProgressSpinner()
 
         return rootView
     }

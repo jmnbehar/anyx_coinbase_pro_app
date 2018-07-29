@@ -93,8 +93,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
@@ -103,10 +103,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
                     android:layout_marginTop="4dp"
+                    android:gravity="center"
                     android:orientation="horizontal">
 
                     <Spinner
-                        android:id="@+id/spinner_setting_preferred_fiat"
+                        android:id="@+id/spinner_chart_trading_pair"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:entries="@array/fiat_currencies"
@@ -114,7 +115,7 @@
 
                     <RadioGroup
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginBottom="2dp"
                         android:layout_marginTop="2dp"
                         android:orientation="horizontal">
@@ -194,25 +195,25 @@
                 </LinearLayout>
 
                 <LinearLayout
-                android:id="@+id/ll_chart_trade_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_chart_buy"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/ll_chart_trade_buttons"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/chart_buy_btn" />
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btn_chart_sell"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/chart_sel_btn" />
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/btn_chart_buy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/chart_buy_btn" />
+
+                    <Button
+                        android:id="@+id/btn_chart_sell"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/chart_sel_btn" />
+                </LinearLayout>
 
 
                 <LinearLayout

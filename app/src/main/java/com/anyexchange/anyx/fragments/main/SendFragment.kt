@@ -15,7 +15,6 @@ import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
@@ -117,7 +116,7 @@ class SendFragment : RefreshFragment() {
             }
         }
 
-        doneLoading()
+        dismissProgressSpinner()
 
         return rootView
     }

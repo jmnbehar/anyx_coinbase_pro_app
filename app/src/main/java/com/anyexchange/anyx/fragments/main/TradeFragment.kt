@@ -254,7 +254,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-        doneLoading()
+        dismissProgressSpinner()
 
         return rootView
     }

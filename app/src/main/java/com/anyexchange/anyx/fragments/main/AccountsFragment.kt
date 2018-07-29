@@ -71,7 +71,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             accountList.adapter = AccountListViewAdapter(context, selectGroup)
             titleText.visibility = View.GONE
 
-            refresh { doneLoading() }
+            refresh { dismissProgressSpinner() }
         } else {
             accountList.visibility = View.GONE
             lineChart.visibility = View.GONE
@@ -79,7 +79,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             //TODO: put a login button here
             titleText.visibility = View.VISIBLE
             titleText.text = resources.getString(R.string.accounts_logged_out_message)
-            doneLoading()
+            dismissProgressSpinner()
         }
 
         return rootView
@@ -162,15 +162,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val btcAccount = Account.btcAccount?.product
         if (btcAccount != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            for (i in 0..(btcAccount.dayCandles.size - 1)) {
+            for (i in 0..(btcAccount.dayCandles[0].size - 1)) {
                 Account.fiatAccount?.value?.let {
                     var totalCandleValue = it
-                    val time = btcAccount.dayCandles[i].time
+                    val time = btcAccount.dayCandles[0][i].time
                     for (account in Account.list) {
-                        val accountCandleValue = if (account.product.dayCandles.size > i) {
-                            account.product.dayCandles[i].close
+                        val accountCandleValue = if (account.product.dayCandles[0].size > i) {
+                            account.product.dayCandles[0][i].close
                         } else {
-                            account.product.dayCandles.last().close
+                            account.product.dayCandles[0].lastOrNull()?.close ?: 0.0
                         }
                         totalCandleValue += (accountCandleValue * account.balance)
                     }
