@@ -22,11 +22,11 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
     var price = 0.0
 
-    private var hourCandles = Array<List<Candle>>(tradingPairs.size) { listOf() }
-    var dayCandles = Array<List<Candle>>(tradingPairs.size) { listOf() }
-    private var weekCandles = Array<List<Candle>>(tradingPairs.size) { listOf() }
-    private var monthCandles = Array<List<Candle>>(tradingPairs.size) { listOf() }
-    private var yearCandles = Array<List<Candle>>(tradingPairs.size) { listOf() }
+    private var hourCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+    var dayCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+    private var weekCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+    private var monthCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+    private var yearCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
 
     private var candlesTimespan = Timespan.DAY
 
@@ -139,6 +139,20 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         weekCandles[0] = basicWeekCandles
         monthCandles[0] = basicMonthCandles
         yearCandles[0] = basicYearCandles
+    }
+    fun clearAllCandles() {
+//        hourCandles[0] = listOf()
+//        weekCandles[0] = listOf()
+//        monthCandles[0] = listOf()
+//        yearCandles[0] = listOf()
+        val tradingPairCount = dayCandles.count()
+        for (i in 0..(tradingPairCount - 1)) {
+            hourCandles[i] = listOf()
+            dayCandles[i] = listOf()
+            weekCandles[i] = listOf()
+            monthCandles[i] = listOf()
+            yearCandles[i] = listOf()
+        }
     }
 
     companion object {

@@ -17,7 +17,8 @@ enum class Currency {
     ETH,
     LTC,
     USD,
-    EUR;
+    EUR,
+    GBP;
 
     override fun toString() : String {
         return when (this) {
@@ -27,6 +28,7 @@ enum class Currency {
             LTC -> "LTC"
             USD -> "USD"
             EUR -> "EUR"
+            GBP -> "GBP"
         }
     }
 
@@ -35,6 +37,7 @@ enum class Currency {
             return when (this) {
                 USD -> "$"
                 EUR -> "€"
+                GBP -> "£"
                 else -> ""
             }
         }
@@ -47,6 +50,7 @@ enum class Currency {
             LTC -> "LTC-USD"
             USD -> "USD"
             EUR -> "EUR"
+            GBP -> "GBP"
         }
 
     val fullName : String
@@ -55,8 +59,9 @@ enum class Currency {
             BCH -> "Bitcoin Cash"
             ETH -> "Ethereum"
             LTC -> "Litecoin"
-            USD -> "USD"
+            USD -> "US Dollar"
             EUR -> "Euro"
+            GBP -> "Pound sterling"
         }
 
     val iconId
@@ -68,6 +73,7 @@ enum class Currency {
             USD -> R.drawable.icon_usd
             //TODO: replace this:
             EUR -> R.drawable.icon_usd
+            GBP -> R.drawable.icon_usd
         }
 
     val feePercentage : Double
@@ -78,11 +84,12 @@ enum class Currency {
             LTC -> 0.003
             USD -> 0.0
             EUR -> 0.0
+            GBP -> 0.0
         }
 
     val isFiat : Boolean
         get() = when(this) {
-            USD, EUR -> true
+            USD, EUR, GBP -> true
             else -> false
         }
 
@@ -104,14 +111,23 @@ enum class Currency {
             else -> 100.0
         }
 
-    private val startDate : Date
-        get() = when (this) {
-            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
-            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).time
-            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).time
-            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
-            else         -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
-        }
+//    private val startDate : Date
+//        get() = when (this) {
+//            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+//            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).time
+//            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).time
+//            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+//            else -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+//        }
+//
+//    val lifetimeInSeconds : Long
+//        get() {
+//            val utcTimeZone = TimeZone.getTimeZone("UTC")
+//            val now = Calendar.getInstance(utcTimeZone)
+//            val nowTime = now.timeInSeconds()
+//            val startTime = startDate.time / 1000
+//            return (nowTime - startTime)
+//        }
 
     fun colorPrimary(context: Context) : Int {
         val prefs = Prefs(context)
@@ -122,7 +138,8 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_dk)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
                 USD,
-                EUR -> ContextCompat.getColor(context, R.color.white)
+                EUR,
+                GBP -> ContextCompat.getColor(context, R.color.white)
             }
         } else {
             when (this) {
@@ -131,7 +148,8 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_light)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_light)
                 USD,
-                EUR -> ContextCompat.getColor(context, R.color.black)
+                EUR,
+                GBP -> ContextCompat.getColor(context, R.color.black)
             }
         }
     }
@@ -145,7 +163,8 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_accent)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
                 USD,
-                EUR -> ContextCompat.getColor(context, R.color.white)
+                EUR,
+                GBP -> ContextCompat.getColor(context, R.color.white)
             }
         } else {
             when (this) {
@@ -154,7 +173,8 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_accent)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
                 USD,
-                EUR -> ContextCompat.getColor(context, R.color.black)
+                EUR,
+                GBP -> ContextCompat.getColor(context, R.color.black)
             }
         }
     }
@@ -168,7 +188,8 @@ enum class Currency {
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
                 USD,
-                EUR -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
+                EUR,
+                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
             }
         } else {
             when (this) {
@@ -177,7 +198,8 @@ enum class Currency {
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
                 USD,
-                EUR -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
+                EUR,
+                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
             }
         }
     }
@@ -191,7 +213,8 @@ enum class Currency {
                 BCH -> Color.WHITE
                 LTC -> Color.BLACK
                 USD,
-                EUR -> Color.WHITE
+                EUR,
+                GBP -> Color.WHITE
             }
         } else {
             when (this) {
@@ -200,7 +223,8 @@ enum class Currency {
                 BCH -> Color.WHITE
                 LTC -> Color.WHITE
                 USD,
-                EUR -> Color.BLACK
+                EUR,
+                GBP -> Color.BLACK
             }
         }
     }
@@ -213,7 +237,8 @@ enum class Currency {
             BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
             LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
             USD,
-            EUR -> "my irl address?"
+            EUR,
+            GBP -> "my irl address?"
         }
 
     val verificationAddress : String
@@ -224,17 +249,10 @@ enum class Currency {
             BCH -> "qzqj4dxr2m20ys99x2jkuyq90d4q9q6jzq985ey2j7"
             LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
             USD,
-            EUR -> "my irl address?"
+            EUR,
+            GBP -> "my irl address?"
         }
 
-    val lifetimeInSeconds : Long
-        get() {
-            val utcTimeZone = TimeZone.getTimeZone("UTC")
-            val now = Calendar.getInstance(utcTimeZone)
-            val nowTime = now.timeInSeconds()
-            val startTime = startDate.time / 1000
-            return (nowTime - startTime)
-        }
 
     val orderValue : Int
         get() {
@@ -244,13 +262,13 @@ enum class Currency {
                 LTC -> 2
                 BCH -> 1
                 USD,
-                EUR -> 0
+                EUR,
+                GBP -> 0
             }
         }
 
     companion object {
         val cryptoList = Currency.values().filter { !it.isFiat }
-        val fiatList = Currency.values().filter { it.isFiat }
 
         fun forString(string: String) : Currency? {
             return when (string) {
@@ -264,6 +282,7 @@ enum class Currency {
                 "LTC" -> LTC
                 "USD" -> USD
                 "EUR" -> EUR
+                "GBP" -> GBP
                 else -> null
             }
         }

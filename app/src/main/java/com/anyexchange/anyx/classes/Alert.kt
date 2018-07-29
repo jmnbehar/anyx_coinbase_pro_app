@@ -21,8 +21,9 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
             1
         }
         val currencyCode = when (currency) {
-            Currency.USD -> 0
-            Currency.EUR -> 0
+            Currency.USD,
+            Currency.EUR,
+            Currency.GBP -> 0
             Currency.LTC -> 1
             Currency.ETH -> 2
             Currency.BCH -> 3
