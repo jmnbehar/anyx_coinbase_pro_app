@@ -92,7 +92,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
 
         accountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                 coinbaseAccount = coinbaseAccounts[position]
                 val currency = coinbaseAccount?.currency
                 if (currency != null) {

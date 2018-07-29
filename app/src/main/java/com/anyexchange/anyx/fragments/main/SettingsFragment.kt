@@ -92,7 +92,7 @@ class SettingsFragment : RefreshFragment() {
 //        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 //        preferredFiatSpinner.adapter = arrayAdapter
 //        preferredFiatSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+//            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
 //                val selectedItem = fiatList[position]
 //            }
 //

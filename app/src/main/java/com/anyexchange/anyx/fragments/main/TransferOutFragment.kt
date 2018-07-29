@@ -110,7 +110,7 @@ class TransferOutFragment : RefreshFragment() {
         cbAccountsSpinner.adapter = arrayAdapter
 
         cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (relevantAccounts.size > position) {
                     destinationAccount = relevantAccounts[position]
                     if (destinationAccount is Account.CoinbaseAccount) {

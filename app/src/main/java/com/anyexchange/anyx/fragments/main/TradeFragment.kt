@@ -591,7 +591,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 advancedOptionTimeInForceSpinner.adapter = arrayAdapter
                 advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                         val selectedItem = timeInForceList[position]
                         if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
                             advancedOptionEndTimeSpinner.visibility = View.VISIBLE

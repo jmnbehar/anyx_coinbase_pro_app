@@ -22,6 +22,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
@@ -36,10 +37,7 @@ import java.util.*
  */
 class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
-
     private var historyPager: ViewPager? = null
-
-
     private var chartTimeSpan = Timespan.DAY
     private var tradingPair: TradingPair? = null
     private var candles = listOf<Candle>()
@@ -122,20 +120,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             //TODO: don't use simple_spinner_item
             val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            rootView.spinner_chart_trading_pair.adapter = arrayAdapter
-//            rootView.spinner_chart_trading_pair.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-////                    val tradingPair = if (account.product.tradingPairs.size >= position) {
-////                        account.product.tradingPairs[position]
-////                    } else {
-////                        TradingPair(account.id)
-////                    }
-////                    setTradingPair(tradingPair)
-//                }
-//
-//                override fun onNothingSelected(parent: AdapterView<*>) {
-//                }
-//            }
+            val tradingPairSpinner = rootView.spinner_chart_trading_pair
+            tradingPairSpinner.adapter = arrayAdapter
+            tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val tradingPair = if (account.product.tradingPairs.size >= position) {
+                        account.product.tradingPairs[position]
+                    } else {
+                        TradingPair(account.id)
+                    }
+                    setTradingPair(tradingPair)
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                }
+            }
 
 
             val stashedFills = prefs.getStashedFills(account.product.id)

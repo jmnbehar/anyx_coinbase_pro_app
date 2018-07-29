@@ -109,7 +109,7 @@ class TransferInFragment : RefreshFragment() {
 
 
         cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (relevantAccounts.size > position) {
                     sourceAccount = relevantAccounts[position]
                     if (sourceAccount is Account.CoinbaseAccount) {

@@ -55,8 +55,8 @@ open class RefreshFragment: Fragment() {
         mainActivity.spinnerNav.isEnabled = true
         mainActivity.spinnerNav.visibility = View.VISIBLE
         mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                if (parent.getItemAtPosition(position) is Currency) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (parent?.getItemAtPosition(position) is Currency) {
                     val selectedItem = parent.getItemAtPosition(position) as Currency
                     onItemSelected(selectedItem)
                 }
