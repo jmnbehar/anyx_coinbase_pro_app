@@ -70,23 +70,20 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
 
         fun updateAllAccountsCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            val timespan = Timespan.DAY
-            val granularity = Candle.granularityForTimespan(timespan)
             var candlesUpdated = 0
             for (account in list) {
+                //TODO: don't do this:
                 account.product.clearAllCandles()
-                CBProApi.candles(account.product.id, timespan.value(), granularity, 0).getCandles(onFailure) { candleList ->
-                    candlesUpdated++
-                    //TODO: verify this
-                    account.product.dayCandles[0] = candleList
-                    if (candlesUpdated == list.size) {
-                        onComplete()
+                val tradingPair = TradingPair(account.product.id)
+                Product.updateAllProducts(onFailure) {
+                    account.product.updateCandles(Timespan.DAY, tradingPair, onFailure) {
+                        if (candlesUpdated == list.size) {
+                            onComplete()
+                        }
                     }
                 }
             }
             //TODO: Do not call this here
-
-            Product.updateAllProducts(onFailure, {})
         }
     }
 

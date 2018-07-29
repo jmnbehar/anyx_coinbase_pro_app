@@ -93,6 +93,13 @@ fun Double.fiatFormat(currency: Currency): String {
     val currencySymbol = currency.symbol
     return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
 }
+fun Double.format(currency: Currency): String {
+    if (currency.isFiat) {
+        return this.fiatFormat(currency)
+    } else {
+        return this.btcFormatShortened() + " " + currency.toString()
+    }
+}
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
 

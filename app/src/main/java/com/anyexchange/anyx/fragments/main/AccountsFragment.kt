@@ -162,15 +162,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val btcAccount = Account.btcAccount?.product
         if (btcAccount != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            for (i in 0..(btcAccount.dayCandles[0].size - 1)) {
+            for (i in 0..(btcAccount.defaultDayCandles.size - 1)) {
                 Account.fiatAccount?.value?.let {
                     var totalCandleValue = it
-                    val time = btcAccount.dayCandles[0][i].time
+                    val time = btcAccount.defaultDayCandles[i].time
                     for (account in Account.list) {
-                        val accountCandleValue = if (account.product.dayCandles[0].size > i) {
-                            account.product.dayCandles[0][i].close
+                        val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
+                            account.product.defaultDayCandles[i].close
                         } else {
-                            account.product.dayCandles[0].lastOrNull()?.close ?: 0.0
+                            account.product.defaultDayCandles.lastOrNull()?.close ?: 0.0
                         }
                         totalCandleValue += (accountCandleValue * account.balance)
                     }

@@ -14,6 +14,8 @@ data class Candle(
         val close: Double,
         val volume: Double) : Parcelable  {
 
+//    val tradingPair: TradingPair? = null
+
      companion object {
          fun granularityForTimespan(timespan: Timespan) : Long {
              return when (timespan) {

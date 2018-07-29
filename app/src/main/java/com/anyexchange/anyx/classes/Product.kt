@@ -11,22 +11,39 @@ import com.google.gson.reflect.TypeToken
  * Created by anyexchange on 12/20/2017.
  */
 
-class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, var tradingPairs: List<TradingPair>) {
+class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: ApiProduct, tradingPairs: List<TradingPair>)
             : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
             Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
 
-    init {
-        tradingPairs = tradingPairs.sortedBy { it.quoteCurrency != Account.fiatCurrency }
-    }
+    var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency != Account.fiatCurrency }
+        set(value) {
+            field = value
+            if (dayCandles.size < tradingPairs.size) {
+                val candlesSizeTemp = dayCandles.size
+                val hourCandlesTemp = hourCandles
+                val dayCandlesTemp = dayCandles
+                val weekCandlesTemp = weekCandles
+                val monthCandlesTemp = monthCandles
+                val yearCandlesTemp = yearCandles
+                hourCandles = Array(tradingPairs.size + 1) { i -> if (i < candlesSizeTemp) { hourCandlesTemp[i] } else { listOf() } }
+                dayCandles  = Array(tradingPairs.size + 1) { i -> if (i < candlesSizeTemp) { dayCandlesTemp[i]  } else { listOf() } }
+                weekCandles = Array(tradingPairs.size + 1) { i -> if (i < candlesSizeTemp) { weekCandlesTemp[i] } else { listOf() } }
+                monthCandles = Array(tradingPairs.size + 1){ i -> if (i < candlesSizeTemp) { monthCandlesTemp[i]} else { listOf() } }
+                yearCandles = Array(tradingPairs.size + 1) { i -> if (i < candlesSizeTemp) { yearCandlesTemp[i] } else { listOf() } }
+            }
+        }
 
     var price = 0.0
 
     private var hourCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
-    var dayCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+    private var dayCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
     private var weekCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
     private var monthCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
     private var yearCandles = Array<List<Candle>>(tradingPairs.size + 1) { listOf() }
+
+    val defaultDayCandles: List<Candle>
+        get() = dayCandles[0]
 
     private var candlesTimespan = Timespan.DAY
 
@@ -141,10 +158,6 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         yearCandles[0] = basicYearCandles
     }
     fun clearAllCandles() {
-//        hourCandles[0] = listOf()
-//        weekCandles[0] = listOf()
-//        monthCandles[0] = listOf()
-//        yearCandles[0] = listOf()
         val tradingPairCount = dayCandles.count()
         for (i in 0..(tradingPairCount - 1)) {
             hourCandles[i] = listOf()

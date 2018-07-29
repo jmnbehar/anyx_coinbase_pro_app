@@ -129,7 +129,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     val tradingPair = if (account.product.tradingPairs.size >= position) {
                         account.product.tradingPairs[position]
                     } else {
-                        TradingPair(account.id)
+                        TradingPair(account.product.id)
                     }
                     setTradingPair(tradingPair)
                 }
@@ -177,7 +177,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
 
         val price = candles.lastOrNull()?.close ?: newAccount.product.price
-        txt_chart_price.text = price.fiatFormat(quoteCurrency)
+        txt_chart_price.text = price.format(quoteCurrency)
 
         val tradingPairs = account?.product?.tradingPairs ?: listOf()
         val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
@@ -252,7 +252,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 txt_chart_ticker.text = resources.getString(R.string.chart_wallet_label, currency.toString())
                 img_chart_account_icon.setImageResource(currency.iconId)
                 txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
-                txt_chart_account_value.text = account.value.fiatFormat(quoteCurrency)
+                txt_chart_account_value.text = account.value.format(quoteCurrency)
 
                 historyPager?.visibility = View.VISIBLE
             } else {
@@ -372,8 +372,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 createdTimeRaw
             }
             val currency = Currency.forString(order.product_id) ?: Currency.USD
-            val fillFees = order.fill_fees.toDouble().fiatFormat(quoteCurrency)
-            val price = order.price.toDouble().fiatFormat(quoteCurrency)
+            val fillFees = order.fill_fees.toDouble().format(quoteCurrency)
+            val price = order.price.toDouble().format(quoteCurrency)
             val filledSize = order.filled_size.toDouble().toString()
             val size = (order.size ?: "0").toDouble().btcFormat()
 
@@ -422,8 +422,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 //e.printStackTrace()
                 createdTimeRaw
             }
-            val fee = fill.fee.toDouble().fiatFormat(quoteCurrency)
-            val price = fill.price.toDouble().fiatFormat(quoteCurrency)
+            val fee = fill.fee.toDouble().format(quoteCurrency)
+            val price = fill.price.toDouble().format(quoteCurrency)
             val size = fill.size.toDouble().btcFormat()
             customView {
                 linearLayout {
@@ -443,7 +443,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onValueSelected(entry: Entry, h: Highlight) {
         val index = entry.x.toInt()
         if (candles.size > index) {
-            txt_chart_price.text = entry.y.toDouble().fiatFormat(quoteCurrency)
+            txt_chart_price.text = entry.y.toDouble().format(quoteCurrency)
             val candle = candles[index]
             txt_chart_change_or_date.text = candle.time.toStringWithTimespan(chartTimeSpan)
             val prefs = Prefs(context!!)
@@ -458,7 +458,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onNothingSelected() {
         val account = account
         if (account != null) {
-            txt_chart_price.text = account.product.price.fiatFormat(quoteCurrency)
+            txt_chart_price.text = account.product.price.format(quoteCurrency)
             setPercentChangeText(chartTimeSpan)
             chart_fragment_chart.highlightValues(arrayOf<Highlight>())
         }
@@ -516,7 +516,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
                         val newBalance = apiAccount.balance.toDoubleOrZero()
                         txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
-                        txt_chart_account_value.text = account.value.fiatFormat(quoteCurrency)
+                        txt_chart_account_value.text = account.value.format(quoteCurrency)
                         miniRefresh(onFailure) {
                             account.apiAccount = apiAccount
                             onComplete(true)
@@ -598,8 +598,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         //complete mini refresh assumes account is not null
-        txt_chart_price.text = price.fiatFormat(quoteCurrency)
-        txt_chart_account_value.text = account!!.value.fiatFormat(quoteCurrency)
+        txt_chart_price.text = price.format(quoteCurrency)
+        txt_chart_account_value.text = account!!.value.format(quoteCurrency)
         chart_fragment_chart.addCandles(candles, account!!.currency)
         setPercentChangeText(chartTimeSpan)
         checkTimespanButton()
