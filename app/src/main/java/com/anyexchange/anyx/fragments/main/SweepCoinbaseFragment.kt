@@ -60,7 +60,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         //titleText.text = "Buy and Sell " + account.currency.toString()
 
-        titleText.text =  getText(R.string.transfer_in_title)
+        titleText.text =  getString(R.string.transfer_in_title)
 
         coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
         val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
@@ -71,11 +71,11 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
-            titleText.text =  getText(R.string.transfer_cb_accounts_empty)
+            titleText.text =  getString(R.string.transfer_cb_accounts_empty)
 
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = getText(R.string.transfer_in_title)
+            titleText.text = getString(R.string.transfer_in_title)
 
             coinbaseAccount = coinbaseAccounts.first()
             val currency = coinbaseAccount?.currency
@@ -197,10 +197,10 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         if (coinbaseAccounts.isEmpty()) {
             depositDetailsLayout.visibility = View.GONE
-            titleText.text = getText(R.string.transfer_cb_accounts_empty)
+            titleText.text = getString(R.string.transfer_cb_accounts_empty)
         } else {
             depositDetailsLayout.visibility = View.VISIBLE
-            titleText.text = getText(R.string.transfer_in_title)
+            titleText.text = getString(R.string.transfer_in_title)
 
             (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).relatedAccountList = coinbaseAccounts
             (accountsSpinner.adapter as RelatedAccountSpinnerAdapter).notifyDataSetChanged()

@@ -70,8 +70,6 @@ class TransferInFragment : RefreshFragment() {
         depositDetailsLayout = rootView.layout_transfer_in_details
         interactiveLayout = rootView.layout_transfer_in_interactive_layout
 
-        currencyTabLayout = rootView.tabl_transfer_in_currency
-
         amountLabelText = rootView.txt_transfer_in_amount_label
         amountEditText = rootView.etxt_transfer_in_amount
         amountUnitText = rootView.txt_transfer_in_amount_unit
@@ -91,8 +89,10 @@ class TransferInFragment : RefreshFragment() {
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         val fiatCurrency = Account.fiatCurrency
-        currencyTabLayout.tab_transfer_fiat.text.text = fiatCurrency.toString()
         cbAccountsSpinner.adapter = arrayAdapter
+
+        //TODO: nuke this tab layout, use spinner
+        currencyTabLayout = rootView.tabl_transfer_in_currency
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
@@ -278,7 +278,7 @@ class TransferInFragment : RefreshFragment() {
         when (relevantAccounts.size) {
             0 -> {
                 sourceAccount = null
-                cbAccountText.text = resources.getText(R.string.transfer_coinbase_account_empty, currency.toString())
+                cbAccountText.text = resources.getString(R.string.transfer_coinbase_account_empty, currency.toString())
                 cbAccountText.visibility = View.VISIBLE
                 cbAccountsSpinner.visibility = View.GONE
                 interactiveLayout.visibility = View.INVISIBLE

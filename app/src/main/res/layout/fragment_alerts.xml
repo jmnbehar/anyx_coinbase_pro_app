@@ -75,12 +75,14 @@
                     android:id="@+id/txt_alert_price_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="4dp"
                     android:text="price" />
 
                 <TextView
                     android:id="@+id/txt_alert_current_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
                     android:text="BTC"
                     android:textSize="20sp" />
             </LinearLayout>

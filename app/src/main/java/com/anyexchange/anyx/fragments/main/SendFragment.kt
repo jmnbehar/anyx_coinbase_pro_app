@@ -77,7 +77,7 @@ class SendFragment : RefreshFragment() {
 
         sendButton = rootView.btn_send
 
-        titleText.text = resources.getText(R.string.send_title)
+        titleText.text = resources.getString(R.string.send_title)
 
         switchCurrency()
 
@@ -143,7 +143,7 @@ class SendFragment : RefreshFragment() {
                         responseDataStr = responseDataStr.removePrefix("{\"message\":\"")
                         responseDataStr = responseDataStr.removeSuffix("\"}")
                         val errorString = when(responseDataStr) {
-                            "invalid crypto_address" -> resources.getText(R.string.send_invalid_destination_error,
+                            "invalid crypto_address" -> resources.getString(R.string.send_invalid_destination_error,
                                     currency.toString())
                             else -> CBProApi.defaultPostFailure(context, result)
                         }
@@ -153,7 +153,7 @@ class SendFragment : RefreshFragment() {
                         toast(R.string.toast_success)
                     })
         } else {
-            toast(resources.getText(R.string.send_amount_error, min.toString()))
+            toast(resources.getString(R.string.send_amount_error, min.toString()))
         }
     }
 

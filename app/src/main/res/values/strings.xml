@@ -228,7 +228,7 @@
     <string name="transfer_received_message">Transfer Received</string>
     <string name="transfer_sent_message">Transfer Sent</string>
     <string name="transfer_coinbase_account_empty">Coinbase %s Wallet is Empty</string>
-    <string name="transfer_account_empty">Coinbase Pro %s Wallet is Empty</string>
+    <string name="transfer_pro_account_empty">Coinbase Pro %s Wallet is Empty</string>
 
     <string name="transfer_account_balance_text">"Coinbase Pro %s Balance: %s</string>
 

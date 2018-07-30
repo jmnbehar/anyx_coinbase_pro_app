@@ -156,6 +156,48 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
+    override fun onResume() {
+        super.onResume()
+        checkTimespanButton()
+        showNavSpinner(account?.currency) { selectedCurrency ->
+            //            showProgressSpinner()
+            account = Account.forCurrency(selectedCurrency)
+            account?. let { account ->
+                switchAccount(account)
+            }
+        }
+
+        if (account != null) {
+            setButtonColors()
+            System.out.println("Account not null")
+            switchAccount(account!!)
+        } else {
+            val mainActivity = activity as? MainActivity
+            val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
+            account = if (selectedCurrency != null) {
+                System.out.println("Account retrieved from Spinner")
+                Account.forCurrency(selectedCurrency)
+            } else {
+                System.out.println("Account reset to BTC")
+                Account.forCurrency(Currency.BTC)
+            }
+            setButtonsAndBalanceText(account!!)
+            switchAccount(account!!)
+        }
+
+        autoRefresh = Runnable {
+            miniRefresh({ }, { })
+            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        }
+        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        dismissProgressSpinner()
+    }
+
+    override fun onPause() {
+        handler.removeCallbacks(autoRefresh)
+        super.onPause()
+    }
+
     private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
@@ -224,14 +266,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun setButtonsAndBalanceText(account: Account) {
         context?.let {
             val currency = account.currency
-            val buttonColors = currency.colorStateList(it)
-            btn_chart_buy.backgroundTintList = buttonColors
-            btn_chart_sell.backgroundTintList = buttonColors
-            val buttonTextColor = currency.buttonTextColor(it)
-            btn_chart_buy.textColor = buttonTextColor
-            btn_chart_sell.textColor = buttonTextColor
-            val tabColor = currency.colorPrimary(it)
-            history_tab_layout.setSelectedTabIndicatorColor(tabColor)
+            setButtonColors()
             val prefs = Prefs(it)
             if (prefs.isLoggedIn) {
                 txt_chart_ticker.text = resources.getString(R.string.chart_wallet_label, currency.toString())
@@ -251,44 +286,19 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        checkTimespanButton()
-        showNavSpinner(account?.currency) { selectedCurrency ->
-//            showProgressSpinner()
-            account = Account.forCurrency(selectedCurrency)
-            account?. let { account ->
-                switchAccount(account)
+    private fun setButtonColors() {
+        context?.let { context ->
+            account?.currency?.let { currency ->
+                val buttonColors = currency.colorStateList(context)
+                btn_chart_buy.backgroundTintList = buttonColors
+                btn_chart_sell.backgroundTintList = buttonColors
+                val buttonTextColor = currency.buttonTextColor(context)
+                btn_chart_buy.textColor = buttonTextColor
+                btn_chart_sell.textColor = buttonTextColor
+                val tabColor = currency.colorPrimary(context)
+                history_tab_layout.setSelectedTabIndicatorColor(tabColor)
             }
         }
-
-        if (account != null) {
-            System.out.println("Account not null")
-            switchAccount(account!!)
-        } else {
-            val mainActivity = activity as? MainActivity
-            val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
-            account = if (selectedCurrency != null) {
-                System.out.println("Account retrieved from Spinner")
-                Account.forCurrency(selectedCurrency)
-            } else {
-                System.out.println("Account reset to BTC")
-                Account.forCurrency(Currency.BTC)
-            }
-            switchAccount(account!!)
-        }
-
-        autoRefresh = Runnable {
-            miniRefresh({ }, { })
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
-        }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
-        dismissProgressSpinner()
-    }
-
-    override fun onPause() {
-        handler.removeCallbacks(autoRefresh)
-        super.onPause()
     }
 
     private fun checkTimespanButton() {

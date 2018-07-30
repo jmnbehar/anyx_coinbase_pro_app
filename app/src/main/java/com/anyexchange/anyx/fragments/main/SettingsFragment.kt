@@ -146,9 +146,9 @@ class SettingsFragment : RefreshFragment() {
         }
 
         if (prefs.isLoggedIn) {
-            logoutButton.text = resources.getText(R.string.settings_log_out_btn)
+            logoutButton.text = resources.getString(R.string.settings_log_out_btn)
         } else {
-            logoutButton.text = resources.getText(R.string.settings_log_in_btn)
+            logoutButton.text = resources.getString(R.string.settings_log_in_btn)
         }
 
     }
