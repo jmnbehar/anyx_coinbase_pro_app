@@ -143,13 +143,18 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString.isNotBlank() && productString.isNotBlank()) {
                     val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                    var product: Product = try {
-                        gson.fromJson(productString, Product::class.java)
+                    try {
+                        val product = gson.fromJson(productString, Product::class.java)
+                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
+                        if (dayCandleOutliers.isEmpty()) {
+                            val newAccount = Account(product, apiAccount)
+                            newAccountList.add(newAccount)
+                        } else {
+                            return mutableListOf()
+                        }
                     } catch (e: Exception) {
-                        gson.fromJson(productString, SimpleFiatProduct::class.java).toProduct()
+                        return mutableListOf()
                     }
-                    val newAccount = Account(product, apiAccount)
-                    newAccountList.add(newAccount)
                 }
             }
             return newAccountList
@@ -170,10 +175,7 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
-        /* Keeps track of unpaid fees, returns true if unpaid fees total over the minimum fee.
-         * If total unpaid fees are over the minimum send amount, send only the minimum send
-         * amount to keep things consistant and then reset unpaid fees to 0.0
-         */
+        /* Keeps track of unpaid fees to be paid once over the min send amount */
         var totalUnpaidFees = prefs.getFloat(UNPAID_FEES + currency.toString(), 0.0f)
         totalUnpaidFees += unpaidFee.toFloat()
         prefs.edit().putFloat(UNPAID_FEES + currency.toString(), totalUnpaidFees).apply()

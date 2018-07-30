@@ -156,10 +156,9 @@ sealed class CBProApi : FuelRouting {
                     pagesReceived ++
                     val gson = Gson()
                     val apiCandles = result.value
-
+                    val tradingPair = TradingPair(productId)
                     try {
                         val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-
                         var candles = candleDoubleList.map {
                             val time = (it[0] as? Double) ?: 0.0
                             val low = (it[1] as? Double) ?: 0.0
@@ -167,7 +166,7 @@ sealed class CBProApi : FuelRouting {
                             val open = (it[3] as? Double) ?: 0.0
                             val close = (it[4] as? Double) ?: 0.0
                             val volume = (it[5] as? Double) ?: 0.0
-                            Candle(time, low, high, open, close, volume)
+                            Candle(time, low, high, open, close, volume, tradingPair)
                         }
                         val now = Calendar.getInstance()
 

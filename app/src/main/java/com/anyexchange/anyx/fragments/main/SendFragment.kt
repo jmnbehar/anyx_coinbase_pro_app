@@ -227,7 +227,7 @@ class SendFragment : RefreshFragment() {
                     warning1TextView.setText(R.string.send_warning_1_ltc)
                     warning2TextView.setText(R.string.send_warning_2_ltc)
                 }
-                Currency.USD, Currency.EUR -> { /* how tho */ }
+                Currency.USD, Currency.EUR, Currency.GBP -> { /* how tho */ }
             }
         }
     }

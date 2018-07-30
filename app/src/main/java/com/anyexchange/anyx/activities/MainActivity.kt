@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (!prefs.shouldAutologin) {
                 returnToLogin()
-            } else if (Account.list.size > 0) {
+            } else if (Account.list.isNotEmpty()) {
                 goHome()
                 setDrawerMenu()
             } else {
@@ -424,7 +424,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Currency.BCH -> goToFragment(FragmentType.BCH_CHART)
             Currency.ETH -> goToFragment(FragmentType.ETH_CHART)
             Currency.LTC -> goToFragment(FragmentType.LTC_CHART)
-            Currency.USD, Currency.EUR -> {}
+            Currency.USD, Currency.EUR, Currency.GBP -> {}
         }
     }
     private fun chartFragment(currency: Currency) : ChartFragment? {

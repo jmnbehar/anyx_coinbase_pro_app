@@ -43,6 +43,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
 
     companion object {
         var list = mutableListOf<Account>()
+
         val btcAccount: Account?
             get() = forCurrency(Currency.BTC)
 

@@ -87,6 +87,12 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         viewHolder.priceText?.text = product.price.fiatFormat(Account.fiatCurrency)
 
+        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
+        if (dayCandleOutliers.isEmpty()) {
+            println("yay")
+        } else {
+            println("oh no")
+        }
         viewHolder.lineChart?.configure(product.defaultDayCandles, product.currency, false, PriceChart.DefaultDragDirection.Vertical) {}
 
         outputView.setOnClickListener { onClick(product) }

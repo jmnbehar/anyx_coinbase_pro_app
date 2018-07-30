@@ -66,14 +66,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
-        val account = account
+        val tempAccount = account
         val activity = activity!!
-        if (account == null) {
+        if (tempAccount == null) {
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
             val prefs = Prefs(activity)
-            candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
-            val currency = account.currency
+            candles = tempAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+            val currency = tempAccount.currency
 
             rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
@@ -82,11 +82,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             rootView.chart_fragment_chart.onChartGestureListener = this
 
             rootView.btn_chart_buy.setOnClickListener {
-                buySellButtonOnClick(prefs.isLoggedIn, account, TradeSide.BUY)
+                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
             }
 
             rootView.btn_chart_sell.setOnClickListener {
-                buySellButtonOnClick(prefs.isLoggedIn, account, TradeSide.SELL)
+                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.SELL)
             }
 
             rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
@@ -114,10 +114,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //                setChartTimespan(Timespan.ALL)
 //            }
 
-            val tradingPairs = if (account.product.tradingPairs.isNotEmpty()) {
-                account.product.tradingPairs
+            val tradingPairs = if (tempAccount.product.tradingPairs.isNotEmpty()) {
+                tempAccount.product.tradingPairs
             } else {
-                listOf(account.id)
+                listOf(tempAccount.id)
             }
             //TODO: don't use simple_spinner_item
             val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
@@ -126,12 +126,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairSpinner.adapter = arrayAdapter
             tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val tradingPair = if (account.product.tradingPairs.size >= position) {
-                        account.product.tradingPairs[position]
-                    } else {
-                        TradingPair(account.product.id)
+                    account?.let {
+                        val tradingPair = if (it.product.tradingPairs.size >= position) {
+                            it.product.tradingPairs[position]
+                        } else {
+                            TradingPair(it.product.id)
+                        }
+                        setTradingPair(tradingPair)
                     }
-                    setTradingPair(tradingPair)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {
@@ -139,8 +141,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
 
-            val stashedFills = prefs.getStashedFills(account.product.id)
-            val stashedOrders = prefs.getStashedOrders(account.product.id)
+            val stashedFills = prefs.getStashedFills(tempAccount.product.id)
+            val stashedOrders = prefs.getStashedOrders(tempAccount.product.id)
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
             historyPager?.setOnTouchListener(this)
@@ -169,7 +171,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val oldAccount = account
         account = newAccount
         if (newAccount.currency != oldAccount?.currency || tradingPair == null) {
-            tradingPair = null
+            tradingPair = TradingPair(newAccount.product.id)
         }
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
         val currency = newAccount.currency

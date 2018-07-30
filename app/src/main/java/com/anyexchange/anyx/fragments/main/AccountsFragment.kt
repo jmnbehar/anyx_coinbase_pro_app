@@ -174,7 +174,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                         }
                         totalCandleValue += (accountCandleValue * account.balance)
                     }
-                    val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0)
+                    val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
                     accountTotalCandleList.add(newCandle)
                 }
             }

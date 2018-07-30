@@ -55,7 +55,6 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         } else {
             0.0
         }
-        hourCandles[0]
         val change = currentPrice - open
 
         val weightedChange: Double = (change / open)
