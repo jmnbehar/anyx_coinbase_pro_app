@@ -2,9 +2,7 @@ package com.anyexchange.anyx.classes
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
 import java.util.*
-import com.google.gson.reflect.TypeToken
 
 
 /**
@@ -186,10 +184,8 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
 
         fun updateAllProducts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            CBProApi.products().executeRequest(onFailure) { result ->
+            CBProApi.products().get(onFailure) { unfilteredApiProductList ->
                 val fiatCurrency = Account.fiatCurrency
-                val gson = Gson()
-                val unfilteredApiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                 val apiProductList = unfilteredApiProductList.filter { s ->
                     s.quote_currency == fiatCurrency.toString()
                 }

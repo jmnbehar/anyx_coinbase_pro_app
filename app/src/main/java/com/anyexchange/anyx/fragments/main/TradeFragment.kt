@@ -11,8 +11,6 @@ import android.view.ViewGroup
 import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.classes.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
@@ -21,8 +19,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.text.InputFilter
-
-
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -239,9 +235,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
                     account?.let { account ->
-                        CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                            val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                            val price = ticker.price.toDoubleOrNull()
+                        CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                            val price = ticker?.price?.toDoubleOrNull()
                             if (price != null) {
                                 account.product.price = price
                                 confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
@@ -287,9 +282,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
         account?.let { account ->
-            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                val price = ticker.price.toDoubleOrNull()
+            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                val price = ticker?.price?.toDoubleOrNull()
                 if (price != null) {
                     account.product.price = price
                 }

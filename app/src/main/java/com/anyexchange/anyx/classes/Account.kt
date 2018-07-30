@@ -3,8 +3,6 @@ package com.anyexchange.anyx.classes
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.parcel.IgnoredOnParcel
 
 /**
@@ -37,9 +35,10 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     var coinbaseAccount: CoinbaseAccount? = null
 
     fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        CBProApi.account(id).executeRequest(onFailure) { result ->
-            val apiAccount: ApiAccount = Gson().fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-            this.apiAccount = apiAccount
+        CBProApi.account(id).get(onFailure) { apiAccount ->
+            if (apiAccount != null) {
+                this.apiAccount = apiAccount
+            }
             onComplete()
         }
     }

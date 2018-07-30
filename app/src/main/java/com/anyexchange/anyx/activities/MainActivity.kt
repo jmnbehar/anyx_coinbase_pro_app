@@ -24,8 +24,6 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
@@ -317,9 +315,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
-            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                val price = ticker.price.toDoubleOrNull()
+            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                val price = ticker?.price?.toDoubleOrNull()
                 if (price != null) {
                     account.product.price = price
                 }

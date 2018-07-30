@@ -11,6 +11,7 @@ import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -194,6 +195,18 @@ sealed class CBProApi : FuelRouting {
     }
 
     class accounts : CBProApi() {
+
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiAccount>) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                    onComplete(apiAccountList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
+            }
+        }
+
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.list.clear()
             val prefs = Prefs(context)
@@ -203,9 +216,7 @@ sealed class CBProApi : FuelRouting {
             if (stashedProductList.isNotEmpty()) {
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
-                CBProApi.products().executeRequest(onFailure = onFailure) { result ->
-                    val gson = Gson()
-                    val apiProductList: List<ApiProduct> = gson.fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
+                CBProApi.products().get(onFailure) { apiProductList ->
                     for (apiProduct in apiProductList) {
                         val baseCurrency = apiProduct.base_currency
                         val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it.id) }
@@ -231,8 +242,7 @@ sealed class CBProApi : FuelRouting {
                 }
                 Account.updateAllAccountsCandles(onFailure, onComplete)
             } else {
-                this.executeRequest(onFailure) { result ->
-                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                this.get(onFailure) { apiAccountList ->
                     for (apiAccount in apiAccountList) {
                         val currency = Currency.forString(apiAccount.currency)
                         val relevantProduct = productList.find { p -> p.currency == currency }
@@ -248,8 +258,7 @@ sealed class CBProApi : FuelRouting {
         }
 
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            this.executeRequest(onFailure) { result ->
-                val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+            this.get(onFailure) { apiAccountList ->
                 for (account in Account.list.plus(Account.fiatAccount)) {
                     val apiAccount = apiAccountList.find { a -> a.currency == account?.currency.toString() }
                     apiAccount?.let {
@@ -263,36 +272,94 @@ sealed class CBProApi : FuelRouting {
     }
 
     class account(val accountId: String) : CBProApi() {
-        val gson = Gson()
-        fun updateAccount(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiAccount?) -> Unit) {
             this.executeRequest(onFailure) { result ->
-                val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                val account = Account.list.find { account -> account.id == accountId }
-                account?.apiAccount = apiAccount
-                onComplete()
+                //TODO: why does this sometimes get a jsonArray instead of a JSON?
+                val gson = Gson()
+                try {
+                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                    onComplete(apiAccount)
+                } catch (e: JsonSyntaxException) {
+                    try {
+                        val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                        onComplete(apiAccountList.firstOrNull())
+                    } catch (e: JsonSyntaxException) {
+                        onComplete(null)
+                    }
+                    onComplete(null)
+                }
             }
         }
     }
 
     class accountHistory(val accountId: String) : CBProApi()
-    class products : CBProApi()
-    class ticker(val productId: String) : CBProApi()
+    class products : CBProApi() {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiProduct>) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val productList: List<ApiProduct> = Gson().fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
+                    onComplete(productList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
+            }
+        }
+    }
+    class ticker(val productId: String) : CBProApi() {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker?) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    onComplete(ticker)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(null)
+                }
+            }
+        }
+    }
     class orderLimit(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : CBProApi()
     class orderMarket(val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : CBProApi()
     class orderStop(val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi()
     class cancelOrder(val orderId: String) : CBProApi()
     class cancelAllOrders : CBProApi()
-    class listOrders(val status: String = "all", val productId: String?) : CBProApi()
+    class listOrders(val status: String = "all", val productId: String?) : CBProApi() {
+        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
+            this.executeRequest(onFailure) {result ->
+                try {
+                    val apiOrderList: List<ApiOrder> = Gson().fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                    Prefs(context).stashOrders(result.value)
+                    onComplete(apiOrderList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
+            }
+        }
+    }
     class getOrder(val orderId: String) : CBProApi()
-    class fills(val orderId: String = "all", val productId: String = "all") : CBProApi()
+    class fills(val orderId: String = "all", val productId: String = "all") : CBProApi() {
+        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
+            this.executeRequest(onFailure) {result ->
+                try {
+                    val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                    Prefs(context).stashFills(result.value)
+                    onComplete(apiFillList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
+            }
+        }
+    }
     //add position?
     class sendCrypto(val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi()
     class coinbaseAccounts : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
             this.executeRequest(onFailure) {result ->
-                val apiCBAccountString = result.value
-                val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(apiCBAccountString, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
-                onComplete(apiCBAccountList)
+                try {
+                    val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
+                    onComplete(apiCBAccountList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
             }
         }
 
@@ -312,11 +379,14 @@ sealed class CBProApi : FuelRouting {
     class paymentMethods : CBProApi() {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
-                val apiPaymentMethodsString = result.value
-                var apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(apiPaymentMethodsString, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
-                apiPaymentMethodsList = apiPaymentMethodsList.filter { apiPaymentMethod -> apiPaymentMethod.type != "fiat_account" }
-                val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
-                onComplete(paymentMethodsList)
+                try {
+                    var apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(result.value, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
+                    apiPaymentMethodsList = apiPaymentMethodsList.filter { apiPaymentMethod -> apiPaymentMethod.type != "fiat_account" }
+                    val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
+                    onComplete(paymentMethodsList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+                }
             }
         }
     }
@@ -336,12 +406,16 @@ sealed class CBProApi : FuelRouting {
                 } else {
                     ""
                 }
-                val apiReportInfo: ApiReportInfo = Gson().fromJson(responseString, object : TypeToken<ApiReportInfo>() {}.type)
-                CBProApi.getReport(apiReportInfo.id).executeRequest({ result ->
-                    println(result)
-                }, { result ->
-                    println(result.value)
-                })
+                try {
+                    val apiReportInfo: ApiReportInfo = Gson().fromJson(responseString, object : TypeToken<ApiReportInfo>() {}.type)
+                    CBProApi.getReport(apiReportInfo.id).executeRequest({ result ->
+                        println(result)
+                    }, { result ->
+                        println(result.value)
+                    })
+                } catch (e: Exception) {
+                    println("nah")
+                }
             })
         }
     }

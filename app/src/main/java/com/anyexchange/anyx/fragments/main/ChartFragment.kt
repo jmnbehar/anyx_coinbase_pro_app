@@ -13,7 +13,6 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
@@ -485,15 +484,19 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val prefs = Prefs(context!!)
         account?. let { account ->
             if (prefs.isLoggedIn) {
-                CBProApi.account(account.id).executeRequest( onFailure) { result ->
+                /* Refresh does 2 things, it updates the chart, account info first
+                 * then candles etc in mini refresh, while simultaneosly updating history info
+                */
+                CBProApi.account(account.id).get( onFailure) { apiAccount ->
                     if (lifecycle.isCreatedOrResumed) {
-                        //TODO: why does this sometimes get a jsonArray instead of a JSON
-                        val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
-                        val newBalance = apiAccount.balance.toDoubleOrZero()
+                        var newBalance = account.balance
+                        if (apiAccount != null) {
+                            newBalance = apiAccount.balance.toDoubleOrZero()
+                            account.apiAccount = apiAccount
+                        }
                         txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
                         txt_chart_account_value.text = account.value.format(quoteCurrency)
                         miniRefresh(onFailure) {
-                            account.apiAccount = apiAccount
                             onComplete(true)
                         }
                     }
@@ -501,20 +504,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
-                CBProApi.listOrders(productId = account.product.id).executeRequest(onFailure) { result ->
+                CBProApi.listOrders(productId = account.product.id).getAndStash(context!!, onFailure) { apiOrderList ->
                     if (lifecycle.isCreatedOrResumed) {
-                        prefs.stashOrders(result.value)
-                        val apiOrderList: List<ApiOrder> = gson.fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
                         filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
                             updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
                         }
                     }
                 }
-                CBProApi.fills(productId = account.product.id).executeRequest(onFailure) { result ->
+                CBProApi.fills(productId = account.product.id).getAndStash(context!!, onFailure) { apiFillList ->
                     if (lifecycle.isCreatedOrResumed) {
-                        prefs.stashFills(result.value)
-                        val apiFillList: List<ApiFill> = gson.fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                         filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
                             updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
@@ -554,10 +553,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                             val price = candles.lastOrNull()?.close ?: 0.0
                             completeMiniRefresh(price, candles, onComplete)
                         } else {
-                            CBProApi.ticker(tradingPairId).executeRequest(onFailure) { result ->
+                            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                                //TODO: consider adding another case for tradingPairTemp != tradingPai
                                 if (lifecycle.isCreatedOrResumed && tradingPairTemp == tradingPair) {
-                                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                                    var price = ticker.price.toDoubleOrNull()
+                                    var price = ticker?.price?.toDoubleOrNull()
                                     if (price != null) {
                                         account.product.price = price
                                     } else {

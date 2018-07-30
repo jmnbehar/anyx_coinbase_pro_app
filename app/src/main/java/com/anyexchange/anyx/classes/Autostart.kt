@@ -6,14 +6,11 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.media.RingtoneManager
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.anyexchange.anyx.R
 import android.app.job.JobScheduler
 import android.app.job.JobInfo
@@ -218,13 +215,10 @@ class AlertJobService : JobService() {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
-            CBProApi.ticker(account.product.id).executeRequest(onFailure) { result ->
-                if (result.value.isNotBlank()) {
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
-                    if (price != null) {
-                        account.product.price = price
-                    }
+            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                val price = ticker?.price?.toDoubleOrNull()
+                if (price != null) {
+                    account.product.price = price
                 }
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {

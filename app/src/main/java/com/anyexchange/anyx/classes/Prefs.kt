@@ -3,6 +3,7 @@ package com.anyexchange.anyx.classes
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 
 /**
@@ -35,6 +36,7 @@ private const val PREFERRED_FIAT = "preferred_fiat"
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
 
+@Suppress("LiftReturnOrAssignment")
 class Prefs (var context: Context) {
 
 
@@ -109,21 +111,20 @@ class Prefs (var context: Context) {
 
     var stashedFiatAccount: Account?
         get() {
-            val gson = Gson()
             val fiatString = prefs.getString(PREFERRED_FIAT, Currency.USD.toString())
             val accountString = prefs.getString(ACCOUNT + fiatString, "")
-            if (accountString.isNotBlank()) {
-                val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
+            try {
+                val apiAccount = Gson().fromJson(accountString, ApiAccount::class.java)
                 val fiatCurrency = Currency.forString(fiatString) ?: Currency.USD
                 val product = Product.fiatProduct(fiatCurrency)
                 return Account(product, apiAccount)
+            } catch (e: JsonSyntaxException) {
+                return null
             }
-            return null
         }
         set(value) {
-            val gson = Gson()
             if (value != null) {
-                val accountJson = gson.toJson(value.apiAccount) ?: ""
+                val accountJson = Gson().toJson(value.apiAccount) ?: ""
                 prefs.edit().putString(ACCOUNT + value.currency.toString(), accountJson).apply()
             } else {
                 //for each fiat currency:
@@ -142,8 +143,8 @@ class Prefs (var context: Context) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString.isNotBlank() && productString.isNotBlank()) {
-                    val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
                     try {
+                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
                         val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
                         if (dayCandleOutliers.isEmpty()) {
@@ -191,10 +192,10 @@ class Prefs (var context: Context) {
     }
     fun getStashedOrders(productId: String) : List<ApiOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
-        return if (apiOrdersJson != null) {
+        return try {
             val apiOrderList: List<ApiOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<ApiOrder>>() {}.type)
             apiOrderList.filter { it.product_id == productId }
-        } else {
+        } catch (e: Exception) {
             listOf()
         }
     }
@@ -204,10 +205,10 @@ class Prefs (var context: Context) {
     }
     fun getStashedFills(productId: String) : List<ApiFill> {
         val fillListJson = prefs.getString(STASHED_FILLS, null)
-        return if (fillListJson != null) {
+        return try {
             val apiFillList: List<ApiFill> = Gson().fromJson(fillListJson, object : TypeToken<List<ApiFill>>() {}.type)
             apiFillList.filter { it.product_id == productId }
-        } else {
+        } catch (e: Exception) {
             listOf()
         }
     }
