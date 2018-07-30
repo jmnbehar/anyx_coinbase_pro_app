@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.graphics.Color
 import android.os.Bundle
@@ -24,6 +25,7 @@ import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
@@ -39,7 +41,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private lateinit var inflater: LayoutInflater
     private var historyPager: ViewPager? = null
     private var chartTimeSpan = Timespan.DAY
-    private var tradingPair: TradingPair? = account?.id?.let { TradingPair(it) }
+    private var tradingPairSpinner: Spinner? = null
+
+    private val tradingPair: TradingPair?
+        get() = account?.product?.tradingPairs?.get(tradingPairSpinner?.selectedItemPosition ?: 0)
+
     private val quoteCurrency: Currency
         get() = tradingPair?.quoteCurrency ?: Currency.USD
 
@@ -122,17 +128,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             //TODO: don't use simple_spinner_item
             val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            val tradingPairSpinner = rootView.spinner_chart_trading_pair
-            tradingPairSpinner.adapter = arrayAdapter
+            tradingPairSpinner = rootView.spinner_chart_trading_pair
+            tradingPairSpinner?.adapter = arrayAdapter
             tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    account?.let {
-                        val tradingPair = if (it.product.tradingPairs.size >= position) {
-                            it.product.tradingPairs[position]
-                        } else {
-                            TradingPair(it.product.id)
-                        }
-                        setTradingPair(tradingPair)
+                    if (lifecycle.currentState == Lifecycle.State.RESUMED) {
+                        showProgressSpinner()
+                        miniRefresh({
+                            toast(R.string.chart_update_error)
+                            dismissProgressSpinner()
+                        }, {
+                            dismissProgressSpinner()
+                        })
                     }
                 }
 
@@ -168,11 +175,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun switchAccount(newAccount: Account) {
-        val oldAccount = account
         account = newAccount
-        if (newAccount.currency != oldAccount?.currency || tradingPair == null) {
-            tradingPair = TradingPair(newAccount.product.id)
-        }
+
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
         val currency = newAccount.currency
 
@@ -204,28 +208,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             showProgressSpinner()
             miniRefresh({   //onfailure
-                if (chartTimeSpan != Timespan.DAY) {
-                    val backupTimespan = chartTimeSpan
-                    chartTimeSpan = Timespan.DAY
-                    miniRefresh({
-                        toast(R.string.error_message)
-                        chartTimeSpan = backupTimespan
-                        dismissProgressSpinner()
-                    }, {
-                        checkTimespanButton()
-                        candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
-                        chart_fragment_chart.addCandles(candles, newAccount.currency)
-                        setPercentChangeText(chartTimeSpan)
-                        txt_chart_name.text = currency.fullName
-                        dismissProgressSpinner()
-                        setButtonsAndBalanceText(newAccount)
-
-                        updateHistoryPagerAdapter(stashedOrders, stashedFills)
-                    })
-                } else {
-                    toast(R.string.error_message)
-                    dismissProgressSpinner()
-                }
+                toast(R.string.error_message)
+                dismissProgressSpinner()
             }, {    //success
                 candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
                 chart_fragment_chart.addCandles(candles, newAccount.currency)
@@ -332,17 +316,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         })
     }
 
-    private fun setTradingPair(newTradingPair: TradingPair) {
-        tradingPair = newTradingPair
-        showProgressSpinner()
-        miniRefresh({
-            toast(R.string.chart_update_error)
-            dismissProgressSpinner()
-        }, {
-            checkTimespanButton()
-            dismissProgressSpinner()
-        })
-    }
 
     private fun setPercentChangeText(timespan: Timespan) {
         account?.let { account ->
@@ -573,25 +546,30 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             val tradingPairTemp = tradingPair
             account.product.updateCandles(chartTimeSpan, tradingPairTemp, onFailure) { _ ->
-                if (lifecycle.isCreatedOrResumed && tradingPairTemp == tradingPair) {
-                    candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
-                    val tradingPairId = tradingPair?.id
-                    if (tradingPairId == null) {
-                        val price = candles.lastOrNull()?.close ?: 0.0
-                        completeMiniRefresh(price, candles, onComplete)
-                    } else {
-                        CBProApi.ticker(tradingPairId).executeRequest(onFailure) { result ->
-                            if (lifecycle.isCreatedOrResumed && tradingPairTemp == tradingPair) {
-                                val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
-                                var price = ticker.price.toDoubleOrNull()
-                                if (price != null) {
-                                    account.product.price = price
-                                } else {
-                                    price = candles.lastOrNull()?.close ?: 0.0
+                if (lifecycle.isCreatedOrResumed) {
+                    if (tradingPairTemp == tradingPair) {
+                        candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
+                        val tradingPairId = tradingPair?.id
+                        if (tradingPairId == null) {
+                            val price = candles.lastOrNull()?.close ?: 0.0
+                            completeMiniRefresh(price, candles, onComplete)
+                        } else {
+                            CBProApi.ticker(tradingPairId).executeRequest(onFailure) { result ->
+                                if (lifecycle.isCreatedOrResumed && tradingPairTemp == tradingPair) {
+                                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                                    var price = ticker.price.toDoubleOrNull()
+                                    if (price != null) {
+                                        account.product.price = price
+                                    } else {
+                                        price = candles.lastOrNull()?.close ?: 0.0
+                                    }
+                                    completeMiniRefresh(price, candles, onComplete)
                                 }
-                                completeMiniRefresh(price, candles, onComplete)
                             }
                         }
+                    } else {
+                        val error = Result.Failure<String, FuelError>(FuelError(Exception()))
+                        onFailure(error)
                     }
                 }
             }

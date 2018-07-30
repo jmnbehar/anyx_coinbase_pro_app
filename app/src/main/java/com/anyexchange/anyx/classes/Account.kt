@@ -73,18 +73,16 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         fun updateAllAccountsCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
             for (account in list) {
-                //TODO: don't do this:
-                account.product.clearAllCandles()
                 val tradingPair = TradingPair(account.product.id)
                 Product.updateAllProducts(onFailure) {
                     account.product.updateCandles(Timespan.DAY, tradingPair, onFailure) {
+                        candlesUpdated++
                         if (candlesUpdated == list.size) {
                             onComplete()
                         }
                     }
                 }
             }
-            //TODO: Do not call this here
         }
     }
 
