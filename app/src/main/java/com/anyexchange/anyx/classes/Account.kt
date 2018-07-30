@@ -24,6 +24,9 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     val value: Double
         get() = balance * product.price
 
+    val fiatValue: Double
+        get() = balance * (product.defaultDayCandles.lastOrNull()?.close ?: product.price)
+
     val id: String
         get() = apiAccount.id
 

@@ -33,7 +33,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
     private val sortedProductList: List<Product>
         get() {
-            val sortedAccounts = Account.list.sortedWith(compareBy({ it.value }, { it.currency.orderValue })).reversed()
+            val sortedAccounts = Account.list.sortedWith(compareBy({ it.fiatValue }, { it.currency.orderValue })).reversed()
             return sortedAccounts.map { a -> a.product }
         }
 
