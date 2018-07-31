@@ -165,7 +165,7 @@ class AlertsFragment : RefreshFragment() {
     private fun setAlert() {
         val price = priceEditText.text.toString().toDoubleOrZero()
         if (price > 0) {
-            val productPrice = Account.forCurrency(currency)?.product?.price ?: 0.0
+            val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
             val triggerIfAbove = price > productPrice
             val alert = Alert(price, currency, triggerIfAbove)
             prefs?.addAlert(alert)
@@ -177,8 +177,7 @@ class AlertsFragment : RefreshFragment() {
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
-
-        val price = Account.forCurrency(currency)?.product?.price
+        val price = Account.forCurrency(currency)?.product?.priceForTradingPair(null)
         if (price == null) {
             priceLabelText.text = ""
             currentPriceText.text = ""

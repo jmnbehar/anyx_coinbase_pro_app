@@ -215,11 +215,7 @@ class AlertJobService : JobService() {
         var tickersUpdated = 0
         val accountListSize = Account.list.size
         for (account in Account.list) {
-            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
-                val price = ticker?.price?.toDoubleOrNull()
-                if (price != null) {
-                    account.product.price = price
-                }
+            CBProApi.ticker(account.product.id).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
                     onComplete()
@@ -233,7 +229,7 @@ class AlertJobService : JobService() {
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.price
+                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     triggerAlert(alert)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {

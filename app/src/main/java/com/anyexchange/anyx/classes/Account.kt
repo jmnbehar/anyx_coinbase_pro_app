@@ -19,11 +19,14 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
             return apiAccount.available.toDoubleOrZero()
         }
 
-    val value: Double
-        get() = balance * product.price
+    fun valueForTradingPair(tradingPair: TradingPair?): Double {
+        return balance * product.priceForTradingPair(tradingPair)
+    }
+    val defaultValue: Double
+        get() = balance * product.defaultPrice
 
     val fiatValue: Double
-        get() = balance * (product.defaultDayCandles.lastOrNull()?.close ?: product.price)
+        get() = balance * (product.defaultDayCandles.lastOrNull()?.close ?: product.defaultPrice)
 
     val id: String
         get() = apiAccount.id
@@ -62,7 +65,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         val fiatCurrency = fiatAccount?.currency ?: Currency.USD
 
         var totalValue: Double = 0.0
-            get() = Account.list.map { a -> a.value }.sum() + (Account.fiatAccount?.value ?: 0.0)
+            get() = Account.list.map { a -> a.defaultValue }.sum() + (Account.fiatAccount?.defaultValue ?: 0.0)
 
         fun forCurrency(currency: Currency): Account? {
             return if (currency.isFiat) {

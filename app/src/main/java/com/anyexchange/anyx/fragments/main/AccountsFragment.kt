@@ -163,7 +163,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         if (btcAccount != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             for (i in 0..(btcAccount.defaultDayCandles.size - 1)) {
-                Account.fiatAccount?.value?.let {
+                Account.fiatAccount?.defaultValue?.let {
                     var totalCandleValue = it
                     val time = btcAccount.defaultDayCandles[i].time
                     for (account in Account.list) {

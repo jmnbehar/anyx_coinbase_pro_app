@@ -230,7 +230,7 @@
     <string name="transfer_coinbase_account_empty">Coinbase %s Wallet is Empty</string>
     <string name="transfer_pro_account_empty">Coinbase Pro %s Wallet is Empty</string>
 
-    <string name="transfer_account_balance_text">"Coinbase Pro %s Balance: %s</string>
+    <string name="transfer_pro_account_balance_text">"Coinbase Pro %s Balance: %s</string>
 
 
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>

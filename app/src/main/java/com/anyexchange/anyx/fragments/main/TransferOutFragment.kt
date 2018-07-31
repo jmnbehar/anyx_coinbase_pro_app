@@ -297,7 +297,7 @@ class TransferOutFragment : RefreshFragment() {
             } else {
                 (cbproAccount?.availableBalance ?: 0.0).btcFormatShortened()
             }
-            resources.getString(R.string.transfer_account_balance_text, currency.toString(), cbproAccountBalance)
+            cbproBalanceText.text = resources.getString(R.string.transfer_pro_account_balance_text, currency.toString(), cbproAccountBalance)
         } else {
             cbproBalanceText.text = resources.getString(R.string.transfer_pro_account_empty)
         }

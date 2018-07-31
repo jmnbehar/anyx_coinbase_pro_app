@@ -238,7 +238,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
                             val price = ticker?.price?.toDoubleOrNull()
                             if (price != null) {
-                                account.product.price = price
                                 confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
                             }
                         }
@@ -282,11 +281,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
         account?.let { account ->
-            CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
-                val price = ticker?.price?.toDoubleOrNull()
-                if (price != null) {
-                    account.product.price = price
-                }
+            CBProApi.ticker(account.product.id).get(onFailure) {
                 updateButtonsAndText()
                 onComplete(true)
             }
@@ -316,7 +311,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
 
                 currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
-                currentPriceText.text = account.product.price.fiatFormat(fiatCurrency)
+                currentPriceText.text = account.product.defaultPrice.fiatFormat(fiatCurrency)
             }
         }
         updateTotalText()
@@ -487,7 +482,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 TradeType.STOP -> amount
             }
             TradeSide.SELL -> when (tradeType) {
-                TradeType.MARKET -> amount * (account?.product?.price ?: 0.0)
+                TradeType.MARKET -> amount * (account?.product?.defaultPrice ?: 0.0)
                 TradeType.LIMIT -> amount * limitPrice
                 TradeType.STOP -> amount * limitPrice
             }
@@ -497,7 +492,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun totalInCrypto(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
         return when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
-                TradeType.MARKET -> amount / (account?.product?.price ?: 0.0)
+                TradeType.MARKET -> amount / (account?.product?.defaultPrice ?: 0.0)
                 TradeType.LIMIT -> amount
                 TradeType.STOP -> if (limitPrice > 0.0) {
                     amount / limitPrice
@@ -510,8 +505,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun feeEstimate(amount: Double, limit: Double) : Double {
-        val price = account?.product?.price
-
+        val price = account?.product?.defaultPrice
         if (price != null) {
             when (tradeSide) {
                 TradeSide.BUY -> {

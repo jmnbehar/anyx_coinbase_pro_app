@@ -85,7 +85,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = product.price.fiatFormat(Account.fiatCurrency)
+        viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.fiatCurrency)
 
         val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
         if (dayCandleOutliers.isEmpty()) {

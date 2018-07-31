@@ -10,7 +10,6 @@ import com.anyexchange.anyx.adapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
-import kotlinx.android.synthetic.main.notification_template_lines_media.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -335,6 +334,6 @@ class TransferInFragment : RefreshFragment() {
         } else {
             "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
-        cbproBalanceText.text = resources.getString(R.string.transfer_account_balance_text, currency.toString(), cbproAccountBalanceString)
+        cbproBalanceText.text = resources.getString(R.string.transfer_pro_account_balance_text, currency.toString(), cbproAccountBalanceString)
     }
 }

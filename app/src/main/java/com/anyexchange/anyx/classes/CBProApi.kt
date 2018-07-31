@@ -305,11 +305,18 @@ sealed class CBProApi : FuelRouting {
             }
         }
     }
-    class ticker(val productId: String) : CBProApi() {
+    class ticker(accountId: String) : CBProApi() {
+        val tradingPair = TradingPair(accountId)
+        constructor(tradingPair: TradingPair): this(tradingPair.id)
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker?) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val price = ticker.price.toDoubleOrNull()
+                    val account = Account.forCurrency(tradingPair.baseCurrency)
+                    if (price != null) {
+                        account?.product?.setPriceForTradingPair(price, tradingPair)
+                    }
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {
                     onComplete(null)
@@ -460,7 +467,7 @@ sealed class CBProApi : FuelRouting {
                 is account -> "/accounts/$accountId"
                 is accountHistory -> "/accounts/$accountId/ledger"
                 is products -> "/products"
-                is ticker -> "/products/$productId/ticker"
+                is ticker -> "/products/${tradingPair.id}/ticker"
                 is candles -> "/products/$productId/candles"
                 is orderLimit -> "/orders"
                 is orderMarket -> "/orders"

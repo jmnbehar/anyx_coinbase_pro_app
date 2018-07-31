@@ -92,11 +92,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             onComplete(true)
                         }
                     } else {
-                        CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
-                            val price = ticker?.price?.toDoubleOrNull()
-                            if (price != null) {
-                                account.product.price = price
-                            }
+                        CBProApi.ticker(account.product.id).get(onFailure) {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
