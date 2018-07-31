@@ -140,9 +140,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         dataFragment?.restoreData(this)
-        if (Account.fiatAccount == null) {
-            CBProApi.accounts().getAllAccountInfo(this, { }, { })
-        }
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)

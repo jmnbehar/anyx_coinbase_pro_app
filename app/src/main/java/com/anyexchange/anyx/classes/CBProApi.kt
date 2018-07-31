@@ -202,7 +202,7 @@ sealed class CBProApi : FuelRouting {
                     val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                     onComplete(apiAccountList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -282,11 +282,15 @@ sealed class CBProApi : FuelRouting {
                 } catch (e: JsonSyntaxException) {
                     try {
                         val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
-                        onComplete(apiAccountList.firstOrNull())
+                        val apiAccountFirst = apiAccountList.firstOrNull()
+                        if (apiAccountFirst != null) {
+                            onComplete(apiAccountList.firstOrNull())
+                        } else {
+                            onFailure(Result.Failure(FuelError(Exception())))
+                        }
                     } catch (e: JsonSyntaxException) {
-                        onComplete(null)
+                        onFailure(Result.Failure(FuelError(Exception())))
                     }
-                    onComplete(null)
                 }
             }
         }
@@ -300,7 +304,7 @@ sealed class CBProApi : FuelRouting {
                     val productList: List<ApiProduct> = Gson().fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     onComplete(productList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -308,7 +312,7 @@ sealed class CBProApi : FuelRouting {
     class ticker(accountId: String) : CBProApi() {
         val tradingPair = TradingPair(accountId)
         constructor(tradingPair: TradingPair): this(tradingPair.id)
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker?) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
                     val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
@@ -319,7 +323,7 @@ sealed class CBProApi : FuelRouting {
                     }
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(null)
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -337,7 +341,7 @@ sealed class CBProApi : FuelRouting {
                     Prefs(context).stashOrders(result.value)
                     onComplete(apiOrderList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -351,7 +355,7 @@ sealed class CBProApi : FuelRouting {
                     Prefs(context).stashFills(result.value)
                     onComplete(apiFillList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -365,7 +369,7 @@ sealed class CBProApi : FuelRouting {
                     val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
                     onComplete(apiCBAccountList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }
@@ -392,7 +396,7 @@ sealed class CBProApi : FuelRouting {
                     val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
                     onComplete(paymentMethodsList)
                 } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
+                    onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
         }

@@ -88,6 +88,9 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
                     }
                 }
             }
+            if (list.isEmpty()) {
+                onComplete()
+            }
         }
     }
 
