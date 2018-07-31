@@ -34,9 +34,9 @@
         android:layout_height="wrap_content"
         android:hint="@string/login_api_secret_label"
         android:inputType="textMultiLine"
-        android:lines="2"
+        android:lines="3"
         android:maxLines="6"
-        android:minLines="2"
+        android:minLines="3"
         android:singleLine="false" />
 
     <EditText

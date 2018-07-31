@@ -2,21 +2,23 @@ package com.anyexchange.anyx.fragments.main
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
 import com.anyexchange.anyx.adapters.HistoryListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.list_view.view.*
+import kotlinx.android.synthetic.main.recycler_view.view.*
 
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class HistoryListFragment() : Fragment() {
-    lateinit var historyList: ListView
-    lateinit var inflater: LayoutInflater
+class HistoryListFragment : Fragment() {
+    lateinit var historyList: RecyclerView
+    private lateinit var historyListAdapter: HistoryListViewAdapter
+    private lateinit var viewManager: RecyclerView.LayoutManager
 
     var orders = listOf<ApiOrder>()
     var onOrderClick: (ApiOrder) -> Unit = { }
@@ -38,13 +40,29 @@ class HistoryListFragment() : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.list_view, container, false)
-        historyList = rootView.list_view
-        if (isOrderList) {
-            historyList.adapter = HistoryListViewAdapter(context!!, true, orders, resources, orderOnClick =  { order -> onOrderClick(order)})
+        val rootView = inflater.inflate(R.layout.recycler_view, container, false)
+        viewManager = LinearLayoutManager(context)
+        historyListAdapter = if (isOrderList) {
+            HistoryListViewAdapter(context!!, true, orders, resources, orderOnClick =  { order -> onOrderClick(order)})
         } else {
-            historyList.adapter = HistoryListViewAdapter(context!!,false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
+            HistoryListViewAdapter(context!!,false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
         }
+
+        historyList = rootView.recycler_view.apply {
+            // use this setting to improve performance if you know that changes
+            // in content do not change the layout size of the RecyclerView
+            setHasFixedSize(true)
+
+            // use a linear layout manager
+            layoutManager = viewManager
+
+            // specify an viewAdapter (see also next example)
+            adapter = historyListAdapter
+
+        }
+
+
+
 //        val listHeight = historyList.setHeightBasedOnChildren()
 //
 //        val params = rootView.layoutParams

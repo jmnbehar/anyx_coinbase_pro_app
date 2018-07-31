@@ -114,10 +114,14 @@ class Prefs (var context: Context) {
             val fiatString = prefs.getString(PREFERRED_FIAT, Currency.USD.toString())
             val accountString = prefs.getString(ACCOUNT + fiatString, "")
             try {
-                val apiAccount = Gson().fromJson(accountString, ApiAccount::class.java)
+                val apiAccount: ApiAccount? = Gson().fromJson(accountString, ApiAccount::class.java)
                 val fiatCurrency = Currency.forString(fiatString) ?: Currency.USD
                 val product = Product.fiatProduct(fiatCurrency)
-                return Account(product, apiAccount)
+                return if (apiAccount != null) {
+                    Account(product, apiAccount)
+                } else {
+                    null
+                }
             } catch (e: JsonSyntaxException) {
                 return null
             }

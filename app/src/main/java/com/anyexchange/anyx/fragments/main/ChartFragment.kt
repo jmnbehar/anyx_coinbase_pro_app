@@ -248,7 +248,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             updateHistoryPagerAdapter(stashedOrders, stashedFills)
         } else {
             showProgressSpinner()
-            miniRefresh({   //onfailure
+            miniRefresh({   //onFailure
                 toast(R.string.error_message)
                 dismissProgressSpinner()
             }, {    //success
