@@ -128,6 +128,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 hideSoftKeyboard()
             }
         }
+        val prefs0 = Prefs(this)
+        prefs0.stashedFiatAccountList = listOf()
+        prefs0.stashedCryptoAccountList = listOf()
 
         dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
 
@@ -363,7 +366,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.fiatCurrency)}"
+        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
         val priceAlertGroupTag = "PriceAlert"
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)

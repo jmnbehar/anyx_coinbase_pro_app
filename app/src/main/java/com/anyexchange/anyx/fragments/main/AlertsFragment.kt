@@ -166,13 +166,13 @@ class AlertsFragment : RefreshFragment() {
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
-        val price = Account.forCurrency(currency)?.product?.priceForTradingPair(null)
+        val price = Account.forCurrency(currency)?.product?.priceForQuoteCurrency(Account.defaultFiatCurrency)
         if (price == null) {
             priceLabelText.text = ""
             currentPriceText.text = ""
         } else {
             priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
-            currentPriceText.text = price.fiatFormat(Account.fiatCurrency)
+            currentPriceText.text = price.fiatFormat(Account.defaultFiatCurrency)
         }
         activity?.let { activity ->
             val tabAccentColor = currency.colorAccent(activity)

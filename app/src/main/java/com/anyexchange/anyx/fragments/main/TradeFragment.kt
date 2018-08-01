@@ -302,7 +302,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
                 val fiatAccount = Account.defaultFiatAccount
-                val fiatCurrency = Account.fiatCurrency
+                val fiatCurrency = Account.defaultFiatCurrency
                 fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat(fiatCurrency)
 
                 fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, fiatCurrency.toString())
@@ -321,7 +321,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
-        val fiatCurrency = Account.fiatCurrency
+        val fiatCurrency = Account.defaultFiatCurrency
         val currencyString = account?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
             "less than $0.01"
@@ -459,7 +459,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
-        val fiatCurrency = Account.fiatCurrency
+        val fiatCurrency = Account.defaultFiatCurrency
         totalText.text = when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
@@ -553,7 +553,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             advancedOptionsLayout.visibility = View.GONE
         }
-        val fiatCurrency = Account.fiatCurrency
+        val fiatCurrency = Account.defaultFiatCurrency
         when (tradeType) {
             TradeType.MARKET -> {
                 val marketTab = tradeTypeTabLayout.getTabAt(0)

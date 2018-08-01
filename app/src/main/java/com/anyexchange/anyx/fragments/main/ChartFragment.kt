@@ -43,7 +43,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var tradingPairSpinner: Spinner? = null
 
     private val tradingPair: TradingPair?
-        get() = account?.product?.tradingPairs?.get(tradingPairSpinner?.selectedItemPosition ?: 0)
+        get() = tradingPairSpinner?.selectedItem as? TradingPair
 
     private val quoteCurrency: Currency
         get() = tradingPair?.quoteCurrency ?: Currency.USD
@@ -120,7 +120,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //            }
 
             val tradingPairs = if (tempAccount.product.tradingPairs.isNotEmpty()) {
-                tempAccount.product.tradingPairs
+                tempAccount.product.tradingPairs.sortedBy { it.quoteCurrency.orderValue }
             } else {
                 listOf(tempAccount.id)
             }
@@ -145,7 +145,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 override fun onNothingSelected(parent: AdapterView<*>) {
                 }
             }
-
 
             val stashedFills = prefs.getStashedFills(tempAccount.product.id)
             val stashedOrders = prefs.getStashedOrders(tempAccount.product.id)
@@ -223,7 +222,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
 
-        val price = newAccount.product.priceForTradingPair(tradingPair)
+        val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
         txt_chart_price.text = price.format(quoteCurrency)
 
         val tradingPairs = account?.product?.tradingPairs ?: listOf()
@@ -269,7 +268,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setButtonColors()
             val prefs = Prefs(it)
             if (prefs.isLoggedIn) {
-                val value = account.valueForTradingPair(tradingPair)
+                val value = account.valueForQuoteCurrency(quoteCurrency)
                 txt_chart_ticker.text = resources.getString(R.string.chart_wallet_label, currency.toString())
                 img_chart_account_icon.setImageResource(currency.iconId)
                 txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
@@ -329,7 +328,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun setPercentChangeText(timespan: Timespan) {
         account?.let { account ->
-            val percentChange = account.product.percentChange(timespan, tradingPair)
+            val percentChange = account.product.percentChange(timespan, quoteCurrency)
             txt_chart_change_or_date.text = percentChange.percentFormat()
             txt_chart_change_or_date.textColor = if (percentChange >= 0) {
                 Color.GREEN
@@ -443,7 +442,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onNothingSelected() {
         val account = account
         if (account != null) {
-            txt_chart_price.text = account.product.priceForTradingPair(tradingPair).format(quoteCurrency)
+            txt_chart_price.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
             setPercentChangeText(chartTimeSpan)
             chart_fragment_chart.highlightValues(arrayOf<Highlight>())
         }
@@ -505,7 +504,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                             account.apiAccount = apiAccount
                         }
                         txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
-                        txt_chart_account_value.text = account.valueForTradingPair(tradingPair).format(quoteCurrency)
+                        txt_chart_account_value.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
                         miniRefresh(onFailure) {
                             onComplete(true)
                         }
@@ -561,7 +560,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         tradingPair?.let {
                             CBProApi.ticker(it).get(onFailure) {
                                 if (lifecycle.isCreatedOrResumed) {
-                                    val price = account.product.priceForTradingPair(tradingPair)
+                                    val price = account.product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)
                                 }
                             }
@@ -581,7 +580,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         //complete mini refresh assumes account is not null
         txt_chart_price.text = price.format(quoteCurrency)
-        txt_chart_account_value.text = account!!.valueForTradingPair(tradingPair).format(quoteCurrency)
+        txt_chart_account_value.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
         chart_fragment_chart.addCandles(candles, account!!.currency)
         setPercentChangeText(chartTimeSpan)
         checkTimespanButton()

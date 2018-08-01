@@ -261,9 +261,9 @@ enum class Currency {
                 ETH -> 3
                 LTC -> 2
                 BCH -> 1
-                USD,
-                EUR,
-                GBP -> 0
+                EUR -> -1
+                GBP -> -2
+                USD -> -100
             }
         }
 

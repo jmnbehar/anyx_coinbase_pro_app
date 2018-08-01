@@ -87,7 +87,7 @@ class TransferInFragment : RefreshFragment() {
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val fiatCurrency = Account.fiatCurrency
+        val fiatCurrency = Account.defaultFiatCurrency
         cbAccountsSpinner.adapter = arrayAdapter
 
         //TODO: nuke this tab layout, use spinner
@@ -330,7 +330,7 @@ class TransferInFragment : RefreshFragment() {
         amountUnitText.text = currency.toString()
 
         val cbproAccountBalanceString = if (currency.isFiat) {
-            "${(cbproAccount?.balance ?: 0.0).fiatFormat(Account.fiatCurrency)} $currency"
+            "${(cbproAccount?.balance ?: 0.0).fiatFormat(Account.defaultFiatCurrency)} $currency"
         } else {
             "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }

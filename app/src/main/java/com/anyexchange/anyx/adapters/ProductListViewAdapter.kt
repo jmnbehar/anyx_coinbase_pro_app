@@ -77,7 +77,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         viewHolder.productNameText?.text = product.currency.toString()
 
-        val percentChange = product.percentChange(Timespan.DAY, null)
+        val percentChange = product.percentChange(Timespan.DAY, Account.defaultFiatCurrency)
         viewHolder.percentChangeText?.text = percentChange.percentFormat()
         viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -85,7 +85,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
-        viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.fiatCurrency)
+        viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
 
         val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
         if (dayCandleOutliers.isEmpty()) {

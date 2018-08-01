@@ -3,7 +3,6 @@ package com.anyexchange.anyx.classes
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import kotlinx.android.parcel.IgnoredOnParcel
 
 /**
  * Created by anyexchange on 12/20/2017.
@@ -19,7 +18,11 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
             return apiAccount.available.toDoubleOrZero()
         }
 
-    fun valueForTradingPair(tradingPair: TradingPair?): Double {
+    fun valueForQuoteCurrency(quoteCurrency: Currency) : Double {
+        return balance * product.priceForQuoteCurrency(quoteCurrency)
+    }
+    //TODO: consider deleting this part:
+    fun valueForTradingPair(tradingPair: TradingPair): Double {
         return balance * product.priceForTradingPair(tradingPair)
     }
     val defaultValue: Double
@@ -51,7 +54,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         val defaultFiatAccount: Account?
             get() = fiatAccounts.firstOrNull()
 
-        val fiatCurrency = defaultFiatAccount?.currency ?: Currency.USD
+        val defaultFiatCurrency = defaultFiatAccount?.currency ?: Currency.USD
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
@@ -97,7 +100,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         override fun toString(): String {
             //TODO: use string resources
             return if (currency.isFiat) {
-                "Coinbase $currency Balance: ${balance.fiatFormat(fiatCurrency)}"
+                "Coinbase $currency Balance: ${balance.fiatFormat(defaultFiatCurrency)}"
             } else {
                 "Coinbase $currency Balance: ${balance.btcFormatShortened()} $currency"
             }

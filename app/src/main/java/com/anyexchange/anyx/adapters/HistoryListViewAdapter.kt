@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.anyexchange.anyx.classes.*
@@ -150,7 +149,7 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
 
         viewHolder.amountText?.text = amount.btcFormat()
         viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
-        viewHolder.priceText?.text = price.fiatFormat(Account.fiatCurrency)
+        viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
         if (tradeType == null) {
             viewHolder.tradeTypeText?.visibility = View.GONE
         } else {

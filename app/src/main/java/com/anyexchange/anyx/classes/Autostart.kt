@@ -247,7 +247,7 @@ class AlertJobService : JobService() {
         }
         val currency = alert.currency
         val notificationTitle = "${currency.fullName} price alert"
-        val notificationText = "$currency is $overUnder ${alert.price.fiatFormat(Account.fiatCurrency)}"
+        val notificationText = "$currency is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
         val priceAlertGroupTag = "PriceAlert"
 
         val notificationTag = "PriceAlert_" + currency.toString() + "_" + alert.price

@@ -92,7 +92,7 @@ class TransferOutFragment : RefreshFragment() {
         currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
-                    0 -> switchCurrency(Account.fiatCurrency)
+                    0 -> switchCurrency(Account.defaultFiatCurrency)
                     1 -> switchCurrency(Currency.BTC)
                     2 -> switchCurrency(Currency.ETH)
                     3 -> switchCurrency(Currency.BCH)
@@ -294,7 +294,7 @@ class TransferOutFragment : RefreshFragment() {
         amountUnitText.text = currency.toString()
         if ((cbproAccount?.availableBalance ?: 0.0) > 0) {
             val cbproAccountBalance = if (currency.isFiat) {
-                (cbproAccount?.availableBalance ?: 0.0).fiatFormat(Account.fiatCurrency)
+                (cbproAccount?.availableBalance ?: 0.0).fiatFormat(Account.defaultFiatCurrency)
             } else {
                 (cbproAccount?.availableBalance ?: 0.0).btcFormatShortened()
             }
