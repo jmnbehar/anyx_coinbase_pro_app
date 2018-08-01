@@ -38,17 +38,6 @@ class AlertsFragment : RefreshFragment() {
     var alertAdapter: AlertListViewAdapter? = null
 
     var currency = Currency.BTC
-    private var prefs: Prefs? = null
-        get() {
-            return if (field == null) {
-                field
-            } else if (context != null){
-                field = Prefs(context!!)
-                field
-            }else {
-                null
-            }
-        }
 
     companion object {
         lateinit var currency: Currency
@@ -156,7 +145,7 @@ class AlertsFragment : RefreshFragment() {
     }
 
     private fun deleteAlert(alert: Alert) {
-        prefs?.removeAlert(alert)
+        Prefs(context!!).removeAlert(alert)
         alertAdapter?.alerts = sortedAlerts
         alertAdapter?.notifyDataSetChanged()
         alertList.adapter = alertAdapter
@@ -168,7 +157,7 @@ class AlertsFragment : RefreshFragment() {
             val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
             val triggerIfAbove = price > productPrice
             val alert = Alert(price, currency, triggerIfAbove)
-            prefs?.addAlert(alert)
+            Prefs(context!!).addAlert(alert)
             alertAdapter?.alerts = sortedAlerts
             alertAdapter?.notifyDataSetChanged()
             priceEditText.setText("")
@@ -199,8 +188,7 @@ class AlertsFragment : RefreshFragment() {
 
     private val sortedAlerts : List<Alert>
         get() {
-            val prefs = Prefs(context!!)
-            val alerts = prefs.alerts
+            val alerts = Prefs(context!!).alerts
             return alerts.sortedWith(compareBy { it.price })
         }
 

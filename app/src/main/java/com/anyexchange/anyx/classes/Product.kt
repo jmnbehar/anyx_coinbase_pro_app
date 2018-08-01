@@ -210,6 +210,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
         fun fiatProduct(currency: Currency): Product {
             val fiatProduct = Product(currency, currency.productId, null, listOf())
+            
             fiatProduct.price[0] = 1.0
             return fiatProduct
         }
