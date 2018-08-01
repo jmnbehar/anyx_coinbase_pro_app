@@ -20,7 +20,7 @@ import android.widget.TextView
 class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return Account.list.size
+        return Account.cryptoAccounts.size
     }
 
     override fun getItem(i: Int): Any {
@@ -33,7 +33,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
     private val sortedProductList: List<Product>
         get() {
-            val sortedAccounts = Account.list.sortedWith(compareBy({ it.fiatValue }, { it.currency.orderValue })).reversed()
+            val sortedAccounts = Account.cryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
             return sortedAccounts.map { a -> a.product }
         }
 

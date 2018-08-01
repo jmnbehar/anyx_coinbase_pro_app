@@ -210,8 +210,9 @@ class TransferOutFragment : RefreshFragment() {
                 onComplete(false)
                 isRefreshing = false
             }, {
-                val cbproAccounts = Account.list.toMutableList()
-                val fiatAccount = Account.fiatAccount
+                val cbproAccounts = Account.cryptoAccounts.toMutableList()
+                //TODO: work on adding more fiat accounts in here
+                val fiatAccount = Account.defaultFiatAccount
                 if (fiatAccount != null) {
                     cbproAccounts.add(fiatAccount)
                 }

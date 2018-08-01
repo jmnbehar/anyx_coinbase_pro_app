@@ -147,8 +147,8 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             if (credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
                 dataFragment?.destroyData(this)
-                prefs.stashedAccountList = mutableListOf()
-                prefs.stashedFiatAccount = null
+                prefs.stashedCryptoAccountList = mutableListOf()
+                prefs.stashedFiatAccountList = mutableListOf()
 
                 prefs.isLoggedIn = false
             } else {

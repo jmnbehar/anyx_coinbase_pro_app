@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (!prefs.shouldAutologin) {
                 returnToLogin()
-            } else if (Account.list.isNotEmpty()) {
+            } else if (Account.cryptoAccounts.isNotEmpty()) {
                 goHome()
                 setDrawerMenu()
             } else {
@@ -310,8 +310,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
-        val accountListSize = Account.list.size
-        for (account in Account.list) {
+        val accountListSize = Account.cryptoAccounts.size
+        for (account in Account.cryptoAccounts) {
             CBProApi.ticker(account.product.id).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {

@@ -17,8 +17,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
 class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        val listSize = Account.list.size
-        return if (Account.fiatAccount != null) { listSize + 1 } else { listSize }
+        return Account.cryptoAccounts.size + Account.fiatAccounts.size
     }
 
     override fun getItem(i: Int): Any {
@@ -31,11 +30,10 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
 
     private val sortedAccountList: List<Account>
         get() {
-            val sortedAccounts = Account.list.sortedWith(compareBy({ it.fiatValue }, { it.currency.orderValue })).reversed().toMutableList()
-            val fiatAccount = Account.fiatAccount
-            if (fiatAccount != null) {
-                sortedAccounts.add(fiatAccount)
-            }
+            val sortedAccounts = Account.cryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+            val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+            sortedAccounts.addAll(sortedFiatAccounts)
+
             return sortedAccounts
         }
 

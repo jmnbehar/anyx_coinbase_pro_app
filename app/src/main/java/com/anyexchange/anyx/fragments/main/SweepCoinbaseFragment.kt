@@ -62,8 +62,8 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
         titleText.text =  getString(R.string.transfer_in_title)
 
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
+        coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+        val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
         }
@@ -182,8 +182,8 @@ class SweepCoinbaseFragment : RefreshFragment() {
     }
 
     private fun completeRefresh(onComplete: (Boolean) -> Unit) {
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-        val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
+        coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+        val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
         }

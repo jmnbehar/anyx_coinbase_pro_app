@@ -109,37 +109,38 @@ class Prefs (var context: Context) {
         rapidMovementAlerts = tempRapidMovementAlerts
     }
 
-    var stashedFiatAccount: Account?
+    var stashedFiatAccountList: MutableList<Account>
         get() {
-            val fiatString = prefs.getString(PREFERRED_FIAT, Currency.USD.toString())
-            val accountString = prefs.getString(ACCOUNT + fiatString, "")
-            try {
-                val apiAccount: ApiAccount? = Gson().fromJson(accountString, ApiAccount::class.java)
-                val fiatCurrency = Currency.forString(fiatString) ?: Currency.USD
-                val product = Product.fiatProduct(fiatCurrency)
-                return if (apiAccount != null) {
-                    Account(product, apiAccount)
-                } else {
-                    null
+            val gson = Gson()
+            val newAccountList = mutableListOf<Account>()
+            for (currency in Currency.cryptoList) {
+                val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
+                val productString = prefs.getString(PRODUCT + currency.toString(), "")
+                if (accountString.isNotBlank() && productString.isNotBlank()) {
+                    try {
+                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
+                        val product = gson.fromJson(productString, Product::class.java)
+                        val newAccount = Account(product, apiAccount)
+                        newAccountList.add(newAccount)
+                    } catch (e: Exception) {
+                        return newAccountList
+                    }
                 }
-            } catch (e: JsonSyntaxException) {
-                return null
             }
+            return newAccountList
         }
         set(value) {
-            if (value != null) {
-                val accountJson = Gson().toJson(value.apiAccount) ?: ""
-                prefs.edit().putString(ACCOUNT + value.currency.toString(), accountJson).apply()
-            } else {
-                //for each fiat currency:
-                prefs.edit().putString(ACCOUNT + Currency.USD.toString(), null).apply()
-                prefs.edit().putString(ACCOUNT + Currency.EUR.toString(), null).apply()
-
+            val gson = Gson()
+            for (account in value) {
+                val accountJson = gson.toJson(account.apiAccount) ?: ""
+                val productJson = gson.toJson(account.product) ?: ""
+                prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
+                        .putString(PRODUCT + account.currency.toString(), productJson).apply()
             }
+
         }
 
-
-    var stashedAccountList: MutableList<Account>
+    var stashedCryptoAccountList: MutableList<Account>
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()

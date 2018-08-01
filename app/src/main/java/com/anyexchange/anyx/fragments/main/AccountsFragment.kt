@@ -159,24 +159,23 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     private fun sumAccountCandles() : List<Candle> {
-        val btcAccount = Account.btcAccount?.product
-        if (btcAccount != null) {
+        val btcProduct = Account.forCurrency(Currency.BTC)?.product
+        if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            for (i in 0..(btcAccount.defaultDayCandles.size - 1)) {
-                Account.fiatAccount?.defaultValue?.let {
-                    var totalCandleValue = it
-                    val time = btcAccount.defaultDayCandles[i].time
-                    for (account in Account.list) {
-                        val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
-                            account.product.defaultDayCandles[i].close
-                        } else {
-                            account.product.defaultDayCandles.lastOrNull()?.close ?: 0.0
-                        }
-                        totalCandleValue += (accountCandleValue * account.balance)
+            val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
+            for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
+                var totalCandleValue = fiatValue
+                val time = btcProduct.defaultDayCandles[i].time
+                for (account in Account.cryptoAccounts) {
+                    val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
+                        account.product.defaultDayCandles[i].close
+                    } else {
+                        account.product.defaultDayCandles.lastOrNull()?.close ?: 0.0
                     }
-                    val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
-                    accountTotalCandleList.add(newCandle)
+                    totalCandleValue += (accountCandleValue * account.balance)
                 }
+                val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
+                accountTotalCandleList.add(newCandle)
             }
             return accountTotalCandleList
         }

@@ -25,16 +25,12 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
-    val fiatValue: Double
-        get() = balance * (product.defaultDayCandles.lastOrNull()?.close ?: product.defaultPrice)
-
     val id: String
         get() = apiAccount.id
 
     val currency: Currency
         get() = product.currency
 
-    @IgnoredOnParcel
     var coinbaseAccount: CoinbaseAccount? = null
 
     fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
@@ -47,48 +43,41 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     }
 
     companion object {
-        var list = mutableListOf<Account>()
+        var cryptoAccounts = mutableListOf<Account>()
 
-        val btcAccount: Account?
-            get() = forCurrency(Currency.BTC)
+        var fiatAccounts = mutableListOf<Account>()
 
-        val ltcAccount: Account?
-            get() = forCurrency(Currency.LTC)
+        //TODO: make this changeable
+        val defaultFiatAccount: Account?
+            get() = fiatAccounts.firstOrNull()
 
-        val ethAccount: Account?
-            get() = forCurrency(Currency.ETH)
-
-        val bchAccount: Account?
-            get() = forCurrency(Currency.BCH)
-
-        var fiatAccount: Account? = null
-        val fiatCurrency = fiatAccount?.currency ?: Currency.USD
+        val fiatCurrency = defaultFiatAccount?.currency ?: Currency.USD
 
         var totalValue: Double = 0.0
-            get() = Account.list.map { a -> a.defaultValue }.sum() + (Account.fiatAccount?.defaultValue ?: 0.0)
+            get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
 
         fun forCurrency(currency: Currency): Account? {
             return if (currency.isFiat) {
-                fiatAccount
+                fiatAccounts.find { a -> a.product.currency == currency }
             } else {
-                list.find { a -> a.product.currency == currency }
+                cryptoAccounts.find { a -> a.product.currency == currency }
             }
         }
 
         fun updateAllAccountsCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
-            for (account in list) {
+            for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)
                 Product.updateAllProducts(onFailure) {
                     account.product.updateCandles(Timespan.DAY, tradingPair, onFailure) {
                         candlesUpdated++
-                        if (candlesUpdated == list.size) {
+                        if (candlesUpdated == cryptoAccounts.size) {
                             onComplete()
                         }
                     }
                 }
             }
-            if (list.isEmpty()) {
+            if (cryptoAccounts.isEmpty()) {
                 onComplete()
             }
         }

@@ -186,10 +186,10 @@ class TransferInFragment : RefreshFragment() {
 
         titleText.text = getString(R.string.transfer_in_title)
 
-        coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
         coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
 
-        val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
+        val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
         }
@@ -229,8 +229,8 @@ class TransferInFragment : RefreshFragment() {
                 isRefreshing = false
                 onComplete(false)
             }, {
-                coinbaseAccounts = Account.list.mapNotNull { account -> account.coinbaseAccount }
-                val fiatCoinbaseAccount = Account.fiatAccount?.coinbaseAccount
+                coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+                val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
                 if (fiatCoinbaseAccount != null) {
                     coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
                 }

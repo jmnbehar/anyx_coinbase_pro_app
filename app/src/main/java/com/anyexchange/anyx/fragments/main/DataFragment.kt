@@ -18,8 +18,8 @@ class DataFragment : Fragment() {
     }
 
     private var backupCredentials: CBProApi.ApiCredentials? = null
-    private var backupAccountList: MutableList<Account> = mutableListOf()
-    private var backupFiatAccount: Account? = null
+    private var backupCryptoAccountList = mutableListOf<Account>()
+    private var backupFiatAccountList = mutableListOf<Account>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +32,11 @@ class DataFragment : Fragment() {
             backupCredentials = CBProApi.credentials
         }   //TODO: wipe this backup on log out
 
-        backupAccountList = Account.list
+        backupCryptoAccountList = Account.cryptoAccounts
         activity?.let { activity ->
             val prefs = Prefs(activity)
-            prefs.stashedAccountList = Account.list
-            prefs.stashedFiatAccount = Account.fiatAccount
+            prefs.stashedCryptoAccountList = Account.cryptoAccounts
+            prefs.stashedFiatAccountList = Account.fiatAccounts
         }
     }
 
@@ -59,29 +59,29 @@ class DataFragment : Fragment() {
                 }
             }
         }
-        if (backupAccountList.isNotEmpty()) {
-            Account.list = backupAccountList
-        } else if (Account.list.isEmpty()){
-            Account.list = prefs.stashedAccountList
+        if (backupCryptoAccountList.isNotEmpty()) {
+            Account.cryptoAccounts = backupCryptoAccountList
+        } else if (Account.cryptoAccounts.isEmpty()){
+            Account.cryptoAccounts = prefs.stashedCryptoAccountList
         }
-        if (backupFiatAccount != null) {
-            Account.fiatAccount = backupFiatAccount
-        } else if (Account.fiatAccount == null){
-            Account.fiatAccount = prefs.stashedFiatAccount
+        if (backupFiatAccountList.isEmpty()) {
+            Account.fiatAccounts = backupFiatAccountList
+        } else if (Account.fiatAccounts.isEmpty()){
+            Account.fiatAccounts = prefs.stashedFiatAccountList
         }
     }
 
     fun destroyData(context: Context) {
         backupCredentials = null
-        backupAccountList = mutableListOf()
-        backupFiatAccount = null
+        backupCryptoAccountList = mutableListOf()
+        backupFiatAccountList = mutableListOf()
 
         val prefs = Prefs(context)
         prefs.apiKey = null
         prefs.apiSecret = null
         prefs.passphrase = null
-        prefs.stashedAccountList = mutableListOf()
-        prefs.stashedFiatAccount = null
+        prefs.stashedCryptoAccountList = mutableListOf()
+        prefs.stashedFiatAccountList = mutableListOf()
 
     }
 }

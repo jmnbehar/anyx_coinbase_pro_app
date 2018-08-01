@@ -71,7 +71,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
-        val accountListSize = Account.list.size
+        val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
 
         //TODO: rewmove
@@ -79,7 +79,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
-        for (account in Account.list) {
+        for (account in Account.cryptoAccounts) {
             account.product.updateCandles(time, null, {//OnFailure
                 toast(R.string.error_message)
                 onComplete(false)

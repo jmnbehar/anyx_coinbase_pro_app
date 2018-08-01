@@ -301,7 +301,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
-                val fiatAccount = Account.fiatAccount
+                val fiatAccount = Account.defaultFiatAccount
                 val fiatCurrency = Account.fiatCurrency
                 fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat(fiatCurrency)
 

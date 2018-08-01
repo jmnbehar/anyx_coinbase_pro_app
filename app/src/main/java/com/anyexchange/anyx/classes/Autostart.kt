@@ -97,7 +97,7 @@ object AlertUtil {
 class RapidMovementJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
-        if (Account.list.isEmpty()) {
+        if (Account.cryptoAccounts.isEmpty()) {
             CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
                 checkPriceChanges()
             })
@@ -121,7 +121,7 @@ class RapidMovementJobService : JobService() {
     fun checkPriceChanges() {
         val prefs = Prefs(this)
         val enabledCurrencies = prefs.rapidMovementAlerts
-        for (account in Account.list) {
+        for (account in Account.cryptoAccounts) {
             if (enabledCurrencies.contains(account.currency)) {
                 //TODO: consider switching to hour timespan
                 val timeSpan = Timespan.DAY
@@ -189,7 +189,7 @@ class RapidMovementJobService : JobService() {
 class AlertJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
-        if (Account.list.isEmpty()) {
+        if (Account.cryptoAccounts.isEmpty()) {
             CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
                 loopThroughAlerts()
             })
@@ -213,8 +213,8 @@ class AlertJobService : JobService() {
 
     private fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
-        val accountListSize = Account.list.size
-        for (account in Account.list) {
+        val accountListSize = Account.cryptoAccounts.size
+        for (account in Account.cryptoAccounts) {
             CBProApi.ticker(account.product.id).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
