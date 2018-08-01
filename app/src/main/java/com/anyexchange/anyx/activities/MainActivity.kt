@@ -137,17 +137,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             dataFragment = DataFragment.newInstance()
             supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
         }
-
-
         dataFragment?.restoreData(this)
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
         }
-
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-
         nav_view.setNavigationItemSelectedListener(this)
 
         progressBarLayout = progress_bar_layout
@@ -155,8 +151,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
-        val prefs0 = Prefs(this)
-        prefs0.shouldSavePassphrase = true
+        val prefs = Prefs(this)
+        prefs.shouldSavePassphrase = true
 
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
         val currencies = Currency.cryptoList
@@ -166,12 +162,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
-
-            val prefs = Prefs(this)
-
             if (!prefs.shouldAutologin) {
                 returnToLogin()
-            } else if (Account.cryptoAccounts.isNotEmpty()) {
+            } else if (Account.cryptoAccounts.isNotEmpty() && Account.fiatAccounts.isNotEmpty()) {
                 goHome()
                 setDrawerMenu()
             } else {
@@ -196,6 +189,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
+        setDrawerMenu()
     }
 
     override fun onPause() {

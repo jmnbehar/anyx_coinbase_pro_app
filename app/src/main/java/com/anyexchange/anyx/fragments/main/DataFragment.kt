@@ -18,8 +18,8 @@ class DataFragment : Fragment() {
     }
 
     private var backupCredentials: CBProApi.ApiCredentials? = null
-    private var backupCryptoAccountList = mutableListOf<Account>()
-    private var backupFiatAccountList = mutableListOf<Account>()
+    private var backupCryptoAccountList = listOf<Account>()
+    private var backupFiatAccountList =listOf<Account>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +64,7 @@ class DataFragment : Fragment() {
         } else if (Account.cryptoAccounts.isEmpty()){
             Account.cryptoAccounts = prefs.stashedCryptoAccountList
         }
-        if (backupFiatAccountList.isEmpty()) {
+        if (backupFiatAccountList.isNotEmpty()) {
             Account.fiatAccounts = backupFiatAccountList
         } else if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList

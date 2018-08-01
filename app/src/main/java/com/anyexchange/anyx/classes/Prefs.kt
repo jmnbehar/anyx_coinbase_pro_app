@@ -109,11 +109,11 @@ class Prefs (var context: Context) {
         rapidMovementAlerts = tempRapidMovementAlerts
     }
 
-    var stashedFiatAccountList: MutableList<Account>
+    var stashedFiatAccountList: List<Account>
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()
-            for (currency in Currency.cryptoList) {
+            for (currency in Currency.fiatList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString.isNotBlank() && productString.isNotBlank()) {
@@ -130,17 +130,23 @@ class Prefs (var context: Context) {
             return newAccountList
         }
         set(value) {
-            val gson = Gson()
-            for (account in value) {
-                val accountJson = gson.toJson(account.apiAccount) ?: ""
-                val productJson = gson.toJson(account.product) ?: ""
-                prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                        .putString(PRODUCT + account.currency.toString(), productJson).apply()
+            if (value.isEmpty()) {
+                for (currency in Currency.fiatList) {
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
+                                .putString(PRODUCT + currency.toString(), null).apply()
+                }
+            } else {
+                val gson = Gson()
+                for (account in value) {
+                    val accountJson = gson.toJson(account.apiAccount) ?: ""
+                    val productJson = gson.toJson(account.product) ?: ""
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
+                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                }
             }
-
         }
 
-    var stashedCryptoAccountList: MutableList<Account>
+    var stashedCryptoAccountList: List<Account>
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()
@@ -166,14 +172,20 @@ class Prefs (var context: Context) {
             return newAccountList
         }
         set(value) {
-            val gson = Gson()
-            for (account in value) {
-                val accountJson = gson.toJson(account.apiAccount) ?: ""
-                val productJson = gson.toJson(account.product) ?: ""
-                prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
+            if (value.isEmpty()) {
+                for (currency in Currency.cryptoList) {
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
+                            .putString(PRODUCT + currency.toString(), null).apply()
+                }
+            } else {
+                val gson = Gson()
+                for (account in value) {
+                    val accountJson = gson.toJson(account.apiAccount) ?: ""
+                    val productJson = gson.toJson(account.product) ?: ""
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
                             .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                }
             }
-
         }
 
     var rapidMovementAlerts: Set<Currency>

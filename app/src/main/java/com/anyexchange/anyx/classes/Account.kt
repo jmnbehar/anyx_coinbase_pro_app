@@ -43,9 +43,9 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     }
 
     companion object {
-        var cryptoAccounts = mutableListOf<Account>()
+        var cryptoAccounts = listOf<Account>()
 
-        var fiatAccounts = mutableListOf<Account>()
+        var fiatAccounts = listOf<Account>()
 
         //TODO: make this changeable
         val defaultFiatAccount: Account?

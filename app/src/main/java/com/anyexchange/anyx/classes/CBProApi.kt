@@ -208,7 +208,7 @@ sealed class CBProApi : FuelRouting {
         }
 
         fun getAllAccountInfo(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            Account.cryptoAccounts.clear()
+            Account.cryptoAccounts = listOf()
             val prefs = Prefs(context)
 
             val productList: MutableList<Product> = mutableListOf()
@@ -229,30 +229,34 @@ sealed class CBProApi : FuelRouting {
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            val tempCryptoAccounts = mutableListOf<Account>()
             if (CBProApi.credentials == null) {
                 val fiatCurrency = Currency.USD
                 val filteredProductList = productList.filter {
                     it.quoteCurrency == fiatCurrency
                 }
                 val fiatAccount = ApiAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
-                Account.fiatAccounts.add(Account(Product.fiatProduct(fiatCurrency), fiatAccount))
+                Account.fiatAccounts = listOf(Account(Product.fiatProduct(fiatCurrency), fiatAccount))
                 for (product in filteredProductList) {
                     val apiAccount = ApiAccount("", product.currency.toString(), "0.0", "", "0.0", "")
-                    Account.cryptoAccounts.add(Account(product, apiAccount))
+                    tempCryptoAccounts.add(Account(product, apiAccount))
                 }
+                Account.cryptoAccounts = tempCryptoAccounts
                 Account.updateAllAccountsCandles(onFailure, onComplete)
             } else {
                 this.get(onFailure) { apiAccountList ->
+                    val tempFiatAccounts = mutableListOf<Account>()
                     for (apiAccount in apiAccountList) {
                         val currency = Currency.forString(apiAccount.currency)
                         val relevantProduct = productList.find { p -> p.currency == currency }
                         if (relevantProduct != null) {
-                            Account.cryptoAccounts.add(Account(relevantProduct, apiAccount))
+                            tempCryptoAccounts.add(Account(relevantProduct, apiAccount))
                         } else if (currency?.isFiat == true) {
-                            Account.fiatAccounts.add(Account(Product.fiatProduct(currency), apiAccount))
+                            tempFiatAccounts.add(Account(Product.fiatProduct(currency), apiAccount))
                         }
                     }
-                    Account.fiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+                    Account.cryptoAccounts = tempCryptoAccounts
+                    Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
 
                     Account.updateAllAccountsCandles(onFailure, onComplete)
                 }
