@@ -22,7 +22,7 @@ import android.widget.LinearLayout
  * Created by anyexchange on 11/12/2017.
  */
 
-class HistoryListViewAdapter(val context: Context, private var isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources,
+class HistoryListViewAdapter(val context: Context, private val isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources,
                              private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
     var orders: List<ApiOrder> = listOf()
     var fills: List<ApiFill> = listOf()
@@ -71,9 +71,9 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
                                     viewType: Int): HistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.list_row_history, parent, false) as View
-        view.layoutParams = LinearLayout.LayoutParams(Constraints.LayoutParams.MATCH_PARENT, Constraints.LayoutParams.WRAP_CONTENT, 1f)
 
-        // set the view's size, margins, paddings and layout parameters
+//        view.layoutParams = LinearLayout.LayoutParams(Constraints.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+
         return HistoryViewHolder(view,
                 view.img_history_icon,
                 view.txt_history_side,
@@ -83,55 +83,65 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
                 view.txt_history_trade_type)
     }
 
+    private fun setViewsVisibility(viewHolder: HistoryViewHolder, setVisible: Boolean) {
+        if (setVisible) {
+            viewHolder.colorView?.visibility = View.VISIBLE
+            viewHolder.sideText?.visibility = View.VISIBLE
+            viewHolder.priceText?.visibility = View.VISIBLE
+            viewHolder.currencyText?.visibility = View.VISIBLE
+            viewHolder.tradeTypeText?.visibility = View.VISIBLE
+        } else {
+            viewHolder.colorView?.visibility = View.INVISIBLE
+            viewHolder.sideText?.visibility = View.GONE
+            viewHolder.priceText?.visibility = View.GONE
+            viewHolder.currencyText?.visibility = View.GONE
+            viewHolder.tradeTypeText?.visibility = View.GONE
+        }
+    }
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: HistoryViewHolder, position: Int) {
 
         val tradeSide: TradeSide
         val price: Double
         val amount: Double
-        val tradeType: TradeType?
         val currency: Currency
         if (isOrderList) {
             if (orders.isEmpty()) {
-                viewHolder.colorView?.visibility = View.INVISIBLE
-                viewHolder.sideText?.visibility = View.GONE
+                setViewsVisibility(viewHolder, false)
                 viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_orders)
-                viewHolder.priceText?.visibility = View.GONE
-                viewHolder.currencyText?.visibility = View.GONE
-                viewHolder.tradeTypeText?.visibility = View.GONE
                 return
             }
-                val order = orders[position]
-                tradeSide = TradeSide.fromString(order.side)
-                price = order.price.toDoubleOrZero()
-                val size = (order.size ?: order.specified_funds).toDoubleOrZero()
-                val filled = order.filled_size.toDoubleOrZero()
-                val unfilledSize = size - filled
-                amount = unfilledSize
-                currency = Currency.forString(order.product_id) ?: Currency.USD
-                tradeType = TradeType.fromString(order.type)
-                viewHolder.sideText?.text = when (tradeSide) {
-                    TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
-                    TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
-                }
-                viewHolder.view?.setOnClickListener { orderOnClick(order) }
+            setViewsVisibility(viewHolder, true)
+            val order = orders[position]
+            tradeSide = TradeSide.fromString(order.side)
+            price = order.price.toDoubleOrZero()
+            val size = (order.size ?: order.specified_funds).toDoubleOrZero()
+            val filled = order.filled_size.toDoubleOrZero()
+            val unfilledSize = size - filled
+            amount = unfilledSize
+            currency = Currency.forString(order.product_id) ?: Currency.USD
+            val tradeType = TradeType.fromString(order.type)
+            viewHolder.sideText?.text = when (tradeSide) {
+                TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
+                TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
+            }
+            viewHolder.view?.setOnClickListener { orderOnClick(order) }
 
+            viewHolder.tradeTypeText?.visibility = View.VISIBLE
+            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
         } else {
             if (fills.isEmpty()) {
-                viewHolder.colorView?.visibility = View.INVISIBLE
-                viewHolder.sideText?.visibility = View.GONE
                 viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_fills)
-                viewHolder.priceText?.visibility = View.GONE
-                viewHolder.currencyText?.visibility = View.GONE
-                viewHolder.tradeTypeText?.visibility = View.GONE
+                setViewsVisibility(viewHolder, false)
                 return
             }
+            setViewsVisibility(viewHolder, true)
+            viewHolder.tradeTypeText?.visibility = View.GONE
             val fill = fills[position]
             tradeSide = TradeSide.fromString(fill.side)
             currency = Currency.forString(fill.product_id) ?: Currency.USD
             price = fill.price.toDoubleOrZero()
             amount = fill.size.toDoubleOrZero()
-            tradeType = null
             viewHolder.view?.setOnClickListener { fillOnClick(fill) }
 
             viewHolder.sideText?.text = when (tradeSide) {
@@ -145,16 +155,8 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
             TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
         }
 
-//        vi.img_history_icon.setImageResource(currency.iconId)
-
         viewHolder.amountText?.text = amount.btcFormat()
         viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
         viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
-        if (tradeType == null) {
-            viewHolder.tradeTypeText?.visibility = View.GONE
-        } else {
-            viewHolder.tradeTypeText?.visibility = View.VISIBLE
-            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
-        }
     }
 }

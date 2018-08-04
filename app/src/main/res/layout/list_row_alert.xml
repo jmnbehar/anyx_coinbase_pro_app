@@ -5,49 +5,39 @@
     android:layout_height="wrap_content"
     android:layout_weight="1"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/img_alert_currency"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        app:srcCompat="@drawable/icon_btc" />
+
+    <TextView
+        android:id="@+id/txt_alert_product"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"
+        android:text="Bitcoin"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/txt_alert_side"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:text="TextView" />
 
-        <ImageView
-            android:id="@+id/img_alert_currency"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="5dp"
-            app:srcCompat="@drawable/icon_btc" />
-
-        <TextView
-            android:id="@+id/txt_alert_product"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="10"
-            android:text="Bitcoin"
-            android:textSize="24sp" />
-
-        <TextView
-            android:id="@+id/txt_alert_side"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
-
-        <TextView
-            android:id="@+id/txt_alert_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Bitcoin"
-            android:textAlignment="textEnd"
-            android:textSize="24sp" />
-
-    </LinearLayout>
-
+    <TextView
+        android:id="@+id/txt_alert_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Bitcoin"
+        android:textAlignment="textEnd"
+        android:textSize="24sp" />
 
 </LinearLayout>

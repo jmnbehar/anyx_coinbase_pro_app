@@ -118,8 +118,8 @@
     <string name="chart_history_no_orders">You have no open orders</string>
     <string name="chart_history_no_fills">You have no filled orders</string>
 
-    <string name="chart_history_order_side_buy">Buying </string>
-    <string name="chart_history_order_side_sell">Selling </string>
+    <string name="chart_history_order_side_buy">Buy </string>
+    <string name="chart_history_order_side_sell">Sell </string>
 
     <string name="chart_history_fill_side_buy">Bought</string>
     <string name="chart_history_fill_side_sell">Sold</string>
