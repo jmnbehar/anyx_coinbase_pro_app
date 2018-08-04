@@ -8,4 +8,12 @@ class TradingPair(val baseCurrency: Currency, val quoteCurrency: Currency) {
     override fun toString(): String {
         return id
     }
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is TradingPair) {
+            (other.baseCurrency == this.baseCurrency && other.quoteCurrency == this.quoteCurrency)
+        } else {
+            super.equals(other)
+        }
+    }
 }
