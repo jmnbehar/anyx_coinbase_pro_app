@@ -128,9 +128,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 hideSoftKeyboard()
             }
         }
-        val prefs0 = Prefs(this)
-        prefs0.stashedFiatAccountList = listOf()
-        prefs0.stashedCryptoAccountList = listOf()
 
         dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
 
