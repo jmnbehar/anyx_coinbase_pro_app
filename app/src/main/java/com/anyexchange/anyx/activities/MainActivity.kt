@@ -115,9 +115,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var progressBarLayout: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        println("Printing lots of stuff starting now:")
+        println("MainActivity - OnCreate - 1")
         super.onCreate(savedInstanceState)
+        println("MainActivity - OnCreate - 2")
         setContentView(R.layout.activity_main)
         onRestoreInstanceState(savedInstanceState)
+        println("MainActivity - OnCreate - 3")
 
         setSupportActionBar(toolbar)
 
@@ -128,6 +132,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 hideSoftKeyboard()
             }
         }
+        println("MainActivity - OnCreate - 4")
 
         dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
 
@@ -138,6 +143,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
         }
         dataFragment?.restoreData(this)
+        println("MainActivity - OnCreate - 5")
 
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
@@ -151,6 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
+        println("MainActivity - OnCreate - 6")
         val prefs = Prefs(this)
         prefs.shouldSavePassphrase = true
 
@@ -160,6 +167,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerNav.adapter = spinnerNavAdapter
 
+        println("MainActivity - OnCreate - 7")
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
             if (!prefs.shouldAutologin) {
@@ -188,11 +196,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        println("MainActivity - onRestoreInstanceState - 1")
         if (savedInstanceState != null) {
             super.onRestoreInstanceState(savedInstanceState)
         }
+        println("MainActivity - onRestoreInstanceState - 2")
         dataFragment?.restoreData(this)
+        println("MainActivity - onRestoreInstanceState - 3")
         setDrawerMenu()
+        println("MainActivity - onRestoreInstanceState - 4")
     }
 
     override fun onPause() {
@@ -201,18 +213,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onDestroy() {
+        println("MainActivity - onDestroy - 1")
         super.onDestroy()
+        println("MainActivity - onDestroy - 2")
         dataFragment?.backupData()
+        println("MainActivity - onDestroy - 3")
     }
 
    // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {
+       println("MainActivity - goHome - 1")
         loopThroughAlerts()
         goToFragment(FragmentType.HOME)
     }
 
     private var progressBarCount = 0
     fun showProgressBar() {
+        println("MainActivity - showProgressBar - 1")
         progressBarCount++
         progressBarLayout.visibility = View.VISIBLE
         val prefs = Prefs(this)
@@ -225,6 +242,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun dismissProgressBar() {
+        println("MainActivity - dismissProgressBar - 1")
         progressBarCount--
         if (progressBarCount <= 0) {
             progressBarCount = 0
@@ -234,6 +252,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     private fun signIn() {
+        println("MainActivity - signIn - 1")
         val prefs = Prefs(this)
 
         val apiKey = prefs.apiKey
@@ -243,20 +262,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val iv = ByteArray(16)
         val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
         val passphrase = encryption.decryptOrNull(passphraseEncrypted)
+        println("MainActivity - signIn - 2")
         if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
             val isApiKeyValid = prefs.isApiKeyValid(apiKey)
             CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            println("MainActivity - signIn - 2")
             showProgressBar()
             CBProApi.accounts().getAllAccountInfo(this, { _ ->
+                println("MainActivity - signIn - 3")
                 toast(R.string.error_message)
                 dismissProgressBar()
                 returnToLogin()
             }, {
+                println("MainActivity - signIn - 4")
                 dismissProgressBar()
                 setDrawerMenu()
                 goHome()
             })
         } else {
+            println("MainActivity - signIn - 5")
             returnToLogin()
         }
     }
@@ -425,18 +449,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun goToFragment(fragmentType: FragmentType) {
+        println("MainActivity - goToFragment - 1")
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.BTC_CHART -> {
+                println("MainActivity - goToFragment - 2")
                 chartFragment(Currency.BTC)
             }
             FragmentType.BCH_CHART -> {
+                println("MainActivity - goToFragment - 2")
                 chartFragment(Currency.BCH)
             }
             FragmentType.ETH_CHART -> {
+                println("MainActivity - goToFragment - 2")
                 chartFragment(Currency.ETH)
             }
             FragmentType.LTC_CHART -> {
+                println("MainActivity - goToFragment - 2")
                 chartFragment(Currency.LTC)
             }
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
