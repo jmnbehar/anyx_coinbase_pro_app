@@ -74,8 +74,6 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
             resultintent.putExtra("BarCode", rawResult.text)
             setResult(2, resultintent)
             finish()
-
-            println("************** Stop Camera**********")
             // Stop camera on pause
         } catch (e: Exception) {
             Log.e("Error", e.message)

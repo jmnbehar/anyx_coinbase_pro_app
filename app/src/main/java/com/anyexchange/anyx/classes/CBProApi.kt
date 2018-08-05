@@ -413,10 +413,8 @@ sealed class CBProApi : FuelRouting {
     class sendToPayment(val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi()
     class createReport(val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : CBProApi() {
         fun createAndGetInfo(onComplete: (Boolean) -> Unit) {
-            this.executePost({ result ->
-                println(result)
-                onComplete(false)
-            }, { reportInfo ->
+            this.executePost({ onComplete(false) },
+                    { reportInfo -> //OnSuccess
                 val byteArray = reportInfo.component1()
                 val responseString = if (byteArray != null) {
                     String(byteArray)
@@ -655,10 +653,6 @@ sealed class CBProApi : FuelRouting {
             if (credentials != null) {
                 val timestamp = (Date().timeInSeconds()).toString()
                 val message = timestamp + method + path + body
-                println("timestamp:")
-                println(timestamp)
-
-
                 var hash = ""
                 try {
                     val secretDecoded: ByteArray? = Base64.decode(credentials.apiSecret, 0)
@@ -669,11 +663,8 @@ sealed class CBProApi : FuelRouting {
                     hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
 
                 } catch (e: Exception) {
-                    println("api secret error")
+                    println("API Secret Hashing Error")
                 }
-
-                println("hash:")
-                println(hash)
 
                 headers = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.apiPassPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
 

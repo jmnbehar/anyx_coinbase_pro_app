@@ -347,7 +347,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
-//                System.out.println(date)
                 val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
                 outputFormat.format(date)
 
@@ -398,7 +397,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
             val createdTime = try {
                 val date = format.parse(createdTimeRaw)
-//                System.out.println(date)
                 val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
                 outputFormat.format(date)
 

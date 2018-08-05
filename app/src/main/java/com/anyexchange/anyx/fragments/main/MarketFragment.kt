@@ -77,7 +77,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         //TODO: rewmove
         Product.updateAllProducts({ }, {})
 
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.errorMessage}") }
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.cryptoAccounts) {
             account.product.updateCandles(time, null, {//OnFailure

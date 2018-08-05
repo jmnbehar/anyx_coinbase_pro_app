@@ -188,6 +188,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
         dataFragment?.restoreData(this)
         setDrawerMenu()
     }
@@ -500,7 +501,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.SETTINGS -> SettingsFragment.newInstance()
             FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
-                System.out.println("Do not use this function for tradeFragments")
                 null
             }
             FragmentType.OTHER -> null
@@ -509,7 +509,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
         } else {
-            System.out.println("Error switching fragments")
+            toast("Error switching fragments")
         }
     }
     fun goToFragment(fragment: RefreshFragment, tag: String) {

@@ -31,7 +31,6 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
         }
         val priceCode = (price * 100).toInt()
         val hashCodeInt = (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
-        println(hashCodeInt)
         return hashCodeInt
     }
 

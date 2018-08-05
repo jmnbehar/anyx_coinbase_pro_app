@@ -118,8 +118,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         amountEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
-                println(tradeSide)
-                println(tradeType)
                 val amount = p0.toString().toDoubleOrZero()
                 updateTotalText(amount)
             }
@@ -181,7 +179,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-        val onFailure = { result: Result.Failure<String, FuelError> ->  println("Error!: ${result.error}") }
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
 
         submitOrderButton.setOnClickListener {
             val prefs = Prefs(activity)
@@ -271,9 +269,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        val onFailure = { result: Result.Failure<String, FuelError> ->
-            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
-            println("error!" )}
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
+            toast(resources.getString(R.string.error_generic_message, result.errorMessage))}
         account?.update(onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
@@ -446,15 +443,10 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun payFee(amount: Double) {
         account?.currency?.let { currency ->
             val destination = currency.developerAddress
+            //TODO: only count fees as paid if they are successfully paid
             CBProApi.sendCrypto(amount, currency, destination).executePost(
-                    { _ ->
-                        /*  fail silently   */
-                        println("failure")
-                    },
-                    { _ ->
-                        /* succeed silently */
-                        println("success")
-                    })
+                    {  /*  fail silently   */ },
+                    {  /* succeed silently */ })
         }
     }
 
