@@ -74,8 +74,8 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
 
-        //TODO: rewmove
-        Product.updateAllProducts({ }, {})
+        //TODO: add this back occasionally
+//        Product.updateAllProducts({ }, {})
 
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
