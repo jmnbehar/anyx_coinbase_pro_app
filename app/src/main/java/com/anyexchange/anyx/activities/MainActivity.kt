@@ -188,7 +188,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
+        if (savedInstanceState != null) {
+            super.onRestoreInstanceState(savedInstanceState)
+        }
         dataFragment?.restoreData(this)
         setDrawerMenu()
     }
