@@ -231,7 +231,7 @@ sealed class CBProApi : FuelRouting {
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             val tempCryptoAccounts = mutableListOf<Account>()
             if (CBProApi.credentials == null) {
-                val fiatCurrency = Currency.USD
+                val fiatCurrency = Account.defaultFiatCurrency
                 val filteredProductList = productList.filter {
                     it.quoteCurrency == fiatCurrency
                 }

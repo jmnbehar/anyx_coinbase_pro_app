@@ -52,9 +52,10 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
 
         //TODO: make this changeable
         val defaultFiatAccount: Account?
-            get() = fiatAccounts.firstOrNull()
+            get() = fiatAccounts.sortedBy { it.balance }.lastOrNull()
 
-        val defaultFiatCurrency = defaultFiatAccount?.currency ?: Currency.USD
+        val defaultFiatCurrency: Currency
+            get() = defaultFiatAccount?.currency ?: Currency.USD
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()

@@ -59,15 +59,15 @@ class DataFragment : Fragment() {
                 }
             }
         }
-        if (backupCryptoAccountList.isNotEmpty()) {
-            Account.cryptoAccounts = backupCryptoAccountList
-        } else if (Account.cryptoAccounts.isEmpty()){
-            Account.cryptoAccounts = prefs.stashedCryptoAccountList
-        }
         if (backupFiatAccountList.isNotEmpty()) {
             Account.fiatAccounts = backupFiatAccountList
         } else if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList
+        }
+        if (backupCryptoAccountList.isNotEmpty()) {
+            Account.cryptoAccounts = backupCryptoAccountList
+        } else if (Account.cryptoAccounts.isEmpty()){
+            Account.cryptoAccounts = prefs.stashedCryptoAccountList
         }
     }
 
