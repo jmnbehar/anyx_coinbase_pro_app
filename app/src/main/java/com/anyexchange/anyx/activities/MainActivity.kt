@@ -540,7 +540,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (fragment != null) {
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
-        } else {
+        } else if (fragmentType != FragmentType.TRADE && fragmentType != FragmentType.SEND
+                && fragmentType != FragmentType.TRANSFER_IN && fragmentType != FragmentType.TRANSFER_OUT) {
             toast("Error switching fragments")
         }
     }

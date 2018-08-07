@@ -51,7 +51,7 @@ class TransferOutFragment : RefreshFragment() {
     private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
 
     private var destinationAccount: Account.RelatedAccount? = null
-    private var currency: Currency = Currency.USD
+    private var currency: Currency = Account.defaultFiatCurrency
 
     companion object {
         fun newInstance(): TransferOutFragment {
