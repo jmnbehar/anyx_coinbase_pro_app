@@ -210,7 +210,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } else {
                 tradeFragment?.tradeSide = tradeSide
             }
-            (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, "Trade: " + tradeSide.name)
+            (activity as com.anyexchange.anyx.activities.MainActivity).goToFragment(tradeFragment!!, MainActivity.FragmentType.TRADE.toString())
         }
     }
 

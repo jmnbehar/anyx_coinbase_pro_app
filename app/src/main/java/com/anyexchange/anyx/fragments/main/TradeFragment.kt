@@ -234,7 +234,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 if (prefs.shouldShowTradeConfirmModal) {
                     account?.let { account ->
                         CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
-                            val price = ticker?.price?.toDoubleOrNull()
+                            val price = ticker.price.toDoubleOrNull()
                             if (price != null) {
                                 confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
                             }

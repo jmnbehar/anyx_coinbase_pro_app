@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     var defaultSpinnerColorFilter: ColorFilter? = null
 
     enum class FragmentType {
+        //TODO: only use 1 chart thing
         BTC_CHART,
         BCH_CHART,
         ETH_CHART,
@@ -77,15 +78,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         companion object {
             fun forString(tag: String) : FragmentType {
                 return when (tag) {
-                    "CHART" -> BTC_CHART
-                    "ACCOUNT" -> ACCOUNT
-                    "SEND" -> SEND
-                    "ALERTS" -> ALERTS
-                    "TRANSFER_IN" -> TRANSFER_IN
-                    "TRANSFER_OUT" -> TRANSFER_OUT
-                    "SETTINGS" -> SETTINGS
-                    "TRADE" -> TRADE
-                    "HOME" -> HOME
+                    BTC_CHART.toString() -> BTC_CHART
+                    ACCOUNT.toString() -> ACCOUNT
+                    SEND.toString() -> SEND
+                    ALERTS.toString() -> ALERTS
+                    TRANSFER_IN.toString() -> TRANSFER_IN
+                    TRANSFER_OUT.toString() -> TRANSFER_OUT
+                    SETTINGS.toString() -> SETTINGS
+                    TRADE.toString() -> TRADE
+                    HOME.toString() -> HOME
                     else -> OTHER
                 }
             }
