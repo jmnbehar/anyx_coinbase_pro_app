@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.ColorFilter
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.NotificationCompat
@@ -64,8 +65,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
-                TRANSFER_IN -> "DEPOSIT"
-                TRANSFER_OUT -> "WITHDRAW"
+                TRANSFER_IN -> "TRANSFER_IN"
+                TRANSFER_OUT -> "TRANSFER_OUT"
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
                 HOME -> "HOME"
@@ -74,6 +75,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         companion object {
+            fun forString(tag: String) : FragmentType {
+                return when (tag) {
+                    "CHART" -> BTC_CHART
+                    "ACCOUNT" -> ACCOUNT
+                    "SEND" -> SEND
+                    "ALERTS" -> ALERTS
+                    "TRANSFER_IN" -> TRANSFER_IN
+                    "TRANSFER_OUT" -> TRANSFER_OUT
+                    "SETTINGS" -> SETTINGS
+                    "TRADE" -> TRADE
+                    "HOME" -> HOME
+                    else -> OTHER
+                }
+            }
+
             fun fromFragment(fragment: RefreshFragment?) : FragmentType {
                 return when (fragment) {
                     is ChartFragment -> {
@@ -117,8 +133,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        onRestoreInstanceState(savedInstanceState)
-
         setSupportActionBar(toolbar)
 
         val toggle = object : ActionBarDrawerToggle(
@@ -171,7 +185,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 signIn()
             }
         } else {
-            //TODO: do this in onRestoreInstanceState
             setDrawerMenu()
         }
     }
@@ -188,11 +201,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            super.onRestoreInstanceState(savedInstanceState)
-        }
         dataFragment?.restoreData(this)
         setDrawerMenu()
+        if (savedInstanceState != null) {
+            super.onRestoreInstanceState(savedInstanceState)
+            val fragmentTag = savedInstanceState.getString("FRAGMENT_TAG") ?: ""
+            val fragmentType = FragmentType.forString(fragmentTag)
+            goToFragment(fragmentType)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        super.onSaveInstanceState(outState, outPersistentState)
+
+        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
+        outState?.putString("FRAGMENT_TAG", fragmentTag)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
+        outState?.putString("FRAGMENT_TAG", fragmentTag)
     }
 
     override fun onPause() {
