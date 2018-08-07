@@ -95,9 +95,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return when (fragment) {
                     is ChartFragment -> {
                         when (ChartFragment.account?.currency ?: Currency.BTC) {
+                            //TODO: simplify to a single CHART item
                             Currency.BTC -> BTC_CHART
                             Currency.BCH -> BCH_CHART
                             Currency.ETH -> ETH_CHART
+                            Currency.ETC -> ETH_CHART
                             Currency.LTC -> LTC_CHART
                             Currency.USD,
                             Currency.EUR,
