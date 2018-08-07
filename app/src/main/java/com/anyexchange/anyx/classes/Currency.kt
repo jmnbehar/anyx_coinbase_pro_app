@@ -65,9 +65,8 @@ enum class Currency {
             LTC -> R.drawable.icon_ltc
             BCH -> R.drawable.icon_bch
             USD -> R.drawable.icon_usd
-            //TODO: replace this:
-            EUR -> R.drawable.icon_usd
-            GBP -> R.drawable.icon_usd
+            EUR -> R.drawable.icon_eur
+            GBP -> R.drawable.icon_gbp
         }
 
     val feePercentage : Double
