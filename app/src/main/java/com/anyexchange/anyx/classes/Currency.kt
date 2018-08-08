@@ -15,7 +15,7 @@ enum class Currency {
     BTC,
     BCH,
     ETH,
-    ETC,
+//    //ETC,
     LTC,
     USD,
     EUR,
@@ -26,7 +26,7 @@ enum class Currency {
             BTC -> "BTC"
             BCH -> "BCH"
             ETH -> "ETH"
-            ETC -> "ETC"
+//            //ETC -> "ETC"
             LTC -> "LTC"
             USD -> "USD"
             EUR -> "EUR"
@@ -49,7 +49,7 @@ enum class Currency {
             BTC -> "Bitcoin"
             BCH -> "Bitcoin Cash"
             ETH -> "Ethereum"
-            ETC -> "Ethereum Classic"
+            //ETC -> "Ethereum Classic"
             LTC -> "Litecoin"
             USD -> "US Dollar"
             EUR -> "Euro"
@@ -61,7 +61,7 @@ enum class Currency {
             BTC -> R.drawable.icon_btc
             ETH -> R.drawable.icon_eth
             //TODO: replace this:
-            ETC -> R.drawable.icon_eth
+            //ETC -> R.drawable.icon_eth
             LTC -> R.drawable.icon_ltc
             BCH -> R.drawable.icon_bch
             USD -> R.drawable.icon_usd
@@ -88,7 +88,7 @@ enum class Currency {
         get() = when (this) {
             BTC -> .001
             ETH -> .01
-            ETC -> .01
+            //ETC -> .01
             BCH -> .01
             LTC -> .1
             else -> 1.0
@@ -98,7 +98,7 @@ enum class Currency {
         get() = when (this) {
             BTC -> .0001
             ETH -> .001
-            ETC -> .001
+            //ETC -> .001
             BCH -> .001
             LTC -> .1
             else -> 100.0
@@ -130,7 +130,7 @@ enum class Currency {
                 BCH -> ContextCompat.getColor(context, R.color.bch_dk)
                 ETH -> ContextCompat.getColor(context, R.color.eth_dk)
                 //TODO: change this color
-                ETC -> ContextCompat.getColor(context, R.color.eth_dk)
+                //ETC -> ContextCompat.getColor(context, R.color.eth_dk)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
                 USD,
                 EUR,
@@ -142,7 +142,7 @@ enum class Currency {
                 BCH -> ContextCompat.getColor(context, R.color.bch_light)
                 ETH -> ContextCompat.getColor(context, R.color.eth_light)
                 //TODO: change this color
-                ETC -> ContextCompat.getColor(context, R.color.eth_dk)
+                //ETC -> ContextCompat.getColor(context, R.color.eth_dk)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_light)
                 USD,
                 EUR,
@@ -159,7 +159,7 @@ enum class Currency {
                 BCH -> ContextCompat.getColor(context, R.color.bch_accent)
                 ETH -> ContextCompat.getColor(context, R.color.eth_accent)
                 //TODO: change this color
-                ETC -> ContextCompat.getColor(context, R.color.eth_accent)
+                //ETC -> ContextCompat.getColor(context, R.color.eth_accent)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
                 USD,
                 EUR,
@@ -171,7 +171,7 @@ enum class Currency {
                 BCH -> ContextCompat.getColor(context, R.color.bch_accent)
                 ETH -> ContextCompat.getColor(context, R.color.eth_accent)
                 //TODO: change this color
-                ETC -> ContextCompat.getColor(context, R.color.eth_accent)
+                //ETC -> ContextCompat.getColor(context, R.color.eth_accent)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
                 USD,
                 EUR,
@@ -187,7 +187,7 @@ enum class Currency {
                 BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_dark, context.resources.newTheme())
                 ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
                 //TODO: change this color
-                ETC -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
+                //ETC -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
                 USD,
@@ -199,7 +199,7 @@ enum class Currency {
                 BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_light, context.resources.newTheme())
                 ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_light, context.resources.newTheme())
                 //TODO: change this color
-                ETC -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
+                //ETC -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
                 USD,
@@ -215,7 +215,7 @@ enum class Currency {
             when (this) {
                 BTC -> Color.BLACK
                 ETH -> Color.WHITE
-                ETC -> Color.WHITE
+                //ETC -> Color.WHITE
                 BCH -> Color.WHITE
                 LTC -> Color.BLACK
                 USD,
@@ -226,7 +226,7 @@ enum class Currency {
             when (this) {
                 BTC -> Color.WHITE
                 ETH -> Color.WHITE
-                ETC -> Color.WHITE
+                //ETC -> Color.WHITE
                 BCH -> Color.WHITE
                 LTC -> Color.WHITE
                 USD,
@@ -241,7 +241,7 @@ enum class Currency {
         //paper wallets: (Messiah)
             BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
             ETH -> "0xAA75018336e91f3b621205b8cbdf020304052b5a"
-            ETC -> ""   //TODO: fix this asap
+            //ETC -> ""   //TODO: fix this asap
             BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
             LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
             USD,
@@ -254,7 +254,7 @@ enum class Currency {
         //paper wallets: (Messiah)
             BTC -> "3QYWtcfgu8W8p43rmJAufiGABhYtq7b8F2"
             ETH -> "0x497125cf15da8F397cc33693434125Db50D659bc"
-            ETC -> ""   //TODO: fix this asap
+            //ETC -> ""   //TODO: fix this asap
             BCH -> "qzqj4dxr2m20ys99x2jkuyq90d4q9q6jzq985ey2j7"
             LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
             USD,
@@ -270,7 +270,7 @@ enum class Currency {
                 ETH -> 4
                 LTC -> 3
                 BCH -> 2
-                ETC -> 1
+                //ETC -> 1
                 EUR -> -1
                 GBP -> -2
                 USD -> -100
@@ -286,7 +286,7 @@ enum class Currency {
                 "BTC" -> BTC
                 "BCH" -> BCH
                 "ETH" -> ETH
-                "ETC" -> ETC
+               // "ETC" -> ETC
                 "LTC" -> LTC
                 "USD" -> USD
                 "EUR" -> EUR

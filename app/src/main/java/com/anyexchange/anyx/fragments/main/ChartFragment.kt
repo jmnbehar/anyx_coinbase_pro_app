@@ -54,10 +54,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     companion object {
         var account: Account? = null
-        fun newInstance(account: Account): ChartFragment {
-            this.account = account
-            return ChartFragment()
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

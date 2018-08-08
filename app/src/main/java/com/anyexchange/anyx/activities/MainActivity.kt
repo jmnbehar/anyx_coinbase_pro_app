@@ -42,10 +42,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     enum class FragmentType {
         //TODO: only use 1 chart thing
-        BTC_CHART,
-        BCH_CHART,
-        ETH_CHART,
-        LTC_CHART,
+        CHART,
         ACCOUNT,
         SEND,
         ALERTS,
@@ -59,10 +56,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         override fun toString() : String {
             return when (this) {
-                BTC_CHART -> "CHART"
-                BCH_CHART -> "CHART"
-                ETH_CHART -> "CHART"
-                LTC_CHART -> "CHART"
+                CHART -> "CHART"
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
@@ -78,7 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         companion object {
             fun forString(tag: String) : FragmentType {
                 return when (tag) {
-                    BTC_CHART.toString() -> BTC_CHART
+                    CHART.toString() -> CHART
                     ACCOUNT.toString() -> ACCOUNT
                     SEND.toString() -> SEND
                     ALERTS.toString() -> ALERTS
@@ -93,19 +87,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             fun fromFragment(fragment: RefreshFragment?) : FragmentType {
                 return when (fragment) {
-                    is ChartFragment -> {
-                        when (ChartFragment.account?.currency ?: Currency.BTC) {
-                            //TODO: simplify to a single CHART item
-                            Currency.BTC -> BTC_CHART
-                            Currency.BCH -> BCH_CHART
-                            Currency.ETH -> ETH_CHART
-                            Currency.ETC -> ETH_CHART
-                            Currency.LTC -> LTC_CHART
-                            Currency.USD,
-                            Currency.EUR,
-                            Currency.GBP -> BTC_CHART   //error
-                        }
-                    }
+                    is ChartFragment -> CHART
                     is AccountsFragment -> ACCOUNT
                     is SendFragment -> SEND
                     is AlertsFragment -> ALERTS
@@ -189,6 +171,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         } else {
             setDrawerMenu()
+            val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
+            supportFragmentManager.popBackStack()
+            val fragmentType = FragmentType.forString(fragmentTag)
+            goToFragment(fragmentType)
         }
     }
 
@@ -206,12 +192,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         setDrawerMenu()
-        if (savedInstanceState != null) {
-            super.onRestoreInstanceState(savedInstanceState)
-            val fragmentTag = savedInstanceState.getString("FRAGMENT_TAG") ?: ""
-            val fragmentType = FragmentType.forString(fragmentTag)
-            goToFragment(fragmentType)
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
@@ -438,38 +418,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun goToChartFragment(currency: Currency) {
-        when (currency) {
-            Currency.BTC -> goToFragment(FragmentType.BTC_CHART)
-            Currency.BCH -> goToFragment(FragmentType.BCH_CHART)
-            Currency.ETH -> goToFragment(FragmentType.ETH_CHART)
-            Currency.LTC -> goToFragment(FragmentType.LTC_CHART)
-            Currency.USD, Currency.EUR, Currency.GBP -> {}
-        }
-    }
-    private fun chartFragment(currency: Currency) : ChartFragment? {
-        val account = Account.forCurrency(currency)
-        return if (account == null) {
-            null
-        } else {
-            ChartFragment.newInstance(account)
-        }
-
+        ChartFragment.account = Account.forCurrency(currency)
+        goToFragment(FragmentType.CHART)
     }
 
     private fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
-            FragmentType.BTC_CHART -> {
-                chartFragment(Currency.BTC)
-            }
-            FragmentType.BCH_CHART -> {
-                chartFragment(Currency.BCH)
-            }
-            FragmentType.ETH_CHART -> {
-                chartFragment(Currency.ETH)
-            }
-            FragmentType.LTC_CHART -> {
-                chartFragment(Currency.LTC)
+            FragmentType.CHART -> {
+                ChartFragment()
             }
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
             FragmentType.SEND -> {
