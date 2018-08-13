@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNav.visibility = View.GONE
         if (!prefs.shouldAutologin) {
             returnToLogin()
-        } else if (Account.cryptoAccounts.isNotEmpty() && Account.fiatAccounts.isNotEmpty()) {
+        } else if (Account.cryptoAccounts.size >= Currency.cryptoList.size && Account.fiatAccounts.isNotEmpty()) {
             goHome()
             setDrawerMenu()
         } else {

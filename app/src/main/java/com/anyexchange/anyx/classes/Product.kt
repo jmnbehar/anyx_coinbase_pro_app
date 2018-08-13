@@ -80,7 +80,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         return weightedChange * 100.0
     }
 
-    fun candlesForTimespan(timespan: Timespan, quoteCurrency: Currency) : List<Candle> {
+    private fun candlesForTimespan(timespan: Timespan, quoteCurrency: Currency) : List<Candle> {
         val tradingPair = TradingPair(this.currency, quoteCurrency)
         return candlesForTimespan(timespan, tradingPair)
     }
@@ -188,23 +188,13 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
-        var tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
+        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
 
         hourCandles[tradingPairIndex] = basicHourCandles
         dayCandles[tradingPairIndex]  = basicDayCandles
         weekCandles[tradingPairIndex] = basicWeekCandles
         monthCandles[tradingPairIndex] = basicMonthCandles
         yearCandles[tradingPairIndex] = basicYearCandles
-    }
-    fun clearAllCandles() {
-        val tradingPairCount = dayCandles.count()
-        for (i in 0..(tradingPairCount - 1)) {
-            hourCandles[i] = listOf()
-            dayCandles[i] = listOf()
-            weekCandles[i] = listOf()
-            monthCandles[i] = listOf()
-            yearCandles[i] = listOf()
-        }
     }
 
     companion object {
