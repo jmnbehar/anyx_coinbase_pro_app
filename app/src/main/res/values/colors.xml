@@ -21,16 +21,19 @@
     <color name="eth_light">#697be5</color>
     <color name="bch_light">#25bb7a</color>
     <color name="ltc_light">#aeb4c0</color>
+    <color name="etc_light">#0e7735</color>
 
     <color name="btc_dk">#f9c800</color>
     <color name="eth_dk">#7086fd</color>
     <color name="bch_dk">#25bb7a</color>
     <color name="ltc_dk">#aeb4c0</color>
+    <color name="etc_dk">#0e7735</color>
 
     <color name="btc_accent">#c6b800</color>
     <color name="eth_accent">#8c9fea</color>
     <color name="bch_accent">#25bb7a</color>
     <color name="ltc_accent">#ccd0da</color>
+    <color name="etc_accent">#1fc759</color>
 
 
     <color name="btc_transparent">#40c1b400</color>

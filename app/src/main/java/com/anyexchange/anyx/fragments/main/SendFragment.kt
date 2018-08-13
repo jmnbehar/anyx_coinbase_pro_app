@@ -200,6 +200,7 @@ class SendFragment : RefreshFragment() {
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
             when (currency) {
+                //TODO: make this smarter:
                 Currency.BTC -> {
                     warning1TextView.setText(R.string.send_warning_1_btc)
                     warning2TextView.setText(R.string.send_warning_2_btc)
@@ -209,9 +210,8 @@ class SendFragment : RefreshFragment() {
                     warning2TextView.setText(R.string.send_warning_2_eth)
                 }
                 Currency.ETC -> {
-                    //TODO: get proper strings
-                    warning1TextView.setText(R.string.send_warning_1_eth)
-                    warning2TextView.setText(R.string.send_warning_2_eth)
+                    warning1TextView.setText(R.string.send_warning_1_etc)
+                    warning2TextView.setText(R.string.send_warning_2_etc)
                 }
                 Currency.BCH -> {
                     warning1TextView.setText(R.string.send_warning_1_bch)
