@@ -20,16 +20,7 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
         } else {
             1
         }
-        val currencyCode = when (currency) {
-            Currency.USD,
-            Currency.EUR,
-            Currency.GBP -> 0
-            Currency.LTC -> 1
-            Currency.ETH -> 2
-            Currency.BCH -> 3
-            Currency.BTC -> 4
-            Currency.ETC -> 5
-        }
+        val currencyCode = currency.orderValue
         val priceCode = (price * 100).toInt()
         val hashCodeInt = (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
         return hashCodeInt
