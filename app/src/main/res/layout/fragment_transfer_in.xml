@@ -34,35 +34,6 @@
             android:layout_height="40dp"
             android:layout_gravity="top">
 
-            <android.support.design.widget.TabItem
-                android:id="@+id/tab_transfer_fiat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/currency_USD" />
-
-            <android.support.design.widget.TabItem
-                android:id="@+id/tab_transfer_btc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/currency_BTC" />
-
-            <android.support.design.widget.TabItem
-                android:id="@+id/tab_transfer_eth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/currency_ETH" />
-
-            <android.support.design.widget.TabItem
-                android:id="@+id/tab_transfer_bch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/currency_BCH" />
-
-            <android.support.design.widget.TabItem
-                android:id="@+id/tab_transfer_ltc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/currency_LTC" />
         </android.support.design.widget.TabLayout>
 
 

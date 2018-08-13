@@ -89,19 +89,7 @@ class TransferOutFragment : RefreshFragment() {
 
         //TODO: nuke this tab layout, use spinner
         currencyTabLayout = rootView.tabl_transfer_out_currency
-        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when(tab.position) {
-                    0 -> switchCurrency(Account.defaultFiatCurrency)
-                    1 -> switchCurrency(Currency.BTC)
-                    2 -> switchCurrency(Currency.ETH)
-                    3 -> switchCurrency(Currency.BCH)
-                    4 -> switchCurrency(Currency.LTC)
-                }
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
+        currencyTabLayout.setupAllCurrencyTabs { switchCurrency(it) }
 
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

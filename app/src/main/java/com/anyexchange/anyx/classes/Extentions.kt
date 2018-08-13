@@ -4,6 +4,7 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.content.res.Resources
 import android.support.annotation.LayoutRes
+import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
 import android.widget.ListView
 import android.view.ViewGroup
@@ -169,3 +170,45 @@ val Lifecycle.isCreatedOrResumed : Boolean
         Lifecycle.State.STARTED, Lifecycle.State.RESUMED -> true
         else -> false
     }
+
+fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
+    removeAllTabs()
+    for (currency in Currency.cryptoList) {
+        val newTab = newTab()
+        newTab.text = currency.toString()
+        addTab(newTab)
+    }
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab) {
+            val selectedCurrency = Currency.cryptoList[tab.position]
+            onSelected(selectedCurrency)
+        }
+        override fun onTabUnselected(tab: TabLayout.Tab) {}
+        override fun onTabReselected(tab: TabLayout.Tab) {}
+    })
+}
+
+
+fun TabLayout.setupAllCurrencyTabs(onSelected: (Currency) -> Unit) {
+    removeAllTabs()
+    val fiatTab = this.newTab()
+    fiatTab.text = Account.defaultFiatCurrency.toString()
+    addTab(fiatTab)
+    for (currency in Currency.cryptoList) {
+        val newTab = newTab()
+        newTab.text = currency.toString()
+        addTab(newTab)
+    }
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab) {
+            if (tab.position == 0) {
+                onSelected(Account.defaultFiatCurrency)
+            } else {
+                val selectedCurrency = Currency.cryptoList[tab.position - 1]
+                onSelected(selectedCurrency)
+            }
+        }
+        override fun onTabUnselected(tab: TabLayout.Tab) {}
+        override fun onTabReselected(tab: TabLayout.Tab) {}
+    })
+}

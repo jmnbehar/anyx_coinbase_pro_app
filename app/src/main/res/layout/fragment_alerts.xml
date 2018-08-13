@@ -26,29 +26,6 @@
         android:layout_marginLeft="-20dp"
         android:layout_marginRight="-20dp">
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_alerts_btc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BTC" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_alerts_eth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ETH" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_alerts_bch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BCH" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_alerts_ltc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LTC" />
     </android.support.design.widget.TabLayout>
 
     <LinearLayout

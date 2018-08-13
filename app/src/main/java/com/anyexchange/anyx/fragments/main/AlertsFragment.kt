@@ -74,18 +74,7 @@ class AlertsFragment : RefreshFragment() {
         titleText.text = resources.getString(R.string.alerts_title)
 
         switchCurrency(this.currency)
-        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when(tab.position) {
-                    0 -> switchCurrency(Currency.BTC)
-                    1 -> switchCurrency(Currency.ETH)
-                    2 -> switchCurrency(Currency.BCH)
-                    3 -> switchCurrency(Currency.LTC)
-                }
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
+        currencyTabLayout.setupCryptoTabs { switchCurrency(it) }
 
         priceUnitText.text = ""
         triggerLabelText.text = resources.getString(R.string.alerts_new_alert_label)

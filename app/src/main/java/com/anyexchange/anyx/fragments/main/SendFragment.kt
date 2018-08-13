@@ -81,18 +81,7 @@ class SendFragment : RefreshFragment() {
 
         switchCurrency()
 
-        currencyTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when(tab.position) {
-                    0 -> switchCurrency(Currency.BTC)
-                    1 -> switchCurrency(Currency.ETH)
-                    2 -> switchCurrency(Currency.BCH)
-                    3 -> switchCurrency(Currency.LTC)
-                }
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
+        currencyTabLayout.setupCryptoTabs { currency -> switchCurrency(currency) }
 
         scanButton.setOnClickListener { getAddressFromCamera() }
 
@@ -216,6 +205,11 @@ class SendFragment : RefreshFragment() {
                     warning2TextView.setText(R.string.send_warning_2_btc)
                 }
                 Currency.ETH -> {
+                    warning1TextView.setText(R.string.send_warning_1_eth)
+                    warning2TextView.setText(R.string.send_warning_2_eth)
+                }
+                Currency.ETC -> {
+                    //TODO: get proper strings
                     warning1TextView.setText(R.string.send_warning_1_eth)
                     warning2TextView.setText(R.string.send_warning_2_eth)
                 }

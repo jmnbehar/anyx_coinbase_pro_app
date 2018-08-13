@@ -23,30 +23,6 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_gravity="top">
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_send_btc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/currency_BTC" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_send_eth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/currency_ETH" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_send_bch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/currency_BCH" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tab_send_ltc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/currency_LTC" />
     </android.support.design.widget.TabLayout>
 
 
