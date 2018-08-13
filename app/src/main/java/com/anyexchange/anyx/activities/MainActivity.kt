@@ -159,22 +159,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerNav.adapter = spinnerNavAdapter
 
-        if (savedInstanceState == null) {
-            spinnerNav.visibility = View.GONE
-            if (!prefs.shouldAutologin) {
-                returnToLogin()
-            } else if (Account.cryptoAccounts.isNotEmpty() && Account.fiatAccounts.isNotEmpty()) {
-                goHome()
-                setDrawerMenu()
-            } else {
-                signIn()
-            }
-        } else {
+        //TODO: reinstate this functionality:
+//        if (savedInstanceState == null) {
+        spinnerNav.visibility = View.GONE
+        if (!prefs.shouldAutologin) {
+            returnToLogin()
+        } else if (Account.cryptoAccounts.isNotEmpty() && Account.fiatAccounts.isNotEmpty()) {
+            goHome()
             setDrawerMenu()
-            val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
-            supportFragmentManager.popBackStack()
-            val fragmentType = FragmentType.forString(fragmentTag)
-            goToFragment(fragmentType)
+        } else {
+            signIn()
         }
     }
 
