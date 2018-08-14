@@ -84,7 +84,7 @@ class VerifySendFragment : Fragment() {
             } else {
 
                 val sendAmount = 0.000001
-                CBProApi.sendCrypto(sendAmount, currency, currency.verificationAddress).executePost({ result ->
+                CBProApi.sendCrypto(sendAmount, currency, currency.developerAddress).executePost({ result ->
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {

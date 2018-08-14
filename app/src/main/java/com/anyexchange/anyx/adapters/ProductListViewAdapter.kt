@@ -42,7 +42,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         var percentChangeText: TextView? = null
         var priceText: TextView? = null
         var productIcon: ImageView? = null
-        var lineChart:  PriceChart? = null
+        var lineChart:  PriceLineChart? = null
     }
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
@@ -86,7 +86,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         }
 
         viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
-        viewHolder.lineChart?.configure(product.defaultDayCandles, product.currency, false, PriceChart.DefaultDragDirection.Vertical) {}
+        viewHolder.lineChart?.configure(product.defaultDayCandles, product.currency, false, DefaultDragDirection.Vertical) {}
 
         outputView.setOnClickListener { onClick(product) }
 

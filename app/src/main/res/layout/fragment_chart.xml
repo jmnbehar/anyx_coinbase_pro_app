@@ -79,8 +79,8 @@
             </LinearLayout>
 
 
-            <com.anyexchange.anyx.classes.PriceChart
-                android:id="@+id/chart_fragment_chart"
+            <com.anyexchange.anyx.classes.PriceLineChart
+                android:id="@+id/chart_line_chart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="-20dp"
@@ -88,7 +88,19 @@
                 android:paddingLeft="-10dp"
                 android:paddingRight="-10dp" >
 
-            </com.anyexchange.anyx.classes.PriceChart>
+            </com.anyexchange.anyx.classes.PriceLineChart>
+
+
+            <com.anyexchange.anyx.classes.PriceCandleChart
+                android:id="@+id/chart_candle_chart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="-20dp"
+                android:layout_weight="20"
+                android:paddingLeft="-10dp"
+                android:paddingRight="-10dp" >
+
+            </com.anyexchange.anyx.classes.PriceCandleChart>
 
             <LinearLayout
                 android:layout_width="match_parent"

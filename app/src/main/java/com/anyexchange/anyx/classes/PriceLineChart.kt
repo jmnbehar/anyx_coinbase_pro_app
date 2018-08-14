@@ -18,15 +18,11 @@ import kotlin.math.absoluteValue
  * Created by anyexchange on 1/17/2018.
  */
 
-class PriceChart : LineChart {
+class PriceLineChart : LineChart {
     constructor(ctx: Context) : super(ctx)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
 
-    enum class DefaultDragDirection {
-        Horizontal,
-        Vertical;
-    }
 
     private var velocityTracker: VelocityTracker? = null
     private var isVerticalDrag: Boolean? = null

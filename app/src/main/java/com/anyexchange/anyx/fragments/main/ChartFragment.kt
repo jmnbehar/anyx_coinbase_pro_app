@@ -12,7 +12,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
-import com.google.gson.Gson
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_chart.view.*
@@ -50,6 +49,24 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var candles = listOf<Candle>()
 
+    private var candleChart: PriceCandleChart? = null
+    private var lineChart: PriceLineChart? = null
+
+    private var activeChartType = ChartType.Line
+        set(value) {
+            when(value) {
+                ChartType.Line -> {
+                    lineChart?.visibility = View.VISIBLE
+                    candleChart?.visibility = View.GONE
+                }
+                ChartType.Candle -> {
+                    lineChart?.visibility = View.GONE
+                    candleChart?.visibility = View.VISIBLE
+                }
+            }
+            field = value
+        }
+
     private var tradeFragment: TradeFragment? = null
 
     companion object {
@@ -76,11 +93,20 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             candles = tempAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
             val currency = tempAccount.currency
 
-            rootView.chart_fragment_chart.configure(candles, currency, true, PriceChart.DefaultDragDirection.Horizontal) {
+            lineChart = rootView.chart_line_chart
+            candleChart = rootView.chart_candle_chart
+
+            lineChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
             }
-            rootView.chart_fragment_chart.setOnChartValueSelectedListener(this)
-            rootView.chart_fragment_chart.onChartGestureListener = this
+            lineChart?.setOnChartValueSelectedListener(this)
+            lineChart?.onChartGestureListener = this
+
+            candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
+                swipeRefreshLayout?.isEnabled = false
+            }
+            candleChart?.setOnChartValueSelectedListener(this)
+            candleChart?.onChartGestureListener = this
 
             rootView.btn_chart_buy.setOnClickListener {
                 buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
@@ -153,6 +179,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onResume() {
         super.onResume()
+        activeChartType = ChartType.Line
         checkTimespanButton()
         showNavSpinner(account?.currency) { selectedCurrency ->
             //            showProgressSpinner()
@@ -236,7 +263,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
 
         if (areCandlesUpToDate) {
-            chart_fragment_chart.addCandles(candles, newAccount.currency)
+            addCandlesToActiveChart(candles, newAccount.currency)
             setPercentChangeText(chartTimeSpan)
             txt_chart_name.text = currency.fullName
             setButtonsAndBalanceText(newAccount)
@@ -248,7 +275,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 dismissProgressSpinner()
             }, {    //success
                 candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
-                chart_fragment_chart.addCandles(candles, newAccount.currency)
+                addCandlesToActiveChart(candles, newAccount.currency)
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
                 setButtonsAndBalanceText(newAccount)
@@ -438,7 +465,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account != null) {
             txt_chart_price.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
             setPercentChangeText(chartTimeSpan)
-            chart_fragment_chart.highlightValues(arrayOf<Highlight>())
+            when (activeChartType) {
+                ChartType.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
+                ChartType.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
+            }
         }
     }
 
@@ -575,9 +605,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         //complete mini refresh assumes account is not null
         txt_chart_price.text = price.format(quoteCurrency)
         txt_chart_account_value.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-        chart_fragment_chart.addCandles(candles, account!!.currency)
+        addCandlesToActiveChart(candles, account!!.currency)
         setPercentChangeText(chartTimeSpan)
         checkTimespanButton()
         onComplete()
+    }
+
+    private fun addCandlesToActiveChart(candles: List<Candle>, currency: Currency) {
+        when (activeChartType) {
+            ChartType.Line -> lineChart?.addCandles(candles, currency)
+            ChartType.Candle -> candleChart?.addCandles(candles, currency)
+        }
     }
 }

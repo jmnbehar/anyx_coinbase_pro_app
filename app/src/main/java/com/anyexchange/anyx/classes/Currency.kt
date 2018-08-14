@@ -231,25 +231,12 @@ enum class Currency {
 
     val developerAddress : String
         get() = when (this) {
-        //paper wallets: (Messiah)
-            BTC -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-            ETH -> "0xAA75018336e91f3b621205b8cbdf020304052b5a"
-            ETC -> ""   //TODO: fix this asap
-            BCH -> "1E9yDtPcWMJESXLjQFCZoZfNeTB3oxiq7o"
-            LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
-            USD,
-            EUR,
-            GBP -> "my irl address?"
-        }
-
-    val verificationAddress : String
-        get() = when (this) {
-        //paper wallets: (Messiah)
-            BTC -> "3QYWtcfgu8W8p43rmJAufiGABhYtq7b8F2"
-            ETH -> "0x497125cf15da8F397cc33693434125Db50D659bc"
-            ETC -> ""   //TODO: fix this asap
-            BCH -> "qzqj4dxr2m20ys99x2jkuyq90d4q9q6jzq985ey2j7"
-            LTC -> "LgASuiijykWJAM3i3E3Ke2zEfhemkYaVxi"
+        //CBPro Wallets (AnyX)
+            BTC -> "3K63fgura9ctK3Wh6ofwyrTgCb4RrwWci6"
+            ETH -> "0x6CDD817fdDAb3Ee5324e0Bb51b0f49f9d0Fd1247"
+            ETC -> "0x6e459139E65B4589e3F91c86D11143dBBA4570cf"
+            BCH -> "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8"
+            LTC -> "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD"
             USD,
             EUR,
             GBP -> "my irl address?"

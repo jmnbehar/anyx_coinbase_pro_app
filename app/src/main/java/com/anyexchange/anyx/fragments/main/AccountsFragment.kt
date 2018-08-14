@@ -25,7 +25,7 @@ import org.jetbrains.anko.textColor
 class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
-    private lateinit var lineChart: PriceChart
+    private lateinit var lineChart: PriceLineChart
     private lateinit var valueText: TextView
     private lateinit var percentChangeText: TextView
     private lateinit var titleText: TextView
@@ -197,7 +197,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 } else {
                     lineChart.visibility = View.VISIBLE
                     //doesn't matter which fiat currency you use here:
-                    lineChart.configure(accountTotalCandles, Currency.USD, true, PriceChart.DefaultDragDirection.Horizontal) {
+                    lineChart.configure(accountTotalCandles, Currency.USD, true, DefaultDragDirection.Horizontal) {
                         swipeRefreshLayout?.isEnabled = false
                         HomeFragment.viewPager?.isLocked = true
                     }
