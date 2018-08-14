@@ -133,6 +133,7 @@ class SettingsFragment : RefreshFragment() {
         return rootView
     }
 
+
     override fun onResume() {
         super.onResume()
         val prefs = Prefs(activity!!)
@@ -150,7 +151,5 @@ class SettingsFragment : RefreshFragment() {
         } else {
             logoutButton.text = resources.getString(R.string.settings_log_in_btn)
         }
-
     }
-
 }

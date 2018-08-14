@@ -25,7 +25,7 @@ import javax.crypto.spec.SecretKeySpec
 
 @Suppress("ClassName")
 sealed class CBProApi : FuelRouting {
-    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isValidated: Boolean?)
+    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
     companion object {
         //TODO: delete creds if api key becomes invalid

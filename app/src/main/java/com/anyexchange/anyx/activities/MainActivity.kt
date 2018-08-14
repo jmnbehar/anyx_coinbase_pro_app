@@ -179,8 +179,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val prefs = Prefs(this)
         if (prefs.isLoggedIn) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
+            menu_login.visibility = View.GONE
+            val apiKey = CBProApi.credentials?.isVerified
+            if (CBProApi.credentials?.isVerified == true) {
+                menu_verify.visibility = View.VISIBLE
+                menu_verify.setOnClickListener  {
+                    val intent = Intent(this, VerifyActivity::class.java)
+                    startActivity(intent)
+                }
+            } else {
+                menu_verify.visibility = View.GONE
+            }
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
+            menu_login.visibility = View.VISIBLE
+            menu_verify.visibility = View.GONE
+
+            menu_login.setOnClickListener {
+                //TODO: simplify this and bring login
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                intent.putExtra(Constants.logout, true)
+                prefs.shouldAutologin = false
+                prefs.isLoggedIn = false
+                CBProApi.credentials = null
+                prefs.stashOrders(null)
+                prefs.stashFills(null)
+                startActivity(intent)
+                finishAffinity()
+            }
         }
 
     }
@@ -429,10 +456,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
                     null
-                } else if (CBProApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isVerified == null) {
                     toast(R.string.toast_please_validate_message)
                     null
-                } else if (CBProApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else {
@@ -443,9 +470,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRANSFER_IN -> {
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isVerified == null) {
                     toast(R.string.toast_please_validate_message)
-                } else if (CBProApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                 } else {
                     showProgressBar()
@@ -465,9 +492,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRANSFER_OUT -> {
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isValidated == null) {
+                } else if (CBProApi.credentials?.isVerified == null) {
                     toast(R.string.toast_please_validate_message)
-                } else if (CBProApi.credentials?.isValidated == false) {
+                } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                 } else {
                     showProgressBar()

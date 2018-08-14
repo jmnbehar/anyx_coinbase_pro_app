@@ -9,27 +9,29 @@
             <item
                 android:id="@+id/nav_home"
                 android:icon="@drawable/icon_home"
-                android:title="Home" />
+                android:title="@string/menu_home" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="@string/menu_send" />
             <item
                 android:id="@+id/nav_alerts"
                 android:icon="@drawable/icon_alert"
-                android:title="Alerts" />
+                android:title="@string/menu_alerts" />
             <item
                 android:id="@+id/nav_deposit"
                 android:icon="@drawable/deposit"
-                android:title="Transfer in" />
+                android:title="@string/menu_transfer_in" />
             <item
                 android:id="@+id/nav_withdraw"
                 android:icon="@drawable/withdrawal"
-                android:title="Transfer out" />
+                android:title="@string/menu_transfer_out" />
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_menu_manage"
-                android:title="Settings" />
+                android:title="@string/menu_settings" />
+
+
         </menu>
     </item>
 

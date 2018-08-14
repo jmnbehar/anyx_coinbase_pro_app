@@ -246,7 +246,7 @@ class Prefs (var context: Context) {
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(APPROVED_API_KEYS, apiKeys).apply()
         if (CBProApi.credentials?.apiKey == apiKey) {
-            CBProApi.credentials?.isValidated = true
+            CBProApi.credentials?.isVerified = true
         }
     }
     fun rejectApiKey(apiKey: String) {
@@ -254,7 +254,7 @@ class Prefs (var context: Context) {
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(REJECTED_API_KEYS, apiKeys).apply()
         if (CBProApi.credentials?.apiKey == apiKey) {
-            CBProApi.credentials?.isValidated = false
+            CBProApi.credentials?.isVerified = false
         }
     }
 

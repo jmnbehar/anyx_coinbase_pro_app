@@ -21,6 +21,29 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer_logged_out" />
+        app:menu="@menu/activity_main_drawer_logged_out">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/menu_login"
+                android:text="@string/menu_login"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:textColor="@color/black" />
+            <Button
+                android:id="@+id/menu_verify"
+                android:text="@string/menu_verify"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </android.support.design.widget.NavigationView>
+
 
 </android.support.v4.widget.DrawerLayout>

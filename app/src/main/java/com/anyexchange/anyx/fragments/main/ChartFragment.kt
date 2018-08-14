@@ -223,9 +223,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
-        } else if (CBProApi.credentials?.isValidated == null) {
+        } else if (CBProApi.credentials?.isVerified == null) {
             toast(R.string.toast_please_validate_message)
-        } else if (CBProApi.credentials?.isValidated == false) {
+        } else if (CBProApi.credentials?.isVerified == false) {
             toast(R.string.toast_missing_permissions_message)
         } else {
             if (tradeFragment == null) {
