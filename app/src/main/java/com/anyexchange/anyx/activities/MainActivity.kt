@@ -141,6 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
         }
+
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
@@ -164,7 +165,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNav.visibility = View.GONE
         if (!prefs.shouldAutologin) {
             returnToLogin()
-        } else if (Account.cryptoAccounts.size >= Currency.cryptoList.size && Account.fiatAccounts.isNotEmpty()) {
+        } else if (!Account.areAccountsOutOfDate) {
             goHome()
             setDrawerMenu()
         } else {

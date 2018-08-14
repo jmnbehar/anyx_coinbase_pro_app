@@ -213,7 +213,7 @@ sealed class CBProApi : FuelRouting {
 
             val productList: MutableList<Product> = mutableListOf()
             val stashedProductList = prefs.stashedProducts
-            if (stashedProductList.size >= Currency.cryptoList.size) {
+            if (!Account.areAccountsOutOfDate) {
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
                 CBProApi.products().get(onFailure) { apiProductList ->

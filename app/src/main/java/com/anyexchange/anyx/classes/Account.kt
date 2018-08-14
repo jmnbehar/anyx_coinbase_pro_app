@@ -50,6 +50,13 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
 
         var fiatAccounts = listOf<Account>()
 
+        val areAccountsOutOfDate: Boolean
+            get() {
+                val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
+                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD } != null
+                return areAccountsMissing || areAccountsUnidentified
+            }
+
         //TODO: make this changeable
         val defaultFiatAccount: Account?
             get() = fiatAccounts.sortedBy { it.balance }.lastOrNull()
