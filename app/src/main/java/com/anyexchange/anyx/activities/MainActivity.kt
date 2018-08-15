@@ -180,7 +180,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (prefs.isLoggedIn) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
-            val apiKey = CBProApi.credentials?.isVerified
             if (CBProApi.credentials?.isVerified == true) {
                 menu_verify.visibility = View.VISIBLE
                 menu_verify.setOnClickListener  {
@@ -192,7 +191,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
-            menu_login.visibility = View.VISIBLE
+            menu_login.visibility  = View.VISIBLE
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {

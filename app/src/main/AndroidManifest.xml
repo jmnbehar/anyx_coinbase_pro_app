@@ -59,7 +59,6 @@
 
         <activity
             android:name="com.anyexchange.anyx.activities.MainActivity"
-            android:screenOrientation="sensorPortrait"
             android:label="@string/app_name"
             android:theme="@style/AppThemeDark.NoActionBar">
             <intent-filter>

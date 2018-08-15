@@ -1,6 +1,6 @@
 package com.anyexchange.anyx.classes
 
-enum class ChartType {
+enum class ChartStyle {
     Line,
     Candle
 }

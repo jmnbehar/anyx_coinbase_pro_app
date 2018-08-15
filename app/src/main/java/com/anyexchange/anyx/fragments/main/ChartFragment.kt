@@ -2,8 +2,10 @@ package com.anyexchange.anyx.fragments.main
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
@@ -21,9 +23,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
@@ -40,6 +40,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var historyPager: ViewPager? = null
     private var chartTimeSpan = Timespan.DAY
     private var tradingPairSpinner: Spinner? = null
+    private var chartStyleSpinner: Spinner? = null
 
     private val tradingPair: TradingPair?
         get() = tradingPairSpinner?.selectedItem as? TradingPair
@@ -52,14 +53,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var candleChart: PriceCandleChart? = null
     private var lineChart: PriceLineChart? = null
 
-    private var activeChartType = ChartType.Line
+    private var tickerTextView: TextView? = null
+    private var priceTextView: TextView? = null
+
+    private var balanceTextView: TextView? = null
+    private var valueTextView: TextView? = null
+    private var accountIcon: ImageView? = null
+
+    private var buyButton: Button? = null
+    private var sellButton: Button? = null
+
+    private var historyTabLayout: TabLayout? = null
+
+    private var activeChartType = ChartStyle.Line
         set(value) {
             when(value) {
-                ChartType.Line -> {
+                ChartStyle.Line -> {
                     lineChart?.visibility = View.VISIBLE
                     candleChart?.visibility = View.GONE
                 }
-                ChartType.Candle -> {
+                ChartStyle.Candle -> {
                     lineChart?.visibility = View.GONE
                     candleChart?.visibility = View.VISIBLE
                 }
@@ -80,7 +93,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         showDarkMode(rootView)
 
         this.inflater = inflater
-        historyPager = rootView.history_view_pager
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
@@ -108,13 +120,34 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             candleChart?.setOnChartValueSelectedListener(this)
             candleChart?.onChartGestureListener = this
 
-            rootView.btn_chart_buy.setOnClickListener {
-                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
+            priceTextView = rootView.txt_chart_price
+
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                tickerTextView = rootView.txt_chart_ticker
+
+                balanceTextView = rootView.txt_chart_account_balance
+                valueTextView = rootView.txt_chart_account_value
+                accountIcon = rootView.img_chart_account_icon
+
+                historyTabLayout = rootView.history_tab_layout
+
+                buyButton = rootView.btn_chart_buy
+                buyButton?.setOnClickListener {
+                    buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
+                }
+                sellButton = rootView.btn_chart_sell
+                sellButton?.setOnClickListener {
+                    buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.SELL)
+                }
+                historyPager = rootView.history_view_pager
+
+                val stashedFills = prefs.getStashedFills(tempAccount.product.id)
+                val stashedOrders = prefs.getStashedOrders(tempAccount.product.id)
+                historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
+                        { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+                historyPager?.setOnTouchListener(this)
             }
 
-            rootView.btn_chart_sell.setOnClickListener {
-                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.SELL)
-            }
 
             rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
             rootView.rbtn_chart_timespan_hour.setOnClickListener {
@@ -167,12 +200,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 override fun onNothingSelected(parent: AdapterView<*>) {
                 }
             }
-
-            val stashedFills = prefs.getStashedFills(tempAccount.product.id)
-            val stashedOrders = prefs.getStashedOrders(tempAccount.product.id)
-            historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
-                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-            historyPager?.setOnTouchListener(this)
         }
         return rootView
     }
@@ -246,7 +273,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
 
         val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
-        txt_chart_price.text = price.format(quoteCurrency)
+        priceTextView?.text = price.format(quoteCurrency)
 
         val tradingPairs = account?.product?.tradingPairs ?: listOf()
         val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
@@ -292,17 +319,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val prefs = Prefs(it)
             if (prefs.isLoggedIn) {
                 val value = account.valueForQuoteCurrency(quoteCurrency)
-                txt_chart_ticker.text = resources.getString(R.string.chart_wallet_label, currency.toString())
-                img_chart_account_icon.setImageResource(currency.iconId)
-                txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
-                txt_chart_account_value.text = value.format(quoteCurrency)
+                tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
+                accountIcon?.setImageResource(currency.iconId)
+                balanceTextView?.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
+                valueTextView?.text = value.format(quoteCurrency)
 
                 historyPager?.visibility = View.VISIBLE
             } else {
-                txt_chart_ticker.visibility = View.GONE
-                img_chart_account_icon.visibility = View.GONE
-                txt_chart_account_balance.visibility = View.GONE
-                txt_chart_account_value.visibility = View.GONE
+                tickerTextView?.visibility = View.GONE
+                accountIcon?.visibility = View.GONE
+                balanceTextView?.visibility = View.GONE
+                valueTextView?.visibility = View.GONE
 
                 historyPager?.visibility = View.INVISIBLE
             }
@@ -313,13 +340,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let { context ->
             account?.currency?.let { currency ->
                 val buttonColors = currency.colorStateList(context)
-                btn_chart_buy.backgroundTintList = buttonColors
-                btn_chart_sell.backgroundTintList = buttonColors
+                buyButton?.backgroundTintList = buttonColors
+                sellButton?.backgroundTintList = buttonColors
                 val buttonTextColor = currency.buttonTextColor(context)
-                btn_chart_buy.textColor = buttonTextColor
-                btn_chart_sell.textColor = buttonTextColor
+                buyButton?.textColor = buttonTextColor
+                sellButton?.textColor = buttonTextColor
                 val tabColor = currency.colorPrimary(context)
-                history_tab_layout.setSelectedTabIndicatorColor(tabColor)
+                historyTabLayout?.setSelectedTabIndicatorColor(tabColor)
             }
         }
     }
@@ -448,7 +475,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onValueSelected(entry: Entry, h: Highlight) {
         val index = entry.x.toInt()
         if (candles.size > index) {
-            txt_chart_price.text = entry.y.toDouble().format(quoteCurrency)
+            priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
             val candle = candles[index]
             txt_chart_change_or_date.text = candle.time.toStringWithTimespan(chartTimeSpan)
             val prefs = Prefs(context!!)
@@ -463,11 +490,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onNothingSelected() {
         val account = account
         if (account != null) {
-            txt_chart_price.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+            priceTextView?.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
             setPercentChangeText(chartTimeSpan)
             when (activeChartType) {
-                ChartType.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
-                ChartType.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
+                ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
+                ChartStyle.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
             }
         }
     }
@@ -527,8 +554,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                             newBalance = apiAccount.balance.toDoubleOrZero()
                             account.apiAccount = apiAccount
                         }
-                        txt_chart_account_balance.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
-                        txt_chart_account_value.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+                        balanceTextView?.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
+                        valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
                         miniRefresh(onFailure) {
                             onComplete(true)
                         }
@@ -563,11 +590,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateHistoryPagerAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>? = null) {
-        (historyPager?.adapter as HistoryPagerAdapter).orders = orderList
+        (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
         fillList?.let {
-            (historyPager?.adapter as HistoryPagerAdapter).fills = it
+            (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it
         }
-        (historyPager?.adapter as HistoryPagerAdapter).notifyDataSetChanged()
+        (historyPager?.adapter as? HistoryPagerAdapter)?.notifyDataSetChanged()
         //historyList.setHeightBasedOnChildren()
     }
 
@@ -603,8 +630,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         //complete mini refresh assumes account is not null
-        txt_chart_price.text = price.format(quoteCurrency)
-        txt_chart_account_value.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+        priceTextView?.text = price.format(quoteCurrency)
+        valueTextView?.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
         addCandlesToActiveChart(candles, account!!.currency)
         setPercentChangeText(chartTimeSpan)
         checkTimespanButton()
@@ -613,8 +640,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun addCandlesToActiveChart(candles: List<Candle>, currency: Currency) {
         when (activeChartType) {
-            ChartType.Line -> lineChart?.addCandles(candles, currency)
-            ChartType.Candle -> candleChart?.addCandles(candles, currency)
+            ChartStyle.Line -> lineChart?.addCandles(candles, currency)
+            ChartStyle.Candle -> candleChart?.addCandles(candles, currency)
         }
     }
 }
