@@ -163,16 +163,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerNav.adapter = spinnerNavAdapter
 
-        //TODO: reinstate this functionality:
-//        if (savedInstanceState == null) {
-        spinnerNav.visibility = View.GONE
-        if (!prefs.shouldAutologin) {
-            returnToLogin()
-        } else if (!Account.areAccountsOutOfDate) {
-            goHome()
-            setDrawerMenu()
+        if (savedInstanceState == null) {
+            spinnerNav.visibility = View.GONE
+            if (!prefs.shouldAutologin) {
+                returnToLogin()
+            } else if (!Account.areAccountsOutOfDate) {
+                goHome()
+                setDrawerMenu()
+            } else {
+                signIn()
+            }
         } else {
-            signIn()
+            //TODO: fix this for Trade Fragment and Transfer Fragments
+            setDrawerMenu()
+            val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
+            supportFragmentManager.popBackStack()
+            val fragmentType = FragmentType.forString(fragmentTag)
+            goToFragment(fragmentType)
         }
     }
 
