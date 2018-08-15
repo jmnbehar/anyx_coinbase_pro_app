@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Handler
@@ -25,6 +26,7 @@ open class RefreshFragment: Fragment() {
     var autoRefresh: Runnable? = null
     var swipeRefreshLayout: SwipeRefreshLayout? = null
     var skipNextRefresh: Boolean = false
+    var lockPortrait = true
 
     companion object {
         val ARG_OBJECT = "object"
@@ -32,6 +34,11 @@ open class RefreshFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
+        activity?.requestedOrientation = if (lockPortrait) {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+        }
         if (!skipNextRefresh) {
             refresh {
                 endRefresh()

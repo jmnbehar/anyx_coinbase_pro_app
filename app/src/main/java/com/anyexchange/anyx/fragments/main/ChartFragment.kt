@@ -95,6 +95,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         showDarkMode(rootView)
 
         setHasOptionsMenu(true)
+        lockPortrait = false
 
         this.inflater = inflater
 

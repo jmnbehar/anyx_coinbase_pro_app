@@ -113,13 +113,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val weightedChange: Double = (change / open)
         val percentChange: Double = weightedChange * 100.0
         val sign = if (change >= 0) { "+" } else { "" }
-        percentChangeText.text = resources.getString(R.string.accounts_percent_change_text,
-                percentChange.percentFormat(), sign, change.fiatFormat(Account.defaultFiatCurrency))
+        context?.let {
+            percentChangeText.text = resources.getString(R.string.accounts_percent_change_text,
+                    percentChange.percentFormat(), sign, change.fiatFormat(Account.defaultFiatCurrency))
 
-        percentChangeText.textColor = if (percentChange >= 0) {
-            Color.GREEN
-        } else {
-            Color.RED
+            percentChangeText.textColor = if (percentChange >= 0) {
+                Color.GREEN
+            } else {
+                Color.RED
+            }
         }
     }
 
