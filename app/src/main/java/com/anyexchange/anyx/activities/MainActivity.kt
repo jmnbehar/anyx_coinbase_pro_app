@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.ColorFilter
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -181,13 +184,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
             if (CBProApi.credentials?.isVerified == true) {
+                menu_verify.visibility = View.GONE
+            } else {
                 menu_verify.visibility = View.VISIBLE
                 menu_verify.setOnClickListener  {
                     val intent = Intent(this, VerifyActivity::class.java)
                     startActivity(intent)
                 }
-            } else {
-                menu_verify.visibility = View.GONE
             }
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
@@ -195,7 +198,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {
-                //TODO: simplify this and bring login
+                //TODO: simplify this and bring login into MainActivity
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 intent.putExtra(Constants.logout, true)
@@ -324,8 +327,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        // menuInflater.inflate(R.menu.main, menu)
-        return false
+        menuInflater.inflate(R.menu.chart_menu, menu)
+        for (i in 0..(menu.size() - 1)) {
+            val item = menu.getItem(i)
+            val spanString = SpannableString(item.title.toString())
+            spanString.setSpan(ForegroundColorSpan(Color.BLACK),0, spanString.length, 0)
+            item.title = spanString
+        }
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

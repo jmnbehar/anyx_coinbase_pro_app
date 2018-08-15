@@ -141,6 +141,10 @@
     <string name="chart_wallet_label">%s wallet</string>
     <string name="chart_balance_text">%s %s</string>
 
+
+    <string name="chart_style_line">Line</string>
+    <string name="chart_style_candle">Candle</string>
+
     //Home Fragment
     <string name="home_market_tab">Market</string>
     <string name="home_account_tab">Account</string>

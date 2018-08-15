@@ -31,6 +31,9 @@ import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import android.view.MenuInflater
+
+
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -40,7 +43,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var historyPager: ViewPager? = null
     private var chartTimeSpan = Timespan.DAY
     private var tradingPairSpinner: Spinner? = null
-    private var chartStyleSpinner: Spinner? = null
 
     private val tradingPair: TradingPair?
         get() = tradingPairSpinner?.selectedItem as? TradingPair
@@ -91,6 +93,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val rootView = inflater.inflate(R.layout.fragment_chart, container, false)
 
         showDarkMode(rootView)
+
+        setHasOptionsMenu(true)
 
         this.inflater = inflater
 
@@ -180,10 +184,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 listOf(tempAccount.id)
             }
             //TODO: don't use simple_spinner_item
-            val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            val tradingPairAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
+            tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
-            tradingPairSpinner?.adapter = arrayAdapter
+            tradingPairSpinner?.adapter = tradingPairAdapter
             tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (lifecycle.currentState == Lifecycle.State.RESUMED) {
@@ -196,9 +200,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         })
                     }
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
         }
         return rootView
@@ -206,7 +208,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onResume() {
         super.onResume()
-        activeChartType = ChartType.Line
+        activeChartType = ChartStyle.Line
         checkTimespanButton()
         showNavSpinner(account?.currency) { selectedCurrency ->
             //            showProgressSpinner()
@@ -247,6 +249,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPause()
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        val shouldShowOptions = lifecycle.isCreatedOrResumed
+        menu.findItem(R.id.chart_style_line).isVisible = shouldShowOptions
+        menu.findItem(R.id.chart_style_candle).isVisible = shouldShowOptions
+        activity!!.invalidateOptionsMenu()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.chart_style_line   -> activeChartType = ChartStyle.Line
+            R.id.chart_style_candle -> activeChartType = ChartStyle.Candle
+        }
+        return false
+    }
     private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)

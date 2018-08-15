@@ -31,48 +31,6 @@
         <item name="android:colorBackground">@color/gray_bg</item>
     </style>
 
-    <style name="AppThemeDarkBtc" parent="AppThemeDark">
-        <item name="android:colorAccent">@color/btc_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/btc_dk</item>
-    </style>
-    <style name="AppThemeDarkBch" parent="AppThemeDark">
-        <item name="android:colorAccent">@color/bch_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/bch_dk</item>
-    </style>
-    <style name="AppThemeDarkEth" parent="AppThemeDark">
-        <item name="android:colorAccent">@color/eth_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/eth_dk</item>
-    </style>
-    <style name="AppThemeDarkLtc" parent="AppThemeDark">
-        <item name="android:colorAccent">@color/ltc_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorDarkText</item>
-        <item name="android:colorButtonNormal">@color/ltc_dk</item>
-    </style>
-
-    <style name="AppThemeLightBtc" parent="AppThemeLight">
-        <item name="android:colorAccent">@color/btc_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/btc_light</item>
-    </style>
-    <style name="AppThemeLightBch" parent="AppThemeLight">
-        <item name="android:colorAccent">@color/bch_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/bch_light</item>
-    </style>
-    <style name="AppThemeLightEth" parent="AppThemeLight">
-        <item name="android:colorAccent">@color/eth_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/eth_light</item>
-    </style>
-    <style name="AppThemeLightLtc" parent="AppThemeLight">
-        <item name="android:colorAccent">@color/ltc_accent</item>
-        <item name="android:buttonStyle">@style/ButtonColorWhiteText</item>
-        <item name="android:colorButtonNormal">@color/ltc_light</item>
-    </style>
-
 
     <style name="AppThemeDark.NoActionBar">
         <item name="windowActionBar">false</item>
