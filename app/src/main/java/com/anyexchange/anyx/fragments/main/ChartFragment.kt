@@ -172,14 +172,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
-            tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
+            val tradingPairListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
                 var userSelect = false
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
                     userSelect = true
                     return false
                 }
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (lifecycle.currentState == Lifecycle.State.RESUMED) {
+                    if (lifecycle.currentState == Lifecycle.State.RESUMED && userSelect) {
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
                         miniRefresh({
@@ -192,6 +192,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
+            tradingPairSpinner?.onItemSelectedListener = tradingPairListener
+            tradingPairSpinner?.setOnTouchListener(tradingPairListener)
+
         }
         return rootView
     }

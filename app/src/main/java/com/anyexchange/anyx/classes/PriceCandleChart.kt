@@ -154,8 +154,6 @@ class PriceCandleChart : CandleStickChart {
 
         val strokeWidth = 2.toFloat()
         xAxis.axisLineWidth = strokeWidth
-        axisLeft.axisLineWidth = strokeWidth
-//        axisRight.axisLineWidth = strokeWidth
 
         val data = CandleData(dataSet)
 
