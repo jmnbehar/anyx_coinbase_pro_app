@@ -2,6 +2,7 @@ package com.anyexchange.anyx.fragments.main
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.ViewModelProviders
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -27,12 +28,11 @@ import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
+import com.anyexchange.anyx.fragments.ViewModels.ChartViewModel
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import android.view.MenuInflater
-
 
 
 /**
@@ -41,14 +41,12 @@ import android.view.MenuInflater
 class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
     private var historyPager: ViewPager? = null
-    private var chartTimeSpan = Timespan.DAY
     private var tradingPairSpinner: Spinner? = null
 
-    private val tradingPair: TradingPair?
-        get() = tradingPairSpinner?.selectedItem as? TradingPair
+    private lateinit var viewModel: ChartViewModel
 
     private val quoteCurrency: Currency
-        get() = tradingPair?.quoteCurrency ?: Currency.USD
+        get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
 
     private var candles = listOf<Candle>()
 
@@ -67,21 +65,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var historyTabLayout: TabLayout? = null
 
-    private var activeChartType = ChartStyle.Line
-        set(value) {
-            when(value) {
-                ChartStyle.Line -> {
-                    lineChart?.visibility = View.VISIBLE
-                    candleChart?.visibility = View.GONE
-                }
-                ChartStyle.Candle -> {
-                    lineChart?.visibility = View.GONE
-                    candleChart?.visibility = View.VISIBLE
-                }
-            }
-            field = value
-        }
-
     private var tradeFragment: TradeFragment? = null
 
     companion object {
@@ -92,11 +75,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_chart, container, false)
 
+        viewModel = ViewModelProviders.of(this).get(ChartViewModel::class.java)
         showDarkMode(rootView)
 
         setHasOptionsMenu(true)
         lockPortrait = false
-
         this.inflater = inflater
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
@@ -107,7 +90,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         } else {
             val prefs = Prefs(activity)
-            candles = tempAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+            candles = tempAccount.product.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair)
             val currency = tempAccount.currency
 
             lineChart = rootView.chart_line_chart
@@ -189,9 +172,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
-            tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
+                var userSelect = false
+                override fun onTouch(v: View, event: MotionEvent): Boolean {
+                    userSelect = true
+                    return false
+                }
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (lifecycle.currentState == Lifecycle.State.RESUMED) {
+                        viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
                         miniRefresh({
                             toast(R.string.chart_update_error)
@@ -209,8 +198,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onResume() {
         super.onResume()
-        activeChartType = ChartStyle.Line
+        //TODO: reset trading pair and timespan
+
+        val tradingPairs = account?.product?.tradingPairs?.sortedBy { it.quoteCurrency.orderValue }
+        val index = tradingPairs?.indexOf(viewModel.tradingPair) ?: -1
+        if (index != -1) {
+            tradingPairSpinner?.setSelection(index)
+        }
         checkTimespanButton()
+        updateChartStyle()
+
         showNavSpinner(account?.currency) { selectedCurrency ->
             //            showProgressSpinner()
             account = Account.forCurrency(selectedCurrency)
@@ -260,11 +257,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.chart_style_line   -> activeChartType = ChartStyle.Line
-            R.id.chart_style_candle -> activeChartType = ChartStyle.Candle
+            R.id.chart_style_line   -> viewModel.chartStyle = ChartStyle.Line
+            R.id.chart_style_candle -> viewModel.chartStyle = ChartStyle.Candle
         }
+        updateChartStyle()
         return false
     }
+
+    private fun updateChartStyle() {
+        when(viewModel.chartStyle) {
+            ChartStyle.Line -> {
+                lineChart?.visibility = View.VISIBLE
+                candleChart?.visibility = View.GONE
+            }
+            ChartStyle.Candle -> {
+                lineChart?.visibility = View.GONE
+                candleChart?.visibility = View.VISIBLE
+            }
+        }
+    }
+
     private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
@@ -288,7 +300,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
         val currency = newAccount.currency
 
-        candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+        val chartTimeSpan = viewModel.timeSpan
+        candles = newAccount.product.candlesForTimespan(chartTimeSpan, viewModel.tradingPair)
 
         val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
@@ -319,7 +332,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 toast(R.string.error_message)
                 dismissProgressSpinner()
             }, {    //success
-                candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+                candles = newAccount.product.candlesForTimespan(chartTimeSpan, viewModel.tradingPair)
                 addCandlesToActiveChart(candles, newAccount.currency)
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
@@ -370,7 +383,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun checkTimespanButton() {
-        when (chartTimeSpan) {
+        when (viewModel.timeSpan) {
             Timespan.HOUR -> rbtn_chart_timespan_hour.isChecked = true
             Timespan.DAY ->  rbtn_chart_timespan_day.isChecked = true
             Timespan.WEEK -> rbtn_chart_timespan_week.isChecked = true
@@ -382,7 +395,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun setChartTimespan(timespan: Timespan) {
         checkTimespanButton()
-        chartTimeSpan = timespan
+        viewModel.timeSpan = timespan
         showProgressSpinner()
         miniRefresh({
             toast(R.string.chart_update_error)
@@ -495,7 +508,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (candles.size > index) {
             priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
             val candle = candles[index]
-            txt_chart_change_or_date.text = candle.time.toStringWithTimespan(chartTimeSpan)
+            txt_chart_change_or_date.text = candle.time.toStringWithTimespan(viewModel.timeSpan)
             val prefs = Prefs(context!!)
             if (prefs.isDarkModeOn) {
                 txt_chart_change_or_date.textColor = Color.WHITE
@@ -509,8 +522,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val account = account
         if (account != null) {
             priceTextView?.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-            setPercentChangeText(chartTimeSpan)
-            when (activeChartType) {
+            setPercentChangeText(viewModel.timeSpan)
+            when (viewModel.chartStyle) {
                 ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
                 ChartStyle.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
             }
@@ -621,12 +634,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (account == null) {
             onComplete()
         } else {
-            val tradingPairTemp = tradingPair
-            account.product.updateCandles(chartTimeSpan, tradingPairTemp, onFailure) { _ ->
+            val tradingPairTemp = viewModel.tradingPair
+            account.product.updateCandles(viewModel.timeSpan, tradingPairTemp, onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
-                    if (tradingPairTemp == tradingPair) {
-                        candles = account.product.candlesForTimespan(chartTimeSpan, tradingPair)
-                        tradingPair?.let {
+                    if (tradingPairTemp == viewModel.tradingPair) {
+                        candles = account.product.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair)
+                        viewModel.tradingPair?.let {
                             CBProApi.ticker(it).get(onFailure) {
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = account.product.priceForQuoteCurrency(quoteCurrency)
@@ -651,13 +664,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceTextView?.text = price.format(quoteCurrency)
         valueTextView?.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
         addCandlesToActiveChart(candles, account!!.currency)
-        setPercentChangeText(chartTimeSpan)
+        setPercentChangeText(viewModel.timeSpan)
         checkTimespanButton()
         onComplete()
     }
 
     private fun addCandlesToActiveChart(candles: List<Candle>, currency: Currency) {
-        when (activeChartType) {
+        when (viewModel.chartStyle) {
             ChartStyle.Line -> lineChart?.addCandles(candles, currency)
             ChartStyle.Candle -> candleChart?.addCandles(candles, currency)
         }

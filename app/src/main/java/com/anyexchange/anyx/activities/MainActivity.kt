@@ -173,13 +173,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 signIn()
             }
-        } else {
-            //TODO: fix this for Trade Fragment and Transfer Fragments
-            setDrawerMenu()
-            val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
-            supportFragmentManager.popBackStack()
-            val fragmentType = FragmentType.forString(fragmentTag)
-            goToFragment(fragmentType)
         }
     }
 
@@ -222,14 +215,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
-        setDrawerMenu()
+//        //TODO: fix this for Trade Fragment and Transfer Fragments
+//        setDrawerMenu()
+//        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
+//        supportFragmentManager.popBackStack()
+//        val fragmentType = FragmentType.forString(fragmentTag)
+//        goToFragment(fragmentType)
     }
 
+    val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
+    val CHART_STYLE = "CHART_STYLE"
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
         super.onSaveInstanceState(outState, outPersistentState)
-
-        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
-        outState?.putString("FRAGMENT_TAG", fragmentTag)
+//        if (currentFragment is ChartFragment) {
+//            val chartFragment = currentFragment as ChartFragment
+//            outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair?.toString())
+//            outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
+//        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -538,7 +540,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             goToFragment(fragment, tag)
         } else if (fragmentType != FragmentType.TRADE && fragmentType != FragmentType.SEND
                 && fragmentType != FragmentType.TRANSFER_IN && fragmentType != FragmentType.TRANSFER_OUT) {
-            toast("Error switching fragments")
+            println("Error switching fragments")
         }
     }
     fun goToFragment(fragment: RefreshFragment, tag: String) {
