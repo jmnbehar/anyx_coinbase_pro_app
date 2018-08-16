@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="2dp"
                         android:layout_marginTop="2dp"
-                        android:layout_weight="100"
+                        android:layout_weight="10"
                         android:orientation="horizontal">
 
                         <RadioButton
@@ -201,6 +201,13 @@
                             android:text="@string/chart_timespan_1y" />
 
                     </RadioGroup>
+
+                    <Button
+                        android:id="@+id/btn_chart_buy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/chart_trade_btn" />
 
                 </LinearLayout>
 

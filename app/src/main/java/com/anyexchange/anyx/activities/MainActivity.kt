@@ -215,6 +215,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
+        setDrawerMenu()
 //        //TODO: fix this for Trade Fragment and Transfer Fragments
 //        setDrawerMenu()
 //        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""

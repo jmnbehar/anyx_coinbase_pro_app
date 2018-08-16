@@ -110,6 +110,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             priceTextView = rootView.txt_chart_price
 
+            buyButton = rootView.btn_chart_buy
+            buyButton?.setOnClickListener {
+                //TODO: fix for landscape mode
+                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
+            }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                 tickerTextView = rootView.txt_chart_ticker
 
@@ -119,10 +124,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 historyTabLayout = rootView.history_tab_layout
 
-                buyButton = rootView.btn_chart_buy
-                buyButton?.setOnClickListener {
-                    buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
-                }
                 sellButton = rootView.btn_chart_sell
                 sellButton?.setOnClickListener {
                     buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.SELL)
