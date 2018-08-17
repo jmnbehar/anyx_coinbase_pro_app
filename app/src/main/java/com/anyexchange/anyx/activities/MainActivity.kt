@@ -32,6 +32,7 @@ import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.fragments.login.LoginFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         SETTINGS,
         TRADE,
         HOME,
+        LOGIN,
         OTHER;
 
 
@@ -68,24 +70,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
                 HOME -> "HOME"
+                LOGIN -> "LOGIN"
                 OTHER -> "OTHER"
             }
         }
 
         companion object {
             fun forString(tag: String) : FragmentType {
-                return when (tag) {
-                    CHART.toString() -> CHART
-                    ACCOUNT.toString() -> ACCOUNT
-                    SEND.toString() -> SEND
-                    ALERTS.toString() -> ALERTS
-                    TRANSFER_IN.toString() -> TRANSFER_IN
-                    TRANSFER_OUT.toString() -> TRANSFER_OUT
-                    SETTINGS.toString() -> SETTINGS
-                    TRADE.toString() -> TRADE
-                    HOME.toString() -> HOME
-                    else -> OTHER
+                for (fragmentType in FragmentType.values()) {
+                    if (tag == fragmentType.toString()) {
+                        return fragmentType
+                    }
                 }
+                return OTHER
             }
 
             fun fromFragment(fragment: RefreshFragment?) : FragmentType {
@@ -98,6 +95,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     is TransferOutFragment -> TRANSFER_OUT
                     is SettingsFragment -> SETTINGS
                     is TradeFragment -> TRADE
+                    is LoginFragment -> LOGIN
                     is HomeFragment -> HOME
                     else -> OTHER
                 }
@@ -166,12 +164,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
             if (!prefs.shouldAutologin) {
-                returnToLogin()
+                //TODO: make sure this never shows:
+                toast("No More returnToLogin 1")
             } else if (!Account.areAccountsOutOfDate) {
                 goHome()
                 setDrawerMenu()
             } else {
-                signIn()
+                signIn( {//On Failure
+                    //TODO: refine this behavior:
+                    toast("No More returnToLogin 2")
+                }, { //OnSuccess
+                    /* Do Nothing Extra */
+                } )
             }
         }
     }
@@ -198,17 +202,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {
-                //TODO: simplify this and bring login into MainActivity
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                intent.putExtra(Constants.logout, true)
-                prefs.shouldAutologin = false
-                prefs.isLoggedIn = false
-                CBProApi.credentials = null
-                prefs.stashOrders(null)
-                prefs.stashFills(null)
-                startActivity(intent)
-                finishAffinity()
+                goToFragment(FragmentType.LOGIN)
+                drawer_layout.closeDrawer(GravityCompat.START)
             }
         }
 
@@ -279,40 +274,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-    private fun signIn() {
+    fun signIn(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val prefs = Prefs(this)
+        if (CBProApi.credentials == null) {
+            val apiKey = prefs.apiKey
+            val apiSecret = prefs.apiSecret
+            val passphraseEncrypted  = prefs.passphrase
 
-        val apiKey = prefs.apiKey
-        val apiSecret = prefs.apiSecret
-        val passphraseEncrypted  = prefs.passphrase
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+            val passphrase = encryption.decryptOrNull(passphraseEncrypted)
 
-        val iv = ByteArray(16)
-        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-        val passphrase = encryption.decryptOrNull(passphraseEncrypted)
-        if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
-            val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-            CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-            showProgressBar()
-            CBProApi.accounts().getAllAccountInfo(this, { _ ->
-                toast(R.string.error_message)
-                dismissProgressBar()
-                returnToLogin()
-            }, {
-                dismissProgressBar()
-                setDrawerMenu()
-                goHome()
-            })
-        } else {
-            returnToLogin()
+            if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            }
         }
-    }
+        showProgressBar()
+        CBProApi.accounts().getAllAccountInfo(this, { error ->
+            toast(R.string.error_message)
+            dismissProgressBar()
+            onFailure(error)
+        }, {
+            dismissProgressBar()
+            setDrawerMenu()
+            if (CBProApi.credentials == null) {
+                val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
+                dataFragment?.destroyData(this)
+                prefs.stashedCryptoAccountList = mutableListOf()
+                prefs.stashedFiatAccountList = mutableListOf()
 
-
-    private fun returnToLogin() {
-        val intent = Intent(this, com.anyexchange.anyx.activities.LoginActivity::class.java)
-        intent.putExtra(Constants.logout, true)
-        startActivity(intent)
-        finish()
+                prefs.isLoggedIn = false
+            } else {
+                prefs.isLoggedIn = true
+            }
+            goHome()
+            onComplete()
+        })
     }
 
     override fun onBackPressed() {
@@ -326,10 +324,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
             } else {
-//                val intent = Intent(this, LoginActivity::class.java)
-//                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                intent.putExtra(Constants.exit, true)
-//                startActivity(intent)
                 finishAffinity()
             }
         }
@@ -533,6 +527,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
                 null
+            }
+
+            FragmentType.LOGIN -> {
+                LoginFragment.newInstance()
             }
             FragmentType.OTHER -> null
         }

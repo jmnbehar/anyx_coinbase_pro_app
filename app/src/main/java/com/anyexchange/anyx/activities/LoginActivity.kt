@@ -22,8 +22,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private lateinit var prefs: Prefs
 
-    private var shouldSaveApiInfo = false
-    private var shouldSavePassphrase = false
     private var skipLogin = false
     private var currentFragment: Fragment? = null
 
@@ -32,7 +30,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     private fun checkUser() : Boolean {
-        if(!skipLogin && shouldSaveApiInfo && shouldSavePassphrase) {
+        if(!skipLogin ) {
             val apiKey = prefs.apiKey
             val apiSecret = prefs.apiSecret
             var passphrase = prefs.passphrase
@@ -75,8 +73,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             skipLogin = true
         }
 
-        shouldSaveApiInfo = prefs.shouldSaveApiInfo
-        shouldSavePassphrase = prefs.shouldSavePassphrase
         if (savedInstanceState == null) {
             if (!checkUser()) {
                 goToFragment(LoginFragmentType.Login)
@@ -160,7 +156,6 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             val intent = com.anyexchange.anyx.activities.MainActivity.newIntent(this)
             startActivity(intent)
             if (prefs.isLoggedIn) {
-                finish()
             }
         })
     }

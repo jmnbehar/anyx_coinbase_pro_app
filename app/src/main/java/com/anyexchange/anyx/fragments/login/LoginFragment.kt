@@ -2,7 +2,6 @@ package com.anyexchange.anyx.fragments.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -12,6 +11,7 @@ import android.widget.EditText
 import android.widget.PopupMenu
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.fragment_login.view.*
 import org.jetbrains.anko.support.v4.toast
 import se.simbio.encryption.Encryption
@@ -20,7 +20,7 @@ import se.simbio.encryption.Encryption
  * Created by josephbehar on 2/4/18.
  */
 
-class LoginFragment : Fragment()  {
+class LoginFragment : RefreshFragment()  {
     lateinit var inflater: LayoutInflater
 
     private lateinit var apiKeyEditText: EditText
@@ -102,11 +102,16 @@ class LoginFragment : Fragment()  {
 
         btnNewAccount.setOnClickListener { _ ->
             val newAccountUrl = "https://pro.coinbase.com"
-            (activity as com.anyexchange.anyx.activities.LoginActivity).goToFragment(com.anyexchange.anyx.activities.LoginActivity.LoginFragmentType.WebView, newAccountUrl)
+//            (activity as MainActivity).goToFragment(com.anyexchange.anyx.activities.LoginActivity.LoginFragmentType.WebView, newAccountUrl)
         }
 
         btnSkipLogin.setOnClickListener { _ ->
-            (activity as com.anyexchange.anyx.activities.LoginActivity).loginWithCredentials(null)
+            (activity as MainActivity).signIn( {
+                //TODO: refine this behavior:
+                toast("Error Logging In")
+            }, {
+            //destroy and remove self from backstack
+            } )
         }
 
         btnLoginHelp.setOnClickListener {
@@ -176,7 +181,24 @@ class LoginFragment : Fragment()  {
             toast(R.string.login_error_missing_passphrase)
         } else {
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
-            (activity as com.anyexchange.anyx.activities.LoginActivity).loginWithCredentials(CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid))
+            CBProApi.credentials = CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid)
+            (activity as MainActivity).signIn( { result ->
+                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                when (errorMessage) {
+                    CBProApi.ErrorMessage.Forbidden -> {
+                        toast(R.string.login_forbidden_error)
+                    }
+                    CBProApi.ErrorMessage.InvalidApiSignature, CBProApi.ErrorMessage.MissingApiSignature-> {
+                        toast(R.string.login_secret_error)
+                    }
+                    CBProApi.ErrorMessage.InvalidApiKey, CBProApi.ErrorMessage.InvalidPassphrase-> {
+                        toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+                    }
+                    else -> toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+                }
+            }, {
+                //destroy and remove self from backstack
+            } )
         }
     }
 }
