@@ -110,7 +110,7 @@ class LoginFragment : RefreshFragment()  {
                 //TODO: refine this behavior:
                 toast("Error Logging In")
             }, {
-            //destroy and remove self from backstack
+            //TODO: destroy and remove self from backstack
             } )
         }
 
@@ -197,7 +197,7 @@ class LoginFragment : RefreshFragment()  {
                     else -> toast(resources.getString(R.string.error_generic_message, result.errorMessage))
                 }
             }, {
-                //destroy and remove self from backstack
+                //TODO: destroy and remove self from backstack
             } )
         }
     }

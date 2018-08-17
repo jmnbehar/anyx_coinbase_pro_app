@@ -708,6 +708,7 @@ sealed class CBProApi : FuelRouting {
         InvalidPassphrase,
         InvalidApiSignature,
         MissingApiSignature,
+        MissingApiKey,
 
         //Permissions:
 
@@ -737,6 +738,7 @@ sealed class CBProApi : FuelRouting {
                 InvalidPassphrase -> "Invalid Passphrase"
                 InvalidApiSignature -> "invalid signature"
                 MissingApiSignature -> "CB-ACCESS-SIGN header is required"
+                MissingApiKey -> "CB-ACCESS-KEY header is required"
 
                 BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
                 BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"

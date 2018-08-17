@@ -14,7 +14,7 @@
             <item
                 android:id="@+id/nav_alerts"
                 android:icon="@drawable/icon_alert"
-                android:title="@string/menu_home" />
+                android:title="@string/menu_alerts" />
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_menu_manage"

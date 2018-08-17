@@ -307,6 +307,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 prefs.isLoggedIn = true
             }
+            setDrawerMenu()
             goHome()
             onComplete()
         })
