@@ -58,10 +58,6 @@ class Prefs (var context: Context) {
         get() = prefs.getString(API_SECRET, null)
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
 
-    var shouldAutologin: Boolean
-        get() = prefs.getBoolean(AUTOLOGIN, true)
-        set(value) = prefs.edit().putBoolean(AUTOLOGIN, value).apply()
-
     var shouldShowTradeConfirmModal: Boolean
         get() = prefs.getBoolean(SHOW_TRADE_CONFIRM, true)
         set(value) = prefs.edit().putBoolean(SHOW_TRADE_CONFIRM, value).apply()

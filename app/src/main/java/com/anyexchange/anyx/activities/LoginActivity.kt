@@ -152,7 +152,7 @@ class LoginActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             }
             progressDialog?.dismiss()
             //toast("Success! logging in")
-            prefs.shouldAutologin = true
+//            prefs.shouldAutologin = true
             val intent = com.anyexchange.anyx.activities.MainActivity.newIntent(this)
             startActivity(intent)
             if (prefs.isLoggedIn) {

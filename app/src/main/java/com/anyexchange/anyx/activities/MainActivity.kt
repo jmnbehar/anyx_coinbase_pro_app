@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     var defaultSpinnerColorFilter: ColorFilter? = null
 
     enum class FragmentType {
-        //TODO: only use 1 chart thing
         CHART,
         ACCOUNT,
         SEND,
@@ -163,16 +162,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
-            if (!prefs.shouldAutologin) {
-                //TODO: make sure this never shows:
-                toast("No More returnToLogin 1")
-            } else if (!Account.areAccountsOutOfDate) {
+            if (!Account.areAccountsOutOfDate) {
                 goHome()
                 setDrawerMenu()
             } else {
                 signIn( {//On Failure
                     //TODO: refine this behavior:
-                    toast("No More returnToLogin 2")
+                    toast("No More returnToLogin 1")
                 }, { //OnSuccess
                     /* Do Nothing Extra */
                 } )
@@ -456,7 +452,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.CHART)
     }
 
-    private fun goToFragment(fragmentType: FragmentType) {
+    fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> {
@@ -542,6 +538,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             println("Error switching fragments")
         }
     }
+    //TODO: make this one private:
     fun goToFragment(fragment: RefreshFragment, tag: String) {
         currentFragment = fragment
         if (supportFragmentManager.backStackEntryCount == 0) {

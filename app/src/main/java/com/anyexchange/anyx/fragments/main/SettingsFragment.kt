@@ -56,16 +56,13 @@ class SettingsFragment : RefreshFragment() {
         val prefs = Prefs(activity!!)
 
         logoutButton.setOnClickListener  {
-            val intent = Intent(activity, com.anyexchange.anyx.activities.LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.putExtra(Constants.logout, true)
-            prefs.shouldAutologin = false
+
             prefs.isLoggedIn = false
             CBProApi.credentials = null
             prefs.stashOrders(null)
             prefs.stashFills(null)
-            startActivity(intent)
-            activity!!.finishAffinity()
+            (activity as? MainActivity)?.goToFragment(MainActivity.FragmentType.LOGIN)
+
         }
 
         verifyButton.setOnClickListener  {
