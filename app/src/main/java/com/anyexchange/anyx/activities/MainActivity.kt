@@ -284,6 +284,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
                 val isApiKeyValid = prefs.isApiKeyValid(apiKey)
                 CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            } else if (!Account.areAccountsOutOfDate) {
+                goHome()
+                return
             }
         }
         showProgressBar()
