@@ -80,7 +80,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         for (account in Account.cryptoAccounts) {
-            account.product.updateCandles(time, null, {//OnFailure
+            account.product.updateCandles(time, null, apiInitData, {//OnFailure
                 toast(R.string.error_message)
                 onComplete(false)
             }) { didUpdate ->   //OnSuccess
@@ -92,7 +92,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             onComplete(true)
                         }
                     } else {
-                        CBProApi.ticker(account.product.id).get(onFailure) {
+                        CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()

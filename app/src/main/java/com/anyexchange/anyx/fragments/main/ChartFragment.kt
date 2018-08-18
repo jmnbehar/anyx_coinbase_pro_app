@@ -460,7 +460,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             positiveButton(R.string.popup_ok_btn) {  }
             negativeButton(R.string.chart_cancel_order) {
-                CBProApi.cancelOrder(order.id).executeRequest({ }) {
+                CBProApi.cancelOrder(apiInitData, order.id).executeRequest({ }) {
                     if (lifecycle.isCreatedOrResumed) {
                         var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
@@ -582,7 +582,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 /* Refresh does 2 things, it updates the chart, account info first
                  * then candles etc in mini refresh, while simultaneously updating history info
                 */
-                CBProApi.account(account.id).get( onFailure) { apiAccount ->
+                CBProApi.account(apiInitData, account.id).get( onFailure) { apiAccount ->
                     if (lifecycle.isCreatedOrResumed) {
                         var newBalance = account.balance
                         if (apiAccount != null) {
@@ -599,7 +599,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
-                CBProApi.listOrders(productId = account.product.id).getAndStash(context!!, onFailure) { apiOrderList ->
+                CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash(context!!, onFailure) { apiOrderList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
@@ -607,7 +607,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         }
                     }
                 }
-                CBProApi.fills(productId = account.product.id).getAndStash(context!!, onFailure) { apiFillList ->
+                CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(context!!, onFailure) { apiFillList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
@@ -639,12 +639,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             onComplete()
         } else {
             val tradingPairTemp = viewModel.tradingPair
-            account.product.updateCandles(viewModel.timeSpan, tradingPairTemp, onFailure) { _ ->
+            account.product.updateCandles(viewModel.timeSpan, tradingPairTemp, apiInitData,  onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == viewModel.tradingPair) {
                         candles = account.product.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair)
                         viewModel.tradingPair?.let {
-                            CBProApi.ticker(it).get(onFailure) {
+                            CBProApi.ticker(apiInitData, it).get(onFailure) {
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = account.product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

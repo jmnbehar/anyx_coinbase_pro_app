@@ -117,7 +117,7 @@ class SendFragment : RefreshFragment() {
         val min = currency.minSendAmount
 
         if (amount >= min) {
-            CBProApi.sendCrypto(amount, currency, destination).executePost(
+            CBProApi.sendCrypto(apiInitData, amount, currency, destination).executePost(
                     { result -> //failure
                         val response = result.error.response.data
 

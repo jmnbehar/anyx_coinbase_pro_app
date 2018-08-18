@@ -112,7 +112,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         price[tradingPairIndex] = newPrice
     }
 
-    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, apiInitData: CBProApi.CBProApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
@@ -138,7 +138,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            CBProApi.candles(tradingPair?.id ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
+            CBProApi.candles(apiInitData,tradingPair?.id ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
@@ -216,8 +216,8 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         }
 
 
-        fun updateAllProducts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            CBProApi.products().get(onFailure) { unfilteredApiProductList ->
+        fun updateAllProducts(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
                 val fiatCurrency = Account.defaultFiatCurrency
                 val apiProductList = unfilteredApiProductList.filter { s ->
                     s.quote_currency == fiatCurrency.toString()

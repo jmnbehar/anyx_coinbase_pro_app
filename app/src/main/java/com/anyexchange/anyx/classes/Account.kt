@@ -36,8 +36,8 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
 
     var coinbaseAccount: CoinbaseAccount? = null
 
-    fun update(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        CBProApi.account(id).get(onFailure) { apiAccount ->
+    fun update(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
             if (apiAccount != null) {
                 this.apiAccount = apiAccount
             }
@@ -75,12 +75,12 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
             }
         }
 
-        fun updateAllAccountsCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        fun updateAllAccountsCandles(apiInitData: CBProApi.CBProApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
             for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)
-                Product.updateAllProducts(onFailure) {
-                    account.product.updateCandles(Timespan.DAY, tradingPair, onFailure) {
+                Product.updateAllProducts(apiInitData, onFailure) {
+                    account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) {
                         candlesUpdated++
                         if (candlesUpdated == cryptoAccounts.size) {
                             onComplete()

@@ -188,7 +188,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
-            CBProApi.accounts().updateAllAccounts({ onComplete(false) }) {
+            CBProApi.accounts(apiInitData).updateAllAccounts({ onComplete(false) }) {
                 (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
 
                 accountTotalCandles = sumAccountCandles()

@@ -10,12 +10,11 @@ import android.view.View
 import android.widget.AdapterView
 import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.fragment_chart.view.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by anyexchange on 1/15/2018.
@@ -27,6 +26,17 @@ open class RefreshFragment: Fragment() {
     var swipeRefreshLayout: SwipeRefreshLayout? = null
     var skipNextRefresh: Boolean = false
     var lockPortrait = true
+
+    val apiInitData: CBProApi.CBProApiInitData?
+        get() {
+            return if (activity is MainActivity) {
+                (activity as MainActivity).apiInitData
+            } else if (context != null){
+                CBProApi.CBProApiInitData(context!!) { /* do nothing */ }
+            } else {
+                null
+            }
+        }
 
     companion object {
         val ARG_OBJECT = "object"

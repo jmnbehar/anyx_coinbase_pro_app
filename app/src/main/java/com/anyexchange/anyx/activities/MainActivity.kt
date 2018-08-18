@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
+import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
@@ -109,8 +110,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private var currentFragment: RefreshFragment? = null
-
     private var dataFragment: DataFragment? = null
+
+    val apiInitData = CBProApi.CBProApiInitData(this) {
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        goToFragment(FragmentType.LOGIN)
+    }
 
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarLayout: ConstraintLayout
@@ -269,6 +274,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    fun cbProApiFactory(subClass: Class<CBProApi>) : CBProApi {
+        val initData = CBProApi.CBProApiInitData(this) {
+            goToFragment(FragmentType.LOGIN)
+            //TODO: Nuke backstack
+        }
+        when (subClass) {
+            CBProApi.account::class.java -> {
+
+            }
+        }
+        return CBProApi.accounts(initData)
+    }
 
     fun signIn(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val prefs = Prefs(this)
@@ -290,7 +307,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         showProgressBar()
-        CBProApi.accounts().getAllAccountInfo(this, { error ->
+        CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
             toast(R.string.error_message)
             dismissProgressBar()
             onFailure(error)
@@ -355,7 +372,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(account.product.id).get(onFailure) {
+            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
                     onComplete()

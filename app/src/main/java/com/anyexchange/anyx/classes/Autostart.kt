@@ -95,10 +95,11 @@ object AlertUtil {
 }
 
 class RapidMovementJobService : JobService() {
+    val apiInitData = CBProApi.CBProApiInitData(this, { })
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (Account.cryptoAccounts.isEmpty()) {
-            CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
+            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
                 checkPriceChanges()
             })
         } else {
@@ -125,7 +126,7 @@ class RapidMovementJobService : JobService() {
             if (enabledCurrencies.contains(account.currency)) {
                 //TODO: consider switching to hour timespan
                 val timeSpan = Timespan.DAY
-                account.product.updateCandles(timeSpan, null, { }, { didUpdate ->
+                account.product.updateCandles(timeSpan, null, apiInitData, { }, { didUpdate ->
                     val candles = account.product.candlesForTimespan(timeSpan, null)
                     if (didUpdate && candles.size > 12) {
                         var alertPercentage = 1.0
@@ -187,10 +188,11 @@ class RapidMovementJobService : JobService() {
 }
 
 class AlertJobService : JobService() {
+    val apiInitData = CBProApi.CBProApiInitData(this, { })
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (Account.cryptoAccounts.isEmpty()) {
-            CBProApi.accounts().getAllAccountInfo(this, { /* do nothing*/ }, {
+            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
                 loopThroughAlerts()
             })
         } else {
@@ -215,7 +217,7 @@ class AlertJobService : JobService() {
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(account.product.id).get(onFailure) {
+            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
                     onComplete()

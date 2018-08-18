@@ -233,7 +233,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
                     account?.let { account ->
-                        CBProApi.ticker(account.product.id).get(onFailure) { ticker ->
+                        CBProApi.ticker(apiInitData, account.product.id).get(onFailure) { ticker ->
                             val price = ticker.price.toDoubleOrNull()
                             if (price != null) {
                                 confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
@@ -271,14 +271,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
             toast(resources.getString(R.string.error_generic_message, result.errorMessage))}
-        account?.update(onFailure) {
+        account?.update(apiInitData, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
                 onComplete(false)
             }
         }
         account?.let { account ->
-            CBProApi.ticker(account.product.id).get(onFailure) {
+            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
                 updateButtonsAndText()
                 onComplete(true)
             }
@@ -423,18 +423,18 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             when(tradeType) {
                 TradeType.MARKET -> {
                     when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderMarket(tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderMarket(tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
                 TradeType.LIMIT -> {
-                    CBProApi.orderLimit(tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
+                    CBProApi.orderLimit(apiInitData, tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
                 }
                 TradeType.STOP -> {
                     val stopPrice = limitPrice
                     when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderStop(tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderStop(tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderStop(apiInitData, tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
             }
@@ -445,7 +445,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         account?.currency?.let { currency ->
             val destination = currency.developerAddress
             //TODO: only count fees as paid if they are successfully paid
-            CBProApi.sendCrypto(amount, currency, destination).executePost(
+            CBProApi.sendCrypto(apiInitData, amount, currency, destination).executePost(
                     {  /*  fail silently   */ },
                     {  /* succeed silently */ })
         }

@@ -133,7 +133,7 @@ class TransferOutFragment : RefreshFragment() {
                     showPopup(R.string.transfer_funds_error)
                 } else {
                     showProgressSpinner()
-                    CBProApi.sendToCoinbase(amount, currency, coinbaseAccount.id).executePost({ result ->
+                    CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost({ result ->
                         showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         dismissProgressSpinner()
                     }, {
@@ -149,7 +149,7 @@ class TransferOutFragment : RefreshFragment() {
                     showPopup(R.string.transfer_funds_error)
                 } else {
                     showProgressSpinner()
-                    CBProApi.sendToPayment(amount, currency, paymentMethod.id).executePost( { result ->
+                    CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
                         showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         dismissProgressSpinner()
                     }, {
@@ -182,7 +182,7 @@ class TransferOutFragment : RefreshFragment() {
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
 
-            CBProApi.accounts().updateAllAccounts({ _ ->
+            CBProApi.accounts(apiInitData).updateAllAccounts({ _ ->
                 onComplete(false)
                 toast(R.string.toast_coinbase_pro_site_error)
                 isRefreshing = false
@@ -193,7 +193,7 @@ class TransferOutFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             }
-            CBProApi.coinbaseAccounts().linkToAccounts({ _ ->
+            CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({ _ ->
                 toast(R.string.toast_coinbase_site_error)
                 onComplete(false)
                 isRefreshing = false
@@ -211,7 +211,7 @@ class TransferOutFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             })
-            CBProApi.paymentMethods().get({
+            CBProApi.paymentMethods(apiInitData).get({
                 toast(R.string.error_message)
                 onComplete(false)
             }, { result ->

@@ -58,7 +58,7 @@ class VerifySendFragment : Fragment() {
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
             val productId = verifyAccount.product.id
-            CBProApi.orderLimit(TradeSide.BUY, productId, 1.0, 1.0,
+            CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
                     timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
                 val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                 when (errorMessage) {
@@ -75,7 +75,7 @@ class VerifySendFragment : Fragment() {
     }
 
     private fun sendCryptoToVerify() {
-        CBProApi.coinbaseAccounts().linkToAccounts({
+        CBProApi.coinbaseAccounts(null).linkToAccounts({
             toast(R.string.verify_unknown_error)
         }, {
             val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
@@ -84,7 +84,7 @@ class VerifySendFragment : Fragment() {
             } else {
 
                 val sendAmount = 0.000001
-                CBProApi.sendCrypto(sendAmount, currency, currency.developerAddress).executePost({ result ->
+                CBProApi.sendCrypto(null, sendAmount, currency, currency.developerAddress).executePost({ result ->
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {

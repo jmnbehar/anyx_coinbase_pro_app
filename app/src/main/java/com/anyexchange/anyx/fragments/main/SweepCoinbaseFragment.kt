@@ -133,7 +133,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                         showPopup("Not enough funds", { })
                     } else {
                         showProgressSpinner()
-                        CBProApi.getFromCoinbase(amount, currency, coinbaseAccount.id).executePost( { result ->
+                        CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
                             showPopup("Transfer failed\n Error: ${result.error.message}", { })
                             dismissProgressSpinner()
                         } , {
@@ -157,7 +157,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
             isRefreshing = true
             var didUpdateCBPro = false
             var didUpdateCoinbase = false
-            CBProApi.accounts().updateAllAccounts({
+            CBProApi.accounts(apiInitData).updateAllAccounts({
                 onComplete(false)
                 toast("Cannot access Coinbase Pro")
                 isRefreshing = false
@@ -168,7 +168,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             }
-            CBProApi.coinbaseAccounts().linkToAccounts({
+            CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({
                 toast("Cannot access Coinbase")
                 isRefreshing = false
             }, {
