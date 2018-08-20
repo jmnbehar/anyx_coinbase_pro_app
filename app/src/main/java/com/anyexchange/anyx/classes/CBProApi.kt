@@ -324,7 +324,9 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     val productList: List<ApiProduct> = Gson().fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
                     onComplete(productList)
                 } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(Exception())))
+                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: IllegalStateException) {
+                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }
