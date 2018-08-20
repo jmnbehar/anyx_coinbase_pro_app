@@ -568,28 +568,30 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 val timeInForceList = CBProApi.TimeInForce.values()
                 val spinnerList = timeInForceList.map { t -> t.label() }
                 //TODO: don't use simple_spinner_item
-                val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, spinnerList)
-                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                advancedOptionTimeInForceSpinner.adapter = arrayAdapter
-                advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-                        val selectedItem = timeInForceList[position]
-                        if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
-                            advancedOptionEndTimeSpinner.visibility = View.VISIBLE
-                        } else {
+                context?.let {
+                    val arrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, spinnerList)
+                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+                    advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                            val selectedItem = timeInForceList[position]
+                            if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
+                                advancedOptionEndTimeSpinner.visibility = View.VISIBLE
+                            } else {
+                                advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
+                            }
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {
                             advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
                         }
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>) {
-                        advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
-                    }
+                    val endTimeList = listOf("min", "hour", "day")
+                    val endTimeArrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, endTimeList)
+                    endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
                 }
-
-                val endTimeList = listOf("min", "hour", "day")
-                val endTimeArrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, endTimeList)
-                endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
             }
             TradeType.STOP -> {
                 amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))

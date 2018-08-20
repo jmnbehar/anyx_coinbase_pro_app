@@ -174,13 +174,15 @@ class SendFragment : RefreshFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        val barcode = data.extras.getString("BarCode")
-
-        if (barcode == "") {
-            toast(R.string.send_address_not_found_warning)
-        } else {
-            //TODO: parse more advanced qr codes
-            destinationEditText.setText(barcode)
+        val extras = data.extras
+        if (extras != null) {
+            val barcode = extras.getString("BarCode")
+            if (barcode == "") {
+                toast(R.string.send_address_not_found_warning)
+            } else {
+                //TODO: parse more advanced qr codes
+                destinationEditText.setText(barcode)
+            }
         }
     }
 

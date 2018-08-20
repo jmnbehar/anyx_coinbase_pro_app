@@ -581,6 +581,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun hideSoftKeyboard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        val currentFocus = currentFocus
         if (currentFocus != null && inputManager != null) {
             inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
             inputManager.hideSoftInputFromInputMethod(currentFocus.windowToken, 0)

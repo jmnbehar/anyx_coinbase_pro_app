@@ -100,10 +100,10 @@ class LoginFragment : RefreshFragment()  {
             signIn()
         }
 
-        btnNewAccount.setOnClickListener { _ ->
-            val newAccountUrl = "https://pro.coinbase.com"
+//        btnNewAccount.setOnClickListener { _ ->
+//            val newAccountUrl = "https://pro.coinbase.com"
 //            (activity as MainActivity).goToFragment(com.anyexchange.anyx.activities.LoginActivity.LoginFragmentType.WebView, newAccountUrl)
-        }
+//        }
 
         btnSkipLogin.setOnClickListener { _ ->
             (activity as MainActivity).signIn( {
