@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
@@ -116,8 +117,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var dataFragment: DataFragment? = null
 
     val apiInitData = CBProApi.CBProApiInitData(this) {
-        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        goToFragment(FragmentType.LOGIN)
+        returnToLogin()
     }
 
     private lateinit var progressBar: ProgressBar
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 goHome()
                 setDrawerMenu()
             } else {
-                signIn( {//On Failure
+                signIn(false,  {//On Failure
                     //TODO: refine this behavior:
                     toast("No More returnToLogin 1")
                 }, { //OnSuccess
@@ -184,9 +184,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun hideDrawerMenu() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+    }
+
     private fun setDrawerMenu() {
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         val prefs = Prefs(this)
         if (prefs.isLoggedIn) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
@@ -206,8 +212,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {
-                goToFragment(FragmentType.LOGIN)
                 drawer_layout.closeDrawer(GravityCompat.START)
+                goToFragment(FragmentType.LOGIN)
             }
         }
 
@@ -277,22 +283,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun cbProApiFactory(subClass: Class<CBProApi>) : CBProApi {
-        val initData = CBProApi.CBProApiInitData(this) {
-            goToFragment(FragmentType.LOGIN)
-            //TODO: Nuke backstack
-        }
-        when (subClass) {
-            CBProApi.account::class.java -> {
-
-            }
-        }
-        return CBProApi.accounts(initData)
-    }
-
-    fun signIn(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+    fun signIn(shouldSkipCredentials: Boolean, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val prefs = Prefs(this)
-        if (CBProApi.credentials == null) {
+        if (CBProApi.credentials == null && !shouldSkipCredentials) {
             val apiKey = prefs.apiKey
             val apiSecret = prefs.apiSecret
             val passphraseEncrypted  = prefs.passphrase
@@ -401,6 +394,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
             (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
         }
+    }
+
+    private fun returnToLogin() {
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        goToFragment(FragmentType.LOGIN)
     }
 
     private fun triggerAlert(alert: Alert) {
@@ -548,8 +546,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRADE -> {
                 null
             }
-
             FragmentType.LOGIN -> {
+                hideDrawerMenu()
                 LoginFragment.newInstance()
             }
             FragmentType.EULA -> EulaFragment()

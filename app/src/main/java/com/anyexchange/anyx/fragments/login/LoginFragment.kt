@@ -106,11 +106,12 @@ class LoginFragment : RefreshFragment()  {
 //        }
 
         btnSkipLogin.setOnClickListener { _ ->
-            (activity as MainActivity).signIn( {
+            (activity as? MainActivity)?.signIn(true, {
                 //TODO: refine this behavior:
                 toast("Error Logging In")
             }, {
             //TODO: destroy and remove self from backstack
+//                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             } )
         }
 
@@ -182,7 +183,7 @@ class LoginFragment : RefreshFragment()  {
         } else {
             val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
             CBProApi.credentials = CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid)
-            (activity as MainActivity).signIn( { result ->
+            (activity as? MainActivity)?.signIn(false, { result ->
                 val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                 when (errorMessage) {
                     CBProApi.ErrorMessage.Forbidden -> {
@@ -198,6 +199,7 @@ class LoginFragment : RefreshFragment()  {
                 }
             }, {
                 //TODO: destroy and remove self from backstack
+//                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             } )
         }
     }

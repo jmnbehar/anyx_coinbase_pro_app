@@ -31,7 +31,6 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
     companion object {
-        //TODO: delete creds if api key becomes invalid
         var credentials: ApiCredentials? = null
 
         const val basePath = "https://api.pro.coinbase.com"

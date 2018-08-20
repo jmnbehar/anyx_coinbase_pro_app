@@ -21,10 +21,6 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     fun valueForQuoteCurrency(quoteCurrency: Currency) : Double {
         return balance * product.priceForQuoteCurrency(quoteCurrency)
     }
-    //TODO: consider deleting this part:
-    fun valueForTradingPair(tradingPair: TradingPair): Double {
-        return balance * product.priceForTradingPair(tradingPair)
-    }
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
