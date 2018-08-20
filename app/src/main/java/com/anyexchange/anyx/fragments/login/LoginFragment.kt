@@ -111,7 +111,7 @@ class LoginFragment : RefreshFragment()  {
                 toast("Error Logging In")
             }, {
             //TODO: destroy and remove self from backstack
-//                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                removeSelfFromBackstack()
             } )
         }
 
@@ -199,8 +199,19 @@ class LoginFragment : RefreshFragment()  {
                 }
             }, {
                 //TODO: destroy and remove self from backstack
+                removeSelfFromBackstack()
 //                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             } )
+        }
+    }
+
+    fun removeSelfFromBackstack() {
+        activity?.supportFragmentManager?.let {
+            val transaction = it.beginTransaction()
+            transaction.remove(this)
+            transaction.commit()
+            it.popBackStack()
+//                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
 }

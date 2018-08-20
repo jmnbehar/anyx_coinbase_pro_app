@@ -202,8 +202,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 menu_verify.visibility = View.VISIBLE
                 menu_verify.setOnClickListener  {
-                    val intent = Intent(this, VerifyActivity::class.java)
-                    startActivity(intent)
+                    if (CBProApi.credentials?.isVerified == true) {
+                        toast("Already verified!")
+                        setDrawerMenu()
+                    } else {
+                        val intent = Intent(this, VerifyActivity::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
         } else {
@@ -285,19 +290,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun signIn(shouldSkipCredentials: Boolean, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val prefs = Prefs(this)
-        if (CBProApi.credentials == null && !shouldSkipCredentials) {
-            val apiKey = prefs.apiKey
-            val apiSecret = prefs.apiSecret
-            val passphraseEncrypted  = prefs.passphrase
+        if (CBProApi.credentials == null) {
+            if (!shouldSkipCredentials) {
+                val apiKey = prefs.apiKey
+                val apiSecret = prefs.apiSecret
+                val passphraseEncrypted  = prefs.passphrase
 
-            val iv = ByteArray(16)
-            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-            val passphrase = encryption.decryptOrNull(passphraseEncrypted)
+                val iv = ByteArray(16)
+                val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+                val passphrase = encryption.decryptOrNull(passphraseEncrypted)
 
-            if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
-                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+                    val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                    CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                }
             } else if (!Account.areAccountsOutOfDate) {
+                setDrawerMenu()
+                onComplete()
                 goHome()
                 return
             }
@@ -321,8 +330,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 prefs.isLoggedIn = true
             }
             setDrawerMenu()
-            goHome()
             onComplete()
+            goHome()
         })
     }
 
@@ -334,8 +343,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (supportFragmentManager.backStackEntryCount > 1) {
                 supportFragmentManager.popBackStack()
                 val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
-
                 currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
+                if (currentFragment !is LoginFragment) {
+                    setDrawerMenu()
+                }
             } else {
                 finishAffinity()
             }
