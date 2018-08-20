@@ -224,11 +224,9 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.cryptoAccounts = listOf()
             //TODO: dont force unwrap this:
-            val prefs = Prefs(context!!)
-
             val productList: MutableList<Product> = mutableListOf()
-            val stashedProductList = prefs.stashedProducts
-            if (!Account.areAccountsOutOfDate) {
+            if (!Account.areAccountsOutOfDate && context != null) {
+                val stashedProductList = Prefs(context).stashedProducts
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
                 CBProApi.products(initData).get(onFailure) { apiProductList ->

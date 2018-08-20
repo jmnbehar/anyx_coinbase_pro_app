@@ -513,11 +513,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
             val candle = candles[index]
             txt_chart_change_or_date.text = candle.time.toStringWithTimespan(viewModel.timeSpan)
-            val prefs = Prefs(context!!)
-            if (prefs.isDarkModeOn) {
-                txt_chart_change_or_date.textColor = Color.WHITE
-            } else {
-                txt_chart_change_or_date.textColor = Color.BLACK
+            context?.let {
+                if (Prefs(it).isDarkModeOn) {
+                    txt_chart_change_or_date.textColor = Color.WHITE
+                } else {
+                    txt_chart_change_or_date.textColor = Color.BLACK
+                }
             }
         }
     }
@@ -576,9 +577,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             onComplete(false)
         }
-        val prefs = Prefs(context!!)
         account?. let { account ->
-            if (prefs.isLoggedIn) {
+            val context = context
+            if (context != null && Prefs(context).isLoggedIn) {
                 /* Refresh does 2 things, it updates the chart, account info first
                  * then candles etc in mini refresh, while simultaneously updating history info
                 */
@@ -599,7 +600,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
-                CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash(context!!, onFailure) { apiOrderList ->
+                CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash(context, onFailure) { apiOrderList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
@@ -607,7 +608,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         }
                     }
                 }
-                CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(context!!, onFailure) { apiFillList ->
+                CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(context, onFailure) { apiFillList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {

@@ -43,7 +43,6 @@ class LoginFragment : RefreshFragment()  {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_login, container, false)
 
-        val prefs = Prefs(context!!)
 
         apiKeyEditText = rootView.etxt_login_api_key
         apiSecretEditText = rootView.etxt_login_secret
@@ -53,6 +52,7 @@ class LoginFragment : RefreshFragment()  {
         val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
 
+        val prefs = Prefs(context!!)
         if(prefs.apiKey != null) {
             apiKey = prefs.apiKey
             apiKeyEditText.setText(apiKey)

@@ -95,11 +95,12 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             timeString = timeString.replace(" ", "\n")
             percentChangeText.text = timeString
         }
-        val prefs = Prefs(context!!)
-        percentChangeText.textColor = if (prefs.isDarkModeOn) {
-            Color.WHITE
-        } else {
-            Color.BLACK
+        context?.let {
+            percentChangeText.textColor = if (Prefs(it).isDarkModeOn) {
+                Color.WHITE
+            } else {
+                Color.BLACK
+            }
         }
     }
 

@@ -29,10 +29,11 @@ open class RefreshFragment: Fragment() {
 
     val apiInitData: CBProApi.CBProApiInitData?
         get() {
+            val context = context
             return if (activity is MainActivity) {
                 (activity as MainActivity).apiInitData
             } else if (context != null){
-                CBProApi.CBProApiInitData(context!!) { /* do nothing */ }
+                CBProApi.CBProApiInitData(context) { /* do nothing */ }
             } else {
                 null
             }

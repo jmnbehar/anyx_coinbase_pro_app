@@ -85,16 +85,16 @@ class SendFragment : RefreshFragment() {
 
         scanButton.setOnClickListener { getAddressFromCamera() }
 
-        val prefs = Prefs(context!!)
 
         sendButton.setOnClickListener {
             val amount = amountEditText.text.toString()
             val destination = destinationEditText.text.toString()
+            val context = context
             if (amount.isBlank()) {
                 toast(R.string.send_enter_amount_warning)
             } else if (destination.isBlank()) {
                 toast(R.string.send_enter_destination_warning)
-            } else if (prefs.shouldShowSendConfirmModal) {
+            } else if (context != null && Prefs(context).shouldShowSendConfirmModal) {
                 alert {
                     title = resources.getString(R.string.send_confirm_message, amount, currency, destination)
                     positiveButton(R.string.send_confirm_button) { submitSend() }

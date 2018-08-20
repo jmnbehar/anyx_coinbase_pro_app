@@ -133,6 +133,7 @@ class SettingsFragment : RefreshFragment() {
 
     override fun onResume() {
         super.onResume()
+        dismissProgressSpinner()
         val prefs = Prefs(activity!!)
         val apiKey = CBProApi.credentials?.apiKey
         if (apiKey == null) {

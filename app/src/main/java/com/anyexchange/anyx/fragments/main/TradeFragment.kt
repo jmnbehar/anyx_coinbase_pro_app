@@ -402,15 +402,17 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         @Suppress("UNUSED_PARAMETER")
         fun onComplete(result: Result<ByteArray, FuelError>) {
             toast(R.string.toast_success)
-            activity!!.onBackPressed()
-            account?.let { account ->
-                val currency = account.currency
-                if (devFee > 0.0) {
-                    val prefs = Prefs(context!!)
-                    val unpaidFees = prefs.addUnpaidFee(devFee, currency)
-                    if (unpaidFees > currency.minSendAmount) {
-                        payFee(unpaidFees)
-                        prefs.wipeUnpaidFees(currency)
+            activity?.let { activity ->
+                activity.onBackPressed()
+                account?.let { account ->
+                    val currency = account.currency
+                    if (devFee > 0.0) {
+                        val prefs = Prefs(activity)
+                        val unpaidFees = prefs.addUnpaidFee(devFee, currency)
+                        if (unpaidFees > currency.minSendAmount) {
+                            payFee(unpaidFees)
+                            prefs.wipeUnpaidFees(currency)
+                        }
                     }
                 }
             }
@@ -604,27 +606,29 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-        account?.let { account ->
-            when (tradeSide) {
-                TradeSide.BUY -> {
-                    submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
-                    tradeSideBuyRadioButton.isChecked = true
-                    when (tradeType) {
-                        TradeType.MARKET, TradeType.STOP -> {
-                            amountUnitText.text = fiatCurrency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
-                        }
-                        TradeType.LIMIT -> {
-                            amountUnitText.text = account.currency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+        if (context != null) {
+            account?.let { account ->
+                when (tradeSide) {
+                    TradeSide.BUY -> {
+                        submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
+                        tradeSideBuyRadioButton.isChecked = true
+                        when (tradeType) {
+                            TradeType.MARKET, TradeType.STOP -> {
+                                amountUnitText.text = fiatCurrency.toString()
+                                totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
+                            }
+                            TradeType.LIMIT -> {
+                                amountUnitText.text = account.currency.toString()
+                                totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+                            }
                         }
                     }
-                }
-                TradeSide.SELL -> {
-                    submitOrderButton.text =  resources.getString(R.string.trade_sell_order_btn)
-                    tradeSideSellRadioButton.isChecked = true
-                    amountUnitText.text = account.currency.toString()
-                    totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+                    TradeSide.SELL -> {
+                        submitOrderButton.text = resources.getString(R.string.trade_sell_order_btn)
+                        tradeSideSellRadioButton.isChecked = true
+                        amountUnitText.text = account.currency.toString()
+                        totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+                    }
                 }
             }
         }

@@ -12,6 +12,8 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import android.util.TypedValue
 import android.view.MenuItem
+import com.anyexchange.anyx.activities.MainActivity
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 
@@ -83,23 +85,26 @@ class AlertsFragment : RefreshFragment() {
         setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
 
-        alertAdapter = AlertListViewAdapter(context!!, inflater, sortedAlerts) { view, alert ->
-            val popup = PopupMenu(activity, view)
-            //Inflating the Popup using xml file
-            popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
-            
-            popup.setOnMenuItemClickListener { item: MenuItem? ->
-                when (item?.itemId ?: R.id.delete_alert) {
-                    R.id.delete_alert -> {
-                        deleteAlert(alert)
-                    }
-                }
-                true
-            }
-            popup.show()
-        }
+        context?.let {
+            alertAdapter = AlertListViewAdapter(it, inflater, sortedAlerts) { view, alert ->
+                val popup = PopupMenu(activity, view)
+                //Inflating the Popup using xml file
+                popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
 
-        alertList.adapter = alertAdapter
+                popup.setOnMenuItemClickListener { item: MenuItem? ->
+                    when (item?.itemId ?: R.id.delete_alert) {
+                        R.id.delete_alert -> {
+                            deleteAlert(alert)
+                        }
+                    }
+                    true
+                }
+                popup.show()
+            }
+            alertList.adapter = alertAdapter
+        } ?: run {
+            alertList.visibility = View.GONE
+        }
 
 //        val swipeMenuCreator = SwipeMenuCreator { menu ->
 //            var deleteItem = SwipeMenuItem(context)
@@ -134,22 +139,28 @@ class AlertsFragment : RefreshFragment() {
     }
 
     private fun deleteAlert(alert: Alert) {
-        Prefs(context!!).removeAlert(alert)
-        alertAdapter?.alerts = sortedAlerts
-        alertAdapter?.notifyDataSetChanged()
-        alertList.adapter = alertAdapter
+        context?.let {
+            Prefs(it).removeAlert(alert)
+            alertAdapter?.alerts = sortedAlerts
+            alertAdapter?.notifyDataSetChanged()
+            alertList.adapter = alertAdapter
+        } ?: run {
+            toast(R.string.error_message)
+        }
     }
 
     private fun setAlert() {
         val price = priceEditText.text.toString().toDoubleOrZero()
-        if (price > 0) {
-            val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
-            val triggerIfAbove = price > productPrice
-            val alert = Alert(price, currency, triggerIfAbove)
-            Prefs(context!!).addAlert(alert)
-            alertAdapter?.alerts = sortedAlerts
-            alertAdapter?.notifyDataSetChanged()
-            priceEditText.setText("")
+        context?.let { context ->
+            if (price > 0) {
+                val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
+                val triggerIfAbove = price > productPrice
+                val alert = Alert(price, currency, triggerIfAbove)
+                Prefs(context).addAlert(alert)
+                alertAdapter?.alerts = sortedAlerts
+                alertAdapter?.notifyDataSetChanged()
+                priceEditText.setText("")
+            }
         }
     }
 
@@ -177,16 +188,22 @@ class AlertsFragment : RefreshFragment() {
 
     private val sortedAlerts : List<Alert>
         get() {
-            val alerts = Prefs(context!!).alerts
-            return alerts.sortedWith(compareBy { it.price })
+            context?.let { context ->
+                val alerts = Prefs(context).alerts
+                return alerts.sortedWith(compareBy { it.price })
+            } ?: run {
+                return listOf()
+            }
         }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        (activity as com.anyexchange.anyx.activities.MainActivity).updatePrices({ onComplete(false) }, {
-            (activity as com.anyexchange.anyx.activities.MainActivity).loopThroughAlerts()
-            alertAdapter?.alerts = sortedAlerts
-            alertAdapter?.notifyDataSetChanged()
-            onComplete(true)
-        })
+        (activity as? MainActivity)?.let { mainActivity ->
+            mainActivity.updatePrices({ onComplete(false) }, {
+                mainActivity.loopThroughAlerts()
+                alertAdapter?.alerts = sortedAlerts
+                alertAdapter?.notifyDataSetChanged()
+                onComplete(true)
+            })
+        }
     }
 }

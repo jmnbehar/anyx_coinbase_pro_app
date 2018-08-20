@@ -42,33 +42,25 @@ class HistoryListFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.recycler_view, container, false)
         viewManager = LinearLayoutManager(context)
-        historyListAdapter = if (isOrderList) {
-            HistoryListViewAdapter(context!!, true, orders, resources, orderOnClick =  { order -> onOrderClick(order)})
-        } else {
-            HistoryListViewAdapter(context!!,false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
+        context?.let {
+            historyListAdapter = if (isOrderList) {
+                HistoryListViewAdapter(it, true, orders, resources, orderOnClick = { order -> onOrderClick(order) })
+            } else {
+                HistoryListViewAdapter(it, false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
+            }
+
+            historyList = rootView.recycler_view.apply {
+                // use this setting to improve performance if you know that changes
+                // in content do not change the layout size of the RecyclerView
+                setHasFixedSize(true)
+
+                // use a linear layout manager
+                layoutManager = viewManager
+
+                // specify an viewAdapter (see also next example)
+                adapter = historyListAdapter
+            }
         }
-
-        historyList = rootView.recycler_view.apply {
-            // use this setting to improve performance if you know that changes
-            // in content do not change the layout size of the RecyclerView
-            setHasFixedSize(true)
-
-            // use a linear layout manager
-            layoutManager = viewManager
-
-            // specify an viewAdapter (see also next example)
-            adapter = historyListAdapter
-
-        }
-
-
-
-//        val listHeight = historyList.setHeightBasedOnChildren()
-//
-//        val params = rootView.layoutParams
-//        params.height = listHeight
-//        rootView.layoutParams = params
-//        (parentFragment as ChartFragment).setHistoryPagerHeight(listHeight)
         return rootView
     }
 }

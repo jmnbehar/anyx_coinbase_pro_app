@@ -30,19 +30,22 @@ class HomeFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_home, container, false)
 
-        val prefs = Prefs(context!!)
         val tabLayout = rootView.home_tab_layout
-
-        if (prefs.isDarkModeOn) {
-            tabLayout.setTabTextColors(Color.LTGRAY, Color.WHITE)
-        } else {
-            tabLayout.setTabTextColors(Color.DKGRAY, Color.BLACK)
-        }
 
         viewPager = rootView.home_view_pager
 
-        collectionPagerAdapter = HomePagerAdapter(context!!, childFragmentManager)
-        viewPager?.adapter = collectionPagerAdapter
+        context?.let {
+            if (Prefs(it).isDarkModeOn) {
+                tabLayout.setTabTextColors(Color.LTGRAY, Color.WHITE)
+            } else {
+                tabLayout.setTabTextColors(Color.DKGRAY, Color.BLACK)
+            }
+
+            collectionPagerAdapter = HomePagerAdapter(it, childFragmentManager)
+            viewPager?.adapter = collectionPagerAdapter
+        }
+
+
 
         return rootView
     }
