@@ -119,7 +119,8 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
             amount = unfilledSize
-            currency = Currency.forString(order.product_id) ?: Currency.USD
+            val tradingPair = TradingPair(order.product_id)
+            currency = tradingPair.baseCurrency
             val tradeType = TradeType.fromString(order.type)
             viewHolder.sideText?.text = when (tradeSide) {
                 TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
@@ -139,7 +140,8 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             viewHolder.tradeTypeText?.visibility = View.GONE
             val fill = fills[position]
             tradeSide = TradeSide.fromString(fill.side)
-            currency = Currency.forString(fill.product_id) ?: Currency.USD
+            val tradingPair = TradingPair(fill.product_id)
+            currency = tradingPair.baseCurrency
             price = fill.price.toDoubleOrZero()
             amount = fill.size.toDoubleOrZero()
             viewHolder.view?.setOnClickListener { fillOnClick(fill) }
