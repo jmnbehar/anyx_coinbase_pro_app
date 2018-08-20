@@ -343,7 +343,9 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     }
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(Exception())))
+                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: IllegalStateException) {
+                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }
