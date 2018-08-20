@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         TRADE,
         HOME,
         LOGIN,
+        EULA,
         OTHER;
 
 
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 TRADE -> "TRADE"
                 HOME -> "HOME"
                 LOGIN -> "LOGIN"
+                EULA -> "EULA"
                 OTHER -> "OTHER"
             }
         }
@@ -97,6 +99,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     is TradeFragment -> TRADE
                     is LoginFragment -> LOGIN
                     is HomeFragment -> HOME
+                    is EulaFragment -> EULA
                     else -> OTHER
                 }
             }
@@ -549,6 +552,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.LOGIN -> {
                 LoginFragment.newInstance()
             }
+            FragmentType.EULA -> EulaFragment()
             FragmentType.OTHER -> null
         }
         if (fragment != null) {
@@ -559,7 +563,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             println("Error switching fragments")
         }
     }
-    //TODO: make this one private:
+
     fun goToFragment(fragment: RefreshFragment, tag: String) {
         currentFragment = fragment
         if (supportFragmentManager.backStackEntryCount == 0) {

@@ -76,10 +76,10 @@ class SettingsFragment : RefreshFragment() {
         }
 
         anyxEulaButton.visibility = View.GONE
-        activity?.let { activity ->
+        (activity as? MainActivity)?.let { activity ->
             anyxEulaButton.visibility = View.VISIBLE
             anyxEulaButton.setOnClickListener {
-                (activity as? MainActivity)?.goToFragment(EulaFragment(), "EULA")
+                activity.goToFragment(MainActivity.FragmentType.EULA)
             }
         }
 
