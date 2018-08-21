@@ -67,6 +67,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var tradeFragment: TradeFragment? = null
 
+    private var blockRefresh = false
+    private var didTouchTradingPairSpinner = false
+
     companion object {
         var account: Account? = null
     }
@@ -174,13 +177,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
             val tradingPairListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
-                var userSelect = false
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    userSelect = true
+                    didTouchTradingPairSpinner = true
                     return false
                 }
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (lifecycle.currentState == Lifecycle.State.RESUMED && userSelect) {
+                    if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
                         miniRefresh({
@@ -239,8 +241,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         autoRefresh = Runnable {
-            miniRefresh({ }, { })
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+            if (!blockRefresh) {
+                miniRefresh({ }, { })
+                handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+            }
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         dismissProgressSpinner()
@@ -300,7 +304,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun switchAccount(newAccount: Account) {
         account = newAccount
-
+        blockRefresh = true
+        didTouchTradingPairSpinner = false
         val activity = activity as com.anyexchange.anyx.activities.MainActivity
         val currency = newAccount.currency
 
@@ -314,6 +319,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner_chart_trading_pair.adapter = arrayAdapter
+        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == viewModel.tradingPair?.quoteCurrency }
+        if (relevantTradingPair != null) {
+            val index = tradingPairs.indexOf(relevantTradingPair)
+            spinner_chart_trading_pair.setSelection(index)
+            viewModel.tradingPair = relevantTradingPair
+        } else {
+            viewModel.tradingPair = tradingPairs.firstOrNull()
+        }
+
 
         val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(newAccount.product.id)
@@ -333,6 +347,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             showProgressSpinner()
             miniRefresh({   //onFailure
+                blockRefresh = false
                 toast(R.string.error_message)
                 dismissProgressSpinner()
             }, {    //success
@@ -341,6 +356,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 setPercentChangeText(chartTimeSpan)
                 txt_chart_name.text = currency.fullName
                 setButtonsAndBalanceText(newAccount)
+                blockRefresh = false
                 dismissProgressSpinner()
                 updateHistoryPagerAdapter(stashedOrders, stashedFills)
             })
