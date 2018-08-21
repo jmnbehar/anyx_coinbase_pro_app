@@ -71,9 +71,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     companion object {
         var tradeSide = TradeSide.BUY
 
-        private var account: Account? = null
-        fun newInstance(account: Account, tradeSide: TradeSide): TradeFragment {
-            this.account = account
+        fun newInstance(tradeSide: TradeSide): TradeFragment {
             this.tradeSide = tradeSide
             return TradeFragment()
         }

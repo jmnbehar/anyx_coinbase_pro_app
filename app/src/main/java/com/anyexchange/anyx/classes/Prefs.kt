@@ -88,11 +88,11 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<Alert>
-        get() = prefs.getStringSet(ALERTS, setOf<String>()).map { s -> Alert.fromString(s) }.toSet()
+        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.fromString(s) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
 
     var stashedProducts: List<Product>
-        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>()).map { s -> Product.fromString(s) }
+        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.fromString(s) } ?: listOf()
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
     fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
@@ -112,7 +112,7 @@ class Prefs (var context: Context) {
             for (currency in Currency.fiatList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString.isNotBlank() && productString.isNotBlank()) {
+                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
                         val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
@@ -149,7 +149,7 @@ class Prefs (var context: Context) {
             for (currency in Currency.cryptoList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString.isNotBlank() && productString.isNotBlank()) {
+                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
                         val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
@@ -185,7 +185,7 @@ class Prefs (var context: Context) {
         }
 
     var rapidMovementAlerts: Set<Currency>
-        get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>()).mapNotNull { string -> Currency.forString(string) }.toSet()
+        get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
@@ -227,8 +227,8 @@ class Prefs (var context: Context) {
     }
 
     fun isApiKeyValid(apiKey: String) : Boolean? {
-        val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
-        val rejectedApiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
+        val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
+        val rejectedApiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
         if (approvedApiKeys.contains(apiKey)) {
             return true
         } else if (rejectedApiKeys.contains(apiKey)) {
@@ -238,7 +238,7 @@ class Prefs (var context: Context) {
         }
     }
     fun approveApiKey(apiKey: String) {
-        val apiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>()).toMutableSet()
+        val apiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(APPROVED_API_KEYS, apiKeys).apply()
         if (CBProApi.credentials?.apiKey == apiKey) {
@@ -246,7 +246,7 @@ class Prefs (var context: Context) {
         }
     }
     fun rejectApiKey(apiKey: String) {
-        val apiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>()).toMutableSet()
+        val apiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
         apiKeys.add(apiKey)
         prefs.edit().putStringSet(REJECTED_API_KEYS, apiKeys).apply()
         if (CBProApi.credentials?.apiKey == apiKey) {

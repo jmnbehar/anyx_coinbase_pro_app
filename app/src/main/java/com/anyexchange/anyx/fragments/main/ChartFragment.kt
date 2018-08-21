@@ -88,35 +88,33 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         val tempAccount = account
-        val activity = activity!!
-        if (tempAccount == null) {
-            activity.supportFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
-        } else {
-            val prefs = Prefs(activity)
-            candles = tempAccount.product.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair)
-            val currency = tempAccount.currency
 
-            lineChart = rootView.chart_line_chart
-            candleChart = rootView.chart_candle_chart
+        candles = tempAccount?.product?.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair) ?: listOf()
+        val currency = tempAccount?.currency ?: Currency.USD
 
-            lineChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
-                swipeRefreshLayout?.isEnabled = false
-            }
-            lineChart?.setOnChartValueSelectedListener(this)
-            lineChart?.onChartGestureListener = this
+        lineChart = rootView.chart_line_chart
+        candleChart = rootView.chart_candle_chart
 
-            candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
-                swipeRefreshLayout?.isEnabled = false
-            }
-            candleChart?.setOnChartValueSelectedListener(this)
-            candleChart?.onChartGestureListener = this
+        lineChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
+            swipeRefreshLayout?.isEnabled = false
+        }
+        lineChart?.setOnChartValueSelectedListener(this)
+        lineChart?.onChartGestureListener = this
 
-            priceTextView = rootView.txt_chart_price
+        candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
+            swipeRefreshLayout?.isEnabled = false
+        }
+        candleChart?.setOnChartValueSelectedListener(this)
+        candleChart?.onChartGestureListener = this
 
-            buyButton = rootView.btn_chart_buy
+        priceTextView = rootView.txt_chart_price
+
+        buyButton = rootView.btn_chart_buy
+        context?.let {
+            val prefs = Prefs(it)
+
             buyButton?.setOnClickListener {
-                //TODO: fix for landscape mode
-                buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.BUY)
+                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
             }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                 tickerTextView = rootView.txt_chart_ticker
@@ -129,76 +127,44 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 sellButton = rootView.btn_chart_sell
                 sellButton?.setOnClickListener {
-                    buySellButtonOnClick(prefs.isLoggedIn, tempAccount, TradeSide.SELL)
+                    buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
                 }
                 historyPager = rootView.history_view_pager
 
-                val stashedFills = prefs.getStashedFills(tempAccount.product.id)
-                val stashedOrders = prefs.getStashedOrders(tempAccount.product.id)
+                val stashedFills: List<ApiFill> = if (tempAccount != null) {
+                    prefs.getStashedFills(tempAccount.product.id)
+                } else { listOf() }
+                val stashedOrders: List<ApiOrder> = if (tempAccount != null) {
+                    prefs.getStashedOrders(tempAccount?.product.id)
+                } else { listOf() }
                 historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                         { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                 historyPager?.setOnTouchListener(this)
             }
-
-
-            rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
-            rootView.rbtn_chart_timespan_hour.setOnClickListener {
-                setChartTimespan(Timespan.HOUR)
-            }
-            rootView.rbtn_chart_timespan_day.text = resources.getString(R.string.chart_timespan_1d)
-            rootView.rbtn_chart_timespan_day.setOnClickListener {
-                setChartTimespan(Timespan.DAY)
-            }
-            rootView.rbtn_chart_timespan_week.text = resources.getString(R.string.chart_timespan_1w)
-            rootView.rbtn_chart_timespan_week.setOnClickListener {
-                setChartTimespan(Timespan.WEEK)
-            }
-            rootView.rbtn_chart_timespan_month.text = resources.getString(R.string.chart_timespan_1m)
-            rootView.rbtn_chart_timespan_month.setOnClickListener {
-                setChartTimespan(Timespan.MONTH)
-            }
-            rootView.rbtn_chart_timespan_year.text = resources.getString(R.string.chart_timespan_1y)
-            rootView.rbtn_chart_timespan_year.setOnClickListener {
-                setChartTimespan(Timespan.YEAR)
-            }
-//            timespanButtonAll.setText("ALL")
-//            timespanButtonAll.setOnClickListener {
-//                setChartTimespan(Timespan.ALL)
-//            }
-
-            val tradingPairs = if (tempAccount.product.tradingPairs.isNotEmpty()) {
-                tempAccount.product.tradingPairs.sortedBy { it.quoteCurrency.orderValue }
-            } else {
-                listOf(tempAccount.id)
-            }
-            //TODO: don't use simple_spinner_item
-            val tradingPairAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
-            tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            tradingPairSpinner = rootView.spinner_chart_trading_pair
-            tradingPairSpinner?.adapter = tradingPairAdapter
-            val tradingPairListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    didTouchTradingPairSpinner = true
-                    return false
-                }
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
-                        viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
-                        showProgressSpinner()
-                        miniRefresh({
-                            toast(R.string.chart_update_error)
-                            dismissProgressSpinner()
-                        }, {
-                            dismissProgressSpinner()
-                        })
-                    }
-                }
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
-            tradingPairSpinner?.onItemSelectedListener = tradingPairListener
-            tradingPairSpinner?.setOnTouchListener(tradingPairListener)
-
         }
+
+
+        rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
+        rootView.rbtn_chart_timespan_hour.setOnClickListener {
+            setChartTimespan(Timespan.HOUR)
+        }
+        rootView.rbtn_chart_timespan_day.text = resources.getString(R.string.chart_timespan_1d)
+        rootView.rbtn_chart_timespan_day.setOnClickListener {
+            setChartTimespan(Timespan.DAY)
+        }
+        rootView.rbtn_chart_timespan_week.text = resources.getString(R.string.chart_timespan_1w)
+        rootView.rbtn_chart_timespan_week.setOnClickListener {
+            setChartTimespan(Timespan.WEEK)
+        }
+        rootView.rbtn_chart_timespan_month.text = resources.getString(R.string.chart_timespan_1m)
+        rootView.rbtn_chart_timespan_month.setOnClickListener {
+            setChartTimespan(Timespan.MONTH)
+        }
+        rootView.rbtn_chart_timespan_year.text = resources.getString(R.string.chart_timespan_1y)
+        rootView.rbtn_chart_timespan_year.setOnClickListener {
+            setChartTimespan(Timespan.YEAR)
+        }
+
         return rootView
     }
 
@@ -291,7 +257,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun buySellButtonOnClick(isLoggedIn: Boolean, account: Account, tradeSide: TradeSide) {
+    private fun buySellButtonOnClick(isLoggedIn: Boolean, tradeSide: TradeSide) {
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
         } else if (CBProApi.credentials?.isVerified == null) {
@@ -300,7 +266,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             toast(R.string.toast_missing_permissions_message)
         } else {
             if (tradeFragment == null) {
-                tradeFragment = TradeFragment.newInstance(account, tradeSide)
+                tradeFragment = TradeFragment.newInstance(tradeSide)
             } else {
                 tradeFragment?.tradeSide = tradeSide
             }
@@ -333,7 +299,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             viewModel.tradingPair = tradingPairs.firstOrNull()
         }
-
 
         val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(newAccount.product.id)
@@ -368,7 +333,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             })
         }
     }
-    
+
     private fun setButtonsAndBalanceText(account: Account) {
         context?.let {
             val currency = account.currency
