@@ -107,12 +107,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, MainActivity::class.java)
-        }
-    }
-
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
 
@@ -175,8 +169,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 setDrawerMenu()
             } else {
                 signIn(false,  {//On Failure
-                    //TODO: refine this behavior:
-                    toast("No More returnToLogin 1")
+                    toast(R.string.error_message)
+                    returnToLogin()
                 }, { //OnSuccess
                     /* Do Nothing Extra */
                 } )
@@ -226,29 +220,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         setDrawerMenu()
-//        //TODO: fix this for Trade Fragment and Transfer Fragments
-//        setDrawerMenu()
-//        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
-//        supportFragmentManager.popBackStack()
-//        val fragmentType = FragmentType.forString(fragmentTag)
-//        goToFragment(fragmentType)
     }
 
-    val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
-    val CHART_STYLE = "CHART_STYLE"
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
         super.onSaveInstanceState(outState, outPersistentState)
-//        if (currentFragment is ChartFragment) {
-//            val chartFragment = currentFragment as ChartFragment
-//            outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair?.toString())
-//            outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
-//        }
+        dataFragment?.backupData()
     }
-
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        val fragmentTag = supportFragmentManager.fragments.lastOrNull()?.tag ?: ""
-        outState?.putString("FRAGMENT_TAG", fragmentTag)
+        dataFragment?.backupData()
     }
 
     override fun onPause() {
@@ -261,7 +241,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         dataFragment?.backupData()
     }
 
-   // private fun goHome(onFailure: (result: Result.Failure<String, FuelError>) -> Unit) {
    private fun goHome() {
         loopThroughAlerts()
         goToFragment(FragmentType.HOME)
@@ -313,7 +292,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         showProgressBar()
         CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
-            toast(R.string.error_message)
             dismissProgressBar()
             onFailure(error)
         }, {
@@ -408,7 +386,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun returnToLogin() {
-        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         goToFragment(FragmentType.LOGIN)
     }
 

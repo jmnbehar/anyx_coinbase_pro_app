@@ -1,7 +1,7 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.content.res.Configuration
 import android.graphics.Color
@@ -28,7 +28,6 @@ import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.fragments.ViewModels.ChartViewModel
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -43,7 +42,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var historyPager: ViewPager? = null
     private var tradingPairSpinner: Spinner? = null
 
-    private lateinit var viewModel: ChartViewModel
 
     private val quoteCurrency: Currency
         get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
@@ -72,6 +70,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     companion object {
         var account: Account? = null
+    }
+
+    private lateinit var viewModel: ChartViewModel
+    class ChartViewModel : ViewModel() {
+        var timeSpan = Timespan.DAY
+        var chartStyle = ChartStyle.Line
+        var tradingPair: TradingPair? = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -135,7 +140,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     prefs.getStashedFills(tempAccount.product.id)
                 } else { listOf() }
                 val stashedOrders: List<ApiOrder> = if (tempAccount != null) {
-                    prefs.getStashedOrders(tempAccount?.product.id)
+                    prefs.getStashedOrders(tempAccount.product.id)
                 } else { listOf() }
                 historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                         { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })

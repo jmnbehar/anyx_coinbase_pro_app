@@ -107,8 +107,7 @@ class LoginFragment : RefreshFragment()  {
 
         btnSkipLogin.setOnClickListener { _ ->
             (activity as? MainActivity)?.signIn(true, {
-                //TODO: refine this behavior:
-                toast("Error Logging In")
+                toast(R.string.error_message)
             }, {
             //TODO: destroy and remove self from backstack
                 removeSelfFromBackstack()
