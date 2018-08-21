@@ -11,6 +11,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.YAxis
 import android.view.VelocityTracker
+import java.util.*
 import kotlin.math.absoluteValue
 
 
@@ -127,10 +128,11 @@ class PriceLineChart : LineChart {
 
     fun addCandles(candles: List<Candle>, currency: Currency) {
         val entries = if (candles.isEmpty()) {
-            val blankEntry = Entry(0.0f, 0.0f)
+            val now = Date().time.toDouble()
+            val blankEntry = Entry(0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
-            candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat()) }
+            candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.time) }
         }
         val dataSet = LineDataSet(entries, "Chart")
 
@@ -174,11 +176,3 @@ class PriceLineChart : LineChart {
     }
 
 }
-
-
-//class XAxisDateFormatter(private val values: DoubleArray, var timeRange: Int) : IAxisValueFormatter {
-//    override fun getFormattedValue(value: Float, axis: AxisBase): String {
-//        val dateDouble = values[value.toInt()]
-//        return dateDouble.toStringWithTimespan(timeRange)
-//    }
-//}

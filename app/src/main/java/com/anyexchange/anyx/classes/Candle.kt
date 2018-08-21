@@ -43,3 +43,11 @@ fun MutableList<Candle>.addingCandles(newList: List<Candle>) : MutableList<Candl
 fun MutableList<Candle>.sorted() : MutableList<Candle> {
     return this.sortedWith(compareBy({ it.time }, { it.close })).toMutableList()
 }
+
+fun MutableList<Candle>.compositeFactor() : Int {
+    return if (size > 70) {
+        (size / 40) - 1
+    } else {
+        0
+    }
+}

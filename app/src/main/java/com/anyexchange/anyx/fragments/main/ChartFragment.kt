@@ -508,17 +508,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        val index = entry.x.toInt()
-        if (candles.size > index) {
-            priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
-            val candle = candles[index]
-            txt_chart_change_or_date.text = candle.time.toStringWithTimespan(viewModel.timeSpan)
-            context?.let {
-                if (Prefs(it).isDarkModeOn) {
-                    txt_chart_change_or_date.textColor = Color.WHITE
-                } else {
-                    txt_chart_change_or_date.textColor = Color.BLACK
-                }
+        val time = entry.data as? Double
+        txt_chart_change_or_date.text = time?.toStringWithTimespan(viewModel.timeSpan)
+        context?.let {
+            if (Prefs(it).isDarkModeOn) {
+                txt_chart_change_or_date.textColor = Color.WHITE
+            } else {
+                txt_chart_change_or_date.textColor = Color.BLACK
             }
         }
     }

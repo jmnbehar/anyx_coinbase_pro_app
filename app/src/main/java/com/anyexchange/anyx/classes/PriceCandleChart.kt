@@ -14,6 +14,7 @@ import android.view.VelocityTracker
 import com.anyexchange.anyx.R
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.data.*
+import java.util.*
 import kotlin.math.absoluteValue
 
 
@@ -129,7 +130,8 @@ class PriceCandleChart : CandleStickChart {
 
     fun addCandles(candles: List<Candle>, currency: Currency) {
         val entries = if (candles.isEmpty()) {
-            val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+            val now = Date().time.toDouble()
+            val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
             //TODO: add back blank candles
@@ -142,7 +144,7 @@ class PriceCandleChart : CandleStickChart {
                 var high = 0.0
                 var open = 0.0
                 var volume = 0.0
-                for (candle in candles) {
+                for ((index, candle) in candles.withIndex()) {
                     if (i == 0) {
                         low = candle.low
                         high = candle.high
@@ -157,15 +159,15 @@ class PriceCandleChart : CandleStickChart {
                         }
                         volume += candle.volume
                     }
-                    if (i >= compositeFactor) {
+                    if (i >= compositeFactor || index == candles.size - 1) {
                         compositeCandles.add(Candle(candle.time, low, high, open, candle.close, volume, candle.tradingPair))
                         i = -1
                     }
                     i++
                  }
-                compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat()) }
+                compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             } else {
-                candles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat()) }
+                candles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             }
         }
 
@@ -184,7 +186,6 @@ class PriceCandleChart : CandleStickChart {
 
         xAxis.axisLineColor = currencyColor
         axisLeft.axisLineColor = currencyColor
-//        axisRight
 
         val strokeWidth = 2.toFloat()
         xAxis.axisLineWidth = strokeWidth
