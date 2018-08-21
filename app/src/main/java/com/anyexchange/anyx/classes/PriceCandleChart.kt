@@ -132,7 +132,41 @@ class PriceCandleChart : CandleStickChart {
             val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
             listOf(blankEntry, blankEntry)
         } else {
-            candles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat()) }
+            //TODO: add back blank candles
+            //Combine Candles to prevent v small candles:
+            val compositeCandles = mutableListOf<Candle>()
+            if (candles.size > 70) {
+                val compositeFactor: Int = (candles.size / 40) - 1
+                var i = 0
+                var low = 0.0
+                var high = 0.0
+                var open = 0.0
+                var volume = 0.0
+                for (candle in candles) {
+                    if (i == 0) {
+                        low = candle.low
+                        high = candle.high
+                        open = candle.open
+                        volume = candle.volume
+                    } else {
+                        if (candle.low < low) {
+                            low = candle.low
+                        }
+                        if (candle.high > high) {
+                            high = candle.high
+                        }
+                        volume += candle.volume
+                    }
+                    if (i >= compositeFactor) {
+                        compositeCandles.add(Candle(candle.time, low, high, open, candle.close, volume, candle.tradingPair))
+                        i = -1
+                    }
+                    i++
+                 }
+                compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat()) }
+            } else {
+                candles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat()) }
+            }
         }
 
         val currencyColor = currency.colorPrimary(context)
