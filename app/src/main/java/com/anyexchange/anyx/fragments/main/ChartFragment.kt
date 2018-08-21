@@ -268,7 +268,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             R.id.chart_style_line   -> viewModel.chartStyle = ChartStyle.Line
             R.id.chart_style_candle -> viewModel.chartStyle = ChartStyle.Candle
         }
-        updateChartStyle()
+        showProgressSpinner()
+        miniRefresh({
+            dismissProgressSpinner()
+        }, {
+            updateChartStyle()
+            dismissProgressSpinner()
+        })
         return false
     }
 
