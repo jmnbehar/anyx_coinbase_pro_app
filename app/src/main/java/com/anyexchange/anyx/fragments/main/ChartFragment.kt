@@ -509,6 +509,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         val time = entry.data as? Double
+        priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
         txt_chart_change_or_date.text = time?.toStringWithTimespan(viewModel.timeSpan)
         context?.let {
             if (Prefs(it).isDarkModeOn) {
