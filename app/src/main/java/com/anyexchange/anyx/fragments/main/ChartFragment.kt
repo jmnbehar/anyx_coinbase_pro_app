@@ -31,6 +31,7 @@ import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
+import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.classes.Currency
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
@@ -68,17 +69,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var blockRefresh = false
     private var didTouchTradingPairSpinner = false
 
-    var timeSpan: Timespan
+    val timeSpan: Timespan
         get() = viewModel.timeSpan
-        private set(value) { viewModel.timeSpan = value }
 
-    var chartStyle: ChartStyle
+    val chartStyle: ChartStyle
         get() = viewModel.chartStyle
-        private set(value) { viewModel.chartStyle = value }
 
-    var tradingPair: TradingPair?
+    val tradingPair: TradingPair?
         get() = viewModel.tradingPair
-        private set(value) { viewModel.tradingPair = value }
 
     private val quoteCurrency: Currency
         get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
@@ -105,13 +103,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lockPortrait = false
         this.inflater = inflater
 
-        val tradingPairStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
+        val tradingPairStr = savedInstanceState?.getString(CHART_TRADING_PAIR) ?: ""
         val chartStyleStr  = savedInstanceState?.getString(CHART_STYLE) ?: ""
         val timespanLong   = savedInstanceState?.getLong(CHART_TIMESPAN) ?: 0
 
-        tradingPair = TradingPair(tradingPairStr)
-        chartStyle = ChartStyle.forString(chartStyleStr)
-        timeSpan = Timespan.forLong(timespanLong)
+        viewModel.tradingPair = TradingPair(tradingPairStr)
+        viewModel.chartStyle = ChartStyle.forString(chartStyleStr)
+        viewModel.timeSpan = Timespan.forLong(timespanLong)
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
