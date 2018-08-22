@@ -65,17 +65,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var blockRefresh = false
     private var didTouchTradingPairSpinner = false
 
-//    private var timeSpan: Timespan
-//        get() = viewModel.timeSpan
-//        set(value) { viewModel.timeSpan = value }
-//
-//    private var chartStyle: ChartStyle
-//        get() = viewModel.chartStyle
-//        set(value) { viewModel.chartStyle = value }
-//
-//    private var tradingPair: TradingPair?
-//        get() = viewModel.tradingPair
-//        set(value) { viewModel.tradingPair = value }
+    var timeSpan: Timespan
+        get() = viewModel.timeSpan
+        private set(value) { viewModel.timeSpan = value }
+
+    var chartStyle: ChartStyle
+        get() = viewModel.chartStyle
+        private set(value) { viewModel.chartStyle = value }
+
+    var tradingPair: TradingPair?
+        get() = viewModel.tradingPair
+        private set(value) { viewModel.tradingPair = value }
 
     private val quoteCurrency: Currency
         get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD

@@ -38,6 +38,7 @@ import com.anyexchange.anyx.fragments.login.LoginFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.notification_template_part_time.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -217,27 +218,33 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
     }
+
+    val CHART_CURRENCY = "CHART_CURRENCY"
+    val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
+    val CHART_STYLE = "CHART_STYLE"
+    val CHART_TIMESPAN = "CHART_TIMESPAN"
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
+        val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
+        val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
+        ChartFragment.account = Account.forCurrency(chartCurrency)
         setDrawerMenu()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-        super.onSaveInstanceState(outState, outPersistentState)
-        dataFragment?.backupData()
-    }
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         dataFragment?.backupData()
+        outState?.putString(CHART_CURRENCY, ChartFragment.account?.currency?.toString())
+//        if (currentFragment is ChartFragment) {
+//            val chartFragment = currentFragment as ChartFragment
+//            outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
+//            outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
+//            outState?.putString(CHART_TIMESPAN, chartFragment.timeSpan.toString())
+//        }
     }
 
     override fun onPause() {
         super.onPause()
-        dataFragment?.backupData()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
         dataFragment?.backupData()
     }
 
