@@ -54,7 +54,10 @@ fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
                 val missingCandles = (missingTimeToNextCandle / granularity).toInt()
                 for (i in 1..missingCandles) {
                     addedCandles++
-                    tempCandles.add(index + addedCandles, candle)
+                    val time = candle.time + (granularity * i)
+
+                    val fillCandle = Candle(time, candle.close, candle.close, candle.close, candle.close, 0.0, candle.tradingPair)
+                    tempCandles.add(index + addedCandles, fillCandle)
                 }
             }
         }

@@ -134,13 +134,12 @@ class PriceCandleChart : CandleStickChart {
             val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
-            val filledInCandles = candles.filledInBlanks(granularity)
             //Combine Candles to prevent v small candles:
-            if (filledInCandles.size > 70) { //70 is safely above 60 - hour candles should never get cut down
-                val compositeCandles = filledInCandles.compositeCandles(40)
+            if (candles.size > 70) { //70 is safely above 60 - hour candles should never get cut down
+                val compositeCandles = candles.compositeCandles(40)
                 compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             } else {
-                filledInCandles.withIndex().map  { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
+                candles.withIndex().map  { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             }
         }
 
