@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
@@ -146,6 +147,39 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                 historyPager?.setOnTouchListener(this)
             }
+
+
+            val tradingPairs = if (tempAccount != null && tempAccount.product.tradingPairs.isNotEmpty()) {
+                tempAccount.product.tradingPairs.sortedBy { tradingPair ->  tradingPair.quoteCurrency.orderValue }
+            } else {
+                listOf(tempAccount?.id)
+            }
+            //TODO: don't use simple_spinner_item
+            val tradingPairAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, tradingPairs)
+            tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            tradingPairSpinner = rootView.spinner_chart_trading_pair
+            tradingPairSpinner?.adapter = tradingPairAdapter
+            val tradingPairListener = object : AdapterView.OnItemSelectedListener, View.OnTouchListener {
+                override fun onTouch(v: View, event: MotionEvent): Boolean {
+                    didTouchTradingPairSpinner = true
+                    return false
+                }
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
+                        viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
+                        showProgressSpinner()
+                        miniRefresh({
+                            toast(R.string.chart_update_error)
+                            dismissProgressSpinner()
+                        }, {
+                            dismissProgressSpinner()
+                        })
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+            tradingPairSpinner?.onItemSelectedListener = tradingPairListener
+            tradingPairSpinner?.setOnTouchListener(tradingPairListener)
         }
 
 
