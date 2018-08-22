@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Build
 import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.R
@@ -43,17 +42,17 @@ object AlertUtil {
         jobScheduler!!.schedule(builder.build())
     }
 
-    fun scheduleRapidMovementJob(context: Context) {
-        val serviceComponent = ComponentName(context, RapidMovementJobService::class.java)
-        val builder = JobInfo.Builder(0, serviceComponent)
-        builder.setMinimumLatency((300 * 1000).toLong()) // wait at least
-        builder.setOverrideDeadline((600 * 1000).toLong()) // maximum delay
-        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
-        //builder.setRequiresDeviceIdle(true); // device should be idle
-        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
-        val jobScheduler = context.getSystemService(JobScheduler::class.java)
-        jobScheduler!!.schedule(builder.build())
-    }
+//    fun scheduleRapidMovementJob(context: Context) {
+//        val serviceComponent = ComponentName(context, RapidMovementJobService::class.java)
+//        val builder = JobInfo.Builder(0, serviceComponent)
+//        builder.setMinimumLatency((300 * 1000).toLong()) // wait at least
+//        builder.setOverrideDeadline((600 * 1000).toLong()) // maximum delay
+//        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
+//        //builder.setRequiresDeviceIdle(true); // device should be idle
+//        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
+//        val jobScheduler = context.getSystemService(JobScheduler::class.java)
+//        jobScheduler!!.schedule(builder.build())
+//    }
 
     private var notificationManager: NotificationManager? = null
 
@@ -67,7 +66,7 @@ object AlertUtil {
                 // the NotificationChannel class is new and not in the support library
                 val name = context.getString(R.string.channel_name)
                 val description = context.getString(R.string.channel_description)
-                val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
                 val channel = NotificationChannel(CHANNEL_ID, name, importance)
                 channel.description = description
                 // Register the channel with the system
@@ -94,101 +93,97 @@ object AlertUtil {
     }
 }
 
-class RapidMovementJobService : JobService() {
-    val apiInitData = CBProApi.CBProApiInitData(this, { })
-
-    override fun onStartJob(params: JobParameters): Boolean {
-        if (Account.cryptoAccounts.isEmpty()) {
-            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
-                checkPriceChanges()
-            })
-        } else {
-            checkPriceChanges()
-        }
-
-        AlertUtil.scheduleRapidMovementJob(applicationContext) // reschedule the job
-        return true
-    }
-
-    override fun onStopJob(params: JobParameters): Boolean {
-        return true
-    }
-
-    companion object {
-        private val TAG = "SyncService"
-    }
-
-    var lastAlertTimestamp: Long = 0
-    fun checkPriceChanges() {
-        val prefs = Prefs(this)
-        val enabledCurrencies = prefs.rapidMovementAlerts
-        for (account in Account.cryptoAccounts) {
-            if (enabledCurrencies.contains(account.currency)) {
-                //TODO: consider switching to hour timespan
-                val timeSpan = Timespan.DAY
-                account.product.updateCandles(timeSpan, null, apiInitData, { }, { didUpdate ->
-                    val candles = account.product.candlesForTimespan(timeSpan, null)
-                    if (didUpdate && candles.size > 12) {
-                        var alertPercentage = 1.0
-                        var alertTime = ""
-                        var changeIsPositive = false
-                        val timestamp = Date().timeInSeconds()
-
-                        val mostRecentPrice = candles.last().close
-                        val twentyMinutePrice = candles[candles.size - 4].close
-                        val halfHourPrice = candles[candles.size - 6].close
-                        val hourPrice = candles[candles.size - 12].close
-
-                        val twentyMinuteChange = percentChange(mostRecentPrice, twentyMinutePrice)
-                        if (twentyMinuteChange > 2.0 && (lastAlertTimestamp < timestamp - (20 * 60))) {
-                            alertPercentage = twentyMinuteChange
-                            alertTime = "twenty minutes"
-                            changeIsPositive = mostRecentPrice > twentyMinutePrice
-                        }
-                        val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
-                        if (halfHourChange > alertPercentage + 1.0 && (lastAlertTimestamp < timestamp - (30 * 60))) {
-                            alertPercentage = halfHourChange
-                            alertTime = "half hour"
-                            changeIsPositive = mostRecentPrice > halfHourPrice
-                        }
-                        val hourChange = percentChange(mostRecentPrice, hourPrice)
-                        if (hourChange > alertPercentage + 1.0 && (lastAlertTimestamp < timestamp - (60 * 60))) {
-                            alertPercentage = hourChange
-                            alertTime = "hour"
-                            changeIsPositive = mostRecentPrice > hourPrice
-                        }
-                        if (alertPercentage > 2.0) {
-                            val currency = account.currency
-                            val notificationTitle = "${currency.fullName} price alert"
-
-                            val upDown = when(changeIsPositive) {
-                                true  -> "up"
-                                false -> "down"
-                            }
-                            val notificationText = "$currency is $upDown ${alertPercentage.percentFormat()} in the past $alertTime"
-                            val priceAlertGroupTag = "PriceMovementAlert"
-
-                            lastAlertTimestamp = timestamp
-
-                            val notificationTag = "PriceMovementAlert_" + currency.toString() + "_" + timestamp.toString()
-
-                            AlertUtil.postNotification(notificationTitle, notificationText, priceAlertGroupTag, notificationTag, this)
-                        }
-                    }
-                })
-            }
-        }
-    }
-
-    fun percentChange(start: Double, end: Double) : Double {
-        val change = end - start
-        val percentChange = (change / start) * 100.0
-        return percentChange.absoluteValue
-    }
-}
+//class RapidMovementJobService : JobService() {
+//    val apiInitData = CBProApi.CBProApiInitData(this, { })
+//
+//    override fun onStartJob(params: JobParameters): Boolean {
+//        if (Account.cryptoAccounts.isEmpty()) {
+//            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
+//                checkPriceChanges()
+//            })
+//        } else {
+//            checkPriceChanges()
+//        }
+//
+//        AlertUtil.scheduleRapidMovementJob(applicationContext) // reschedule the job
+//        return true
+//    }
+//
+//    override fun onStopJob(params: JobParameters): Boolean {
+//        return true
+//    }
+//
+//    var lastAlertTimestamp: Long = 0
+//    fun checkPriceChanges() {
+//        val prefs = Prefs(this)
+//        val enabledCurrencies = prefs.rapidMovementAlerts
+//        for (account in Account.cryptoAccounts) {
+//            if (enabledCurrencies.contains(account.currency)) {
+//                //TODO: consider switching to hour timespan
+//                val timeSpan = Timespan.DAY
+//                account.product.updateCandles(timeSpan, null, apiInitData, { }, { didUpdate ->
+//                    val candles = account.product.candlesForTimespan(timeSpan, null)
+//                    if (didUpdate && candles.size > 12) {
+//                        var alertPercentage = 1.0
+//                        var alertTime = ""
+//                        var changeIsPositive = false
+//                        val timestamp = Date().timeInSeconds()
+//
+//                        val mostRecentPrice = candles.last().close
+//                        val twentyMinutePrice = candles[candles.size - 4].close
+//                        val halfHourPrice = candles[candles.size - 6].close
+//                        val hourPrice = candles[candles.size - 12].close
+//
+//                        val twentyMinuteChange = percentChange(mostRecentPrice, twentyMinutePrice)
+//                        if (twentyMinuteChange > 2.0 && (lastAlertTimestamp < timestamp - (20 * 60))) {
+//                            alertPercentage = twentyMinuteChange
+//                            alertTime = "twenty minutes"
+//                            changeIsPositive = mostRecentPrice > twentyMinutePrice
+//                        }
+//                        val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
+//                        if (halfHourChange > alertPercentage + 1.0 && (lastAlertTimestamp < timestamp - (30 * 60))) {
+//                            alertPercentage = halfHourChange
+//                            alertTime = "half hour"
+//                            changeIsPositive = mostRecentPrice > halfHourPrice
+//                        }
+//                        val hourChange = percentChange(mostRecentPrice, hourPrice)
+//                        if (hourChange > alertPercentage + 1.0 && (lastAlertTimestamp < timestamp - (60 * 60))) {
+//                            alertPercentage = hourChange
+//                            alertTime = "hour"
+//                            changeIsPositive = mostRecentPrice > hourPrice
+//                        }
+//                        if (alertPercentage > 2.0) {
+//                            val currency = account.currency
+//                            val notificationTitle = "${currency.fullName} price alert"
+//
+//                            val upDown = when(changeIsPositive) {
+//                                true  -> "up"
+//                                false -> "down"
+//                            }
+//                            val notificationText = "$currency is $upDown ${alertPercentage.percentFormat()} in the past $alertTime"
+//                            val priceAlertGroupTag = "PriceMovementAlert"
+//
+//                            lastAlertTimestamp = timestamp
+//
+//                            val notificationTag = "PriceMovementAlert_" + currency.toString() + "_" + timestamp.toString()
+//
+//                            AlertUtil.postNotification(notificationTitle, notificationText, priceAlertGroupTag, notificationTag, this)
+//                        }
+//                    }
+//                })
+//            }
+//        }
+//    }
+//
+//    fun percentChange(start: Double, end: Double) : Double {
+//        val change = end - start
+//        val percentChange = (change / start) * 100.0
+//        return percentChange.absoluteValue
+//    }
+//}
 
 class AlertJobService : JobService() {
-    val apiInitData = CBProApi.CBProApiInitData(this, { })
+    val apiInitData = CBProApi.CBProApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (Account.cryptoAccounts.isEmpty()) {
@@ -207,11 +202,6 @@ class AlertJobService : JobService() {
     override fun onStopJob(params: JobParameters): Boolean {
         return true
     }
-
-    companion object {
-        private val TAG = "SyncService"
-    }
-
 
     private fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0

@@ -28,7 +28,6 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
-import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
@@ -140,7 +139,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let {
             val prefs = Prefs(it)
 
-            buyButton?.setOnClickListener {
+            buyButton?.setOnClickListener {_ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
             }
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -153,7 +152,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 historyTabLayout = rootView.history_tab_layout
 
                 sellButton = rootView.btn_chart_sell
-                sellButton?.setOnClickListener {
+                sellButton?.setOnClickListener { _ ->
                     buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
                 }
                 historyPager = rootView.history_view_pager
@@ -189,7 +188,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
-                        miniRefresh({
+                        miniRefresh({ _ ->
                             toast(R.string.chart_update_error)
                             dismissProgressSpinner()
                         }, {
@@ -507,7 +506,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             positiveButton(R.string.popup_ok_btn) {  }
             negativeButton(R.string.chart_cancel_order) {
-                CBProApi.cancelOrder(apiInitData, order.id).executeRequest({ }) {
+                CBProApi.cancelOrder(apiInitData, order.id).executeRequest({ _ -> }) { _ ->
                     if (lifecycle.isCreatedOrResumed) {
                         var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
@@ -689,7 +688,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (tradingPairTemp == viewModel.tradingPair) {
                         candles = account.product.candlesForTimespan(viewModel.timeSpan, viewModel.tradingPair)
                         viewModel.tradingPair?.let {
-                            CBProApi.ticker(apiInitData, it).get(onFailure) {
+                            CBProApi.ticker(apiInitData, it).get(onFailure) {_ ->
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = account.product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

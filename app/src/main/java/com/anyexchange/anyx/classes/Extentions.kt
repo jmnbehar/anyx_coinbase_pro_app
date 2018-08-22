@@ -155,15 +155,6 @@ fun Date.timeInSeconds() : Long {
     return floatMillis / 1000
 }
 
-fun List<Candle>.updateWith(newList: List<Candle>, timespan: Int) {
-    val now = Calendar.getInstance()
-    val nowInSeconds = now.timeInSeconds()
-    val timespanStart = nowInSeconds - timespan
-
-    val firstInTimespan = this.indexOfFirst { candle -> candle.time >= timespanStart }
-    val trimmedList = this.subList(firstInTimespan, this.lastIndex).toMutableList()
-    trimmedList.addAll(newList)
-}
 
 val Lifecycle.isCreatedOrResumed : Boolean
     get() = when (currentState) {

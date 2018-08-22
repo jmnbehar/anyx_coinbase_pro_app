@@ -274,6 +274,9 @@
     <string name="verify_payment_method_error_message">Could not verify at this time because your account is unfunded.\n\nPlease add funds and try again.</string>
     <string name="verify_unknown_error_message">An unknown error occurred. Try again later.</string>
 
+    <string name="verify_accept">I Accept</string>
+    <string name="verify_done">Done</string>
+
 
 
     <string-array name="login_help_mobile_titles">

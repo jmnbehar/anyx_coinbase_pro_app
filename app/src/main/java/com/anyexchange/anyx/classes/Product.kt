@@ -100,7 +100,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         return priceForTradingPair(tradingPair)
     }
 
-    fun priceForTradingPair(tradingPair: TradingPair) : Double {
+    private fun priceForTradingPair(tradingPair: TradingPair) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
         return price[tradingPairIndex]

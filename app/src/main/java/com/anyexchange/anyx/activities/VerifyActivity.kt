@@ -17,7 +17,6 @@ import com.anyexchange.anyx.fragments.verify.VerifyCompleteFragment
 import com.anyexchange.anyx.fragments.verify.VerifyIntroFragment
 import com.anyexchange.anyx.fragments.verify.VerifySendFragment
 import kotlinx.android.synthetic.main.activity_verify.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 
 
 class VerifyActivity : AppCompatActivity() {
@@ -32,7 +31,7 @@ class VerifyActivity : AppCompatActivity() {
 
     var verifyStatus: VerificationStatus? = null
 
-    var blockBackButton = false
+    private var blockBackButton = false
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
@@ -47,7 +46,7 @@ class VerifyActivity : AppCompatActivity() {
         nextBtn = btn_verify_next
 
         nextBtn?.visibility = View.VISIBLE
-        nextBtn?.text = "I Accept"
+        nextBtn?.text = resources.getString(R.string.verify_accept)
         nextBtn?.setOnClickListener {
             currentPage += 1
             viewPager.setCurrentItem(currentPage, true)
@@ -78,7 +77,7 @@ class VerifyActivity : AppCompatActivity() {
                     1 -> nextBtn?.visibility = View.GONE
                     2 -> {
                         nextBtn?.visibility = View.VISIBLE
-                        nextBtn?.text = "Done"
+                        nextBtn?.text = resources.getString(R.string.verify_done)
                         nextBtn?.setOnClickListener { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
                     }
                 }
