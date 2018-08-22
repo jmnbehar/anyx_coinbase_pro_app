@@ -81,7 +81,7 @@ class PriceLineChart : LineChart {
         }
     }
 
-    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, granularity: Long, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         val newDescription = Description()
@@ -123,16 +123,18 @@ class PriceLineChart : LineChart {
         setScaleEnabled(false)
         isDoubleTapToZoomEnabled = false
 
-        addCandles(candles, currency)
+        addCandles(candles, granularity, currency)
     }
 
-    fun addCandles(candles: List<Candle>, currency: Currency) {
+    fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
         val entries = if (candles.isEmpty()) {
             val now = Date().time.toDouble()
             val blankEntry = Entry(0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
-            candles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.time) }
+            //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
+            val filledInCandles = candles.filledInBlanks(granularity)
+            filledInCandles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.time) }
         }
         val dataSet = LineDataSet(entries, "Chart")
 
@@ -165,9 +167,6 @@ class PriceLineChart : LineChart {
             axisRight.setDrawPartialAxis(close)
         }
 
-        //TODO: fill in missing entries
-//        val dates = candles.map { c -> c.time }.toDoubleArray()
-//        xAxis.valueFormatter = XAxisDateFormatter(dates, timespan)
         dataSet.setDrawCircles(false)
         val lineData = LineData(dataSet)
         this.data = lineData

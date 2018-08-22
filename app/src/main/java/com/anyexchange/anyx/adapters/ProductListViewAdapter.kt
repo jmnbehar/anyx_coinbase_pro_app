@@ -77,7 +77,8 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         viewHolder.productNameText?.text = product.currency.toString()
 
-        val percentChange = product.percentChange(Timespan.DAY, Account.defaultFiatCurrency)
+        val timespan = Timespan.DAY
+        val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
         viewHolder.percentChangeText?.text = percentChange.percentFormat()
         viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -85,8 +86,9 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             Color.RED
         }
 
+        val granularity = Candle.granularityForTimespan(timespan)
         viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
-        viewHolder.lineChart?.configure(product.defaultDayCandles, product.currency, false, DefaultDragDirection.Vertical) {}
+        viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
 
         outputView.setOnClickListener { onClick(product) }
 

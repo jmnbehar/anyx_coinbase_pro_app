@@ -43,10 +43,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var historyPager: ViewPager? = null
     private var tradingPairSpinner: Spinner? = null
 
-
-    private val quoteCurrency: Currency
-        get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
-
     private var candles = listOf<Candle>()
 
     private var candleChart: PriceCandleChart? = null
@@ -68,6 +64,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var blockRefresh = false
     private var didTouchTradingPairSpinner = false
+
+//    private var timeSpan: Timespan
+//        get() = viewModel.timeSpan
+//        set(value) { viewModel.timeSpan = value }
+//
+//    private var chartStyle: ChartStyle
+//        get() = viewModel.chartStyle
+//        set(value) { viewModel.chartStyle = value }
+//
+//    private var tradingPair: TradingPair?
+//        get() = viewModel.tradingPair
+//        set(value) { viewModel.tradingPair = value }
+
+    private val quoteCurrency: Currency
+        get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
 
     companion object {
         var account: Account? = null
@@ -101,13 +112,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lineChart = rootView.chart_line_chart
         candleChart = rootView.chart_candle_chart
 
-        lineChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
+        val granularity = Candle.granularityForTimespan(viewModel.timeSpan)
+        lineChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
         }
         lineChart?.setOnChartValueSelectedListener(this)
         lineChart?.onChartGestureListener = this
 
-        candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
+        candleChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
         }
         candleChart?.setOnChartValueSelectedListener(this)
@@ -321,7 +333,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val currency = newAccount.currency
 
         val chartTimeSpan = viewModel.timeSpan
-        candles = newAccount.product.candlesForTimespan(chartTimeSpan, viewModel.tradingPair)
 
         val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
@@ -339,6 +350,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             viewModel.tradingPair = tradingPairs.firstOrNull()
         }
 
+        candles = newAccount.product.candlesForTimespan(chartTimeSpan, viewModel.tradingPair)
         val prefs = Prefs(activity)
         val stashedFills = prefs.getStashedFills(newAccount.product.id)
         val stashedOrders = prefs.getStashedOrders(newAccount.product.id)
@@ -691,6 +703,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         //complete mini refresh assumes account is not null
         priceTextView?.text = price.format(quoteCurrency)
         valueTextView?.text = account!!.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+
         addCandlesToActiveChart(candles, account!!.currency)
         setPercentChangeText(viewModel.timeSpan)
         checkTimespanButton()
@@ -698,9 +711,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun addCandlesToActiveChart(candles: List<Candle>, currency: Currency) {
+        val granularity = Candle.granularityForTimespan(viewModel.timeSpan)
         when (viewModel.chartStyle) {
-            ChartStyle.Line -> lineChart?.addCandles(candles, currency)
-            ChartStyle.Candle -> candleChart?.addCandles(candles, currency)
+            ChartStyle.Line   ->   lineChart?.addCandles(candles, granularity, currency)
+            ChartStyle.Candle -> candleChart?.addCandles(candles, granularity, currency)
         }
     }
 }

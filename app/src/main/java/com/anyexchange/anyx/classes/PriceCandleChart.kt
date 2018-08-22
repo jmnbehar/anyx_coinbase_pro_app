@@ -83,7 +83,7 @@ class PriceCandleChart : CandleStickChart {
         }
     }
 
-    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, granularity: Long, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         val newDescription = Description()
@@ -125,49 +125,22 @@ class PriceCandleChart : CandleStickChart {
         setScaleEnabled(false)
         isDoubleTapToZoomEnabled = false
 
-        addCandles(candles, currency)
+        addCandles(candles, granularity, currency)
     }
 
-    fun addCandles(candles: List<Candle>, currency: Currency) {
+    fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
         val entries = if (candles.isEmpty()) {
             val now = Date().time.toDouble()
             val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
-            //TODO: add back blank candles
+            val filledInCandles = candles.filledInBlanks(granularity)
             //Combine Candles to prevent v small candles:
-            val compositeCandles = mutableListOf<Candle>()
-            if (candles.size > 70) {
-                val compositeFactor: Int = (candles.size / 40) - 1
-                var i = 0
-                var low = 0.0
-                var high = 0.0
-                var open = 0.0
-                var volume = 0.0
-                for ((index, candle) in candles.withIndex()) {
-                    if (i == 0) {
-                        low = candle.low
-                        high = candle.high
-                        open = candle.open
-                        volume = candle.volume
-                    } else {
-                        if (candle.low < low) {
-                            low = candle.low
-                        }
-                        if (candle.high > high) {
-                            high = candle.high
-                        }
-                        volume += candle.volume
-                    }
-                    if (i >= compositeFactor || index == candles.size - 1) {
-                        compositeCandles.add(Candle(candle.time, low, high, open, candle.close, volume, candle.tradingPair))
-                        i = -1
-                    }
-                    i++
-                 }
+            if (filledInCandles.size > 70) { //70 is safely above 60 - hour candles should never get cut down
+                val compositeCandles = filledInCandles.compositeCandles(40)
                 compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             } else {
-                candles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
+                filledInCandles.withIndex().map  { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
             }
         }
 

@@ -44,10 +44,52 @@ fun MutableList<Candle>.sorted() : MutableList<Candle> {
     return this.sortedWith(compareBy({ it.time }, { it.close })).toMutableList()
 }
 
-fun MutableList<Candle>.compositeFactor() : Int {
-    return if (size > 70) {
-        (size / 40) - 1
-    } else {
-        0
+fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
+    val tempCandles = this.toMutableList()
+    var addedCandles = 0
+    for ((index, candle) in this.withIndex()) {
+        if (index < size - 2) {
+            val missingTimeToNextCandle = this[index + 1].time - candle.time - granularity
+            if (missingTimeToNextCandle > 0) {
+                val missingCandles = (missingTimeToNextCandle / granularity).toInt()
+                for (i in 1..missingCandles) {
+                    addedCandles++
+                    tempCandles.add(index + addedCandles, candle)
+                }
+            }
+        }
     }
+    return tempCandles
+}
+
+fun List<Candle>.compositeCandles(targetCandleCount: Int) : List<Candle> {
+    val compositeCandles = mutableListOf<Candle>()
+    val compositeFactor: Int = (size / targetCandleCount) - 1
+    var i = 0
+    var low = 0.0
+    var high = 0.0
+    var open = 0.0
+    var volume = 0.0
+    for ((index, candle) in this.withIndex()) {
+        if (i == 0) {
+            low = candle.low
+            high = candle.high
+            open = candle.open
+            volume = candle.volume
+        } else {
+            if (candle.low < low) {
+                low = candle.low
+            }
+            if (candle.high > high) {
+                high = candle.high
+            }
+            volume += candle.volume
+        }
+        if (i >= compositeFactor || index == size - 1) {
+            compositeCandles.add(Candle(candle.time, low, high, open, candle.close, volume, candle.tradingPair))
+            i = -1
+        }
+        i++
+    }
+    return compositeCandles
 }
