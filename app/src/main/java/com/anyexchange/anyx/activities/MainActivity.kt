@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.FragmentManager
@@ -34,11 +33,14 @@ import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
+import com.anyexchange.anyx.classes.Constants.CHART_STYLE
+import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
+import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.fragments.login.LoginFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.notification_template_part_time.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
@@ -89,7 +91,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return OTHER
             }
 
-            fun fromFragment(fragment: RefreshFragment?) : FragmentType {
+            fun forFragment(fragment: RefreshFragment?) : FragmentType {
                 return when (fragment) {
                     is ChartFragment -> CHART
                     is AccountsFragment -> ACCOUNT
@@ -219,10 +221,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-    val CHART_CURRENCY = "CHART_CURRENCY"
-    val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
-    val CHART_STYLE = "CHART_STYLE"
-    val CHART_TIMESPAN = "CHART_TIMESPAN"
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
@@ -235,12 +233,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onSaveInstanceState(outState)
         dataFragment?.backupData()
         outState?.putString(CHART_CURRENCY, ChartFragment.account?.currency?.toString())
-//        if (currentFragment is ChartFragment) {
-//            val chartFragment = currentFragment as ChartFragment
-//            outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
-//            outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
-//            outState?.putString(CHART_TIMESPAN, chartFragment.timeSpan.toString())
-//        }
+        if (currentFragment is ChartFragment) {
+            val chartFragment = currentFragment as ChartFragment
+            outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
+            outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
+            outState?.putLong(CHART_TIMESPAN, chartFragment.timeSpan.value())
+        }
     }
 
     override fun onPause() {
@@ -456,7 +454,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
         }
-        val currentFragmentType = FragmentType.fromFragment(currentFragment)
+        val currentFragmentType = FragmentType.forFragment(currentFragment)
 
         if (fragmentType != currentFragmentType) {
             goToFragment(fragmentType)

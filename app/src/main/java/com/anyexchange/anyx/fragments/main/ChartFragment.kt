@@ -28,6 +28,9 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
+import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
+import com.anyexchange.anyx.classes.Constants.CHART_STYLE
+import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Currency
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
@@ -101,6 +104,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         setHasOptionsMenu(true)
         lockPortrait = false
         this.inflater = inflater
+
+        val tradingPairStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
+        val chartStyleStr  = savedInstanceState?.getString(CHART_STYLE) ?: ""
+        val timespanLong   = savedInstanceState?.getLong(CHART_TIMESPAN) ?: 0
+
+        tradingPair = TradingPair(tradingPairStr)
+        chartStyle = ChartStyle.forString(chartStyleStr)
+        timeSpan = Timespan.forLong(timespanLong)
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 

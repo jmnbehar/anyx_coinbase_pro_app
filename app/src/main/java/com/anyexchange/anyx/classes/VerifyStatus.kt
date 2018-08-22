@@ -43,7 +43,7 @@ enum class VerificationFundSource {
     }
 
     companion object {
-        fun fromString(string: String) : VerificationFundSource? {
+        fun forString(string: String) : VerificationFundSource? {
             return when (string) {
                 "pro" -> Pro
                 "coinbase" -> Coinbase

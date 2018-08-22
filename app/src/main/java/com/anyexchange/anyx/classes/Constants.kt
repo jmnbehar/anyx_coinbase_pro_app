@@ -10,6 +10,11 @@ object Constants {
     const val salt = "GdaxApp"  //DO NOT RENAME
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
 
+    const val CHART_CURRENCY = "CHART_CURRENCY"
+    const val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
+    const val CHART_STYLE = "CHART_STYLE"
+    const val CHART_TIMESPAN = "CHART_TIMESPAN"
+
     const val dataFragmentTag = "data"
 }
 
@@ -67,7 +72,7 @@ enum class Timespan {
     }
 
     companion object {
-        fun fromLong(value: Long) : Timespan {
+        fun forLong(value: Long) : Timespan {
             return when (value) {
                 TimeInSeconds.oneHour -> HOUR
                 TimeInSeconds.oneDay -> DAY

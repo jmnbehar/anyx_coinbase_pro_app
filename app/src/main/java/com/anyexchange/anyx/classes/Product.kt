@@ -198,7 +198,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     companion object {
-        fun fromString(string: String): Product {
+        fun forString(string: String): Product {
             val splitString = string.split('\n')
             val currency = Currency.forString(splitString[0]) ?: Currency.USD
             val id = splitString[1]

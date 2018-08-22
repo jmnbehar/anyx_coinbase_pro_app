@@ -20,7 +20,7 @@ enum class TradeSide {
         }
     }
     companion object {
-        fun fromString(string: String) : TradeSide {
+        fun forString(string: String) : TradeSide {
             return when (string) {
                 "buy"  -> BUY
                 "sell" -> SELL
@@ -43,7 +43,7 @@ enum class TradeType {
         }
     }
     companion object {
-        fun fromString(string: String) : TradeType {
+        fun forString(string: String) : TradeType {
             return when (string) {
                 "market"  ->  MARKET
                 "limit"  -> LIMIT

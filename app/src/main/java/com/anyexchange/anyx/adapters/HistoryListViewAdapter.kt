@@ -2,7 +2,6 @@ package com.anyexchange.anyx.adapters
 
 import android.content.Context
 import android.content.res.Resources
-import android.support.constraint.Constraints
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -14,8 +13,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.list_row_history.view.*
 import org.jetbrains.anko.backgroundColor
-import android.widget.LinearLayout
-
 
 
 /**
@@ -113,7 +110,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             }
             setViewsVisibility(viewHolder, true)
             val order = orders[position]
-            tradeSide = TradeSide.fromString(order.side)
+            tradeSide = TradeSide.forString(order.side)
             price = order.price.toDoubleOrZero()
             val size = (order.size ?: order.specified_funds).toDoubleOrZero()
             val filled = order.filled_size.toDoubleOrZero()
@@ -121,7 +118,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             amount = unfilledSize
             val tradingPair = TradingPair(order.product_id)
             currency = tradingPair.baseCurrency
-            val tradeType = TradeType.fromString(order.type)
+            val tradeType = TradeType.forString(order.type)
             viewHolder.sideText?.text = when (tradeSide) {
                 TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
                 TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
@@ -139,7 +136,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             setViewsVisibility(viewHolder, true)
             viewHolder.tradeTypeText?.visibility = View.GONE
             val fill = fills[position]
-            tradeSide = TradeSide.fromString(fill.side)
+            tradeSide = TradeSide.forString(fill.side)
             val tradingPair = TradingPair(fill.product_id)
             currency = tradingPair.baseCurrency
             price = fill.price.toDoubleOrZero()

@@ -11,7 +11,7 @@ enum class ChartStyle {
         }
     }
     companion object {
-        fun fromString(string: String) : ChartStyle{
+        fun forString(string: String) : ChartStyle{
             return when (string) {
                 Line.toString() -> Line
                 Candle.toString() -> Candle

@@ -3,7 +3,6 @@ package com.anyexchange.anyx.classes
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 
 /**
@@ -88,11 +87,11 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<Alert>
-        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.fromString(s) }?.toSet() ?: setOf()
+        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.forString(s) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
 
     var stashedProducts: List<Product>
-        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.fromString(s) } ?: listOf()
+        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
     fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {

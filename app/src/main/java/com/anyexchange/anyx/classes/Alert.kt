@@ -35,7 +35,7 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
     }
 
     companion object {
-        fun fromString(string: String): Alert {
+        fun forString(string: String): Alert {
             val splitString = string.split('\n')
             val price = splitString[0].toDoubleOrZero()
             val currency = Currency.forString(splitString[1]) ?: Currency.USD
