@@ -167,6 +167,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                         { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
                 historyPager?.setOnTouchListener(this)
+                candleChart?.isScaleXEnabled = false
+            } else {
+                candleChart?.isScaleXEnabled = true
             }
 
 

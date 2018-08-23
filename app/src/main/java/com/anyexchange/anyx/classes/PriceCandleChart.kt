@@ -122,7 +122,11 @@ class PriceCandleChart : CandleStickChart {
 
         setTouchEnabled(touchEnabled)
 
-        setScaleEnabled(false)
+        isScaleYEnabled = false
+        isScaleXEnabled = false
+        isDragEnabled = false
+        isAutoScaleMinMaxEnabled = true
+//        isKeepPositionOnRotation = false
         isDoubleTapToZoomEnabled = false
 
         addCandles(candles, granularity, currency)
