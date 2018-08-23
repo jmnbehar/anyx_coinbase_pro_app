@@ -175,10 +175,17 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_show_trade_confirm">Show confirm popup before buying or selling assets</string>
     <string name="settings_show_send_confirm">Show confirm popup before sending assets</string>
+    <string name="settings_show_fill_alerts">Alert when an open order is filled</string>
     <string name="settings_unknown"> </string>
     <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
     <string name="settings_anyx_eula">Read AnyX User Agreement</string>
     <string name="settings_verify">Verify Account</string>
+    <string name="settings_verify_info">Verify your account to enable trading.</string>
+
+    <string name="settings_email_dev">Email Developer</string>
+    <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
+
+
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
 
     <string-array name="fiat_currencies">

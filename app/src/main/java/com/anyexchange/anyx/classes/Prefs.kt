@@ -9,16 +9,17 @@ import com.google.gson.reflect.TypeToken
  * Created by josephbehar on 12/28/17.
  */
 
+//Never change these strings:
 private const val FILE_NAME = "com.anyexchange.gdax.prefs"  //do not rename
 private const val PASSPHRASE = "passphrase"
 private const val API_KEY = "api_key"
 private const val API_SECRET = "api_secret"
-private const val SAVE_API_INFO = "save_api_info"
-private const val SAVE_PASSPHRASE = "save_passphrase"
+private const val SHOULD_SAVE_API_INFO = "save_api_info"
+private const val SHOULD_SAVE_PASSPHRASE = "save_passphrase"
 private const val ALERTS = "alerts"
-private const val AUTOLOGIN = "should_autologin"
-private const val SHOW_TRADE_CONFIRM = "show_trade_confirm"
-private const val SHOW_SEND_CONFIRM = "show_send_confirm"
+private const val SHOULD_SHOW_TRADE_CONFIRM = "show_trade_confirm"
+private const val SHOULD_SHOW_SEND_CONFIRM = "show_send_confirm"
+private const val ARE_ALERT_FILLS_ON = "ARE_ALERT_FILLS_ON"
 private const val STASHED_PRODUCTS = "stashed_products"
 private const val STASHED_ORDERS = "stashed_orders"
 private const val STASHED_FILLS = "stashed_fills"
@@ -58,21 +59,21 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
 
     var shouldShowTradeConfirmModal: Boolean
-        get() = prefs.getBoolean(SHOW_TRADE_CONFIRM, true)
-        set(value) = prefs.edit().putBoolean(SHOW_TRADE_CONFIRM, value).apply()
+        get() = prefs.getBoolean(SHOULD_SHOW_TRADE_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SHOW_TRADE_CONFIRM, value).apply()
 
     var shouldShowSendConfirmModal: Boolean
-        get() = prefs.getBoolean(SHOW_SEND_CONFIRM, true)
-        set(value) = prefs.edit().putBoolean(SHOW_SEND_CONFIRM, value).apply()
+        get() = prefs.getBoolean(SHOULD_SHOW_SEND_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SHOW_SEND_CONFIRM, value).apply()
 
     var isDarkModeOn: Boolean
         get() = prefs.getBoolean(DARK_MODE, true)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
     var shouldSaveApiInfo: Boolean
-        get() = prefs.getBoolean(SAVE_API_INFO, true)
+        get() = prefs.getBoolean(SHOULD_SAVE_API_INFO, true)
         set(value) {
-            prefs.edit().putBoolean(SAVE_API_INFO, value).apply()
+            prefs.edit().putBoolean(SHOULD_SAVE_API_INFO, value).apply()
             if (!value) {
                 shouldSavePassphrase = false
             }
@@ -83,8 +84,8 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
 
     var shouldSavePassphrase: Boolean
-        get() = prefs.getBoolean(SAVE_PASSPHRASE, true)
-        set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
+        get() = prefs.getBoolean(SHOULD_SAVE_PASSPHRASE, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<Alert>
         get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.forString(s) }?.toSet() ?: setOf()
@@ -224,6 +225,10 @@ class Prefs (var context: Context) {
             listOf()
         }
     }
+
+    var areAlertFillsActive: Boolean
+        get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
+        set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
 
     fun isApiKeyValid(apiKey: String) : Boolean? {
         val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()

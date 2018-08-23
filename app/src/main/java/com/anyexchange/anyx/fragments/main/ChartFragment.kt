@@ -652,7 +652,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         }
                     }
                 }
-                CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(context, onFailure) { apiFillList ->
+                CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(onFailure) { apiFillList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredFills = apiFillList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
