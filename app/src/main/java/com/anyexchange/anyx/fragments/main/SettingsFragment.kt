@@ -62,7 +62,7 @@ class SettingsFragment : RefreshFragment() {
             prefs.isLoggedIn = false
             CBProApi.credentials = null
             prefs.stashOrders(null)
-            prefs.stashFills(null)
+            prefs.nukeStashedFills()
             (activity as? MainActivity)?.goToFragment(MainActivity.FragmentType.LOGIN)
 
         }
