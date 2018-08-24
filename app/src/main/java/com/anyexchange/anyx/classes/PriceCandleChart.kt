@@ -1,12 +1,10 @@
 package com.anyexchange.anyx.classes
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Paint
 import android.support.v4.content.res.ResourcesCompat
 import android.util.AttributeSet
 import android.view.MotionEvent
-import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
@@ -83,7 +81,7 @@ class PriceCandleChart : CandleStickChart {
         }
     }
 
-    fun configure(candles: List<Candle>, granularity: Long, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         val newDescription = Description()
@@ -125,10 +123,10 @@ class PriceCandleChart : CandleStickChart {
         setScaleEnabled(false)
         isDoubleTapToZoomEnabled = false
 
-        addCandles(candles, granularity, currency)
+        addCandles(candles, currency)
     }
 
-    fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
+    fun addCandles(candles: List<Candle>, currency: Currency) {
         val entries = if (candles.isEmpty()) {
             val now = Date().time.toDouble()
             val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)

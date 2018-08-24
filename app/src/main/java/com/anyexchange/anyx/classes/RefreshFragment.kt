@@ -40,7 +40,7 @@ open class RefreshFragment: Fragment() {
         }
 
     companion object {
-        val ARG_OBJECT = "object"
+        const val ARG_OBJECT = "object"
     }
 
     override fun onResume() {
@@ -143,7 +143,7 @@ open class RefreshFragment: Fragment() {
         onComplete(true)
     }
 
-    fun endRefresh() {
+    private fun endRefresh() {
         swipeRefreshLayout?.isRefreshing = false
     }
 }

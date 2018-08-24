@@ -28,28 +28,3 @@ enum class VerificationStatus {
             }
 
 }
-
-enum class VerificationFundSource {
-    Pro,
-    Coinbase,
-    Buy;
-
-    override fun toString(): String {
-        return when (this) {
-            Pro -> "pro"
-            Coinbase -> "coinbase"
-            Buy -> "buy"
-        }
-    }
-
-    companion object {
-        fun forString(string: String) : VerificationFundSource? {
-            return when (string) {
-                "pro" -> Pro
-                "coinbase" -> Coinbase
-                "buy" -> Buy
-                else -> null
-            }
-        }
-    }
-}

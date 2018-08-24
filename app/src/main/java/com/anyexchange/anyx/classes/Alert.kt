@@ -22,8 +22,7 @@ class Alert(var price: Double, val currency: Currency, val triggerIfAbove: Boole
         }
         val currencyCode = currency.orderValue
         val priceCode = (price * 100).toInt()
-        val hashCodeInt = (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
-        return hashCodeInt
+        return (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
     }
 
     override fun toString(): String {

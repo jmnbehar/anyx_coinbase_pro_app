@@ -68,15 +68,30 @@
             android:id="@+id/txt_setting_verify_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             android:text="@string/settings_verify_info" />
 
         <Button
             android:id="@+id/btn_setting_email_dev"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:text="@string/settings_email_dev" />
+
+        <TextView
+            android:id="@+id/txt_setting_email_dev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/settings_email_dev_info" />
+
+        <Button
+            android:id="@+id/btn_setting_show_cbpro_eula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="2dp"
+            android:text="@string/settings_coinbase_pro_eula" />
 
         <TextView
             android:id="@+id/txt_setting_email_dev"
@@ -86,27 +101,19 @@
             android:text="@string/settings_email_dev_info" />
 
         <Button
-            android:id="@+id/btn_setting_show_cbpro_eula"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:layout_marginTop="4dp"
-            android:text="@string/settings_coinbase_pro_eula" />
-
-        <Button
             android:id="@+id/btn_setting_show_anyx_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="2dp"
             android:text="@string/settings_anyx_eula" />
+
 
         <Button
             android:id="@+id/btn_setting_log_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="25dp"
             android:text="@string/settings_log_out" />
     </LinearLayout>
 

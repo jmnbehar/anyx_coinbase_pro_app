@@ -187,6 +187,10 @@
 
 
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
+    <string name="settings_verify_info">Verify your account to enable trading.</string>
+
+    <string name="settings_email_dev">Email Developer</string>
+    <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
 
     <string-array name="fiat_currencies">
         <item>USD</item>
@@ -280,6 +284,9 @@
     <string name="verify_repay_error_message">Due to an unknown error, you may have lost a very small quantity of %s. Please reach out to our verification support at anyx.verify@gmail.com</string>
     <string name="verify_payment_method_error_message">Could not verify at this time because your account is unfunded.\n\nPlease add funds and try again.</string>
     <string name="verify_unknown_error_message">An unknown error occurred. Try again later.</string>
+
+    <string name="verify_accept">I Accept</string>
+    <string name="verify_done">Done</string>
 
 
 

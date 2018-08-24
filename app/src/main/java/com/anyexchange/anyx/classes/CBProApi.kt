@@ -109,7 +109,6 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                             handler.postDelayed(retry, 1000.toLong())
                         }
                         ErrorCode.Unauthorized.code, ErrorCode.BadRequest.code -> {
-                            //TODO: possibly dont pass in initData for log in calls
                             when (result.errorMessage) {
                                 ErrorMessage.InvalidApiKey.toString(), ErrorMessage.InvalidApiKey.toString() -> {
                                     credentials = null
@@ -215,15 +214,14 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 try {
                     val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
                     onComplete(apiAccountList)
-                } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(Exception())))
+                } catch (e: Exception) {
+                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.cryptoAccounts = listOf()
-            //TODO: dont force unwrap this:
             val productList: MutableList<Product> = mutableListOf()
             if (!Account.areAccountsOutOfDate && context != null) {
                 val stashedProductList = Prefs(context).stashedProducts
@@ -357,7 +355,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     class orderStop(initData: CBProApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
     class cancelOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: CBProApiInitData) : CBProApi(initData)
-    class listOrders(initData: CBProApiInitData?, val status: String = "all", val productId: String?) : CBProApi(initData) {
+    class listOrders(initData: CBProApiInitData?, val status: String? = null, val productId: String?) : CBProApi(initData) {
         fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -371,9 +369,11 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         }
     }
     class getOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
-    class fills(initData: CBProApiInitData?, val orderId: String = "all", val productId: String = "all") : CBProApi(initData) {
-        //TODO: verify this will still work
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
+    class fills(initData: CBProApiInitData?, val orderId: String? = null, val productId: String? = null) : CBProApi(initData) {
+        companion object {
+            var dateLastUpdated: Long? = null
+        }
+        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let {context ->
                     try {
@@ -549,18 +549,43 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is fills -> {
-                    paramList.add(Pair("order_id", orderId))
-                    paramList.add(Pair("product_id", productId))
-                    return listOf()
-                }
-                is listOrders -> {
-                    paramList.add(Pair("status", status))
+                    if (orderId != null) {
+                        paramList.add(Pair("order_id", orderId))
+                    }
                     if (productId != null) {
                         paramList.add(Pair("product_id", productId))
                     }
-                    return listOf()
+                    return paramList.toList()
+                }
+                is listOrders -> {
+                    if (status != null) {
+                        paramList.add(Pair("status", status))
+                    }
+                    if (productId != null) {
+                        paramList.add(Pair("product_id", productId))
+                    }
+                    return paramList.toList()
                 }
                 else -> return null
+            }
+        }
+    private val fullPath: String
+        get() {
+            params?.let { params ->
+                if (params.isEmpty()) {
+                    return path
+                } else {
+                    var fullPath = "$path?"
+                    for ((index, param) in params.withIndex()) {
+                        if (index > 0) {
+                            fullPath += "&"
+                        }
+                        fullPath += "${param.first}=${param.second}"
+                    }
+                    return fullPath
+                }
+            } ?: run {
+                return path
             }
         }
 
@@ -683,7 +708,11 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
             val credentials = credentials
             if (credentials != null) {
                 val timestamp = (Date().timeInSeconds()).toString()
-                val message = timestamp + method + path + body
+                val message = if (this is fills || this is listOrders) {
+                    timestamp + method + fullPath + body
+                } else {
+                    timestamp + method + path + body
+                }
                 var hash = ""
                 try {
                     val secretDecoded: ByteArray? = Base64.decode(credentials.apiSecret, 0)

@@ -12,6 +12,7 @@ import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
 
@@ -33,6 +34,7 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var verifyButton: Button
     private lateinit var cbproEulaButton: Button
     private lateinit var anyxEulaButton: Button
+    private lateinit var emailDevButton: Button
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
@@ -46,6 +48,7 @@ class SettingsFragment : RefreshFragment() {
         verifyButton = rootView.btn_setting_verify_account
         cbproEulaButton = rootView.btn_setting_show_cbpro_eula
         anyxEulaButton = rootView.btn_setting_show_anyx_eula
+        emailDevButton = rootView.btn_setting_email_dev
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
@@ -59,7 +62,7 @@ class SettingsFragment : RefreshFragment() {
             prefs.isLoggedIn = false
             CBProApi.credentials = null
             prefs.stashOrders(null)
-            prefs.stashFills(null)
+            prefs.nukeStashedFills()
             (activity as? MainActivity)?.goToFragment(MainActivity.FragmentType.LOGIN)
 
         }
@@ -72,6 +75,18 @@ class SettingsFragment : RefreshFragment() {
         cbproEulaButton.setOnClickListener {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
+        }
+
+        emailDevButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO)
+            intent.data = Uri.parse("mailto:anyx.app@gmail.com")
+            intent.putExtra(Intent.EXTRA_SUBJECT, "AnyX Feedback")
+
+            context?.packageManager?.let { packageManager ->
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
+            }
         }
 
         anyxEulaButton.visibility = View.GONE
@@ -139,8 +154,10 @@ class SettingsFragment : RefreshFragment() {
             verifyButton.visibility = View.GONE
         } else if (prefs.isApiKeyValid(apiKey) == true) {
             verifyButton.visibility = View.GONE
+            txt_setting_verify_account.visibility = View.GONE
         } else {
             verifyButton.visibility = View.VISIBLE
+            txt_setting_verify_account.visibility = View.VISIBLE
         }
 
         if (prefs.isLoggedIn) {

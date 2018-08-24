@@ -213,11 +213,20 @@ class Prefs (var context: Context) {
         }
     }
 
-    fun stashFills(fillListJson: String?) {
-        prefs.edit().putString(STASHED_FILLS, fillListJson).apply()
+    fun stashFills(fillListJson: String?, productId: String) {
+        //TODO: remove this line in the next version, its just there to delete old stuff
+        prefs.edit().remove(STASHED_FILLS).apply()
+        prefs.edit().putString(STASHED_FILLS + productId, fillListJson).apply()
+    }
+    fun nukeStashedFills() {
+        for (product in Account.cryptoAccounts.map { it.product }) {
+            for (tradingPair in product.tradingPairs) {
+                prefs.edit().remove(STASHED_FILLS + tradingPair.id).apply()
+            }
+        }
     }
     fun getStashedFills(productId: String) : List<ApiFill> {
-        val fillListJson = prefs.getString(STASHED_FILLS, null)
+        val fillListJson = prefs.getString(STASHED_FILLS + productId, null)
         return try {
             val apiFillList: List<ApiFill> = Gson().fromJson(fillListJson, object : TypeToken<List<ApiFill>>() {}.type)
             apiFillList.filter { it.product_id == productId }
