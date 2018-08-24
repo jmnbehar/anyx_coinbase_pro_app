@@ -193,7 +193,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         candles = candles.reversed()
                         allCandles = allCandles.addingCandles(candles)
                     } catch (exception: Exception) {
-                        //Do nothing
+                        onFailure(Result.Failure(FuelError(exception)))
                     }
 
                     if (pagesReceived == pages && allCandles.isNotEmpty()) {

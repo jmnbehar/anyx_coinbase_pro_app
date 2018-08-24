@@ -96,13 +96,13 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
     fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
-        val tempRapidMovementAlerts = rapidMovementAlerts.toMutableSet()
-        if (!isActive && rapidMovementAlerts.contains(currency)) {
+        val tempRapidMovementAlerts = rapidMovementAlertCurrencies.toMutableSet()
+        if (!isActive && rapidMovementAlertCurrencies.contains(currency)) {
             tempRapidMovementAlerts.remove(currency)
-        } else if (isActive && !rapidMovementAlerts.contains(currency)) {
+        } else if (isActive && !rapidMovementAlertCurrencies.contains(currency)) {
             tempRapidMovementAlerts.add(currency)
         }
-        rapidMovementAlerts = tempRapidMovementAlerts
+        rapidMovementAlertCurrencies = tempRapidMovementAlerts
     }
 
     var stashedFiatAccountList: List<Account>
@@ -184,7 +184,7 @@ class Prefs (var context: Context) {
             }
         }
 
-    var rapidMovementAlerts: Set<Currency>
+    var rapidMovementAlertCurrencies: Set<Currency>
         get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
 

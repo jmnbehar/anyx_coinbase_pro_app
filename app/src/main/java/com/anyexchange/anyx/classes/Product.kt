@@ -167,6 +167,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                             Timespan.MONTH -> monthCandles[tradingPairIndex] = candles
                             Timespan.YEAR -> yearCandles[tradingPairIndex] = candles
                         }
+                        //TODO: consider whether or not we should do this:
                         price[tradingPairIndex] = candles.last().close
                     }
                 }

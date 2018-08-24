@@ -31,6 +31,7 @@ object TimeInSeconds {
     const val oneMinute: Long = 60
     const val fiveMinutes: Long = 300
     const val fifteenMinutes: Long = 900
+    const val twentyMinutes: Long = 1200
     const val thirtyMinutes: Long = 1800
     const val halfHour: Long = 1800
     const val oneHour: Long = 3600
