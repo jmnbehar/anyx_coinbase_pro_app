@@ -28,9 +28,6 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
-import com.anyexchange.anyx.classes.Constants.CHART_STYLE
-import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
-import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.classes.Currency
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
@@ -336,10 +333,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         account = newAccount
         blockRefresh = true
         didTouchTradingPairSpinner = false
-        val activity = activity as com.anyexchange.anyx.activities.MainActivity
-        val currency = newAccount.currency
-
-        val chartTimeSpan = timeSpan
+        //TODO: don't force unwrap:
+        val activity = activity as MainActivity
 
         val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
@@ -357,22 +352,32 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             viewModel.tradingPair = tradingPairs.firstOrNull()
         }
 
-        candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
+        candles = newAccount.product.candlesForTimespan(timeSpan, tradingPair)
         val prefs = Prefs(activity)
-        val stashedFills = prefs.getStashedFills(newAccount.product.id)
-        val stashedOrders = prefs.getStashedOrders(newAccount.product.id)
+        val nowInSeconds = Calendar.getInstance().timeInSeconds()
+        val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
 
-        val now = Calendar.getInstance()
+//        if (!wereFillsRecentlyUpdated && context != null) {
+        if (true) {
+            showProgressSpinner()
+            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash(activity, { }) { apiFillList ->
+                if (lifecycle.isCreatedOrResumed) {
+                    switchAccountCandlesCheck(newAccount, apiFillList)
+                    dismissProgressSpinner()
+                }
+            }
+        } else {
+            val stashedFills = prefs.getStashedFills(newAccount.product.id)
+            switchAccountCandlesCheck(newAccount, stashedFills)
+        }
+    }
+    private fun switchAccountCandlesCheck(account: Account, fills: List<ApiFill>) {
+        val nowInSeconds = Calendar.getInstance().timeInSeconds()
         val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
-        val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(chartTimeSpan)
-        val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > now.timeInSeconds())
-
+        val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timeSpan)
+        val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
         if (areCandlesUpToDate) {
-            addCandlesToActiveChart(candles, newAccount.currency)
-            setPercentChangeText(chartTimeSpan)
-            txt_chart_name.text = currency.fullName
-            setButtonsAndBalanceText(newAccount)
-            updateHistoryPagerAdapter(stashedOrders, stashedFills)
+            completeSwitchAccount(account, fills)
         } else {
             showProgressSpinner()
             miniRefresh({   //onFailure
@@ -380,15 +385,22 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 toast(R.string.error_message)
                 dismissProgressSpinner()
             }, {    //success
-                candles = newAccount.product.candlesForTimespan(chartTimeSpan, tradingPair)
-                addCandlesToActiveChart(candles, newAccount.currency)
-                setPercentChangeText(chartTimeSpan)
-                txt_chart_name.text = currency.fullName
-                setButtonsAndBalanceText(newAccount)
-                blockRefresh = false
                 dismissProgressSpinner()
-                updateHistoryPagerAdapter(stashedOrders, stashedFills)
+                candles = account.product.candlesForTimespan(timeSpan, tradingPair)
+                completeSwitchAccount(account, fills)
             })
+        }
+    }
+    private fun completeSwitchAccount(account: Account, fills: List<ApiFill>) {
+        blockRefresh = false
+        context?.let {
+            val prefs = Prefs(it)
+            val stashedOrders = prefs.getStashedOrders(account.product.id)
+            addCandlesToActiveChart(candles, account.currency)
+            setPercentChangeText(timeSpan)
+            txt_chart_name.text = account.currency.fullName
+            setButtonsAndBalanceText(account)
+            updateHistoryPagerAdapter(stashedOrders, fills)
         }
     }
 
