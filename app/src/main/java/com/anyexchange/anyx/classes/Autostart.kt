@@ -106,7 +106,7 @@ class AlertJobService : JobService() {
             for (account in Account.cryptoAccounts) {
                 val stashedOrders = prefs.getStashedOrders(account.product.id)
                 if (stashedOrders.isNotEmpty()) {
-                    CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash(this, { }) { }
+                    CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash({ }) { }
                     CBProApi.fills(apiInitData, productId = account.product.id).getAndStash({ }) {
                         //TODO: trigger alerts? or is that already done elsewhere
                     }
@@ -124,7 +124,7 @@ class AlertJobService : JobService() {
         var candlesUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         for (account in Account.cryptoAccounts) {
-            account.product.updateCandles(timespan, null, apiInitData, onFailure) { didUpdate ->
+            account.product.updateCandles(timespan, null, apiInitData, onFailure) { _ ->
                 candlesUpdated++
                 if (candlesUpdated == accountListSize) {
                     onComplete()

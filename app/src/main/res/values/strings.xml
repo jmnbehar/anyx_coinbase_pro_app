@@ -185,12 +185,7 @@
     <string name="settings_email_dev">Email Developer</string>
     <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
 
-
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
-    <string name="settings_verify_info">Verify your account to enable trading.</string>
-
-    <string name="settings_email_dev">Email Developer</string>
-    <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
 
     <string-array name="fiat_currencies">
         <item>USD</item>

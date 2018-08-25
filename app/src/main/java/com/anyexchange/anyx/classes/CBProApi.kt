@@ -356,11 +356,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     class cancelOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: CBProApiInitData) : CBProApi(initData)
     class listOrders(initData: CBProApiInitData?, val status: String? = null, val productId: String?) : CBProApi(initData) {
-        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<ApiOrder> = Gson().fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    Prefs(context).stashOrders(result.value)
+                    if (context != null) {
+                        Prefs(context).stashOrders(result.value)
+                    }
                     onComplete(apiOrderList)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
@@ -373,20 +375,22 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         companion object {
             var dateLastUpdated: Long? = null
         }
-        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let {context ->
                     try {
                         val prefs = Prefs(context)
                         val alertFillsAreActive = prefs.areAlertFillsActive
                         val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                        if (alertFillsAreActive) {
-                            val stashedFills = prefs.getStashedFills(productId)
-                            if (apiFillList.size > stashedFills.size) {
-                                //TODO: show Alert
+                        if (productId != null) {
+                            if (alertFillsAreActive) {
+                                val stashedFills = prefs.getStashedFills(productId)
+                                if (apiFillList.size > stashedFills.size) {
+                                    //TODO: show Alert
+                                }
                             }
+                            prefs.stashFills(result.value, productId)
                         }
-                        prefs.stashFills(result.value)
                         onComplete(apiFillList)
                     } catch (e: JsonSyntaxException) {
                         onFailure(Result.Failure(FuelError(e)))

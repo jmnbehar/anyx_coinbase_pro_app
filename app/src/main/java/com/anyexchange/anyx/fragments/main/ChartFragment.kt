@@ -359,7 +359,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         if (!wereFillsRecentlyUpdated && context != null) {
             showProgressSpinner()
-            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash(activity, { }) { apiFillList ->
+            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({ }) { apiFillList ->
                 if (lifecycle.isCreatedOrResumed) {
                     switchAccountCandlesCheck(newAccount, apiFillList)
                     dismissProgressSpinner()
@@ -653,7 +653,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
                 var filteredOrders: List<ApiOrder>? = null
                 var filteredFills: List<ApiFill>? = null
-                CBProApi.listOrders(apiInitData, productId = null).getAndStash(context, onFailure) { apiOrderList ->
+                CBProApi.listOrders(apiInitData, productId = null).getAndStash(onFailure) { apiOrderList ->
                     if (lifecycle.isCreatedOrResumed) {
                         filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                         if (filteredOrders != null && filteredFills != null) {
