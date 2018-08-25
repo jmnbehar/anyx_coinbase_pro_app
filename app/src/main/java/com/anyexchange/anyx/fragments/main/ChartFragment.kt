@@ -357,9 +357,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
         val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
 
-        if (!wereFillsRecentlyUpdated && context != null) {
+        if (prefs.isLoggedIn && !wereFillsRecentlyUpdated && context != null) {
             showProgressSpinner()
-            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash(activity, { }) { apiFillList ->
+            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash(activity, {
+                dismissProgressSpinner()
+            }) { apiFillList ->
                 if (lifecycle.isCreatedOrResumed) {
                     switchAccountCandlesCheck(newAccount, apiFillList)
                     dismissProgressSpinner()
