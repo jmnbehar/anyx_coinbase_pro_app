@@ -143,6 +143,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         dataFragment?.restoreData(this)
 
+        if (!AutoStart.hasStarted) {
+            AutoStart.scheduleCustomAlertJob(this)
+        }
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
         }
@@ -583,16 +586,4 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             inputManager.hideSoftInputFromInputMethod(currentFocus.windowToken, 0)
         }
     }
-
-//    private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
-//        alert {
-//            title = titleString
-//            message = messageString
-//            positiveButton(positiveText) { positiveAction() }
-//            if (negativeText != null) {
-//                negativeButton(negativeText) { negativeAction() }
-//            }
-//        }.show()
-//    }
-
 }

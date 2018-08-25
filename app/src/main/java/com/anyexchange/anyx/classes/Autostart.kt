@@ -21,64 +21,25 @@ class AutoStart : BroadcastReceiver() {
     }
     companion object {
 
+        var hasStarted = false
+
         // schedule the start of the service every 1 - 5 minutes
         fun scheduleCustomAlertJob(context: Context) {
+            hasStarted = true
             val serviceComponent = ComponentName(context, AlertJobService::class.java)
             val builder = JobInfo.Builder(0, serviceComponent)
             builder.setMinimumLatency((TimeInSeconds.oneMinute * 1000)) // wait at least
             builder.setOverrideDeadline((TimeInSeconds.fiveMinutes * 1000)) // maximum delay
             //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
-            //builder.setRequiresDeviceIdle(true); // device should be idle
-            //builder.setRequiresCharging(false); // we don't care if the device is charging or not
+            builder.setRequiresDeviceIdle(true) // device should be idle
+            builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
             jobScheduler!!.schedule(builder.build())
         }
 
-//        fun scheduleRapidMovementJob(context: Context) {
-//            val serviceComponent = ComponentName(context, RapidMovementJobService::class.java)
-//            val builder = JobInfo.Builder(0, serviceComponent)
-//            builder.setMinimumLatency((300 * 1000).toLong()) // wait at least
-//            builder.setOverrideDeadline((600 * 1000).toLong()) // maximum delay
-//            //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
-//            //builder.setRequiresDeviceIdle(true); // device should be idle
-//            //builder.setRequiresCharging(false); // we don't care if the device is charging or not
-//            val jobScheduler = context.getSystemService(JobScheduler::class.java)
-//            jobScheduler!!.schedule(builder.build())
-//        }
     }
 }
 
-//class RapidMovementJobService : JobService() {
-//    val apiInitData = CBProApi.CBProApiInitData(this, { })
-//
-//    override fun onStartJob(params: JobParameters): Boolean {
-//        if (Account.cryptoAccounts.isEmpty()) {
-//            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
-//                checkPriceChanges()
-//            })
-//        } else {
-//            checkPriceChanges()
-//        }
-//
-//        AutoStart.scheduleRapidMovementJob(applicationContext) // reschedule the job
-//        return true
-//    }
-//
-//    override fun onStopJob(params: JobParameters): Boolean {
-//        return true
-//    }
-//
-//    companion object {
-//        private val TAG = "SyncService"
-//    }
-//
-//
-//    fun percentChange(start: Double, end: Double) : Double {
-//        val change = end - start
-//        val percentChange = (change / start) * 100.0
-//        return percentChange.absoluteValue
-//    }
-//}
 
 class AlertJobService : JobService() {
     val apiInitData = CBProApi.CBProApiInitData(this) { }

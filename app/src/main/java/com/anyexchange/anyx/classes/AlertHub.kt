@@ -17,7 +17,7 @@ object AlertHub {
 
     fun triggerDummyAlert(context: Context) {
         val date = Date()
-        triggerAlert("Dummy", "AnyX Ran Alerts", "Tested Alerts at $date", "Dummy_${date.time}", context)
+        postAlert("Dummy", "AnyX Ran Alerts", "Tested Alerts at $date", "Dummy_${date.time}", context)
     }
 
     fun triggerRapidMovementAlert(currency: Currency, percentChange: Double, isChangePositive: Boolean, timespan: String, context: Context) {
@@ -32,7 +32,7 @@ object AlertHub {
 
         val notificationTag = "PriceMovementAlert_${currency}_${Date().time}"
 
-        triggerAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
     }
 
     fun triggerFillAlert(fill: ApiFill, context: Context) {
@@ -50,7 +50,7 @@ object AlertHub {
         val notificationText = "$side order of $size ${tradingPair.baseCurrency} filled at $price"
         val notificationTag = "FillAlert_" + fill.trade_id
 
-        triggerAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
     }
 
     fun triggerPriceAlert(alert: Alert, context: Context) {
@@ -64,12 +64,12 @@ object AlertHub {
         val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
         val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
 
-        triggerAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
         val prefs = Prefs(context)
         prefs.removeAlert(alert)
     }
 
-    private fun triggerAlert(channelId: String, title: String, text: String, tag: String, context: Context) {
+    private fun postAlert(channelId: String, title: String, text: String, tag: String, context: Context) {
         if (notificationManager == null) {
             notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
