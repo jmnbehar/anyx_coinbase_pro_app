@@ -360,6 +360,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (prefs.isLoggedIn && !wereFillsRecentlyUpdated && context != null) {
             showProgressSpinner()
             CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash(activity, {
+                switchAccountCandlesCheck(newAccount, listOf())
                 dismissProgressSpinner()
             }) { apiFillList ->
                 if (lifecycle.isCreatedOrResumed) {
