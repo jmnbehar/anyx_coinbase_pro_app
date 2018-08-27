@@ -31,7 +31,7 @@ private const val APPROVED_API_KEYS = "approved_api_keys"
 private const val REJECTED_API_KEYS = "rejected_api_keys"
 private const val RAPID_PRICE_MOVES = "rapid_price_movement"
 private const val PREFERRED_FIAT = "preferred_fiat"
-
+private const val MOVEMENT_ALERT_TIMESTAMP = "MOVEMENT_ALERT_TIMESTAMP"
 
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
@@ -184,9 +184,24 @@ class Prefs (var context: Context) {
             }
         }
 
+    var lastMovementAlertTimestamp: Long
+        get() = prefs.getLong(MOVEMENT_ALERT_TIMESTAMP, 0)
+        set(value) = prefs.edit().putLong(MOVEMENT_ALERT_TIMESTAMP, value).apply()
+
     var rapidMovementAlertCurrencies: Set<Currency>
         get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
+
+    fun setMovementAlert(currency: Currency, isActive: Boolean) {
+        val currentActiveAlerts = rapidMovementAlertCurrencies.toMutableSet()
+        if (isActive && !rapidMovementAlertCurrencies.contains(currency)) {
+            currentActiveAlerts.add(currency)
+        } else if (!isActive && rapidMovementAlertCurrencies.contains(currency)) {
+            currentActiveAlerts.remove(currency)
+        }
+        rapidMovementAlertCurrencies = currentActiveAlerts.toSet()
+    }
+
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
         /* Keeps track of unpaid fees to be paid once over the min send amount */

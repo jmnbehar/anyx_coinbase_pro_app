@@ -28,8 +28,8 @@ class AutoStart : BroadcastReceiver() {
             hasStarted = true
             val serviceComponent = ComponentName(context, AlertJobService::class.java)
             val builder = JobInfo.Builder(0, serviceComponent)
-            builder.setMinimumLatency((TimeInSeconds.oneMinute * 1000)) // wait at least
-            builder.setOverrideDeadline((TimeInSeconds.fiveMinutes * 1000)) // maximum delay
+            builder.setMinimumLatency((10 * 1000)) // wait at least
+            builder.setOverrideDeadline((20 * 1000)) // maximum delay
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
@@ -44,7 +44,7 @@ class AlertJobService : JobService() {
     val apiInitData = CBProApi.CBProApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        AlertHub.triggerDummyAlert(this)
+//        AlertHub.triggerDummyAlert(this)
         if (Account.cryptoAccounts.isEmpty()) {
             CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
                 loopThroughAlerts()
@@ -77,7 +77,21 @@ class AlertJobService : JobService() {
     }
 
     private val timespan = Timespan.DAY
-    private var lastMovementAlertTimestamp: Long = 0
+
+    private var movementTimestampBackingLong: Long? = null
+    private var lastMovementAlertTimestamp: Long
+        get() {
+            val tempTimestamp = movementTimestampBackingLong
+            return if (tempTimestamp == null) {
+                Prefs(this).lastMovementAlertTimestamp
+            } else {
+                tempTimestamp
+            }
+        }
+        set(value) {
+            Prefs(this).lastMovementAlertTimestamp = value
+        }
+
 
     private fun loopThroughAlerts() {
         val prefs = Prefs(this)
@@ -93,13 +107,15 @@ class AlertJobService : JobService() {
             }
         }
 
-        val enabledCurrencies = prefs.rapidMovementAlertCurrencies
+        //TODO: revert this
+//        val enabledCurrencies = prefs.rapidMovementAlertCurrencies
+        val enabledCurrencies = listOf(Currency.ETH)
         for (currency in enabledCurrencies) {
             val account = Account.forCurrency(currency)
             if (account != null) {
                 val candles = account.product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
-                    val minAlertPercentage = 2.0
+                    val minAlertPercentage = 0.7
                     var alertPercentage = minAlertPercentage
                     var alertTime = ""
                     var changeIsPositive = false
@@ -117,13 +133,13 @@ class AlertJobService : JobService() {
                         changeIsPositive = mostRecentPrice > twentyMinutePrice
                     }
                     val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
-                    if (halfHourChange > alertPercentage + 1.0 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.halfHour)) {
+                    if (halfHourChange > alertPercentage + 0.5 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.halfHour)) {
                         alertPercentage = halfHourChange
                         alertTime = "half hour"
                         changeIsPositive = mostRecentPrice > halfHourPrice
                     }
                     val hourChange = percentChange(mostRecentPrice, hourPrice)
-                    if (hourChange > alertPercentage + 1.0 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.oneHour)) {
+                    if (hourChange > alertPercentage + 0.5 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.oneHour)) {
                         alertPercentage = hourChange
                         alertTime = "hour"
                         changeIsPositive = mostRecentPrice > hourPrice
