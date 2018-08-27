@@ -28,14 +28,6 @@
             tools:layout_editor_absoluteX="48dp"
             tools:layout_editor_absoluteY="16dp" />
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabl_transfer_in_currency"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="top">
-
-        </android.support.design.widget.TabLayout>
-
 
         <LinearLayout
             android:id="@+id/layout_transfer_in_details"

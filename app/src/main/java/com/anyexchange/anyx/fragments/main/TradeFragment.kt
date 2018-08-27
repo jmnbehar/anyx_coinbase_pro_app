@@ -252,7 +252,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun onResume() {
         super.onResume()
 
-        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
+        showNavSpinner(ChartFragment.account?.currency, Currency.cryptoList) { selectedCurrency ->
             val selectedAccount = Account.forCurrency(selectedCurrency)
             if (selectedAccount != null) {
                 ChartFragment.account = selectedAccount

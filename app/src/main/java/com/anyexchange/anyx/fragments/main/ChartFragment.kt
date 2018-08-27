@@ -235,7 +235,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         checkTimespanButton()
         updateChartStyle()
 
-        showNavSpinner(account?.currency) { selectedCurrency ->
+        showNavSpinner(account?.currency, Currency.cryptoList) { selectedCurrency ->
             //            showProgressSpinner()
             account = Account.forCurrency(selectedCurrency)
             account?. let { account ->

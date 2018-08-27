@@ -66,25 +66,31 @@ open class RefreshFragment: Fragment() {
         }
     }
 
-    fun showNavSpinner(defaultSelection: Currency?, onItemSelected: (currency: Currency) -> Unit) {
-        val mainActivity = (activity as com.anyexchange.anyx.activities.MainActivity)
-        mainActivity.toolbar.title = ""
-        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-        mainActivity.spinnerNav.isEnabled = true
-        mainActivity.spinnerNav.visibility = View.VISIBLE
-        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (parent?.getItemAtPosition(position) is Currency) {
-                    val selectedItem = parent.getItemAtPosition(position) as Currency
-                    onItemSelected(selectedItem)
+    fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
+        (activity as? MainActivity)?.let { mainActivity ->
+            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_coinbase_account, currencyList)
+            spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            mainActivity.spinnerNav.adapter = spinnerNavAdapter
+
+            mainActivity.toolbar.title = ""
+            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+            mainActivity.spinnerNav.isEnabled = true
+            mainActivity.spinnerNav.visibility = View.VISIBLE
+            mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (parent?.getItemAtPosition(position) is Currency) {
+                        val selectedItem = parent.getItemAtPosition(position) as Currency
+                        onItemSelected(selectedItem)
+                    }
                 }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
-        }
-        if (defaultSelection != null) {
-            val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-            val currentIndex = spinnerList.indexOf(defaultSelection)
-            mainActivity.spinnerNav.setSelection(currentIndex)
+            if (defaultSelection != null) {
+                val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
+                val currentIndex = spinnerList.indexOf(defaultSelection)
+                mainActivity.spinnerNav.setSelection(currentIndex)
+            }
         }
     }
 

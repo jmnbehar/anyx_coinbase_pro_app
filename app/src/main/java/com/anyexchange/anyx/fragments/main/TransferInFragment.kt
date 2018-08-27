@@ -26,8 +26,6 @@ class TransferInFragment : RefreshFragment() {
 
     private lateinit var interactiveLayout: LinearLayout
 
-    private lateinit var currencyTabLayout: TabLayout
-
     private lateinit var cbAccountsLabelTxt: TextView
     private lateinit var cbAccountsSpinner: Spinner
     private lateinit var cbAccountText: TextView
@@ -47,7 +45,7 @@ class TransferInFragment : RefreshFragment() {
 
     private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
 
-    private var currency: Currency = Account.defaultFiatCurrency
+    private var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
     private var sourceAccount: Account.RelatedAccount? = null
 
     companion object {
@@ -93,11 +91,6 @@ class TransferInFragment : RefreshFragment() {
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         cbAccountsSpinner.adapter = arrayAdapter
-
-        //TODO: nuke this tab layout, use spinner
-        currencyTabLayout = rootView.tabl_transfer_in_currency
-        currencyTabLayout.setupAllCurrencyTabs { switchCurrency(it) }
-
         cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (relevantAccounts.size > position) {
@@ -174,6 +167,14 @@ class TransferInFragment : RefreshFragment() {
 
     override fun onResume() {
         super.onResume()
+
+        val relevantCurrencies = Account.fiatAccounts.map { it.currency }.toMutableList()
+        relevantCurrencies.addAll(Currency.cryptoList)
+
+        showNavSpinner(currency, relevantCurrencies) { selectedCurrency ->
+            currency = selectedCurrency
+            switchCurrency(selectedCurrency)
+        }
 
         titleText.text = getString(R.string.transfer_in_title)
 
@@ -307,9 +308,6 @@ class TransferInFragment : RefreshFragment() {
 
             depositMaxButton.textColor = buttonTextColor
             submitDepositButton.textColor = buttonTextColor
-
-            val tabAccentColor = currency.colorAccent(activity)
-            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
             updateCBProAccountText()
         }
