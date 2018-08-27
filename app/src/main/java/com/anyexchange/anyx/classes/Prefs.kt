@@ -33,6 +33,7 @@ private const val RAPID_PRICE_MOVES = "rapid_price_movement"
 private const val PREFERRED_FIAT = "preferred_fiat"
 private const val MOVEMENT_ALERT_TIMESTAMP = "MOVEMENT_ALERT_TIMESTAMP"
 
+private const val PAYMENT_METHODS = "PAYMENT_METHODS"
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
 
@@ -182,6 +183,30 @@ class Prefs (var context: Context) {
                             .putString(PRODUCT + account.currency.toString(), productJson).apply()
                 }
             }
+        }
+
+
+
+    var stashedPaymentMethodList: List<Account.PaymentMethod>
+        get() {
+            val gson = Gson()
+            val paymentMethodList = mutableListOf<Account.PaymentMethod>()
+
+            val paymentMethodJsons: Set<String> = prefs.getStringSet(PAYMENT_METHODS, setOf()) ?: setOf()
+            for (paymentMethodJson in paymentMethodJsons) {
+                if (paymentMethodJson.isNotBlank()) {
+                    try {
+                        val paymentMethod = gson.fromJson(paymentMethodJson, Account.PaymentMethod::class.java)
+                        paymentMethodList.add(paymentMethod)
+                    } catch (e: Exception) {  }
+                }
+            }
+            return paymentMethodList
+        }
+        set(value) {
+            val gson = Gson()
+            val paymentMethodJsons = value.map { gson.toJson(it) }.toSet()
+            prefs.edit().putStringSet(PAYMENT_METHODS, paymentMethodJsons).apply()
         }
 
     var lastMovementAlertTimestamp: Long

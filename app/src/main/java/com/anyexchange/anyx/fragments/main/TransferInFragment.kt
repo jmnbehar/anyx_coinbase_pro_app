@@ -44,7 +44,6 @@ class TransferInFragment : RefreshFragment() {
     private lateinit var submitDepositButton: Button
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
-    private var paymentMethods: List<Account.PaymentMethod> = listOf()
 
     private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
 
@@ -55,6 +54,12 @@ class TransferInFragment : RefreshFragment() {
         fun newInstance(): TransferInFragment {
             return TransferInFragment()
         }
+
+        val hasRelevantData: Boolean
+            get() {
+                val coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+                return (coinbaseAccounts.isNotEmpty() && Account.paymentMethods.isNotEmpty())
+            }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -184,7 +189,7 @@ class TransferInFragment : RefreshFragment() {
 
         relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
         if (currency.isFiat) {
-            relevantAccounts.addAll(paymentMethods)
+            relevantAccounts.addAll(Account.paymentMethods)
         }
 
         switchCurrency(currency)
@@ -228,10 +233,9 @@ class TransferInFragment : RefreshFragment() {
                 }
             })
             CBProApi.paymentMethods(apiInitData).get({
-                paymentMethods = listOf()
                 onComplete(false)
             }, { result ->
-                paymentMethods = result
+                Account.paymentMethods = result
                 didUpdatePaymentMethods = true
                 if (didUpdateCBPro && didUpdateCoinbase) {
                     completeRefresh(onComplete)
@@ -245,18 +249,18 @@ class TransferInFragment : RefreshFragment() {
         if (isVisible) {
             depositDetailsLayout.visibility = View.VISIBLE
             amountUnitText.text = currency.toString()
-
             switchCurrency(currency)
         }
         onComplete(true)
     }
+
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
         amountEditText.setText("")
         relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
         if (currency.isFiat) {
-            val relevantPaymentMethods = paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() }
+            val relevantPaymentMethods = Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() }
             relevantAccounts.addAll(relevantPaymentMethods)
         }
 

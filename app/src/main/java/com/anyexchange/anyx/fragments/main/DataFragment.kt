@@ -19,7 +19,8 @@ class DataFragment : Fragment() {
 
     private var backupCredentials: CBProApi.ApiCredentials? = null
     private var backupCryptoAccountList = listOf<Account>()
-    private var backupFiatAccountList =listOf<Account>()
+    private var backupFiatAccountList = listOf<Account>()
+    private var backupPaymentMethodList = listOf<Account.PaymentMethod>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,13 +31,14 @@ class DataFragment : Fragment() {
     fun backupData() {
         if (CBProApi.credentials != null) {
             backupCredentials = CBProApi.credentials
-        }   //TODO: wipe this backup on log out
+        }
 
         backupCryptoAccountList = Account.cryptoAccounts
-        activity?.let { activity ->
-            val prefs = Prefs(activity)
+        context?.let {
+            val prefs = Prefs(it)
             prefs.stashedCryptoAccountList = Account.cryptoAccounts
             prefs.stashedFiatAccountList = Account.fiatAccounts
+            prefs.stashedPaymentMethodList = Account.paymentMethods
         }
     }
 
@@ -68,6 +70,11 @@ class DataFragment : Fragment() {
             Account.cryptoAccounts = backupCryptoAccountList
         } else if (Account.cryptoAccounts.isEmpty()){
             Account.cryptoAccounts = prefs.stashedCryptoAccountList
+        }
+        if (backupPaymentMethodList.isNotEmpty()) {
+            Account.paymentMethods = backupPaymentMethodList
+        } else if (Account.paymentMethods.isEmpty()){
+            Account.paymentMethods = prefs.stashedPaymentMethodList
         }
     }
 

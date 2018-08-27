@@ -73,7 +73,7 @@
 
     //MainActivity
     <string name="toast_please_login_message">Please log in</string>
-    <string name="toast_please_validate_message">Please validate your account in Settings</string>
+    <string name="toast_please_verify_message">Please verify your account in Settings</string>
     <string name="toast_missing_permissions_message">Please use an API Key with all required permissions.</string>
 
     <string name="toast_success">Success</string>

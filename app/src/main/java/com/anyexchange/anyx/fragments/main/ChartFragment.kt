@@ -313,10 +313,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun buySellButtonOnClick(isLoggedIn: Boolean, tradeSide: TradeSide) {
+        //TODO: go directly to verify/login
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
         } else if (CBProApi.credentials?.isVerified == null) {
-            toast(R.string.toast_please_validate_message)
+            toast(R.string.toast_please_verify_message)
         } else if (CBProApi.credentials?.isVerified == false) {
             toast(R.string.toast_missing_permissions_message)
         } else {

@@ -206,8 +206,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
-                        val intent = Intent(this, VerifyActivity::class.java)
-                        startActivity(intent)
+                        goToVerify({ })
                     }
                 }
             }
@@ -221,7 +220,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 goToFragment(FragmentType.LOGIN)
             }
         }
+    }
 
+    fun goToVerify(onComplete: (Boolean) -> Unit) {
+        val intent = Intent(this, VerifyActivity::class.java)
+        startActivity(intent)
+        VerifyActivity.onComplete = onComplete
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -304,6 +308,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             onFailure(error)
         }, {
             dismissProgressBar()
+
             setDrawerMenu()
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
@@ -484,7 +489,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast(R.string.toast_please_login_message)
                     null
                 } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
+                    goToVerify { if (it) { goToFragment(fragmentType) } }
                     null
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
@@ -495,13 +500,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER_IN -> {
+                //TODO: go directly to verify/login
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
+                    null
                 } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
+                    goToVerify { if (it) { goToFragment(fragmentType) } }
+                    null
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
-                } else {
+                    null
+                } else if (!TransferInFragment.hasRelevantData) {
                     showProgressBar()
                     val depositFragment = TransferInFragment.newInstance()
                     depositFragment.refresh {didSucceed ->
@@ -513,14 +522,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             toast(R.string.error_message)
                         }
                     }
+                    null
+                } else {
+                    TransferInFragment.newInstance()
                 }
-                null
             }
             FragmentType.TRANSFER_OUT -> {
+                //TODO: go directly to verify/login
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
                 } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
+                    goToVerify { if (it) { goToFragment(fragmentType) } }
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                 } else {

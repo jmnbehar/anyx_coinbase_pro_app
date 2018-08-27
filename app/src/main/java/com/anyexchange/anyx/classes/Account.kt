@@ -53,6 +53,9 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
                 return areAccountsMissing || areAccountsUnidentified
             }
 
+        //TODO: stash this
+        var paymentMethods: List<Account.PaymentMethod> = listOf()
+
         //TODO: make this changeable
         val defaultFiatAccount: Account?
             get() = fiatAccounts.sortedBy { it.balance }.lastOrNull()
@@ -119,5 +122,13 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         override fun toString(): String {
             return apiPaymentMethod.name
         }
+
+        val stashString: String
+            get() {
+                var string = "ID:$id\n"
+                string += "Balance:$balance\n"
+                string += "Currency:$currency"
+                return string
+            }
     }
 }

@@ -35,6 +35,11 @@ class VerifyActivity : AppCompatActivity() {
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
+    companion object {
+        var onComplete: (Boolean) -> Unit = { }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_verify)
@@ -78,7 +83,11 @@ class VerifyActivity : AppCompatActivity() {
                     2 -> {
                         nextBtn?.visibility = View.VISIBLE
                         nextBtn?.text = resources.getString(R.string.verify_done)
-                        nextBtn?.setOnClickListener { finish() }    //TODO: maybe eventually go to sweep coinbase fragment
+                        nextBtn?.setOnClickListener {
+                            val isVerified = (verifyStatus == VerificationStatus.Success)
+                            onComplete(isVerified)
+                            finish()
+                        }    //TODO: maybe eventually go to sweep coinbase fragment
                     }
                 }
             }

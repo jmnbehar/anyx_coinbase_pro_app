@@ -105,6 +105,27 @@ class SendFragment : RefreshFragment() {
             }
         }
 
+//        val ethAccount = Account.forCurrency(Currency.ETH)
+//        if (ethAccount != null) {
+//            CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({
+//                toast("that shouldnt fail")
+//            }) {
+//                Account.forCurrency(Currency.ETH)?.coinbaseAccount?.id?.let { id ->
+//                    CBProApi.depositAddress(apiInitData, id).executePost({
+//                        toast("Failed")
+//                    }) {
+//                        val byteArray = it.component1()
+//                        val responseString = if (byteArray != null) {
+//                            String(byteArray)
+//                        } else {
+//                            "meh"
+//                        }
+//                        toast(responseString)
+//                    }
+//                }
+//            }
+//        }
+
         dismissProgressSpinner()
 
         return rootView
