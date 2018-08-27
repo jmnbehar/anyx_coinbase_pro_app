@@ -562,13 +562,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun goToFragment(fragment: RefreshFragment, tag: String) {
         currentFragment = fragment
         if (supportFragmentManager.backStackEntryCount == 0) {
-//            if (Companion.fragmentManager.fragments.isEmpty()) {
+            //If there are no fragments on the stack, add it
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, tag)
                     .addToBackStack(tag)
                     .commitAllowingStateLoss()
         } else {
+            //Replace the current fragment
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)

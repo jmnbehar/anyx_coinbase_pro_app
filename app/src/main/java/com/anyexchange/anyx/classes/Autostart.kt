@@ -30,7 +30,6 @@ class AutoStart : BroadcastReceiver() {
             val builder = JobInfo.Builder(0, serviceComponent)
             builder.setMinimumLatency((TimeInSeconds.oneMinute * 1000)) // wait at least
             builder.setOverrideDeadline((TimeInSeconds.fiveMinutes * 1000)) // maximum delay
-            //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
@@ -46,7 +45,6 @@ class AlertJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         AlertHub.triggerDummyAlert(this)
-
         if (Account.cryptoAccounts.isEmpty()) {
             CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
                 loopThroughAlerts()
@@ -63,14 +61,12 @@ class AlertJobService : JobService() {
     }
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
-        if (Prefs(this).areAlertFillsActive) {
+        if (prefs.areAlertFillsActive && prefs.isLoggedIn) {
             for (account in Account.cryptoAccounts) {
                 val stashedOrders = prefs.getStashedOrders(account.product.id)
                 if (stashedOrders.isNotEmpty()) {
                     CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash({ }) { }
-                    CBProApi.fills(apiInitData, productId = account.product.id).getAndStash({ }) {
-                        //TODO: trigger alerts? or is that already done elsewhere
-                    }
+                    CBProApi.fills(apiInitData, productId = account.product.id).getAndStash({ }) { }
                 }
             }
         }
@@ -80,29 +76,8 @@ class AlertJobService : JobService() {
         return true
     }
 
-    private fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        var tickersUpdated = 0
-        var candlesUpdated = 0
-        val accountListSize = Account.cryptoAccounts.size
-        for (account in Account.cryptoAccounts) {
-            account.product.updateCandles(timespan, null, apiInitData, onFailure) { _ ->
-                candlesUpdated++
-                if (candlesUpdated == accountListSize) {
-                    onComplete()
-                }
-            }
-
-//            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
-//                tickersUpdated++
-//                if (tickersUpdated == accountListSize) {
-//                    onComplete()
-//                }
-//            }
-        }
-    }
-
-    val timespan = Timespan.DAY
-    var lastMovementAlertTimestamp: Long = 0
+    private val timespan = Timespan.DAY
+    private var lastMovementAlertTimestamp: Long = 0
 
     private fun loopThroughAlerts() {
         val prefs = Prefs(this)
@@ -122,7 +97,7 @@ class AlertJobService : JobService() {
         for (currency in enabledCurrencies) {
             val account = Account.forCurrency(currency)
             if (account != null) {
-                val candles = account.product.candlesForTimespan(Timespan.DAY, null)
+                val candles = account.product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
                     val minAlertPercentage = 2.0
                     var alertPercentage = minAlertPercentage

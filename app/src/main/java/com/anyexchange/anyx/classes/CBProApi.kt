@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
@@ -377,17 +378,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         }
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
-                context?.let {context ->
+                context?.let { context ->
                     try {
                         val prefs = Prefs(context)
-                        val alertFillsAreActive = prefs.areAlertFillsActive
                         val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                         if (productId != null) {
-                            if (alertFillsAreActive) {
-                                val stashedFills = prefs.getStashedFills(productId)
-                                if (apiFillList.size > stashedFills.size) {
-                                    //TODO: show Alert
-                                }
+                            if (prefs.areAlertFillsActive) {
+                                checkForFillAlerts(apiFillList, productId)
                             }
                             prefs.stashFills(result.value, productId)
                         }
@@ -397,6 +394,33 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     }
                 } ?: run {
                     onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+        }
+        private fun checkForFillAlerts(apiFillList: List<ApiFill>, productId: String) {
+            context?.let {
+                val stashedFills = Prefs(context).getStashedFills(productId)
+
+                if (apiFillList.size > stashedFills.size) {
+                    val locale = Locale.getDefault()
+                    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
+                    val stashedFillsDate: Long = try {
+                        format.parse(stashedFills.firstOrNull()?.created_at ).time
+                    } catch (e: ParseException) {
+                        0
+                    }
+                    for (fill in apiFillList) {
+                        val fillDate: Long = try {
+                            format.parse(stashedFills.firstOrNull()?.created_at ).time
+                        } catch (e: ParseException) {
+                            0
+                        }
+                        if (fillDate > stashedFillsDate) {
+                            AlertHub.triggerFillAlert(fill, context)
+                        } else if (fillDate < stashedFillsDate) {
+                            break
+                        }
+                    }
                 }
             }
         }
