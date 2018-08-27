@@ -426,6 +426,8 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         }
     }
     //add position?
+    class depositAddress(initData: CBProApiInitData?, val accountId: String) : CBProApi(initData)
+
     class sendCrypto(initData: CBProApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi(initData)
     class coinbaseAccounts(initData: CBProApiInitData?) : CBProApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
@@ -516,6 +518,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getOrder -> Method.GET
                 is fills -> Method.GET
                 is sendCrypto -> Method.POST
+                is depositAddress -> Method.POST
                 is coinbaseAccounts -> Method.GET
                 is paymentMethods -> Method.GET
                 is getFromCoinbase -> Method.POST
@@ -545,6 +548,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getOrder -> "/orders/$orderId"
                 is fills -> "/fills"
                 is sendCrypto -> "/withdrawals/crypto"
+                is depositAddress -> "/coinbase-accounts/$accountId/addresses"
                 is coinbaseAccounts -> "/coinbase-accounts"
                 is paymentMethods -> "/payment-methods"
                 is getFromCoinbase -> "/deposits/coinbase-account"
