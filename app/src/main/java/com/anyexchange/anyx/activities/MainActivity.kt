@@ -54,8 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ACCOUNT,
         SEND,
         ALERTS,
-        TRANSFER_IN,
-        TRANSFER_OUT,
+        TRANSFER,
         SETTINGS,
         TRADE,
         HOME,
@@ -70,8 +69,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ACCOUNT -> "ACCOUNT"
                 SEND -> "SEND"
                 ALERTS -> "ALERTS"
-                TRANSFER_IN -> "TRANSFER_IN"
-                TRANSFER_OUT -> "TRANSFER_OUT"
+                TRANSFER -> "TRANSFER"
                 SETTINGS -> "SETTINGS"
                 TRADE -> "TRADE"
                 HOME -> "HOME"
@@ -97,8 +95,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     is AccountsFragment -> ACCOUNT
                     is SendFragment -> SEND
                     is AlertsFragment -> ALERTS
-                    is TransferInFragment -> TRANSFER_IN
-                    is TransferOutFragment -> TRANSFER_OUT
+                    is TransferFragment -> TRANSFER
                     is SettingsFragment -> SETTINGS
                     is TradeFragment -> TRADE
                     is LoginFragment -> LOGIN
@@ -202,7 +199,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 menu_verify.visibility = View.GONE
             } else {
                 menu_verify.visibility = View.VISIBLE
-                menu_verify.setOnClickListener  {
+                menu_verify.setOnClickListener  { _ ->
                     if (CBProApi.credentials?.isVerified == true) {
                         toast("Already verified!")
                         setDrawerMenu()
@@ -457,8 +454,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-            R.id.nav_deposit -> FragmentType.TRANSFER_IN
-            R.id.nav_withdraw -> FragmentType.TRANSFER_OUT
+            R.id.nav_deposit -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
@@ -500,7 +496,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance()
-            FragmentType.TRANSFER_IN -> {
+            FragmentType.TRANSFER -> {
                 //TODO: go directly to verify/login
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
@@ -511,9 +507,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
-                } else if (!TransferInFragment.hasRelevantData) {
+                } else if (!TransferFragment.hasRelevantData) {
                     showProgressBar()
-                    val depositFragment = TransferInFragment.newInstance()
+                    val depositFragment = TransferFragment.newInstance()
                     depositFragment.refresh {didSucceed ->
                         if (didSucceed) {
                             val tag = fragmentType.toString()
@@ -525,31 +521,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                     null
                 } else {
-                    TransferInFragment.newInstance()
+                    TransferFragment.newInstance()
                 }
-            }
-            FragmentType.TRANSFER_OUT -> {
-                //TODO: go directly to verify/login
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isVerified == null) {
-                    goToVerify { if (it) { goToFragment(fragmentType) } }
-                } else if (CBProApi.credentials?.isVerified == false) {
-                    toast(R.string.toast_missing_permissions_message)
-                } else {
-                    showProgressBar()
-                    val withdrawFragment = TransferOutFragment.newInstance()
-                    withdrawFragment.refresh {didSucceed ->
-                        if (didSucceed) {
-                            val tag = fragmentType.toString()
-                            withdrawFragment.skipNextRefresh = true
-                            goToFragment(withdrawFragment, tag)
-                        } else {
-                            toast(R.string.error_message)
-                        }
-                    }
-                }
-                null
             }
             FragmentType.SETTINGS -> SettingsFragment.newInstance()
             FragmentType.HOME -> HomeFragment.newInstance()
@@ -566,8 +539,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (fragment != null) {
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
-        } else if (fragmentType != FragmentType.TRADE && fragmentType != FragmentType.SEND
-                && fragmentType != FragmentType.TRANSFER_IN && fragmentType != FragmentType.TRANSFER_OUT) {
+        } else if (fragmentType != FragmentType.TRADE
+                && fragmentType != FragmentType.SEND
+                && fragmentType != FragmentType.TRANSFER) {
             println("Error switching fragments")
         }
     }

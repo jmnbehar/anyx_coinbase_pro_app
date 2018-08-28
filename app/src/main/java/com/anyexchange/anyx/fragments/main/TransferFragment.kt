@@ -15,13 +15,13 @@ import org.jetbrains.anko.textColor
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class TransferInFragment : RefreshFragment() {
+class TransferFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
     private lateinit var titleText: TextView
 
-    private lateinit var depositDetailsLayout: LinearLayout
+    private lateinit var transferDetailsLayout: LinearLayout
 
     private lateinit var interactiveLayout: LinearLayout
 
@@ -29,7 +29,7 @@ class TransferInFragment : RefreshFragment() {
     private lateinit var sourceAccountsSpinner: Spinner
     private lateinit var sourceAccountText: TextView
 
-    private lateinit var depositMaxButton: Button
+    private lateinit var transferMaxButton: Button
 
     private lateinit var amountLabelText: TextView
     private lateinit var amountEditText: EditText
@@ -39,7 +39,7 @@ class TransferInFragment : RefreshFragment() {
     private lateinit var destAccountsSpinner: Spinner
     private lateinit var destBalanceText: TextView
 
-    private lateinit var submitDepositButton: Button
+    private lateinit var submitTransferButton: Button
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
@@ -58,13 +58,12 @@ class TransferInFragment : RefreshFragment() {
                 destAccounts.firstOrNull()
             }
         }
-    private var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
-
 
     companion object {
-        fun newInstance(): TransferInFragment {
-            return TransferInFragment()
+        fun newInstance(): TransferFragment {
+            return TransferFragment()
         }
+        var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
 
         val hasRelevantData: Boolean
             get() {
@@ -82,14 +81,14 @@ class TransferInFragment : RefreshFragment() {
         val activity = activity!!
         titleText = rootView.txt_transfer_in_title
 
-        depositDetailsLayout = rootView.layout_transfer_in_details
+        transferDetailsLayout = rootView.layout_transfer_in_details
         interactiveLayout = rootView.layout_transfer_in_interactive_layout
 
         amountLabelText = rootView.txt_transfer_in_amount_label
         amountEditText = rootView.etxt_transfer_in_amount
         amountUnitText = rootView.txt_transfer_in_amount_unit
 
-        depositMaxButton = rootView.btn_transfer_in_max
+        transferMaxButton = rootView.btn_transfer_in_max
 
         sourceAccountsLabelTxt = rootView.txt_transfer_in_account_label
         sourceAccountsSpinner = rootView.spinner_transfer_in_accounts
@@ -99,7 +98,7 @@ class TransferInFragment : RefreshFragment() {
         infoText = rootView.txt_transfer_in_info
         destBalanceText = rootView.txt_transfer_in_cbpro_account_info
 
-        submitDepositButton = rootView.btn_transfer_in_transfer_in
+        submitTransferButton = rootView.btn_transfer_in_transfer_in
 
         val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, sourceAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -108,27 +107,26 @@ class TransferInFragment : RefreshFragment() {
         sourceAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (sourceAccounts.size > position) {
-                    if (sourceAccount is Account.CoinbaseAccount) {
-                        infoText.setText(R.string.transfer_coinbase_info)
-                    } else {
-                        infoText.setText(R.string.transfer_bank_info)
-                    }
                     setDestAccounts()
+                    setInfoAndButtons()
                 }
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-//                sourceAccountsSpinner.visibility = View.GONE
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+        destAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                setInfoAndButtons()
             }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        depositMaxButton.setOnClickListener {
+        transferMaxButton.setOnClickListener {
             sourceAccount?.balance?.let { balance ->
                 amountEditText.setText(balance.btcFormatShortened())
             }
         }
 
-        submitDepositButton.setOnClickListener {
+        submitTransferButton.setOnClickListener {
             submitTransfer()
         }
 
@@ -249,7 +247,7 @@ class TransferInFragment : RefreshFragment() {
                         CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
                             showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                             dismissProgressSpinner()
-                        } , {
+                        } , { _ ->
                             toast(R.string.transfer_received_message)
                             amountEditText.setText("")
 
@@ -271,7 +269,7 @@ class TransferInFragment : RefreshFragment() {
                                 CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost({ result ->
                                     showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                                     dismissProgressSpinner()
-                                }, {
+                                }, { _ ->
                                     toast(R.string.transfer_sent_message)
                                     amountEditText.setText("")
 
@@ -288,7 +286,7 @@ class TransferInFragment : RefreshFragment() {
                                 CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
                                     showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                                     dismissProgressSpinner()
-                                }, {
+                                }, { _ ->
                                     toast(R.string.transfer_sent_message)
                                     amountEditText.setText("")
                                     refresh { dismissProgressSpinner() }
@@ -306,7 +304,7 @@ class TransferInFragment : RefreshFragment() {
 
     private fun completeRefresh(onComplete: (Boolean) -> Unit) {
         if (isVisible) {
-            depositDetailsLayout.visibility = View.VISIBLE
+            transferDetailsLayout.visibility = View.VISIBLE
             amountUnitText.text = currency.toString()
             switchCurrency(currency)
         }
@@ -315,7 +313,7 @@ class TransferInFragment : RefreshFragment() {
 
 
     private fun switchCurrency(currency: Currency) {
-        this.currency = currency
+        Companion.currency = currency
         amountEditText.setText("")
 
         val relevantCBProAccount = Account.forCurrency(currency)
@@ -324,7 +322,7 @@ class TransferInFragment : RefreshFragment() {
         } else {
             mutableListOf(relevantCBProAccount)
         }
-        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency }) //&& account.balance > 0
+        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency })
         if (currency.isFiat) {
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
         }
@@ -335,48 +333,24 @@ class TransferInFragment : RefreshFragment() {
                 sourceAccountText.text = resources.getString(R.string.transfer_coinbase_account_empty, currency.toString())
                 sourceAccountText.visibility = View.VISIBLE
                 sourceAccountsSpinner.visibility = View.GONE
-                interactiveLayout.visibility = View.INVISIBLE
             }
             1 -> {
                 sourceAccountText.text = sourceAccount.toString()
                 sourceAccountText.visibility = View.VISIBLE
                 sourceAccountsSpinner.visibility = View.GONE
-                interactiveLayout.visibility = View.VISIBLE
             }
             else -> {
                 val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, sourceAccounts)
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 sourceAccountsSpinner.adapter = arrayAdapter
-
                 sourceAccountText.visibility = View.GONE
                 sourceAccountsSpinner.visibility = View.VISIBLE
-                interactiveLayout.visibility = View.VISIBLE
             }
         }
+
         setDestAccounts()
-        infoText.visibility = View.VISIBLE
-        when (sourceAccount) {
-            is Account.CoinbaseAccount -> infoText.setText(R.string.transfer_coinbase_info)
-            is Account.PaymentMethod -> infoText.setText(R.string.transfer_bank_info)
-            is Account -> {
-                //TODO: figure out the text here
-                infoText.setText(R.string.transfer_bank_info)
-            }
-            else -> infoText.visibility = View.GONE
-        }
 
-        activity?.let {activity ->
-            amountUnitText.text = currency.toString()
-
-            val buttonColors = currency.colorStateList(activity)
-            val buttonTextColor = currency.buttonTextColor(activity)
-
-            depositMaxButton.backgroundTintList = buttonColors
-            submitDepositButton.backgroundTintList = buttonColors
-
-            depositMaxButton.textColor = buttonTextColor
-            submitDepositButton.textColor = buttonTextColor
-        }
+        setInfoAndButtons()
     }
 
     private fun setDestAccounts() {
@@ -395,8 +369,7 @@ class TransferInFragment : RefreshFragment() {
         }
         when (destAccounts.size) {
             0 -> {
-                //TODO: use str resources if this is a real thing
-                destBalanceText.text = "No possible Destinations"
+                destBalanceText.text = resources.getString(R.string.transfer_no_destinations_text)
                 destBalanceText.visibility = View.VISIBLE
                 destAccountsSpinner.visibility = View.GONE
             }
@@ -415,5 +388,46 @@ class TransferInFragment : RefreshFragment() {
             }
         }
         amountUnitText.text = currency.toString()
+    }
+
+    private fun setInfoAndButtons() {
+        infoText.visibility = View.VISIBLE
+        when (sourceAccount) {
+            is Account.CoinbaseAccount -> {
+                interactiveLayout.visibility = if ((sourceAccount?.balance ?: 0.0) <= 0.0) {
+                    View.INVISIBLE
+                } else { View.VISIBLE }
+                infoText.setText(R.string.transfer_coinbase_info)
+            }
+            is Account.PaymentMethod -> {
+                infoText.setText(R.string.transfer_bank_info)
+            }
+            is Account -> {
+                interactiveLayout.visibility = if ((sourceAccount?.balance ?: 0.0) <= 0.0) {
+                    View.INVISIBLE
+                } else { View.VISIBLE }
+                when (destAccount) {
+                    is Account.CoinbaseAccount -> infoText.setText(R.string.transfer_coinbase_info)
+                    is Account.PaymentMethod -> infoText.setText(R.string.transfer_bank_info)
+                }
+            }
+            else -> {
+                interactiveLayout.visibility = View.INVISIBLE
+                infoText.visibility = View.GONE
+            }
+        }
+
+        context?.let { context ->
+            amountUnitText.text = currency.toString()
+
+            val buttonColors = currency.colorStateList(context)
+            val buttonTextColor = currency.buttonTextColor(context)
+
+            transferMaxButton.backgroundTintList = buttonColors
+            submitTransferButton.backgroundTintList = buttonColors
+
+            transferMaxButton.textColor = buttonTextColor
+            submitTransferButton.textColor = buttonTextColor
+        }
     }
 }
