@@ -128,52 +128,8 @@ class TransferInFragment : RefreshFragment() {
             }
         }
 
-        submitDepositButton.setOnClickListener { _ ->
-            val amountString = amountEditText.text.toString()
-            val amount = amountString.toDoubleOrZero()
-
-            if (amount <= 0) {
-                showPopup(R.string.transfer_amount_error)
-            } else if (sourceAccount is Account.CoinbaseAccount) {
-                val coinbaseAccount = sourceAccount as Account.CoinbaseAccount
-                if (amount > coinbaseAccount.balance) {
-                    showPopup(R.string.transfer_funds_error)
-                } else {
-                    showProgressSpinner()
-                    CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
-                        val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                        if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
-                            showPopup(R.string.transfer_amount_low_error)
-                        } else {
-                            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                        }
-                        dismissProgressSpinner()
-                    } , { _ ->
-                        toast(R.string.transfer_received_message)
-                        amountEditText.setText("")
-
-                        refresh { _ -> dismissProgressSpinner() }
-                    })
-                }
-            } else if (sourceAccount is Account.PaymentMethod) {
-                val paymentMethod = sourceAccount as Account.PaymentMethod
-                if (paymentMethod.balance != null && amount > paymentMethod.balance) {
-                    showPopup(R.string.transfer_funds_error)
-                } else {
-                    showProgressSpinner()
-                    CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
-                        showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                        dismissProgressSpinner()
-                    } , {
-                        toast(R.string.transfer_received_message)
-                        amountEditText.setText("")
-
-                        refresh { _ -> dismissProgressSpinner() }
-                    })
-                }
-            } else {
-                showPopup(R.string.error_message)
-            }
+        submitDepositButton.setOnClickListener {
+            submitTransfer()
         }
 
         return rootView
@@ -251,6 +207,100 @@ class TransferInFragment : RefreshFragment() {
                     isRefreshing = false
                 }
             })
+        }
+    }
+
+    private fun submitTransfer() {
+        val amountString = amountEditText.text.toString()
+        val amount = amountString.toDoubleOrZero()
+
+        if (amount <= 0) {
+            showPopup(R.string.transfer_amount_error)
+        } else {
+            when (sourceAccount) {
+                is Account.CoinbaseAccount -> {
+                    val coinbaseAccount = sourceAccount as Account.CoinbaseAccount
+                    if (amount > coinbaseAccount.balance) {
+                        showPopup(R.string.transfer_funds_error)
+                    } else {
+                        showProgressSpinner()
+                        CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
+                            val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                            if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
+                                showPopup(R.string.transfer_amount_low_error)
+                            } else {
+                                showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+                            }
+                            dismissProgressSpinner()
+                        } , { _ ->
+                            toast(R.string.transfer_received_message)
+                            amountEditText.setText("")
+
+                            refresh { _ -> dismissProgressSpinner() }
+                        })
+                    }
+                }
+                is Account.PaymentMethod -> {
+                    val paymentMethod = sourceAccount as Account.PaymentMethod
+                    if (paymentMethod.balance != null && amount > paymentMethod.balance) {
+                        showPopup(R.string.transfer_funds_error)
+                    } else {
+                        showProgressSpinner()
+                        CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
+                            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+                            dismissProgressSpinner()
+                        } , {
+                            toast(R.string.transfer_received_message)
+                            amountEditText.setText("")
+
+                            refresh { _ -> dismissProgressSpinner() }
+                        })
+                    }
+
+                }
+                is Account -> {
+                    when (destAccount) {
+                        is Account.CoinbaseAccount -> {
+                            val coinbaseAccount = destAccount as Account.CoinbaseAccount
+                            val cbproAccount = Account.forCurrency(currency)
+
+                            if (amount > cbproAccount?.availableBalance ?: 0.0) {
+                                showPopup(R.string.transfer_funds_error)
+                            } else {
+                                showProgressSpinner()
+                                CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost({ result ->
+                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+                                    dismissProgressSpinner()
+                                }, {
+                                    toast(R.string.transfer_sent_message)
+                                    amountEditText.setText("")
+
+                                    refresh { dismissProgressSpinner() }
+                                })
+                            }
+                        }
+                        is Account.PaymentMethod -> {
+                            val paymentMethod = destAccount as Account.PaymentMethod
+                            if (paymentMethod.balance != null && amount > paymentMethod.balance) {
+                                showPopup(R.string.transfer_funds_error)
+                            } else {
+                                showProgressSpinner()
+                                CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
+                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+                                    dismissProgressSpinner()
+                                }, {
+                                    toast(R.string.transfer_sent_message)
+                                    amountEditText.setText("")
+                                    refresh { dismissProgressSpinner() }
+                                })
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    showPopup(R.string.error_message)
+                }
+            }
         }
     }
 
