@@ -5,16 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import com.anyexchange.anyx.classes.Account
 import com.anyexchange.anyx.classes.inflate
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.BaseAccount
 import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
 
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class RelatedAccountSpinnerAdapter(context: Context, var resource: Int, var relatedAccountList: List<Account.RelatedAccount>) :
-        ArrayAdapter<Account.RelatedAccount>(context, resource, relatedAccountList) {
+class RelatedAccountSpinnerAdapter(context: Context, var resource: Int, var relatedAccountList: List<BaseAccount>) :
+        ArrayAdapter<BaseAccount>(context, resource, relatedAccountList) {
 
     internal class ViewHolder {
         var cbAccountNameText: TextView? = null

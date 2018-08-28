@@ -48,9 +48,9 @@ class TransferOutFragment : RefreshFragment() {
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
     private var paymentMethods: List<Account.PaymentMethod> = listOf()
-    private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
+    private var relevantAccounts: MutableList<BaseAccount> = mutableListOf()
 
-    private var destinationAccount: Account.RelatedAccount? = null
+    private var destinationAccount: BaseAccount? = null
     private var currency: Currency = Account.defaultFiatCurrency
 
     companion object {

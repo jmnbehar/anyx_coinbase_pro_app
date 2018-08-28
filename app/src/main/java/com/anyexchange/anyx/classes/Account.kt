@@ -7,8 +7,8 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: ApiAccount) {
-    val balance: Double
+class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
+    override val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 
     val availableBalance: Double
@@ -24,10 +24,10 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
-    val id: String
+    override val id: String
         get() = apiAccount.id
 
-    val currency: Currency
+    override val currency: Currency
         get() = product.currency
 
     var coinbaseAccount: CoinbaseAccount? = null
@@ -93,13 +93,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
     }
 
-    abstract class RelatedAccount {
-        abstract val id: String
-        abstract val balance: Double?
-        abstract val currency: Currency
-    }
-
-    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : RelatedAccount() {
+    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : BaseAccount() {
         override val id: String = apiCoinbaseAccount.id
         override val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
         override val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
@@ -114,7 +108,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
     }
 
-    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : RelatedAccount() {
+    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : BaseAccount() {
         override val id: String = apiPaymentMethod.id
         override val balance = apiPaymentMethod.balance?.toDoubleOrNull()
         override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD

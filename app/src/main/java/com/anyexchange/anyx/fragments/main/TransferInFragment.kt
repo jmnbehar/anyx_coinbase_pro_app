@@ -1,7 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.os.Bundle
-import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,9 +25,9 @@ class TransferInFragment : RefreshFragment() {
 
     private lateinit var interactiveLayout: LinearLayout
 
-    private lateinit var cbAccountsLabelTxt: TextView
-    private lateinit var cbAccountsSpinner: Spinner
-    private lateinit var cbAccountText: TextView
+    private lateinit var sourceAccountsLabelTxt: TextView
+    private lateinit var sourceAccountsSpinner: Spinner
+    private lateinit var sourceAccountText: TextView
 
     private lateinit var depositMaxButton: Button
 
@@ -37,16 +36,27 @@ class TransferInFragment : RefreshFragment() {
     private lateinit var amountUnitText: TextView
 
     private lateinit var infoText: TextView
-    private lateinit var cbproBalanceText: TextView
+    private lateinit var destAccountsSpinner: Spinner
+    private lateinit var destBalanceText: TextView
 
     private lateinit var submitDepositButton: Button
 
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
-    private var relevantAccounts: MutableList<Account.RelatedAccount> = mutableListOf()
-
+    private var sourceAccounts: MutableList<BaseAccount> = mutableListOf()
+    private val sourceAccount: BaseAccount?
+        get() {
+            val spinnerSelection = sourceAccountsSpinner.selectedItem as? BaseAccount
+            return spinnerSelection ?: sourceAccounts.firstOrNull()
+        }
+    private var destAccounts:   List<BaseAccount?> = mutableListOf()
+    private val destAccount: BaseAccount?
+        get() {
+            val spinnerSelection = destAccountsSpinner.selectedItem as? BaseAccount
+            return spinnerSelection ?: destAccounts.firstOrNull()
+        }
     private var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
-    private var sourceAccount: Account.RelatedAccount? = null
+
 
     companion object {
         fun newInstance(): TransferInFragment {
@@ -78,33 +88,33 @@ class TransferInFragment : RefreshFragment() {
 
         depositMaxButton = rootView.btn_transfer_in_max
 
-        cbAccountsLabelTxt = rootView.txt_transfer_in_account_label
-        cbAccountsSpinner = rootView.spinner_transfer_in_accounts
-        cbAccountText = rootView.txt_transfer_in_account_info
+        sourceAccountsLabelTxt = rootView.txt_transfer_in_account_label
+        sourceAccountsSpinner = rootView.spinner_transfer_in_accounts
+        sourceAccountText = rootView.txt_transfer_in_account_info
 
         infoText = rootView.txt_transfer_in_info
-        cbproBalanceText = rootView.txt_transfer_in_cbpro_account_info
+        destBalanceText = rootView.txt_transfer_in_cbpro_account_info
 
         submitDepositButton = rootView.btn_transfer_in_transfer_in
 
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, relevantAccounts)
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, sourceAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        cbAccountsSpinner.adapter = arrayAdapter
-        cbAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        sourceAccountsSpinner.adapter = arrayAdapter
+        sourceAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (relevantAccounts.size > position) {
-                    sourceAccount = relevantAccounts[position]
+                if (sourceAccounts.size > position) {
                     if (sourceAccount is Account.CoinbaseAccount) {
                         infoText.setText(R.string.transfer_coinbase_info)
                     } else {
                         infoText.setText(R.string.transfer_bank_info)
                     }
+                    setDestAccounts()
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
-//                cbAccountsSpinner.visibility = View.GONE
+//                sourceAccountsSpinner.visibility = View.GONE
             }
         }
 
@@ -114,7 +124,7 @@ class TransferInFragment : RefreshFragment() {
             }
         }
 
-        submitDepositButton.setOnClickListener {
+        submitDepositButton.setOnClickListener { _ ->
             val amountString = amountEditText.text.toString()
             val amount = amountString.toDoubleOrZero()
 
@@ -134,11 +144,11 @@ class TransferInFragment : RefreshFragment() {
                             showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                         }
                         dismissProgressSpinner()
-                    } , {
+                    } , { _ ->
                         toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
-                        refresh { dismissProgressSpinner() }
+                        refresh { _ -> dismissProgressSpinner() }
                     })
                 }
             } else if (sourceAccount is Account.PaymentMethod) {
@@ -154,7 +164,7 @@ class TransferInFragment : RefreshFragment() {
                         toast(R.string.transfer_received_message)
                         amountEditText.setText("")
 
-                        refresh { dismissProgressSpinner() }
+                        refresh { _ -> dismissProgressSpinner() }
                     })
                 }
             } else {
@@ -179,7 +189,6 @@ class TransferInFragment : RefreshFragment() {
         titleText.text = getString(R.string.transfer_in_title)
 
         coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
-        coinbaseAccounts = coinbaseAccounts.filter { account -> account.balance > 0 }
 
         val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
@@ -187,11 +196,6 @@ class TransferInFragment : RefreshFragment() {
         }
 
         amountUnitText.text = currency.toString()
-
-        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
-        if (currency.isFiat) {
-            relevantAccounts.addAll(Account.paymentMethods)
-        }
 
         switchCurrency(currency)
 
@@ -259,44 +263,54 @@ class TransferInFragment : RefreshFragment() {
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
         amountEditText.setText("")
-        relevantAccounts = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
-        if (currency.isFiat) {
-            val relevantPaymentMethods = Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() }
-            relevantAccounts.addAll(relevantPaymentMethods)
-        }
 
-        when (relevantAccounts.size) {
+        val relevantCBProAccount = Account.forCurrency(currency)
+        val tempRelevantAccounts: MutableList<BaseAccount> = if (relevantCBProAccount == null) {
+            mutableListOf()
+        } else {
+            mutableListOf(relevantCBProAccount)
+        }
+        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 })
+        if (currency.isFiat) {
+            tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
+        }
+        sourceAccounts = tempRelevantAccounts
+
+        when (sourceAccounts.size) {
             0 -> {
-                sourceAccount = null
-                cbAccountText.text = resources.getString(R.string.transfer_coinbase_account_empty, currency.toString())
-                cbAccountText.visibility = View.VISIBLE
-                cbAccountsSpinner.visibility = View.GONE
+                sourceAccountText.text = resources.getString(R.string.transfer_coinbase_account_empty, currency.toString())
+                sourceAccountText.visibility = View.VISIBLE
+                sourceAccountsSpinner.visibility = View.GONE
                 interactiveLayout.visibility = View.INVISIBLE
             }
             1 -> {
-                sourceAccount = relevantAccounts.first()
-                cbAccountText.text = sourceAccount.toString()
-                cbAccountText.visibility = View.VISIBLE
-                cbAccountsSpinner.visibility = View.GONE
+                sourceAccountText.text = sourceAccount.toString()
+                sourceAccountText.visibility = View.VISIBLE
+                sourceAccountsSpinner.visibility = View.GONE
                 interactiveLayout.visibility = View.VISIBLE
             }
             else -> {
-                sourceAccount = relevantAccounts.first()
-
-                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, relevantAccounts)
+                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, sourceAccounts)
                 arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                cbAccountsSpinner.adapter = arrayAdapter
+                sourceAccountsSpinner.adapter = arrayAdapter
 
-                cbAccountText.visibility = View.GONE
-                cbAccountsSpinner.visibility = View.VISIBLE
+                sourceAccountText.visibility = View.GONE
+                sourceAccountsSpinner.visibility = View.VISIBLE
                 interactiveLayout.visibility = View.VISIBLE
             }
         }
-        if (sourceAccount is Account.CoinbaseAccount) {
-            infoText.setText(R.string.transfer_coinbase_info)
-        } else {
-            infoText.setText(R.string.transfer_bank_info)
+        setDestAccounts()
+        infoText.visibility = View.VISIBLE
+        when (sourceAccount) {
+            is Account.CoinbaseAccount -> infoText.setText(R.string.transfer_coinbase_info)
+            is Account.PaymentMethod -> infoText.setText(R.string.transfer_bank_info)
+            is Account -> {
+                //TODO: figure out the text here
+                infoText.setText(R.string.transfer_bank_info)
+            }
+            else -> infoText.visibility = View.GONE
         }
+
         activity?.let {activity ->
             amountUnitText.text = currency.toString()
 
@@ -313,6 +327,21 @@ class TransferInFragment : RefreshFragment() {
         }
     }
 
+    private fun setDestAccounts() {
+        val cbproAccount = Account.forCurrency(currency)
+        destAccounts = when(sourceAccount) {
+            is Account.CoinbaseAccount -> listOf(cbproAccount)
+            is Account.PaymentMethod ->  listOf(cbproAccount)
+            is Account -> {
+                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
+                if (currency.isFiat) {
+                    tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
+                }
+                tempDestAccounts.toList()
+            }
+            else  -> listOf()
+        }
+    }
     private fun updateCBProAccountText() {
         val cbproAccount = Account.forCurrency(currency)
         amountUnitText.text = currency.toString()
@@ -322,6 +351,6 @@ class TransferInFragment : RefreshFragment() {
         } else {
             "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
         }
-        cbproBalanceText.text = resources.getString(R.string.transfer_pro_account_balance_text, currency.toString(), cbproAccountBalanceString)
+        destBalanceText.text = resources.getString(R.string.transfer_pro_account_balance_text, currency.toString(), cbproAccountBalanceString)
     }
 }

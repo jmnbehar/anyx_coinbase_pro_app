@@ -406,13 +406,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
                     val stashedFillsDate: Long = try {
                         format.parse(stashedFills.firstOrNull()?.created_at ).time
-                    } catch (e: ParseException) {
+                    } catch (e: Exception) {
                         0
                     }
                     for (fill in apiFillList) {
                         val fillDate: Long = try {
                             format.parse(stashedFills.firstOrNull()?.created_at ).time
-                        } catch (e: ParseException) {
+                        } catch (e: Exception) {
                             0
                         }
                         if (fillDate > stashedFillsDate) {
