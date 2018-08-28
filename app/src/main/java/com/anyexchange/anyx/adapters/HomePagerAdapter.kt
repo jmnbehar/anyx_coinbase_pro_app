@@ -19,21 +19,22 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
+    val marketFragment = MarketFragment()
+    val accountsFragment = AccountsFragment()
+
     override fun getItem(i: Int): Fragment {
         when (i) {
             0 -> {
-                val fragment = MarketFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
-                fragment.arguments = args
-                return fragment
+                marketFragment.arguments = args
+                return marketFragment
             }
             1 -> {
-                val fragment = AccountsFragment()
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
-                fragment.arguments = args
-                return fragment
+                accountsFragment.arguments = args
+                return accountsFragment
             }
             else -> {
                 //do something here

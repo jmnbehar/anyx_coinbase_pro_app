@@ -316,11 +316,9 @@ class TransferFragment : RefreshFragment() {
         Companion.currency = currency
         amountEditText.setText("")
 
-        val relevantCBProAccount = Account.forCurrency(currency)
-        val tempRelevantAccounts: MutableList<BaseAccount> = if (relevantCBProAccount == null) {
-            mutableListOf()
-        } else {
-            mutableListOf(relevantCBProAccount)
+        val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
+        Account.forCurrency(currency)?.let {
+            tempRelevantAccounts.add(it)
         }
         tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency })
         if (currency.isFiat) {

@@ -40,13 +40,13 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         }
     }
 
+    private val granularity = Candle.granularityForTimespan(Timespan.DAY)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_accounts, container, false)
 
         listView = rootView.list_accounts
 
-        //TODO: add autorefresh
         this.inflater = inflater
         setupSwipeRefresh(rootView.swipe_refresh_layout)
 
@@ -65,13 +65,17 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart.setOnChartValueSelectedListener(this)
             lineChart.onChartGestureListener = this
 
+            lineChart.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
+                swipeRefreshLayout?.isEnabled = false
+                HomeFragment.viewPager?.isLocked = true
+            }
+
             val selectGroup = lambda@ { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
             accountList.adapter = AccountListViewAdapter(context, selectGroup)
             titleText.visibility = View.GONE
 
-            refresh { dismissProgressSpinner() }
         } else {
             accountList.visibility = View.GONE
             lineChart.visibility = View.GONE
@@ -190,26 +194,26 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
             CBProApi.accounts(apiInitData).updateAllAccounts({ onComplete(false) }) {
-                (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
-
-                accountTotalCandles = sumAccountCandles()
-                setValueAndPercentChangeTexts()
-
-                if (Account.totalValue == 0.0) {
-                    lineChart.visibility = View.GONE
-                } else {
-                    lineChart.visibility = View.VISIBLE
-                    //doesn't matter which fiat currency you use here:
-                    val granularity = Candle.granularityForTimespan(Timespan.DAY)
-                    lineChart.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
-                        swipeRefreshLayout?.isEnabled = false
-                        HomeFragment.viewPager?.isLocked = true
-                    }
-                }
+                refreshComplete()
                 onComplete(true)
             }
         } else {
             onComplete(true)
+        }
+    }
+
+    fun refreshComplete() {
+        (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
+
+        accountTotalCandles = sumAccountCandles()
+        setValueAndPercentChangeTexts()
+
+        if (Account.totalValue == 0.0) {
+            lineChart.visibility = View.GONE
+        } else {
+            lineChart.visibility = View.VISIBLE
+            //doesn't matter which fiat currency you use here:
+            lineChart.addCandles(accountTotalCandles, granularity, Currency.USD)
         }
     }
 }

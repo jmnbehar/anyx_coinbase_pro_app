@@ -25,6 +25,8 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     lateinit var inflater: LayoutInflater
 
+    var updateAccountsFragment = { }
+
     companion object {
         fun newInstance(): MarketFragment
         {
@@ -58,7 +60,10 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         super.onResume()
         autoRefresh = Runnable {
-            refresh() {}
+            if (!skipNextRefresh) {
+                refresh() {}
+            }
+            skipNextRefresh = false
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
@@ -74,6 +79,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         var productsUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
+        skipNextRefresh = true
 
         //TODO: add this back occasionally
 //        Product.updateAllProducts({ }, {})
@@ -90,6 +96,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
                             (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                            updateAccountsFragment()
                             onComplete(true)
                         }
                     } else {
@@ -97,6 +104,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                updateAccountsFragment()
                                 onComplete(true)
                             }
                         }

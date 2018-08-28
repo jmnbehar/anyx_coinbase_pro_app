@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 class HomeFragment : RefreshFragment() {
 
     lateinit var inflater: LayoutInflater
-    var collectionPagerAdapter: HomePagerAdapter? = null
+    private var homePagerAdapter: HomePagerAdapter? = null
 
     companion object {
         fun newInstance(): HomeFragment
@@ -41,18 +41,16 @@ class HomeFragment : RefreshFragment() {
                 tabLayout.setTabTextColors(Color.DKGRAY, Color.BLACK)
             }
 
-            collectionPagerAdapter = HomePagerAdapter(it, childFragmentManager)
-            viewPager?.adapter = collectionPagerAdapter
+            homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
+            viewPager?.adapter = homePagerAdapter
+
+            homePagerAdapter?.marketFragment?.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.refreshComplete() }
         }
 
 
 
         return rootView
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//    }
 
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)
