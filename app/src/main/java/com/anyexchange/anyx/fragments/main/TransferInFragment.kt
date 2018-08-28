@@ -335,7 +335,7 @@ class TransferInFragment : RefreshFragment() {
             is Account.CoinbaseAccount -> listOf(cbproAccount)
             is Account.PaymentMethod ->  listOf(cbproAccount)
             is Account -> {
-                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 }.toMutableList()
+                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
                 if (currency.isFiat) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
