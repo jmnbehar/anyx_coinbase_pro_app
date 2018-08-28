@@ -252,8 +252,8 @@
     <string name="transfer_coinbase_account_empty">Coinbase %s Wallet is Empty</string>
     <string name="transfer_pro_account_empty">Coinbase Pro %s Wallet is Empty</string>
 
-    <string name="transfer_pro_account_balance_text">"Coinbase Pro %s Balance: %s</string>
-
+    <string name="transfer_pro_account_balance_text">Coinbase Pro %s Balance: %s</string>
+    <string name="transfer_no_destinations_text">No possible destinations</string>
 
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
     <string name="transfer_bank_info">Bank wire transfers take one business day to process.</string>

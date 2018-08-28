@@ -52,8 +52,11 @@ class TransferInFragment : RefreshFragment() {
     private var destAccounts:   List<BaseAccount?> = mutableListOf()
     private val destAccount: BaseAccount?
         get() {
-            val spinnerSelection = destAccountsSpinner.selectedItem as? BaseAccount
-            return spinnerSelection ?: destAccounts.firstOrNull()
+            return if (destAccounts.size > 1) {
+                destAccountsSpinner.selectedItem as? BaseAccount ?: destAccounts.firstOrNull()
+            } else {
+                destAccounts.firstOrNull()
+            }
         }
     private var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
 
@@ -92,6 +95,7 @@ class TransferInFragment : RefreshFragment() {
         sourceAccountsSpinner = rootView.spinner_transfer_in_accounts
         sourceAccountText = rootView.txt_transfer_in_account_info
 
+        destAccountsSpinner = rootView.spinner_transfer_out_accounts
         infoText = rootView.txt_transfer_in_info
         destBalanceText = rootView.txt_transfer_in_cbpro_account_info
 
@@ -270,7 +274,7 @@ class TransferInFragment : RefreshFragment() {
         } else {
             mutableListOf(relevantCBProAccount)
         }
-        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency && account.balance > 0 })
+        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency }) //&& account.balance > 0
         if (currency.isFiat) {
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
         }
@@ -322,8 +326,6 @@ class TransferInFragment : RefreshFragment() {
 
             depositMaxButton.textColor = buttonTextColor
             submitDepositButton.textColor = buttonTextColor
-
-            updateCBProAccountText()
         }
     }
 
@@ -341,16 +343,27 @@ class TransferInFragment : RefreshFragment() {
             }
             else  -> listOf()
         }
-    }
-    private fun updateCBProAccountText() {
-        val cbproAccount = Account.forCurrency(currency)
-        amountUnitText.text = currency.toString()
-
-        val cbproAccountBalanceString = if (currency.isFiat) {
-            "${(cbproAccount?.balance ?: 0.0).fiatFormat(Account.defaultFiatCurrency)} $currency"
-        } else {
-            "${(cbproAccount?.balance ?: 0.0).btcFormatShortened()} $currency"
+        when (destAccounts.size) {
+            0 -> {
+                //TODO: use str resources if this is a real thing
+                destBalanceText.text = "No possible Destinations"
+                destBalanceText.visibility = View.VISIBLE
+                destAccountsSpinner.visibility = View.GONE
+            }
+            1 -> {
+                destBalanceText.text = destAccount.toString()
+                destBalanceText.visibility = View.VISIBLE
+                destAccountsSpinner.visibility = View.GONE
+            }
+            else -> {
+                val destAccountsTemp = destAccounts.filterNotNull()
+                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, destAccountsTemp)
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                destAccountsSpinner.adapter = arrayAdapter
+                destBalanceText.visibility = View.GONE
+                destAccountsSpinner.visibility = View.VISIBLE
+            }
         }
-        destBalanceText.text = resources.getString(R.string.transfer_pro_account_balance_text, currency.toString(), cbproAccountBalanceString)
+        amountUnitText.text = currency.toString()
     }
 }

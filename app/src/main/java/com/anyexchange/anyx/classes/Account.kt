@@ -41,6 +41,15 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         }
     }
 
+    override fun toString(): String {
+        val cbproAccountBalanceString =  if (currency.isFiat) {
+            balance.fiatFormat(Account.defaultFiatCurrency)
+        } else {
+            "${balance.btcFormatShortened()} $currency"
+        }
+        return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
+    }
+
     companion object {
         var cryptoAccounts = listOf<Account>()
 
