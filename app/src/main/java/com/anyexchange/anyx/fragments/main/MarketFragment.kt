@@ -81,7 +81,9 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         //TODO: check in about refreshing product list
         for (account in Account.cryptoAccounts) {
             account.product.updateCandles(time, null, apiInitData, {//OnFailure
-                toast(R.string.error_message)
+                if (context != null) {
+                    toast(R.string.error_message)
+                }
                 onComplete(false)
             }) { didUpdate ->   //OnSuccess
                 if (lifecycle.isCreatedOrResumed) {
