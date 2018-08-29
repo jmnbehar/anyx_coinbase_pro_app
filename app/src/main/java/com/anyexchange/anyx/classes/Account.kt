@@ -73,6 +73,8 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
+        val dummyAccount = Account(Product.fiatProduct(Currency.USD), ApiAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""))
+
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
 

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.design.widget.TabLayout
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
@@ -24,11 +23,8 @@ import org.jetbrains.anko.textColor
  */
 class SendFragment : RefreshFragment() {
 
-
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
-
-    private lateinit var currencyTabLayout: TabLayout
 
     private lateinit var amountEditText: EditText
     private lateinit var amountUnitText: TextView
@@ -44,10 +40,11 @@ class SendFragment : RefreshFragment() {
 
     private lateinit var sendButton: Button
 
-    var currency = Currency.BTC
+    var currency: Currency
+        get() = ChartFragment.currency
+        set(value) { ChartFragment.currency = value }
 
     companion object {
-        lateinit var currency: Currency
         fun newInstance(): SendFragment {
             return SendFragment()
         }
@@ -60,8 +57,6 @@ class SendFragment : RefreshFragment() {
         this.inflater = inflater
 
         titleText = rootView.txt_send_name
-
-        currencyTabLayout = rootView.tabl_send_currency
 
         amountLabelText = rootView.txt_send_amount_label
         amountEditText = rootView.etxt_send_amount
@@ -79,14 +74,12 @@ class SendFragment : RefreshFragment() {
 
         titleText.text = resources.getString(R.string.send_title)
 
-        switchCurrency()
-
-        currencyTabLayout.setupCryptoTabs { currency -> switchCurrency(currency) }
+        switchCurrency(currency)
 
         scanButton.setOnClickListener { getAddressFromCamera() }
 
 
-        sendButton.setOnClickListener {
+        sendButton.setOnClickListener { _ ->
             val amount = amountEditText.text.toString()
             val destination = destinationEditText.text.toString()
             val context = context
@@ -167,14 +160,13 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-//    override fun onResume() {
-//        super.onResume()
-////        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
-////            currency = selectedCurrency
-//////                refresh { }
-////            switchCurrency()
-////        }
-//    }
+    override fun onResume() {
+        super.onResume()
+        showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
+            currency = selectedCurrency
+            switchCurrency(selectedCurrency)
+        }
+    }
 
     //TODO: add refresh
 
@@ -207,8 +199,10 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    private fun switchCurrency(currency: Currency = this.currency) {
-        this.currency = currency
+    private fun switchCurrency(newCurrency: Currency?) {
+        if (newCurrency != null) {
+            ChartFragment.currency = newCurrency
+        }
 
         amountUnitText.text = currency.toString()
         destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)
@@ -218,9 +212,6 @@ class SendFragment : RefreshFragment() {
             val buttonTextColor = currency.buttonTextColor(context)
             sendButton.backgroundTintList = buttonColors
             sendButton.textColor = buttonTextColor
-
-            val tabAccentColor = currency.colorAccent(activity!!)
-            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
             when (currency) {
                 //TODO: make this smarter:
@@ -245,6 +236,7 @@ class SendFragment : RefreshFragment() {
                     warning2TextView.setText(R.string.send_warning_2_ltc)
                 }
                 Currency.USD, Currency.EUR, Currency.GBP -> { /* how tho */ }
+                Currency.OTHER -> { /* how tho */ }
             }
         }
     }

@@ -1,136 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/txt_send_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="10dp"
-        android:text="@string/send_title"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabl_send_currency"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="top">
-    </android.support.design.widget.TabLayout>
-
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/layout_send_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="10dp">
+        android:paddingRight="20dp">
 
         <TextView
-            android:id="@+id/txt_send_warning"
-            android:layout_width="match_parent"
+            android:id="@+id/txt_send_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:text="@string/send_warning_1_btc" />
+            android:text="@string/send_title"
+            android:textSize="30sp"
+            tools:layout_editor_absoluteX="48dp"
+            tools:layout_editor_absoluteY="16dp" />
+
 
         <LinearLayout
-            android:id="@+id/layout_send_amount_layout"
+            android:id="@+id/layout_send_details"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingTop="5dp">
 
             <TextView
-                android:id="@+id/txt_send_amount_label"
+                android:id="@+id/txt_send_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/send_amount_label" />
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/send_warning_1_btc" />
 
             <LinearLayout
+                android:id="@+id/layout_send_amount_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etxt_send_amount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="numberDecimal" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txt_send_amount_unit"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txt_send_amount_label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/currency_BTC" />
+                    android:text="@string/send_amount_label" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etxt_send_amount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="20"
+                        android:inputType="numberDecimal" />
+
+                    <TextView
+                        android:id="@+id/txt_send_amount_unit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/currency_BTC" />
+                </LinearLayout>
+
             </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_send_destination"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txt_send_destination_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/send_destination_blank_label" />
 
             <LinearLayout
+                android:id="@+id/layout_send_destination"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/etxt_send_destination"
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/txt_send_destination_label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="text" />
+                    android:text="@string/send_destination_blank_label" />
 
-                <ImageButton
-                    android:id="@+id/btn_send_destination_camera"
-                    android:contentDescription="@string/send_camera_btn"
-                    android:layout_width="35dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_menu_camera" />
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etxt_send_destination"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="20"
+                        android:inputType="text" />
+
+                    <ImageButton
+                        android:id="@+id/btn_send_destination_camera"
+                        android:layout_width="35dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:contentDescription="@string/send_camera_btn"
+                        app:srcCompat="@drawable/ic_menu_camera" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
+
+            <TextView
+                android:id="@+id/txt_send_warning_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp" />
+
         </LinearLayout>
 
-
-        <TextView
-            android:id="@+id/txt_send_warning_2"
+        <Button
+            android:id="@+id/btn_send"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp" />
+            android:layout_marginTop="20dp"
+            android:text="@string/send_send_btn" />
+
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/send_send_btn" />
-
-
-</LinearLayout>
+</ScrollView>

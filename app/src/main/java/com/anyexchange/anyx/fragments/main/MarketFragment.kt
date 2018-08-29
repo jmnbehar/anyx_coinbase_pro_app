@@ -14,7 +14,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_market.view.*
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -61,7 +60,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         super.onResume()
         autoRefresh = Runnable {
             if (!skipNextRefresh) {
-                refresh() {}
+                refresh {}
             }
             skipNextRefresh = false
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))

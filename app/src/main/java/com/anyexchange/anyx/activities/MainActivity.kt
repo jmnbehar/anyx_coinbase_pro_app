@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
         val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
-        ChartFragment.account = Account.forCurrency(chartCurrency)
+        ChartFragment.currency = chartCurrency
         setDrawerMenu()
     }
 
@@ -469,7 +469,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun goToChartFragment(currency: Currency) {
-        ChartFragment.account = Account.forCurrency(currency)
+        ChartFragment.currency = currency
         goToFragment(FragmentType.CHART)
     }
 
