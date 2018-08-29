@@ -19,8 +19,7 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_login">Log In</string>
     <string name="menu_send">Send</string>
-    <string name="menu_transfer_in">Transfer In</string>
-    <string name="menu_transfer_out">Transfer Out</string>
+    <string name="menu_transfer">Transfer</string>
     <string name="menu_verify">Verify</string>
 
     //Login Strings
@@ -97,6 +96,8 @@
 
     <string name="alert_above">above</string>
     <string name="alert_below">below</string>
+
+    <string name="alert_rapid_movement">Alert when the price of %s spikes or drops</string>
 
     //Chart Fragment
     <string name="chart_timespan_1h">1H</string>

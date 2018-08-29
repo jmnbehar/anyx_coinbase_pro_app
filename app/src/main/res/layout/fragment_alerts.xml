@@ -1,120 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txt_alert_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
-        android:text="Alert Page"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabl_alerts_currency"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="top"
-        android:layout_marginLeft="-20dp"
-        android:layout_marginRight="-20dp">
-
-    </android.support.design.widget.TabLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_alert_price"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/layout_alert_price_layout"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:paddingTop="10dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/txt_alert_price_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dp"
-                    android:text="price" />
-
-                <TextView
-                    android:id="@+id/txt_alert_current_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:text="BTC"
-                    android:textSize="20sp" />
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/txt_alert_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:text="Alert Page"
+                android:textSize="30sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/txt_alert_trigger_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="BTC" />
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabl_alerts_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                app:layout_constraintTop_toBottomOf="@+id/txt_alert_name"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_refresh_layout">
 
-                <EditText
-                    android:id="@+id/etxt_alert_price"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="numberDecimal" />
+            </android.support.design.widget.TabLayout>
 
-                <TextView
-                    android:id="@+id/txt_alert_price_unit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="BTC" />
 
-                <Button
-                    android:id="@+id/btn_alert_set"
-                    android:layout_width="wrap_content"
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/layout_alert_price_layout"
+                app:layout_constraintTop_toBottomOf="@+id/tabl_alerts_currency"
+                android:orientation="vertical">
+
+                <ListView
+                    android:id="@+id/list_alerts"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_alert_price_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="2dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+
+                <CheckBox
+                    android:id="@+id/cb_alert_price_movement"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_alert_price_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/txt_alert_current_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Set" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_alert_trigger_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="BTC" />
+
+                    <EditText
+                        android:id="@+id/etxt_alert_price"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="20"
+                        android:inputType="numberDecimal" />
+
+                    <TextView
+                        android:id="@+id/txt_alert_price_unit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="BTC" />
+
+                    <Button
+                        android:id="@+id/btn_alert_set"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Set" />
+                </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
-
-    </LinearLayout>
+        </android.support.constraint.ConstraintLayout>
 
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:orientation="vertical">
-
-        <ListView
-            android:id="@+id/list_alerts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

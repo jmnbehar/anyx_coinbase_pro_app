@@ -454,7 +454,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-            R.id.nav_deposit -> FragmentType.TRANSFER
+            R.id.nav_transfer -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME

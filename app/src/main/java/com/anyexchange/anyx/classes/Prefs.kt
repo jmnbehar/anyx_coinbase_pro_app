@@ -96,15 +96,6 @@ class Prefs (var context: Context) {
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
 
-    fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
-        val tempRapidMovementAlerts = rapidMovementAlertCurrencies.toMutableSet()
-        if (!isActive && rapidMovementAlertCurrencies.contains(currency)) {
-            tempRapidMovementAlerts.remove(currency)
-        } else if (isActive && !rapidMovementAlertCurrencies.contains(currency)) {
-            tempRapidMovementAlerts.add(currency)
-        }
-        rapidMovementAlertCurrencies = tempRapidMovementAlerts
-    }
 
     var stashedFiatAccountList: List<Account>
         get() {
@@ -213,7 +204,7 @@ class Prefs (var context: Context) {
         get() = prefs.getLong(MOVEMENT_ALERT_TIMESTAMP, 0)
         set(value) = prefs.edit().putLong(MOVEMENT_ALERT_TIMESTAMP, value).apply()
 
-    var rapidMovementAlertCurrencies: Set<Currency>
+    private var rapidMovementAlertCurrencies: Set<Currency>
         get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
 
@@ -224,9 +215,11 @@ class Prefs (var context: Context) {
         } else if (!isActive && rapidMovementAlertCurrencies.contains(currency)) {
             currentActiveAlerts.remove(currency)
         }
-        rapidMovementAlertCurrencies = currentActiveAlerts.toSet()
+        rapidMovementAlertCurrencies = currentActiveAlerts
     }
-
+    fun isMovementAlertActive(currency: Currency): Boolean {
+        return rapidMovementAlertCurrencies.contains(currency)
+    }
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
         /* Keeps track of unpaid fees to be paid once over the min send amount */

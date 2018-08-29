@@ -1,17 +1,15 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.adapters.AlertListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import android.util.TypedValue
-import android.view.MenuItem
+import android.view.*
 import com.anyexchange.anyx.activities.MainActivity
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
@@ -34,6 +32,8 @@ class AlertsFragment : RefreshFragment() {
     private lateinit var priceEditText: EditText
     private lateinit var priceUnitText: TextView
 
+    private var priceMovementCheckBox: CheckBox? = null
+
     private lateinit var setButton: Button
 
     private lateinit var alertList: ListView
@@ -50,6 +50,7 @@ class AlertsFragment : RefreshFragment() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_alerts, container, false)
@@ -69,6 +70,7 @@ class AlertsFragment : RefreshFragment() {
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
 
+        priceMovementCheckBox = rootView.cb_alert_price_movement
         setButton = rootView.btn_alert_set
 
         alertList = rootView.list_alerts
@@ -84,6 +86,11 @@ class AlertsFragment : RefreshFragment() {
         setButton.setOnClickListener { setAlert() }
         setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
+        priceMovementCheckBox?.setOnCheckedChangeListener {  _, isChecked ->
+            context?.let {
+                Prefs(it).setMovementAlert(currency, isChecked)
+            }
+        }
 
         context?.let {
             alertAdapter = AlertListViewAdapter(it, inflater, sortedAlerts) { view, alert ->
@@ -105,27 +112,6 @@ class AlertsFragment : RefreshFragment() {
         } ?: run {
             alertList.visibility = View.GONE
         }
-
-//        val swipeMenuCreator = SwipeMenuCreator { menu ->
-//            var deleteItem = SwipeMenuItem(context)
-//            deleteItem.background = ColorDrawable(Color.RED)
-//            deleteItem.width = dp2px(90)
-//            deleteItem.title = "Delete"
-//            menu.addMenuItem(deleteItem)
-//        }
-//        alertList.setMenuCreator(swipeMenuCreator)
-//        alertList.setOnMenuItemClickListener { position, _, index ->
-//            when (index) {
-//                0 -> {
-//                    val alertAtPos = alerts.toList()[position]
-//                    deleteAlert(alertAtPos)
-//                    alertAdapter.notifyDataSetChanged()
-//                    toaasdfsdfast("Item deleted")
-//                }
-//            }
-//            true
-//        }
-//        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
 
         //alertList.setHeightBasedOnChildren()
         dismissProgressSpinner()
@@ -174,16 +160,20 @@ class AlertsFragment : RefreshFragment() {
             priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
             currentPriceText.text = price.fiatFormat(Account.defaultFiatCurrency)
         }
-        activity?.let { activity ->
-            val tabAccentColor = currency.colorAccent(activity)
+        context?.let { context ->
+            val isMovementAlertActive = Prefs(context).isMovementAlertActive(currency)
+            priceMovementCheckBox?.isChecked = isMovementAlertActive
+            val priceMovementLabel = resources.getString(R.string.alert_rapid_movement, currency.toString())
+            priceMovementCheckBox?.text = priceMovementLabel
+
+            val tabAccentColor = currency.colorAccent(context)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-            val buttonColors = currency.colorStateList(activity)
-            val buttonTextColor = currency.buttonTextColor(activity)
+            val buttonColors = currency.colorStateList(context)
+            val buttonTextColor = currency.buttonTextColor(context)
             setButton.backgroundTintList = buttonColors
             setButton.textColor = buttonTextColor
         }
-
     }
 
     private val sortedAlerts : List<Alert>

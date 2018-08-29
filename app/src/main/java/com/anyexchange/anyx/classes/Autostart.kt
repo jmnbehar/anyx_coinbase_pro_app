@@ -115,22 +115,22 @@ class AlertJobService : JobService() {
             if (account != null) {
                 val candles = account.product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
-                    val minAlertPercentage = 0.7
+                    val minAlertPercentage = 1.25
                     var alertPercentage = minAlertPercentage
                     var alertTime = ""
                     var changeIsPositive = false
                     val timestamp = Date().timeInSeconds()
 
                     val mostRecentPrice = candles.last().close
-                    val twentyMinutePrice = candles[candles.size - 4].close
+                    val tenMinutePrice = candles[candles.size - 2].close
                     val halfHourPrice = candles[candles.size - 6].close
                     val hourPrice = candles[candles.size - 12].close
 
-                    val twentyMinuteChange = percentChange(mostRecentPrice, twentyMinutePrice)
-                    if (twentyMinuteChange > alertPercentage && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.twentyMinutes)) {
-                        alertPercentage = twentyMinuteChange
-                        alertTime = "twenty minutes"
-                        changeIsPositive = mostRecentPrice > twentyMinutePrice
+                    val tenMinuteChange = percentChange(mostRecentPrice, tenMinutePrice)
+                    if (tenMinuteChange > alertPercentage && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.twentyMinutes)) {
+                        alertPercentage = tenMinuteChange
+                        alertTime = "ten minutes"
+                        changeIsPositive = mostRecentPrice > tenMinutePrice
                     }
                     val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
                     if (halfHourChange > alertPercentage + 0.5 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.halfHour)) {
