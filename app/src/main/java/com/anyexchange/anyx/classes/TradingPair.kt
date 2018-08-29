@@ -2,8 +2,8 @@ package com.anyexchange.anyx.classes
 
 class TradingPair(val baseCurrency: Currency, val quoteCurrency: Currency) {
     constructor(id: String) : this(
-            if (id.length > 2) { Currency.forString(id.substring(0, 3)) ?: Currency.BTC } else { Currency.BTC },
-            if (id.length > 7) { Currency.forString(id.substring(4, 7)) ?: Currency.USD } else { Currency.USD })
+            if (id.length >= 3) { Currency.forString(id.substring(0, 3)) ?: Currency.BTC } else { Currency.BTC },
+            if (id.length >= 7) { Currency.forString(id.substring(4, 7)) ?: Currency.USD } else { Currency.USD })
 
     val id = baseCurrency.toString() + "-" + quoteCurrency.toString()
 
