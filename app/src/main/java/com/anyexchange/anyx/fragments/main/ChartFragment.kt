@@ -630,7 +630,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure = { result: Result.Failure<String, FuelError> ->
-            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            if (context != null) {
+                toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            }
             onComplete(false)
         }
         account?. let { account ->
