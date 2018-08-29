@@ -25,11 +25,11 @@ import org.jetbrains.anko.textColor
 class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
     lateinit var listView: ListView
     lateinit var inflater: LayoutInflater
-    private lateinit var lineChart: PriceLineChart
-    private lateinit var valueText: TextView
-    private lateinit var percentChangeText: TextView
-    private lateinit var titleText: TextView
-    private lateinit var accountList: ListView
+    private var lineChart: PriceLineChart? = null
+    private var valueText: TextView? = null
+    private var percentChangeText: TextView? = null
+    private var titleText: TextView? = null
+    private var accountList: ListView? = null
 
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
@@ -62,10 +62,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_accounts_label.text = resources.getString(R.string.accounts_title)
 
-            lineChart.setOnChartValueSelectedListener(this)
-            lineChart.onChartGestureListener = this
+            lineChart?.setOnChartValueSelectedListener(this)
+            lineChart?.onChartGestureListener = this
 
-            lineChart.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
+            lineChart?.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
                 HomeFragment.viewPager?.isLocked = true
             }
@@ -73,16 +73,16 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             val selectGroup = lambda@ { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
-            accountList.adapter = AccountListViewAdapter(context, selectGroup)
-            titleText.visibility = View.GONE
+            accountList?.adapter = AccountListViewAdapter(context, selectGroup)
+            titleText?.visibility = View.GONE
 
         } else {
-            accountList.visibility = View.GONE
-            lineChart.visibility = View.GONE
+            accountList?.visibility = View.GONE
+            lineChart?.visibility = View.GONE
             rootView.layout_accounts_chart_info.visibility = View.GONE
             //TODO: put a login button here
-            titleText.visibility = View.VISIBLE
-            titleText.text = resources.getString(R.string.accounts_logged_out_message)
+            titleText?.visibility = View.VISIBLE
+            titleText?.text = resources.getString(R.string.accounts_logged_out_message)
             dismissProgressSpinner()
         }
 
@@ -91,16 +91,16 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        valueText.text = entry.y.toDouble().fiatFormat(Account.defaultFiatCurrency)
+        valueText?.text = entry.y.toDouble().fiatFormat(Account.defaultFiatCurrency)
         if (accountTotalCandles.size > entry.x) {
             val candle = accountTotalCandles[entry.x.toInt()]
 
             var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
             timeString = timeString.replace(" ", "\n")
-            percentChangeText.text = timeString
+            percentChangeText?.text = timeString
         }
         context?.let {
-            percentChangeText.textColor = if (Prefs(it).isDarkModeOn) {
+            percentChangeText?.textColor = if (Prefs(it).isDarkModeOn) {
                 Color.WHITE
             } else {
                 Color.BLACK
@@ -110,7 +110,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onNothingSelected() {
         setValueAndPercentChangeTexts()
-        lineChart.highlightValues(arrayOf<Highlight>())
+        lineChart?.highlightValues(arrayOf<Highlight>())
     }
 
     private fun setPercentChangeText(price: Double, open: Double) {
@@ -119,10 +119,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val percentChange: Double = weightedChange * 100.0
         val sign = if (change >= 0) { "+" } else { "" }
         context?.let {
-            percentChangeText.text = resources.getString(R.string.accounts_percent_change_text,
+            percentChangeText?.text = resources.getString(R.string.accounts_percent_change_text,
                     percentChange.percentFormat(), sign, change.fiatFormat(Account.defaultFiatCurrency))
 
-            percentChangeText.textColor = if (percentChange >= 0) {
+            percentChangeText?.textColor = if (percentChange >= 0) {
                 Color.GREEN
             } else {
                 Color.RED
@@ -132,7 +132,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private fun setValueAndPercentChangeTexts() {
         val totalValue = Account.totalValue
-        valueText.text = totalValue.fiatFormat(Account.defaultFiatCurrency)
+        valueText?.text = totalValue.fiatFormat(Account.defaultFiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
             accountTotalCandles.first().close
@@ -140,11 +140,11 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             0.0
         }
         if (totalValue == 0.0) {
-            valueText.visibility = View.GONE
-            percentChangeText.visibility = View.GONE
+            valueText?.visibility = View.GONE
+            percentChangeText?.visibility = View.GONE
         } else {
-            valueText.visibility = View.VISIBLE
-            percentChangeText.visibility = View.VISIBLE
+            valueText?.visibility = View.VISIBLE
+            percentChangeText?.visibility = View.VISIBLE
             setPercentChangeText(totalValue, open)
         }
     }
@@ -203,17 +203,17 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     fun refreshComplete() {
-        (accountList.adapter as AccountListViewAdapter).notifyDataSetChanged()
+        (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
 
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()
 
         if (Account.totalValue == 0.0) {
-            lineChart.visibility = View.GONE
+            lineChart?.visibility = View.GONE
         } else {
-            lineChart.visibility = View.VISIBLE
+            lineChart?.visibility = View.VISIBLE
             //doesn't matter which fiat currency you use here:
-            lineChart.addCandles(accountTotalCandles, granularity, Currency.USD)
+            lineChart?.addCandles(accountTotalCandles, granularity, Currency.USD)
         }
     }
 }

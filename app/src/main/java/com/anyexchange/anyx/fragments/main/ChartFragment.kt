@@ -120,8 +120,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val tempAccount = account
 
-        candles = tempAccount.product.candlesForTimespan(timeSpan, tradingPair) ?: listOf()
-        val currency = tempAccount.currency ?: Currency.USD
+        candles = tempAccount.product.candlesForTimespan(timeSpan, tradingPair)
+        val currency = tempAccount.currency
 
         lineChart = rootView.chart_line_chart
         candleChart = rootView.chart_candle_chart
@@ -230,6 +230,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
+    var blockNextAccountChange = false
     override fun onResume() {
         super.onResume()
         //TODO: reset trading pair and timespan
@@ -239,14 +240,20 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (index != -1) {
             tradingPairSpinner?.setSelection(index)
         }
+
+        txt_chart_name.text = currency.fullName
         checkTimespanButton()
         updateChartStyle()
 
+        blockNextAccountChange = true
         showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
-            Account.forCurrency(selectedCurrency)?.let { tempAccount ->
-                account = tempAccount
-                switchAccount(tempAccount)
+            if (!blockNextAccountChange) {
+                Account.forCurrency(selectedCurrency)?.let { tempAccount ->
+                    account = tempAccount
+                    switchAccount(tempAccount)
+                }
             }
+            blockNextAccountChange = false
         }
 
         if (currency.isFiat) {
@@ -339,48 +346,52 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         account = newAccount
         blockRefresh = true
         didTouchTradingPairSpinner = false
-        //TODO: don't force unwrap:
-        val activity = activity as MainActivity
 
         val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
 
-        val tradingPairs = account.product.tradingPairs
-        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, tradingPairs)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner_chart_trading_pair.adapter = arrayAdapter
-        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
-        if (relevantTradingPair != null) {
-            val index = tradingPairs.indexOf(relevantTradingPair)
-            spinner_chart_trading_pair.setSelection(index)
-            viewModel.tradingPair = relevantTradingPair
-        } else {
-            viewModel.tradingPair = tradingPairs.firstOrNull()
-        }
-
-        candles = newAccount.product.candlesForTimespan(timeSpan, tradingPair)
-        val prefs = Prefs(activity)
-        val nowInSeconds = Calendar.getInstance().timeInSeconds()
-        val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
-
-        if (!wereFillsRecentlyUpdated && context != null) {
-            showProgressSpinner()
-            CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({ }) { apiFillList ->
-                if (lifecycle.isCreatedOrResumed) {
-                    switchAccountCandlesCheck(newAccount, apiFillList)
-                    dismissProgressSpinner()
-                }
+        context?.let { context ->
+            val tradingPairs = account.product.tradingPairs
+            val arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, tradingPairs)
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner_chart_trading_pair.adapter = arrayAdapter
+            val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
+            if (relevantTradingPair != null) {
+                val index = tradingPairs.indexOf(relevantTradingPair)
+                spinner_chart_trading_pair.setSelection(index)
+                viewModel.tradingPair = relevantTradingPair
+            } else {
+                viewModel.tradingPair = tradingPairs.firstOrNull()
             }
-        } else {
-            val stashedFills = prefs.getStashedFills(newAccount.product.id)
-            switchAccountCandlesCheck(newAccount, stashedFills)
+
+            candles = newAccount.product.candlesForTimespan(timeSpan, tradingPair)
+            val prefs = Prefs(context)
+            val nowInSeconds = Calendar.getInstance().timeInSeconds()
+            val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
+
+            if (!wereFillsRecentlyUpdated) {
+                showProgressSpinner()
+                CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({ }) { apiFillList ->
+                    if (lifecycle.isCreatedOrResumed) {
+                        switchAccountCandlesCheck(newAccount, apiFillList)
+                        dismissProgressSpinner()
+                    }
+                }
+            } else {
+                val stashedFills = prefs.getStashedFills(newAccount.product.id)
+                switchAccountCandlesCheck(newAccount, stashedFills)
+            }
         }
     }
+    private val areCandlesUpToDate: Boolean
+        get() {
+            val nowInSeconds = Calendar.getInstance().timeInSeconds()
+            val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
+            val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timeSpan)
+            return candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
+        }
+
     private fun switchAccountCandlesCheck(account: Account, fills: List<ApiFill>) {
-        val nowInSeconds = Calendar.getInstance().timeInSeconds()
-        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
-        val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timeSpan)
-        val areCandlesUpToDate = candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
         if (areCandlesUpToDate) {
             completeSwitchAccount(account, fills)
         } else {
