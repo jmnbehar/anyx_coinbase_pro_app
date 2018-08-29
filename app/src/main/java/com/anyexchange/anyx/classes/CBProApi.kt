@@ -14,7 +14,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
@@ -426,7 +425,22 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         }
     }
     //add position?
-    class depositAddress(initData: CBProApiInitData?, val accountId: String) : CBProApi(initData)
+    class depositAddress(initData: CBProApiInitData?, val cbAccountId: String) : CBProApi(initData) {
+        fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (String) -> Unit) {
+            this.executePost(onFailure) {
+                val byteArray = it.component1()
+                try {
+                    if (byteArray != null) {
+                        onComplete(String(byteArray))
+                    } else {
+                        onFailure(Result.Failure(FuelError(Exception())))
+                    }
+                } catch (e: Exception) {
+                    onFailure(Result.Failure(FuelError(e)))
+                }
+            }
+        }
+    }
 
     class sendCrypto(initData: CBProApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi(initData)
     class coinbaseAccounts(initData: CBProApiInitData?) : CBProApi(initData) {
@@ -548,7 +562,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getOrder -> "/orders/$orderId"
                 is fills -> "/fills"
                 is sendCrypto -> "/withdrawals/crypto"
-                is depositAddress -> "/coinbase-accounts/$accountId/addresses"
+                is depositAddress -> "/coinbase-accounts/$cbAccountId/addresses"
                 is coinbaseAccounts -> "/coinbase-accounts"
                 is paymentMethods -> "/payment-methods"
                 is getFromCoinbase -> "/deposits/coinbase-account"

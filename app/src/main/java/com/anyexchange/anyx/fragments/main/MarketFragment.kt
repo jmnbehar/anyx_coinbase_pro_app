@@ -86,6 +86,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
+        //TODO: use Account's updateAllCandles
         for (account in Account.cryptoAccounts) {
             account.product.updateCandles(time, null, apiInitData, {//OnFailure
                 toast(R.string.error_message)
@@ -95,6 +96,9 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                     if (didUpdate) {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
+                            context?.let {
+                                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+                            }
                             (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                             updateAccountsFragment()
                             onComplete(true)

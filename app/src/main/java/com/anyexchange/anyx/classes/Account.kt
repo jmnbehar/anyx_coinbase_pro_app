@@ -32,6 +32,8 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     var coinbaseAccount: CoinbaseAccount? = null
 
+    var depositAddress: String? = null
+
     fun update(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
             if (apiAccount != null) {
@@ -52,7 +54,6 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     companion object {
         var cryptoAccounts = listOf<Account>()
-
         var fiatAccounts = listOf<Account>()
 
         val areAccountsOutOfDate: Boolean
@@ -87,10 +88,14 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
             var candlesUpdated = 0
             for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)
+                //TODO: do we really need to call updateAllProducts here?
                 Product.updateAllProducts(apiInitData, onFailure) {
-                    account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) {
+                    account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
                         candlesUpdated++
                         if (candlesUpdated == cryptoAccounts.size) {
+                            if (didUpdate && apiInitData?.context != null) {
+                                Prefs(apiInitData.context).stashedCryptoAccountList = Account.cryptoAccounts
+                            }
                             onComplete()
                         }
                     }
@@ -133,5 +138,15 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
                 string += "Currency:$currency"
                 return string
             }
+    }
+
+    class ExternalAccount(currency: Currency) : BaseAccount() {
+        override val id: String = "External $currency Account"
+        override val balance = 0.0
+        override val currency = currency
+
+        override fun toString(): String {
+            return id
+        }
     }
 }

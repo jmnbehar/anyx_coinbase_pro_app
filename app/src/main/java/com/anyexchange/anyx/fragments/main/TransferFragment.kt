@@ -107,8 +107,7 @@ class TransferFragment : RefreshFragment() {
         sourceAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (sourceAccounts.size > position) {
-                    setDestAccounts()
-                    setInfoAndButtons()
+                    sourceAccountSelected()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -316,13 +315,15 @@ class TransferFragment : RefreshFragment() {
         Companion.currency = currency
         amountEditText.setText("")
 
+
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
         Account.forCurrency(currency)?.let {
             tempRelevantAccounts.add(it)
         }
-        tempRelevantAccounts.addAll( coinbaseAccounts.filter { account -> account.currency == currency })
         if (currency.isFiat) {
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
+        } else {
+            tempRelevantAccounts.add(Account.ExternalAccount(currency))
         }
         sourceAccounts = tempRelevantAccounts
 
@@ -351,6 +352,30 @@ class TransferFragment : RefreshFragment() {
         setInfoAndButtons()
     }
 
+    private fun sourceAccountSelected() {
+        val relevantAccount = Account.forCurrency(currency)
+        if (sourceAccount is Account.ExternalAccount) {
+            Account.forCurrency(currency)?.coinbaseAccount?.let {
+                if (relevantAccount?.depositAddress == null) {
+                    CBProApi.depositAddress(apiInitData, it.id).get({ _ ->
+                        toast("Error")
+                        sourceAccountsSpinner.setSelection(0)
+                    }) { depositAddress ->
+                        relevantAccount?.depositAddress = depositAddress
+                        setDestAccounts()
+                        setInfoAndButtons()
+                    }
+                }
+            } ?: run {
+                toast("Error")
+                sourceAccountsSpinner.setSelection(0)
+            }
+        } else {
+            setDestAccounts()
+            setInfoAndButtons()
+        }
+    }
+
     private fun setDestAccounts() {
         val cbproAccount = Account.forCurrency(currency)
         destAccounts = when(sourceAccount) {
@@ -363,6 +388,7 @@ class TransferFragment : RefreshFragment() {
                 }
                 tempDestAccounts.toList()
             }
+            is Account.ExternalAccount -> listOf(cbproAccount)
             else  -> listOf()
         }
         when (destAccounts.size) {
@@ -408,6 +434,11 @@ class TransferFragment : RefreshFragment() {
                     is Account.CoinbaseAccount -> infoText.setText(R.string.transfer_coinbase_info)
                     is Account.PaymentMethod -> infoText.setText(R.string.transfer_bank_info)
                 }
+            }
+            is Account.ExternalAccount -> {
+                val account = destAccount as Account
+                interactiveLayout.visibility = View.GONE
+                infoText.text = "Deposit address: " + (account.depositAddress ?: "null")
             }
             else -> {
                 interactiveLayout.visibility = View.INVISIBLE
