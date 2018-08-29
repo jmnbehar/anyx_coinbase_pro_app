@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val chartFragment = currentFragment as ChartFragment
             outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
             outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
-            outState?.putLong(CHART_TIMESPAN, chartFragment.timeSpan.value())
+            outState?.putLong(CHART_TIMESPAN, chartFragment.timespan.value())
         }
     }
 
