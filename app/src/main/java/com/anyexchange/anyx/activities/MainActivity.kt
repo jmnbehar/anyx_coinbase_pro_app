@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
-                        goToVerify({ })
+                        goToVerify{ }
                     }
                 }
             }
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun goToVerify(onComplete: (Boolean) -> Unit) {
+    private fun goToVerify(onComplete: (Boolean) -> Unit) {
         val intent = Intent(this, VerifyActivity::class.java)
         startActivity(intent)
         VerifyActivity.onComplete = onComplete
@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         dataFragment?.backupData()
-        outState?.putString(CHART_CURRENCY, ChartFragment.account?.currency?.toString())
+        outState?.putString(CHART_CURRENCY, ChartFragment.currency.toString())
         if (currentFragment is ChartFragment) {
             val chartFragment = currentFragment as ChartFragment
             outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
@@ -390,10 +390,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
         }
-        if (currentFragment is AlertsFragment) {
-            (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
-            (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
-        }
+        AlertListFragment.blockRefresh = true
+        (currentFragment as? AlertsFragment)?.updatePagerAdapter()
+        AlertListFragment.blockRefresh = false
     }
 
     private fun returnToLogin() {
@@ -573,7 +572,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentFocus = currentFocus
         if (currentFocus != null && inputManager != null) {
             inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
-            inputManager.hideSoftInputFromInputMethod(currentFocus.windowToken, 0)
         }
     }
 }

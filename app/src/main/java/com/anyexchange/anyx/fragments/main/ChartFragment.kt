@@ -242,6 +242,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         txt_chart_name.text = currency.fullName
+        setPercentChangeText(timespan)
         checkTimespanButton()
         updateChartStyle()
 
