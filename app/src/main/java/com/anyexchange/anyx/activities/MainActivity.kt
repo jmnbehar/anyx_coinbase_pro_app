@@ -390,9 +390,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
         }
-        AlertListFragment.blockRefresh = true
         (currentFragment as? AlertsFragment)?.updatePagerAdapter()
-        AlertListFragment.blockRefresh = false
     }
 
     private fun returnToLogin() {

@@ -162,6 +162,8 @@ class AlertsFragment : RefreshFragment() {
 
 
     fun updatePagerAdapter() {
+        AlertListFragment.blockRefresh = true
         (alertPager.adapter as? AlertPagerAdapter)?.notifyDataSetChanged()
+        AlertListFragment.blockRefresh = false
     }
 }
