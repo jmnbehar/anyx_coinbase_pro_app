@@ -30,6 +30,7 @@ import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.Currency
+import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -55,6 +56,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var balanceTextView: TextView? = null
     private var valueTextView: TextView? = null
     private var accountIcon: ImageView? = null
+
+    private var highLabelTextView: TextView? = null
+    private var highTextView: TextView? = null
+    private var lowLabelTextView: TextView? = null
+    private var lowTextView: TextView? = null
+
+    private var openLabelTextView: TextView? = null
+    private var openTextView: TextView? = null
+    private var closeLabelTextView: TextView? = null
+    private var volumeLabelTextView: TextView? = null
+    private var volumeTextView: TextView? = null
 
     private var buyButton: Button? = null
     private var sellButton: Button? = null
@@ -142,22 +154,40 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceTextView = rootView.txt_chart_price
 
         buyButton = rootView.btn_chart_buy
+
+        highLabelTextView = rootView.txt_chart_high_label
+        highTextView = rootView.txt_chart_high
+        lowLabelTextView = rootView.txt_chart_low_label
+        lowTextView = rootView.txt_chart_low
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            tickerTextView = rootView.txt_chart_ticker
+
+            balanceTextView = rootView.txt_chart_account_balance
+            valueTextView = rootView.txt_chart_account_value
+            accountIcon = rootView.img_chart_account_icon
+
+            historyTabLayout = rootView.history_tab_layout
+
+            sellButton = rootView.btn_chart_sell
+            historyPager = rootView.history_view_pager
+        } else {
+            openLabelTextView = rootView.txt_chart_open_label
+            openTextView = rootView.txt_chart_open
+            closeLabelTextView =  rootView.txt_chart_close_label
+
+            volumeLabelTextView = rootView.txt_chart_volume_label
+            volumeTextView = rootView.txt_chart_volume
+        }
+
         context?.let {
             val prefs = Prefs(it)
 
             buyButton?.setOnClickListener {_ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
             }
+
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                tickerTextView = rootView.txt_chart_ticker
-
-                balanceTextView = rootView.txt_chart_account_balance
-                valueTextView = rootView.txt_chart_account_value
-                accountIcon = rootView.img_chart_account_icon
-
-                historyTabLayout = rootView.history_tab_layout
-
-                sellButton = rootView.btn_chart_sell
                 sellButton?.setOnClickListener { _ ->
                     buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
                 }
@@ -245,6 +275,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         setPercentChangeText(timespan)
         checkTimespanButton()
         updateChartStyle()
+        highLabelTextView?.visibility = View.GONE
+        highTextView?.visibility = View.GONE
+        lowLabelTextView?.visibility = View.GONE
+        lowTextView?.visibility = View.GONE
+
+        openLabelTextView?.visibility = View.GONE
+        openTextView?.visibility = View.GONE
+        closeLabelTextView?.visibility = View.GONE
+        volumeLabelTextView?.visibility = View.GONE
+        volumeTextView?.visibility = View.GONE
 
         blockNextAccountChange = true
         showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
@@ -339,7 +379,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } else {
                 tradeFragment?.tradeSide = tradeSide
             }
-            (activity as? MainActivity)?.goToFragment(tradeFragment!!, MainActivity.FragmentType.TRADE.toString())
+            (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
         }
     }
 
@@ -600,6 +640,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 txt_chart_change_or_date.textColor = Color.BLACK
             }
         }
+        if (chartStyle == ChartStyle.Candle && entry is CandleEntry) {
+            highLabelTextView?.visibility = View.VISIBLE
+            highTextView?.visibility = View.VISIBLE
+            lowLabelTextView?.visibility = View.VISIBLE
+            lowTextView?.visibility = View.VISIBLE
+
+            openLabelTextView?.visibility = View.VISIBLE
+            openTextView?.visibility = View.VISIBLE
+            closeLabelTextView?.visibility = View.VISIBLE
+
+            //format these:
+            highTextView?.text = entry.high.toString()
+            lowTextView?.text = entry.low.toString()
+            openTextView?.text = entry.open.toString()
+
+            //TODO: add volume to CandleEntry
+
+            volumeLabelTextView?.visibility = View.GONE
+            volumeTextView?.visibility = View.GONE
+        }
     }
 
     override fun onNothingSelected() {
@@ -609,6 +669,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
             ChartStyle.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
         }
+
+        highLabelTextView?.visibility = View.GONE
+        highTextView?.visibility = View.GONE
+        lowLabelTextView?.visibility = View.GONE
+        lowTextView?.visibility = View.GONE
+
+        openLabelTextView?.visibility = View.GONE
+        openTextView?.visibility = View.GONE
+        closeLabelTextView?.visibility = View.GONE
+        volumeLabelTextView?.visibility = View.GONE
+        volumeTextView?.visibility = View.GONE
     }
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {

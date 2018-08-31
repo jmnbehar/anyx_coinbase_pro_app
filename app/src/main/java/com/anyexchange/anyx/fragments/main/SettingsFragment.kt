@@ -63,8 +63,7 @@ class SettingsFragment : RefreshFragment() {
             CBProApi.credentials = null
             prefs.stashOrders(null)
             prefs.nukeStashedFills()
-            (activity as? MainActivity)?.goToFragment(MainActivity.FragmentType.LOGIN)
-
+            (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
         }
 
         verifyButton.setOnClickListener  {
@@ -93,7 +92,7 @@ class SettingsFragment : RefreshFragment() {
         (activity as? MainActivity)?.let { activity ->
             anyxEulaButton.visibility = View.VISIBLE
             anyxEulaButton.setOnClickListener {
-                activity.goToFragment(MainActivity.FragmentType.EULA)
+                activity.goToFragment(FragmentType.EULA)
             }
         }
 

@@ -323,7 +323,8 @@ class TransferFragment : RefreshFragment() {
         if (currency.isFiat) {
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
         } else {
-            tempRelevantAccounts.add(Account.ExternalAccount(currency))
+            //uncomment this if we want to have deposit in transfer page:
+//            tempRelevantAccounts.add(Account.ExternalAccount(currency))
         }
         sourceAccounts = tempRelevantAccounts
 

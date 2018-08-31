@@ -49,64 +49,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     lateinit var spinnerNav: Spinner
     var defaultSpinnerColorFilter: ColorFilter? = null
 
-    enum class FragmentType {
-        CHART,
-        ACCOUNT,
-        SEND,
-        ALERTS,
-        TRANSFER,
-        SETTINGS,
-        TRADE,
-        HOME,
-        LOGIN,
-        EULA,
-        OTHER;
-
-
-        override fun toString() : String {
-            return when (this) {
-                CHART -> "CHART"
-                ACCOUNT -> "ACCOUNT"
-                SEND -> "SEND"
-                ALERTS -> "ALERTS"
-                TRANSFER -> "TRANSFER"
-                SETTINGS -> "SETTINGS"
-                TRADE -> "TRADE"
-                HOME -> "HOME"
-                LOGIN -> "LOGIN"
-                EULA -> "EULA"
-                OTHER -> "OTHER"
-            }
-        }
-
-        companion object {
-            fun forString(tag: String) : FragmentType {
-                for (fragmentType in FragmentType.values()) {
-                    if (tag == fragmentType.toString()) {
-                        return fragmentType
-                    }
-                }
-                return OTHER
-            }
-
-            fun forFragment(fragment: RefreshFragment?) : FragmentType {
-                return when (fragment) {
-                    is ChartFragment -> CHART
-                    is AccountsFragment -> ACCOUNT
-                    is SendFragment -> SEND
-                    is AlertsFragment -> ALERTS
-                    is TransferFragment -> TRANSFER
-                    is SettingsFragment -> SETTINGS
-                    is TradeFragment -> TRADE
-                    is LoginFragment -> LOGIN
-                    is HomeFragment -> HOME
-                    is EulaFragment -> EULA
-                    else -> OTHER
-                }
-            }
-        }
-    }
-
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
 
@@ -477,7 +419,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> ChartFragment()
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
-            FragmentType.SEND -> {
+            FragmentType.SEND, FragmentType.RECEIVE, FragmentType.SEND_RECEIVE -> {
 
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
