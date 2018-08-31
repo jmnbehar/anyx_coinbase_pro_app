@@ -29,9 +29,9 @@ private const val IS_LOGGED_IN = "is_logged_in"
 private const val UNPAID_FEES = "unpaid_fees_"
 private const val APPROVED_API_KEYS = "approved_api_keys"
 private const val REJECTED_API_KEYS = "rejected_api_keys"
-private const val RAPID_PRICE_MOVES = "rapid_price_movement"
+private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
 private const val PREFERRED_FIAT = "preferred_fiat"
-private const val MOVEMENT_ALERT_TIMESTAMP = "MOVEMENT_ALERT_TIMESTAMP"
+private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
 
 private const val PAYMENT_METHODS = "PAYMENT_METHODS"
 private const val PRODUCT = "account_product_"
@@ -88,8 +88,8 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(SHOULD_SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()
 
-    var alerts: Set<Alert>
-        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.forString(s) }?.toSet() ?: setOf()
+    var alerts: Set<PriceAlert>
+        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
 
     var stashedProducts: List<Product>
@@ -200,25 +200,25 @@ class Prefs (var context: Context) {
             prefs.edit().putStringSet(PAYMENT_METHODS, paymentMethodJsons).apply()
         }
 
-    var lastMovementAlertTimestamp: Long
-        get() = prefs.getLong(MOVEMENT_ALERT_TIMESTAMP, 0)
-        set(value) = prefs.edit().putLong(MOVEMENT_ALERT_TIMESTAMP, value).apply()
+    var lastQuickChangeAlertTimestamp: Long
+        get() = prefs.getLong(QUICK_CHANGE_ALERT_TIME, 0)
+        set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
 
-    private var rapidMovementAlertCurrencies: Set<Currency>
-        get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
+    var quickChangeAlertCurrencies: Set<Currency>
+        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
+        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
 
-    fun setMovementAlert(currency: Currency, isActive: Boolean) {
-        val currentActiveAlerts = rapidMovementAlertCurrencies.toMutableSet()
-        if (isActive && !rapidMovementAlertCurrencies.contains(currency)) {
+    fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
+        val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
+        if (isActive && !quickChangeAlertCurrencies.contains(currency)) {
             currentActiveAlerts.add(currency)
-        } else if (!isActive && rapidMovementAlertCurrencies.contains(currency)) {
+        } else if (!isActive && quickChangeAlertCurrencies.contains(currency)) {
             currentActiveAlerts.remove(currency)
         }
-        rapidMovementAlertCurrencies = currentActiveAlerts
+        quickChangeAlertCurrencies = currentActiveAlerts
     }
-    fun isMovementAlertActive(currency: Currency): Boolean {
-        return rapidMovementAlertCurrencies.contains(currency)
+    fun isQuickChangeAlertActive(currency: Currency): Boolean {
+        return quickChangeAlertCurrencies.contains(currency)
     }
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
@@ -300,13 +300,13 @@ class Prefs (var context: Context) {
         }
     }
 
-    fun addAlert(alert: Alert) {
+    fun addAlert(alert: PriceAlert) {
         val tempAlerts = alerts.toMutableSet()
         tempAlerts.add(alert)
         alerts = tempAlerts.toSet()
     }
 
-    fun removeAlert(alert: Alert) {
+    fun removeAlert(alert: PriceAlert) {
         val tempAlerts = alerts.toMutableSet()
         tempAlerts.removeAlert(alert)
         alerts = tempAlerts.toSet()

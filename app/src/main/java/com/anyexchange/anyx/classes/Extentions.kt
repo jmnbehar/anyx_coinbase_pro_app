@@ -1,8 +1,6 @@
 package com.anyexchange.anyx.classes
 
 import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleOwner
-import android.content.res.Resources
 import android.support.annotation.LayoutRes
 import android.support.design.widget.TabLayout
 import android.view.LayoutInflater
@@ -27,7 +25,7 @@ import kotlin.math.absoluteValue
 
  */
 
-fun MutableSet<Alert>.removeAlert(alert: Alert) {
+fun MutableSet<PriceAlert>.removeAlert(alert: PriceAlert) {
     val removeItem = this.find { a -> alert == a }
     if (removeItem != null) {
         this.remove(removeItem)

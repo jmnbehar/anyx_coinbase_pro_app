@@ -3,16 +3,14 @@ package com.anyexchange.anyx.classes
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import android.app.job.JobScheduler
 import android.app.job.JobInfo
 import android.content.ComponentName
 import android.app.job.JobParameters
 import android.app.job.JobService
-import java.sql.Time
 import java.util.*
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 
 class AutoStart : BroadcastReceiver() {
@@ -78,18 +76,19 @@ class AlertJobService : JobService() {
 
     private val timespan = Timespan.DAY
 
-    private var movementTimestampBackingLong: Long? = null
-    private var lastMovementAlertTimestamp: Long
+    private var quickChangeTimestampBackingLong: Long? = null
+    private var lastQuickChangeAlertTimestamp: Long
         get() {
-            val tempTimestamp = movementTimestampBackingLong
+            val tempTimestamp = quickChangeTimestampBackingLong
             return if (tempTimestamp == null) {
-                Prefs(this).lastMovementAlertTimestamp
+                Prefs(this).lastQuickChangeAlertTimestamp
             } else {
                 tempTimestamp
             }
         }
         set(value) {
-            Prefs(this).lastMovementAlertTimestamp = value
+            quickChangeTimestampBackingLong = value
+            Prefs(this).lastQuickChangeAlertTimestamp = value
         }
 
 
@@ -107,9 +106,9 @@ class AlertJobService : JobService() {
             }
         }
 
-        //TODO: revert this
-//        val enabledCurrencies = prefs.rapidMovementAlertCurrencies
-        val enabledCurrencies = listOf(Currency.ETH)
+        val enabledCurrencies = prefs.quickChangeAlertCurrencies
+        var changeAlert: QuickChangeAlert? = null
+        val setTimespan: QuickChangeAlert.AlertTimespan? = null
         for (currency in enabledCurrencies) {
             val account = Account.forCurrency(currency)
             if (account != null) {
@@ -117,7 +116,7 @@ class AlertJobService : JobService() {
                 if (candles.size > 12) {
                     val minAlertPercentage = 1.25
                     var alertPercentage = minAlertPercentage
-                    var alertTime = ""
+                    var alertTimespan: QuickChangeAlert.AlertTimespan? = null
                     var changeIsPositive = false
                     val timestamp = Date().timeInSeconds()
 
@@ -127,30 +126,48 @@ class AlertJobService : JobService() {
                     val hourPrice = candles[candles.size - 12].close
 
                     val tenMinuteChange = percentChange(mostRecentPrice, tenMinutePrice)
-                    if (tenMinuteChange > alertPercentage && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.twentyMinutes)) {
+                    if (tenMinuteChange > minAlertPercentage
+                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.TEN_MINUTES)) {
                         alertPercentage = tenMinuteChange
-                        alertTime = "ten minutes"
+                        alertTimespan = QuickChangeAlert.AlertTimespan.TEN_MINUTES
                         changeIsPositive = mostRecentPrice > tenMinutePrice
                     }
                     val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
-                    if (halfHourChange > alertPercentage + 0.5 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.halfHour)) {
+                    if ((halfHourChange > minAlertPercentage) && (halfHourChange > alertPercentage + 0.5)
+                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HALF_HOUR)) {
                         alertPercentage = halfHourChange
-                        alertTime = "half hour"
+                        alertTimespan = QuickChangeAlert.AlertTimespan.HALF_HOUR
                         changeIsPositive = mostRecentPrice > halfHourPrice
                     }
                     val hourChange = percentChange(mostRecentPrice, hourPrice)
-                    if (hourChange > alertPercentage + 0.5 && (lastMovementAlertTimestamp < timestamp - TimeInSeconds.oneHour)) {
+                    if ((hourChange > minAlertPercentage) && (hourChange > alertPercentage + 0.5)
+                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HOUR)) {
                         alertPercentage = hourChange
-                        alertTime = "hour"
+                        alertTimespan = QuickChangeAlert.AlertTimespan.HOUR
                         changeIsPositive = mostRecentPrice > hourPrice
                     }
-                    if (alertPercentage > minAlertPercentage) {
-                        lastMovementAlertTimestamp = timestamp
+                    if (alertPercentage > minAlertPercentage && alertTimespan != null) {
+                        lastQuickChangeAlertTimestamp = timestamp
 
-                        AlertHub.triggerRapidMovementAlert(currency, alertPercentage, changeIsPositive, alertTime, this)
+                        if (changeAlert == null) {
+                            changeAlert = QuickChangeAlert(mutableListOf(currency), alertPercentage, changeIsPositive, alertTimespan)
+                        } else if (changeIsPositive == changeAlert.isChangePositive) {
+                            changeAlert.currencies.add(currency)
+                            if (alertPercentage < changeAlert.percentChange) {
+                                val doublePercent: Int = (alertPercentage * 2.0).roundToInt()
+                                val roundedPercent: Double = doublePercent / 2.0
+                                changeAlert.percentChange = roundedPercent
+                            }
+                        }
                     }
                 }
             }
+        }
+        if (changeAlert != null) {
+            AlertHub.triggerQuickChangeAlert(changeAlert, this)
         }
     }
 

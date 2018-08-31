@@ -1,7 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -26,7 +25,7 @@ class AlertListFragment : RefreshFragment() {
 
     var currency: Currency = Currency.OTHER
 
-    private val sortedAlerts : List<Alert>
+    private val sortedAlerts : List<PriceAlert>
         get() {
             context?.let { context ->
                 val alerts = Prefs(context).alerts.filter { it.currency == currency }
@@ -95,7 +94,7 @@ class AlertListFragment : RefreshFragment() {
         }
     }
 
-    private fun deleteAlert(alert: Alert) {
+    private fun deleteAlert(alert: PriceAlert) {
         context?.let {
             Prefs(it).removeAlert(alert)
             alertAdapter?.alerts = sortedAlerts

@@ -400,7 +400,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.LOGIN)
     }
 
-    private fun triggerAlert(alert: Alert) {
+    private fun triggerAlert(alert: PriceAlert) {
         val channelId = "Price_Alerts"
         if (notificationManager == null) {
             notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

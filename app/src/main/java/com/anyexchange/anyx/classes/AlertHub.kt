@@ -20,19 +20,9 @@ object AlertHub {
         postAlert("Dummy", "AnyX Ran Alerts", "Tested Alerts at $date", "Dummy_${date.time}", context)
     }
 
-    fun triggerRapidMovementAlert(currency: Currency, percentChange: Double, isChangePositive: Boolean, timespan: String, context: Context) {
-        val channelId = "Movement_Alerts"
-        val notificationTitle = "${currency.fullName} price alert"
-
-        val upDown = when (isChangePositive) {
-            true -> "up"
-            false -> "down"
-        }
-        val notificationText = "$currency is $upDown ${percentChange.percentFormat()} in the past $timespan"
-
-        val notificationTag = "PriceMovementAlert_${currency}_${Date().time}"
-
-        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+    fun triggerQuickChangeAlert(alert: QuickChangeAlert, context: Context) {
+        val channelId = "Change_Alerts"
+        postAlert(channelId, alert.title, alert.text, alert.tag, context)
     }
 
     fun triggerFillAlert(fill: ApiFill, context: Context) {
@@ -53,18 +43,10 @@ object AlertHub {
         postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
     }
 
-    fun triggerPriceAlert(alert: Alert, context: Context) {
+    fun triggerPriceAlert(alert: PriceAlert, context: Context) {
         val channelId = "Price_Alerts"
 
-        val overUnder = when(alert.triggerIfAbove) {
-            true  -> "over"
-            false -> "under"
-        }
-        val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
-        val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
-
-        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+        postAlert(channelId, alert.title, alert.text, alert.tag, context)
         val prefs = Prefs(context)
         prefs.removeAlert(alert)
     }

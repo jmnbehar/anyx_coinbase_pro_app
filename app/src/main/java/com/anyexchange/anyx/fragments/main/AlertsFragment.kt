@@ -1,20 +1,15 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.Lifecycle
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.widget.*
-import com.anyexchange.anyx.adapters.AlertListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import android.util.TypedValue
 import android.view.*
-import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.AlertPagerAdapter
-import com.anyexchange.anyx.adapters.HistoryPagerAdapter
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 
@@ -35,7 +30,7 @@ class AlertsFragment : RefreshFragment() {
     private lateinit var priceEditText: EditText
     private lateinit var priceUnitText: TextView
 
-    private var priceMovementCheckBox: CheckBox? = null
+    private var quickChangeAlertCheckBox: CheckBox? = null
 
     private lateinit var setButton: Button
 
@@ -71,7 +66,7 @@ class AlertsFragment : RefreshFragment() {
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
 
-        priceMovementCheckBox = rootView.cb_alert_price_movement
+        quickChangeAlertCheckBox = rootView.cb_alert_price_movement
         setButton = rootView.btn_alert_set
 
         alertPager = rootView.alerts_view_pager
@@ -92,9 +87,9 @@ class AlertsFragment : RefreshFragment() {
         setButton.setOnClickListener { setAlert() }
         setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
-        priceMovementCheckBox?.setOnCheckedChangeListener {  _, isChecked ->
+        quickChangeAlertCheckBox?.setOnCheckedChangeListener { _, isChecked ->
             context?.let {
-                Prefs(it).setMovementAlert(currency, isChecked)
+                Prefs(it).setQuickChangeAlertActive(currency, isChecked)
             }
         }
 
@@ -127,7 +122,7 @@ class AlertsFragment : RefreshFragment() {
             if (price > 0) {
                 val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
                 val triggerIfAbove = price > productPrice
-                Prefs(context).addAlert(Alert(price, currency, triggerIfAbove))
+                Prefs(context).addAlert(PriceAlert(price, currency, triggerIfAbove))
                 updatePagerAdapter()
                 priceEditText.setText("")
             }
@@ -145,10 +140,8 @@ class AlertsFragment : RefreshFragment() {
             currentPriceText.text = price.fiatFormat(Account.defaultFiatCurrency)
         }
         context?.let { context ->
-            val isMovementAlertActive = Prefs(context).isMovementAlertActive(currency)
-            priceMovementCheckBox?.isChecked = isMovementAlertActive
-            val priceMovementLabel = resources.getString(R.string.alert_rapid_movement, currency.toString())
-            priceMovementCheckBox?.text = priceMovementLabel
+            quickChangeAlertCheckBox?.isChecked = Prefs(context).isQuickChangeAlertActive(currency)
+            quickChangeAlertCheckBox?.text = resources.getString(R.string.alert_rapid_movement, currency.toString())
 
             val tabAccentColor = currency.colorAccent(context)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
