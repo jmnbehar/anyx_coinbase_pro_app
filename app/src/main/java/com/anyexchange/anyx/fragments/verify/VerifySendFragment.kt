@@ -103,14 +103,17 @@ class VerifySendFragment : Fragment() {
 
     }
     private fun goToVerificationComplete(verificationStatus: VerificationStatus) {
-        val prefs = Prefs(context!!)
-        val apiKey = CBProApi.credentials!!.apiKey
-        if (verificationStatus.isVerified) {
-            prefs.approveApiKey(apiKey)
-        } else {
-            prefs.rejectApiKey(apiKey)
+        (activity as? VerifyActivity)?.let { verifyActivity ->
+            val prefs = Prefs(verifyActivity)
+            CBProApi.credentials?.apiKey?.let { apiKey ->
+                if (verificationStatus.isVerified) {
+                    prefs.approveApiKey(apiKey)
+                } else {
+                    prefs.rejectApiKey(apiKey)
+                }
+            }
+            verifyActivity.verificationComplete(verificationStatus)
         }
-        (activity as VerifyActivity).verificationComplete(verificationStatus)
     }
 
     private fun showPopup(titleString: String, messageString: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
