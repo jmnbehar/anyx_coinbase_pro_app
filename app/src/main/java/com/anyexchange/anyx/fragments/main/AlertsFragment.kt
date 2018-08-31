@@ -75,9 +75,6 @@ class AlertsFragment : RefreshFragment() {
 
         switchCurrency(currency)
         currencyTabLayout.setupCryptoTabs {
-//            if (lifecycle.currentState == Lifecycle.State.RESUMED) {
-//                switchCurrency(it)
-//            }
             switchCurrency(it)
         }
 
@@ -104,12 +101,6 @@ class AlertsFragment : RefreshFragment() {
 
         return rootView
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        val index = Currency.cryptoList.indexOf(currency)
-//        alertPager.setCurrentItem(index, false)
-//    }
 
     private fun dp2px(dp: Int): Int {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),

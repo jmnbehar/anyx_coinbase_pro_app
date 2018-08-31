@@ -475,9 +475,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
-            FragmentType.CHART -> {
-                ChartFragment()
-            }
+            FragmentType.CHART -> ChartFragment()
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
             FragmentType.SEND -> {
 

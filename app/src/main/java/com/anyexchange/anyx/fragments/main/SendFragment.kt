@@ -74,7 +74,7 @@ class SendFragment : RefreshFragment() {
 
         titleText.text = resources.getString(R.string.send_title)
 
-        switchCurrency(currency)
+        switchCurrency()
 
         scanButton.setOnClickListener { getAddressFromCamera() }
 
@@ -160,14 +160,6 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
-            currency = selectedCurrency
-            switchCurrency(selectedCurrency)
-        }
-    }
-
     //TODO: add refresh
 
     private fun getAddressFromCamera() {
@@ -199,10 +191,7 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    private fun switchCurrency(newCurrency: Currency?) {
-        if (newCurrency != null) {
-            ChartFragment.currency = newCurrency
-        }
+    fun switchCurrency() {
 
         amountUnitText.text = currency.toString()
         destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)

@@ -169,6 +169,14 @@
     <string name="send_confirm_button">Confirm</string>
     <string name="send_cancel_button">Cancel</string>
 
+    //Receive Fragment
+    <string name="receive_title">Receive</string>
+    <string name="receive_receive_btn">Receive</string>
+    <string name="receive_copy_address">Copy</string>
+    <string name="receive_address_label">%s Address:</string>
+
+
+
     //Settings Fragment
     <string name="settings_log_out_btn">Log Out</string>
     <string name="settings_log_in_btn">Log In</string>
@@ -355,6 +363,24 @@ You're good to go!</item>
 
     <string name="send_warning_1_etc">Enter an ETC address and the amount you wish to transfer from your Coinbase Pro trading account. ETC transfers are free and fast.</string>
     <string name="send_warning_2_etc">Warning: Please double check the destination address before sending.</string>
+
+
+
+
+    <string name="receive_warning_1_bch">Enter a BCH address and the amount you wish to transfer from your Coinbase Pro trading account. BCH transfers are free and fast.</string>
+    <string name="receive_warning_2_bch">Warning: Please double check the destination address before receiveing, and ensure that it is a Bitcoin Cash (BCH) address. </string>
+
+    <string name="receive_warning_1_btc">Enter a BTC address and the amount you wish to transfer from your Coinbase Pro trading account. BTC transfers are free and fast.</string>
+    <string name="receive_warning_2_btc">Warning: Please double check the destination address before receiveing, and ensure that it is a Bitcoin (BTC) address. </string>
+
+    <string name="receive_warning_1_eth">Enter an ETH address and the amount you wish to transfer from your Coinbase Pro trading account. ETH transfers are free and fast.</string>
+    <string name="receive_warning_2_eth">Warning: Do not receive ETH from Coinbase Pro directly to an Ethereum contract. receiveing to a contract may result in lost ETH. Read more here:\nhttps://support.Coinbase Pro.com/customer/en/portal/articles/2430150</string>
+
+    <string name="receive_warning_1_ltc">Enter a LTC address and the amount you wish to transfer from your Coinbase Pro trading account. LTC transfers are free and fast.</string>
+    <string name="receive_warning_2_ltc">Warning: Please double check the destination address before receiveing. </string>
+
+    <string name="receive_warning_1_etc">Enter an ETC address and the amount you wish to transfer from your Coinbase Pro trading account. ETC transfers are free and fast.</string>
+    <string name="receive_warning_2_etc">Warning: Please double check the destination address before receiveing.</string>
 
 
 
