@@ -252,14 +252,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun onResume() {
         super.onResume()
 
-        showNavSpinner(ChartFragment.account?.currency, Currency.cryptoList) { selectedCurrency ->
-            val selectedAccount = Account.forCurrency(selectedCurrency)
-            if (selectedAccount != null) {
-                ChartFragment.account = selectedAccount
-                amountEditText.setText("")
-                limitEditText.setText("")
-                updateButtonsAndText()
-            }
+        showNavSpinner(ChartFragment.currency, Currency.cryptoList) { selectedCurrency ->
+            ChartFragment.currency = selectedCurrency
+            amountEditText.setText("")
+            limitEditText.setText("")
+            updateButtonsAndText()
         }
 
         updateButtonsAndText()

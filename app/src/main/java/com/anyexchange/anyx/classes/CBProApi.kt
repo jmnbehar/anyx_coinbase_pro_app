@@ -227,6 +227,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 val stashedProductList = Prefs(context).stashedProducts
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
+
                 CBProApi.products(initData).get(onFailure) { apiProductList ->
                     for (apiProduct in apiProductList) {
                         val baseCurrency = apiProduct.base_currency
@@ -431,7 +432,8 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 val byteArray = it.component1()
                 try {
                     if (byteArray != null) {
-                        onComplete(String(byteArray))
+                        val apiDepositAddress: ApiDepositAddress = Gson().fromJson(String(byteArray), object : TypeToken<ApiDepositAddress>() {}.type)
+                        onComplete(apiDepositAddress.address)
                     } else {
                         onFailure(Result.Failure(FuelError(Exception())))
                     }

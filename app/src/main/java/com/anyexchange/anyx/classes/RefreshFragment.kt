@@ -27,6 +27,8 @@ open class RefreshFragment: Fragment() {
     var skipNextRefresh: Boolean = false
     var lockPortrait = true
 
+    var shouldHideSpinner = true
+
     val apiInitData: CBProApi.CBProApiInitData?
         get() {
             val context = context
@@ -59,14 +61,18 @@ open class RefreshFragment: Fragment() {
         showDarkMode()
 
         System.out.println("Removing spinner: ")
-        if (activity is com.anyexchange.anyx.activities.MainActivity) {
-            (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-            (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.visibility = View.GONE
-            (activity as com.anyexchange.anyx.activities.MainActivity).toolbar.title = resources.getString(R.string.app_name)
+
+        if (shouldHideSpinner) {
+            (activity as? MainActivity)?.let { mainActivity ->
+                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                mainActivity.spinnerNav.visibility = View.GONE
+                mainActivity.toolbar.title = resources.getString(R.string.app_name)
+            }
         }
     }
 
     fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
+        shouldHideSpinner = false
         (activity as? MainActivity)?.let { mainActivity ->
             val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_coinbase_account, currencyList)
             spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

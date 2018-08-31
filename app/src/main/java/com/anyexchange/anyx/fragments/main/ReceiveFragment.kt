@@ -8,6 +8,8 @@ import android.widget.*
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_receive.view.*
+import net.glxn.qrgen.android.QRCode
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -58,13 +60,54 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     override fun onResume() {
+        shouldHideSpinner = false
         super.onResume()
         titleText.setText(R.string.receive_title)
-        val address = Account.forCurrency(currency)?.depositAddress ?: ""
-        addressTextView.text = address
+    }
+
+    fun showAddressInfo(address: String?) {
+        if (address != null) {
+            val bitmap = QRCode.from(address).withSize(1000, 1000).bitmap()
+            qrCodeImageView.setImageBitmap(bitmap)
+            qrCodeImageView.visibility = View.VISIBLE
+            addressTextView.text = address
+        } else {
+            qrCodeImageView.visibility = View.GONE
+            addressTextView.text = "Add a refresh button"
+        }
+    }
+    private fun getDepositAddress() {
+        val relevantAccount = Account.forCurrency(currency)
+        val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
+        if (coinbaseAccountId != null) {
+            CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
+                dismissProgressSpinner()
+                showAddressInfo(null)
+            }) { depositAddress ->
+                dismissProgressSpinner()
+                Account.forCurrency(currency)?.depositAddress = depositAddress
+                showAddressInfo(depositAddress)
+            }
+        }
     }
 
     fun switchCurrency() {
+        val relevantAccount = Account.forCurrency(currency)
+        if (relevantAccount != null && relevantAccount.depositAddress == null) {
+            showProgressSpinner()
+            if (relevantAccount.coinbaseAccount == null) {
+                CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({
+                    dismissProgressSpinner()
+                    showAddressInfo(null)
+                }, {
+                    getDepositAddress()
+                })
+            } else {
+                getDepositAddress()
+            }
+        } else {
+            showAddressInfo(relevantAccount?.depositAddress)
+        }
         when (currency) {
             //TODO: make this smarter:
             Currency.BTC -> {

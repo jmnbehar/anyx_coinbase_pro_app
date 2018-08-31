@@ -160,6 +160,10 @@ class SendFragment : RefreshFragment() {
         }
     }
 
+    override fun onResume() {
+        shouldHideSpinner = false
+        super.onResume()
+    }
     //TODO: add refresh
 
     private fun getAddressFromCamera() {
