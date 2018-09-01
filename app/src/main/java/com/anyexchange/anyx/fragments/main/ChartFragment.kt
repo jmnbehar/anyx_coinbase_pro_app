@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
@@ -186,20 +187,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             buyButton?.setOnClickListener {_ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
             }
-
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                sellButton?.setOnClickListener { _ ->
-                    buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
-                }
-                historyPager = rootView.history_view_pager
-
-                val stashedFills: List<ApiFill> = prefs.getStashedFills(tempAccount.product.id)
-                val stashedOrders: List<ApiOrder> = prefs.getStashedOrders(tempAccount.product.id)
-
-                historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
-                        { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-                historyPager?.setOnTouchListener(this)
+            sellButton?.setOnClickListener { _ ->
+                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
+            historyPager = rootView.history_view_pager
+
+            val stashedFills: List<ApiFill> = prefs.getStashedFills(tempAccount.product.id)
+            val stashedOrders: List<ApiOrder> = prefs.getStashedOrders(tempAccount.product.id)
+
+            historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
+                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
+            historyPager?.setOnTouchListener(this)
 
 
             val tradingPairs = if (tempAccount.product.tradingPairs.isNotEmpty()) {
@@ -650,10 +648,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             openTextView?.visibility = View.VISIBLE
             closeLabelTextView?.visibility = View.VISIBLE
 
-            //format these:
-            highTextView?.text = entry.high.toString()
-            lowTextView?.text = entry.low.toString()
-            openTextView?.text = entry.open.toString()
+
+
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                highTextView?.typeface = Typeface.MONOSPACE
+                lowTextView?.typeface = Typeface.MONOSPACE
+                openTextView?.typeface = Typeface.MONOSPACE
+                volumeTextView?.typeface = Typeface.MONOSPACE
+                priceTextView?.typeface = Typeface.MONOSPACE
+                //TODO: set percentChange text to monospace
+            }
+
+            if (quoteCurrency.isFiat) {
+                highTextView?.text = entry.high.toDouble().fiatFormat(quoteCurrency)
+                lowTextView?.text = entry.low.toDouble().fiatFormat(quoteCurrency)
+                openTextView?.text = entry.open.toDouble().fiatFormat(quoteCurrency)
+            } else {
+                highTextView?.text = entry.high.toDouble().btcFormatShortened()
+                lowTextView?.text = entry.low.toDouble().btcFormatShortened()
+                openTextView?.text = entry.open.toDouble().btcFormatShortened()
+            }
 
             //TODO: add volume to CandleEntry
 
@@ -680,6 +694,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         closeLabelTextView?.visibility = View.GONE
         volumeLabelTextView?.visibility = View.GONE
         volumeTextView?.visibility = View.GONE
+
+        //format these:
+        highTextView?.typeface = Typeface.DEFAULT
+        lowTextView?.typeface = Typeface.DEFAULT
+        openTextView?.typeface = Typeface.DEFAULT
+        volumeTextView?.typeface = Typeface.DEFAULT
+        priceTextView?.typeface = Typeface.DEFAULT
     }
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {

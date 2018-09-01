@@ -38,9 +38,9 @@
 
                     <TextView
                         android:id="@+id/txt_chart_name"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="20"
+                        android:layout_weight="10"
                         android:text=""
                         android:textSize="30sp"
                         tools:layout_editor_absoluteX="48dp"
@@ -48,19 +48,17 @@
 
                     <TextView
                         android:id="@+id/txt_chart_open_label"
-                        android:layout_width="0dp"
-                        android:layout_weight="2"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="open:"
                         android:textSize="12sp"/>
 
                     <TextView
                         android:id="@+id/txt_chart_open"
-                        android:layout_width="0dp"
-                        android:layout_weight="8"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="4dp"
                         android:paddingEnd="20dp"
+                        android:paddingStart="1dp"
                         android:text="5000.55"
                         android:textSize="18sp" />
 
@@ -75,7 +73,6 @@
                         android:id="@+id/txt_chart_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="4dp"
                         android:text=""
                         android:textAlignment="textEnd"
                         android:textSize="30sp"
@@ -90,75 +87,58 @@
                     android:gravity="end"
                     android:orientation="horizontal">
 
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="20" />
-
                     <TextView
                         android:id="@+id/txt_chart_low_label"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="2"
                         android:text="low:"
-                        android:textAlignment="textEnd"
                         android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_low"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="8"
                         android:paddingEnd="20dp"
-                        android:paddingStart="4dp"
+                        android:paddingStart="1dp"
                         android:text="5000.55"
                         android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_high_label"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="2"
                         android:text="high:"
-                        android:textAlignment="textEnd"
                         android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_high"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="8"
                         android:paddingEnd="20dp"
-                        android:paddingStart="4dp"
+                        android:paddingStart="1dp"
                         android:text="8000.45"
                         android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_volume_label"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="2"
                         android:text="volume:"
-                        android:textAlignment="textEnd"
                         android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_volume"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="8"
-                        android:paddingEnd="0dp"
-                        android:paddingStart="4dp"
+                        android:paddingEnd="20dp"
+                        android:paddingStart="1dp"
                         android:text="8000.45"
                         android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_change_or_date"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:layout_weight="8"
-                        android:paddingEnd="0dp"
-                        android:paddingStart="20dp"
                         android:text=""
                         android:textAlignment="textEnd"
                         android:textSize="18sp"
