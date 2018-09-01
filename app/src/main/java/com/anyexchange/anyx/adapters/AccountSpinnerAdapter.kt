@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class AccountSpinnerAdapter(context: Context, var resource: Int, var accountList: List<Account>) :
+class CurrencySpinnerAdapter(context: Context, var resource: Int, var accountList: List<Account>) :
         ArrayAdapter<Account>(context, resource, accountList) {
 
 

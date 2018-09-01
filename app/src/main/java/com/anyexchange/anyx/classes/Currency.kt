@@ -38,9 +38,31 @@ enum class Currency {
         }
     }
 
+    val tickerSymbol: String
+        get() {
+            return when (this) {
+                BTC -> "BTC"
+                BCH -> "BCH"
+                ETH -> "ETH"
+                ETC -> "ETC"
+                LTC -> "LTC"
+
+                USD -> "USD"
+                EUR -> "EUR"
+                GBP -> "GBP"
+
+                OTHER -> "OTHER"
+            }
+        }
+
     val symbol : String
         get() {
             return when (this) {
+                BTC -> "BTC"
+                BCH -> "BCH"
+                ETH -> "ETH"
+                ETC -> "ETC"
+                LTC -> "LTC"
                 USD -> "$"
                 EUR -> "€"
                 GBP -> "£"
@@ -156,6 +178,20 @@ enum class Currency {
                 GBP -> ContextCompat.getColor(context, R.color.black)
                 OTHER -> ContextCompat.getColor(context, R.color.black)
             }
+        }
+    }
+
+    fun colorFade(context: Context): Int {
+        return when (this) {
+            BTC -> ContextCompat.getColor(context, R.color.btc_fade)
+            BCH -> ContextCompat.getColor(context, R.color.bch_fade)
+            ETH -> ContextCompat.getColor(context, R.color.eth_fade)
+            LTC -> ContextCompat.getColor(context, R.color.ltc_fade)
+            ETC -> ContextCompat.getColor(context, R.color.etc_fade)
+            USD,
+            EUR,
+            GBP -> ContextCompat.getColor(context, R.color.white_fade)
+            OTHER -> ContextCompat.getColor(context, R.color.black_fade)
         }
     }
 

@@ -104,8 +104,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
-        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
-        spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
         spinnerNav.adapter = spinnerNavAdapter
 
         if (savedInstanceState == null) {

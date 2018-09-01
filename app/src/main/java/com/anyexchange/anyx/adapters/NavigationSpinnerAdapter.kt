@@ -9,12 +9,14 @@ import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.inflate
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.list_row_coinbase_account.view.*
+import kotlinx.android.synthetic.main.list_row_spinner_nav.view.*
+import org.jetbrains.anko.backgroundColor
 
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class NavigationSpinnerAdapter(context: Context, var resource: Int, var currencyList: List<Currency>) :
-        ArrayAdapter<Currency>(context, resource, currencyList) {
+class NavigationSpinnerAdapter(context: Context, var resource: Int, textViewId: Int, var currencyList: List<Currency>) :
+        ArrayAdapter<Currency>(context, resource, textViewId, currencyList) {
 
 
     internal class ViewHolder {
@@ -22,16 +24,24 @@ class NavigationSpinnerAdapter(context: Context, var resource: Int, var currency
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+        return getViewGeneric(position, convertView, parent)
+    }
+
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val currency = currencyList[position]
+        val dropDownView = getViewGeneric(position, convertView, parent)
+//        dropDownView.backgroundColor = currency.colorFade(context)
+        return dropDownView
+    }
+
+    fun getViewGeneric(position: Int, convertView: View?, parent: ViewGroup): View {
         val viewHolder: ViewHolder?
         val outputView: View
 
         if (convertView == null) {
             viewHolder = ViewHolder()
-
             val vi = parent.inflate(R.layout.list_row_spinner_nav)
-
-            viewHolder.currencyTxt = vi.txt_cb_account_name
-
+            viewHolder.currencyTxt = vi.txt_currency
             vi.tag = viewHolder
             outputView = vi
         } else {
@@ -41,7 +51,7 @@ class NavigationSpinnerAdapter(context: Context, var resource: Int, var currency
 
         val currency = currencyList[position]
 
-        viewHolder.currencyTxt?.text = currency.toString() //"${cbAccount.currency} Wallet"
+        viewHolder.currencyTxt?.text = "$currency - ${currency.fullName}"
 
         return outputView
     }
