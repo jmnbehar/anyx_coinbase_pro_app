@@ -13,9 +13,8 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     val availableBalance: Double
         get() {
-//        val holds = apiAccount.holds.toDoubleOrZero()
-//        return balance - holds
-            return apiAccount.available.toDoubleOrZero()
+            val holds = apiAccount.holds.toDoubleOrZero()
+            return balance - holds
         }
 
     fun valueForQuoteCurrency(quoteCurrency: Currency) : Double {
@@ -59,8 +58,10 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         val areAccountsOutOfDate: Boolean
             get() {
                 val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
-                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD } != null
-                return areAccountsMissing || areAccountsUnidentified
+                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD || it.currency == Currency.OTHER } != null
+                val tradingPairs = Account.cryptoAccounts.firstOrNull()?.product?.tradingPairs
+                val areTradingPairsDuplicates = (tradingPairs?.distinct()?.size ?: 0) < (tradingPairs?.size ?: 1)
+                return areAccountsMissing || areAccountsUnidentified || areTradingPairsDuplicates
             }
 
         //TODO: stash this
@@ -91,15 +92,13 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
             for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)
                 //TODO: do we really need to call updateAllProducts here?
-                Product.updateAllProducts(apiInitData, onFailure) {
-                    account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
-                        candlesUpdated++
-                        if (candlesUpdated == cryptoAccounts.size) {
-                            if (didUpdate && apiInitData?.context != null) {
-                                Prefs(apiInitData.context).stashedCryptoAccountList = Account.cryptoAccounts
-                            }
-                            onComplete()
+                account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
+                    candlesUpdated++
+                    if (candlesUpdated == cryptoAccounts.size) {
+                        if (didUpdate && apiInitData?.context != null) {
+                            Prefs(apiInitData.context).stashedCryptoAccountList = Account.cryptoAccounts
                         }
+                        onComplete()
                     }
                 }
             }
