@@ -316,7 +316,7 @@ enum class Currency {
         val cryptoList = Currency.values().filter { !it.isFiat && it != OTHER }
         val fiatList = Currency.values().filter { it.isFiat && it != OTHER }
 
-        fun forString(string: String) : Currency? {
+        fun forString(string: String?) : Currency? {
             return when (string) {
                 "BTC" -> BTC
                 "BCH" -> BCH

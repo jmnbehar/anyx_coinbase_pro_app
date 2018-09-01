@@ -15,6 +15,8 @@ object Constants {
     const val CHART_STYLE = "CHART_STYLE"
     const val CHART_TIMESPAN = "CHART_TIMESPAN"
 
+    const val GO_TO_CURRENCY = "GO_TO_CURRENCY"
+
     const val dataFragmentTag = "data"
 }
 

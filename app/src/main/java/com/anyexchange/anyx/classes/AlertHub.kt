@@ -17,12 +17,15 @@ object AlertHub {
 
     fun triggerDummyAlert(context: Context) {
         val date = Date()
-        postAlert("Dummy", "AnyX Ran Alerts", "Tested Alerts at $date", "Dummy_${date.time}", context)
+        postAlert("Dummy", "AnyX Ran Alerts", "Tested Alerts at $date", "Dummy_${date.time}", null, context)
     }
 
     fun triggerQuickChangeAlert(alert: QuickChangeAlert, context: Context) {
         val channelId = "Change_Alerts"
-        postAlert(channelId, alert.title, alert.text, alert.tag, context)
+        val currency = if (alert.currencies.size == 1) {
+            alert.currencies.first()
+        }  else { null }
+        postAlert(channelId, alert.title, alert.text, alert.tag, currency, context)
     }
 
     fun triggerFillAlert(fill: ApiFill, context: Context) {
@@ -40,18 +43,18 @@ object AlertHub {
         val notificationText = "$side order of $size ${tradingPair.baseCurrency} filled at $price"
         val notificationTag = "FillAlert_" + fill.trade_id
 
-        postAlert(channelId, notificationTitle, notificationText, notificationTag, context)
+        postAlert(channelId, notificationTitle, notificationText, notificationTag, tradingPair.baseCurrency, context)
     }
 
     fun triggerPriceAlert(alert: PriceAlert, context: Context) {
         val channelId = "Price_Alerts"
 
-        postAlert(channelId, alert.title, alert.text, alert.tag, context)
+        postAlert(channelId, alert.title, alert.text, alert.tag, alert.currency, context)
         val prefs = Prefs(context)
         prefs.removeAlert(alert)
     }
 
-    private fun postAlert(channelId: String, title: String, text: String, tag: String, context: Context) {
+    private fun postAlert(channelId: String, title: String, text: String, tag: String, goToCurrency: Currency?, context: Context) {
         if (notificationManager == null) {
             notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -71,6 +74,8 @@ object AlertHub {
 
         val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtra(Constants.GO_TO_CURRENCY, goToCurrency?.toString())
+
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 //        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 

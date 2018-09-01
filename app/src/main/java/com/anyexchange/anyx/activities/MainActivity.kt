@@ -107,7 +107,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
         spinnerNav.adapter = spinnerNavAdapter
 
-        if (savedInstanceState == null) {
+        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
+
+        if (goToCurrency != null) {
+            goToChartFragment(goToCurrency)
+        } else if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
             if (!Account.areAccountsOutOfDate) {
                 goHome()
@@ -325,9 +329,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (!alert.hasTriggered) {
                 val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
-                    triggerAlert(alert)
+                    AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
-                    triggerAlert(alert)
+                    AlertHub.triggerPriceAlert(alert, this)
                 }
             }
         }
@@ -341,53 +345,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.LOGIN)
     }
 
-    private fun triggerAlert(alert: PriceAlert) {
-        val channelId = "Price_Alerts"
-        if (notificationManager == null) {
-            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Create the NotificationChannel, but only on API 26+ because
-                // the NotificationChannel class is new and not in the support library
-                val name = getString(R.string.channel_name)
-                val description = getString(R.string.channel_description)
-                val importance = NotificationManager.IMPORTANCE_DEFAULT
-                val channel = NotificationChannel(channelId, name, importance)
-                channel.description = description
-                // Register the channel with the system
-                notificationManager?.createNotificationChannel(channel)
-            }
-        }
-
-
-        val overUnder = when(alert.triggerIfAbove) {
-            true  -> "over"
-            false -> "under"
-        }
-        val intent = Intent(this, this.javaClass)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-//        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-        val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
-        val priceAlertGroupTag = "PriceAlert"
-
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.anyx_notification_icon)
-                .setContentTitle(notificationTitle)
-                .setContentText(notificationText)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setGroup(priceAlertGroupTag)
-//                .setSound(defaultSoundUri)
-
-        val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
-        notificationManager?.notify(notificationTag, 0, notificationBuilder.build())
-        val prefs = Prefs(this)
-        prefs.removeAlert(alert)
-    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
