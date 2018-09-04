@@ -31,7 +31,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     var coinbaseAccount: CoinbaseAccount? = null
 
-    var depositAddress: String? = null
+    var depositInfo: ApiDepositAddress? = null
 
     fun update(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
@@ -131,14 +131,6 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         override fun toString(): String {
             return apiPaymentMethod.name
         }
-
-        val stashString: String
-            get() {
-                var string = "ID:$id\n"
-                string += "Balance:$balance\n"
-                string += "Currency:$currency"
-                return string
-            }
     }
 
     class ExternalAccount(currency: Currency) : BaseAccount() {

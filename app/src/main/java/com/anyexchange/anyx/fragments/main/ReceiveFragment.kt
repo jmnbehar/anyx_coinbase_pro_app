@@ -17,7 +17,6 @@ import org.jetbrains.anko.support.v4.toast
 class ReceiveFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
-    private lateinit var titleText: TextView
 
     private lateinit var qrCodeImageView: ImageView
     private lateinit var addressTextView: TextView
@@ -42,8 +41,6 @@ class ReceiveFragment : RefreshFragment() {
 
         this.inflater = inflater
 
-        titleText = rootView.txt_receive_name
-
         qrCodeImageView = rootView.img_receive_qr_code
         addressTextView = rootView.txt_receive_address
 
@@ -62,38 +59,39 @@ class ReceiveFragment : RefreshFragment() {
     override fun onResume() {
         shouldHideSpinner = false
         super.onResume()
-        titleText.setText(R.string.receive_title)
     }
 
-    fun showAddressInfo(address: String?) {
-        if (address != null) {
-            val bitmap = QRCode.from(address).withSize(1000, 1000).bitmap()
+    private fun showAddressInfo(addressInfo: ApiDepositAddress?) {
+        if (addressInfo != null) {
+            val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView.setImageBitmap(bitmap)
             qrCodeImageView.visibility = View.VISIBLE
-            addressTextView.text = address
+            addressTextView.text = addressInfo.address
+
+            warning1TextView.visibility = View.VISIBLE
+            warning2TextView.visibility = View.VISIBLE
+            if (addressInfo.warning_title != null) {
+                warning1TextView.text = addressInfo.warning_title
+            } else {
+                warning1TextView.text = getString(R.string.receive_warning_1, currency.fullName, currency.toString())
+            }
+            if (addressInfo.warning_details != null) {
+                warning2TextView.text = addressInfo.warning_details
+            } else {
+                warning2TextView.text = getString(R.string.receive_warning_2)
+            }
+            warningIconImageView.setImageResource(currency.iconId)
         } else {
             qrCodeImageView.visibility = View.GONE
             addressTextView.text = "Add a refresh button"
-        }
-    }
-    private fun getDepositAddress() {
-        val relevantAccount = Account.forCurrency(currency)
-        val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
-        if (coinbaseAccountId != null) {
-            CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
-                dismissProgressSpinner()
-                showAddressInfo(null)
-            }) { depositAddress ->
-                dismissProgressSpinner()
-                Account.forCurrency(currency)?.depositAddress = depositAddress
-                showAddressInfo(depositAddress)
-            }
+            warning1TextView.visibility = View.GONE
+            warning2TextView.visibility = View.GONE
         }
     }
 
     fun switchCurrency() {
         val relevantAccount = Account.forCurrency(currency)
-        if (relevantAccount != null && relevantAccount.depositAddress == null) {
+        if (relevantAccount != null && relevantAccount.depositInfo == null) {
             showProgressSpinner()
             if (relevantAccount.coinbaseAccount == null) {
                 CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({
@@ -106,32 +104,25 @@ class ReceiveFragment : RefreshFragment() {
                 getDepositAddress()
             }
         } else {
-            showAddressInfo(relevantAccount?.depositAddress)
+            showAddressInfo(relevantAccount?.depositInfo)
         }
-        when (currency) {
-            //TODO: make this smarter:
-            Currency.BTC -> {
-                warning1TextView.setText(R.string.receive_warning_1_btc)
-                warning2TextView.setText(R.string.receive_warning_2_btc)
+    }
+
+    private fun getDepositAddress() {
+        val relevantAccount = Account.forCurrency(currency)
+        val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
+        if (coinbaseAccountId != null) {
+            CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
+                dismissProgressSpinner()
+                showAddressInfo(null)
+            }) { depositInfo ->
+                dismissProgressSpinner()
+                Account.forCurrency(currency)?.depositInfo = depositInfo
+                showAddressInfo(depositInfo)
             }
-            Currency.ETH -> {
-                warning1TextView.setText(R.string.receive_warning_1_eth)
-                warning2TextView.setText(R.string.receive_warning_2_eth)
+            context?.let {
+                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
             }
-            Currency.ETC -> {
-                warning1TextView.setText(R.string.receive_warning_1_etc)
-                warning2TextView.setText(R.string.receive_warning_2_etc)
-            }
-            Currency.BCH -> {
-                warning1TextView.setText(R.string.receive_warning_1_bch)
-                warning2TextView.setText(R.string.receive_warning_2_bch)
-            }
-            Currency.LTC -> {
-                warning1TextView.setText(R.string.receive_warning_1_ltc)
-                warning2TextView.setText(R.string.receive_warning_2_ltc)
-            }
-            Currency.USD, Currency.EUR, Currency.GBP -> { /* how tho */ }
-            Currency.OTHER -> { /* how tho */ }
         }
     }
 }

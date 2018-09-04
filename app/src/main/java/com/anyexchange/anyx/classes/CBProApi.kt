@@ -223,7 +223,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.cryptoAccounts = listOf()
             val productList: MutableList<Product> = mutableListOf()
-            if (!Account.areAccountsOutOfDate && context != null) {
+            if (!Account.areAccountsOutOfDate && context != null && Prefs(context).stashedProducts.isNotEmpty()) {
                 val stashedProductList = Prefs(context).stashedProducts
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
@@ -427,13 +427,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     }
     //add position?
     class depositAddress(initData: CBProApiInitData?, val cbAccountId: String) : CBProApi(initData) {
-        fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (String) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (ApiDepositAddress) -> Unit) {
             this.executePost(onFailure) {
                 val byteArray = it.component1()
                 try {
                     if (byteArray != null) {
                         val apiDepositAddress: ApiDepositAddress = Gson().fromJson(String(byteArray), object : TypeToken<ApiDepositAddress>() {}.type)
-                        onComplete(apiDepositAddress.address)
+                        onComplete(apiDepositAddress)
                     } else {
                         onFailure(Result.Failure(FuelError(Exception())))
                     }

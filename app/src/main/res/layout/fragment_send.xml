@@ -12,16 +12,6 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
 
-        <TextView
-            android:id="@+id/txt_send_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:text="@string/send_title"
-            android:textSize="30sp"
-            tools:layout_editor_absoluteX="48dp"
-            tools:layout_editor_absoluteY="16dp" />
-
 
         <LinearLayout
             android:id="@+id/layout_send_details"
@@ -115,6 +105,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
+                android:minLines="5"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp" />
 
@@ -124,7 +115,7 @@
             android:id="@+id/btn_send"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="4dp"
             android:text="@string/send_send_btn" />
 
 

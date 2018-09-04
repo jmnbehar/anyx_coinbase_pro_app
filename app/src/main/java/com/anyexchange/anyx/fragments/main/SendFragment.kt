@@ -24,7 +24,6 @@ import org.jetbrains.anko.textColor
 class SendFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
-    private lateinit var titleText: TextView
 
     private lateinit var amountEditText: EditText
     private lateinit var amountUnitText: TextView
@@ -56,8 +55,6 @@ class SendFragment : RefreshFragment() {
 
         this.inflater = inflater
 
-        titleText = rootView.txt_send_name
-
         amountLabelText = rootView.txt_send_amount_label
         amountEditText = rootView.etxt_send_amount
         amountUnitText = rootView.txt_send_amount_unit
@@ -71,8 +68,6 @@ class SendFragment : RefreshFragment() {
         warning2TextView = rootView.txt_send_warning_2
 
         sendButton = rootView.btn_send
-
-        titleText.text = resources.getString(R.string.send_title)
 
         switchCurrency()
 
@@ -97,27 +92,6 @@ class SendFragment : RefreshFragment() {
                 submitSend()
             }
         }
-
-//        val ethAccount = Account.forCurrency(Currency.ETH)
-//        if (ethAccount != null) {
-//            CBProApi.coinbaseAccounts(apiInitData).linkToAccounts({
-//                toast("that shouldnt fail")
-//            }) {
-//                Account.forCurrency(Currency.ETH)?.coinbaseAccount?.id?.let { id ->
-//                    CBProApi.depositAddress(apiInitData, id).executePost({
-//                        toast("Failed")
-//                    }) {
-//                        val byteArray = it.component1()
-//                        val responseString = if (byteArray != null) {
-//                            String(byteArray)
-//                        } else {
-//                            "meh"
-//                        }
-//                        toast(responseString)
-//                    }
-//                }
-//            }
-//        }
 
         dismissProgressSpinner()
 

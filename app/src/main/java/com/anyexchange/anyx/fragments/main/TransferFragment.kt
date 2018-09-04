@@ -356,12 +356,12 @@ class TransferFragment : RefreshFragment() {
         val relevantAccount = Account.forCurrency(currency)
         if (sourceAccount is Account.ExternalAccount) {
             Account.forCurrency(currency)?.coinbaseAccount?.let {
-                if (relevantAccount?.depositAddress == null) {
+                if (relevantAccount?.depositInfo?.address == null) {
                     CBProApi.depositAddress(apiInitData, it.id).get({ _ ->
                         toast("Error")
                         sourceAccountsSpinner.setSelection(0)
-                    }) { depositAddress ->
-                        relevantAccount?.depositAddress = depositAddress
+                    }) { depositInfo ->
+                        relevantAccount?.depositInfo = depositInfo
                         setDestAccounts()
                         setInfoAndButtons()
                     }
@@ -438,7 +438,7 @@ class TransferFragment : RefreshFragment() {
             is Account.ExternalAccount -> {
                 val account = destAccount as Account
                 interactiveLayout.visibility = View.GONE
-                infoText.text = "Deposit address: " + (account.depositAddress ?: "null")
+                infoText.text = "Deposit address: " + (account.depositInfo?.address ?: "null")
             }
             else -> {
                 interactiveLayout.visibility = View.INVISIBLE
