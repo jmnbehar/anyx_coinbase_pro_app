@@ -66,6 +66,8 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
             handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+
+        refresh { endRefresh() }
     }
 
     override fun onPause() {

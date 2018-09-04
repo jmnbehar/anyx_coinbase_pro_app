@@ -1,84 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.constraint.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp">
+        android:layout_height="match_parent">
 
-
-        <ImageView
-            android:id="@+id/img_receive_qr_code"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="70dp"
-            android:layout_marginStart="70dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/anyx_fg" />
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp">
 
-        <TextView
-            android:id="@+id/txt_receive_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txt_receive_address">
 
             <ImageView
-                android:id="@+id/img_receive_warning"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:id="@+id/img_receive_qr_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="70dp"
+                android:layout_marginStart="70dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/anyx_fg" />
 
             <LinearLayout
-                android:id="@+id/layout_receive_details"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="100"
-                android:orientation="vertical"
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp"
-                android:paddingBottom="20dp"
-                android:paddingTop="20dp">
+                android:id="@+id/layout_receive_account"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code"
+                tools:layout_editor_absoluteX="20dp">
 
                 <TextView
-                    android:id="@+id/txt_receive_warning"
-                    android:layout_width="match_parent"
+                    android:id="@+id/txt_receive_address_label"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="2dp"
-                    android:paddingTop="2dp"
-                    android:text="@string/receive_warning_1" />
-
+                    android:layout_margin="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
 
                 <TextView
-                    android:id="@+id/txt_receive_warning_2"
-                    android:layout_width="match_parent"
+                    android:id="@+id/txt_receive_address"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="2dp"
-                    android:paddingTop="2dp"
-                    android:autoLink="web"
-                    android:text="@string/receive_warning_2" />
-
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
             </LinearLayout>
-        </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_receive_account">
+
+                <ImageView
+                    android:id="@+id/img_receive_warning"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:srcCompat="@drawable/anyx_fg" />
+
+                <LinearLayout
+                    android:id="@+id/layout_receive_details"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="100"
+                    android:orientation="vertical"
+                    android:paddingBottom="20dp"
+                    android:paddingEnd="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingTop="20dp">
+
+                    <TextView
+                        android:id="@+id/txt_receive_warning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="2dp"
+                        android:paddingTop="2dp"
+                        android:text="@string/receive_warning_1" />
 
 
-    </android.support.constraint.ConstraintLayout>
-</ScrollView>
+                    <TextView
+                        android:id="@+id/txt_receive_warning_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autoLink="web"
+                        android:paddingBottom="2dp"
+                        android:paddingTop="2dp"
+                        android:text="@string/receive_warning_2" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>

@@ -175,6 +175,9 @@
     <string name="receive_copy_address">Copy</string>
     <string name="receive_address_label">%s Address:</string>
 
+    <string name="receive_warning_1">Only send %s (%s) to this address</string>
+    <string name="receive_warning_2">Sending any other digital asset will result in permanent loss.</string>
+
 
 
     //Settings Fragment
@@ -366,8 +369,6 @@ You're good to go!</item>
     <string name="send_warning_1_etc">Enter an ETC address and the amount you wish to transfer from your Coinbase Pro trading account. ETC transfers are free and fast.</string>
     <string name="send_warning_2_etc">Warning: Please double check the destination address before sending.</string>
 
-
-    <string name="receive_warning_1">Only send %s (%s) to this address</string>
-    <string name="receive_warning_2">Sending any other digital asset will result in permanent loss.</string>
+    <string name="send_balance_text">Available Balance: %s</string>
 
 </resources>

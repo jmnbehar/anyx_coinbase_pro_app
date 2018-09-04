@@ -43,6 +43,6 @@ class SendRecievePagerAdapter(val context: Context, fm: FragmentManager) : Fragm
 
     fun switchCurrency() {
         sendFragment.switchCurrency()
-        receiveFragment.switchCurrency()
+        receiveFragment.switchCurrency(false)
     }
 }

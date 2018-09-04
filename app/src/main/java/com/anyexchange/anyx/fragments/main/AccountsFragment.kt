@@ -89,6 +89,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         return rootView
     }
 
+    override fun onResume() {
+        super.onResume()
+        refresh { endRefresh() }
+    }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
         valueText?.text = entry.y.toDouble().fiatFormat(Account.defaultFiatCurrency)

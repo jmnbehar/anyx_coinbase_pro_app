@@ -261,12 +261,17 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
 
         updateButtonsAndText()
+        refresh { endRefresh() }
     }
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
-            toast(resources.getString(R.string.error_generic_message, result.errorMessage))}
+            if (context != null) {
+                toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            }
+        }
+
         account?.update(apiInitData, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()

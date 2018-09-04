@@ -50,11 +50,6 @@ open class RefreshFragment: Fragment() {
         } else {
             ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
         }
-        if (!skipNextRefresh) {
-            refresh {
-                endRefresh()
-            }
-        }
 
         skipNextRefresh = false
         showDarkMode()
@@ -153,7 +148,7 @@ open class RefreshFragment: Fragment() {
         onComplete(true)
     }
 
-    private fun endRefresh() {
+    fun endRefresh() {
         swipeRefreshLayout?.isRefreshing = false
     }
 }

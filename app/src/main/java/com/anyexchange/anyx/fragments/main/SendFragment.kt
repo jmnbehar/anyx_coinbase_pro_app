@@ -13,6 +13,9 @@ import android.widget.*
 import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
+import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
@@ -36,6 +39,11 @@ class SendFragment : RefreshFragment() {
 
     private lateinit var warning1TextView: TextView
     private lateinit var warning2TextView: TextView
+
+    private var iconImageView: ImageView? = null
+    private var currencyTickerTextView: TextView? = null
+    private var accountBalanceTextView: TextView? = null
+    private var accountValueTextView: TextView? = null
 
     private lateinit var sendButton: Button
 
@@ -67,6 +75,11 @@ class SendFragment : RefreshFragment() {
         warning1TextView = rootView.txt_send_warning
         warning2TextView = rootView.txt_send_warning_2
 
+        iconImageView = rootView.img_send_account_icon
+        currencyTickerTextView = rootView.txt_send_ticker
+        accountBalanceTextView = rootView.txt_send_account_balance
+        accountValueTextView = rootView.txt_send_account_value
+
         sendButton = rootView.btn_send
 
         switchCurrency()
@@ -96,6 +109,45 @@ class SendFragment : RefreshFragment() {
         dismissProgressSpinner()
 
         return rootView
+    }
+
+    override fun onResume() {
+        shouldHideSpinner = false
+        super.onResume()
+    }
+
+    override fun refresh(onComplete: (Boolean) -> Unit) {
+        super.refresh(onComplete)
+
+        Account.forCurrency(currency)?.let { account ->
+            account.update(apiInitData, {//onFailure
+                onComplete(false)
+            }) { //onSuccess
+                setAccountBalanceText()
+                onComplete(true)
+//                val tradingPair = TradingPair(account.id)
+//                CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {_ ->
+//                    if (lifecycle.isCreatedOrResumed) {
+//                        val price = ChartFragment.account.product.priceForQuoteCurrency(tradingPair.quoteCurrency)
+//
+//                    }
+//                }
+            }
+        } ?: run {
+            onComplete(false)
+        }
+    }
+
+    private fun setAccountBalanceText() {
+        currencyTickerTextView?.text = currency.toString()
+        iconImageView?.setImageResource(currency.iconId)
+        Account.forCurrency(currency)?.let {
+            accountBalanceTextView?.visibility = View.VISIBLE
+            accountBalanceTextView?.text = resources.getString(R.string.send_balance_text, it.availableBalance.btcFormatShortened())
+        } ?: run {
+            accountBalanceTextView?.visibility = View.GONE
+        }
+        accountValueTextView?.visibility = View.GONE
     }
 
     private fun submitSend() {
@@ -134,12 +186,6 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-    override fun onResume() {
-        shouldHideSpinner = false
-        super.onResume()
-    }
-    //TODO: add refresh
-
     private fun getAddressFromCamera() {
         activity?.let { activity ->
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
@@ -170,6 +216,8 @@ class SendFragment : RefreshFragment() {
     }
 
     fun switchCurrency() {
+
+        setAccountBalanceText()
 
         amountUnitText.text = currency.toString()
         destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)

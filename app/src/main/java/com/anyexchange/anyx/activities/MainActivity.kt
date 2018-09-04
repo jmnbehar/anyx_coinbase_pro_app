@@ -384,7 +384,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else {
-                    SendRecieveFragment.newInstance()
+                    SendReceiveFragment.newInstance()
                 }
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance()

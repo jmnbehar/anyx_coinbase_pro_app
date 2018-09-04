@@ -142,15 +142,12 @@ class Prefs (var context: Context) {
             val newAccountList = mutableListOf<Account>()
             for (currency in Currency.cryptoList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
+                if (accountString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
+                        val account = gson.fromJson(accountString, Account::class.java)
+                        val dayCandleOutliers = account.product.defaultDayCandles.filter { it.tradingPair.id != account.product.id }
                         if (dayCandleOutliers.isEmpty()) {
-                            val newAccount = Account(product, apiAccount)
-                            newAccountList.add(newAccount)
+                            newAccountList.add(account)
                         } else {
                             return mutableListOf()
                         }
@@ -164,16 +161,13 @@ class Prefs (var context: Context) {
         set(value) {
             if (value.isEmpty()) {
                 for (currency in Currency.cryptoList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                            .putString(PRODUCT + currency.toString(), null).apply()
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
                 }
             } else {
                 val gson = Gson()
                 for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                    val accountJson = gson.toJson(account) ?: ""
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
                 }
             }
         }

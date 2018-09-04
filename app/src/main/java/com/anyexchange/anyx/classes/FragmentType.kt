@@ -54,7 +54,7 @@ enum class FragmentType {
                 is AccountsFragment -> ACCOUNT
                 is SendFragment -> SEND
                 is ReceiveFragment -> RECEIVE
-                is SendRecieveFragment -> SEND_RECEIVE
+                is SendReceiveFragment -> SEND_RECEIVE
                 is AlertsFragment -> ALERTS
                 is TransferFragment -> TRANSFER
                 is SettingsFragment -> SETTINGS

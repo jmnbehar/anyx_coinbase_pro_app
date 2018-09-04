@@ -327,6 +327,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
         handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
         dismissProgressSpinner()
+        refresh { endRefresh() }
     }
 
     override fun onPause() {
