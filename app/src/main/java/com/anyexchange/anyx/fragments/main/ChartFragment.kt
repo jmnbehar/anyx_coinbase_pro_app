@@ -30,6 +30,7 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -207,8 +208,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } else {
                 listOf()
             }
-            //TODO: don't use simple_spinner_item
-            val tradingPairAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, tradingPairs)
+            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
@@ -398,9 +398,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         context?.let { context ->
             val tradingPairs = account.product.tradingPairs
-            val arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, tradingPairs)
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            tradingPairSpinner?.adapter = arrayAdapter
+            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
+            tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
             val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
             if (relevantTradingPair != null) {
                 val index = tradingPairs.indexOf(relevantTradingPair)

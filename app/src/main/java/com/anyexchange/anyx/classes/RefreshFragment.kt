@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
 import android.widget.AdapterView
-import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.app_bar_main.*

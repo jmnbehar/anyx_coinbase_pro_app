@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.adapters.RelatedAccountSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
@@ -100,10 +100,9 @@ class TransferFragment : RefreshFragment() {
 
         submitTransferButton = rootView.btn_transfer_in_transfer_in
 
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, sourceAccounts)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val relatedAccountSpinnerAdapter = RelatedAccountSpinnerAdapter(activity, sourceAccounts)
 
-        sourceAccountsSpinner.adapter = arrayAdapter
+        sourceAccountsSpinner.adapter = relatedAccountSpinnerAdapter
         sourceAccountsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (sourceAccounts.size > position) {
@@ -340,11 +339,11 @@ class TransferFragment : RefreshFragment() {
                 sourceAccountsSpinner.visibility = View.GONE
             }
             else -> {
-                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, sourceAccounts)
-                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                sourceAccountsSpinner.adapter = arrayAdapter
-                sourceAccountText.visibility = View.GONE
-                sourceAccountsSpinner.visibility = View.VISIBLE
+                context?.let {
+                    sourceAccountsSpinner.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
+                    sourceAccountText.visibility = View.GONE
+                    sourceAccountsSpinner.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -405,11 +404,11 @@ class TransferFragment : RefreshFragment() {
             }
             else -> {
                 val destAccountsTemp = destAccounts.filterNotNull()
-                val arrayAdapter = RelatedAccountSpinnerAdapter(activity!!, R.layout.list_row_coinbase_account, destAccountsTemp)
-                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                destAccountsSpinner.adapter = arrayAdapter
-                destBalanceText.visibility = View.GONE
-                destAccountsSpinner.visibility = View.VISIBLE
+                context?.let {
+                    destAccountsSpinner.adapter = RelatedAccountSpinnerAdapter(it, destAccountsTemp)
+                    destBalanceText.visibility = View.GONE
+                    destAccountsSpinner.visibility = View.VISIBLE
+                }
             }
         }
         amountUnitText.text = currency.toString()

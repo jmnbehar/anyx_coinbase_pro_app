@@ -1,18 +1,14 @@
 package com.anyexchange.anyx.activities
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.ColorFilter
-import android.os.Build
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.FragmentManager
-import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -29,7 +25,7 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R

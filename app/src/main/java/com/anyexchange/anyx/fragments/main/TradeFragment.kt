@@ -19,6 +19,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
 import android.text.InputFilter
+import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -566,9 +567,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 val spinnerList = timeInForceList.map { t -> t.label() }
                 //TODO: don't use simple_spinner_item
                 context?.let {
-                    val arrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, spinnerList)
-                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+                    advancedOptionTimeInForceSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, spinnerList)
                     advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                             val selectedItem = timeInForceList[position]
@@ -585,9 +584,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     }
 
                     val endTimeList = listOf("min", "hour", "day")
-                    val endTimeArrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, endTimeList)
-                    endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
+                    advancedOptionEndTimeSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
                 }
             }
             TradeType.STOP -> {

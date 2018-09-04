@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.adapters.RelatedAccountSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import org.jetbrains.anko.support.v4.toast
@@ -85,7 +85,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
         }
         updateCBProAccountText()
 
-        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, R.layout.list_row_coinbase_account, coinbaseAccounts)
+        val arrayAdapter = RelatedAccountSpinnerAdapter(activity, coinbaseAccounts)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         accountsSpinner.adapter = arrayAdapter
         dismissProgressSpinner()
