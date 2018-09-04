@@ -33,6 +33,8 @@ private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
 private const val PREFERRED_FIAT = "preferred_fiat"
 private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
 
+private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
+
 private const val PAYMENT_METHODS = "PAYMENT_METHODS"
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
@@ -207,6 +209,10 @@ class Prefs (var context: Context) {
     var quickChangeAlertCurrencies: Set<Currency>
         get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
+
+    var quickChangeThreshold: Float
+        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
+        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, value).apply()
 
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()

@@ -12,6 +12,7 @@ import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
@@ -38,6 +39,8 @@ class SettingsFragment : RefreshFragment() {
     private lateinit var darkModeCheckBox: CheckBox
     private lateinit var showTradeConfirmCheckBox: CheckBox
     private lateinit var showSendConfirmCheckBox: CheckBox
+    private lateinit var quickChangeThresholdSpinner: Spinner
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -52,6 +55,7 @@ class SettingsFragment : RefreshFragment() {
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
+        quickChangeThresholdSpinner = rootView.spinner_settings_quick_change_threshold
 
         showDarkMode(rootView)
 
@@ -96,20 +100,28 @@ class SettingsFragment : RefreshFragment() {
             }
         }
 
+        context?.let {
+            val tempThreshold = prefs.quickChangeThreshold
+            quickChangeThresholdSpinner.visibility = View.VISIBLE
+            val floatList = listOf<Float>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
+            val arrayAdapter = FloatSpinnerAdapter(it, floatList)
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            quickChangeThresholdSpinner.adapter = arrayAdapter
+            quickChangeThresholdSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                    prefs.quickChangeThreshold = floatList[position]
+                }
 
-//        val fiatList = Currency.fiatList
-//        val arrayAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, fiatList)
-//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        preferredFiatSpinner.adapter = arrayAdapter
-//        preferredFiatSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-//                val selectedItem = fiatList[position]
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>) {
-//            }
-//        }
-
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+            val index = floatList.indexOf(tempThreshold)
+            if (index != -1) {
+                quickChangeThresholdSpinner.setSelection(index)
+            }
+            quickChangeThresholdSpinner.visibility = View.VISIBLE
+        } ?: run {
+            quickChangeThresholdSpinner.visibility = View.GONE
+        }
 
         showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
         showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->

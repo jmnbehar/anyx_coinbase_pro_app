@@ -103,11 +103,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
         spinnerNav.adapter = spinnerNavAdapter
 
-        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
-
-        if (goToCurrency != null) {
-            goToChartFragment(goToCurrency)
-        } else if (savedInstanceState == null) {
+        if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
             if (!Account.areAccountsOutOfDate) {
                 goHome()
@@ -119,7 +115,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }, { //OnSuccess
                     /* Do Nothing Extra */
                 } )
+                return
             }
+        }
+        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
+        if (goToCurrency != null) {
+            goToChartFragment(goToCurrency)
         }
     }
 

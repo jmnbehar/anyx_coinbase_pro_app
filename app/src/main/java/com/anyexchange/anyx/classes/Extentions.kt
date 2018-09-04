@@ -101,6 +101,7 @@ fun Double.format(currency: Currency): String {
 }
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
+fun Double.intPercentFormat(): String = "%.0f".format(this) + "%"
 
 fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0
 

@@ -196,6 +196,8 @@
 
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
 
+    <string name="settings_quick_change_threshold_info">Minimum change in 1 hour to trigger price spike or drop notifications</string>
+
     <string-array name="fiat_currencies">
         <item>USD</item>
         <item>EUR</item>

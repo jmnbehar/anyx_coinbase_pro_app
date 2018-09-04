@@ -114,7 +114,7 @@ class AlertJobService : JobService() {
             if (account != null) {
                 val candles = account.product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
-                    val minAlertPercentage = 1.25
+                    val minAlertPercentage = prefs.quickChangeThreshold.toDouble()
                     var alertPercentage = minAlertPercentage
                     var alertTimespan: QuickChangeAlert.AlertTimespan? = null
                     var changeIsPositive = false
