@@ -446,9 +446,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             showProgressSpinner()
             miniRefresh({   //onFailure
-                blockRefresh = false
-                toast(R.string.error_message)
+                //Even if miniRefresh fails here, switch anyways
                 dismissProgressSpinner()
+                candles = account.product.candlesForTimespan(timespan, tradingPair)
+                completeSwitchAccount(account, fills)
             }, {    //success
                 dismissProgressSpinner()
                 candles = account.product.candlesForTimespan(timespan, tradingPair)
