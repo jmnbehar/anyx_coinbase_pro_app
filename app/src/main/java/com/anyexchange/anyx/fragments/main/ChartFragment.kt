@@ -72,6 +72,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var buyButton: Button? = null
     private var sellButton: Button? = null
 
+    private var timespanRadioGroup: RadioGroup? = null
+
     private var historyTabLayout: TabLayout? = null
 
     private var tradeFragment: TradeFragment? = null
@@ -200,10 +202,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             historyPager?.setOnTouchListener(this)
 
 
-            val tradingPairs = if (tempAccount.product.tradingPairs.isNotEmpty()) {
+            val tradingPairs: List<TradingPair> = if (tempAccount.product.tradingPairs.isNotEmpty()) {
                 tempAccount.product.tradingPairs.sortedBy { tradingPair ->  tradingPair.quoteCurrency.orderValue }
             } else {
-                listOf(tempAccount.id)
+                listOf()
             }
             //TODO: don't use simple_spinner_item
             val tradingPairAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, tradingPairs)
@@ -217,10 +219,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
+                        val tempTradingPairIndex = account.product.tradingPairs.indexOf(tradingPair)
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
                         miniRefresh({ _ ->
                             toast(R.string.chart_update_error)
+                            tradingPairSpinner?.setSelection(tempTradingPairIndex)
+                            didTouchTradingPairSpinner = false
+
                             dismissProgressSpinner()
                         }, {
                             dismissProgressSpinner()
@@ -233,6 +239,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairSpinner?.setOnTouchListener(tradingPairListener)
         }
 
+        timespanRadioGroup = rootView.rgroup_chart_timespans
 
         rootView.rbtn_chart_timespan_hour.text = resources.getString(R.string.chart_timespan_1h)
         rootView.rbtn_chart_timespan_hour.setOnClickListener {
@@ -393,7 +400,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val tradingPairs = account.product.tradingPairs
             val arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, tradingPairs)
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner_chart_trading_pair.adapter = arrayAdapter
+            tradingPairSpinner?.adapter = arrayAdapter
             val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
             if (relevantTradingPair != null) {
                 val index = tradingPairs.indexOf(relevantTradingPair)
@@ -512,7 +519,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun setChartTimespan(newTimespan: Timespan) {
         checkTimespanButton()
-        if (timespan != newTimespan) {
+        val tempTimespan = timespan
+        if (tempTimespan != newTimespan) {
+            timespanRadioGroup?.isEnabled = false
             viewModel.timeSpan = newTimespan
             showProgressSpinner()
             if (areCandlesUpToDate(timespan)) {
@@ -520,14 +529,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 val price = account.product.priceForQuoteCurrency(quoteCurrency)
                 completeMiniRefresh(price, candles) {
                     dismissProgressSpinner()
+                    timespanRadioGroup?.isEnabled = true
                 }
             } else {
                 miniRefresh({
                     toast(R.string.chart_update_error)
+                    viewModel.timeSpan = tempTimespan
+                    timespanRadioGroup?.isEnabled = true
                     dismissProgressSpinner()
                 }, {
                     checkTimespanButton()
                     dismissProgressSpinner()
+                    timespanRadioGroup?.isEnabled = true
                 })
             }
         }
@@ -742,7 +755,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure = { result: Result.Failure<String, FuelError> ->
-            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            if (context != null) {
+                toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            }
             onComplete(false)
         }
 
