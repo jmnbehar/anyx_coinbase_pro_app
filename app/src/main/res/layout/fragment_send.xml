@@ -81,7 +81,7 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="10dp"
                     android:paddingTop="10dp"
-                    android:text="@string/send_warning_1_btc" />
+                    android:text="@string/send_warning_1" />
 
                 <LinearLayout
                     android:id="@+id/layout_send_amount_layout"

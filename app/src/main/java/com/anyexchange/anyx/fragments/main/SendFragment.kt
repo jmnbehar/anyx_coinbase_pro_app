@@ -26,17 +26,17 @@ class SendFragment : RefreshFragment() {
 
     private lateinit var inflater: LayoutInflater
 
-    private lateinit var amountEditText: EditText
-    private lateinit var amountUnitText: TextView
-    private lateinit var amountLabelText: TextView
+    private var amountEditText: EditText? = null
+    private var amountUnitText: TextView? = null
+    private var amountLabelText: TextView? = null
 
-    private lateinit var destinationEditText: EditText
-    private lateinit var destinationLabelText: TextView
+    private var destinationEditText: EditText? = null
+    private var destinationLabelText: TextView? = null
 
-    private lateinit var scanButton: ImageButton
+    private var scanButton: ImageButton? = null
 
-    private lateinit var warning1TextView: TextView
-    private lateinit var warning2TextView: TextView
+    private var warning1TextView: TextView? = null
+    private var warning2TextView: TextView? = null
 
     private var iconImageView: ImageView? = null
     private var currencyTickerTextView: TextView? = null
@@ -84,12 +84,12 @@ class SendFragment : RefreshFragment() {
 
         switchCurrency()
 
-        scanButton.setOnClickListener { getAddressFromCamera() }
+        scanButton?.setOnClickListener { getAddressFromCamera() }
 
 
         sendButton.setOnClickListener { _ ->
-            val amount = amountEditText.text.toString()
-            val destination = destinationEditText.text.toString()
+            val amount = amountEditText?.text.toString()
+            val destination = destinationEditText?.text.toString()
             val context = context
             if (amount.isBlank()) {
                 toast(R.string.send_enter_amount_warning)
@@ -125,13 +125,6 @@ class SendFragment : RefreshFragment() {
             }) { //onSuccess
                 setAccountBalanceText()
                 onComplete(true)
-//                val tradingPair = TradingPair(account.id)
-//                CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {_ ->
-//                    if (lifecycle.isCreatedOrResumed) {
-//                        val price = ChartFragment.account.product.priceForQuoteCurrency(tradingPair.quoteCurrency)
-//
-//                    }
-//                }
             }
         } ?: run {
             onComplete(false)
@@ -151,8 +144,8 @@ class SendFragment : RefreshFragment() {
     }
 
     private fun submitSend() {
-        val amount = amountEditText.text.toString().toDoubleOrZero()
-        val destination = destinationEditText.text.toString()
+        val amount = amountEditText?.text.toString().toDoubleOrZero()
+        val destination = destinationEditText?.text.toString()
 
         val min = currency.minSendAmount
 
@@ -210,7 +203,7 @@ class SendFragment : RefreshFragment() {
                 toast(R.string.send_address_not_found_warning)
             } else {
                 //TODO: parse more advanced qr codes
-                destinationEditText.setText(barcode)
+                destinationEditText?.setText(barcode)
             }
         }
     }
@@ -219,8 +212,8 @@ class SendFragment : RefreshFragment() {
 
         setAccountBalanceText()
 
-        amountUnitText.text = currency.toString()
-        destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)
+        amountUnitText?.text = currency.toString()
+        destinationLabelText?.text = resources.getString(R.string.send_destination_label, currency)
 
         context?.let { context ->
             val buttonColors = currency.colorStateList(context)
@@ -228,32 +221,22 @@ class SendFragment : RefreshFragment() {
             sendButton.backgroundTintList = buttonColors
             sendButton.textColor = buttonTextColor
 
-            when (currency) {
-                //TODO: make this smarter:
-                Currency.BTC -> {
-                    warning1TextView.setText(R.string.send_warning_1_btc)
-                    warning2TextView.setText(R.string.send_warning_2_btc)
-                }
-                Currency.ETH -> {
-                    warning1TextView.setText(R.string.send_warning_1_eth)
-                    warning2TextView.setText(R.string.send_warning_2_eth)
-                }
-                Currency.ETC -> {
-                    warning1TextView.setText(R.string.send_warning_1_etc)
-                    warning2TextView.setText(R.string.send_warning_2_etc)
-                }
-                Currency.BCH -> {
-                    warning1TextView.setText(R.string.send_warning_1_bch)
-                    warning2TextView.setText(R.string.send_warning_2_bch)
-                }
-                Currency.LTC -> {
-                    warning1TextView.setText(R.string.send_warning_1_ltc)
-                    warning2TextView.setText(R.string.send_warning_2_ltc)
-                }
-                Currency.USD, Currency.EUR, Currency.GBP -> { /* how tho */ }
-                Currency.OTHER -> { /* how tho */ }
+
+            warning1TextView?.visibility = View.VISIBLE
+            warning2TextView?.visibility = View.VISIBLE
+            if (currency == Currency.ETH) {
+                warning1TextView?.setText(R.string.send_warning_1_eth)
+                warning2TextView?.setText(R.string.send_warning_2_eth)
+            } else if (currency.isFiat) {
+                warning1TextView?.visibility = View.GONE
+                warning2TextView?.visibility = View.GONE
+            } else {
+                warning1TextView?.text = resources.getString(R.string.send_warning_1, currency.toString(), currency.toString())
+                warning2TextView?.text = resources.getString(R.string.send_warning_2, currency.fullName, currency.toString())
             }
+
+            sendButton.backgroundTintList = buttonColors
+            sendButton.textColor = buttonTextColor
         }
     }
-
 }
