@@ -47,7 +47,7 @@ class SweepCoinbaseFragment : RefreshFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_transfer_in, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
 //        setupSwipeRefresh(rootView)
 
         this.inflater = inflater

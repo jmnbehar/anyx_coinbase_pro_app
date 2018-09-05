@@ -8,7 +8,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.fragment_transfer_in.view.*
+import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
@@ -59,11 +59,14 @@ class TransferFragment : RefreshFragment() {
             }
         }
 
+    var currency: Currency
+        get() = ChartFragment.currency
+        set(value) { ChartFragment.currency = value }
+
     companion object {
         fun newInstance(): TransferFragment {
             return TransferFragment()
         }
-        var currency: Currency = ChartFragment.account?.currency ?: Account.defaultFiatCurrency
 
         val hasRelevantData: Boolean
             get() {
@@ -74,31 +77,31 @@ class TransferFragment : RefreshFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_transfer_in, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
         setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         this.inflater = inflater
         val activity = activity!!
-        titleText = rootView.txt_transfer_in_title
+        titleText = rootView.txt_transfer_title
 
-        transferDetailsLayout = rootView.layout_transfer_in_details
-        interactiveLayout = rootView.layout_transfer_in_interactive_layout
+        transferDetailsLayout = rootView.layout_transfer_details
+        interactiveLayout = rootView.layout_transfer_interactive_layout
 
-        amountLabelText = rootView.txt_transfer_in_amount_label
-        amountEditText = rootView.etxt_transfer_in_amount
-        amountUnitText = rootView.txt_transfer_in_amount_unit
+        amountLabelText = rootView.txt_transfer_amount_label
+        amountEditText = rootView.etxt_transfer_amount
+        amountUnitText = rootView.txt_transfer_amount_unit
 
-        transferMaxButton = rootView.btn_transfer_in_max
+        transferMaxButton = rootView.btn_transfer_max
 
-        sourceAccountsLabelTxt = rootView.txt_transfer_in_account_label
-        sourceAccountsSpinner = rootView.spinner_transfer_in_accounts
-        sourceAccountText = rootView.txt_transfer_in_account_info
+        sourceAccountsLabelTxt = rootView.txt_transfer_account_label
+        sourceAccountsSpinner = rootView.spinner_transfer_accounts
+        sourceAccountText = rootView.txt_transfer_account_info
 
-        destAccountsSpinner = rootView.spinner_transfer_out_accounts
-        infoText = rootView.txt_transfer_in_info
-        destBalanceText = rootView.txt_transfer_in_cbpro_account_info
+        destAccountsSpinner = rootView.spinner_transfer_destination_accounts
+        infoText = rootView.txt_transfer_info
+        destBalanceText = rootView.txt_transfer_destination_info
 
-        submitTransferButton = rootView.btn_transfer_in_transfer_in
+        submitTransferButton = rootView.btn_transfer_submit_transfer
 
         val relatedAccountSpinnerAdapter = RelatedAccountSpinnerAdapter(activity, sourceAccounts)
 
@@ -311,7 +314,7 @@ class TransferFragment : RefreshFragment() {
 
 
     private fun switchCurrency(currency: Currency) {
-        Companion.currency = currency
+        ChartFragment.currency = currency
         amountEditText.setText("")
 
 
@@ -416,20 +419,17 @@ class TransferFragment : RefreshFragment() {
 
     private fun setInfoAndButtons() {
         infoText.visibility = View.VISIBLE
+        interactiveLayout.visibility = View.VISIBLE
         when (sourceAccount) {
             is Account.CoinbaseAccount -> {
-                interactiveLayout.visibility = if ((sourceAccount?.balance ?: 0.0) <= 0.0) {
-                    View.INVISIBLE
-                } else { View.VISIBLE }
+                setInteractiveLayoutEnabled((sourceAccount?.balance ?: 0.0) > 0.0)
                 infoText.setText(R.string.transfer_coinbase_info)
             }
             is Account.PaymentMethod -> {
                 infoText.setText(R.string.transfer_bank_info)
             }
             is Account -> {
-                interactiveLayout.visibility = if ((sourceAccount?.balance ?: 0.0) <= 0.0) {
-                    View.INVISIBLE
-                } else { View.VISIBLE }
+                setInteractiveLayoutEnabled((sourceAccount?.balance ?: 0.0) > 0.0)
                 when (destAccount) {
                     is Account.CoinbaseAccount -> infoText.setText(R.string.transfer_coinbase_info)
                     is Account.PaymentMethod -> infoText.setText(R.string.transfer_bank_info)
@@ -441,7 +441,7 @@ class TransferFragment : RefreshFragment() {
                 infoText.text = "Deposit address: " + (account.depositInfo?.address ?: "null")
             }
             else -> {
-                interactiveLayout.visibility = View.INVISIBLE
+                interactiveLayout.visibility = View.GONE
                 infoText.visibility = View.GONE
             }
         }
@@ -458,5 +458,9 @@ class TransferFragment : RefreshFragment() {
             transferMaxButton.textColor = buttonTextColor
             submitTransferButton.textColor = buttonTextColor
         }
+    }
+
+    private fun setInteractiveLayoutEnabled(enabled: Boolean) {
+        submitTransferButton.isEnabled = enabled
     }
 }
