@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +14,6 @@ import android.widget.*
 import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
-import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast
@@ -81,6 +79,8 @@ class SendFragment : RefreshFragment() {
         accountValueTextView = rootView.txt_send_account_value
 
         sendButton = rootView.btn_send
+
+        setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         switchCurrency()
 

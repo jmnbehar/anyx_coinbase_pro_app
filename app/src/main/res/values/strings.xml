@@ -18,7 +18,7 @@
     <string name="menu_alerts">Alerts</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_login">Log In</string>
-    <string name="menu_send">Send</string>
+    <string name="menu_send">Send/Receive</string>
     <string name="menu_transfer">Transfer</string>
     <string name="menu_verify">Verify</string>
 
