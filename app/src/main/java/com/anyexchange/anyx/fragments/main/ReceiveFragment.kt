@@ -10,6 +10,11 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_receive.view.*
 import net.glxn.qrgen.android.QRCode
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context.CLIPBOARD_SERVICE
+import org.jetbrains.anko.support.v4.toast
+
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -78,6 +83,10 @@ class ReceiveFragment : RefreshFragment() {
 
             addressLabelTextView.text = resources.getString(R.string.receive_address_label, currency.toString())
             addressTextView.text = addressInfo.address
+            addressTextView.setOnTouchListener { _, _ ->
+                copyAddressToClipboard()
+                true
+            }
 
             warning1TextView.visibility = View.VISIBLE
             warning2TextView.visibility = View.VISIBLE
@@ -133,6 +142,17 @@ class ReceiveFragment : RefreshFragment() {
             }
             context?.let {
                 Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+            }
+        }
+    }
+
+    private fun copyAddressToClipboard() {
+        context?.let { context ->
+            Account.forCurrency(currency)?.depositInfo?.let { depositInfo ->
+                val clipboard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Address", depositInfo?.address)
+                clipboard.primaryClip = clip
+                toast("Copied Address to Clipboard")
             }
         }
     }
