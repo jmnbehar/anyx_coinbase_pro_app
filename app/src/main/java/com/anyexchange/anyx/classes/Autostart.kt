@@ -149,13 +149,15 @@ class AlertJobService : JobService() {
                         alertTimespan = QuickChangeAlert.AlertTimespan.HOUR
                         changeIsPositive = mostRecentPrice > hourPrice
                     }
-                    if (alertPercentage > minAlertPercentage && alertTimespan != null) {
+                    //Make sure alert Percent is high enough to be interesting but low enough to not be an error
+                    if (alertPercentage > minAlertPercentage && alertPercentage < 80 && alertTimespan != null) {
                         lastQuickChangeAlertTimestamp = timestamp
 
                         if (changeAlert == null) {
                             changeAlert = QuickChangeAlert(mutableListOf(currency), alertPercentage, changeIsPositive, alertTimespan)
                         } else if (changeIsPositive == changeAlert.isChangePositive) {
                             changeAlert.currencies.add(currency)
+                            //Make sure alert Percent is high enough to be interesting but
                             if (alertPercentage < changeAlert.percentChange) {
                                 val doublePercent: Int = (alertPercentage * 2.0).roundToInt()
                                 val roundedPercent: Double = doublePercent / 2.0
