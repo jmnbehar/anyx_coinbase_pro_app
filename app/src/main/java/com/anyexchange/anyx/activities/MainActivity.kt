@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.activities
 
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -41,7 +40,6 @@ import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private var notificationManager: NotificationManager? = null
     lateinit var spinnerNav: Spinner
     var defaultSpinnerColorFilter: ColorFilter? = null
 

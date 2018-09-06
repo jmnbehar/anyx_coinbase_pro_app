@@ -280,27 +280,8 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun sourceAccountSelected() {
-        val relevantAccount = Account.forCurrency(currency)
-        if (sourceAccount is Account.ExternalAccount) {
-            Account.forCurrency(currency)?.coinbaseAccount?.let {
-                if (relevantAccount?.depositInfo?.address == null) {
-                    CBProApi.depositAddress(apiInitData, it.id).get({ _ ->
-                        toast("Error")
-                        sourceAccountsSpinner?.setSelection(0)
-                    }) { depositInfo ->
-                        relevantAccount?.depositInfo = depositInfo
-                        setDestAccounts()
-                        setInfoAndButtons()
-                    }
-                }
-            } ?: run {
-                toast("Error")
-                sourceAccountsSpinner?.setSelection(0)
-            }
-        } else {
-            setDestAccounts()
-            setInfoAndButtons()
-        }
+        setDestAccounts()
+        setInfoAndButtons()
     }
 
     private fun setDestAccounts() {
@@ -315,7 +296,6 @@ class TransferFragment : RefreshFragment() {
                 }
                 tempDestAccounts.toList()
             }
-            is Account.ExternalAccount -> listOf(cbproAccount)
             else  -> listOf()
         }
         when (destAccounts.size) {
@@ -359,11 +339,6 @@ class TransferFragment : RefreshFragment() {
                     is Account.CoinbaseAccount -> infoText?.setText(R.string.transfer_coinbase_info)
                     is Account.PaymentMethod -> infoText?.setText(R.string.transfer_bank_info)
                 }
-            }
-            is Account.ExternalAccount -> {
-                val account = destAccount as Account
-                interactiveLayout.visibility = View.GONE
-                infoText?.text = "Deposit address: " + (account.depositInfo?.address ?: "null")
             }
             else -> {
                 interactiveLayout.visibility = View.GONE

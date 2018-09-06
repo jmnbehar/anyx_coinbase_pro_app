@@ -101,16 +101,12 @@ class Prefs (var context: Context) {
 
     var stashedFiatAccountList: List<Account>
         get() {
-            val gson = Gson()
             val newAccountList = mutableListOf<Account>()
             for (currency in Currency.fiatList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
+                if (accountString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val newAccount = Account(product, apiAccount)
+                        val newAccount = Gson().fromJson(accountString, Account::class.java)
                         newAccountList.add(newAccount)
                     } catch (e: Exception) {
                         return newAccountList
@@ -122,16 +118,12 @@ class Prefs (var context: Context) {
         set(value) {
             if (value.isEmpty()) {
                 for (currency in Currency.fiatList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                                .putString(PRODUCT + currency.toString(), null).apply()
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
                 }
             } else {
-                val gson = Gson()
                 for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                    val accountJson = Gson().toJson(account) ?: ""
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
                 }
             }
         }
