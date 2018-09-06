@@ -337,7 +337,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         }
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }

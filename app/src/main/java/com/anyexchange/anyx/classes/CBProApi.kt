@@ -411,13 +411,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     }
                     for (fill in apiFillList) {
                         val fillDate: Long = try {
-                            format.parse(stashedFills.firstOrNull()?.created_at ).time
+                            format.parse(fill.created_at).time
                         } catch (e: Exception) {
                             0
                         }
                         if (fillDate > stashedFillsDate) {
                             AlertHub.triggerFillAlert(fill, context)
-                        } else if (fillDate < stashedFillsDate) {
+                        } else if (fillDate <= stashedFillsDate) {
                             break
                         }
                     }

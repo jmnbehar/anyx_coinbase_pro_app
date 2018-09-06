@@ -34,13 +34,14 @@ object AlertHub {
         val tradingPair = TradingPair(fill.product_id)
         val side = TradeSide.forString(fill.side)
         val size = fill.size
-        val notificationTitle = "${fill.order_id} "
+        val notificationTitle = "${tradingPair.baseCurrency} Fill Alert"
         val price = if (tradingPair.quoteCurrency.isFiat) {
             fill.price.toDoubleOrNull()?.fiatFormat(tradingPair.quoteCurrency)
         } else {
             "${fill.price.toDoubleOrNull()?.btcFormat()} ${tradingPair.quoteCurrency}"
         }
-        val notificationText = "$side order of $size ${tradingPair.baseCurrency} filled at $price"
+
+        val notificationText = "${side.toString().capitalize()} order of $size ${tradingPair.baseCurrency} filled at $price"
         val notificationTag = "FillAlert_" + fill.trade_id
 
         postAlert(channelId, notificationTitle, notificationText, notificationTag, tradingPair.baseCurrency, context)

@@ -238,7 +238,7 @@
     <string name="trade_confirm_popup_price_label">Last %s Trade Price:</string>
     <string name="trade_confirm_popup_currency_label">%s to %s:</string>
     <string name="trade_confirm_popup_estimated_fees_label">Estimated fees:</string>
-    <string name="trade_confirm_popup_total_label">Total %s:</string>
+    <string name="trade_confirm_popup_total_label">Total price in %s:</string>
     <string name="trade_confirm_popup_confirm_btn">Confirm</string>
     <string name="trade_confirm_popup_cancel_btn">Cancel</string>
 

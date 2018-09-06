@@ -415,20 +415,30 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val nowInSeconds = Calendar.getInstance().timeInSeconds()
             val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
 
-            if (prefs.isLoggedIn && !wereFillsRecentlyUpdated) {
-                showProgressSpinner()
-                CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({
-                    switchAccountCandlesCheck(newAccount, listOf())
-                    dismissProgressSpinner()
-                }) { apiFillList ->
-                    if (lifecycle.isCreatedOrResumed) {
-                        switchAccountCandlesCheck(newAccount, apiFillList)
+            if (prefs.isLoggedIn) {
+                if (!wereFillsRecentlyUpdated) {
+                    showProgressSpinner()
+                    CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({
+                        switchAccountCandlesCheck(newAccount, listOf())
+                        dismissProgressSpinner()
+                    }) { apiFillList ->
+                        if (lifecycle.isCreatedOrResumed) {
+                            switchAccountCandlesCheck(newAccount, apiFillList)
+                            dismissProgressSpinner()
+                        }
+                    }
+                } else if (account.apiAccount.balance.toDoubleOrNull() == null) {
+                    refresh {
+                        val stashedFills = prefs.getStashedFills(newAccount.product.id)
+                        switchAccountCandlesCheck(newAccount, stashedFills)
                         dismissProgressSpinner()
                     }
+                } else {
+                    val stashedFills = prefs.getStashedFills(newAccount.product.id)
+                    switchAccountCandlesCheck(newAccount, stashedFills)
                 }
             } else {
-                val stashedFills = prefs.getStashedFills(newAccount.product.id)
-                switchAccountCandlesCheck(newAccount, stashedFills)
+                switchAccountCandlesCheck(newAccount, listOf())
             }
         }
     }
