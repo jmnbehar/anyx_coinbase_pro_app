@@ -72,10 +72,11 @@ object AlertHub {
             }
         }
 
-
         val intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        intent.putExtra(Constants.GO_TO_CURRENCY, goToCurrency?.toString())
+        if (goToCurrency != null) {
+            intent.putExtra(Constants.GO_TO_CURRENCY, goToCurrency.toString())
+        }
 
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 //        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
