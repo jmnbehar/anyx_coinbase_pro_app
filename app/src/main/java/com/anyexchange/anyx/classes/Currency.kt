@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import com.anyexchange.anyx.R
-import java.util.*
 
 /**
  * Created by anyexchange on 1/19/2018.
@@ -37,23 +36,6 @@ enum class Currency {
             OTHER -> "OTHER"
         }
     }
-
-    val tickerSymbol: String
-        get() {
-            return when (this) {
-                BTC -> "BTC"
-                BCH -> "BCH"
-                ETH -> "ETH"
-                ETC -> "ETC"
-                LTC -> "LTC"
-
-                USD -> "USD"
-                EUR -> "EUR"
-                GBP -> "GBP"
-
-                OTHER -> "OTHER"
-            }
-        }
 
     val symbol : String
         get() {

@@ -79,12 +79,7 @@ class AlertJobService : JobService() {
     private var quickChangeTimestampBackingLong: Long? = null
     private var lastQuickChangeAlertTimestamp: Long
         get() {
-            val tempTimestamp = quickChangeTimestampBackingLong
-            return if (tempTimestamp == null) {
-                Prefs(this).lastQuickChangeAlertTimestamp
-            } else {
-                tempTimestamp
-            }
+            return quickChangeTimestampBackingLong ?: Prefs(this).lastQuickChangeAlertTimestamp
         }
         set(value) {
             quickChangeTimestampBackingLong = value

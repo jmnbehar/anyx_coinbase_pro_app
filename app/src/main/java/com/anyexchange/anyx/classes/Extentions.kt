@@ -93,10 +93,10 @@ fun Double.fiatFormat(currency: Currency): String {
     return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
 }
 fun Double.format(currency: Currency): String {
-    if (currency.isFiat) {
-        return this.fiatFormat(currency)
+    return if (currency.isFiat) {
+        this.fiatFormat(currency)
     } else {
-        return this.btcFormatShortened() + " " + currency.toString()
+        this.btcFormatShortened() + " " + currency.toString()
     }
 }
 
@@ -172,31 +172,6 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
         override fun onTabSelected(tab: TabLayout.Tab) {
             val selectedCurrency = Currency.cryptoList[tab.position]
             onSelected(selectedCurrency)
-        }
-        override fun onTabUnselected(tab: TabLayout.Tab) {}
-        override fun onTabReselected(tab: TabLayout.Tab) {}
-    })
-}
-
-
-fun TabLayout.setupAllCurrencyTabs(onSelected: (Currency) -> Unit) {
-    removeAllTabs()
-    val fiatTab = this.newTab()
-    fiatTab.text = Account.defaultFiatCurrency.toString()
-    addTab(fiatTab)
-    for (currency in Currency.cryptoList) {
-        val newTab = newTab()
-        newTab.text = currency.toString()
-        addTab(newTab)
-    }
-    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-        override fun onTabSelected(tab: TabLayout.Tab) {
-            if (tab.position == 0) {
-                onSelected(Account.defaultFiatCurrency)
-            } else {
-                val selectedCurrency = Currency.cryptoList[tab.position - 1]
-                onSelected(selectedCurrency)
-            }
         }
         override fun onTabUnselected(tab: TabLayout.Tab) {}
         override fun onTabReselected(tab: TabLayout.Tab) {}

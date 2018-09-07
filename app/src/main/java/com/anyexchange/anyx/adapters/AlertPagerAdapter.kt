@@ -5,13 +5,9 @@ import android.os.Bundle
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.RefreshFragment
-import com.anyexchange.anyx.fragments.main.AccountsFragment
 import com.anyexchange.anyx.fragments.main.AlertListFragment
-import com.anyexchange.anyx.fragments.main.HistoryListFragment
-import com.anyexchange.anyx.fragments.main.MarketFragment
 
 
 /**

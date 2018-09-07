@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
@@ -75,6 +76,7 @@ class ReceiveFragment : RefreshFragment() {
         switchCurrency(true)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun showAddressInfo(addressInfo: ApiDepositAddress?) {
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
@@ -103,7 +105,7 @@ class ReceiveFragment : RefreshFragment() {
             warningIconImageView.setImageResource(currency.iconId)
         } else {
             qrCodeImageView.visibility = View.GONE
-            addressTextView.text = "Swipe down to refresh"
+            addressTextView.text = resources.getString(R.string.receive_refresh_label)
             warning1TextView.visibility = View.GONE
             warning2TextView.visibility = View.GONE
         }
@@ -150,7 +152,7 @@ class ReceiveFragment : RefreshFragment() {
         context?.let { context ->
             Account.forCurrency(currency)?.depositInfo?.let { depositInfo ->
                 val clipboard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("Copied Address", depositInfo?.address)
+                val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
                 clipboard.primaryClip = clip
                 toast("Copied Address to Clipboard")
             }

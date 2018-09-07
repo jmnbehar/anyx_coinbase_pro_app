@@ -82,7 +82,7 @@ class QuickChangeAlert(val currencies: MutableList<Currency>, var percentChange:
         }
     }
 
-    fun currencyListToString() : String {
+    private fun currencyListToString() : String {
             var currencyListString = ""
             for ((index, currency) in currencies.withIndex()) {
                 if (index != 0) {
@@ -111,12 +111,10 @@ class QuickChangeAlert(val currencies: MutableList<Currency>, var percentChange:
                 false -> "down"
             }
             val currenciesString = currencyListToString()
-            return if (currencies.size == 1) {
-                "$currenciesString is $upDown ${percentChange.percentFormat()} in the past $timespan"
-            } else if (currencies.size > 1) {
-                "$currenciesString are $upDown at least ${percentChange.percentFormat()} in the past $timespan"
-            } else {
-                ""
+            return when {
+                currencies.size == 1 -> "$currenciesString is $upDown ${percentChange.percentFormat()} in the past $timespan"
+                currencies.size > 1 -> "$currenciesString are $upDown at least ${percentChange.percentFormat()} in the past $timespan"
+                else -> ""
             }
         }
 

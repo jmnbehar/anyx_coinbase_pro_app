@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.fragments.main.ReceiveFragment
 import com.anyexchange.anyx.fragments.main.SendFragment
-import java.util.*
 
 
 /**

@@ -69,6 +69,18 @@
     <string name="error_server">Error: Coinbase Pro Servers are encountering problems right now</string>
 
 
+    //Onboarding
+    <string name="onboard_skip">Skip</string>
+    <string name="onboard_continue">Continue</string>
+
+
+    <string-array name="onboarding_titles">
+        <item>Welcome to AnyX!</item>
+        <item>Track Prices</item>
+        <item>Your account</item>
+        <item>Notifications</item>
+        <item>Trade Cryptocurrency</item>
+    </string-array>
 
     //MainActivity
     <string name="toast_please_login_message">Please log in</string>
@@ -174,6 +186,8 @@
     <string name="receive_receive_btn">Receive</string>
     <string name="receive_copy_address">Copy</string>
     <string name="receive_address_label">%s Address:</string>
+
+    <string name="receive_refresh_label">Swipe down to refresh</string>
 
     <string name="receive_warning_1">Only send %s (%s) to this address</string>
     <string name="receive_warning_2">Sending any other digital asset will result in permanent loss.</string>

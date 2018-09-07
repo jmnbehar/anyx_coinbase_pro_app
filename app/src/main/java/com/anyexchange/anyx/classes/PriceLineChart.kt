@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -22,7 +23,7 @@ import kotlin.math.absoluteValue
 class PriceLineChart : LineChart {
     constructor(ctx: Context) : super(ctx)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
 
     private var velocityTracker: VelocityTracker? = null
@@ -31,6 +32,7 @@ class PriceLineChart : LineChart {
     private var onVerticalDrag: () -> Unit = { }
     private var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked
 

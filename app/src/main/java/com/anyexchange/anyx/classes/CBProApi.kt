@@ -517,7 +517,6 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     //add deposits
     //look into reports
 
-
     override val method: Method
         get() {
             return when (this) {
@@ -622,8 +621,8 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     private val fullPath: String
         get() {
             params?.let { params ->
-                if (params.isEmpty()) {
-                    return path
+                return if (params.isEmpty()) {
+                    path
                 } else {
                     var fullPath = "$path?"
                     for ((index, param) in params.withIndex()) {
@@ -632,7 +631,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         }
                         fullPath += "${param.first}=${param.second}"
                     }
-                    return fullPath
+                    fullPath
                 }
             } ?: run {
                 return path
@@ -781,7 +780,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
             }
 
             if (method == Method.POST) {
-                headers.put("Content-Type", "application/json")
+                headers["Content-Type"] = "application/json"
             }
             return headers
         }

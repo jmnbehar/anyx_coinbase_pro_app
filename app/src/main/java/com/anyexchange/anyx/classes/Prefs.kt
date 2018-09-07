@@ -281,12 +281,10 @@ class Prefs (var context: Context) {
     fun isApiKeyValid(apiKey: String) : Boolean? {
         val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
         val rejectedApiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
-        if (approvedApiKeys.contains(apiKey)) {
-            return true
-        } else if (rejectedApiKeys.contains(apiKey)) {
-            return false
-        } else {
-            return null //testResult ?: false
+        when {
+            approvedApiKeys.contains(apiKey) -> return true
+            rejectedApiKeys.contains(apiKey) -> return false
+            else -> return null
         }
     }
     fun approveApiKey(apiKey: String) {

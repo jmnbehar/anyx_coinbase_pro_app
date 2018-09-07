@@ -106,20 +106,20 @@ data class ApiTicker(
         val volume: String,
         val time: String)
 
-data class ApiCurrencies(
-        val id: String,
-        val name: String,
-        val min_size: String)
-
-data class ApiStats(
-        val open: String,
-        val high: String,
-        val low: String,
-        val volume: String)
-
-data class ApiTime(
-        val iso: String,
-        val epoch: String)
+//data class ApiCurrencies(
+//        val id: String,
+//        val name: String,
+//        val min_size: String)
+//
+//data class ApiStats(
+//        val open: String,
+//        val high: String,
+//        val low: String,
+//        val volume: String)
+//
+//data class ApiTime(
+//        val iso: String,
+//        val epoch: String)
 
 @SuppressLint("ParcelCreator")
 @Parcelize

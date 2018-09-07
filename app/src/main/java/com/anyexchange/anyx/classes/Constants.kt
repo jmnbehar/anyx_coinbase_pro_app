@@ -5,8 +5,6 @@ package com.anyexchange.anyx.classes
  */
 
 object Constants {
-    const val exit = "EXIT"
-    const val logout = "LOGOUT"
     const val salt = "GdaxApp"  //DO NOT RENAME
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
 
@@ -74,19 +72,19 @@ enum class Timespan {
         }
     }
 
-    companion object {
-        fun forLong(value: Long) : Timespan {
-            return when (value) {
-                TimeInSeconds.oneHour -> HOUR
-                TimeInSeconds.oneDay -> DAY
-                TimeInSeconds.oneWeek -> WEEK
-                TimeInSeconds.oneMonth -> MONTH
-                TimeInSeconds.oneYear -> YEAR
-//                (-1).toLong() -> ALL
-                else -> DAY
-            }
-        }
-    }
+//    companion object {
+//        fun forLong(value: Long) : Timespan {
+//            return when (value) {
+//                TimeInSeconds.oneHour -> HOUR
+//                TimeInSeconds.oneDay -> DAY
+//                TimeInSeconds.oneWeek -> WEEK
+//                TimeInSeconds.oneMonth -> MONTH
+//                TimeInSeconds.oneYear -> YEAR
+////                (-1).toLong() -> ALL
+//                else -> DAY
+//            }
+//        }
+//    }
 }
 
 object Granularity {

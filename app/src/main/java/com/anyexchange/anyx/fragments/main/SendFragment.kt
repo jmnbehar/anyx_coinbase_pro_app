@@ -224,15 +224,19 @@ class SendFragment : RefreshFragment() {
 
             warning1TextView?.visibility = View.VISIBLE
             warning2TextView?.visibility = View.VISIBLE
-            if (currency == Currency.ETH) {
-                warning1TextView?.setText(R.string.send_warning_1_eth)
-                warning2TextView?.setText(R.string.send_warning_2_eth)
-            } else if (currency.isFiat) {
-                warning1TextView?.visibility = View.GONE
-                warning2TextView?.visibility = View.GONE
-            } else {
-                warning1TextView?.text = resources.getString(R.string.send_warning_1, currency.toString(), currency.toString())
-                warning2TextView?.text = resources.getString(R.string.send_warning_2, currency.fullName, currency.toString())
+            when {
+                currency == Currency.ETH -> {
+                    warning1TextView?.setText(R.string.send_warning_1_eth)
+                    warning2TextView?.setText(R.string.send_warning_2_eth)
+                }
+                currency.isFiat -> {
+                    warning1TextView?.visibility = View.GONE
+                    warning2TextView?.visibility = View.GONE
+                }
+                else -> {
+                    warning1TextView?.text = resources.getString(R.string.send_warning_1, currency.toString(), currency.toString())
+                    warning2TextView?.text = resources.getString(R.string.send_warning_2, currency.fullName, currency.toString())
+                }
             }
 
             sendButton.backgroundTintList = buttonColors

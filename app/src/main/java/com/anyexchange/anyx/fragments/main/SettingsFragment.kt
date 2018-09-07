@@ -103,7 +103,7 @@ class SettingsFragment : RefreshFragment() {
         context?.let {
             val tempThreshold = prefs.quickChangeThreshold
             quickChangeThresholdSpinner.visibility = View.VISIBLE
-            val floatList = listOf<Float>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
+            val floatList = listOf(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
             val arrayAdapter = FloatSpinnerAdapter(it, floatList)
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             quickChangeThresholdSpinner.adapter = arrayAdapter
@@ -161,14 +161,17 @@ class SettingsFragment : RefreshFragment() {
         dismissProgressSpinner()
         val prefs = Prefs(activity!!)
         val apiKey = CBProApi.credentials?.apiKey
-        if (apiKey == null) {
-            verifyButton.visibility = View.GONE
-        } else if (prefs.isApiKeyValid(apiKey) == true) {
-            verifyButton.visibility = View.GONE
-            txt_setting_verify_account.visibility = View.GONE
-        } else {
-            verifyButton.visibility = View.VISIBLE
-            txt_setting_verify_account.visibility = View.VISIBLE
+
+        when {
+            apiKey == null -> verifyButton.visibility = View.GONE
+            prefs.isApiKeyValid(apiKey) == true -> {
+                verifyButton.visibility = View.GONE
+                txt_setting_verify_account.visibility = View.GONE
+            }
+            else -> {
+                verifyButton.visibility = View.VISIBLE
+                txt_setting_verify_account.visibility = View.VISIBLE
+            }
         }
 
         if (prefs.isLoggedIn) {

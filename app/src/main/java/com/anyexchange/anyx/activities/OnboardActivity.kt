@@ -22,7 +22,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import com.anyexchange.anyx.classes.Prefs
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.textColor
 
 
@@ -30,11 +29,10 @@ class OnboardActivity : AppCompatActivity() {
     lateinit var viewPager: ViewPager
 
     var nextBtn: ImageButton? = null
-    var skipBtn: Button? = null
+    private var skipBtn: Button? = null
     var finishBtn:Button? = null
 
     var indicators: List<ImageView> = listOf()
-    var lastLeftValue = 0
 
     internal var currentPage = 0   //  to track page position
     val pageCount = 5
@@ -57,13 +55,13 @@ class OnboardActivity : AppCompatActivity() {
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
-        var color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
-        var color2 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
-        var color3 = ResourcesCompat.getColor(resources, R.color.gray_bg, null)
-        var color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
-        var color5 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
+        val color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
+        val color2 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
+        val color3 = ResourcesCompat.getColor(resources, R.color.gray_bg, null)
+        val color4 = ResourcesCompat.getColor(resources, R.color.bch_light, null)
+        val color5 = ResourcesCompat.getColor(resources, R.color.eth_light, null)
 
-        var colorList = intArrayOf(color1, color2, color3, color4, color5)
+        val colorList = intArrayOf(color1, color2, color3, color4, color5)
 
         indicators = listOf(intro_indicator_0, intro_indicator_1, intro_indicator_2, intro_indicator_3, intro_indicator_4, intro_indicator_5, intro_indicator_6, intro_indicator_7)
 
@@ -77,7 +75,7 @@ class OnboardActivity : AppCompatActivity() {
         finishBtn = intro_btn_finish
 
         finishBtn?.visibility = View.VISIBLE
-        finishBtn?.text = "Skip"
+        finishBtn?.text = resources.getString(R.string.onboard_skip)
 
         // Set up the ViewPager with the sections adapter.
         viewPager = home_view_pager
@@ -119,7 +117,7 @@ class OnboardActivity : AppCompatActivity() {
 
                 nextBtn?.visibility = View.GONE // if (position == pageCount - 1) View.GONE else View.VISIBLE
                 if (position == pageCount - 1) {
-                    finishBtn?.text = "Continue"
+                    finishBtn?.text = resources.getString(R.string.onboard_continue)
                 }
             }
         })
@@ -188,21 +186,16 @@ class OnboardActivity : AppCompatActivity() {
      */
     class PlaceholderFragment : Fragment() {
 
-        val textColors: Array<Int> = arrayOf(Color.BLACK, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE)
-        val pageTitles: Array<String> = arrayOf(
-                "Welcome to AnyX!",
-                "Track Prices",
-                "Your account",
-                "Notifications",
-                "Buy and Sell Cryptocurrency")
-        val pageStrings: Array<String> = arrayOf(
+        private val textColors: Array<Int> = arrayOf(Color.BLACK, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE)
+        private val pageTitles = resources.getStringArray(R.array.onboarding_titles)
+        private val pageStrings: Array<String> = arrayOf(
                 "The best Android app for Coinbase Pro",
                 "With this app you can keep up to date on Bitcoin, Ethereum, Litecoin, and Bitcoin Cash prices",
                 "Create an API Key on the Coinbase Pro website to log in to this app. Once you're in, you'll be able to track your personal account.",
                 "Set notifications to trigger if tokens reach specific price points, or if a rapid price change occurs.",
                 "Buy or sell any cryptocurrencies available on Coinbase Pro. You can make market, limit, or stop orders. Maker orders pay no fees!",
                 "Heads up: This app charges a 0.1% fee for taker orders. Maker orders remain free just as they are on the Coinbase Pro website.")
-        val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.coin_pile, R.drawable.chart, R.drawable.icon_alert_spaced, R.drawable.exchange)
+        private val pageImages: Array<Int> = arrayOf(R.drawable.anyx_fg, R.drawable.coin_pile, R.drawable.chart, R.drawable.icon_alert_spaced, R.drawable.exchange)
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
@@ -222,7 +215,7 @@ class OnboardActivity : AppCompatActivity() {
              * The fragment argument representing the section number for this
              * fragment.
              */
-            private val ARG_SECTION_NUMBER = "section_number"
+            private const val ARG_SECTION_NUMBER = "section_number"
 
             /**
              * Returns a new instance of this fragment for the given section

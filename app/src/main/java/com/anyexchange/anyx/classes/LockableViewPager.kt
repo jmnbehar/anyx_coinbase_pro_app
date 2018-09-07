@@ -4,6 +4,7 @@ package com.anyexchange.anyx.classes
  * Created by anyexchange on 2/18/2018.
  */
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.support.v4.view.ViewPager
 import android.util.AttributeSet
@@ -29,6 +30,7 @@ class LockableViewPager : ViewPager {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // Never allow swiping to switch between pages
         return if (isLocked) {

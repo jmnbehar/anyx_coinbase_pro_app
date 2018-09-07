@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
 import android.support.v4.content.res.ResourcesCompat
@@ -31,6 +32,7 @@ class PriceCandleChart : CandleStickChart {
     private var onVerticalDrag: () -> Unit = { }
     private var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked
 

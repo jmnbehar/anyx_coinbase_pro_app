@@ -12,7 +12,6 @@ import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
-import org.jetbrains.anko.support.v4.alert
 import com.anyexchange.anyx.classes.Currency
 import org.jetbrains.anko.support.v4.toast
 
@@ -111,17 +110,6 @@ class VerifySendFragment : Fragment() {
             prefs.rejectApiKey(apiKey)
         }
         (activity as VerifyActivity).verificationComplete(verificationStatus)
-    }
-
-    private fun showPopup(titleString: String, messageString: String, positiveText: String = "OK", positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
-        alert {
-            title = titleString
-            message = messageString
-            positiveButton(positiveText) { positiveAction() }
-            if (negativeText != null) {
-                negativeButton(negativeText) { negativeAction() }
-            }
-        }.show()
     }
 
     override fun onResume() {

@@ -133,13 +133,13 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         }
     }
 
-    class ExternalAccount(currency: Currency) : BaseAccount() {
-        override val id: String = "External $currency Account"
-        override val balance = 0.0
-        override val currency = currency
-
-        override fun toString(): String {
-            return id
-        }
-    }
+//    class ExternalAccount(currency: Currency) : BaseAccount() {
+//        override val id: String = "External $currency Account"
+//        override val balance = 0.0
+//        override val currency = currency
+//
+//        override fun toString(): String {
+//            return id
+//        }
+//    }
 }

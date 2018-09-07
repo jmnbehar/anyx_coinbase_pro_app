@@ -7,7 +7,6 @@ import android.widget.*
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
-import android.util.TypedValue
 import android.view.*
 import com.anyexchange.anyx.adapters.AlertPagerAdapter
 import org.jetbrains.anko.textColor
@@ -100,11 +99,6 @@ class AlertsFragment : RefreshFragment() {
         dismissProgressSpinner()
 
         return rootView
-    }
-
-    private fun dp2px(dp: Int): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
-                resources.displayMetrics).toInt()
     }
 
     private fun setAlert() {

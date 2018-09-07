@@ -23,7 +23,8 @@ import org.jetbrains.anko.textColor
  * Created by anyexchange on 11/5/2017.
  */
 class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener {
-    lateinit var listView: ListView
+    private var listView: ListView? = null
+    //Consider deleting this:
     lateinit var inflater: LayoutInflater
     private var lineChart: PriceLineChart? = null
     private var valueText: TextView? = null
