@@ -111,10 +111,10 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
 
 val Result.Failure<Any, FuelError>.errorMessage : String
     get() {
-        return if (error.response.data.isNotEmpty()) {
+        return try {
             val errorData = JSONObject(String(error.response.data))
             (errorData["message"] as? String) ?: error.response.responseMessage
-        } else {
+        } catch (e: Exception) {
             if (error.response.statusCode == CBProApi.ErrorCode.NoInternet.code) {
                 "Can't access Coinbase Pro"
             } else {
