@@ -375,9 +375,6 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     }
     class getOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class fills(initData: CBProApiInitData?, val orderId: String? = null, val productId: String? = null) : CBProApi(initData) {
-        companion object {
-            var dateLastUpdated: Long? = null
-        }
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let { context ->

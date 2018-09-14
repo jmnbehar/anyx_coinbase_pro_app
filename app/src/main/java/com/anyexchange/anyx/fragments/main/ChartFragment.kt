@@ -413,12 +413,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             candles = newAccount.product.candlesForTimespan(timespan, tradingPair)
             val prefs = Prefs(context)
             val nowInSeconds = Calendar.getInstance().timeInSeconds()
-            val wereFillsRecentlyUpdated = (CBProApi.fills.dateLastUpdated ?: 0 + TimeInSeconds.fiveMinutes > nowInSeconds)
+            val productId = newAccount.product.id
+            val wereFillsRecentlyUpdated = prefs.getDateFillsLastStashed(productId) + TimeInSeconds.fiveMinutes > nowInSeconds
 
             if (prefs.isLoggedIn) {
                 if (!wereFillsRecentlyUpdated) {
                     showProgressSpinner()
-                    CBProApi.fills(apiInitData, productId = newAccount.product.id).getAndStash({
+                    CBProApi.fills(apiInitData, productId = productId).getAndStash({
                         switchAccountCandlesCheck(newAccount, listOf())
                         dismissProgressSpinner()
                     }) { apiFillList ->

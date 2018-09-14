@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.util.*
 
 /**
  * Created by josephbehar on 12/28/17.
@@ -23,6 +24,7 @@ private const val ARE_ALERT_FILLS_ON = "ARE_ALERT_FILLS_ON"
 private const val STASHED_PRODUCTS = "stashed_products"
 private const val STASHED_ORDERS = "stashed_orders"
 private const val STASHED_FILLS = "stashed_fills"
+private const val STASHED_FILLS_DATE = "stashed_fills_date"
 private const val DARK_MODE = "dark_mode"
 private const val IS_FIRST_TIME = "is_first_time"
 private const val IS_LOGGED_IN = "is_logged_in"
@@ -255,7 +257,8 @@ class Prefs (var context: Context) {
     fun stashFills(fillListJson: String?, productId: String) {
         //TODO: remove this line in the next version, its just there to delete old stuff
         prefs.edit().remove(STASHED_FILLS).apply()
-        prefs.edit().putString(STASHED_FILLS + productId, fillListJson).apply()
+        prefs.edit().putString(STASHED_FILLS + productId, fillListJson)
+                    .putLong(STASHED_FILLS + productId, Date().time).apply()
     }
     fun nukeStashedFills() {
         for (product in Account.cryptoAccounts.map { it.product }) {
@@ -272,6 +275,9 @@ class Prefs (var context: Context) {
         } catch (e: Exception) {
             listOf()
         }
+    }
+    fun getDateFillsLastStashed(productId: String): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + productId, 0)
     }
 
     var areAlertFillsActive: Boolean
