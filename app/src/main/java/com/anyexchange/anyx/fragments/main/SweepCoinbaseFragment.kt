@@ -8,7 +8,6 @@
 //import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 //import com.anyexchange.anyx.classes.*
 //import com.anyexchange.anyx.R
-//import org.jetbrains.anko.support.v4.toast
 //import org.jetbrains.anko.textColor
 //
 ///**

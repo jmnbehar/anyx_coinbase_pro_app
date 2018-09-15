@@ -13,7 +13,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import com.anyexchange.anyx.classes.Currency
-import org.jetbrains.anko.support.v4.toast
 
 
 /**

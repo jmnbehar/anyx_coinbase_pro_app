@@ -13,7 +13,6 @@ import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_market.view.*
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by anyexchange on 11/5/2017.

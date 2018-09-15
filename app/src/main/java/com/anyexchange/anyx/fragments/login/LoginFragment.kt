@@ -13,7 +13,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.fragment_login.view.*
-import org.jetbrains.anko.support.v4.toast
 import se.simbio.encryption.Encryption
 
 /**

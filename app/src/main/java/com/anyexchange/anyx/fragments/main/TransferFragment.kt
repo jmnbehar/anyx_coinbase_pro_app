@@ -9,7 +9,6 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapte
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 /**

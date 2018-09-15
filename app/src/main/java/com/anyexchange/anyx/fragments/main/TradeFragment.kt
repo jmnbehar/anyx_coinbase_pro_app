@@ -17,7 +17,6 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
 
@@ -442,6 +441,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     }
                 }
             }
+        }
+        CBProApi.listOrders(apiInitData, productId = productId).getAndStash({ /* do nothing */ }) {
+            //do nothing here either
         }
     }
 

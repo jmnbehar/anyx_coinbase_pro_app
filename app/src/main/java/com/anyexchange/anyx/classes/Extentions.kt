@@ -3,6 +3,7 @@ package com.anyexchange.anyx.classes
 import android.arch.lifecycle.Lifecycle
 import android.support.annotation.LayoutRes
 import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.widget.ListView
 import android.view.ViewGroup
@@ -177,3 +178,6 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
         override fun onTabReselected(tab: TabLayout.Tab) {}
     })
 }
+
+ fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
+ fun Fragment.toast(text: CharSequence) = activity?.toast(text)

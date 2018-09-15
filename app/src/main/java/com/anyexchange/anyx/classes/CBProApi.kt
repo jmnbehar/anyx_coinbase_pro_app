@@ -382,7 +382,8 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         val prefs = Prefs(context)
                         val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                         if (productId != null) {
-                            if (prefs.areAlertFillsActive) {
+                            val isFirstCheck = prefs.getDateFillsLastStashed(productId) == 0L
+                            if (prefs.areAlertFillsActive && !isFirstCheck) {
                                 checkForFillAlerts(apiFillList, productId)
                             }
                             prefs.stashFills(result.value, productId)

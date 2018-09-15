@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
     }
 
-    private fun setDrawerMenu() {
+    fun setDrawerMenu() {
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
-                        goToVerify{ }
+                        goToVerify{ setDrawerMenu() }
                     }
                 }
             }
@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun goToVerify(onComplete: (Boolean) -> Unit) {
+    fun goToVerify(onComplete: (Boolean) -> Unit) {
         val intent = Intent(this, VerifyActivity::class.java)
         startActivity(intent)
         VerifyActivity.onComplete = onComplete

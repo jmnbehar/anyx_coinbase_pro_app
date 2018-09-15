@@ -157,7 +157,6 @@ class PriceCandleChart : CandleStickChart {
 
 
         xAxis.axisLineColor = currencyColor
-        axisLeft.axisLineColor = currencyColor
 
         val strokeWidth = 2.toFloat()
         xAxis.axisLineWidth = strokeWidth

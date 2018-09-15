@@ -16,7 +16,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 /**

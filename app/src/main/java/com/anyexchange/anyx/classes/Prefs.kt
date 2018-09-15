@@ -25,6 +25,7 @@ private const val STASHED_PRODUCTS = "stashed_products"
 private const val STASHED_ORDERS = "stashed_orders"
 private const val STASHED_FILLS = "stashed_fills"
 private const val STASHED_FILLS_DATE = "stashed_fills_date"
+private const val STASHED_ORDERS_DATE = "stashed_orders_date"
 private const val DARK_MODE = "dark_mode"
 private const val IS_FIRST_TIME = "is_first_time"
 private const val IS_LOGGED_IN = "is_logged_in"
@@ -242,7 +243,8 @@ class Prefs (var context: Context) {
     }
 
     fun stashOrders(orderListString: String?) {
-        prefs.edit().putString(STASHED_ORDERS, orderListString).apply()
+        prefs.edit().putString(STASHED_ORDERS, orderListString)
+                .putLong(STASHED_ORDERS_DATE, Date().time).apply()
     }
     fun getStashedOrders(productId: String) : List<ApiOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
@@ -253,12 +255,16 @@ class Prefs (var context: Context) {
             listOf()
         }
     }
+    fun getDateOrdersLastStashed(): Long {
+        return prefs.getLong(STASHED_FILLS_DATE, 0)
+    }
+
 
     fun stashFills(fillListJson: String?, productId: String) {
         //TODO: remove this line in the next version, its just there to delete old stuff
         prefs.edit().remove(STASHED_FILLS).apply()
         prefs.edit().putString(STASHED_FILLS + productId, fillListJson)
-                    .putLong(STASHED_FILLS + productId, Date().time).apply()
+                    .putLong(STASHED_FILLS_DATE + productId, Date().time).apply()
     }
     fun nukeStashedFills() {
         for (product in Account.cryptoAccounts.map { it.product }) {

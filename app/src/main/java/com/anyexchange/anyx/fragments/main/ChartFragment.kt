@@ -5,6 +5,7 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
@@ -25,7 +26,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
@@ -302,9 +302,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             blockNextAccountChange = false
         }
 
-        if (currency.isFiat) {
-            setButtonColors()
-            System.out.println("Account not null")
+        if (!currency.isFiat) {
+            setButtonsAndBalanceText(account)
             switchAccount(account)
         } else {
             val mainActivity = activity as? MainActivity
@@ -372,21 +371,32 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun buySellButtonOnClick(isLoggedIn: Boolean, tradeSide: TradeSide) {
-        //TODO: go directly to verify/login
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
         } else if (CBProApi.credentials?.isVerified == null) {
-            toast(R.string.toast_please_verify_message)
+            (activity as? MainActivity)?.let {
+                it.goToVerify{ didVerify ->
+                    if (didVerify) {
+                        goToTradeFragment(tradeSide)
+                        it.setDrawerMenu()
+                    }
+                }
+            } ?: run {
+                toast(R.string.toast_please_verify_message)
+            }
         } else if (CBProApi.credentials?.isVerified == false) {
             toast(R.string.toast_missing_permissions_message)
         } else {
-            if (tradeFragment == null) {
-                tradeFragment = TradeFragment.newInstance(tradeSide)
-            } else {
-                tradeFragment?.tradeSide = tradeSide
-            }
-            (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
+            goToTradeFragment(tradeSide)
         }
+    }
+    fun goToTradeFragment(tradeSide: TradeSide) {
+        if (tradeFragment == null) {
+            tradeFragment = TradeFragment.newInstance(tradeSide)
+        } else {
+            tradeFragment?.tradeSide = tradeSide
+        }
+        (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
 
     private fun switchAccount(newAccount: Account) {
@@ -412,34 +422,54 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             candles = newAccount.product.candlesForTimespan(timespan, tradingPair)
             val prefs = Prefs(context)
-            val nowInSeconds = Calendar.getInstance().timeInSeconds()
             val productId = newAccount.product.id
-            val wereFillsRecentlyUpdated = prefs.getDateFillsLastStashed(productId) + TimeInSeconds.fiveMinutes > nowInSeconds
+            val stashedFills = prefs.getStashedFills(productId)
 
+            checkOrdersAndFills(productId, context)
             if (prefs.isLoggedIn) {
-                if (!wereFillsRecentlyUpdated) {
-                    showProgressSpinner()
-                    CBProApi.fills(apiInitData, productId = productId).getAndStash({
-                        switchAccountCandlesCheck(newAccount, listOf())
-                        dismissProgressSpinner()
-                    }) { apiFillList ->
-                        if (lifecycle.isCreatedOrResumed) {
-                            switchAccountCandlesCheck(newAccount, apiFillList)
-                            dismissProgressSpinner()
-                        }
-                    }
-                } else if (account.apiAccount.balance.toDoubleOrNull() == null) {
+                if (account.apiAccount.balance.toDoubleOrNull() == null) {
                     refresh {
-                        val stashedFills = prefs.getStashedFills(newAccount.product.id)
                         switchAccountCandlesCheck(newAccount, stashedFills)
                         dismissProgressSpinner()
                     }
                 } else {
-                    val stashedFills = prefs.getStashedFills(newAccount.product.id)
                     switchAccountCandlesCheck(newAccount, stashedFills)
                 }
             } else {
                 switchAccountCandlesCheck(newAccount, listOf())
+            }
+        }
+    }
+
+    private fun checkOrdersAndFills(productId: String, context: Context) {
+        val prefs = Prefs(context)
+        val stashedFills = prefs.getStashedFills(productId)
+        val stashedOrders = prefs.getStashedOrders(productId)
+
+        val dateOrdersLastStashed = prefs.getDateOrdersLastStashed()
+        val dateFillsLastStashed  = prefs.getDateFillsLastStashed(productId)
+        val nowInSeconds = Calendar.getInstance().timeInSeconds()
+
+        if (dateOrdersLastStashed + TimeInSeconds.oneHour > nowInSeconds) {
+            CBProApi.listOrders(apiInitData, productId = productId).getAndStash({
+                updateFills(productId, stashedOrders, stashedFills)
+            }) { newOrderList ->
+                updateFills(productId, newOrderList,  stashedFills)
+            }
+        } else if (dateFillsLastStashed + TimeInSeconds.fiveMinutes > nowInSeconds) {
+            updateFills(productId, stashedOrders, stashedFills)
+        } else if (dateFillsLastStashed + TimeInSeconds.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
+            updateFills(productId, stashedOrders, stashedFills)
+        }
+    }
+    private fun updateFills(productId: String, orderList: List<ApiOrder>, stashedFills: List<ApiFill>) {
+        CBProApi.fills(apiInitData, productId = productId).getAndStash({ _ ->
+            if (lifecycle.isCreatedOrResumed) {
+                updateHistoryPagerAdapter(orderList, stashedFills)
+            }
+        }) { apiFillList ->
+            if (lifecycle.isCreatedOrResumed) {
+                updateHistoryPagerAdapter(orderList, apiFillList)
             }
         }
     }

@@ -14,7 +14,6 @@ import net.glxn.qrgen.android.QRCode
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import org.jetbrains.anko.support.v4.toast
 
 
 /**
