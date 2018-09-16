@@ -94,12 +94,12 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()
 
     var alerts: Set<PriceAlert>
-        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
+        get() = prefs.getStringSet(ALERTS, setOf<String>())?.asSequence()?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
+        set(value) = prefs.edit().putStringSet(ALERTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
     var stashedProducts: List<Product>
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
-        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
+        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
 
     var stashedFiatAccountList: List<Account>
