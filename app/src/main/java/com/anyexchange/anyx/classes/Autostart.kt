@@ -21,13 +21,13 @@ class AutoStart : BroadcastReceiver() {
 
         var hasStarted = false
 
-        // schedule the start of the service every 1 - 5 minutes
+        // schedule the start of the service every 1 - 10 minutes
         fun scheduleCustomAlertJob(context: Context) {
             hasStarted = true
             val serviceComponent = ComponentName(context, AlertJobService::class.java)
             val builder = JobInfo.Builder(0, serviceComponent)
-            builder.setMinimumLatency((10 * 1000)) // wait at least
-            builder.setOverrideDeadline((20 * 1000)) // maximum delay
+            builder.setMinimumLatency(TimeInMillis.oneMinute) // wait at least
+            builder.setOverrideDeadline(TimeInMillis.tenMinutes) // maximum delay
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
