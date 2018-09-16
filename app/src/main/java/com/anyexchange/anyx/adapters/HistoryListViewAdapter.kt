@@ -106,6 +106,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             if (orders.isEmpty()) {
                 setViewsVisibility(viewHolder, false)
                 viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_orders)
+                viewHolder.view?.setOnClickListener { }
                 return
             }
             setViewsVisibility(viewHolder, true)
@@ -131,6 +132,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             if (fills.isEmpty()) {
                 viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_fills)
                 setViewsVisibility(viewHolder, false)
+                viewHolder.view?.setOnClickListener {}
                 return
             }
             setViewsVisibility(viewHolder, true)
