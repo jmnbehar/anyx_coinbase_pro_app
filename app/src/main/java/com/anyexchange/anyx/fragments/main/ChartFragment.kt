@@ -824,7 +824,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         } else {
             miniRefresh(onFailure) {
-//                    account.balance = 0.0
                 onComplete(true)
             }
         }
@@ -869,7 +868,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
-        //complete mini refresh assumes account is not null
         priceTextView?.text = price.format(quoteCurrency)
         valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
 
