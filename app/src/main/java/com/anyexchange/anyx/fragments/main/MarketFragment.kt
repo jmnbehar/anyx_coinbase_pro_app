@@ -62,9 +62,9 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                 refresh {}
             }
             skipNextRefresh = false
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
 
         refresh { endRefresh() }
     }

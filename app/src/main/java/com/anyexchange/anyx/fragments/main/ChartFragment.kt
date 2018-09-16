@@ -34,8 +34,6 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
-import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -321,10 +319,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         autoRefresh = Runnable {
             if (!blockRefresh) {
                 miniRefresh({ }, { })
-                handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
             }
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
         dismissProgressSpinner()
         refresh { endRefresh() }
     }
@@ -390,7 +388,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             goToTradeFragment(tradeSide)
         }
     }
-    fun goToTradeFragment(tradeSide: TradeSide) {
+    private fun goToTradeFragment(tradeSide: TradeSide) {
         if (tradeFragment == null) {
             tradeFragment = TradeFragment.newInstance(tradeSide)
         } else {
@@ -422,21 +420,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             candles = newAccount.product.candlesForTimespan(timespan, tradingPair)
             val prefs = Prefs(context)
-            val productId = newAccount.product.id
-            val stashedFills = prefs.getStashedFills(productId)
-
-            checkOrdersAndFills(productId, context)
             if (prefs.isLoggedIn) {
                 if (account.apiAccount.balance.toDoubleOrNull() == null) {
                     refresh {
-                        switchAccountCandlesCheck(newAccount, stashedFills)
+                        switchAccountCandlesCheck(newAccount)
                         dismissProgressSpinner()
                     }
                 } else {
-                    switchAccountCandlesCheck(newAccount, stashedFills)
+                    switchAccountCandlesCheck(newAccount)
                 }
             } else {
-                switchAccountCandlesCheck(newAccount, listOf())
+                switchAccountCandlesCheck(newAccount)
             }
         }
     }
@@ -450,15 +444,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val dateFillsLastStashed  = prefs.getDateFillsLastStashed(productId)
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
-        if (dateOrdersLastStashed + TimeInSeconds.oneHour > nowInSeconds) {
+        if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
             CBProApi.listOrders(apiInitData, productId = productId).getAndStash({
                 updateFills(productId, stashedOrders, stashedFills)
             }) { newOrderList ->
                 updateFills(productId, newOrderList,  stashedFills)
             }
-        } else if (dateFillsLastStashed + TimeInSeconds.fiveMinutes > nowInSeconds) {
+        } else if (dateFillsLastStashed + TimeInMillis.fiveMinutes > nowInSeconds) {
             updateFills(productId, stashedOrders, stashedFills)
-        } else if (dateFillsLastStashed + TimeInSeconds.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
+        } else if (dateFillsLastStashed + TimeInMillis.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
             updateFills(productId, stashedOrders, stashedFills)
         }
     }
@@ -481,33 +475,36 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
     }
 
-    private fun switchAccountCandlesCheck(account: Account, fills: List<ApiFill>) {
+    private fun switchAccountCandlesCheck(account: Account) {
         if (areCandlesUpToDate(timespan)) {
-            completeSwitchAccount(account, fills)
+            completeSwitchAccount(account)
         } else {
             showProgressSpinner()
             miniRefresh({   //onFailure
                 //Even if miniRefresh fails here, switch anyways
                 dismissProgressSpinner()
                 candles = account.product.candlesForTimespan(timespan, tradingPair)
-                completeSwitchAccount(account, fills)
+                completeSwitchAccount(account)
             }, {    //success
                 dismissProgressSpinner()
                 candles = account.product.candlesForTimespan(timespan, tradingPair)
-                completeSwitchAccount(account, fills)
+                completeSwitchAccount(account)
             })
         }
     }
-    private fun completeSwitchAccount(account: Account, fills: List<ApiFill>) {
+    private fun completeSwitchAccount(account: Account) {
         blockRefresh = false
         context?.let {
             val prefs = Prefs(it)
-            val stashedOrders = prefs.getStashedOrders(account.product.id)
+            val productId = account.product.id
+            val stashedFills = prefs.getStashedFills(productId)
+            val stashedOrders = prefs.getStashedOrders(productId)
             addCandlesToActiveChart(candles, account.currency)
             setPercentChangeText(timespan)
             txt_chart_name.text = account.currency.fullName
             setButtonsAndBalanceText(account)
-            updateHistoryPagerAdapter(stashedOrders, fills)
+            updateHistoryPagerAdapter(stashedOrders, stashedFills)
+            checkOrdersAndFills(productId, it)
         }
     }
 
@@ -604,17 +601,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
             val createdTimeRaw = order.created_at
-            val locale = Locale.getDefault()
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
-            val createdTime = try {
-                val date = format.parse(createdTimeRaw)
-                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
-                outputFormat.format(date)
+            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
+            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
 
-            } catch (e: ParseException) {
-                //e.printStackTrace()
-                createdTimeRaw
-            }
             val fillFees = order.fill_fees.toDouble().format(quoteCurrency)
             val price = order.price.toDouble().format(quoteCurrency)
             val filledSize = order.filled_size.toDouble().toString()
@@ -629,7 +618,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_time_label, createdTime).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
@@ -653,17 +642,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val layoutWidth = 1000
             val createdTimeRaw = fill.created_at
-            val locale = Locale.getDefault()
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
-            val createdTime = try {
-                val date = format.parse(createdTimeRaw)
-                val outputFormat = SimpleDateFormat("h:mma, MM/dd/yyyy", locale)
-                outputFormat.format(date)
+            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
+            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
 
-            } catch (e: ParseException) {
-                //e.printStackTrace()
-                createdTimeRaw
-            }
             val fee = fill.fee.toDouble().format(quoteCurrency)
             val price = fill.price.toDouble().format(quoteCurrency)
             val size = fill.size.toDouble().btcFormat()
@@ -674,7 +655,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_fee_label, fee).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_time_label, createdTime).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }

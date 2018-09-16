@@ -179,5 +179,21 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
     })
 }
 
- fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
- fun Fragment.toast(text: CharSequence) = activity?.toast(text)
+fun String.dateFromApiDateString(): Date? {
+    return try {
+        val locale = Locale.getDefault()
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
+        format.timeZone = TimeZone.getTimeZone("UTC")
+        format.parse(this)
+    } catch (e: Exception) {
+        null
+    }
+}
+fun Date.format(formatString: String): String {
+    val outputFormat = SimpleDateFormat(formatString, Locale.getDefault())
+    outputFormat.timeZone = TimeZone.getDefault()
+    return outputFormat.format(this)
+}
+
+fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
+fun Fragment.toast(text: CharSequence) = activity?.toast(text)

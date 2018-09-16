@@ -122,7 +122,7 @@ class AlertJobService : JobService() {
 
                     val tenMinuteChange = percentChange(mostRecentPrice, tenMinutePrice)
                     if (tenMinuteChange > minAlertPercentage
-                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.TEN_MINUTES)) {
                         alertPercentage = tenMinuteChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.TEN_MINUTES
@@ -130,7 +130,7 @@ class AlertJobService : JobService() {
                     }
                     val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
                     if ((halfHourChange > minAlertPercentage) && (halfHourChange > alertPercentage + 0.5)
-                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HALF_HOUR)) {
                         alertPercentage = halfHourChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.HALF_HOUR
@@ -138,7 +138,7 @@ class AlertJobService : JobService() {
                     }
                     val hourChange = percentChange(mostRecentPrice, hourPrice)
                     if ((hourChange > minAlertPercentage) && (hourChange > alertPercentage + 0.5)
-                            && (lastQuickChangeAlertTimestamp < timestamp - TimeInSeconds.oneHour)
+                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HOUR)) {
                         alertPercentage = hourChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.HOUR

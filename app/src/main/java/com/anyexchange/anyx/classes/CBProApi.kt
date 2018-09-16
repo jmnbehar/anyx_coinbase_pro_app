@@ -382,8 +382,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         val prefs = Prefs(context)
                         val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
                         if (productId != null) {
-                            val isFirstCheck = prefs.getDateFillsLastStashed(productId) == 0L
-                            if (prefs.areAlertFillsActive && !isFirstCheck) {
+                            if (prefs.areAlertFillsActive) {
                                 checkForFillAlerts(apiFillList, productId)
                             }
                             prefs.stashFills(result.value, productId)
@@ -402,22 +401,13 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 val stashedFills = Prefs(context).getStashedFills(productId)
 
                 if (apiFillList.size > stashedFills.size) {
-                    val locale = Locale.getDefault()
-                    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
-                    val stashedFillsDate: Long = try {
-                        format.parse(stashedFills.firstOrNull()?.created_at ).time
-                    } catch (e: Exception) {
-                        0
-                    }
+                    val stashedFillsDate = stashedFills.firstOrNull()?.created_at?.dateFromApiDateString()?.time ?: 0
                     for (fill in apiFillList) {
-                        val fillDate: Long = try {
-                            format.parse(fill.created_at).time
-                        } catch (e: Exception) {
-                            0
-                        }
-                        if (fillDate > stashedFillsDate) {
+                        val fillDate = fill.created_at.dateFromApiDateString()
+                        val fillDateTime = fillDate?.time ?: 0
+                        if (fillDateTime > stashedFillsDate && fillDateTime + TimeInMillis.sixHours > Date().time) {
                             AlertHub.triggerFillAlert(fill, context)
-                        } else if (fillDate <= stashedFillsDate) {
+                        } else if (fillDateTime <= stashedFillsDate) {
                             break
                         }
                     }

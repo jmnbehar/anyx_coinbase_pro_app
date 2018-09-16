@@ -43,6 +43,20 @@ object TimeInSeconds {
     const val oneYear: Long = 31536000
     const val fiveYears: Long = 158112000
 }
+object TimeInMillis {
+    const val halfMinute: Long = 30 * 1000
+    const val oneMinute: Long = 60 * 1000
+    const val fiveMinutes: Long = 300 * 1000
+    const val fifteenMinutes: Long = 900 * 1000
+    const val twentyMinutes: Long = 1200 * 1000
+    const val thirtyMinutes: Long = 1800 * 1000
+    const val halfHour: Long = 1800 * 1000
+    const val oneHour: Long = 3600 * 1000
+    const val sixHours: Long = 21600 * 1000
+    const val oneDay: Long = 86400 * 1000
+    const val oneWeek: Long = 604800 * 1000
+    const val twoWeeks: Long = 1209600 * 1000
+}
 
 enum class Timespan {
     HOUR,
