@@ -63,7 +63,7 @@ class AlertJobService : JobService() {
             for (account in Account.cryptoAccounts) {
                 val stashedOrders = prefs.getStashedOrders(account.product.id)
                 if (stashedOrders.isNotEmpty()) {
-                    CBProApi.listOrders(apiInitData, productId = account.product.id).getAndStash({ }) { }
+                    CBProApi.listOrders(apiInitData).getAndStash({ }) { }
                     CBProApi.fills(apiInitData, productId = account.product.id).getAndStash({ }) { }
                 }
             }

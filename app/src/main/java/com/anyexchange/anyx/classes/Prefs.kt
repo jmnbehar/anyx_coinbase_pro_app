@@ -243,8 +243,9 @@ class Prefs (var context: Context) {
     }
 
     fun stashOrders(orderListString: String?) {
+        val stashDate = if (orderListString == null) { 0 } else { Date().time }
         prefs.edit().putString(STASHED_ORDERS, orderListString)
-                .putLong(STASHED_ORDERS_DATE, Date().time).apply()
+                .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
     fun getStashedOrders(productId: String) : List<ApiOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)

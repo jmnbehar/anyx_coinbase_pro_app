@@ -445,7 +445,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
-            CBProApi.listOrders(apiInitData, productId = productId).getAndStash({
+            CBProApi.listOrders(apiInitData).getAndStash({
                 updateFills(productId, stashedOrders, stashedFills)
             }) { newOrderList ->
                 updateFills(productId, newOrderList,  stashedFills)
@@ -806,7 +806,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             var filteredOrders: List<ApiOrder>? = null
             var filteredFills: List<ApiFill>? = null
-            CBProApi.listOrders(apiInitData, productId = null).getAndStash(onFailure) { apiOrderList ->
+            CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
                     if (filteredOrders != null && filteredFills != null) {

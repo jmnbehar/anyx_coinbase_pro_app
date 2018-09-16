@@ -358,7 +358,9 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     class orderStop(initData: CBProApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
     class cancelOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: CBProApiInitData) : CBProApi(initData)
-    class listOrders(initData: CBProApiInitData?, val status: String? = null, val productId: String?) : CBProApi(initData) {
+    class listOrders(initData: CBProApiInitData?, val status: String? = null) : CBProApi(initData) {
+        //For now don't use product ID, always get ALL orders
+        val productId: String? = null
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
