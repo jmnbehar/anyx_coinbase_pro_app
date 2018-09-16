@@ -684,7 +684,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             openTextView?.visibility = View.VISIBLE
             closeLabelTextView?.visibility = View.VISIBLE
 
-
+            volumeLabelTextView?.visibility = View.VISIBLE
+            volumeTextView?.visibility = View.VISIBLE
 
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 highTextView?.typeface = Typeface.MONOSPACE
@@ -692,7 +693,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 openTextView?.typeface = Typeface.MONOSPACE
                 volumeTextView?.typeface = Typeface.MONOSPACE
                 priceTextView?.typeface = Typeface.MONOSPACE
-                //TODO: set percentChange text to monospace
             }
 
             if (quoteCurrency.isFiat) {
@@ -704,11 +704,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 lowTextView?.text = entry.low.toDouble().btcFormatShortened()
                 openTextView?.text = entry.open.toDouble().btcFormatShortened()
             }
-
-            //TODO: add volume to CandleEntry
-
-            volumeLabelTextView?.visibility = View.GONE
-            volumeTextView?.visibility = View.GONE
+            volumeTextView?.text = entry.volume.volumeFormat()
         }
     }
 

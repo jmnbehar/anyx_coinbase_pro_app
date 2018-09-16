@@ -100,6 +100,7 @@ fun Double.format(currency: Currency): String {
         this.btcFormatShortened() + " " + currency.toString()
     }
 }
+fun Float.volumeFormat() = "%.2f".format(this)
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
 fun Double.intPercentFormat(): String = "%.0f".format(this) + "%"
