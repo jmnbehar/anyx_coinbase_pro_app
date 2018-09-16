@@ -604,21 +604,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val createdTimeDate = createdTimeRaw.dateFromApiDateString()
             val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
 
-            val fillFees = order.fill_fees.toDouble().format(quoteCurrency)
-            val price = order.price.toDouble().format(quoteCurrency)
-            val filledSize = order.filled_size.toDouble().toString()
-            val size = (order.size ?: "0").toDouble().btcFormat()
+            val fillFees = order.fill_fees.toDoubleOrNull()?.format(quoteCurrency)
+            val price = order.price.toDoubleOrNull()?.format(quoteCurrency)
+            val filledSize = order.filled_size.toDoubleOrNull()?.toString()
+            val size = (order.size ?: "0").toDoubleOrNull()?.btcFormat()
 
             customView {
                 linearLayout {
                     verticalLayout {
                         horizontalLayout(R.string.chart_history_side_label, order.side).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
+                        if (size != null)       { horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {} }
+                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
+                        if (price != null)      { horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {} }
+                                                  horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
+                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
+                                                  horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
