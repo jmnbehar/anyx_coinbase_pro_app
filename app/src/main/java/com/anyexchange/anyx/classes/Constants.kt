@@ -47,6 +47,7 @@ object TimeInMillis {
     const val halfMinute: Long = 30 * 1000
     const val oneMinute: Long = 60 * 1000
     const val fiveMinutes: Long = 300 * 1000
+    const val eightMinutes: Long = 60 * 8 * 1000
     const val tenMinutes: Long = 600 * 1000
     const val fifteenMinutes: Long = 900 * 1000
     const val twentyMinutes: Long = 1200 * 1000

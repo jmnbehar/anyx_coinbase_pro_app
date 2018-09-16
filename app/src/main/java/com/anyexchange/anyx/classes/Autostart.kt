@@ -27,7 +27,7 @@ class AutoStart : BroadcastReceiver() {
             val serviceComponent = ComponentName(context, AlertJobService::class.java)
             val builder = JobInfo.Builder(0, serviceComponent)
             builder.setMinimumLatency(TimeInMillis.oneMinute) // wait at least
-            builder.setOverrideDeadline(TimeInMillis.tenMinutes) // maximum delay
+            builder.setOverrideDeadline(TimeInMillis.eightMinutes) // maximum delay
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
