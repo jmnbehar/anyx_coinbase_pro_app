@@ -13,7 +13,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.fragment_login.view.*
-import org.jetbrains.anko.support.v4.toast
 import se.simbio.encryption.Encryption
 
 /**
@@ -48,7 +47,7 @@ class LoginFragment : RefreshFragment()  {
         apiSecretEditText = rootView.etxt_login_secret
         passphraseEditText = rootView.etxt_login_passphrase
         val btnLogin = rootView.btn_login
-        val btnNewAccount = rootView.btn_login_new_account
+//        val btnNewAccount = rootView.btn_login_new_account
         val btnLoginHelp = rootView.btn_login_help
         val btnSkipLogin = rootView.btn_login_skip
 
@@ -173,38 +172,37 @@ class LoginFragment : RefreshFragment()  {
         val apiSecretVal = apiSecret ?: ""
         val passphraseVal = passphrase ?: ""
 
-        if (apiKeyVal.isBlank()) {
-            toast(R.string.login_error_missing_api_key)
-        } else if (apiSecretVal.isBlank()) {
-            toast(R.string.login_error_missing_api_secret)
-        } else if (passphraseVal.isBlank()) {
-            toast(R.string.login_error_missing_passphrase)
-        } else {
-            val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
-            CBProApi.credentials = CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid)
-            (activity as? MainActivity)?.signIn(false, { result ->
-                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                when (errorMessage) {
-                    CBProApi.ErrorMessage.Forbidden -> {
-                        toast(R.string.login_forbidden_error)
+        when {
+            apiKeyVal.isBlank() -> toast(R.string.login_error_missing_api_key)
+            apiSecretVal.isBlank() -> toast(R.string.login_error_missing_api_secret)
+            passphraseVal.isBlank() -> toast(R.string.login_error_missing_passphrase)
+            else -> {
+                val isApiKeyValid = prefs.isApiKeyValid(apiKeyVal)
+                CBProApi.credentials = CBProApi.ApiCredentials(apiKeyVal, apiSecretVal, passphraseVal, isApiKeyValid)
+                (activity as? MainActivity)?.signIn(false, { result ->
+                    val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                    when (errorMessage) {
+                        CBProApi.ErrorMessage.Forbidden -> {
+                            toast(R.string.login_forbidden_error)
+                        }
+                        CBProApi.ErrorMessage.InvalidApiSignature, CBProApi.ErrorMessage.MissingApiSignature-> {
+                            toast(R.string.login_secret_error)
+                        }
+                        CBProApi.ErrorMessage.InvalidApiKey, CBProApi.ErrorMessage.InvalidPassphrase-> {
+                            toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+                        }
+                        else -> toast(resources.getString(R.string.error_generic_message, result.errorMessage))
                     }
-                    CBProApi.ErrorMessage.InvalidApiSignature, CBProApi.ErrorMessage.MissingApiSignature-> {
-                        toast(R.string.login_secret_error)
-                    }
-                    CBProApi.ErrorMessage.InvalidApiKey, CBProApi.ErrorMessage.InvalidPassphrase-> {
-                        toast(resources.getString(R.string.error_generic_message, result.errorMessage))
-                    }
-                    else -> toast(resources.getString(R.string.error_generic_message, result.errorMessage))
-                }
-            }, {
-                //TODO: destroy and remove self from backstack
-                removeSelfFromBackstack()
+                }, {
+                    //TODO: destroy and remove self from backstack
+                    removeSelfFromBackstack()
 //                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            } )
+                } )
+            }
         }
     }
 
-    fun removeSelfFromBackstack() {
+    private fun removeSelfFromBackstack() {
         activity?.supportFragmentManager?.let {
             val transaction = it.beginTransaction()
             transaction.remove(this)

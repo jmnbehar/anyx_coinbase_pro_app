@@ -1,10 +1,9 @@
 package com.anyexchange.anyx.classes
 
 import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleOwner
-import android.content.res.Resources
 import android.support.annotation.LayoutRes
 import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.widget.ListView
 import android.view.ViewGroup
@@ -27,7 +26,7 @@ import kotlin.math.absoluteValue
 
  */
 
-fun MutableSet<Alert>.removeAlert(alert: Alert) {
+fun MutableSet<PriceAlert>.removeAlert(alert: PriceAlert) {
     val removeItem = this.find { a -> alert == a }
     if (removeItem != null) {
         this.remove(removeItem)
@@ -95,14 +94,16 @@ fun Double.fiatFormat(currency: Currency): String {
     return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
 }
 fun Double.format(currency: Currency): String {
-    if (currency.isFiat) {
-        return this.fiatFormat(currency)
+    return if (currency.isFiat) {
+        this.fiatFormat(currency)
     } else {
-        return this.btcFormatShortened() + " " + currency.toString()
+        this.btcFormatShortened() + " " + currency.toString()
     }
 }
+fun Float.volumeFormat() = "%.2f".format(this)
 
 fun Double.percentFormat(): String = "%.2f".format(this) + "%"
+fun Double.intPercentFormat(): String = "%.0f".format(this) + "%"
 
 fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0
 
@@ -112,10 +113,10 @@ fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false):
 
 val Result.Failure<Any, FuelError>.errorMessage : String
     get() {
-        return if (error.response.data.isNotEmpty()) {
+        return try {
             val errorData = JSONObject(String(error.response.data))
             (errorData["message"] as? String) ?: error.response.responseMessage
-        } else {
+        } catch (e: Exception) {
             if (error.response.statusCode == CBProApi.ErrorCode.NoInternet.code) {
                 "Can't access Coinbase Pro"
             } else {
@@ -179,27 +180,21 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
     })
 }
 
-
-fun TabLayout.setupAllCurrencyTabs(onSelected: (Currency) -> Unit) {
-    removeAllTabs()
-    val fiatTab = this.newTab()
-    fiatTab.text = Account.defaultFiatCurrency.toString()
-    addTab(fiatTab)
-    for (currency in Currency.cryptoList) {
-        val newTab = newTab()
-        newTab.text = currency.toString()
-        addTab(newTab)
+fun String.dateFromApiDateString(): Date? {
+    return try {
+        val locale = Locale.getDefault()
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
+        format.timeZone = TimeZone.getTimeZone("UTC")
+        format.parse(this)
+    } catch (e: Exception) {
+        null
     }
-    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-        override fun onTabSelected(tab: TabLayout.Tab) {
-            if (tab.position == 0) {
-                onSelected(Account.defaultFiatCurrency)
-            } else {
-                val selectedCurrency = Currency.cryptoList[tab.position - 1]
-                onSelected(selectedCurrency)
-            }
-        }
-        override fun onTabUnselected(tab: TabLayout.Tab) {}
-        override fun onTabReselected(tab: TabLayout.Tab) {}
-    })
 }
+fun Date.format(formatString: String): String {
+    val outputFormat = SimpleDateFormat(formatString, Locale.getDefault())
+    outputFormat.timeZone = TimeZone.getDefault()
+    return outputFormat.format(this)
+}
+
+fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
+fun Fragment.toast(text: CharSequence) = activity?.toast(text)

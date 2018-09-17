@@ -17,8 +17,8 @@ import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import android.text.InputFilter
+import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -60,7 +60,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private lateinit var submitOrderButton: Button
 
-    var tradeType: TradeType = TradeType.MARKET
+    private var tradeType: TradeType = TradeType.MARKET
 
     var tradeSide: TradeSide = Companion.tradeSide
     val account: Account?
@@ -252,23 +252,25 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun onResume() {
         super.onResume()
 
-        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
-            val selectedAccount = Account.forCurrency(selectedCurrency)
-            if (selectedAccount != null) {
-                ChartFragment.account = selectedAccount
-                amountEditText.setText("")
-                limitEditText.setText("")
-                updateButtonsAndText()
-            }
+        showNavSpinner(ChartFragment.currency, Currency.cryptoList) { selectedCurrency ->
+            ChartFragment.currency = selectedCurrency
+            amountEditText.setText("")
+            limitEditText.setText("")
+            updateButtonsAndText()
         }
 
         updateButtonsAndText()
+        refresh { endRefresh() }
     }
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
-            toast(resources.getString(R.string.error_generic_message, result.errorMessage))}
+            if (context != null) {
+                toast(resources.getString(R.string.error_generic_message, result.errorMessage))
+            }
+        }
+
         account?.update(apiInitData, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
@@ -334,7 +336,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         }
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
@@ -347,7 +349,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         val currency: Currency = when (errorMessage) {
-            //TODO: add in ETC errors, and/or make this smarter so it doesnt explicitly specify currencies
+            //TODO: add in ETC errors, and/or make this smarter so it doesn't explicitly specify currencies
             ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
             ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
             ErrorMessage.BuyAmountTooSmallBch, ErrorMessage.BuyAmountTooLargeBch -> Currency.BCH
@@ -389,11 +391,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 ErrorMessage.BuyAmountTooLargeBtc,
                 ErrorMessage.BuyAmountTooLargeEth,
                 ErrorMessage.BuyAmountTooLargeBch,
-                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage), { })
+                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage)) { }
 
                 ErrorMessage.PriceTooAccurate,
-                ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage), { })
-                else -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage), { })
+                ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
+                else -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
             }
         }
 
@@ -431,6 +433,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     CBProApi.orderLimit(apiInitData, tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
                 }
                 TradeType.STOP -> {
+                    @Suppress("UnnecessaryVariable")
                     val stopPrice = limitPrice
                     when (tradeSide) {
                         TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
@@ -438,6 +441,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     }
                 }
             }
+        }
+        CBProApi.listOrders(apiInitData).getAndStash({ /* do nothing */ }) {
+            //do nothing here either
         }
     }
 
@@ -567,11 +573,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 val timeInForceList = CBProApi.TimeInForce.values()
                 val spinnerList = timeInForceList.map { t -> t.label() }
-                //TODO: don't use simple_spinner_item
                 context?.let {
-                    val arrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, spinnerList)
-                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    advancedOptionTimeInForceSpinner.adapter = arrayAdapter
+                    advancedOptionTimeInForceSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, spinnerList)
                     advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                             val selectedItem = timeInForceList[position]
@@ -588,9 +591,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     }
 
                     val endTimeList = listOf("min", "hour", "day")
-                    val endTimeArrayAdapter = ArrayAdapter(it, android.R.layout.simple_spinner_item, endTimeList)
-                    endTimeArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    advancedOptionEndTimeSpinner.adapter = endTimeArrayAdapter
+                    advancedOptionEndTimeSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
                 }
             }
             TradeType.STOP -> {

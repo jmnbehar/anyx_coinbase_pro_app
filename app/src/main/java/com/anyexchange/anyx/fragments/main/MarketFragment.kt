@@ -13,7 +13,6 @@ import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_market.view.*
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -23,6 +22,8 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
     private var listView: ListView? = null
 
     lateinit var inflater: LayoutInflater
+
+    var updateAccountsFragment = { }
 
     companion object {
         fun newInstance(): MarketFragment
@@ -57,10 +58,15 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         super.onResume()
         autoRefresh = Runnable {
-            refresh() {}
-            handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+            if (!skipNextRefresh) {
+                refresh {}
+            }
+            skipNextRefresh = false
+            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
         }
-        handler.postDelayed(autoRefresh, (TimeInSeconds.halfMinute * 1000))
+        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+
+        refresh { endRefresh() }
     }
 
     override fun onPause() {
@@ -73,12 +79,14 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         var productsUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
+        skipNextRefresh = true
 
         //TODO: add this back occasionally
 //        Product.updateAllProducts({ }, {})
 
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
+        //TODO: use Account's updateAllCandles
         for (account in Account.cryptoAccounts) {
             account.product.updateCandles(time, null, apiInitData, {//OnFailure
                 if (context != null) {
@@ -90,7 +98,11 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                     if (didUpdate) {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
+                            context?.let {
+                                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+                            }
                             (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                            updateAccountsFragment()
                             onComplete(true)
                         }
                     } else {
@@ -98,6 +110,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                updateAccountsFragment()
                                 onComplete(true)
                             }
                         }

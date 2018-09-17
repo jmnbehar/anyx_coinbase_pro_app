@@ -16,16 +16,14 @@ class HistoryPagerAdapter(fm: FragmentManager, var orders: List<ApiOrder>, var f
     override fun getItem(i: Int): Fragment {
         when (i) {
             0 -> {
-                val fragment = HistoryListFragment()
-                fragment.newOrderInstance(orders, orderOnClick)
+                val fragment = HistoryListFragment.newOrderInstance(orders, orderOnClick)
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args
                 return fragment
             }
             else -> {
-                val fragment = HistoryListFragment()
-                fragment.newFillInstance(fills, fillOnClick)
+                val fragment = HistoryListFragment.newFillInstance(fills, fillOnClick)
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 fragment.arguments = args

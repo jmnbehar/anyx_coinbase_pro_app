@@ -167,6 +167,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                             Timespan.MONTH -> monthCandles[tradingPairIndex] = candles
                             Timespan.YEAR -> yearCandles[tradingPairIndex] = candles
                         }
+                        //TODO: consider whether or not we should do this:
                         price[tradingPairIndex] = candles.last().close
                     }
                 }
@@ -186,16 +187,16 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         }
         return alertString
     }
-
-    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
-        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
-
-        hourCandles[tradingPairIndex] = basicHourCandles
-        dayCandles[tradingPairIndex]  = basicDayCandles
-        weekCandles[tradingPairIndex] = basicWeekCandles
-        monthCandles[tradingPairIndex] = basicMonthCandles
-        yearCandles[tradingPairIndex] = basicYearCandles
-    }
+//
+//    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
+//        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
+//
+//        hourCandles[tradingPairIndex] = basicHourCandles
+//        dayCandles[tradingPairIndex]  = basicDayCandles
+//        weekCandles[tradingPairIndex] = basicWeekCandles
+//        monthCandles[tradingPairIndex] = basicMonthCandles
+//        yearCandles[tradingPairIndex] = basicYearCandles
+//    }
 
     companion object {
         fun forString(string: String): Product {

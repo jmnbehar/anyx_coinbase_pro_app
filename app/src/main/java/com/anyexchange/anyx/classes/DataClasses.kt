@@ -106,20 +106,20 @@ data class ApiTicker(
         val volume: String,
         val time: String)
 
-data class ApiCurrencies(
-        val id: String,
-        val name: String,
-        val min_size: String)
-
-data class ApiStats(
-        val open: String,
-        val high: String,
-        val low: String,
-        val volume: String)
-
-data class ApiTime(
-        val iso: String,
-        val epoch: String)
+//data class ApiCurrencies(
+//        val id: String,
+//        val name: String,
+//        val min_size: String)
+//
+//data class ApiStats(
+//        val open: String,
+//        val high: String,
+//        val low: String,
+//        val volume: String)
+//
+//data class ApiTime(
+//        val iso: String,
+//        val epoch: String)
 
 @SuppressLint("ParcelCreator")
 @Parcelize
@@ -163,6 +163,22 @@ data class ApiReportInfo(
         val file_url: String?
         /* val params: String */)
 
+data class ApiDepositAddress(
+        val id: String,
+        val address: String,
+        val name: String?,
+        val created_at: String?,
+        val updated_at: String?,
+        val expires_at: String?,
+        val network: String?,
+        val uri_scheme: String?,
+        val resource: String?,
+        val resource_path: String?,
+        val warning_title: String?,
+        val warning_details: String?,
+        val callback_url: String?,
+        val exchange_deposit_address: Boolean?
+)
 
 //data class ApiCoinbaseAccount(
 //        val id: String,

@@ -4,34 +4,41 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.util.*
 
 /**
  * Created by josephbehar on 12/28/17.
  */
 
+//Never change these strings:
 private const val FILE_NAME = "com.anyexchange.gdax.prefs"  //do not rename
 private const val PASSPHRASE = "passphrase"
 private const val API_KEY = "api_key"
 private const val API_SECRET = "api_secret"
-private const val SAVE_API_INFO = "save_api_info"
-private const val SAVE_PASSPHRASE = "save_passphrase"
+private const val SHOULD_SAVE_API_INFO = "save_api_info"
+private const val SHOULD_SAVE_PASSPHRASE = "save_passphrase"
 private const val ALERTS = "alerts"
-private const val AUTOLOGIN = "should_autologin"
-private const val SHOW_TRADE_CONFIRM = "show_trade_confirm"
-private const val SHOW_SEND_CONFIRM = "show_send_confirm"
+private const val SHOULD_SHOW_TRADE_CONFIRM = "show_trade_confirm"
+private const val SHOULD_SHOW_SEND_CONFIRM = "show_send_confirm"
+private const val ARE_ALERT_FILLS_ON = "ARE_ALERT_FILLS_ON"
 private const val STASHED_PRODUCTS = "stashed_products"
 private const val STASHED_ORDERS = "stashed_orders"
 private const val STASHED_FILLS = "stashed_fills"
+private const val STASHED_FILLS_DATE = "stashed_fills_date"
+private const val STASHED_ORDERS_DATE = "stashed_orders_date"
 private const val DARK_MODE = "dark_mode"
 private const val IS_FIRST_TIME = "is_first_time"
 private const val IS_LOGGED_IN = "is_logged_in"
 private const val UNPAID_FEES = "unpaid_fees_"
 private const val APPROVED_API_KEYS = "approved_api_keys"
 private const val REJECTED_API_KEYS = "rejected_api_keys"
-private const val RAPID_PRICE_MOVES = "rapid_price_movement"
+private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
 private const val PREFERRED_FIAT = "preferred_fiat"
+private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
 
+private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
 
+private const val PAYMENT_METHODS = "PAYMENT_METHODS"
 private const val PRODUCT = "account_product_"
 private const val ACCOUNT = "account_raw_"
 
@@ -58,21 +65,21 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putString(API_SECRET, value).apply()
 
     var shouldShowTradeConfirmModal: Boolean
-        get() = prefs.getBoolean(SHOW_TRADE_CONFIRM, true)
-        set(value) = prefs.edit().putBoolean(SHOW_TRADE_CONFIRM, value).apply()
+        get() = prefs.getBoolean(SHOULD_SHOW_TRADE_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SHOW_TRADE_CONFIRM, value).apply()
 
     var shouldShowSendConfirmModal: Boolean
-        get() = prefs.getBoolean(SHOW_SEND_CONFIRM, true)
-        set(value) = prefs.edit().putBoolean(SHOW_SEND_CONFIRM, value).apply()
+        get() = prefs.getBoolean(SHOULD_SHOW_SEND_CONFIRM, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SHOW_SEND_CONFIRM, value).apply()
 
     var isDarkModeOn: Boolean
         get() = prefs.getBoolean(DARK_MODE, true)
         set(value) = prefs.edit().putBoolean(DARK_MODE, value).apply()
 
     var shouldSaveApiInfo: Boolean
-        get() = prefs.getBoolean(SAVE_API_INFO, true)
+        get() = prefs.getBoolean(SHOULD_SAVE_API_INFO, true)
         set(value) {
-            prefs.edit().putBoolean(SAVE_API_INFO, value).apply()
+            prefs.edit().putBoolean(SHOULD_SAVE_API_INFO, value).apply()
             if (!value) {
                 shouldSavePassphrase = false
             }
@@ -83,26 +90,17 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
 
     var shouldSavePassphrase: Boolean
-        get() = prefs.getBoolean(SAVE_PASSPHRASE, true)
-        set(value) = prefs.edit().putBoolean(SAVE_PASSPHRASE, value).apply()
+        get() = prefs.getBoolean(SHOULD_SAVE_PASSPHRASE, true)
+        set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()
 
-    var alerts: Set<Alert>
-        get() = prefs.getStringSet(ALERTS, setOf<String>())?.map { s -> Alert.forString(s) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(ALERTS, value.map { a -> a.toString() }.toSet()).apply()
+    var alerts: Set<PriceAlert>
+        get() = prefs.getStringSet(ALERTS, setOf<String>())?.asSequence()?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
+        set(value) = prefs.edit().putStringSet(ALERTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
     var stashedProducts: List<Product>
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
-        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.map { a -> a.toString() }.toSet()).apply()
+        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
-    fun setRapidMovementAlerts(currency: Currency, isActive: Boolean) {
-        val tempRapidMovementAlerts = rapidMovementAlerts.toMutableSet()
-        if (!isActive && rapidMovementAlerts.contains(currency)) {
-            tempRapidMovementAlerts.remove(currency)
-        } else if (isActive && !rapidMovementAlerts.contains(currency)) {
-            tempRapidMovementAlerts.add(currency)
-        }
-        rapidMovementAlerts = tempRapidMovementAlerts
-    }
 
     var stashedFiatAccountList: List<Account>
         get() {
@@ -183,9 +181,54 @@ class Prefs (var context: Context) {
             }
         }
 
-    var rapidMovementAlerts: Set<Currency>
-        get() = prefs.getStringSet(RAPID_PRICE_MOVES, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(RAPID_PRICE_MOVES, value.map { currency -> currency.toString() }.toSet()).apply()
+
+
+    var stashedPaymentMethodList: List<Account.PaymentMethod>
+        get() {
+            val gson = Gson()
+            val paymentMethodList = mutableListOf<Account.PaymentMethod>()
+
+            val paymentMethodJsons: Set<String> = prefs.getStringSet(PAYMENT_METHODS, setOf()) ?: setOf()
+            for (paymentMethodJson in paymentMethodJsons) {
+                if (paymentMethodJson.isNotBlank()) {
+                    try {
+                        val paymentMethod = gson.fromJson(paymentMethodJson, Account.PaymentMethod::class.java)
+                        paymentMethodList.add(paymentMethod)
+                    } catch (e: Exception) {  }
+                }
+            }
+            return paymentMethodList
+        }
+        set(value) {
+            val gson = Gson()
+            val paymentMethodJsons = value.map { gson.toJson(it) }.toSet()
+            prefs.edit().putStringSet(PAYMENT_METHODS, paymentMethodJsons).apply()
+        }
+
+    var lastQuickChangeAlertTimestamp: Long
+        get() = prefs.getLong(QUICK_CHANGE_ALERT_TIME, 0)
+        set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
+
+    var quickChangeAlertCurrencies: Set<Currency>
+        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
+        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
+
+    var quickChangeThreshold: Float
+        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
+        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, value).apply()
+
+    fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
+        val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
+        if (isActive && !quickChangeAlertCurrencies.contains(currency)) {
+            currentActiveAlerts.add(currency)
+        } else if (!isActive && quickChangeAlertCurrencies.contains(currency)) {
+            currentActiveAlerts.remove(currency)
+        }
+        quickChangeAlertCurrencies = currentActiveAlerts
+    }
+    fun isQuickChangeAlertActive(currency: Currency): Boolean {
+        return quickChangeAlertCurrencies.contains(currency)
+    }
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
         /* Keeps track of unpaid fees to be paid once over the min send amount */
@@ -200,7 +243,9 @@ class Prefs (var context: Context) {
     }
 
     fun stashOrders(orderListString: String?) {
-        prefs.edit().putString(STASHED_ORDERS, orderListString).apply()
+        val stashDate = if (orderListString == null) { 0 } else { Date().time }
+        prefs.edit().putString(STASHED_ORDERS, orderListString)
+                .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
     fun getStashedOrders(productId: String) : List<ApiOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
@@ -211,11 +256,16 @@ class Prefs (var context: Context) {
             listOf()
         }
     }
+    fun getDateOrdersLastStashed(): Long {
+        return prefs.getLong(STASHED_FILLS_DATE, 0)
+    }
+
 
     fun stashFills(fillListJson: String?, productId: String) {
         //TODO: remove this line in the next version, its just there to delete old stuff
         prefs.edit().remove(STASHED_FILLS).apply()
-        prefs.edit().putString(STASHED_FILLS + productId, fillListJson).apply()
+        prefs.edit().putString(STASHED_FILLS + productId, fillListJson)
+                    .putLong(STASHED_FILLS_DATE + productId, Date().time).apply()
     }
     fun nukeStashedFills() {
         for (product in Account.cryptoAccounts.map { it.product }) {
@@ -233,16 +283,21 @@ class Prefs (var context: Context) {
             listOf()
         }
     }
+    fun getDateFillsLastStashed(productId: String): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + productId, 0)
+    }
+
+    var areAlertFillsActive: Boolean
+        get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
+        set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
 
     fun isApiKeyValid(apiKey: String) : Boolean? {
         val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
         val rejectedApiKeys = prefs.getStringSet(REJECTED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()
-        if (approvedApiKeys.contains(apiKey)) {
-            return true
-        } else if (rejectedApiKeys.contains(apiKey)) {
-            return false
-        } else {
-            return null //testResult ?: false
+        when {
+            approvedApiKeys.contains(apiKey) -> return true
+            rejectedApiKeys.contains(apiKey) -> return false
+            else -> return null
         }
     }
     fun approveApiKey(apiKey: String) {
@@ -262,13 +317,13 @@ class Prefs (var context: Context) {
         }
     }
 
-    fun addAlert(alert: Alert) {
+    fun addAlert(alert: PriceAlert) {
         val tempAlerts = alerts.toMutableSet()
         tempAlerts.add(alert)
         alerts = tempAlerts.toSet()
     }
 
-    fun removeAlert(alert: Alert) {
+    fun removeAlert(alert: PriceAlert) {
         val tempAlerts = alerts.toMutableSet()
         tempAlerts.removeAlert(alert)
         alerts = tempAlerts.toSet()

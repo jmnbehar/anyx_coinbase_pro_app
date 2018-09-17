@@ -4,9 +4,9 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.design.widget.TabLayout
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +16,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.textColor
 
 /**
@@ -24,30 +23,32 @@ import org.jetbrains.anko.textColor
  */
 class SendFragment : RefreshFragment() {
 
-
     private lateinit var inflater: LayoutInflater
-    private lateinit var titleText: TextView
 
-    private lateinit var currencyTabLayout: TabLayout
+    private var amountEditText: EditText? = null
+    private var amountUnitText: TextView? = null
+    private var amountLabelText: TextView? = null
 
-    private lateinit var amountEditText: EditText
-    private lateinit var amountUnitText: TextView
-    private lateinit var amountLabelText: TextView
+    private var destinationEditText: EditText? = null
+    private var destinationLabelText: TextView? = null
 
-    private lateinit var destinationEditText: EditText
-    private lateinit var destinationLabelText: TextView
+    private var scanButton: ImageButton? = null
 
-    private lateinit var scanButton: ImageButton
+    private var warning1TextView: TextView? = null
+    private var warning2TextView: TextView? = null
 
-    private lateinit var warning1TextView: TextView
-    private lateinit var warning2TextView: TextView
+    private var iconImageView: ImageView? = null
+    private var currencyTickerTextView: TextView? = null
+    private var accountBalanceTextView: TextView? = null
+    private var accountValueTextView: TextView? = null
 
     private lateinit var sendButton: Button
 
-    var currency = Currency.BTC
+    var currency: Currency
+        get() = ChartFragment.currency
+        set(value) { ChartFragment.currency = value }
 
     companion object {
-        lateinit var currency: Currency
         fun newInstance(): SendFragment {
             return SendFragment()
         }
@@ -58,10 +59,6 @@ class SendFragment : RefreshFragment() {
         val rootView = inflater.inflate(R.layout.fragment_send, container, false)
 
         this.inflater = inflater
-
-        titleText = rootView.txt_send_name
-
-        currencyTabLayout = rootView.tabl_send_currency
 
         amountLabelText = rootView.txt_send_amount_label
         amountEditText = rootView.etxt_send_amount
@@ -75,20 +72,23 @@ class SendFragment : RefreshFragment() {
         warning1TextView = rootView.txt_send_warning
         warning2TextView = rootView.txt_send_warning_2
 
+        iconImageView = rootView.img_send_account_icon
+        currencyTickerTextView = rootView.txt_send_ticker
+        accountBalanceTextView = rootView.txt_send_account_balance
+        accountValueTextView = rootView.txt_send_account_value
+
         sendButton = rootView.btn_send
 
-        titleText.text = resources.getString(R.string.send_title)
+        setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         switchCurrency()
 
-        currencyTabLayout.setupCryptoTabs { currency -> switchCurrency(currency) }
-
-        scanButton.setOnClickListener { getAddressFromCamera() }
+        scanButton?.setOnClickListener { getAddressFromCamera() }
 
 
-        sendButton.setOnClickListener {
-            val amount = amountEditText.text.toString()
-            val destination = destinationEditText.text.toString()
+        sendButton.setOnClickListener { _ ->
+            val amount = amountEditText?.text.toString()
+            val destination = destinationEditText?.text.toString()
             val context = context
             if (amount.isBlank()) {
                 toast(R.string.send_enter_amount_warning)
@@ -110,9 +110,41 @@ class SendFragment : RefreshFragment() {
         return rootView
     }
 
+    override fun onResume() {
+        shouldHideSpinner = false
+        super.onResume()
+    }
+
+    override fun refresh(onComplete: (Boolean) -> Unit) {
+        super.refresh(onComplete)
+
+        Account.forCurrency(currency)?.let { account ->
+            account.update(apiInitData, {//onFailure
+                onComplete(false)
+            }) { //onSuccess
+                setAccountBalanceText()
+                onComplete(true)
+            }
+        } ?: run {
+            onComplete(false)
+        }
+    }
+
+    private fun setAccountBalanceText() {
+        currencyTickerTextView?.text = currency.toString()
+        iconImageView?.setImageResource(currency.iconId)
+        Account.forCurrency(currency)?.let {
+            accountBalanceTextView?.visibility = View.VISIBLE
+            accountBalanceTextView?.text = resources.getString(R.string.send_balance_text, it.availableBalance.btcFormatShortened())
+        } ?: run {
+            accountBalanceTextView?.visibility = View.GONE
+        }
+        accountValueTextView?.visibility = View.GONE
+    }
+
     private fun submitSend() {
-        val amount = amountEditText.text.toString().toDoubleOrZero()
-        val destination = destinationEditText.text.toString()
+        val amount = amountEditText?.text.toString().toDoubleOrZero()
+        val destination = destinationEditText?.text.toString()
 
         val min = currency.minSendAmount
 
@@ -146,17 +178,6 @@ class SendFragment : RefreshFragment() {
         }
     }
 
-//    override fun onResume() {
-//        super.onResume()
-////        showNavSpinner(ChartFragment.account?.currency) { selectedCurrency ->
-////            currency = selectedCurrency
-//////                refresh { }
-////            switchCurrency()
-////        }
-//    }
-
-    //TODO: add refresh
-
     private fun getAddressFromCamera() {
         activity?.let { activity ->
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
@@ -181,16 +202,17 @@ class SendFragment : RefreshFragment() {
                 toast(R.string.send_address_not_found_warning)
             } else {
                 //TODO: parse more advanced qr codes
-                destinationEditText.setText(barcode)
+                destinationEditText?.setText(barcode)
             }
         }
     }
 
-    private fun switchCurrency(currency: Currency = this.currency) {
-        this.currency = currency
+    fun switchCurrency() {
 
-        amountUnitText.text = currency.toString()
-        destinationLabelText.text = resources.getString(R.string.send_destination_label, currency)
+        setAccountBalanceText()
+
+        amountUnitText?.text = currency.toString()
+        destinationLabelText?.text = resources.getString(R.string.send_destination_label, currency)
 
         context?.let { context ->
             val buttonColors = currency.colorStateList(context)
@@ -198,34 +220,26 @@ class SendFragment : RefreshFragment() {
             sendButton.backgroundTintList = buttonColors
             sendButton.textColor = buttonTextColor
 
-            val tabAccentColor = currency.colorAccent(activity!!)
-            currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-            when (currency) {
-                //TODO: make this smarter:
-                Currency.BTC -> {
-                    warning1TextView.setText(R.string.send_warning_1_btc)
-                    warning2TextView.setText(R.string.send_warning_2_btc)
+            warning1TextView?.visibility = View.VISIBLE
+            warning2TextView?.visibility = View.VISIBLE
+            when {
+                currency == Currency.ETH -> {
+                    warning1TextView?.setText(R.string.send_warning_1_eth)
+                    warning2TextView?.setText(R.string.send_warning_2_eth)
                 }
-                Currency.ETH -> {
-                    warning1TextView.setText(R.string.send_warning_1_eth)
-                    warning2TextView.setText(R.string.send_warning_2_eth)
+                currency.isFiat -> {
+                    warning1TextView?.visibility = View.GONE
+                    warning2TextView?.visibility = View.GONE
                 }
-                Currency.ETC -> {
-                    warning1TextView.setText(R.string.send_warning_1_etc)
-                    warning2TextView.setText(R.string.send_warning_2_etc)
+                else -> {
+                    warning1TextView?.text = resources.getString(R.string.send_warning_1, currency.toString(), currency.toString())
+                    warning2TextView?.text = resources.getString(R.string.send_warning_2, currency.fullName, currency.toString())
                 }
-                Currency.BCH -> {
-                    warning1TextView.setText(R.string.send_warning_1_bch)
-                    warning2TextView.setText(R.string.send_warning_2_bch)
-                }
-                Currency.LTC -> {
-                    warning1TextView.setText(R.string.send_warning_1_ltc)
-                    warning2TextView.setText(R.string.send_warning_2_ltc)
-                }
-                Currency.USD, Currency.EUR, Currency.GBP -> { /* how tho */ }
             }
+
+            sendButton.backgroundTintList = buttonColors
+            sendButton.textColor = buttonTextColor
         }
     }
-
 }

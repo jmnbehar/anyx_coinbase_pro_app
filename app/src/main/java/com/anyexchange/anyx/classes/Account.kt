@@ -7,15 +7,14 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: ApiAccount) {
-    val balance: Double
+class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
+    override val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 
     val availableBalance: Double
         get() {
-//        val holds = apiAccount.holds.toDoubleOrZero()
-//        return balance - holds
-            return apiAccount.available.toDoubleOrZero()
+            val holds = apiAccount.holds.toDoubleOrZero()
+            return balance - holds
         }
 
     fun valueForQuoteCurrency(quoteCurrency: Currency) : Double {
@@ -24,13 +23,15 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
-    val id: String
+    override val id: String
         get() = apiAccount.id
 
-    val currency: Currency
+    override val currency: Currency
         get() = product.currency
 
     var coinbaseAccount: CoinbaseAccount? = null
+
+    var depositInfo: ApiDepositAddress? = null
 
     fun update(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
@@ -41,17 +42,30 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
     }
 
+    override fun toString(): String {
+        val cbproAccountBalanceString =  if (currency.isFiat) {
+            balance.fiatFormat(Account.defaultFiatCurrency)
+        } else {
+            "${balance.btcFormatShortened()} $currency"
+        }
+        return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
+    }
+
     companion object {
         var cryptoAccounts = listOf<Account>()
-
         var fiatAccounts = listOf<Account>()
 
         val areAccountsOutOfDate: Boolean
             get() {
                 val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
-                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD } != null
-                return areAccountsMissing || areAccountsUnidentified
+                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD || it.currency == Currency.OTHER } != null
+                val tradingPairs = Account.cryptoAccounts.firstOrNull()?.product?.tradingPairs
+                val areTradingPairsDuplicates = (tradingPairs?.distinct()?.size ?: 0) < (tradingPairs?.size ?: 1)
+                return areAccountsMissing || areAccountsUnidentified || areTradingPairsDuplicates
             }
+
+        //TODO: stash this
+        var paymentMethods: List<Account.PaymentMethod> = listOf()
 
         //TODO: make this changeable
         val defaultFiatAccount: Account?
@@ -59,6 +73,8 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
 
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
+
+        val dummyAccount = Account(Product.fiatProduct(Currency.USD), ApiAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""))
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
@@ -75,12 +91,14 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
             var candlesUpdated = 0
             for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)
-                Product.updateAllProducts(apiInitData, onFailure) {
-                    account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) {
-                        candlesUpdated++
-                        if (candlesUpdated == cryptoAccounts.size) {
-                            onComplete()
+                //TODO: do we really need to call updateAllProducts here?
+                account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
+                    candlesUpdated++
+                    if (candlesUpdated == cryptoAccounts.size) {
+                        if (didUpdate && apiInitData?.context != null) {
+                            Prefs(apiInitData.context).stashedCryptoAccountList = Account.cryptoAccounts
                         }
+                        onComplete()
                     }
                 }
             }
@@ -90,13 +108,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
     }
 
-    abstract class RelatedAccount {
-        abstract val id: String
-        abstract val balance: Double?
-        abstract val currency: Currency
-    }
-
-    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : RelatedAccount() {
+    class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : BaseAccount() {
         override val id: String = apiCoinbaseAccount.id
         override val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
         override val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
@@ -111,7 +123,7 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
         }
     }
 
-    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : RelatedAccount() {
+    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : BaseAccount() {
         override val id: String = apiPaymentMethod.id
         override val balance = apiPaymentMethod.balance?.toDoubleOrNull()
         override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD
@@ -120,4 +132,14 @@ class Account(var product: Product, var apiAccount: ApiAccount) {
             return apiPaymentMethod.name
         }
     }
+
+//    class ExternalAccount(currency: Currency) : BaseAccount() {
+//        override val id: String = "External $currency Account"
+//        override val balance = 0.0
+//        override val currency = currency
+//
+//        override fun toString(): String {
+//            return id
+//        }
+//    }
 }

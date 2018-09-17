@@ -1,19 +1,14 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import com.anyexchange.anyx.adapters.AlertListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
-import android.util.TypedValue
-import android.view.MenuItem
-import com.anyexchange.anyx.activities.MainActivity
-import org.jetbrains.anko.support.v4.toast
+import android.view.*
+import com.anyexchange.anyx.adapters.AlertPagerAdapter
 import org.jetbrains.anko.textColor
 
 
@@ -34,29 +29,30 @@ class AlertsFragment : RefreshFragment() {
     private lateinit var priceEditText: EditText
     private lateinit var priceUnitText: TextView
 
+    private var quickChangeAlertCheckBox: CheckBox? = null
+
     private lateinit var setButton: Button
 
-    private lateinit var alertList: ListView
-    var alertAdapter: AlertListViewAdapter? = null
+    private lateinit var alertPager: LockableViewPager
 
-    var currency = Currency.BTC
+
+    var currency: Currency
+        get() = ChartFragment.currency
+        set(value) { ChartFragment.currency = value }
+
 
     companion object {
-        lateinit var currency: Currency
-        //var alerts: MutableSet<Alert> = mutableSetOf()
-
         fun newInstance(): AlertsFragment {
             return AlertsFragment()
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_alerts, container, false)
 
         this.inflater = inflater
-
-        setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         titleText = rootView.txt_alert_name
 
@@ -69,14 +65,17 @@ class AlertsFragment : RefreshFragment() {
         priceUnitText = rootView.txt_alert_price_unit
         priceEditText = rootView.etxt_alert_price
 
+        quickChangeAlertCheckBox = rootView.cb_alert_price_movement
         setButton = rootView.btn_alert_set
 
-        alertList = rootView.list_alerts
+        alertPager = rootView.alerts_view_pager
 
         titleText.text = resources.getString(R.string.alerts_title)
 
-        switchCurrency(this.currency)
-        currencyTabLayout.setupCryptoTabs { switchCurrency(it) }
+        switchCurrency(currency)
+        currencyTabLayout.setupCryptoTabs {
+            switchCurrency(it)
+        }
 
         priceUnitText.text = ""
         triggerLabelText.text = resources.getString(R.string.alerts_new_alert_label)
@@ -84,69 +83,22 @@ class AlertsFragment : RefreshFragment() {
         setButton.setOnClickListener { setAlert() }
         setButton.text = resources.getString(R.string.alerts_new_alert_button)
 
-
-        context?.let {
-            alertAdapter = AlertListViewAdapter(it, inflater, sortedAlerts) { view, alert ->
-                val popup = PopupMenu(activity, view)
-                //Inflating the Popup using xml file
-                popup.menuInflater.inflate(R.menu.alert_popup_menu, popup.menu)
-
-                popup.setOnMenuItemClickListener { item: MenuItem? ->
-                    when (item?.itemId ?: R.id.delete_alert) {
-                        R.id.delete_alert -> {
-                            deleteAlert(alert)
-                        }
-                    }
-                    true
-                }
-                popup.show()
+        quickChangeAlertCheckBox?.setOnCheckedChangeListener { _, isChecked ->
+            context?.let {
+                Prefs(it).setQuickChangeAlertActive(currency, isChecked)
             }
-            alertList.adapter = alertAdapter
-        } ?: run {
-            alertList.visibility = View.GONE
         }
 
-//        val swipeMenuCreator = SwipeMenuCreator { menu ->
-//            var deleteItem = SwipeMenuItem(context)
-//            deleteItem.background = ColorDrawable(Color.RED)
-//            deleteItem.width = dp2px(90)
-//            deleteItem.title = "Delete"
-//            menu.addMenuItem(deleteItem)
-//        }
-//        alertList.setMenuCreator(swipeMenuCreator)
-//        alertList.setOnMenuItemClickListener { position, _, index ->
-//            when (index) {
-//                0 -> {
-//                    val alertAtPos = alerts.toList()[position]
-//                    deleteAlert(alertAtPos)
-//                    alertAdapter.notifyDataSetChanged()
-//                    toaasdfsdfast("Item deleted")
-//                }
-//            }
-//            true
-//        }
-//        alertList.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT)
+        context?.let {
+            alertPager.adapter = AlertPagerAdapter(it, childFragmentManager)
+            alertPager.visibility = View.VISIBLE
+        } ?: run {
+            alertPager.visibility = View.GONE
+        }
 
-        //alertList.setHeightBasedOnChildren()
         dismissProgressSpinner()
 
         return rootView
-    }
-
-    private fun dp2px(dp: Int): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
-                resources.displayMetrics).toInt()
-    }
-
-    private fun deleteAlert(alert: Alert) {
-        context?.let {
-            Prefs(it).removeAlert(alert)
-            alertAdapter?.alerts = sortedAlerts
-            alertAdapter?.notifyDataSetChanged()
-            alertList.adapter = alertAdapter
-        } ?: run {
-            toast(R.string.error_message)
-        }
     }
 
     private fun setAlert() {
@@ -155,10 +107,8 @@ class AlertsFragment : RefreshFragment() {
             if (price > 0) {
                 val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
                 val triggerIfAbove = price > productPrice
-                val alert = Alert(price, currency, triggerIfAbove)
-                Prefs(context).addAlert(alert)
-                alertAdapter?.alerts = sortedAlerts
-                alertAdapter?.notifyDataSetChanged()
+                Prefs(context).addAlert(PriceAlert(price, currency, triggerIfAbove))
+                updatePagerAdapter()
                 priceEditText.setText("")
             }
         }
@@ -174,36 +124,24 @@ class AlertsFragment : RefreshFragment() {
             priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
             currentPriceText.text = price.fiatFormat(Account.defaultFiatCurrency)
         }
-        activity?.let { activity ->
-            val tabAccentColor = currency.colorAccent(activity)
+        context?.let { context ->
+            quickChangeAlertCheckBox?.isChecked = Prefs(context).isQuickChangeAlertActive(currency)
+            quickChangeAlertCheckBox?.text = resources.getString(R.string.alert_rapid_movement, currency.toString())
+
+            val tabAccentColor = currency.colorAccent(context)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
-            val buttonColors = currency.colorStateList(activity)
-            val buttonTextColor = currency.buttonTextColor(activity)
+            val buttonColors = currency.colorStateList(context)
+            val buttonTextColor = currency.buttonTextColor(context)
             setButton.backgroundTintList = buttonColors
             setButton.textColor = buttonTextColor
         }
-
     }
 
-    private val sortedAlerts : List<Alert>
-        get() {
-            context?.let { context ->
-                val alerts = Prefs(context).alerts
-                return alerts.sortedWith(compareBy { it.price })
-            } ?: run {
-                return listOf()
-            }
-        }
 
-    override fun refresh(onComplete: (Boolean) -> Unit) {
-        (activity as? MainActivity)?.let { mainActivity ->
-            mainActivity.updatePrices({ onComplete(false) }, {
-                mainActivity.loopThroughAlerts()
-                alertAdapter?.alerts = sortedAlerts
-                alertAdapter?.notifyDataSetChanged()
-                onComplete(true)
-            })
-        }
+    fun updatePagerAdapter() {
+        AlertListFragment.blockRefresh = true
+        (alertPager.adapter as? AlertPagerAdapter)?.notifyDataSetChanged()
+        AlertListFragment.blockRefresh = false
     }
 }

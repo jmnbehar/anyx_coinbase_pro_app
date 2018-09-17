@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.list_row_alert.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class AlertListViewAdapter(val context: Context, var inflater: LayoutInflater?, var alerts: List<Alert>, private var onClick: (View, Alert) -> Unit) : BaseAdapter() {
+class AlertListViewAdapter(val context: Context, var inflater: LayoutInflater?, var alerts: List<PriceAlert>, private var onClick: (View, PriceAlert) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return alerts.size

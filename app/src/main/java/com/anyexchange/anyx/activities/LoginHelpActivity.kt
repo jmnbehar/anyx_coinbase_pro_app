@@ -19,7 +19,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import com.anyexchange.anyx.classes.Constants
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 
 
 class LoginHelpActivity : AppCompatActivity() {

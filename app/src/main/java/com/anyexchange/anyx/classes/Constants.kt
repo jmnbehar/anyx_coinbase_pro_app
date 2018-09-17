@@ -5,8 +5,6 @@ package com.anyexchange.anyx.classes
  */
 
 object Constants {
-    const val exit = "EXIT"
-    const val logout = "LOGOUT"
     const val salt = "GdaxApp"  //DO NOT RENAME
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
 
@@ -14,6 +12,8 @@ object Constants {
     const val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
     const val CHART_STYLE = "CHART_STYLE"
     const val CHART_TIMESPAN = "CHART_TIMESPAN"
+
+    const val GO_TO_CURRENCY = "GO_TO_CURRENCY"
 
     const val dataFragmentTag = "data"
 }
@@ -31,6 +31,7 @@ object TimeInSeconds {
     const val oneMinute: Long = 60
     const val fiveMinutes: Long = 300
     const val fifteenMinutes: Long = 900
+    const val twentyMinutes: Long = 1200
     const val thirtyMinutes: Long = 1800
     const val halfHour: Long = 1800
     const val oneHour: Long = 3600
@@ -41,6 +42,22 @@ object TimeInSeconds {
     const val oneMonth: Long = 2592000
     const val oneYear: Long = 31536000
     const val fiveYears: Long = 158112000
+}
+object TimeInMillis {
+    const val halfMinute: Long = 30 * 1000
+    const val oneMinute: Long = 60 * 1000
+    const val fiveMinutes: Long = 300 * 1000
+    const val eightMinutes: Long = 60 * 8 * 1000
+    const val tenMinutes: Long = 600 * 1000
+    const val fifteenMinutes: Long = 900 * 1000
+    const val twentyMinutes: Long = 1200 * 1000
+    const val thirtyMinutes: Long = 1800 * 1000
+    const val halfHour: Long = 1800 * 1000
+    const val oneHour: Long = 3600 * 1000
+    const val sixHours: Long = 21600 * 1000
+    const val oneDay: Long = 86400 * 1000
+    const val oneWeek: Long = 604800 * 1000
+    const val twoWeeks: Long = 1209600 * 1000
 }
 
 enum class Timespan {
@@ -71,19 +88,19 @@ enum class Timespan {
         }
     }
 
-    companion object {
-        fun forLong(value: Long) : Timespan {
-            return when (value) {
-                TimeInSeconds.oneHour -> HOUR
-                TimeInSeconds.oneDay -> DAY
-                TimeInSeconds.oneWeek -> WEEK
-                TimeInSeconds.oneMonth -> MONTH
-                TimeInSeconds.oneYear -> YEAR
-//                (-1).toLong() -> ALL
-                else -> DAY
-            }
-        }
-    }
+//    companion object {
+//        fun forLong(value: Long) : Timespan {
+//            return when (value) {
+//                TimeInSeconds.oneHour -> HOUR
+//                TimeInSeconds.oneDay -> DAY
+//                TimeInSeconds.oneWeek -> WEEK
+//                TimeInSeconds.oneMonth -> MONTH
+//                TimeInSeconds.oneYear -> YEAR
+////                (-1).toLong() -> ALL
+//                else -> DAY
+//            }
+//        }
+//    }
 }
 
 object Granularity {

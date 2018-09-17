@@ -1,18 +1,13 @@
 package com.anyexchange.anyx.activities
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.ColorFilter
-import android.os.Build
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.app.FragmentManager
-import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -29,7 +24,7 @@ import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
@@ -45,70 +40,8 @@ import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private var notificationManager: NotificationManager? = null
     lateinit var spinnerNav: Spinner
     var defaultSpinnerColorFilter: ColorFilter? = null
-
-    enum class FragmentType {
-        CHART,
-        ACCOUNT,
-        SEND,
-        ALERTS,
-        TRANSFER_IN,
-        TRANSFER_OUT,
-        SETTINGS,
-        TRADE,
-        HOME,
-        LOGIN,
-        EULA,
-        OTHER;
-
-
-        override fun toString() : String {
-            return when (this) {
-                CHART -> "CHART"
-                ACCOUNT -> "ACCOUNT"
-                SEND -> "SEND"
-                ALERTS -> "ALERTS"
-                TRANSFER_IN -> "TRANSFER_IN"
-                TRANSFER_OUT -> "TRANSFER_OUT"
-                SETTINGS -> "SETTINGS"
-                TRADE -> "TRADE"
-                HOME -> "HOME"
-                LOGIN -> "LOGIN"
-                EULA -> "EULA"
-                OTHER -> "OTHER"
-            }
-        }
-
-        companion object {
-            fun forString(tag: String) : FragmentType {
-                for (fragmentType in FragmentType.values()) {
-                    if (tag == fragmentType.toString()) {
-                        return fragmentType
-                    }
-                }
-                return OTHER
-            }
-
-            fun forFragment(fragment: RefreshFragment?) : FragmentType {
-                return when (fragment) {
-                    is ChartFragment -> CHART
-                    is AccountsFragment -> ACCOUNT
-                    is SendFragment -> SEND
-                    is AlertsFragment -> ALERTS
-                    is TransferInFragment -> TRANSFER_IN
-                    is TransferOutFragment -> TRANSFER_OUT
-                    is SettingsFragment -> SETTINGS
-                    is TradeFragment -> TRADE
-                    is LoginFragment -> LOGIN
-                    is HomeFragment -> HOME
-                    is EulaFragment -> EULA
-                    else -> OTHER
-                }
-            }
-        }
-    }
 
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
@@ -143,6 +76,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         dataFragment?.restoreData(this)
 
+        if (!AutoStart.hasStarted) {
+            AutoStart.scheduleCustomAlertJob(this)
+        }
         toolbar.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
         }
@@ -160,9 +96,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         prefs.shouldSavePassphrase = true
 
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+
         val currencies = Currency.cryptoList
-        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_coinbase_account, currencies)
-        spinnerNavAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
         spinnerNav.adapter = spinnerNavAdapter
 
         if (savedInstanceState == null) {
@@ -177,7 +113,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }, { //OnSuccess
                     /* Do Nothing Extra */
                 } )
+                return
             }
+        }
+        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
+        if (goToCurrency != null) {
+            goToChartFragment(goToCurrency)
         }
     }
 
@@ -186,7 +127,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
     }
 
-    private fun setDrawerMenu() {
+    fun setDrawerMenu() {
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
@@ -198,13 +139,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 menu_verify.visibility = View.GONE
             } else {
                 menu_verify.visibility = View.VISIBLE
-                menu_verify.setOnClickListener  {
+                menu_verify.setOnClickListener  { _ ->
                     if (CBProApi.credentials?.isVerified == true) {
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
-                        val intent = Intent(this, VerifyActivity::class.java)
-                        startActivity(intent)
+                        goToVerify{ setDrawerMenu() }
                     }
                 }
             }
@@ -218,26 +158,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 goToFragment(FragmentType.LOGIN)
             }
         }
+    }
 
+    fun goToVerify(onComplete: (Boolean) -> Unit) {
+        val intent = Intent(this, VerifyActivity::class.java)
+        startActivity(intent)
+        VerifyActivity.onComplete = onComplete
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
         val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
-        ChartFragment.account = Account.forCurrency(chartCurrency)
+        ChartFragment.currency = chartCurrency
         setDrawerMenu()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         dataFragment?.backupData()
-        outState?.putString(CHART_CURRENCY, ChartFragment.account?.currency?.toString())
+        outState?.putString(CHART_CURRENCY, ChartFragment.currency.toString())
         if (currentFragment is ChartFragment) {
             val chartFragment = currentFragment as ChartFragment
             outState?.putString(CHART_TRADING_PAIR, chartFragment.tradingPair.toString())
             outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
-            outState?.putLong(CHART_TIMESPAN, chartFragment.timeSpan.value())
+            outState?.putLong(CHART_TIMESPAN, chartFragment.timespan.value())
         }
     }
 
@@ -301,6 +246,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             onFailure(error)
         }, {
             dismissProgressBar()
+
             setDrawerMenu()
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
@@ -378,16 +324,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (!alert.hasTriggered) {
                 val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
-                    triggerAlert(alert)
+                    AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
-                    triggerAlert(alert)
+                    AlertHub.triggerPriceAlert(alert, this)
                 }
             }
         }
-        if (currentFragment is AlertsFragment) {
-            (currentFragment as AlertsFragment).alertAdapter?.alerts = prefs.alerts.toList()
-            (currentFragment as AlertsFragment).alertAdapter?.notifyDataSetChanged()
-        }
+        (currentFragment as? AlertsFragment)?.updatePagerAdapter()
     }
 
     private fun returnToLogin() {
@@ -397,61 +340,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         goToFragment(FragmentType.LOGIN)
     }
 
-    private fun triggerAlert(alert: Alert) {
-        val channelId = "Price_Alerts"
-        if (notificationManager == null) {
-            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Create the NotificationChannel, but only on API 26+ because
-                // the NotificationChannel class is new and not in the support library
-                val name = getString(R.string.channel_name)
-                val description = getString(R.string.channel_description)
-                val importance = NotificationManager.IMPORTANCE_DEFAULT
-                val channel = NotificationChannel(channelId, name, importance)
-                channel.description = description
-                // Register the channel with the system
-                notificationManager?.createNotificationChannel(channel)
-            }
-        }
-
-
-        val overUnder = when(alert.triggerIfAbove) {
-            true  -> "over"
-            false -> "under"
-        }
-        val intent = Intent(this, this.javaClass)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-//        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-        val notificationTitle = "${alert.currency.fullName} price alert"
-        val notificationText = "${alert.currency} is $overUnder ${alert.price.fiatFormat(Account.defaultFiatCurrency)}"
-        val priceAlertGroupTag = "PriceAlert"
-
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.anyx_notification_icon)
-                .setContentTitle(notificationTitle)
-                .setContentText(notificationText)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setGroup(priceAlertGroupTag)
-//                .setSound(defaultSoundUri)
-
-        val notificationTag = "PriceAlert_" + alert.currency.toString() + "_" + alert.price
-        notificationManager?.notify(notificationTag, 0, notificationBuilder.build())
-        val prefs = Prefs(this)
-        prefs.removeAlert(alert)
-    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val fragmentType = when (item.itemId) {
             R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
-            R.id.nav_deposit -> FragmentType.TRANSFER_IN
-            R.id.nav_withdraw -> FragmentType.TRANSFER_OUT
+            R.id.nav_transfer -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
             else -> FragmentType.HOME
@@ -466,43 +361,45 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun goToChartFragment(currency: Currency) {
-        ChartFragment.account = Account.forCurrency(currency)
+        ChartFragment.currency = currency
         goToFragment(FragmentType.CHART)
     }
 
     fun goToFragment(fragmentType: FragmentType) {
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
-            FragmentType.CHART -> {
-                ChartFragment()
-            }
+            FragmentType.CHART -> ChartFragment()
             FragmentType.ACCOUNT -> AccountsFragment.newInstance()
-            FragmentType.SEND -> {
+            FragmentType.SEND, FragmentType.RECEIVE, FragmentType.SEND_RECEIVE -> {
 
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
                     null
                 } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
+                    goToVerify { if (it) { goToFragment(fragmentType) } }
                     null
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else {
-                    SendFragment.newInstance()
+                    SendReceiveFragment.newInstance()
                 }
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance()
-            FragmentType.TRANSFER_IN -> {
+            FragmentType.TRANSFER -> {
+                //TODO: go directly to verify/login
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
+                    null
                 } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
+                    goToVerify { if (it) { goToFragment(fragmentType) } }
+                    null
                 } else if (CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
-                } else {
+                    null
+                } else if (!TransferFragment.hasRelevantData) {
                     showProgressBar()
-                    val depositFragment = TransferInFragment.newInstance()
+                    val depositFragment = TransferFragment.newInstance()
                     depositFragment.refresh {didSucceed ->
                         if (didSucceed) {
                             val tag = fragmentType.toString()
@@ -512,30 +409,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             toast(R.string.error_message)
                         }
                     }
-                }
-                null
-            }
-            FragmentType.TRANSFER_OUT -> {
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                } else if (CBProApi.credentials?.isVerified == null) {
-                    toast(R.string.toast_please_validate_message)
-                } else if (CBProApi.credentials?.isVerified == false) {
-                    toast(R.string.toast_missing_permissions_message)
+                    null
                 } else {
-                    showProgressBar()
-                    val withdrawFragment = TransferOutFragment.newInstance()
-                    withdrawFragment.refresh {didSucceed ->
-                        if (didSucceed) {
-                            val tag = fragmentType.toString()
-                            withdrawFragment.skipNextRefresh = true
-                            goToFragment(withdrawFragment, tag)
-                        } else {
-                            toast(R.string.error_message)
-                        }
-                    }
+                    TransferFragment.newInstance()
                 }
-                null
             }
             FragmentType.SETTINGS -> SettingsFragment.newInstance()
             FragmentType.HOME -> HomeFragment.newInstance()
@@ -552,8 +429,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (fragment != null) {
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
-        } else if (fragmentType != FragmentType.TRADE && fragmentType != FragmentType.SEND
-                && fragmentType != FragmentType.TRANSFER_IN && fragmentType != FragmentType.TRANSFER_OUT) {
+        } else if (fragmentType != FragmentType.TRADE
+                && fragmentType != FragmentType.SEND
+                && fragmentType != FragmentType.TRANSFER) {
             println("Error switching fragments")
         }
     }
@@ -561,13 +439,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun goToFragment(fragment: RefreshFragment, tag: String) {
         currentFragment = fragment
         if (supportFragmentManager.backStackEntryCount == 0) {
-//            if (Companion.fragmentManager.fragments.isEmpty()) {
+            //If there are no fragments on the stack, add it
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, tag)
                     .addToBackStack(tag)
                     .commitAllowingStateLoss()
         } else {
+            //Replace the current fragment
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)
@@ -582,19 +461,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentFocus = currentFocus
         if (currentFocus != null && inputManager != null) {
             inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
-            inputManager.hideSoftInputFromInputMethod(currentFocus.windowToken, 0)
         }
     }
-
-//    private fun showPopup(titleString: String, messageString: String, positiveText: String, positiveAction: () -> Unit, negativeText: String? = null, negativeAction: () -> Unit = {}) {
-//        alert {
-//            title = titleString
-//            message = messageString
-//            positiveButton(positiveText) { positiveAction() }
-//            if (negativeText != null) {
-//                negativeButton(negativeText) { negativeAction() }
-//            }
-//        }.show()
-//    }
-
 }

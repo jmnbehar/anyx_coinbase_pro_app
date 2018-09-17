@@ -173,14 +173,16 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     val tradingPair = TradingPair(productId)
                     try {
                         val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-                        var candles = candleDoubleList.map {
-                            val time = (it[0] as? Double) ?: 0.0
+                        var candles = candleDoubleList.mapNotNull {
+                            val time = (it[0] as? Double)
                             val low = (it[1] as? Double) ?: 0.0
                             val high = (it[2] as? Double) ?: 0.0
                             val open = (it[3] as? Double) ?: 0.0
-                            val close = (it[4] as? Double) ?: 0.0
+                            val close = (it[4] as? Double)
                             val volume = (it[5] as? Double) ?: 0.0
-                            Candle(time, low, high, open, close, volume, tradingPair)
+                            if (close != null && time != null) {
+                                Candle(time, low, high, open, close, volume, tradingPair)
+                            } else { null }
                         }
                         val now = Calendar.getInstance()
 
@@ -192,7 +194,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         candles = candles.reversed()
                         allCandles = allCandles.addingCandles(candles)
                     } catch (exception: Exception) {
-                        //Do nothing
+                        onFailure(Result.Failure(FuelError(exception)))
                     }
 
                     if (pagesReceived == pages && allCandles.isNotEmpty()) {
@@ -223,10 +225,11 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             Account.cryptoAccounts = listOf()
             val productList: MutableList<Product> = mutableListOf()
-            if (!Account.areAccountsOutOfDate && context != null) {
+            if (!Account.areAccountsOutOfDate && context != null && Prefs(context).stashedProducts.isNotEmpty()) {
                 val stashedProductList = Prefs(context).stashedProducts
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
+
                 CBProApi.products(initData).get(onFailure) { apiProductList ->
                     for (apiProduct in apiProductList) {
                         val baseCurrency = apiProduct.base_currency
@@ -355,12 +358,16 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     class orderStop(initData: CBProApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
     class cancelOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: CBProApiInitData) : CBProApi(initData)
-    class listOrders(initData: CBProApiInitData?, val status: String? = null, val productId: String?) : CBProApi(initData) {
-        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
+    class listOrders(initData: CBProApiInitData?, val status: String? = null) : CBProApi(initData) {
+        //For now don't use product ID, always get ALL orders
+        val productId: String? = null
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<ApiOrder> = Gson().fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
-                    Prefs(context).stashOrders(result.value)
+                    if (context != null) {
+                        Prefs(context).stashOrders(result.value)
+                    }
                     onComplete(apiOrderList)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
@@ -370,25 +377,65 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     }
     class getOrder(initData: CBProApiInitData?, val orderId: String) : CBProApi(initData)
     class fills(initData: CBProApiInitData?, val orderId: String? = null, val productId: String? = null) : CBProApi(initData) {
-        companion object {
-            var dateLastUpdated: Long? = null
-        }
-        fun getAndStash(context: Context, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
-                try {
-                    dateLastUpdated = Date().time
-                    val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                    if (productId != null) {
-                        Prefs(context).stashFills(result.value, productId)
+                context?.let { context ->
+                    try {
+                        val prefs = Prefs(context)
+                        val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                        if (productId != null) {
+                            if (prefs.areAlertFillsActive) {
+                                checkForFillAlerts(apiFillList, productId)
+                            }
+                            prefs.stashFills(result.value, productId)
+                        }
+                        onComplete(apiFillList)
+                    } catch (e: JsonSyntaxException) {
+                        onFailure(Result.Failure(FuelError(e)))
                     }
-                    onComplete(apiFillList)
-                } catch (e: JsonSyntaxException) {
+                } ?: run {
                     onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+        }
+        private fun checkForFillAlerts(apiFillList: List<ApiFill>, productId: String) {
+            context?.let {
+                val stashedFills = Prefs(context).getStashedFills(productId)
+
+                if (apiFillList.size > stashedFills.size) {
+                    val stashedFillsDate = stashedFills.firstOrNull()?.created_at?.dateFromApiDateString()?.time ?: 0
+                    for (fill in apiFillList) {
+                        val fillDate = fill.created_at.dateFromApiDateString()
+                        val fillDateTime = fillDate?.time ?: 0
+                        if (fillDateTime > stashedFillsDate && fillDateTime + TimeInMillis.sixHours > Date().time) {
+                            AlertHub.triggerFillAlert(fill, context)
+                        } else if (fillDateTime <= stashedFillsDate) {
+                            break
+                        }
+                    }
                 }
             }
         }
     }
     //add position?
+    class depositAddress(initData: CBProApiInitData?, val cbAccountId: String) : CBProApi(initData) {
+        fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (ApiDepositAddress) -> Unit) {
+            this.executePost(onFailure) {
+                val byteArray = it.component1()
+                try {
+                    if (byteArray != null) {
+                        val apiDepositAddress: ApiDepositAddress = Gson().fromJson(String(byteArray), object : TypeToken<ApiDepositAddress>() {}.type)
+                        onComplete(apiDepositAddress)
+                    } else {
+                        onFailure(Result.Failure(FuelError(Exception())))
+                    }
+                } catch (e: Exception) {
+                    onFailure(Result.Failure(FuelError(e)))
+                }
+            }
+        }
+    }
+
     class sendCrypto(initData: CBProApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi(initData)
     class coinbaseAccounts(initData: CBProApiInitData?) : CBProApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
@@ -397,7 +444,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
                     onComplete(apiCBAccountList)
                 } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(Exception())))
+                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }
@@ -424,7 +471,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                     val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
                     onComplete(paymentMethodsList)
                 } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(Exception())))
+                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }
@@ -460,7 +507,6 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     //add deposits
     //look into reports
 
-
     override val method: Method
         get() {
             return when (this) {
@@ -479,6 +525,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getOrder -> Method.GET
                 is fills -> Method.GET
                 is sendCrypto -> Method.POST
+                is depositAddress -> Method.POST
                 is coinbaseAccounts -> Method.GET
                 is paymentMethods -> Method.GET
                 is getFromCoinbase -> Method.POST
@@ -508,6 +555,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getOrder -> "/orders/$orderId"
                 is fills -> "/fills"
                 is sendCrypto -> "/withdrawals/crypto"
+                is depositAddress -> "/coinbase-accounts/$cbAccountId/addresses"
                 is coinbaseAccounts -> "/coinbase-accounts"
                 is paymentMethods -> "/payment-methods"
                 is getFromCoinbase -> "/deposits/coinbase-account"
@@ -563,8 +611,8 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
     private val fullPath: String
         get() {
             params?.let { params ->
-                if (params.isEmpty()) {
-                    return path
+                return if (params.isEmpty()) {
+                    path
                 } else {
                     var fullPath = "$path?"
                     for ((index, param) in params.withIndex()) {
@@ -573,7 +621,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                         }
                         fullPath += "${param.first}=${param.second}"
                     }
-                    return fullPath
+                    fullPath
                 }
             } ?: run {
                 return path
@@ -722,7 +770,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
             }
 
             if (method == Method.POST) {
-                headers.put("Content-Type", "application/json")
+                headers["Content-Type"] = "application/json"
             }
             return headers
         }

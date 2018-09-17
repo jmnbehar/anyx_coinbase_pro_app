@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ScrollView
@@ -14,10 +15,11 @@ import android.view.MotionEvent
 class LockableScrollView: ScrollView {
     constructor(ctx: Context) : super(ctx)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var scrollLocked = false
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return when (ev.action) {
             MotionEvent.ACTION_DOWN -> {

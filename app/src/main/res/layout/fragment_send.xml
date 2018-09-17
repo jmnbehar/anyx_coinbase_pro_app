@@ -1,136 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/txt_send_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="10dp"
-        android:text="@string/send_title"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="48dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabl_send_currency"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="top">
-    </android.support.design.widget.TabLayout>
-
-
-    <LinearLayout
-        android:id="@+id/layout_send_details"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="10dp">
-
-        <TextView
-            android:id="@+id/txt_send_warning"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:text="@string/send_warning_1_btc" />
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/layout_send_amount_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp">
 
-            <TextView
-                android:id="@+id/txt_send_amount_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/send_amount_label" />
 
             <LinearLayout
+                android:id="@+id/layout_send_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingBottom="10dp"
+                android:paddingTop="5dp">
 
-                <EditText
-                    android:id="@+id/etxt_send_amount"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="numberDecimal" />
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/img_send_account_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="35dp" />
+
+                    <TextView
+                        android:id="@+id/txt_send_ticker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/chart_default_account"
+                        android:textSize="24sp" />
+
+                    <android.support.v4.widget.Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txt_send_account_balance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/chart_default_balance"
+                            android:textAlignment="textEnd" />
+
+                        <TextView
+                            android:id="@+id/txt_send_account_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/chart_default_balance"
+                            android:textAlignment="textEnd" />
+
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/txt_send_amount_unit"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txt_send_warning"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/currency_BTC" />
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/send_warning_1" />
+
+                <LinearLayout
+                    android:id="@+id/layout_send_amount_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_send_amount_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/send_amount_label" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_send_amount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="numberDecimal" />
+
+                        <TextView
+                            android:id="@+id/txt_send_amount_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/currency_BTC" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_send_destination"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_send_destination_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/send_destination_blank_label" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_send_destination"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="text" />
+
+                        <ImageButton
+                            android:id="@+id/btn_send_destination_camera"
+                            android:layout_width="35dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:contentDescription="@string/send_camera_btn"
+                            app:srcCompat="@drawable/ic_menu_camera" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/txt_send_warning_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:minLines="5"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp" />
+
             </LinearLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_send_destination"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txt_send_destination_label"
+            <Button
+                android:id="@+id/btn_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/send_destination_blank_label" />
+                android:layout_marginTop="4dp"
+                android:text="@string/send_send_btn" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etxt_send_destination"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:inputType="text" />
-
-                <ImageButton
-                    android:id="@+id/btn_send_destination_camera"
-                    android:contentDescription="@string/send_camera_btn"
-                    android:layout_width="35dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_menu_camera" />
-
-            </LinearLayout>
 
         </LinearLayout>
-
-
-        <TextView
-            android:id="@+id/txt_send_warning_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp" />
-
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/send_send_btn" />
-
-
-</LinearLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>

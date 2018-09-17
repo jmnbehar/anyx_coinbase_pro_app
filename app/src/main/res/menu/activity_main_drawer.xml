@@ -19,13 +19,9 @@
                 android:icon="@drawable/icon_alert"
                 android:title="@string/menu_alerts" />
             <item
-                android:id="@+id/nav_deposit"
+                android:id="@+id/nav_transfer"
                 android:icon="@drawable/deposit"
-                android:title="@string/menu_transfer_in" />
-            <item
-                android:id="@+id/nav_withdraw"
-                android:icon="@drawable/withdrawal"
-                android:title="@string/menu_transfer_out" />
+                android:title="@string/menu_transfer" />
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_menu_manage"

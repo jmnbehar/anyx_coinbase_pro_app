@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
 import android.widget.AdapterView
-import com.anyexchange.anyx.adapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -27,15 +27,15 @@ open class RefreshFragment: Fragment() {
     var skipNextRefresh: Boolean = false
     var lockPortrait = true
 
+    var shouldHideSpinner = true
+
     val apiInitData: CBProApi.CBProApiInitData?
         get() {
-            val context = context
-            return if (activity is MainActivity) {
-                (activity as MainActivity).apiInitData
-            } else if (context != null){
-                CBProApi.CBProApiInitData(context) { /* do nothing */ }
-            } else {
-                null
+            val activity = activity
+            return when (activity) {
+                is MainActivity -> activity.apiInitData
+                null -> null
+                else -> CBProApi.CBProApiInitData(activity) { /* do nothing */ }
             }
         }
 
@@ -50,41 +50,46 @@ open class RefreshFragment: Fragment() {
         } else {
             ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
         }
-        if (!skipNextRefresh) {
-            refresh {
-                endRefresh()
-            }
-        }
+
         skipNextRefresh = false
         showDarkMode()
 
         System.out.println("Removing spinner: ")
-        if (activity is com.anyexchange.anyx.activities.MainActivity) {
-            (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-            (activity as com.anyexchange.anyx.activities.MainActivity).spinnerNav.visibility = View.GONE
-            (activity as com.anyexchange.anyx.activities.MainActivity).toolbar.title = resources.getString(R.string.app_name)
+
+        if (shouldHideSpinner) {
+            (activity as? MainActivity)?.let { mainActivity ->
+                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                mainActivity.spinnerNav.visibility = View.GONE
+                mainActivity.toolbar.title = resources.getString(R.string.app_name)
+            }
         }
     }
 
-    fun showNavSpinner(defaultSelection: Currency?, onItemSelected: (currency: Currency) -> Unit) {
-        val mainActivity = (activity as com.anyexchange.anyx.activities.MainActivity)
-        mainActivity.toolbar.title = ""
-        mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-        mainActivity.spinnerNav.isEnabled = true
-        mainActivity.spinnerNav.visibility = View.VISIBLE
-        mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (parent?.getItemAtPosition(position) is Currency) {
-                    val selectedItem = parent.getItemAtPosition(position) as Currency
-                    onItemSelected(selectedItem)
+    fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
+        shouldHideSpinner = false
+        (activity as? MainActivity)?.let { mainActivity ->
+            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, currencyList)
+            mainActivity.spinnerNav.adapter = spinnerNavAdapter
+
+            mainActivity.toolbar.title = ""
+            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+            mainActivity.spinnerNav.isEnabled = true
+            mainActivity.spinnerNav.visibility = View.VISIBLE
+            mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (parent?.getItemAtPosition(position) is Currency) {
+                        val selectedItem = parent.getItemAtPosition(position) as Currency
+                        onItemSelected(selectedItem)
+                    }
                 }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
-        }
-        if (defaultSelection != null) {
-            val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-            val currentIndex = spinnerList.indexOf(defaultSelection)
-            mainActivity.spinnerNav.setSelection(currentIndex)
+            if (defaultSelection != null) {
+                val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
+                val currentIndex = spinnerList.indexOf(defaultSelection)
+                mainActivity.spinnerNav.setSelection(currentIndex)
+            }
         }
     }
 
@@ -143,7 +148,7 @@ open class RefreshFragment: Fragment() {
         onComplete(true)
     }
 
-    private fun endRefresh() {
+    fun endRefresh() {
         swipeRefreshLayout?.isRefreshing = false
     }
 }

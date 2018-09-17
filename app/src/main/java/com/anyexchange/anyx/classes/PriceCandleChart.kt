@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
 import android.support.v4.content.res.ResourcesCompat
@@ -31,6 +32,7 @@ class PriceCandleChart : CandleStickChart {
     private var onVerticalDrag: () -> Unit = { }
     private var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked
 
@@ -129,15 +131,17 @@ class PriceCandleChart : CandleStickChart {
     fun addCandles(candles: List<Candle>, currency: Currency) {
         val entries = if (candles.isEmpty()) {
             val now = Date().time.toDouble()
-            val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
+            val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
             //Combine Candles to prevent v small candles:
             if (candles.size > 70) { //70 is safely above 60 - hour candles should never get cut down
                 val compositeCandles = candles.compositeCandles(40)
-                compositeCandles.withIndex().map { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
+                compositeCandles.asSequence().withIndex().map {
+                    CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.time) }.toList()
             } else {
-                candles.withIndex().map  { CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.time) }
+                candles.asSequence().withIndex().map  {
+                    CandleEntry(it.index.toFloat(), it.value.high.toFloat(), it.value.low.toFloat(), it.value.open.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.time) }.toList()
             }
         }
 
@@ -155,7 +159,6 @@ class PriceCandleChart : CandleStickChart {
 
 
         xAxis.axisLineColor = currencyColor
-        axisLeft.axisLineColor = currencyColor
 
         val strokeWidth = 2.toFloat()
         xAxis.axisLineWidth = strokeWidth

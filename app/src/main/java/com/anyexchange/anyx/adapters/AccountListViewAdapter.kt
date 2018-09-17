@@ -79,6 +79,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                     val accountChange = (percentChange * account.defaultValue) / 100
                     val sign = if (percentChange >= 0) { "+" } else { "" }
                     viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.fiatFormat(Account.defaultFiatCurrency))
+                    viewHolder.accountValueText?.visibility = View.VISIBLE
+                    viewHolder.percentChangeText?.visibility = View.VISIBLE
                 } else {
                     viewHolder.accountValueText?.visibility = View.INVISIBLE
                     viewHolder.percentChangeText?.visibility = View.INVISIBLE

@@ -57,6 +57,29 @@
             android:text="@string/settings_unknown"
             android:visibility="gone" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spinner_settings_quick_change_threshold"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="@string/settings_quick_change_threshold_info" />
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/btn_setting_verify_account"
             android:layout_width="match_parent"
@@ -89,7 +112,6 @@
             android:id="@+id/btn_setting_show_cbpro_eula"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
             android:layout_marginTop="2dp"
             android:text="@string/settings_coinbase_pro_eula" />
 
@@ -108,7 +130,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:text="@string/settings_log_out" />
-
     </LinearLayout>
 
 </ScrollView>

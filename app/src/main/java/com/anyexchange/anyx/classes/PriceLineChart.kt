@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -22,7 +23,7 @@ import kotlin.math.absoluteValue
 class PriceLineChart : LineChart {
     constructor(ctx: Context) : super(ctx)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
 
     private var velocityTracker: VelocityTracker? = null
@@ -31,6 +32,7 @@ class PriceLineChart : LineChart {
     private var onVerticalDrag: () -> Unit = { }
     private var defaultDragDirection: DefaultDragDirection = DefaultDragDirection.Horizontal
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.actionMasked
 
@@ -129,12 +131,12 @@ class PriceLineChart : LineChart {
     fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
         val entries = if (candles.isEmpty()) {
             val now = Date().time.toDouble()
-            val blankEntry = Entry(0.0f, 0.0f, now)
+            val blankEntry = Entry(0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
             //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
             val filledInCandles = candles.filledInBlanks(granularity)
-            filledInCandles.withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.time) }
+            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.time) }.toList()
         }
         val dataSet = LineDataSet(entries, "Chart")
 
