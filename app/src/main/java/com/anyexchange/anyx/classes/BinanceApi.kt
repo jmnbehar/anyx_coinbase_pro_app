@@ -308,7 +308,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val icebergQty: Double) : BinanceApi(initData)
     class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double? = null, val price: Double, val funds: Double? = null) : BinanceApi(initData)
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val stopPrice: Double? = null) : BinanceApi(initData)
-    class cancelAllOrders(initData: ApiInitData) : BinanceApi(initData)
+
     class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
@@ -386,49 +386,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class sendCrypto(initData: ApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : BinanceApi(initData)
-    class coinbaseAccounts(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
-            this.executeRequest(onFailure) {result ->
-                try {
-                    val apiCBAccountList: List<ApiCoinbaseAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiCoinbaseAccount>>() {}.type)
-                    onComplete(apiCBAccountList)
-                } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(e)))
-                }
-            }
-        }
 
-        fun linkToAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-           this.get(onFailure) { coinbaseAccounts ->
-                for (cbAccount in coinbaseAccounts) {
-                    val currency = Currency.forString(cbAccount.currency)
-                    if (currency != null && cbAccount.active) {
-                        val account = Account.forCurrency(currency)
-                        account?.coinbaseAccount = Account.CoinbaseAccount(cbAccount)
-                    }
-                }
-                onComplete()
-            }
-        }
-    }
-    class paymentMethods(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
-            this.executeRequest(onFailure) {result ->
-                try {
-                    var apiPaymentMethodsList: List<ApiPaymentMethod> = Gson().fromJson(result.value, object : TypeToken<List<ApiPaymentMethod>>() {}.type)
-                    apiPaymentMethodsList = apiPaymentMethodsList.filter { apiPaymentMethod -> apiPaymentMethod.type != "fiat_account" }
-                    val paymentMethodsList = apiPaymentMethodsList.map { apiPaymentMethod -> Account.PaymentMethod(apiPaymentMethod) }
-                    onComplete(paymentMethodsList)
-                } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(e)))
-                }
-            }
-        }
-    }
-    class getFromCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : BinanceApi(initData)
-    class getFromPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : BinanceApi(initData)
-    class sendToCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : BinanceApi(initData)
-    class sendToPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : BinanceApi(initData)
     class ping(initData: ApiInitData?) : BinanceApi(initData)
     class time(initData: ApiInitData?) : BinanceApi(initData)
 
@@ -458,18 +416,11 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is orderMarket -> Method.POST
                 is orderStop -> Method.POST
                 is cancelOrder -> Method.DELETE
-                is cancelAllOrders -> Method.DELETE
                 is listOrders -> Method.GET
                 is getOrder -> Method.GET
                 is fills -> Method.GET
                 is sendCrypto -> Method.POST
                 is depositAddress -> Method.POST
-                is coinbaseAccounts -> Method.GET
-                is paymentMethods -> Method.GET
-                is getFromCoinbase -> Method.POST
-                is getFromPayment -> Method.POST
-                is sendToCoinbase -> Method.POST
-                is sendToPayment -> Method.POST
                 is ping -> Method.GET
                 is time -> Method.GET
 
@@ -496,15 +447,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is accountHistory -> "/accounts/$accountId/ledger"
                 is products -> "/products"
                 is cancelOrder -> "/orders/$orderId"
-                is cancelAllOrders -> "/orders"
                 is sendCrypto -> "/withdrawals/crypto"
                 is depositAddress -> "/coinbase-accounts/$cbAccountId/addresses"
-                is coinbaseAccounts -> "/coinbase-accounts"
-                is paymentMethods -> "/payment-methods"
-                is getFromCoinbase -> "/deposits/coinbase-account"
-                is getFromPayment -> "/deposits/payment-method"
-                is sendToCoinbase -> "/withdrawals/coinbase-account"
-                is sendToPayment -> "/withdrawals/payment-method"
                 is ping -> "/ping"
                 is time -> "/time"
 
@@ -632,36 +576,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())
                     json.put("crypto_address", cryptoAddress)
-                    return json.toString()
-                }
-                is getFromCoinbase -> {
-                    val json = JSONObject()
-
-                    json.put("amount", amount.btcFormat())
-                    json.put("currency", currency.toString())
-                    json.put("coinbase_account_id", accountId)
-                    return json.toString()
-                }
-                is getFromPayment -> {
-                    val json = JSONObject()
-
-                    json.put("amount", amount.btcFormat())
-                    json.put("currency", currency.toString())
-                    json.put("payment_method_id", paymentMethodId)
-                    return json.toString()
-                }
-                is sendToCoinbase -> {
-                    val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
-                    json.put("currency", currency.toString())
-                    json.put("coinbase_account_id", accountId)
-                    return json.toString()
-                }
-                is sendToPayment -> {
-                    val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
-                    json.put("currency", currency.toString())
-                    json.put("payment_method_id", paymentMethodId)
                     return json.toString()
                 }
                 else -> return ""
