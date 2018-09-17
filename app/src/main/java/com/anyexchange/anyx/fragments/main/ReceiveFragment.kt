@@ -21,15 +21,15 @@ import android.content.Context.CLIPBOARD_SERVICE
  */
 class ReceiveFragment : RefreshFragment() {
 
-    private lateinit var inflater: LayoutInflater
+    private var inflater: LayoutInflater? = null
 
-    private lateinit var qrCodeImageView: ImageView
-    private lateinit var addressLabelTextView: TextView
-    private lateinit var addressTextView: TextView
+    private var qrCodeImageView: ImageView? = null
+    private var addressLabelTextView: TextView? = null
+    private var addressTextView: TextView? = null
 
-    private lateinit var warningIconImageView: ImageView
-    private lateinit var warning1TextView: TextView
-    private lateinit var warning2TextView: TextView
+    private var warningIconImageView: ImageView? = null
+    private var warning1TextView: TextView? = null
+    private var warning2TextView: TextView? = null
 
     var currency: Currency
         get() = ChartFragment.currency
@@ -79,34 +79,39 @@ class ReceiveFragment : RefreshFragment() {
     private fun showAddressInfo(addressInfo: ApiDepositAddress?) {
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
-            qrCodeImageView.setImageBitmap(bitmap)
-            qrCodeImageView.visibility = View.VISIBLE
+            qrCodeImageView?.setImageBitmap(bitmap)
+            qrCodeImageView?.visibility = View.VISIBLE
 
-            addressLabelTextView.text = resources.getString(R.string.receive_address_label, currency.toString())
-            addressTextView.text = addressInfo.address
-            addressTextView.setOnTouchListener { _, _ ->
+            addressLabelTextView?.text = resources.getString(R.string.receive_address_label, currency.toString())
+            addressTextView?.text = addressInfo.address
+            addressTextView?.setOnTouchListener { _, _ ->
                 copyAddressToClipboard()
                 true
             }
 
-            warning1TextView.visibility = View.VISIBLE
-            warning2TextView.visibility = View.VISIBLE
+            warning1TextView?.visibility = View.VISIBLE
+            warning2TextView?.visibility = View.VISIBLE
             if (addressInfo.warning_title != null) {
-                warning1TextView.text = addressInfo.warning_title
+                warning1TextView?.text = addressInfo.warning_title
             } else {
-                warning1TextView.text = getString(R.string.receive_warning_1, currency.fullName, currency.toString())
+                warning1TextView?.text = getString(R.string.receive_warning_1, currency.fullName, currency.toString())
             }
             if (addressInfo.warning_details != null) {
-                warning2TextView.text = addressInfo.warning_details
+                warning2TextView?.text = addressInfo.warning_details
             } else {
-                warning2TextView.text = getString(R.string.receive_warning_2)
+                warning2TextView?.text = getString(R.string.receive_warning_2)
             }
-            warningIconImageView.setImageResource(currency.iconId)
+            warningIconImageView?.setImageResource(currency.iconId)
         } else {
-            qrCodeImageView.visibility = View.GONE
-            addressTextView.text = resources.getString(R.string.receive_refresh_label)
-            warning1TextView.visibility = View.GONE
-            warning2TextView.visibility = View.GONE
+            qrCodeImageView?.visibility = View.GONE
+            if (context != null){
+                addressTextView?.visibility = View.VISIBLE
+                addressTextView?.text = resources.getString(R.string.receive_refresh_label)
+            } else {
+                addressTextView?.visibility = View.GONE
+            }
+            warning1TextView?.visibility = View.GONE
+            warning2TextView?.visibility = View.GONE
         }
     }
 

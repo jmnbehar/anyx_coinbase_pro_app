@@ -387,7 +387,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
-                //TODO: go directly to verify/login
                 if (!prefs.isLoggedIn) {
                     toast(R.string.toast_please_login_message)
                     null

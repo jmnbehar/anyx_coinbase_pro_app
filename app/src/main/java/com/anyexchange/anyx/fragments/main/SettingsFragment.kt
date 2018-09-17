@@ -30,16 +30,16 @@ class SettingsFragment : RefreshFragment() {
         }
     }
 
-    private lateinit var titleText: TextView
-    private lateinit var logoutButton: Button
-    private lateinit var verifyButton: Button
-    private lateinit var cbproEulaButton: Button
-    private lateinit var anyxEulaButton: Button
-    private lateinit var emailDevButton: Button
-    private lateinit var darkModeCheckBox: CheckBox
-    private lateinit var showTradeConfirmCheckBox: CheckBox
-    private lateinit var showSendConfirmCheckBox: CheckBox
-    private lateinit var quickChangeThresholdSpinner: Spinner
+    private var titleText: TextView? = null
+    private var logoutButton: Button? = null
+    private var verifyButton: Button? = null
+    private var cbproEulaButton: Button? = null
+    private var anyxEulaButton: Button? = null
+    private var emailDevButton: Button? = null
+    private var darkModeCheckBox: CheckBox? = null
+    private var showTradeConfirmCheckBox: CheckBox? = null
+    private var showSendConfirmCheckBox: CheckBox? = null
+    private var quickChangeThresholdSpinner: Spinner? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -61,7 +61,7 @@ class SettingsFragment : RefreshFragment() {
 
         val prefs = Prefs(activity!!)
 
-        logoutButton.setOnClickListener  {
+        logoutButton?.setOnClickListener  {
 
             prefs.isLoggedIn = false
             CBProApi.credentials = null
@@ -70,17 +70,17 @@ class SettingsFragment : RefreshFragment() {
             (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
         }
 
-        verifyButton.setOnClickListener  {
+        verifyButton?.setOnClickListener  {
             val intent = Intent(activity, VerifyActivity::class.java)
             startActivity(intent)
         }
 
-        cbproEulaButton.setOnClickListener {
+        cbproEulaButton?.setOnClickListener {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.coinbase.com/legal/user_agreement"))
             startActivity(browserIntent)
         }
 
-        emailDevButton.setOnClickListener {
+        emailDevButton?.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO)
             intent.data = Uri.parse("mailto:anyx.app@gmail.com")
             intent.putExtra(Intent.EXTRA_SUBJECT, "AnyX Feedback")
@@ -92,23 +92,23 @@ class SettingsFragment : RefreshFragment() {
             }
         }
 
-        anyxEulaButton.visibility = View.GONE
+        anyxEulaButton?.visibility = View.GONE
         (activity as? MainActivity)?.let { activity ->
-            anyxEulaButton.visibility = View.VISIBLE
-            anyxEulaButton.setOnClickListener {
+            anyxEulaButton?.visibility = View.VISIBLE
+            anyxEulaButton?.setOnClickListener {
                 activity.goToFragment(FragmentType.EULA)
             }
         }
 
         context?.let {
             val tempThreshold = prefs.quickChangeThreshold
-            quickChangeThresholdSpinner.visibility = View.VISIBLE
+            quickChangeThresholdSpinner?.visibility = View.VISIBLE
             val floatList = listOf(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
             val arrayAdapter = FloatSpinnerAdapter(it, floatList)
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            quickChangeThresholdSpinner.adapter = arrayAdapter
-            quickChangeThresholdSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+            quickChangeThresholdSpinner?.adapter = arrayAdapter
+            quickChangeThresholdSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     prefs.quickChangeThreshold = floatList[position]
                 }
 
@@ -116,38 +116,38 @@ class SettingsFragment : RefreshFragment() {
             }
             val index = floatList.indexOf(tempThreshold)
             if (index != -1) {
-                quickChangeThresholdSpinner.setSelection(index)
+                quickChangeThresholdSpinner?.setSelection(index)
             }
-            quickChangeThresholdSpinner.visibility = View.VISIBLE
+            quickChangeThresholdSpinner?.visibility = View.VISIBLE
         } ?: run {
-            quickChangeThresholdSpinner.visibility = View.GONE
+            quickChangeThresholdSpinner?.visibility = View.GONE
         }
 
-        showTradeConfirmCheckBox.isChecked = prefs.shouldShowTradeConfirmModal
-        showTradeConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+        showTradeConfirmCheckBox?.isChecked = prefs.shouldShowTradeConfirmModal
+        showTradeConfirmCheckBox?.setOnCheckedChangeListener {  _, isChecked ->
             prefs.shouldShowTradeConfirmModal = isChecked
         }
 
-        showSendConfirmCheckBox.isChecked = prefs.shouldShowSendConfirmModal
-        showSendConfirmCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+        showSendConfirmCheckBox?.isChecked = prefs.shouldShowSendConfirmModal
+        showSendConfirmCheckBox?.setOnCheckedChangeListener {  _, isChecked ->
             prefs.shouldShowSendConfirmModal = isChecked
         }
 
-        darkModeCheckBox.isChecked = prefs.isDarkModeOn
-        darkModeCheckBox.setOnCheckedChangeListener {  _, isChecked ->
+        darkModeCheckBox?.isChecked = prefs.isDarkModeOn
+        darkModeCheckBox?.setOnCheckedChangeListener {  _, isChecked ->
             prefs.isDarkModeOn = isChecked
             showDarkMode()
 
             if (isChecked) {
-                darkModeCheckBox.textColor = Color.WHITE
-                showTradeConfirmCheckBox.textColor = Color.WHITE
-                showSendConfirmCheckBox.textColor = Color.WHITE
-                titleText.textColor = Color.WHITE
+                darkModeCheckBox?.textColor = Color.WHITE
+                showTradeConfirmCheckBox?.textColor = Color.WHITE
+                showSendConfirmCheckBox?.textColor = Color.WHITE
+                titleText?.textColor = Color.WHITE
             } else {
-                darkModeCheckBox.textColor = Color.BLACK
-                showTradeConfirmCheckBox.textColor = Color.BLACK
-                showSendConfirmCheckBox.textColor = Color.BLACK
-                titleText.textColor = Color.BLACK
+                darkModeCheckBox?.textColor = Color.BLACK
+                showTradeConfirmCheckBox?.textColor = Color.BLACK
+                showSendConfirmCheckBox?.textColor = Color.BLACK
+                titleText?.textColor = Color.BLACK
             }
         }
         showDarkMode()
@@ -163,21 +163,21 @@ class SettingsFragment : RefreshFragment() {
         val apiKey = CBProApi.credentials?.apiKey
 
         when {
-            apiKey == null -> verifyButton.visibility = View.GONE
+            apiKey == null -> verifyButton?.visibility = View.GONE
             prefs.isApiKeyValid(apiKey) == true -> {
-                verifyButton.visibility = View.GONE
+                verifyButton?.visibility = View.GONE
                 txt_setting_verify_account.visibility = View.GONE
             }
             else -> {
-                verifyButton.visibility = View.VISIBLE
+                verifyButton?.visibility = View.VISIBLE
                 txt_setting_verify_account.visibility = View.VISIBLE
             }
         }
 
         if (prefs.isLoggedIn) {
-            logoutButton.text = resources.getString(R.string.settings_log_out_btn)
+            logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
         } else {
-            logoutButton.text = resources.getString(R.string.settings_log_in_btn)
+            logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
         }
     }
 }
