@@ -33,7 +33,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     var depositInfo: ApiDepositAddress? = null
 
-    fun update(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+    fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
             if (apiAccount != null) {
                 this.apiAccount = apiAccount
@@ -87,7 +87,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
             }
         }
 
-        fun updateAllAccountsCandles(apiInitData: CBProApi.CBProApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        fun updateAllAccountsCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
             for (account in cryptoAccounts) {
                 val tradingPair = TradingPair(account.product.id)

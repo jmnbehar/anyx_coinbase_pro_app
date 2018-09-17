@@ -112,7 +112,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         price[tradingPairIndex] = newPrice
     }
 
-    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, apiInitData: CBProApi.CBProApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
@@ -217,7 +217,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         }
 
 
-        fun updateAllProducts(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
                 val fiatCurrency = Account.defaultFiatCurrency
                 val apiProductList = unfilteredApiProductList.filter { s ->

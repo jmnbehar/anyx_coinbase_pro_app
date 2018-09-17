@@ -29,13 +29,13 @@ open class RefreshFragment: Fragment() {
 
     var shouldHideSpinner = true
 
-    val apiInitData: CBProApi.CBProApiInitData?
+    val apiInitData: ApiInitData?
         get() {
             val activity = activity
             return when (activity) {
                 is MainActivity -> activity.apiInitData
                 null -> null
-                else -> CBProApi.CBProApiInitData(activity) { /* do nothing */ }
+                else -> ApiInitData(activity) { /* do nothing */ }
             }
         }
 

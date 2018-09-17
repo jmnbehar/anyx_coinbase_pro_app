@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec
  */
 
 @Suppress("ClassName")
-sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
+sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     val context = initData?.context
     val returnToLogin = initData?.returnToLogin ?:  { }
 
@@ -33,7 +33,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     companion object {
         var credentials: ApiCredentials? = null
 
-        const val basePath = "https://api.pro.coinbase.com"
+        const val basePath = "https://api.binance.com"
 
         fun defaultPostFailure(context: Context?, result: Result.Failure<ByteArray, FuelError>) : String {
             val errorCode = ErrorCode.withCode(result.error.response.statusCode)
@@ -113,73 +113,55 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 }
     }
 
-    class candles(private val initData: ApiInitData?, val productId: String, val timespan: Long = Timespan.DAY.value(), var granularity: Long, var timeOffset: Long) : CBProApi(initData) {
+    class candles(private val initData: ApiInitData?, val productId: String, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
+        //limit default = 500, max is 1000
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
-            var currentTimespan: Long
-            var coveredTimespan: Long
-            var nextCoveredTimespan: Long = 0
-            var remainingTimespan: Long = timespan
-            var pages = 1
             var pagesReceived = 0
 
+            val timespan = if (endTime != null && startTime != null) {
+                endTime!! - startTime!!
+            } else {
+                0
+            }
+
             var allCandles = mutableListOf<Candle>()
-            while (remainingTimespan > 0) {
-                coveredTimespan = nextCoveredTimespan
-                if ((remainingTimespan / granularity) > 300) {
-                    //split into 2 requests
-                    currentTimespan = granularity * 300
-                    remainingTimespan -= currentTimespan
-                    nextCoveredTimespan = coveredTimespan + currentTimespan
-                    pages++
-                } else {
-                    currentTimespan = remainingTimespan
-                    remainingTimespan = 0
-                }
 
-                CBProApi.candles(initData, productId, currentTimespan, granularity, coveredTimespan).executeRequest(onFailure) { result ->
-                    pagesReceived ++
-                    val gson = Gson()
-                    val apiCandles = result.value
-                    val tradingPair = TradingPair(productId)
-                    try {
-                        val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
-                        var candles = candleDoubleList.mapNotNull {
-                            val time = (it[0] as? Double)
-                            val low = (it[1] as? Double) ?: 0.0
-                            val high = (it[2] as? Double) ?: 0.0
-                            val open = (it[3] as? Double) ?: 0.0
-                            val close = (it[4] as? Double)
-                            val volume = (it[5] as? Double) ?: 0.0
-                            if (close != null && time != null) {
-                                Candle(time, low, high, open, close, volume, tradingPair)
-                            } else { null }
-                        }
-                        val now = Calendar.getInstance()
-
-                        val start = now.timeInSeconds() - timespan - 30
-
-                        candles = candles.filter { it.time >= start }
-
-                        //TODO: edit chart library so it doesn't show below 0
-                        candles = candles.reversed()
-                        allCandles = allCandles.addingCandles(candles)
-                    } catch (exception: Exception) {
-                        onFailure(Result.Failure(FuelError(exception)))
+            this.executeRequest(onFailure) { result ->
+                pagesReceived ++
+                val gson = Gson()
+                val apiCandles = result.value
+                val tradingPair = TradingPair(productId)
+                try {
+                    val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                    var candles = candleDoubleList.mapNotNull {
+                        val time = (it[0] as? Double)
+                        val low = (it[1] as? Double) ?: 0.0
+                        val high = (it[2] as? Double) ?: 0.0
+                        val open = (it[3] as? Double) ?: 0.0
+                        val close = (it[4] as? Double)
+                        val volume = (it[5] as? Double) ?: 0.0
+                        if (close != null && time != null) {
+                            Candle(time, low, high, open, close, volume, tradingPair)
+                        } else { null }
                     }
+                    val now = Calendar.getInstance()
 
-                    if (pagesReceived == pages && allCandles.isNotEmpty()) {
-                        if (pages > 1) {
-                            allCandles = allCandles.sorted()
-                        }
-                        onComplete(allCandles)
-                    }
+                    val start = now.timeInSeconds() - timespan - 30
 
+                    candles = candles.filter { it.time >= start }
+
+                    //TODO: edit chart library so it doesn't show below 0
+                    candles = candles.reversed()
+                    allCandles = allCandles.addingCandles(candles)
+                    onComplete(allCandles.sorted())
+                } catch (exception: Exception) {
+                    onFailure(Result.Failure(FuelError(exception)))
                 }
             }
         }
     }
 
-    class accounts(private val initData: ApiInitData?) : CBProApi(initData) {
+    class accounts(private val initData: ApiInitData?) : BinanceApi(initData) {
 
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiAccount>) -> Unit) {
             this.executeRequest(onFailure) { result ->
@@ -200,7 +182,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 getAccountsWithProductList(stashedProductList, onFailure, onComplete)
             } else {
 
-                CBProApi.products(initData).get(onFailure) { apiProductList ->
+                BinanceApi.products(initData).get(onFailure) { apiProductList ->
                     for (apiProduct in apiProductList) {
                         val baseCurrency = apiProduct.base_currency
                         val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it.id) }
@@ -262,7 +244,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
 
     }
 
-    class account(initData: ApiInitData?, val accountId: String) : CBProApi(initData) {
+    class account(initData: ApiInitData?, val accountId: String) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiAccount?) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 //TODO: why does this sometimes get a jsonArray instead of a JSON?
@@ -287,8 +269,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
     }
 
-    class accountHistory(initData: ApiInitData?, val accountId: String) : CBProApi(initData)
-    class products(initData: ApiInitData?) : CBProApi(initData) {
+    class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
+    class products(initData: ApiInitData?) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiProduct>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
@@ -302,7 +284,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class ticker(initData: ApiInitData?, accountId: String) : CBProApi(initData) {
+    class ticker(initData: ApiInitData?, accountId: String) : BinanceApi(initData) {
         val tradingPair = TradingPair(accountId)
         constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.id)
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker) -> Unit) {
@@ -323,14 +305,11 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class orderLimit(initData: ApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double, val timeInForce: TimeInForce?, val cancelAfter: String?) : CBProApi(initData)
-    class orderMarket(initData: ApiInitData?, val tradeSide: TradeSide, val productId: String, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
-    class orderStop(initData: ApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
-    class cancelOrder(initData: ApiInitData?, val orderId: String) : CBProApi(initData)
-    class cancelAllOrders(initData: ApiInitData) : CBProApi(initData)
-    class listOrders(initData: ApiInitData?, val status: String? = null) : CBProApi(initData) {
-        //For now don't use product ID, always get ALL orders
-        val productId: String? = null
+    class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val icebergQty: Double) : BinanceApi(initData)
+    class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double? = null, val price: Double, val funds: Double? = null) : BinanceApi(initData)
+    class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val stopPrice: Double? = null) : BinanceApi(initData)
+    class cancelAllOrders(initData: ApiInitData) : BinanceApi(initData)
+    class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -345,20 +324,20 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class getOrder(initData: ApiInitData?, val orderId: String) : CBProApi(initData)
-    class fills(initData: ApiInitData?, val orderId: String? = null, val productId: String? = null) : CBProApi(initData) {
+    class getOrder(initData: ApiInitData?, val productId: String, val orderId: String) : BinanceApi(initData)
+    class cancelOrder(initData: ApiInitData?, val productId: String, val orderId: String) : BinanceApi(initData)
+
+    class fills(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
                         val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
-                        if (productId != null) {
-                            if (prefs.areAlertFillsActive) {
-                                checkForFillAlerts(apiFillList, productId)
-                            }
-                            prefs.stashFills(result.value, productId)
+                        if (prefs.areAlertFillsActive) {
+                            checkForFillAlerts(apiFillList, productId)
                         }
+                        prefs.stashFills(result.value, productId)
                         onComplete(apiFillList)
                     } catch (e: JsonSyntaxException) {
                         onFailure(Result.Failure(FuelError(e)))
@@ -388,7 +367,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
     }
     //add position?
-    class depositAddress(initData: ApiInitData?, val cbAccountId: String) : CBProApi(initData) {
+    class depositAddress(initData: ApiInitData?, val cbAccountId: String) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (ApiDepositAddress) -> Unit) {
             this.executePost(onFailure) {
                 val byteArray = it.component1()
@@ -406,8 +385,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
     }
 
-    class sendCrypto(initData: ApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : CBProApi(initData)
-    class coinbaseAccounts(initData: ApiInitData?) : CBProApi(initData) {
+    class sendCrypto(initData: ApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : BinanceApi(initData)
+    class coinbaseAccounts(initData: ApiInitData?) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiCoinbaseAccount>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -432,7 +411,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class paymentMethods(initData: ApiInitData?) : CBProApi(initData) {
+    class paymentMethods(initData: ApiInitData?) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.PaymentMethod>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -446,36 +425,26 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class getFromCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : CBProApi(initData)
-    class getFromPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi(initData)
-    class sendToCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : CBProApi(initData)
-    class sendToPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi(initData)
-    class createReport(private val initData: ApiInitData, val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : CBProApi(initData) {
-        fun createAndGetInfo(onComplete: (Boolean) -> Unit) {
-            this.executePost({ onComplete(false) },
-                    { reportInfo -> //OnSuccess
-                val byteArray = reportInfo.component1()
-                val responseString = if (byteArray != null) {
-                    String(byteArray)
-                } else {
-                    ""
-                }
-                try {
-                    val apiReportInfo: ApiReportInfo = Gson().fromJson(responseString, object : TypeToken<ApiReportInfo>() {}.type)
-                    CBProApi.getReport(initData, apiReportInfo.id).executeRequest({ result ->
-                        println(result)
-                    }, { result ->
-                        println(result.value)
-                    })
-                } catch (e: Exception) {
-                    println("nah")
-                }
-            })
-        }
-    }
-    class getReport(initData: ApiInitData?, val reportId: String) : CBProApi(initData)
-    //add deposits
-    //look into reports
+    class getFromCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : BinanceApi(initData)
+    class getFromPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : BinanceApi(initData)
+    class sendToCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : BinanceApi(initData)
+    class sendToPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : BinanceApi(initData)
+    class ping(initData: ApiInitData?) : BinanceApi(initData)
+    class time(initData: ApiInitData?) : BinanceApi(initData)
+
+    class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData)
+    class orderBookDepth(initData: ApiInitData?, symbol: String, limit: Int?) : BinanceApi(initData)
+    class recentTrades(initData: ApiInitData?, symbol: String, limit: Int?) : BinanceApi(initData)
+    class historicalTrades(initData: ApiInitData?, symbol: String, limit: Int?, fromTradeId: Long) : BinanceApi(initData)
+    class aggregatedTrades(initData: ApiInitData?) : BinanceApi(initData)
+    class dayChangeStats(initData: ApiInitData?, productId: String) : BinanceApi(initData)
+    class bookTicker(initData: ApiInitData?, productId: String?) : BinanceApi(initData)
+    class allOrders(initData: ApiInitData?, productId: String?) : BinanceApi(initData)
+    class o7(initData: ApiInitData?) : BinanceApi(initData)
+    class o8(initData: ApiInitData?) : BinanceApi(initData)
+    class o9(initData: ApiInitData?) : BinanceApi(initData)
+    class o10(initData: ApiInitData?) : BinanceApi(initData)
+
 
     override val method: Method
         get() {
@@ -485,7 +454,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is accountHistory -> Method.GET
                 is products -> Method.GET
                 is ticker -> Method.GET
-                is candles -> Method.GET
                 is orderLimit -> Method.POST
                 is orderMarket -> Method.POST
                 is orderStop -> Method.POST
@@ -502,28 +470,33 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is getFromPayment -> Method.POST
                 is sendToCoinbase -> Method.POST
                 is sendToPayment -> Method.POST
-                is createReport -> Method.POST
-                is getReport -> Method.GET
+                is ping -> Method.GET
+                is time -> Method.GET
+
+                is candles -> Method.GET
+                is exchangeInfo -> Method.GET
+                is orderBookDepth -> Method.GET
+                is recentTrades -> Method.GET
+                is historicalTrades -> Method.GET
+                is aggregatedTrades -> Method.GET
+                is dayChangeStats -> Method.GET
+                is bookTicker -> Method.GET
+                is allOrders -> Method.GET
+                is o7 -> Method.GET
+                is o8 -> Method.GET
+                is o9 -> Method.GET
+                is o10 -> Method.GET
             }
         }
 
     override val path: String
         get() {
-            return when (this) {
-                is accounts -> "/accounts"
-                is account -> "/accounts/$accountId"
+            var tempPath = "/api/"
+            tempPath += when (this) {
                 is accountHistory -> "/accounts/$accountId/ledger"
                 is products -> "/products"
-                is ticker -> "/products/${tradingPair.id}/ticker"
-                is candles -> "/products/$productId/candles"
-                is orderLimit -> "/orders"
-                is orderMarket -> "/orders"
-                is orderStop -> "/orders"
                 is cancelOrder -> "/orders/$orderId"
                 is cancelAllOrders -> "/orders"
-                is listOrders -> "/orders"
-                is getOrder -> "/orders/$orderId"
-                is fills -> "/fills"
                 is sendCrypto -> "/withdrawals/crypto"
                 is depositAddress -> "/coinbase-accounts/$cbAccountId/addresses"
                 is coinbaseAccounts -> "/coinbase-accounts"
@@ -532,9 +505,40 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is getFromPayment -> "/deposits/payment-method"
                 is sendToCoinbase -> "/withdrawals/coinbase-account"
                 is sendToPayment -> "/withdrawals/payment-method"
-                is createReport -> "/reports"
-                is getReport -> "/reports/$reportId"
+                is ping -> "/ping"
+                is time -> "/time"
+
+
+                is candles -> "v1/klines"
+                is exchangeInfo -> "v1/exchangeInfo"
+                is orderBookDepth -> "v1/depth"
+                is recentTrades -> "v1/trades"
+                is historicalTrades -> "v1/historicalTrades"
+                is aggregatedTrades -> "v1/aggTrades"
+                is dayChangeStats -> "v3/ticker/24hr"
+                is ticker -> "v3/ticker/price"
+                is bookTicker -> "v3/ticker/bookTicker"
+
+                //TODO: take off the test
+                is orderLimit -> "v3/order/test"
+                is orderMarket -> "v3/order/test"
+                is orderStop -> "v3/order/test"
+                is getOrder -> "v3/order"
+                is listOrders -> "v3/openOrders"
+                is accounts -> "v3/account"
+                is fills -> "v3/myTrades"
+
+
+                is account -> "/accounts/$accountId"
+
+
+                is allOrders -> "v3/allOrders"
+                is o7 -> ""
+                is o8 -> ""
+                is o9 -> ""
+                is o10 -> ""
             }
+            return tempPath
         }
 
     override val params: List<Pair<String, Any?>>?
@@ -542,34 +546,25 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             val paramList = mutableListOf<Pair<String, String>>()
             when (this) {
                 is candles -> {
-                    val utcTimeZone = TimeZone.getTimeZone("UTC")
-                    val now = Calendar.getInstance(utcTimeZone)
-                    val nowLong = now.timeInSeconds() - timeOffset
-                    val startInt = nowLong - timespan
-
-                    val start = Date(startInt * 1000)
-
-                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                    formatter.timeZone = utcTimeZone
-
-                    paramList.add(Pair("start", formatter.format(start)))
-                    paramList.add(Pair("end", formatter.format(nowLong * 1000)))
-                    paramList.add(Pair("granularity", granularity.toString()))
+                    paramList.add(Pair("symbol", productId))
+                    paramList.add(Pair("interval", interval))
+                    if (startTime != null) {
+                        paramList.add(Pair("startTime", startTime.toString()))
+                    }
+                    if (endTime != null) {
+                        paramList.add(Pair("endTime", endTime.toString()))
+                    }
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+                    }
                     return paramList.toList()
                 }
                 is fills -> {
-                    if (orderId != null) {
-                        paramList.add(Pair("order_id", orderId))
-                    }
-                    if (productId != null) {
-                        paramList.add(Pair("product_id", productId))
-                    }
+                    paramList.add(Pair("product_id", productId))
+
                     return paramList.toList()
                 }
                 is listOrders -> {
-                    if (status != null) {
-                        paramList.add(Pair("status", status))
-                    }
                     if (productId != null) {
                         paramList.add(Pair("product_id", productId))
                     }
@@ -613,14 +608,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     val json = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
 
                     json.put("price", "$price")
-                    json.put("size", "$size")
 
-                    if (timeInForce != null) {
-                        json.put("time_in_force", timeInForce.toString())
-                        if (timeInForce == TimeInForce.GoodTilTime && cancelAfter != null) {
-                            json.put("cancel_after", cancelAfter)
-                        }
-                    }
                     return json.toString()
                 }
                 is orderMarket -> {
@@ -630,10 +618,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     if (funds != null) {
                         json.put("funds", "$funds")
                     }
-                    if (size != null) {
-                          json.put("size", "$size")
-                    }
-
                     return json.toString()
                 }
                 is orderStop -> {
@@ -641,13 +625,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     val json = basicOrderParams(tradeSide, TradeType.STOP, productId)
 
                     json.put("price", "$price")
-                    if (funds != null) {
-                        json.put("funds", "$funds")
-                    }
-                    if (size != null) {
-                        json.put("size", "$size")
-                    }
-
                     return json.toString()
                 }
                 is sendCrypto -> {
@@ -685,26 +662,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     json.put("amount", amount.btcFormat())
                     json.put("currency", currency.toString())
                     json.put("payment_method_id", paymentMethodId)
-                    return json.toString()
-                }
-                is createReport -> {
-                    val json = JSONObject()
-
-                    val utcTimeZone = TimeZone.getTimeZone("UTC")
-                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                    formatter.timeZone = utcTimeZone
-
-                    json.put("type", type)
-                    json.put("start_date", formatter.format(startDate))
-                    json.put("end_date", formatter.format(endDate))
-                    if (type == "fills") {
-                        json.put("product_id", productId)
-                    } else if (type == "account") {
-                        json.put("account_id", accountId)
-                    }
-//                    json.put("currency", currency.toString())
-//                    json.put("payment_method_id", paymentMethodId)
-                    json.put("format", "csv")
                     return json.toString()
                 }
                 else -> return ""

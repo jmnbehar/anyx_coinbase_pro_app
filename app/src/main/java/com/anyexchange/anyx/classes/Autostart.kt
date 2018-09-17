@@ -39,7 +39,7 @@ class AutoStart : BroadcastReceiver() {
 
 
 class AlertJobService : JobService() {
-    val apiInitData = CBProApi.CBProApiInitData(this) { }
+    val apiInitData = ApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
 //        AlertHub.triggerDummyAlert(this)

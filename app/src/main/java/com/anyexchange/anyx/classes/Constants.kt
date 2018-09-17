@@ -87,20 +87,6 @@ enum class Timespan {
             YEAR -> TimeInSeconds.oneYear
         }
     }
-
-//    companion object {
-//        fun forLong(value: Long) : Timespan {
-//            return when (value) {
-//                TimeInSeconds.oneHour -> HOUR
-//                TimeInSeconds.oneDay -> DAY
-//                TimeInSeconds.oneWeek -> WEEK
-//                TimeInSeconds.oneMonth -> MONTH
-//                TimeInSeconds.oneYear -> YEAR
-////                (-1).toLong() -> ALL
-//                else -> DAY
-//            }
-//        }
-//    }
 }
 
 object Granularity {

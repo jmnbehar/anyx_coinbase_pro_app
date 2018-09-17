@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
 
-    val apiInitData = CBProApi.CBProApiInitData(this) {
+    val apiInitData = ApiInitData(this) {
         returnToLogin()
     }
 
