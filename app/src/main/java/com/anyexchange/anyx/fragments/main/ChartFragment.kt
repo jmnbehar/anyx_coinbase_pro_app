@@ -470,7 +470,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun areCandlesUpToDate(timespan: Timespan): Boolean {
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
         val candles = account.product.candlesForTimespan(timespan, tradingPair)
-        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
+        val lastCandleTime = candles.lastOrNull()?.closeTime?.toLong() ?: 0
         val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
         return candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
     }

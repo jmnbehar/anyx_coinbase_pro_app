@@ -151,14 +151,16 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                             val close = (it[4] as? Double)
                             val volume = (it[5] as? Double) ?: 0.0
                             if (close != null && time != null) {
-                                Candle(time, low, high, open, close, volume, tradingPair)
+                                val closeTime = time.toLong()
+                                val openTime = closeTime - granularity
+                                Candle(openTime, closeTime, low, high, open, close, volume, tradingPair)
                             } else { null }
                         }
                         val now = Calendar.getInstance()
 
                         val start = now.timeInSeconds() - timespan - 30
 
-                        candles = candles.filter { it.time >= start }
+                        candles = candles.filter { it.closeTime >= start }
 
                         //TODO: edit chart library so it doesn't show below 0
                         candles = candles.reversed()

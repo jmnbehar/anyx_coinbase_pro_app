@@ -14,7 +14,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
-import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -113,7 +112,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
     }
 
-    class candles(private val initData: ApiInitData?, val productId: String, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
+    class candles(initData: ApiInitData?, val productId: String, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
         //limit default = 500, max is 1000
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var pagesReceived = 0
@@ -132,23 +131,28 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 val apiCandles = result.value
                 val tradingPair = TradingPair(productId)
                 try {
-                    val candleDoubleList: List<List<Double>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
+                    val candleDoubleList: List<List<Any>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                     var candles = candleDoubleList.mapNotNull {
-                        val time = (it[0] as? Double)
-                        val low = (it[1] as? Double) ?: 0.0
+                        val openTime = (it[0] as? Long)
+                        val open = (it[1] as? Double) ?: 0.0
                         val high = (it[2] as? Double) ?: 0.0
-                        val open = (it[3] as? Double) ?: 0.0
+                        val low = (it[3] as? Double) ?: 0.0
                         val close = (it[4] as? Double)
                         val volume = (it[5] as? Double) ?: 0.0
-                        if (close != null && time != null) {
-                            Candle(time, low, high, open, close, volume, tradingPair)
+                        val closeTime = (it[6] as? Long)
+                        val quoteAssetVolume = (it[7] as? Double)
+                        val tradeCount = (it[8] as? Long)
+                        val takerBuyBaseAssetVolume = (it[9] as? Double)
+                        val takerBuyQuoteAssetVolume = (it[10] as? Double)
+                        if (close != null && openTime != null && closeTime != null) {
+                            Candle(openTime, closeTime, low, high, open, close, volume, tradingPair, quoteAssetVolume, tradeCount, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume)
                         } else { null }
                     }
                     val now = Calendar.getInstance()
 
                     val start = now.timeInSeconds() - timespan - 30
 
-                    candles = candles.filter { it.time >= start }
+                    candles = candles.filter { it.closeTime >= start }
 
                     //TODO: edit chart library so it doesn't show below 0
                     candles = candles.reversed()
@@ -284,8 +288,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class ticker(initData: ApiInitData?, accountId: String) : BinanceApi(initData) {
-        val tradingPair = TradingPair(accountId)
+    class ticker(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
+        val tradingPair = TradingPair(productId)
         constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.id)
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
@@ -305,9 +309,9 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val icebergQty: Double) : BinanceApi(initData)
-    class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double? = null, val price: Double, val funds: Double? = null) : BinanceApi(initData)
-    class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: String, val price: Double, val stopPrice: Double? = null) : BinanceApi(initData)
+    class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val price: Double, val icebergQty: Double? = null) : BinanceApi(initData)
+    class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double, val price: Double) : BinanceApi(initData)
+    class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
     class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
@@ -324,10 +328,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class getOrder(initData: ApiInitData?, val productId: String, val orderId: String) : BinanceApi(initData)
-    class cancelOrder(initData: ApiInitData?, val productId: String, val orderId: String) : BinanceApi(initData)
+    class getOrder(initData: ApiInitData?, val productId: String, val orderId: Long) : BinanceApi(initData)
+    class cancelOrder(initData: ApiInitData?, val productId: String, val orderId: Long) : BinanceApi(initData)
 
-    class fills(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
+    class fills(initData: ApiInitData?, val productId: String, val startTime: Long?, val endTime: Long?, val fromTradeId: Long?, val limit: Int? = null) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let { context ->
@@ -367,63 +371,55 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
     }
     //add position?
-    class depositAddress(initData: ApiInitData?, val cbAccountId: String) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onComplete: (ApiDepositAddress) -> Unit) {
-            this.executePost(onFailure) {
-                val byteArray = it.component1()
-                try {
-                    if (byteArray != null) {
-                        val apiDepositAddress: ApiDepositAddress = Gson().fromJson(String(byteArray), object : TypeToken<ApiDepositAddress>() {}.type)
-                        onComplete(apiDepositAddress)
-                    } else {
-                        onFailure(Result.Failure(FuelError(Exception())))
-                    }
-                } catch (e: Exception) {
-                    onFailure(Result.Failure(FuelError(e)))
-                }
-            }
-        }
-    }
+    class depositAddress(initData: ApiInitData?, val currency: Currency, val status: Boolean? = null) : BinanceApi(initData)
 
-    class sendCrypto(initData: ApiInitData?, val amount: Double, val currency: Currency, val cryptoAddress: String) : BinanceApi(initData)
+    class sendCrypto(initData: ApiInitData?, val currency: Currency, val destinationAddress: String, val destAddressTag: String?, val amount: Double, val name: String? = null) : BinanceApi(initData)
+    class depositHistory(initData: ApiInitData?, val currency: Currency?, val startTime: Long? = null, val endTime: Long? = null) : BinanceApi(initData)
+    class withdrawHistory(initData: ApiInitData?, val currency: Currency?, val startTime: Long? = null, val endTime: Long? = null) : BinanceApi(initData)
+
 
     class ping(initData: ApiInitData?) : BinanceApi(initData)
     class time(initData: ApiInitData?) : BinanceApi(initData)
 
     class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData)
-    class orderBookDepth(initData: ApiInitData?, symbol: String, limit: Int?) : BinanceApi(initData)
-    class recentTrades(initData: ApiInitData?, symbol: String, limit: Int?) : BinanceApi(initData)
-    class historicalTrades(initData: ApiInitData?, symbol: String, limit: Int?, fromTradeId: Long) : BinanceApi(initData)
-    class aggregatedTrades(initData: ApiInitData?) : BinanceApi(initData)
-    class dayChangeStats(initData: ApiInitData?, productId: String) : BinanceApi(initData)
-    class bookTicker(initData: ApiInitData?, productId: String?) : BinanceApi(initData)
-    class allOrders(initData: ApiInitData?, productId: String?) : BinanceApi(initData)
-    class o7(initData: ApiInitData?) : BinanceApi(initData)
-    class o8(initData: ApiInitData?) : BinanceApi(initData)
-    class o9(initData: ApiInitData?) : BinanceApi(initData)
-    class o10(initData: ApiInitData?) : BinanceApi(initData)
+    class orderBookDepth(initData: ApiInitData?, val productId: String, val limit: Int? = null) : BinanceApi(initData)
+    class recentTrades(initData: ApiInitData?, val productId: String, val limit: Int?) : BinanceApi(initData)
+    class historicalTrades(initData: ApiInitData?, val productId: String, val limit: Int?, val fromTradeId: Long? = null) : BinanceApi(initData)
+    class aggregatedTrades(initData: ApiInitData?, val productId: String, val fromTradeId: Long?, val startTime: Long? = null, val endTime: Long? = null, val limit: Long? = null) : BinanceApi(initData)
+    class dayChangeStats(initData: ApiInitData?, val productId: String) : BinanceApi(initData)
+    class bookTicker(initData: ApiInitData?, val productId: String?) : BinanceApi(initData)
+    class allOrders(initData: ApiInitData?, val productId: String) : BinanceApi(initData)
+
+
+    //More WAPI endpoints to add if needed:
+    //AccountStatus
+    //SystemStatus
+    //DustLog
+    //TradeFee
+    //AssetDetail
+    //
 
 
     override val method: Method
         get() {
             return when (this) {
-                is accounts -> Method.GET
                 is account -> Method.GET
                 is accountHistory -> Method.GET
                 is products -> Method.GET
-                is ticker -> Method.GET
-                is orderLimit -> Method.POST
-                is orderMarket -> Method.POST
-                is orderStop -> Method.POST
                 is cancelOrder -> Method.DELETE
                 is listOrders -> Method.GET
                 is getOrder -> Method.GET
                 is fills -> Method.GET
-                is sendCrypto -> Method.POST
                 is depositAddress -> Method.POST
+
+                is sendCrypto -> Method.POST
+                is depositHistory -> Method.GET
+                is withdrawHistory -> Method.GET
+                is depositAddress -> Method.GET
+
+                is ticker -> Method.GET
                 is ping -> Method.GET
                 is time -> Method.GET
-
                 is candles -> Method.GET
                 is exchangeInfo -> Method.GET
                 is orderBookDepth -> Method.GET
@@ -433,25 +429,46 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is dayChangeStats -> Method.GET
                 is bookTicker -> Method.GET
                 is allOrders -> Method.GET
-                is o7 -> Method.GET
-                is o8 -> Method.GET
-                is o9 -> Method.GET
-                is o10 -> Method.GET
+                is accounts -> Method.GET
+                is orderLimit -> Method.POST
+                is orderMarket -> Method.POST
+                is orderStop -> Method.POST
+            }
+        }
+
+    enum class ApiType {
+        REST,
+        WAPI;
+    }
+    val apiType: ApiType
+        get() {
+            return when (this) {
+                is sendCrypto      -> ApiType.WAPI
+                is depositHistory  -> ApiType.WAPI
+                is withdrawHistory -> ApiType.WAPI
+                is sendCrypto      -> ApiType.WAPI
+                is depositAddress  -> ApiType.WAPI
+                else -> ApiType.REST
             }
         }
 
     override val path: String
         get() {
-            var tempPath = "/api/"
+            var tempPath = when (apiType) {
+                ApiType.REST -> "/api/"
+                ApiType.WAPI -> "/wapi/"
+            }
             tempPath += when (this) {
                 is accountHistory -> "/accounts/$accountId/ledger"
                 is products -> "/products"
-                is cancelOrder -> "/orders/$orderId"
-                is sendCrypto -> "/withdrawals/crypto"
-                is depositAddress -> "/coinbase-accounts/$cbAccountId/addresses"
-                is ping -> "/ping"
-                is time -> "/time"
 
+                is sendCrypto -> "v3/withdraw.html"
+                is depositHistory -> "v3/depositHistory.html"
+                is withdrawHistory -> "v3/withdrawHistory.html"
+                is depositAddress -> "v3/depositAddress.html"
+
+                is ping -> "v1/ping"
+                is time -> "v1/closeTime"
 
                 is candles -> "v1/klines"
                 is exchangeInfo -> "v1/exchangeInfo"
@@ -468,19 +485,16 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is orderMarket -> "v3/order/test"
                 is orderStop -> "v3/order/test"
                 is getOrder -> "v3/order"
+                is cancelOrder -> "v3/order"
+
                 is listOrders -> "v3/openOrders"
                 is accounts -> "v3/account"
                 is fills -> "v3/myTrades"
 
-
                 is account -> "/accounts/$accountId"
-
-
                 is allOrders -> "v3/allOrders"
-                is o7 -> ""
-                is o8 -> ""
-                is o9 -> ""
-                is o10 -> ""
+
+
             }
             return tempPath
         }
@@ -489,6 +503,46 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         get() {
             val paramList = mutableListOf<Pair<String, String>>()
             when (this) {
+                is orderBookDepth -> {
+                    paramList.add(Pair("symbol", productId))
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+                    }
+                    return paramList.toList()
+                }
+                is recentTrades -> {
+                    paramList.add(Pair("symbol", productId))
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+                    }
+                    return paramList.toList()
+                }
+                is historicalTrades -> {
+                    paramList.add(Pair("symbol", productId))
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+                    }
+                    if (fromTradeId != null) {
+                        paramList.add(Pair("fromId", fromTradeId.toString()))
+                    }
+                    return paramList.toList()
+                }
+                is aggregatedTrades -> {
+                    paramList.add(Pair("symbol", productId))
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+                    }
+                    if (fromTradeId != null) {
+                        paramList.add(Pair("fromId", fromTradeId.toString()))
+                    }
+                    if (startTime != null) {
+                        paramList.add(Pair("startTime", startTime.toString()))
+                    }
+                    if (endTime != null) {
+                        paramList.add(Pair("endTime", endTime.toString()))
+                    }
+                    return paramList.toList()
+                }
                 is candles -> {
                     paramList.add(Pair("symbol", productId))
                     paramList.add(Pair("interval", interval))
@@ -503,15 +557,110 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     }
                     return paramList.toList()
                 }
-                is fills -> {
-                    paramList.add(Pair("product_id", productId))
+                is ticker -> {
+                    return listOf(Pair("symbol", productId))
+                }
+                is bookTicker -> {
+                    if (productId != null) {
+                        paramList.add(Pair("symbol", productId))
+                    }
+                    return paramList.toList()
+                }
+                is dayChangeStats -> {
+                    return listOf(Pair("symbol", productId))
+                }
+                is getOrder -> {
 
+                    paramList.add(Pair("symbol", productId))
+                    paramList.add(Pair("orderId", orderId.toString()))
+
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    return paramList.toList()
+                }
+                is cancelOrder -> {
+                    paramList.add(Pair("symbol", productId))
+                    paramList.add(Pair("orderId", orderId.toString()))
+
+                    paramList.add(Pair("timestamp", Date().time.toString()))
                     return paramList.toList()
                 }
                 is listOrders -> {
                     if (productId != null) {
-                        paramList.add(Pair("product_id", productId))
+                        paramList.add(Pair("symbol", productId))
                     }
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    return paramList.toList()
+
+                }
+                is allOrders -> {
+                    paramList.add(Pair("symbol", productId))
+
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    return paramList.toList()
+                }
+                is accounts -> {
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    return paramList.toList()
+                }
+
+
+                is fills -> {
+                    paramList.add(Pair("symbol", productId))
+                    if (startTime != null) {
+                        paramList.add(Pair("startTime", startTime.toString()))
+                    }
+                    if (endTime != null) {
+                        paramList.add(Pair("endTime", endTime.toString()))
+                    }
+                    if (fromTradeId != null) {
+                        paramList.add(Pair("fromId", fromTradeId.toString()))
+
+                    }
+                    if (limit != null) {
+                        paramList.add(Pair("limit", limit.toString()))
+
+                    }
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+
+                    return paramList.toList()
+                }
+
+                is depositHistory -> {
+                    if (currency != null) {
+                        paramList.add(Pair("asset", currency.toString()))
+                    }
+                    if (startTime != null) {
+                        paramList.add(Pair("startTime", startTime.toString()))
+                    }
+                    if (endTime != null) {
+                        paramList.add(Pair("endTime", endTime.toString()))
+                    }
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+
+                    return paramList.toList()
+                }
+                is withdrawHistory -> {
+                    if (currency != null) {
+                        paramList.add(Pair("asset", currency.toString()))
+                    }
+                    if (startTime != null) {
+                        paramList.add(Pair("startTime", startTime.toString()))
+                    }
+                    if (endTime != null) {
+                        paramList.add(Pair("endTime", endTime.toString()))
+                    }
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+
+                    return paramList.toList()
+                }
+                is depositAddress -> {
+                    paramList.add(Pair("asset", currency.toString()))
+
+                    if (status != null) {
+                        paramList.add(Pair("startTime", status.toString()))
+                    }
+                    paramList.add(Pair("timestamp", Date().time.toString()))
+
                     return paramList.toList()
                 }
                 else -> return null
@@ -537,11 +686,14 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
 
-    private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String): JSONObject {
+    private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String, quantity: Double): JSONObject {
         val json = JSONObject()
+        json.put("symbol", productId)
         json.put("side", tradeSide.toString())
         json.put("type", tradeType.toString())
-        json.put("product_id", productId)
+        json.put("quantity", quantity.toString())
+
+        json.put("timestamp", Date().time.toString())
         return json
     }
 
@@ -549,33 +701,42 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         get() {
             when (this) {
                 is orderLimit -> {
-                    val json = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
+                    val json = basicOrderParams(tradeSide, TradeType.LIMIT, productId, quantity)
 
+
+                    json.put("price", price.toString())
+                    json.put("timeInForce", timeInForce.toString())
                     json.put("price", "$price")
+                    json.put("timestamp", Date().time.toString())
+
 
                     return json.toString()
                 }
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
-                    val json = basicOrderParams(tradeSide, TradeType.MARKET, productId)
-
-                    if (funds != null) {
-                        json.put("funds", "$funds")
-                    }
+                    val json = basicOrderParams(tradeSide, TradeType.MARKET, productId, quantity)
                     return json.toString()
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
-                    val json = basicOrderParams(tradeSide, TradeType.STOP, productId)
+                    val json = basicOrderParams(tradeSide, TradeType.STOP, productId, quantity)
 
-                    json.put("price", "$price")
+                    json.put("stopPrice", stopPrice.toString())
                     return json.toString()
                 }
                 is sendCrypto -> {
                     val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
-                    json.put("currency", currency.toString())
-                    json.put("crypto_address", cryptoAddress)
+                    json.put("asset", currency.toString())
+                    json.put("address", destinationAddress)
+                    if (destAddressTag != null) {
+                        json.put("addressTag", destAddressTag)
+                    }
+                    json.put("amount", amount)
+
+                    if (name != null) {
+                        json.put("name", name)
+                    }
+
                     return json.toString()
                 }
                 else -> return ""

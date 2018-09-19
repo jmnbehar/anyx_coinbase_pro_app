@@ -136,7 +136,7 @@ class PriceLineChart : LineChart {
         } else {
             //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
             val filledInCandles = candles.filledInBlanks(granularity)
-            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.time) }.toList()
+            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.closeTime) }.toList()
         }
         val dataSet = LineDataSet(entries, "Chart")
 

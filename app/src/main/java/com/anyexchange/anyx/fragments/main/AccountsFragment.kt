@@ -100,7 +100,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         if (accountTotalCandles.size > entry.x) {
             val candle = accountTotalCandles[entry.x.toInt()]
 
-            var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
+            var timeString = candle.closeTime.toStringWithTimespan(chartTimeSpan)
             timeString = timeString.replace(" ", "\n")
             percentChangeText?.text = timeString
         }
@@ -177,7 +177,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
-                val time = btcProduct.defaultDayCandles[i].time
+                val time = btcProduct.defaultDayCandles[i].closeTime
                 for (account in Account.cryptoAccounts) {
                     val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
                         account.product.defaultDayCandles[i].close

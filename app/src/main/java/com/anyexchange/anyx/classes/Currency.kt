@@ -118,11 +118,11 @@ enum class Currency {
 
 //    private val startDate : Date
 //        get() = when (this) {
-//            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
-//            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).time
-//            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).time
-//            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
-//            else -> GregorianCalendar(2013, Calendar.JANUARY, 1).time
+//            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
+//            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).closeTime
+//            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).closeTime
+//            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
+//            else -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
 //        }
 //
 //    val lifetimeInSeconds : Long
@@ -130,7 +130,7 @@ enum class Currency {
 //            val utcTimeZone = TimeZone.getTimeZone("UTC")
 //            val now = Calendar.getInstance(utcTimeZone)
 //            val nowTime = now.timeInSeconds()
-//            val startTime = startDate.time / 1000
+//            val startTime = startDate.closeTime / 1000
 //            return (nowTime - startTime)
 //        }
 

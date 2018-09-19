@@ -121,7 +121,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
         var candles = candlesForTimespan(timespan, tradingPair).toMutableList()
 
-        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: longAgoInSeconds
+        val lastCandleTime = candles.lastOrNull()?.closeTime?.toLong() ?: longAgoInSeconds
         val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
 
 //        if (timespan != product.candlesTimespan) {
@@ -141,13 +141,13 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
             CBProApi.candles(apiInitData,tradingPair?.id ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
-                    val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
+                    val newLastCandleTime = candleList.lastOrNull()?.closeTime?.toInt() ?: 0.0
                     didGetNewCandle = (lastCandleTime != newLastCandleTime)
                     if (didGetNewCandle) {
                         val timespanStart = nowInSeconds - timespanLong
 
                         if (candles.isNotEmpty()) {
-                            val firstInTimespan = candles.indexOfFirst { candle -> candle.time >= timespanStart }
+                            val firstInTimespan = candles.indexOfFirst { candle -> candle.closeTime >= timespanStart }
                             candles = if (firstInTimespan >= 0) {
                                 candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
                             } else {
