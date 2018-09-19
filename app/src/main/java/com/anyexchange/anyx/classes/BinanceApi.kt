@@ -167,10 +167,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     class accounts(private val initData: ApiInitData?) : BinanceApi(initData) {
 
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiAccount>) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProAccount>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val apiAccountList: List<ApiAccount> = Gson().fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                    val apiAccountList: List<CBProAccount> = Gson().fromJson(result.value, object : TypeToken<List<CBProAccount>>() {}.type)
                     onComplete(apiAccountList)
                 } catch (e: Exception) {
                     onFailure(Result.Failure(FuelError(e)))
@@ -202,10 +202,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             if (CBProApi.credentials == null) {
                 val fiatCurrency = Account.defaultFiatCurrency
                 val filteredProductList = productList.filter { it.quoteCurrency == fiatCurrency }
-                val fiatAccount = ApiAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
+                val fiatAccount = CBProAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
                 Account.fiatAccounts = listOf(Account(Product.fiatProduct(fiatCurrency), fiatAccount))
                 val tempCryptoAccounts = filteredProductList.map {
-                    val apiAccount = ApiAccount("", it.currency.toString(), "0.0", "", "0.0", "")
+                    val apiAccount = CBProAccount("", it.currency.toString(), "0.0", "", "0.0", "")
                     Account(it, apiAccount)
                 }
                 Account.cryptoAccounts = tempCryptoAccounts
@@ -249,16 +249,15 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class account(initData: ApiInitData?, val accountId: String) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiAccount?) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (CBProAccount?) -> Unit) {
             this.executeRequest(onFailure) { result ->
-                //TODO: why does this sometimes get a jsonArray instead of a JSON?
                 val gson = Gson()
                 try {
-                    val apiAccount: ApiAccount = gson.fromJson(result.value, object : TypeToken<ApiAccount>() {}.type)
+                    val apiAccount: CBProAccount = gson.fromJson(result.value, object : TypeToken<CBProAccount>() {}.type)
                     onComplete(apiAccount)
                 } catch (e: JsonSyntaxException) {
                     try {
-                        val apiAccountList: List<ApiAccount> = gson.fromJson(result.value, object : TypeToken<List<ApiAccount>>() {}.type)
+                        val apiAccountList: List<CBProAccount> = gson.fromJson(result.value, object : TypeToken<List<CBProAccount>>() {}.type)
                         val apiAccountFirst = apiAccountList.firstOrNull()
                         if (apiAccountFirst != null) {
                             onComplete(apiAccountList.firstOrNull())
@@ -275,10 +274,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
     class products(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiProduct>) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProProduct>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val productList: List<ApiProduct> = Gson().fromJson(result.value, object : TypeToken<List<ApiProduct>>() {}.type)
+                    val productList: List<CBProProduct> = Gson().fromJson(result.value, object : TypeToken<List<CBProProduct>>() {}.type)
                     onComplete(productList)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(e)))
@@ -291,10 +290,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class ticker(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
         val tradingPair = TradingPair(productId)
         constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.id)
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (ApiTicker) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (CBProTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val ticker: ApiTicker = Gson().fromJson(result.value, object : TypeToken<ApiTicker>() {}.type)
+                    val ticker: CBProTicker = Gson().fromJson(result.value, object : TypeToken<CBProTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
                     val account = Account.forCurrency(tradingPair.baseCurrency)
                     if (price != null) {
@@ -314,10 +313,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
     class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiOrder>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProOrder>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
-                    val apiOrderList: List<ApiOrder> = Gson().fromJson(result.value, object : TypeToken<List<ApiOrder>>() {}.type)
+                    val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
                     if (context != null) {
                         Prefs(context).stashOrders(result.value)
                     }
@@ -332,12 +331,12 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class cancelOrder(initData: ApiInitData?, val productId: String, val orderId: Long) : BinanceApi(initData)
 
     class fills(initData: ApiInitData?, val productId: String, val startTime: Long?, val endTime: Long?, val fromTradeId: Long?, val limit: Int? = null) : BinanceApi(initData) {
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<ApiFill>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProFill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
-                        val apiFillList: List<ApiFill> = Gson().fromJson(result.value, object : TypeToken<List<ApiFill>>() {}.type)
+                        val apiFillList: List<CBProFill> = Gson().fromJson(result.value, object : TypeToken<List<CBProFill>>() {}.type)
                         if (prefs.areAlertFillsActive) {
                             checkForFillAlerts(apiFillList, productId)
                         }
@@ -351,7 +350,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
             }
         }
-        private fun checkForFillAlerts(apiFillList: List<ApiFill>, productId: String) {
+        private fun checkForFillAlerts(apiFillList: List<CBProFill>, productId: String) {
             context?.let {
                 val stashedFills = Prefs(context).getStashedFills(productId)
 
@@ -406,11 +405,11 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is account -> Method.GET
                 is accountHistory -> Method.GET
                 is products -> Method.GET
+
                 is cancelOrder -> Method.DELETE
                 is listOrders -> Method.GET
                 is getOrder -> Method.GET
                 is fills -> Method.GET
-                is depositAddress -> Method.POST
 
                 is sendCrypto -> Method.POST
                 is depositHistory -> Method.GET
@@ -446,7 +445,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is sendCrypto      -> ApiType.WAPI
                 is depositHistory  -> ApiType.WAPI
                 is withdrawHistory -> ApiType.WAPI
-                is sendCrypto      -> ApiType.WAPI
                 is depositAddress  -> ApiType.WAPI
                 else -> ApiType.REST
             }

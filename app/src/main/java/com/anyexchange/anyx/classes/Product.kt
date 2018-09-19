@@ -10,7 +10,7 @@ import java.util.*
  */
 
 class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
-    constructor(apiProduct: ApiProduct, tradingPairs: List<TradingPair>)
+    constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
             : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
             Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
 

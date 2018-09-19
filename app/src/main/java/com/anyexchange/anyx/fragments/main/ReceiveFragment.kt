@@ -76,7 +76,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun showAddressInfo(addressInfo: ApiDepositAddress?) {
+    private fun showAddressInfo(addressInfo: CBProDepositAddress?) {
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)

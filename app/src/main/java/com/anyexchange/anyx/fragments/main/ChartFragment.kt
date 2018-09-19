@@ -193,8 +193,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             historyPager = rootView.history_view_pager
 
-            val stashedFills: List<ApiFill> = prefs.getStashedFills(tempAccount.product.id)
-            val stashedOrders: List<ApiOrder> = prefs.getStashedOrders(tempAccount.product.id)
+            val stashedFills: List<CBProFill> = prefs.getStashedFills(tempAccount.product.id)
+            val stashedOrders: List<CBProOrder> = prefs.getStashedOrders(tempAccount.product.id)
 
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
@@ -456,7 +456,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             updateFills(productId, stashedOrders, stashedFills)
         }
     }
-    private fun updateFills(productId: String, orderList: List<ApiOrder>, stashedFills: List<ApiFill>) {
+    private fun updateFills(productId: String, orderList: List<CBProOrder>, stashedFills: List<CBProFill>) {
         CBProApi.fills(apiInitData, productId = productId).getAndStash({ _ ->
             if (lifecycle.isCreatedOrResumed) {
                 updateHistoryPagerAdapter(orderList, stashedFills)
@@ -596,7 +596,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun orderOnClick(order: ApiOrder) {
+    private fun orderOnClick(order: CBProOrder) {
         alert {
             title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
@@ -636,7 +636,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }.show()
     }
 
-    private fun fillOnClick(fill: ApiFill) {
+    private fun fillOnClick(fill: CBProFill) {
         alert {
             title = resources.getString(R.string.chart_history_fill)
 
@@ -800,8 +800,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            var filteredOrders: List<ApiOrder>? = null
-            var filteredFills: List<ApiFill>? = null
+            var filteredOrders: List<CBProOrder>? = null
+            var filteredFills: List<CBProFill>? = null
             CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
@@ -825,7 +825,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>? = null) {
+    private fun updateHistoryPagerAdapter(orderList: List<CBProOrder>, fillList: List<CBProFill>? = null) {
         (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
         fillList?.let {
             (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it

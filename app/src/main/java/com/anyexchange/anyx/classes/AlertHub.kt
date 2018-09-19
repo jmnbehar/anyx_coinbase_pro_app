@@ -27,7 +27,7 @@ object AlertHub {
         postAlert(channelId, alert.title, alert.text, alert.tag, currency, context)
     }
 
-    fun triggerFillAlert(fill: ApiFill, context: Context) {
+    fun triggerFillAlert(fill: CBProFill, context: Context) {
         val channelId = "Fill_Alerts"
 
         val tradingPair = TradingPair(fill.product_id)

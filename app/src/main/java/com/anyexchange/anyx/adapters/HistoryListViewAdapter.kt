@@ -20,16 +20,16 @@ import org.jetbrains.anko.backgroundColor
  */
 
 class HistoryListViewAdapter(val context: Context, private val isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources,
-                             private var orderOnClick: (ApiOrder) -> Unit = { }, private var fillOnClick: (ApiFill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
-    var orders: List<ApiOrder> = listOf()
-    var fills: List<ApiFill> = listOf()
+                             private var orderOnClick: (CBProOrder) -> Unit = { }, private var fillOnClick: (CBProFill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
+    var orders: List<CBProOrder> = listOf()
+    var fills: List<CBProFill> = listOf()
 
     init {
         @Suppress("UNCHECKED_CAST")
         if (isOrderList) {
-            orders = ordersOrFills as List<ApiOrder>
+            orders = ordersOrFills as List<CBProOrder>
         } else {
-            fills = ordersOrFills as List<ApiFill>
+            fills = ordersOrFills as List<CBProFill>
         }
     }
 

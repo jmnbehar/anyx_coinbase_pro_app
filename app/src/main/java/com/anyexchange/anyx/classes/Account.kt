@@ -7,7 +7,7 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
+class Account(var product: Product, var apiAccount: CBProAccount): BaseAccount() {
     override val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 
@@ -31,7 +31,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
 
     var coinbaseAccount: CoinbaseAccount? = null
 
-    var depositInfo: ApiDepositAddress? = null
+    var depositInfo: CBProDepositAddress? = null
 
     fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
@@ -74,7 +74,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
-        val dummyAccount = Account(Product.fiatProduct(Currency.USD), ApiAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""))
+        val dummyAccount = Account(Product.fiatProduct(Currency.USD), CBProAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""))
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
@@ -123,7 +123,7 @@ class Account(var product: Product, var apiAccount: ApiAccount): BaseAccount() {
         }
     }
 
-    class PaymentMethod(val apiPaymentMethod: ApiPaymentMethod) : BaseAccount() {
+    class PaymentMethod(val apiPaymentMethod: CBProPaymentMethod) : BaseAccount() {
         override val id: String = apiPaymentMethod.id
         override val balance = apiPaymentMethod.balance?.toDoubleOrNull()
         override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD

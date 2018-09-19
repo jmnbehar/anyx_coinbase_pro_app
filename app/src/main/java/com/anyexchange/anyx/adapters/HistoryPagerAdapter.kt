@@ -11,7 +11,7 @@ import com.anyexchange.anyx.fragments.main.HistoryListFragment
  * Created by josephbehar on 2/17/18.
  */
 
-class HistoryPagerAdapter(fm: FragmentManager, var orders: List<ApiOrder>, var fills: List<ApiFill>, private var orderOnClick: (ApiOrder) -> Unit, private var fillOnClick: (ApiFill) -> Unit) : FragmentStatePagerAdapter(fm) {
+class HistoryPagerAdapter(fm: FragmentManager, var orders: List<CBProOrder>, var fills: List<CBProFill>, private var orderOnClick: (CBProOrder) -> Unit, private var fillOnClick: (CBProFill) -> Unit) : FragmentStatePagerAdapter(fm) {
 
     override fun getItem(i: Int): Fragment {
         when (i) {

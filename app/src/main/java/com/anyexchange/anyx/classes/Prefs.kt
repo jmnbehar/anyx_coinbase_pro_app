@@ -111,7 +111,7 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
+                        val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
                         val newAccount = Account(product, apiAccount)
                         newAccountList.add(newAccount)
@@ -148,7 +148,7 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
+                        val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
                         val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
                         if (dayCandleOutliers.isEmpty()) {
@@ -247,10 +247,10 @@ class Prefs (var context: Context) {
         prefs.edit().putString(STASHED_ORDERS, orderListString)
                 .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
-    fun getStashedOrders(productId: String) : List<ApiOrder> {
+    fun getStashedOrders(productId: String) : List<CBProOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
         return try {
-            val apiOrderList: List<ApiOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<ApiOrder>>() {}.type)
+            val apiOrderList: List<CBProOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<CBProOrder>>() {}.type)
             apiOrderList.filter { it.product_id == productId }
         } catch (e: Exception) {
             listOf()
@@ -274,10 +274,10 @@ class Prefs (var context: Context) {
             }
         }
     }
-    fun getStashedFills(productId: String) : List<ApiFill> {
+    fun getStashedFills(productId: String) : List<CBProFill> {
         val fillListJson = prefs.getString(STASHED_FILLS + productId, null)
         return try {
-            val apiFillList: List<ApiFill> = Gson().fromJson(fillListJson, object : TypeToken<List<ApiFill>>() {}.type)
+            val apiFillList: List<CBProFill> = Gson().fromJson(fillListJson, object : TypeToken<List<CBProFill>>() {}.type)
             apiFillList.filter { it.product_id == productId }
         } catch (e: Exception) {
             listOf()

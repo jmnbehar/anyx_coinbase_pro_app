@@ -20,21 +20,21 @@ class HistoryListFragment : Fragment() {
     private lateinit var historyListAdapter: HistoryListViewAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private var orders = listOf<ApiOrder>()
-    private var onOrderClick: (ApiOrder) -> Unit = { }
-    private var fills = listOf<ApiFill>()
-    private var onFillClick: (ApiFill) -> Unit = { }
+    private var orders = listOf<CBProOrder>()
+    private var onOrderClick: (CBProOrder) -> Unit = { }
+    private var fills = listOf<CBProFill>()
+    private var onFillClick: (CBProFill) -> Unit = { }
     private var isOrderList = true
 
     companion object {
-        fun newOrderInstance(orders: List<ApiOrder>, onClick: (ApiOrder) -> Unit) : HistoryListFragment {
+        fun newOrderInstance(orders: List<CBProOrder>, onClick: (CBProOrder) -> Unit) : HistoryListFragment {
             val newFragment = HistoryListFragment()
             newFragment.orders = orders
             newFragment.onOrderClick = onClick
             newFragment.isOrderList = true
             return newFragment
         }
-        fun newFillInstance(fills: List<ApiFill>, onClick: (ApiFill) -> Unit) : HistoryListFragment {
+        fun newFillInstance(fills: List<CBProFill>, onClick: (CBProFill) -> Unit) : HistoryListFragment {
             val newFragment = HistoryListFragment()
             newFragment.fills = fills
             newFragment.onFillClick = onClick
