@@ -7,7 +7,7 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: CBProAccount): BaseAccount() {
+class Account(var product: Product, var apiAccount: CBProAccount, var exchange: Exchange): BaseAccount() {
     override val balance: Double
         get() = apiAccount.balance.toDoubleOrZero()
 
@@ -74,7 +74,7 @@ class Account(var product: Product, var apiAccount: CBProAccount): BaseAccount()
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
-        val dummyAccount = Account(Product.fiatProduct(Currency.USD), CBProAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""))
+        val dummyAccount = Account(Product.fiatProduct(Currency.USD), CBProAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""), Exchange.CBPro)
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
@@ -96,7 +96,7 @@ class Account(var product: Product, var apiAccount: CBProAccount): BaseAccount()
                     candlesUpdated++
                     if (candlesUpdated == cryptoAccounts.size) {
                         if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashedCryptoAccountList = Account.cryptoAccounts
+                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts
                         }
                         onComplete()
                     }

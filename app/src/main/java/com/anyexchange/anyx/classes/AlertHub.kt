@@ -27,21 +27,21 @@ object AlertHub {
         postAlert(channelId, alert.title, alert.text, alert.tag, currency, context)
     }
 
-    fun triggerFillAlert(fill: CBProFill, context: Context) {
+    fun triggerFillAlert(fill: Fill, context: Context) {
         val channelId = "Fill_Alerts"
 
-        val tradingPair = TradingPair(fill.product_id)
-        val side = TradeSide.forString(fill.side)
-        val size = fill.size
+        val tradingPair = fill.tradingPair
+        val side = fill.side
+        val size = fill.amount
         val notificationTitle = "${tradingPair.baseCurrency} Fill Alert"
         val price = if (tradingPair.quoteCurrency.isFiat) {
-            fill.price.toDoubleOrNull()?.fiatFormat(tradingPair.quoteCurrency)
+            fill.price.fiatFormat(tradingPair.quoteCurrency)
         } else {
-            "${fill.price.toDoubleOrNull()?.btcFormat()} ${tradingPair.quoteCurrency}"
+            "${fill.price.btcFormat()} ${tradingPair.quoteCurrency}"
         }
 
         val notificationText = "${side.toString().capitalize()} order of $size ${tradingPair.baseCurrency} filled at $price"
-        val notificationTag = "FillAlert_" + fill.trade_id
+        val notificationTag = "FillAlert_" + fill.id
 
         postAlert(channelId, notificationTitle, notificationText, notificationTag, tradingPair.baseCurrency, context)
     }

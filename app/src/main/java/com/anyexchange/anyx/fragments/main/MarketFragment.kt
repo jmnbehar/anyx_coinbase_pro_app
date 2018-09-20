@@ -99,7 +99,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                         productsUpdated++
                         if (productsUpdated == accountListSize) {
                             context?.let {
-                                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+                                Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
                             }
                             (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                             updateAccountsFragment()

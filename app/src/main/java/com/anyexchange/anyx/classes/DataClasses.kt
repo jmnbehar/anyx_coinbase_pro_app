@@ -53,3 +53,4 @@ enum class TradeType {
         }
     }
 }
+

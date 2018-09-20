@@ -33,7 +33,10 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                 yearCandles = Array(tradingPairCount) { i -> if (i < candlesSizeTemp) { yearCandlesTemp[i] } else { listOf() } }
             }
         }
-
+    val defaultTradingPair: TradingPair?
+        get() {
+            return tradingPairs.find { it.quoteCurrency == Account.defaultFiatCurrency }
+        }
 
     private fun tradingPairIndex(tradingPair: TradingPair?) : Int {
         //null trading pair will simply select the default fiat pair
@@ -138,7 +141,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            CBProApi.candles(apiInitData,tradingPair?.id ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
+            CBProApi.candles(apiInitData,tradingPair?.idForExchange(Exchange.CBPro) ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.closeTime?.toInt() ?: 0.0

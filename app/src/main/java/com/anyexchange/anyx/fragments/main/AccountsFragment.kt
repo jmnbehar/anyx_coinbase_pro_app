@@ -177,7 +177,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
-                val time = btcProduct.defaultDayCandles[i].closeTime
+                val openTime = btcProduct.defaultDayCandles[i].openTime
+                val closeTime = btcProduct.defaultDayCandles[i].closeTime
                 for (account in Account.cryptoAccounts) {
                     val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
                         account.product.defaultDayCandles[i].close
@@ -186,7 +187,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                     }
                     totalCandleValue += (accountCandleValue * account.balance)
                 }
-                val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
+
+                val newCandle = Candle(openTime, closeTime, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
                 accountTotalCandleList.add(newCandle)
             }
             return accountTotalCandleList

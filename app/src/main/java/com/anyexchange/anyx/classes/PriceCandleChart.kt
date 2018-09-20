@@ -130,7 +130,7 @@ class PriceCandleChart : CandleStickChart {
 
     fun addCandles(candles: List<Candle>, currency: Currency) {
         val entries = if (candles.isEmpty()) {
-            val now = Date().time.toDouble()
+            val now = Date().time
             val blankEntry = CandleEntry(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {

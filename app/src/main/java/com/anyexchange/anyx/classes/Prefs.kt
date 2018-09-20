@@ -102,6 +102,7 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
 
+    //For now assume all fiat accounts are CBPro
     var stashedFiatAccountList: List<Account>
         get() {
             val gson = Gson()
@@ -113,7 +114,7 @@ class Prefs (var context: Context) {
                     try {
                         val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
-                        val newAccount = Account(product, apiAccount)
+                        val newAccount = Account(product, apiAccount, Exchange.CBPro)
                         newAccountList.add(newAccount)
                     } catch (e: Exception) {
                         return newAccountList
@@ -139,7 +140,7 @@ class Prefs (var context: Context) {
             }
         }
 
-    var stashedCryptoAccountList: List<Account>
+    var stashedCBProCryptoAccountList: List<Account>
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()
@@ -150,9 +151,9 @@ class Prefs (var context: Context) {
                     try {
                         val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
-                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
+                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.toString() != product.id }
                         if (dayCandleOutliers.isEmpty()) {
-                            val newAccount = Account(product, apiAccount)
+                            val newAccount = Account(product, apiAccount, Exchange.CBPro)
                             newAccountList.add(newAccount)
                         } else {
                             return mutableListOf()
@@ -247,44 +248,46 @@ class Prefs (var context: Context) {
         prefs.edit().putString(STASHED_ORDERS, orderListString)
                 .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
-    fun getStashedOrders(productId: String) : List<CBProOrder> {
+    fun getStashedOrders(tradingPair: TradingPair, exchange: Exchange) : List<CBProOrder> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
         return try {
             val apiOrderList: List<CBProOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<CBProOrder>>() {}.type)
-            apiOrderList.filter { it.product_id == productId }
+            apiOrderList.filter { it.product_id == tradingPair.idForExchange(exchange) }
         } catch (e: Exception) {
             listOf()
         }
     }
+
     fun getDateOrdersLastStashed(): Long {
         return prefs.getLong(STASHED_FILLS_DATE, 0)
     }
 
-
-    fun stashFills(fillListJson: String?, productId: String) {
-        //TODO: remove this line in the next version, its just there to delete old stuff
-        prefs.edit().remove(STASHED_FILLS).apply()
-        prefs.edit().putString(STASHED_FILLS + productId, fillListJson)
-                    .putLong(STASHED_FILLS_DATE + productId, Date().time).apply()
+    fun stashFills(fillList: List<Fill>, tradingPair: TradingPair, exchange: Exchange) {
+        val fillListJson = Gson().toJson(fillList)
+        prefs.edit().putString(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange), fillListJson)
+                    .putLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), Date().time).apply()
     }
+
     fun nukeStashedFills() {
         for (product in Account.cryptoAccounts.map { it.product }) {
-            for (tradingPair in product.tradingPairs) {
-                prefs.edit().remove(STASHED_FILLS + tradingPair.id).apply()
+            for (exchange in Exchange.values()) {
+                for (tradingPair in product.tradingPairs) {
+                    prefs.edit().remove(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange)).apply()
+                }
             }
         }
     }
-    fun getStashedFills(productId: String) : List<CBProFill> {
-        val fillListJson = prefs.getString(STASHED_FILLS + productId, null)
+    fun getStashedFills(tradingPair: TradingPair, exchange: Exchange) : List<Fill> {
+        val fillListJson = prefs.getString(STASHED_FILLS + exchange + tradingPair.idForExchange(exchange), null)
         return try {
-            val apiFillList: List<CBProFill> = Gson().fromJson(fillListJson, object : TypeToken<List<CBProFill>>() {}.type)
-            apiFillList.filter { it.product_id == productId }
+            val apiFillList: List<Fill> = Gson().fromJson(fillListJson, object : TypeToken<List<Fill>>() {}.type)
+            apiFillList.filter { it.tradingPair == tradingPair }
         } catch (e: Exception) {
             listOf()
         }
     }
-    fun getDateFillsLastStashed(productId: String): Long {
-        return prefs.getLong(STASHED_FILLS_DATE + productId, 0)
+    fun getDateFillsLastStashed(tradingPair: TradingPair, exchange: Exchange): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), 0)
     }
 
     var areAlertFillsActive: Boolean

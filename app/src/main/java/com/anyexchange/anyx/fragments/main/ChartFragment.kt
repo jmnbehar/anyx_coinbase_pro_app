@@ -193,8 +193,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             historyPager = rootView.history_view_pager
 
-            val stashedFills: List<CBProFill> = prefs.getStashedFills(tempAccount.product.id)
-            val stashedOrders: List<CBProOrder> = prefs.getStashedOrders(tempAccount.product.id)
+            val exchange = account.exchange
+            val tradingPair = TradingPair(tempAccount.product.id)
+            val stashedFills: List<Fill> = prefs.getStashedFills(tradingPair, account.exchange)
+            val stashedOrders: List<CBProOrder> = prefs.getStashedOrders(tradingPair, exchange)
 
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
@@ -202,7 +204,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
 
             val tradingPairs: List<TradingPair> = if (tempAccount.product.tradingPairs.isNotEmpty()) {
-                tempAccount.product.tradingPairs.sortedBy { tradingPair ->  tradingPair.quoteCurrency.orderValue }
+                tempAccount.product.tradingPairs.sortedBy { tempTradingPair -> tempTradingPair.quoteCurrency.orderValue }
             } else {
                 listOf()
             }
@@ -435,29 +437,30 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun checkOrdersAndFills(productId: String, context: Context) {
+    private fun checkOrdersAndFills(tradingPair: TradingPair, context: Context) {
         val prefs = Prefs(context)
-        val stashedFills = prefs.getStashedFills(productId)
-        val stashedOrders = prefs.getStashedOrders(productId)
+        val exchange = account.exchange
+        val stashedFills = prefs.getStashedFills(tradingPair, exchange)
+        val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
 
         val dateOrdersLastStashed = prefs.getDateOrdersLastStashed()
-        val dateFillsLastStashed  = prefs.getDateFillsLastStashed(productId)
+        val dateFillsLastStashed  = prefs.getDateFillsLastStashed(tradingPair, exchange)
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
             CBProApi.listOrders(apiInitData).getAndStash({
-                updateFills(productId, stashedOrders, stashedFills)
+                updateFills(tradingPair, stashedOrders, stashedFills)
             }) { newOrderList ->
-                updateFills(productId, newOrderList,  stashedFills)
+                updateFills(tradingPair, newOrderList,  stashedFills)
             }
         } else if (dateFillsLastStashed + TimeInMillis.fiveMinutes > nowInSeconds) {
-            updateFills(productId, stashedOrders, stashedFills)
+            updateFills(tradingPair, stashedOrders, stashedFills)
         } else if (dateFillsLastStashed + TimeInMillis.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
-            updateFills(productId, stashedOrders, stashedFills)
+            updateFills(tradingPair, stashedOrders, stashedFills)
         }
     }
-    private fun updateFills(productId: String, orderList: List<CBProOrder>, stashedFills: List<CBProFill>) {
-        CBProApi.fills(apiInitData, productId = productId).getAndStash({ _ ->
+    private fun updateFills(tradingPair: TradingPair, orderList: List<CBProOrder>, stashedFills: List<Fill>) {
+        CBProApi.fills(apiInitData, tradingPair).getAndStash({ _ ->
             if (lifecycle.isCreatedOrResumed) {
                 updateHistoryPagerAdapter(orderList, stashedFills)
             }
@@ -494,17 +497,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
     private fun completeSwitchAccount(account: Account) {
         blockRefresh = false
+        val tradingPair =
+
         context?.let {
-            val prefs = Prefs(it)
-            val productId = account.product.id
-            val stashedFills = prefs.getStashedFills(productId)
-            val stashedOrders = prefs.getStashedOrders(productId)
-            addCandlesToActiveChart(candles, account.currency)
-            setPercentChangeText(timespan)
-            txt_chart_name.text = account.currency.fullName
-            setButtonsAndBalanceText(account)
-            updateHistoryPagerAdapter(stashedOrders, stashedFills)
-            checkOrdersAndFills(productId, it)
+            account.product.defaultTradingPair?.let { tradingPair ->
+                val prefs = Prefs(it)
+                val exchange = account.exchange
+                val stashedFills = prefs.getStashedFills(tradingPair, exchange)
+                val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
+                addCandlesToActiveChart(candles, account.currency)
+                setPercentChangeText(timespan)
+                txt_chart_name.text = account.currency.fullName
+                setButtonsAndBalanceText(account)
+                updateHistoryPagerAdapter(stashedOrders, stashedFills)
+                checkOrdersAndFills(tradingPair, it)
+            }
         }
     }
 
@@ -601,7 +608,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
             val createdTimeRaw = order.created_at
-            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
+            val createdTimeDate = createdTimeRaw.dateFromCBProApiDateString()
             val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
 
             val fillFees = order.fill_fees.toDoubleOrNull()?.format(quoteCurrency)
@@ -636,22 +643,20 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }.show()
     }
 
-    private fun fillOnClick(fill: CBProFill) {
+    private fun fillOnClick(fill: Fill) {
         alert {
             title = resources.getString(R.string.chart_history_fill)
 
             val layoutWidth = 1000
-            val createdTimeRaw = fill.created_at
-            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
-            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
+            val createdTimeString = fill.time.format("h:mma, MM/dd/yyyy")
 
-            val fee = fill.fee.toDouble().format(quoteCurrency)
-            val price = fill.price.toDouble().format(quoteCurrency)
-            val size = fill.size.toDouble().btcFormat()
+            val fee = fill.fee.format(quoteCurrency)
+            val price = fill.price.format(quoteCurrency)
+            val size = fill.amount.btcFormat()
             customView {
                 linearLayout {
                     verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, fill.side).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_side_label, fill.side.toString()).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
                         horizontalLayout(R.string.chart_history_fee_label, fee).lparams(width = layoutWidth) {}
@@ -664,7 +669,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        val time = entry.data as? Double
+        val time = entry.data as? Long
         priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
         txt_chart_change_or_date.text = time?.toStringWithTimespan(timespan)
         context?.let {
@@ -801,7 +806,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             var filteredOrders: List<CBProOrder>? = null
-            var filteredFills: List<CBProFill>? = null
+            var filteredFills: List<Fill>? = null
             CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
@@ -810,9 +815,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }
                 }
             }
-            CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(onFailure) { apiFillList ->
+            CBProApi.fills(apiInitData, tradingPair).getAndStash(onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredFills = apiFillList.filter { it.product_id == account.product.id }
+                    filteredFills = fillList.filter { it.tradingPair == tradingPair }
                     if (filteredOrders != null && filteredFills != null) {
                         updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
                     }
@@ -825,7 +830,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(orderList: List<CBProOrder>, fillList: List<CBProFill>? = null) {
+    private fun updateHistoryPagerAdapter(orderList: List<CBProOrder>, fillList: List<Fill>? = null) {
         (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
         fillList?.let {
             (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it

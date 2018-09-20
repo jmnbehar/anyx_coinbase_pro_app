@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
                 dataFragment?.destroyData(this)
-                prefs.stashedCryptoAccountList = mutableListOf()
+                prefs.stashedCBProCryptoAccountList = mutableListOf()
                 prefs.stashedFiatAccountList = mutableListOf()
 
                 prefs.isLoggedIn = false

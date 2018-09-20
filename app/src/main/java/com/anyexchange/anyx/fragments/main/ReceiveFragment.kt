@@ -147,7 +147,7 @@ class ReceiveFragment : RefreshFragment() {
                 showAddressInfo(depositInfo)
             }
             context?.let {
-                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+                Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
             }
         }
     }

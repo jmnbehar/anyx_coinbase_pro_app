@@ -1,7 +1,6 @@
 package com.anyexchange.anyx.adapters.spinnerAdapters
 
 import android.content.Context
-import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -12,12 +11,11 @@ import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.TradingPair
 import kotlinx.android.synthetic.main.list_row_trading_pair.view.*
 import org.jetbrains.anko.backgroundColor
-import org.jetbrains.anko.textColor
 
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class TradingPairSpinnerAdapter(context: Context, var tradingPairList: List<TradingPair>) :
+class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: List<TradingPair>) :
         ArrayAdapter<TradingPair>(context, layoutId, textResId, tradingPairList) {
 
     companion object {

@@ -22,8 +22,8 @@ class HistoryListFragment : Fragment() {
 
     private var orders = listOf<CBProOrder>()
     private var onOrderClick: (CBProOrder) -> Unit = { }
-    private var fills = listOf<CBProFill>()
-    private var onFillClick: (CBProFill) -> Unit = { }
+    private var fills = listOf<Fill>()
+    private var onFillClick: (Fill) -> Unit = { }
     private var isOrderList = true
 
     companion object {
@@ -34,7 +34,7 @@ class HistoryListFragment : Fragment() {
             newFragment.isOrderList = true
             return newFragment
         }
-        fun newFillInstance(fills: List<CBProFill>, onClick: (CBProFill) -> Unit) : HistoryListFragment {
+        fun newFillInstance(fills: List<Fill>, onClick: (Fill) -> Unit) : HistoryListFragment {
             val newFragment = HistoryListFragment()
             newFragment.fills = fills
             newFragment.onFillClick = onClick

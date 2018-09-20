@@ -130,7 +130,7 @@ class PriceLineChart : LineChart {
 
     fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
         val entries = if (candles.isEmpty()) {
-            val now = Date().time.toDouble()
+            val now = Date().time
             val blankEntry = Entry(0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {

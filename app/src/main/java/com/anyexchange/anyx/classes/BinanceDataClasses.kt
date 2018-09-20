@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
-//Data classes for Binance  Api Calls
+//Data classes for Binance  Exchange Calls
 
 data class BinanceExchangeInfo(
         val timezone: String,
@@ -49,20 +49,26 @@ data class BinanceDepth(
         val asks: List<List<Any>>
 )
 
-data class BinanceFill(
-        val symbol: String?,
+data class BinanceGeneralFill(
         val id: String,
-        val orderId: Long?,
         val price: Double,
         val qty: Double,
-        val commission: Double?,
-        val commissionAsset: String?,
         val time: Long,
-        val isBuyerMaker: Boolean?,
-        val isBuyer: Boolean?,
-        val isMaker: Boolean?,
-        val isBestMatch: Boolean
-)
+        val isBuyerMaker: Boolean,
+        val isBestMatch: Boolean)
+
+data class BinanceAccountFill(
+        val symbol: String,
+        val id: String,
+        val orderId: Long,
+        val price: Double,
+        val qty: Double,
+        val commission: Double,
+        val commissionAsset: String,
+        val time: Long,
+        val isBuyer: Boolean,
+        val isMaker: Boolean,
+        val isBestMatch: Boolean)
 
 data class BinanceAggregateFill(
         val a: String,  // Aggregate tradeId

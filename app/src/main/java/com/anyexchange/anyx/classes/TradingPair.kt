@@ -5,10 +5,15 @@ class TradingPair(val baseCurrency: Currency, val quoteCurrency: Currency) {
             if (id.length >= 3) { Currency.forString(id.substring(0, 3)) ?: Currency.BTC } else { Currency.BTC },
             if (id.length >= 7) { Currency.forString(id.substring(4, 7)) ?: Currency.USD } else { Currency.USD })
 
-    val id = baseCurrency.toString() + "-" + quoteCurrency.toString()
+    fun idForExchange(exchange: Exchange) : String {
+        return when (exchange) {
+            Exchange.CBPro -> baseCurrency.toString() + "-" + quoteCurrency.toString()
+            Exchange.Binance -> baseCurrency.toString() + quoteCurrency.toString()
+        }
+    }
 
     override fun toString(): String {
-        return id
+        return idForExchange(Exchange.CBPro)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -20,6 +25,6 @@ class TradingPair(val baseCurrency: Currency, val quoteCurrency: Currency) {
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return toString().hashCode()
     }
 }

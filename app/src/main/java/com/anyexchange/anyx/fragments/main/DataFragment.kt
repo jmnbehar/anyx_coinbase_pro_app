@@ -36,7 +36,7 @@ class DataFragment : Fragment() {
         backupCryptoAccountList = Account.cryptoAccounts
         context?.let {
             val prefs = Prefs(it)
-            prefs.stashedCryptoAccountList = Account.cryptoAccounts
+            prefs.stashedCBProCryptoAccountList = Account.cryptoAccounts
             prefs.stashedFiatAccountList = Account.fiatAccounts
             prefs.stashedPaymentMethodList = Account.paymentMethods
         }
@@ -69,7 +69,7 @@ class DataFragment : Fragment() {
         if (backupCryptoAccountList.isNotEmpty()) {
             Account.cryptoAccounts = backupCryptoAccountList
         } else if (Account.cryptoAccounts.isEmpty()){
-            Account.cryptoAccounts = prefs.stashedCryptoAccountList
+            Account.cryptoAccounts = prefs.stashedCBProCryptoAccountList
         }
         if (backupPaymentMethodList.isNotEmpty()) {
             Account.paymentMethods = backupPaymentMethodList
@@ -87,7 +87,7 @@ class DataFragment : Fragment() {
 //        prefs.apiKey = null
 //        prefs.apiSecret = null
 //        prefs.passphrase = null
-        prefs.stashedCryptoAccountList = mutableListOf()
+        prefs.stashedCBProCryptoAccountList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
 
     }

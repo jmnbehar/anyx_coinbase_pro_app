@@ -27,6 +27,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     val context = initData?.context
     val returnToLogin = initData?.returnToLogin ?:  { }
 
+    val binanceExchange = Exchange.Binance
+
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
     companion object {
@@ -203,17 +205,17 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 val fiatCurrency = Account.defaultFiatCurrency
                 val filteredProductList = productList.filter { it.quoteCurrency == fiatCurrency }
                 val fiatAccount = CBProAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
-                Account.fiatAccounts = listOf(Account(Product.fiatProduct(fiatCurrency), fiatAccount))
+                Account.fiatAccounts = listOf(Account(Product.fiatProduct(fiatCurrency), fiatAccount, binanceExchange))
                 val tempCryptoAccounts = filteredProductList.map {
                     val apiAccount = CBProAccount("", it.currency.toString(), "0.0", "", "0.0", "")
-                    Account(it, apiAccount)
+                    Account(it, apiAccount, binanceExchange)
                 }
                 Account.cryptoAccounts = tempCryptoAccounts
                 Account.updateAllAccountsCandles(initData, onFailure, onComplete)
             } else {
                 this.get(onFailure) { apiAccountList ->
                     val fiatApiAccountList = apiAccountList.filter { Currency.forString(it.currency)?.isFiat == true }
-                    val tempFiatAccounts = fiatApiAccountList.map { Account(Product.fiatProduct( Currency.forString(it.currency) ?: Currency.USD), it) }
+                    val tempFiatAccounts = fiatApiAccountList.map { Account(Product.fiatProduct( Currency.forString(it.currency) ?: Currency.USD), it, binanceExchange) }
 
                     val cryptoApiAccountList = apiAccountList.filter { Currency.forString(it.currency)?.isFiat != true }
                     val defaultFiatCurrency = Account.defaultFiatCurrency
@@ -221,7 +223,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         val currency = Currency.forString(it.currency)
                         val relevantProduct = productList.find { p -> p.currency == currency && p.quoteCurrency == defaultFiatCurrency }
                         if (relevantProduct != null) {
-                            Account(relevantProduct, it)
+                            Account(relevantProduct, it, binanceExchange)
                         } else {
                             null
                         }
@@ -289,7 +291,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
     class ticker(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
         val tradingPair = TradingPair(productId)
-        constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.id)
+        constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.idForExchange(Exchange.Binance))
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (CBProTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
@@ -330,17 +332,18 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class getOrder(initData: ApiInitData?, val productId: String, val orderId: Long) : BinanceApi(initData)
     class cancelOrder(initData: ApiInitData?, val productId: String, val orderId: Long) : BinanceApi(initData)
 
-    class fills(initData: ApiInitData?, val productId: String, val startTime: Long?, val endTime: Long?, val fromTradeId: Long?, val limit: Int? = null) : BinanceApi(initData) {
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProFill>) -> Unit) {
+    class fills(initData: ApiInitData?, val tradingPair: TradingPair, val startTime: Long?, val endTime: Long?, val fromTradeId: Long?, val limit: Int? = null) : BinanceApi(initData) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Fill>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
-                        val apiFillList: List<CBProFill> = Gson().fromJson(result.value, object : TypeToken<List<CBProFill>>() {}.type)
+                        val productId = tradingPair.idForExchange(binanceExchange)
+                        val apiFillList: List<Fill> = Gson().fromJson(result.value, object : TypeToken<List<Fill>>() {}.type)
                         if (prefs.areAlertFillsActive) {
-                            checkForFillAlerts(apiFillList, productId)
+                            checkForFillAlerts(apiFillList, tradingPair)
                         }
-                        prefs.stashFills(result.value, productId)
+                        prefs.stashFills(apiFillList, tradingPair, binanceExchange)
                         onComplete(apiFillList)
                     } catch (e: JsonSyntaxException) {
                         onFailure(Result.Failure(FuelError(e)))
@@ -350,15 +353,14 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
             }
         }
-        private fun checkForFillAlerts(apiFillList: List<CBProFill>, productId: String) {
+        private fun checkForFillAlerts(apiFillList: List<Fill>, tradingPair: TradingPair) {
             context?.let {
-                val stashedFills = Prefs(context).getStashedFills(productId)
+                val stashedFills = Prefs(context).getStashedFills(tradingPair, binanceExchange)
 
                 if (apiFillList.size > stashedFills.size) {
-                    val stashedFillsDate = stashedFills.firstOrNull()?.created_at?.dateFromApiDateString()?.time ?: 0
+                    val stashedFillsDate = stashedFills.firstOrNull()?.time?.time ?: 0L
                     for (fill in apiFillList) {
-                        val fillDate = fill.created_at.dateFromApiDateString()
-                        val fillDateTime = fillDate?.time ?: 0
+                        val fillDateTime = fill.time.time
                         if (fillDateTime > stashedFillsDate && fillDateTime + TimeInMillis.sixHours > Date().time) {
                             AlertHub.triggerFillAlert(fill, context)
                         } else if (fillDateTime <= stashedFillsDate) {
@@ -603,7 +605,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
 
                 is fills -> {
-                    paramList.add(Pair("symbol", productId))
+                    paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
                     if (startTime != null) {
                         paramList.add(Pair("startTime", startTime.toString()))
                     }

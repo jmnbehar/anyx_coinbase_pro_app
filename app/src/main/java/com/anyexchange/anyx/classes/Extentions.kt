@@ -4,6 +4,7 @@ import android.arch.lifecycle.Lifecycle
 import android.support.annotation.LayoutRes
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.text.style.QuoteSpan
 import android.view.LayoutInflater
 import android.widget.ListView
 import android.view.ViewGroup
@@ -131,7 +132,7 @@ val Result.Failure<Any, FuelError>.errorMessage : String
 //        return (errorData["message"] as? String) ?: error.response.responseMessage
 //    }
 
-fun Double.toStringWithTimespan(timespan: Timespan) : String {
+fun Long.toStringWithTimespan(timespan: Timespan) : String {
     val locale = Locale.getDefault()
     val formatter = when (timespan) {
         Timespan.HOUR  -> SimpleDateFormat("h:mma", locale)
@@ -141,7 +142,8 @@ fun Double.toStringWithTimespan(timespan: Timespan) : String {
         Timespan.YEAR  -> SimpleDateFormat("M/d/YYYY", locale)
 //        Timespan.ALL   -> SimpleDateFormat("M/d/YYYY", locale)
     }
-    val itemLong = (this * 1000).toLong()
+    //TODO: investigate when this is needed: only for cbpro?
+    val itemLong = (this * 1000)
     val itemDate = Date(itemLong)
     return formatter.format(itemDate)
 }
@@ -180,7 +182,7 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
     })
 }
 
-fun String.dateFromApiDateString(): Date? {
+fun String.dateFromCBProApiDateString(): Date? {
     return try {
         val locale = Locale.getDefault()
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
@@ -194,6 +196,10 @@ fun Date.format(formatString: String): String {
     val outputFormat = SimpleDateFormat(formatString, Locale.getDefault())
     outputFormat.timeZone = TimeZone.getDefault()
     return outputFormat.format(this)
+}
+
+fun List<TradingPair>.withQuoteCurrency(quoteCurrency: Currency) : TradingPair?  {
+    return this.find { it.quoteCurrency == quoteCurrency }
 }
 
 fun Fragment.toast(textResource: Int) = activity?.toast(textResource)

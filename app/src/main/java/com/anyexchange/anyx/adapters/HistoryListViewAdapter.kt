@@ -20,16 +20,16 @@ import org.jetbrains.anko.backgroundColor
  */
 
 class HistoryListViewAdapter(val context: Context, private val isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources,
-                             private var orderOnClick: (CBProOrder) -> Unit = { }, private var fillOnClick: (CBProFill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
+                             private var orderOnClick: (CBProOrder) -> Unit = { }, private var fillOnClick: (Fill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
     var orders: List<CBProOrder> = listOf()
-    var fills: List<CBProFill> = listOf()
+    var fills: List<Fill> = listOf()
 
     init {
         @Suppress("UNCHECKED_CAST")
         if (isOrderList) {
             orders = ordersOrFills as List<CBProOrder>
         } else {
-            fills = ordersOrFills as List<CBProFill>
+            fills = ordersOrFills as List<Fill>
         }
     }
 
@@ -138,11 +138,10 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             setViewsVisibility(viewHolder, true)
             viewHolder.tradeTypeText?.visibility = View.GONE
             val fill = fills[position]
-            tradeSide = TradeSide.forString(fill.side)
-            val tradingPair = TradingPair(fill.product_id)
-            currency = tradingPair.baseCurrency
-            price = fill.price.toDoubleOrZero()
-            amount = fill.size.toDoubleOrZero()
+            tradeSide = fill.side
+            currency = fill.tradingPair.baseCurrency
+            price = fill.price
+            amount = fill.amount
             viewHolder.view?.setOnClickListener { fillOnClick(fill) }
 
             viewHolder.sideText?.text = when (tradeSide) {
