@@ -315,14 +315,16 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
     class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProOrder>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
-                    val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
+                    val apiOrderList: List<BinanceOrder> = Gson().fromJson(result.value, object : TypeToken<List<BinanceOrder>>() {}.type)
+                    val generalOrderList = apiOrderList.map { Order(it) }
+
                     if (context != null) {
                         Prefs(context).stashOrders(result.value)
                     }
-                    onComplete(apiOrderList)
+                    onComplete(generalOrderList)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }

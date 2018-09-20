@@ -334,14 +334,15 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     class listOrders(initData: ApiInitData?, val status: String? = null) : CBProApi(initData) {
         //For now don't use product ID, always get ALL orders
         val productId: String? = null
-        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProOrder>) -> Unit) {
+        fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
+                    val generalOrderList = apiOrderList.map { Order(it) }
                     if (context != null) {
                         Prefs(context).stashOrders(result.value)
                     }
-                    onComplete(apiOrderList)
+                    onComplete(generalOrderList)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }

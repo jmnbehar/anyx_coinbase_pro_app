@@ -248,11 +248,11 @@ class Prefs (var context: Context) {
         prefs.edit().putString(STASHED_ORDERS, orderListString)
                 .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
-    fun getStashedOrders(tradingPair: TradingPair, exchange: Exchange) : List<CBProOrder> {
+    fun getStashedOrders(tradingPair: TradingPair, exchange: Exchange) : List<Order> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
         return try {
-            val apiOrderList: List<CBProOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<CBProOrder>>() {}.type)
-            apiOrderList.filter { it.product_id == tradingPair.idForExchange(exchange) }
+            val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
+            apiOrderList.filter { it.tradingPair == tradingPair  && it.exchange == exchange}
         } catch (e: Exception) {
             listOf()
         }

@@ -20,14 +20,14 @@ import org.jetbrains.anko.backgroundColor
  */
 
 class HistoryListViewAdapter(val context: Context, private val isOrderList: Boolean, ordersOrFills: List<Any>, var resources: Resources,
-                             private var orderOnClick: (CBProOrder) -> Unit = { }, private var fillOnClick: (Fill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
-    var orders: List<CBProOrder> = listOf()
+                             private var orderOnClick: (Order) -> Unit = { }, private var fillOnClick: (Fill) -> Unit = { }) : RecyclerView.Adapter<HistoryListViewAdapter.HistoryViewHolder>() {
+    var orders: List<Order> = listOf()
     var fills: List<Fill> = listOf()
 
     init {
         @Suppress("UNCHECKED_CAST")
         if (isOrderList) {
-            orders = ordersOrFills as List<CBProOrder>
+            orders = ordersOrFills as List<Order>
         } else {
             fills = ordersOrFills as List<Fill>
         }
@@ -111,14 +111,13 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             }
             setViewsVisibility(viewHolder, true)
             val order = orders[position]
-            tradeSide = TradeSide.forString(order.side)
-            price = order.price.toDoubleOrZero()
-            val size = (order.size ?: order.specified_funds).toDoubleOrZero()
+            tradeSide = order.side
+            price = order.price
+            val size = order.amount
             val filled = order.filled_size.toDoubleOrZero()
             val unfilledSize = size - filled
             amount = unfilledSize
-            val tradingPair = TradingPair(order.product_id)
-            currency = tradingPair.baseCurrency
+            currency = order.tradingPair.baseCurrency
             val tradeType = TradeType.forString(order.type)
             viewHolder.sideText?.text = when (tradeSide) {
                 TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)

@@ -196,7 +196,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val exchange = account.exchange
             val tradingPair = TradingPair(tempAccount.product.id)
             val stashedFills: List<Fill> = prefs.getStashedFills(tradingPair, account.exchange)
-            val stashedOrders: List<CBProOrder> = prefs.getStashedOrders(tradingPair, exchange)
+            val stashedOrders: List<Order> = prefs.getStashedOrders(tradingPair, exchange)
 
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
@@ -459,7 +459,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             updateFills(tradingPair, stashedOrders, stashedFills)
         }
     }
-    private fun updateFills(tradingPair: TradingPair, orderList: List<CBProOrder>, stashedFills: List<Fill>) {
+    private fun updateFills(tradingPair: TradingPair, orderList: List<Order>, stashedFills: List<Fill>) {
         CBProApi.fills(apiInitData, tradingPair).getAndStash({ _ ->
             if (lifecycle.isCreatedOrResumed) {
                 updateHistoryPagerAdapter(orderList, stashedFills)
@@ -497,8 +497,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
     private fun completeSwitchAccount(account: Account) {
         blockRefresh = false
-        val tradingPair =
-
         context?.let {
             account.product.defaultTradingPair?.let { tradingPair ->
                 val prefs = Prefs(it)
@@ -603,29 +601,29 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun orderOnClick(order: CBProOrder) {
+    private fun orderOnClick(order: Order) {
         alert {
             title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
-            val createdTimeRaw = order.created_at
-            val createdTimeDate = createdTimeRaw.dateFromCBProApiDateString()
-            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
 
-            val fillFees = order.fill_fees.toDoubleOrNull()?.format(quoteCurrency)
-            val price = order.price.toDoubleOrNull()?.format(quoteCurrency)
-            val filledSize = order.filled_size.toDoubleOrNull()?.toString()
-            val size = (order.size ?: "0").toDoubleOrNull()?.btcFormat()
+            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
+
+            val fillFees = order.fill_fees?.toDoubleOrNull()?.format(quoteCurrency)
+            val price = order.price.format(quoteCurrency)
+            val filledSize = order.filled_size?.toDoubleOrNull()?.toString()
+            val size = order.amount.btcFormat()
+            val status = order.status
 
             customView {
                 linearLayout {
                     verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, order.side).lparams(width = layoutWidth) {}
-                        if (size != null)       { horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {} }
+                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
                         if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
-                        if (price != null)      { horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {} }
-                                                  horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
+                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
                         if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
-                                                  horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
+                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
                     }.lparams(width = matchParent) {leftMargin = dip(20) }
                 }
             }
@@ -805,11 +803,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
             }
 
-            var filteredOrders: List<CBProOrder>? = null
+            var filteredOrders: List<Order>? = null
             var filteredFills: List<Fill>? = null
             CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
+                    filteredOrders = apiOrderList.filter { it.tradingPair == tradingPair }
                     if (filteredOrders != null && filteredFills != null) {
                         updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
                     }
@@ -830,7 +828,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(orderList: List<CBProOrder>, fillList: List<Fill>? = null) {
+    private fun updateHistoryPagerAdapter(orderList: List<Order>, fillList: List<Fill>? = null) {
         (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
         fillList?.let {
             (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it

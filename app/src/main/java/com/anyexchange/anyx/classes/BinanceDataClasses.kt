@@ -166,7 +166,7 @@ data class BinanceOrder(
         val price: Double,
         val origQty: Double,
         val executedQty: Double,
-        val cummulativeQuoteQty: Double,
+        val cummulativeQuoteQty: Double,    //cumulative?
         val status: String,
         val timeInForce: String,
         val type: String,

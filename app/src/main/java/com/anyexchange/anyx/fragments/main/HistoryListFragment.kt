@@ -20,14 +20,14 @@ class HistoryListFragment : Fragment() {
     private lateinit var historyListAdapter: HistoryListViewAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private var orders = listOf<CBProOrder>()
-    private var onOrderClick: (CBProOrder) -> Unit = { }
+    private var orders = listOf<Order>()
+    private var onOrderClick: (Order) -> Unit = { }
     private var fills = listOf<Fill>()
     private var onFillClick: (Fill) -> Unit = { }
     private var isOrderList = true
 
     companion object {
-        fun newOrderInstance(orders: List<CBProOrder>, onClick: (CBProOrder) -> Unit) : HistoryListFragment {
+        fun newOrderInstance(orders: List<Order>, onClick: (Order) -> Unit) : HistoryListFragment {
             val newFragment = HistoryListFragment()
             newFragment.orders = orders
             newFragment.onOrderClick = onClick
