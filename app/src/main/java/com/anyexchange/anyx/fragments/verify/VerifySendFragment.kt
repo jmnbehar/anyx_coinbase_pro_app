@@ -78,12 +78,12 @@ class VerifySendFragment : Fragment() {
             toast(R.string.verify_unknown_error)
         }, {
             val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
+            val devAddress = currency.developerAddress
             if (coinbaseAccount == null) {
                 toast(R.string.verify_unknown_error)
-            } else {
-
+            } else if (devAddress != null){
                 val sendAmount = 0.000001
-                CBProApi.sendCrypto(null, sendAmount, currency, currency.developerAddress).executePost({ result ->
+                CBProApi.sendCrypto(null, sendAmount, currency, devAddress).executePost({ result ->
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {

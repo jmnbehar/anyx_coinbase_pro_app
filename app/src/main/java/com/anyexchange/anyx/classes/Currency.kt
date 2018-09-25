@@ -10,306 +10,95 @@ import com.anyexchange.anyx.R
  * Created by anyexchange on 1/19/2018.
  */
 
-enum class Currency {
-    BTC,
-    BCH,
-    ETH,
-    ETC,
-    LTC,
-    USD,
-    EUR,
-    GBP,
-
-    OTHER;
+class Currency(val id: String) {
+    constructor(knownCurrency: KnownCurrency): this(knownCurrency.symbol)
+    val knownCurrency = KnownCurrency.forString(id)
 
     override fun toString() : String {
-        return when (this) {
-            BTC -> "BTC"
-            BCH -> "BCH"
-            ETH -> "ETH"
-            ETC -> "ETC"
-            LTC -> "LTC"
-            USD -> "USD"
-            EUR -> "EUR"
-            GBP -> "GBP"
-
-            OTHER -> "OTHER"
-        }
+        return id
     }
 
-    val symbol : String
-        get() {
-            return when (this) {
-                BTC -> "BTC"
-                BCH -> "BCH"
-                ETH -> "ETH"
-                ETC -> "ETC"
-                LTC -> "LTC"
-                USD -> "$"
-                EUR -> "€"
-                GBP -> "£"
-                else -> ""
-            }
-        }
+    val symbol = knownCurrency?.symbol ?: id
 
-    val fullName : String
-        get() = when (this) {
-            BTC -> "Bitcoin"
-            BCH -> "Bitcoin Cash"
-            ETH -> "Ethereum"
-            ETC -> "Ether Classic"
-            LTC -> "Litecoin"
-            USD -> "US Dollar"
-            EUR -> "Euro"
-            GBP -> "Pound sterling"
+    val fullName = knownCurrency?.fullName ?: id
 
-
-            OTHER -> "OTHER"
-        }
-
-    val iconId
-        get() = when(this) {
-            BTC -> R.drawable.icon_btc
-            ETH -> R.drawable.icon_eth
-            ETC -> R.drawable.icon_etc
-            LTC -> R.drawable.icon_ltc
-            BCH -> R.drawable.icon_bch
-            USD -> R.drawable.icon_usd
-            EUR -> R.drawable.icon_eur
-            GBP -> R.drawable.icon_gbp
-
-            OTHER -> R.drawable.fail_icon
-        }
+    val iconId = knownCurrency?.iconId ?: R.drawable.fail_icon
 
     val feePercentage : Double
         get() {
-            return if (this.isFiat) {
+            return if (!isFiat) {
                 0.003
             } else {
                 0.0
             }
         }
 
-    val isFiat : Boolean
-        get() = when(this) {
-            USD, EUR, GBP -> true
-            else -> false
-        }
+    val isFiat = knownCurrency?.isFiat ?: false
 
-    val minBuyAmount : Double
-        get() = when (this) {
-            BTC -> .001
-            ETH -> .01
-            ETC -> .01
-            BCH -> .01
-            LTC -> .1
-            else -> 1.0
+    val minSendAmount: Double = knownCurrency?.minSendAmount ?: 0.0
+    init {
+        if (!isFiat && !cryptoList.contains(this)) {
+            cryptoList.add(this)
         }
-
-    val minSendAmount : Double
-        get() = when (this) {
-            BTC -> .0001
-            ETH -> .001
-            ETC -> .001
-            BCH -> .001
-            LTC -> .1
-            else -> 100.0
-        }
-
-//    private val startDate : Date
-//        get() = when (this) {
-//            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).closeTime
-//            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).closeTime
-//            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//            else -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//        }
-//
-//    val lifetimeInSeconds : Long
-//        get() {
-//            val utcTimeZone = TimeZone.getTimeZone("UTC")
-//            val now = Calendar.getInstance(utcTimeZone)
-//            val nowTime = now.timeInSeconds()
-//            val startTime = startDate.closeTime / 1000
-//            return (nowTime - startTime)
-//        }
+    }
 
     fun colorPrimary(context: Context) : Int {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_dk)
-                BCH -> ContextCompat.getColor(context, R.color.bch_dk)
-                ETH -> ContextCompat.getColor(context, R.color.eth_dk)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
-                ETC -> ContextCompat.getColor(context, R.color.etc_dk)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.white)
-                OTHER -> ContextCompat.getColor(context, R.color.white)
-            }
-        } else {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_light)
-                BCH -> ContextCompat.getColor(context, R.color.bch_light)
-                ETH -> ContextCompat.getColor(context, R.color.eth_light)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_light)
-                ETC -> ContextCompat.getColor(context, R.color.etc_light)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.black)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
-            }
+        return knownCurrency?.colorPrimary(context) ?: run {
+            //TODO: generate colors based on name and darkmode
+            val isDarkModeOn = Prefs(context).isDarkModeOn
+
+            ContextCompat.getColor(context, R.color.white)
         }
     }
 
     fun colorFade(context: Context): Int {
-        return when (this) {
-            BTC -> ContextCompat.getColor(context, R.color.btc_fade)
-            BCH -> ContextCompat.getColor(context, R.color.bch_fade)
-            ETH -> ContextCompat.getColor(context, R.color.eth_fade)
-            LTC -> ContextCompat.getColor(context, R.color.ltc_fade)
-            ETC -> ContextCompat.getColor(context, R.color.etc_fade)
-            USD,
-            EUR,
-            GBP -> ContextCompat.getColor(context, R.color.white_fade)
-            OTHER -> ContextCompat.getColor(context, R.color.black_fade)
+        return knownCurrency?.colorFade(context) ?: run {
+            //TODO: generate colors based on name and darkmode
+            val isDarkModeOn = Prefs(context).isDarkModeOn
+            ContextCompat.getColor(context, R.color.black_fade)
         }
     }
 
     fun colorAccent(context: Context) : Int {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_accent)
-                BCH -> ContextCompat.getColor(context, R.color.bch_accent)
-                ETH -> ContextCompat.getColor(context, R.color.eth_accent)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
-                ETC -> ContextCompat.getColor(context, R.color.etc_accent)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.white)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
-            }
-        } else {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_accent)
-                BCH -> ContextCompat.getColor(context, R.color.bch_accent)
-                ETH -> ContextCompat.getColor(context, R.color.eth_accent)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
-                ETC -> ContextCompat.getColor(context, R.color.etc_accent)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.black)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
-            }
+        return knownCurrency?.colorAccent(context) ?: run {
+            //TODO: generate colors based on name and darkmode
+            val isDarkModeOn = Prefs(context).isDarkModeOn
+            ContextCompat.getColor(context, R.color.black)
         }
     }
 
     fun colorStateList(context: Context) : ColorStateList {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_dark, context.resources.newTheme())
-                ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
-                BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
-                LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
-                ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
-                USD,
-                EUR,
-                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
-                OTHER -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
-            }
-        } else {
-            when (this) {
-                BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_light, context.resources.newTheme())
-                ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_light, context.resources.newTheme())
-                ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
-                BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
-                LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
-                USD,
-                EUR,
-                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-                OTHER -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-            }
+        return knownCurrency?.colorStateList(context) ?: run {
+            //TODO: generate colors based on name and darkmode
+            val isDarkModeOn = Prefs(context).isDarkModeOn
+            context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
         }
     }
 
     fun buttonTextColor(context: Context) : Int {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> Color.BLACK
-                ETH -> Color.WHITE
-                ETC -> Color.WHITE
-                BCH -> Color.WHITE
-                LTC -> Color.BLACK
-                USD,
-                EUR,
-                GBP -> Color.WHITE
-                OTHER -> Color.WHITE
-            }
-        } else {
-            when (this) {
-                BTC -> Color.WHITE
-                ETH -> Color.WHITE
-                ETC -> Color.WHITE
-                BCH -> Color.WHITE
-                LTC -> Color.WHITE
-                USD,
-                EUR,
-                GBP -> Color.BLACK
-                OTHER -> Color.BLACK
-            }
+        return knownCurrency?.colorAccent(context) ?: run {
+            //TODO: generate colors based on name and darkmode
+            val isDarkModeOn = Prefs(context).isDarkModeOn
+            Color.WHITE
         }
     }
 
-    val developerAddress : String
-        get() = when (this) {
-        //CBPro Wallets (AnyX)
-            BTC -> "3K63fgura9ctK3Wh6ofwyrTgCb4RrwWci6"
-            ETH -> "0x6CDD817fdDAb3Ee5324e0Bb51b0f49f9d0Fd1247"
-            ETC -> "0x6e459139E65B4589e3F91c86D11143dBBA4570cf"
-            BCH -> "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8"
-            LTC -> "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD"
-            USD,
-            EUR,
-            GBP -> "my irl address?"
-            OTHER -> "jinkies"
-        }
+    val developerAddress = knownCurrency?.developerAddress
+
+    //TODO: improve
+    val orderValue = knownCurrency?.orderValue ?: 999
 
 
-    val orderValue : Int
-        get() {
-            return when (this) {
-                BTC -> 5
-                ETH -> 4
-                LTC -> 3
-                BCH -> 2
-                ETC -> 1
-                EUR -> -1
-                GBP -> -2
-                USD -> -100
-                OTHER -> 9999
-            }
-        }
 
     companion object {
-        val cryptoList = Currency.values().filter { !it.isFiat && it != OTHER }
-        val fiatList = Currency.values().filter { it.isFiat && it != OTHER }
+        val cryptoList: MutableList<Currency> = KnownCurrency.cryptoList.mapNotNull { Currency(it) }.toMutableList()
+        val fiatList = KnownCurrency.values().filter { it.isFiat && it != KnownCurrency.OTHER }
 
-        fun forString(string: String?) : Currency? {
-            return when (string) {
-                "BTC" -> BTC
-                "BCH" -> BCH
-                "ETH" -> ETH
-                "ETC" -> ETC
-                "LTC" -> LTC
-                "USD" -> USD
-                "EUR" -> EUR
-                "GBP" -> GBP
-                else -> null
-            }
-        }
+        val USD = Currency(KnownCurrency.USD)
+        val OTHER = Currency(KnownCurrency.OTHER)
+        val BTC = Currency(KnownCurrency.BTC)
+        val ETH = Currency(KnownCurrency.ETH)
+        val BCH = Currency(KnownCurrency.BCH)
+        val LTC = Currency(KnownCurrency.LTC)
     }
 }

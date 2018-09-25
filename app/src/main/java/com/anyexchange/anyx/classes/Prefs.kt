@@ -213,7 +213,7 @@ class Prefs (var context: Context) {
         set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
 
     var quickChangeAlertCurrencies: Set<Currency>
-        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
+        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency(string) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
 
     var quickChangeThreshold: Float

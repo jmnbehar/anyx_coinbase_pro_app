@@ -117,9 +117,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return
             }
         }
-        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
-        if (goToCurrency != null) {
-            goToChartFragment(goToCurrency)
+        (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
+            goToChartFragment(Currency(it))
         }
     }
 
@@ -170,7 +169,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
-        val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
+        val chartCurrency = Currency(chartCurrencyStr)
         ChartFragment.currency = chartCurrency
         setDrawerMenu()
     }
@@ -309,7 +308,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
+            CBProApi.ticker(apiInitData, account.product.defaultTradingPair!!).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
                     onComplete()

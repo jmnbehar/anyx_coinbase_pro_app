@@ -14,8 +14,8 @@ import java.util.*
 
 class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
-            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
-            Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
+            : this(Currency(apiProduct.base_currency), apiProduct.id,
+            Currency(apiProduct.quote_currency), tradingPairs)
 
     var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
         set(value) {
@@ -68,7 +68,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     private var yearCandles = Array<List<Candle>>(tradingPairCount) { listOf() }
 
     val defaultDayCandles: List<Candle>
-        get() = candlesForTimespan(Timespan.DAY, TradingPair(this.currency, Account.defaultFiatCurrency))
+        get() = candlesForTimespan(Timespan.DAY, defaultTradingPair)
 
     private var candlesTimespan = Timespan.DAY
 
@@ -87,7 +87,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     private fun candlesForTimespan(timespan: Timespan, quoteCurrency: Currency) : List<Candle> {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return candlesForTimespan(timespan, tradingPair)
     }
     fun candlesForTimespan(timespan: Timespan, tradingPair: TradingPair?): List<Candle> {
@@ -102,11 +102,11 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     fun priceForQuoteCurrency(quoteCurrency: Currency) : Double {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return priceForTradingPair(tradingPair)
     }
 
-    private fun priceForTradingPair(tradingPair: TradingPair) : Double {
+    private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
         return price[tradingPairIndex]
@@ -212,11 +212,11 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     companion object {
         fun forString(string: String): Product {
             val splitString = string.split('\n')
-            val currency = Currency.forString(splitString[0]) ?: Currency.USD
+            val currency = Currency(splitString[0])
             val id = splitString[1]
-            val quoteCurrency = if (splitString.size > 2) { Currency.forString(splitString[2]) ?: Currency.USD } else { Currency.USD }
-            val tradingPairStrings = if (splitString.size > 3) { splitString.subList(3, splitString.size - 1) } else { listOf() }
-            val tradingPairs = tradingPairStrings.map { TradingPair(it) }
+            val quoteCurrency = if (splitString.size > 2) { Currency(splitString[2]) } else { Currency.USD }
+
+            val tradingPairs = listOf<TradingPair>()
             return Product(currency, id, quoteCurrency, tradingPairs)
         }
 
@@ -236,9 +236,9 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                 }
                 for (apiProduct in apiProductList) {
                     val baseCurrency = apiProduct.base_currency
-                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }.map { it.id }
+                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }
                     val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
-                    val currency = Currency.forString(baseCurrency) ?: Currency.USD
+                    val currency = Currency(baseCurrency)
                     val relevantAccount = Account.forCurrency(currency)
                     relevantAccount?.product?.currency = newProduct.currency
                     relevantAccount?.product?.id = newProduct.id

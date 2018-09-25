@@ -116,7 +116,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
     }
 
-    class candles(initData: ApiInitData?, val productId: String, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
+    class candles(initData: ApiInitData?, val tradingPair: TradingPair, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
         //limit default = 500, max is 1000
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var pagesReceived = 0
@@ -133,7 +133,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 pagesReceived ++
                 val gson = Gson()
                 val apiCandles = result.value
-                val tradingPair = TradingPair(productId)
                 try {
                     val candleDoubleList: List<List<Any>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                     var candles = candleDoubleList.mapNotNull {
@@ -183,23 +182,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            Account.cryptoAccounts = listOf()
-            val productList: MutableList<Product> = mutableListOf()
-            if (!Account.areAccountsOutOfDate && context != null && Prefs(context).stashedProducts.isNotEmpty()) {
-                val stashedProductList = Prefs(context).stashedProducts
-                getAccountsWithProductList(stashedProductList, onFailure, onComplete)
-            } else {
-
-                products(initData).get(onFailure) { apiProductList ->
-                    for (apiProduct in apiProductList) {
-                        val baseCurrency = apiProduct.base_currency
-                        val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it.id) }
-                        val newProduct = Product(apiProduct, relevantProducts)
-                        productList.add(newProduct)
-                    }
-                    getAccountsWithProductList(productList, onFailure, onComplete)
-                }
-            }
+            //TODO: fix this
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
@@ -216,16 +199,15 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 Account.updateAllAccountsCandles(initData, onFailure, onComplete)
             } else {
                 this.get(onFailure) { apiAccountList ->
-                    val fiatApiAccountList = apiAccountList.filter { Currency.forString(it.currency)?.isFiat == true }
+                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat == true }
                     val tempFiatAccounts = fiatApiAccountList.map {
-                        Account(Product.fiatProduct(Currency.forString(it.currency)
-                                ?: Currency.USD), it, binanceExchange)
+                        Account(Product.fiatProduct(Currency(it.currency)), it, binanceExchange)
                     }
 
-                    val cryptoApiAccountList = apiAccountList.filter { Currency.forString(it.currency)?.isFiat != true }
+                    val cryptoApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat != true }
                     val defaultFiatCurrency = Account.defaultFiatCurrency
                     val tempCryptoAccounts = cryptoApiAccountList.mapNotNull {
-                        val currency = Currency.forString(it.currency)
+                        val currency = Currency(it.currency)
                         val relevantProduct = productList.find { p -> p.currency == currency && p.quoteCurrency == defaultFiatCurrency }
                         if (relevantProduct != null) {
                             Account(relevantProduct, it, binanceExchange)
@@ -294,9 +276,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class ticker(initData: ApiInitData?, val productId: String) : BinanceApi(initData) {
-        val tradingPair = TradingPair(productId)
-        constructor(initData: ApiInitData?, tradingPair: TradingPair): this(initData, tradingPair.idForExchange(Exchange.Binance))
+    class ticker(initData: ApiInitData?, val tradingPair: TradingPair) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
@@ -347,7 +327,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
-                        val productId = tradingPair.idForExchange(binanceExchange)
                         val apiFillList: List<Fill> = Gson().fromJson(result.value, object : TypeToken<List<Fill>>() {}.type)
                         if (prefs.areAlertFillsActive) {
                             checkForFillAlerts(apiFillList, tradingPair)
@@ -553,7 +532,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is candles -> {
-                    paramList.add(Pair("symbol", productId))
+                    paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
                     paramList.add(Pair("interval", interval))
                     if (startTime != null) {
                         paramList.add(Pair("startTime", startTime.toString()))
@@ -567,7 +546,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is ticker -> {
-                    return listOf(Pair("symbol", productId))
+                    return listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
                 }
                 is bookTicker -> {
                     if (productId != null) {

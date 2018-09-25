@@ -196,7 +196,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             historyPager = rootView.history_view_pager
 
             val exchange = account.exchange
-            val tradingPair = TradingPair(tempAccount.product.id)
+            //TODO: make this safer:
+            val tradingPair = tempAccount.product.defaultTradingPair!!
             val stashedFills: List<Fill> = prefs.getStashedFills(tradingPair, account.exchange)
             val stashedOrders: List<Order> = prefs.getStashedOrders(tradingPair, exchange)
 

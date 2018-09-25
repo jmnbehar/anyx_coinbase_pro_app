@@ -352,7 +352,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         val currency: Currency = when (errorMessage) {
-            //TODO: add in ETC errors, and/or make this smarter so it doesn't explicitly specify currencies
+            //TODO: \make this smarter so it doesn't explicitly specify currencies
             ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
             ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
             ErrorMessage.BuyAmountTooSmallBch, ErrorMessage.BuyAmountTooLargeBch -> Currency.BCH
@@ -455,13 +455,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun payFee(amount: Double) {
         account?.currency?.let { currency ->
-            val destination = currency.developerAddress
-            //TODO: make and use AnyApi call
+            currency.developerAddress?.let { developerAddress ->
+                //TODO: make and use AnyApi call
 
-            //TODO: only count fees as paid if they are successfully paid
-            CBProApi.sendCrypto(apiInitData, amount, currency, destination).executePost(
-                    {  /*  fail silently   */ },
-                    {  /* succeed silently */ })
+                //TODO: only count fees as paid if they are successfully paid
+                CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
+                        {  /*  fail silently   */ },
+                        {  /* succeed silently */ })
+            }
         }
     }
 
