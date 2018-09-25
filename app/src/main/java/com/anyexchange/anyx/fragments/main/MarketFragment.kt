@@ -12,6 +12,7 @@ import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.APIs.AnyApi
 import com.anyexchange.anyx.classes.APIs.CBProApi
 import kotlinx.android.synthetic.main.fragment_market.view.*
 
@@ -89,34 +90,40 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
         for (account in Account.cryptoAccounts) {
-            account.product.updateCandles(time, null, apiInitData, {//OnFailure
-                if (context != null) {
-                    toast(R.string.error_message)
-                }
-                onComplete(false)
-            }) { didUpdate ->   //OnSuccess
-                if (lifecycle.isCreatedOrResumed) {
-                    if (didUpdate) {
-                        productsUpdated++
-                        if (productsUpdated == accountListSize) {
-                            context?.let {
-                                Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
-                            }
-                            (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                            updateAccountsFragment()
-                            onComplete(true)
-                        }
-                    } else {
-                        CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
+            account.product.defaultTradingPair?.let { tradingPair ->
+                account.product.updateCandles(time, tradingPair, apiInitData, {
+                    //OnFailure
+                    if (context != null) {
+                        toast(R.string.error_message)
+                    }
+                    onComplete(false)
+                }) { didUpdate ->
+                    //OnSuccess
+                    if (lifecycle.isCreatedOrResumed) {
+                        if (didUpdate) {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
+                                context?.let {
+                                    Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
+                                }
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                 updateAccountsFragment()
                                 onComplete(true)
                             }
+                        } else {
+                            AnyApi.ticker(apiInitData, account.exchange, tradingPair, onFailure) {
+                                productsUpdated++
+                                if (productsUpdated == accountListSize) {
+                                    (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                    updateAccountsFragment()
+                                    onComplete(true)
+                                }
+                            }
                         }
                     }
                 }
+            } ?: run {
+                onFailure(Result.Failure(FuelError(Exception())))
             }
         }
     }

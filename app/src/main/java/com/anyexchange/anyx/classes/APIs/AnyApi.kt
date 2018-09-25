@@ -10,6 +10,8 @@ import java.util.*
 
 class AnyApi {
     companion object {
+        private val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
+
         fun getAndStashOrderList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
@@ -75,7 +77,7 @@ class AnyApi {
                 }
                 Exchange.Binance -> {
                     //TODO: figure this out
-                    onFailure(Result.Failure(FuelError(Exception())))
+                    onFailure(defaultFailure)
                 }
             }
         }
@@ -92,9 +94,40 @@ class AnyApi {
                     val endTime = now - timeOffset
                     BinanceApi.candles(apiInitData, tradingPair.idForExchange(Exchange.Binance), interval, startTime, endTime).getCandles(onFailure, onSuccess)
                 }
-                //    class candles(initData: ApiInitData?, val productId: String, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
-
             }
+        }
+
+        fun orderLimit(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, limitPrice: Double, amount: Double, timeInForceStr: String?,
+                       cancelAfter: String?, icebergQty: Double?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
+            when (exchange) {
+                Exchange.CBPro -> {
+                    val timeInForce = CBProApi.TimeInForce.forString(timeInForceStr)
+                    CBProApi.orderLimit(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onSuccess(it) })
+                }
+                Exchange.Binance -> {
+                    val timeInForce = BinanceApi.TimeInForce.forString(timeInForceStr)
+                    BinanceApi.orderLimit(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, timeInForce, amount, limitPrice, icebergQty).executePost({ onFailure(it) }, { onSuccess(it) })
+
+                }
+            }
+        }
+        fun orderMarket(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, amount: Double? = null, funds: Double? = null,
+                        onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
+            when (exchange) {
+                Exchange.CBPro -> {
+                    when (tradeSide) {
+                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = null, funds = amount).executePost({ onFailure(it) }, { onSuccess(it) })
+                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = amount, funds = null).executePost({ onFailure(it) }, { onSuccess(it) })
+                    }
+                }
+                Exchange.Binance -> {
+                    BinanceApi.orderMarket(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, amount!!, funds!!).executePost({ onFailure(it) }, { onSuccess(it) })
+                }
+            }
+        }
+        fun orderStop(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, productId: String, price: Double, size: Double? = null, funds: Double? = null,
+                      onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+
         }
     }
 }

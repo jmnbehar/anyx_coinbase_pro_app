@@ -118,16 +118,21 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         price[tradingPairIndex] = newPrice
     }
 
-    fun updateCandles(timespan: Timespan, tradingPair: TradingPair, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Timespan, tradingPairOpt: TradingPair?, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
         val longAgoInSeconds = longAgo.timeInSeconds()
         val nowInSeconds = now.timeInSeconds()
+        val tradingPair = tradingPairOpt ?: defaultTradingPair
+        if (tradingPair == null) {
+            onFailure(Result.Failure(FuelError(Exception())))
+            return
+        }
 
-        var candles = candlesForTimespan(timespan, tradingPair).toMutableList()
+        var candles = candlesForTimespan(timespan, tradingPairOpt).toMutableList()
 
-        val lastCandleTime = candles.lastOrNull()?.closeTime?.toLong() ?: longAgoInSeconds
+        val lastCandleTime = candles.lastOrNull()?.closeTime ?: longAgoInSeconds
         val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
 
 //        if (timespan != product.candlesTimespan) {

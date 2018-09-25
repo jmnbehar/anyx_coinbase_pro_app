@@ -202,5 +202,6 @@ fun List<TradingPair>.withQuoteCurrency(quoteCurrency: Currency) : TradingPair? 
     return this.find { it.quoteCurrency == quoteCurrency }
 }
 
+
 fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
 fun Fragment.toast(text: CharSequence) = activity?.toast(text)

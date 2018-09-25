@@ -775,6 +775,19 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 FirstOrKill -> "FOK"
             }
         }
+        companion object {
+            fun forString(string: String?) : TimeInForce? {
+                if (string == null) {
+                    return null
+                }
+                for (value in TimeInForce.values()) {
+                    if (value.toString() == string) {
+                        return value
+                    }
+                }
+                return null
+            }
+        }
         fun label(): String {
             return when (this) {
                 GoodTilCancelled -> "Good Til Cancelled"

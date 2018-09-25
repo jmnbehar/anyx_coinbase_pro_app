@@ -280,8 +280,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 onComplete(false)
             }
         }
-        account?.let { account ->
-            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
+        account?.product?.defaultTradingPair?.let { tradingPair ->
+            AnyApi.ticker(apiInitData, account!!.exchange, tradingPair, onFailure) {
                 updateButtonsAndText()
                 onComplete(true)
             }
@@ -421,38 +421,43 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-        val productId = account?.product?.id
-        if (productId == null) {
+        val tradingPair = account?.product?.defaultTradingPair
+        val exchange = account?.exchange
+        if (tradingPair == null || exchange == null) {
             toast(R.string.error_message)
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {
+                    //TODO: use AnyApi
                     when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, productId, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, productId, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
                 TradeType.LIMIT -> {
-                    CBProApi.orderLimit(apiInitData, tradeSide, productId, limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onComplete(it) })
-                }
+                    AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, timeInForce.toString(), cancelAfter, null,
+                            { onFailure(it) }, { onComplete(it) })
+                    }
                 TradeType.STOP -> {
+                    //TODO: make and use AnyApi call
+
                     @Suppress("UnnecessaryVariable")
                     val stopPrice = limitPrice
                     when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, productId, stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderStop(apiInitData, tradeSide, productId, stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
+                        TradeSide.SELL -> CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
                     }
                 }
             }
-        }
-        CBProApi.listOrders(apiInitData, null).getAndStash({ /* do nothing */ }) {
-            //do nothing here either
+            AnyApi.getAndStashOrderList(apiInitData, exchange, null, { }, { })
         }
     }
 
     private fun payFee(amount: Double) {
         account?.currency?.let { currency ->
             val destination = currency.developerAddress
+            //TODO: make and use AnyApi call
+
             //TODO: only count fees as paid if they are successfully paid
             CBProApi.sendCrypto(apiInitData, amount, currency, destination).executePost(
                     {  /*  fail silently   */ },
