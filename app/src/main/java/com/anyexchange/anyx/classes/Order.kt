@@ -1,10 +1,8 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.APIs.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
 import java.util.*
 
 class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair, val price: Double, val amount: Double, val filledAmount: Double,
@@ -58,14 +56,14 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     }
 
 
-    fun getList(exchange: Exchange, tradingPair: TradingPair, apiInitData: ApiInitData, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
-        when (exchange) {
-            Exchange.CBPro -> {
-                CBProApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure, onComplete)
-            }
-            Exchange.Binance -> {
-                BinanceApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure, onComplete)
-            }
+    companion object {
+
+        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
+            AnyApi.getAndStashOrderList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
         }
+    }
+
+    fun cancel(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: (Result.Success<String, FuelError>) -> Unit) {
+        AnyApi.cancelOrder(apiInitData, this, onFailure, onSuccess)
     }
 }

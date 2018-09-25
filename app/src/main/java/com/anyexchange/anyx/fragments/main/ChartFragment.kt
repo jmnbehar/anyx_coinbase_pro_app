@@ -31,6 +31,8 @@ import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
+import com.anyexchange.anyx.classes.APIs.AnyApi
+import com.anyexchange.anyx.classes.APIs.CBProApi
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -448,9 +450,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
-            CBProApi.listOrders(apiInitData, tradingPair).getAndStash({
+            Order.getAndStashList(apiInitData, exchange, tradingPair, { //OnFailure:
                 updateFills(tradingPair, stashedOrders, stashedFills)
-            }) { newOrderList ->
+            }) { newOrderList -> // OnSuccess:
                 updateFills(tradingPair, newOrderList,  stashedFills)
             }
         } else if (dateFillsLastStashed + TimeInMillis.fiveMinutes > nowInSeconds) {
@@ -459,8 +461,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             updateFills(tradingPair, stashedOrders, stashedFills)
         }
     }
+
     private fun updateFills(tradingPair: TradingPair, orderList: List<Order>, stashedFills: List<Fill>) {
-        CBProApi.fills(apiInitData, tradingPair).getAndStash({ _ ->
+        Fill.getAndStashList(apiInitData, account.exchange, tradingPair, { _ ->
             if (lifecycle.isCreatedOrResumed) {
                 updateHistoryPagerAdapter(orderList, stashedFills)
             }
@@ -470,6 +473,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
         }
     }
+
     private fun areCandlesUpToDate(timespan: Timespan): Boolean {
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
         val candles = account.product.candlesForTimespan(timespan, tradingPair)
@@ -629,7 +633,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             positiveButton(R.string.popup_ok_btn) {  }
             negativeButton(R.string.chart_cancel_order) {
-                CBProApi.cancelOrder(apiInitData, order.id).executeRequest({ _ -> }) { _ ->
+                order.cancel(apiInitData, { _ -> }) { _ ->
                     if (lifecycle.isCreatedOrResumed) {
                         var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
@@ -788,14 +792,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            CBProApi.account(apiInitData, account.id).get( onFailure) { apiAccount ->
+            AnyApi.updateAccount(apiInitData, account, onFailure) { account ->
                 if (lifecycle.isCreatedOrResumed) {
-                    var newBalance = account.balance
-                    if (apiAccount != null) {
-                        newBalance = apiAccount.balance.toDoubleOrZero()
-                        account.apiAccount = apiAccount
-                    }
-                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
+                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), account.currency)
                     valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
                     miniRefresh(onFailure) {
                         onComplete(true)
@@ -805,7 +804,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             var filteredOrders: List<Order>? = null
             var filteredFills: List<Fill>? = null
-            CBProApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure) { orderList ->
+            Order.getAndStashList(apiInitData, account.exchange, tradingPair, onFailure) { orderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = orderList
                     if (filteredFills != null) {
@@ -813,7 +812,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }
                 }
             }
-            CBProApi.fills(apiInitData, tradingPair).getAndStash(onFailure) { fillList ->
+            Fill.getAndStashList(apiInitData, account.exchange, tradingPair, onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredFills = fillList
                     if (filteredOrders != null) {
@@ -838,16 +837,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        val tradingPairTemp = tradingPair
         if (currency.isFiat) {
             onComplete()
-        } else {
-            val tradingPairTemp = tradingPair
+        } else if (tradingPairTemp != null){
             account.product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {
                         candles = account.product.candlesForTimespan(timespan, tradingPair)
                         tradingPair?.let {
-                            CBProApi.ticker(apiInitData, it).get(onFailure) {_ ->
+                            AnyApi.ticker(apiInitData, account.exchange, it, onFailure) { _ ->
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = account.product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

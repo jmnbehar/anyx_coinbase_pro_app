@@ -1,5 +1,8 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.APIs.AnyApi
+import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.APIs.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
@@ -115,7 +118,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         price[tradingPairIndex] = newPrice
     }
 
-    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Timespan, tradingPair: TradingPair, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
@@ -141,7 +144,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            CBProApi.candles(apiInitData,tradingPair?.idForExchange(Exchange.CBPro) ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
+            AnyApi.getCandles(apiInitData, Exchange.CBPro, tradingPair, missingTime, 0, granularity, onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.closeTime?.toInt() ?: 0.0

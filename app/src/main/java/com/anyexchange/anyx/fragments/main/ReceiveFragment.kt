@@ -14,6 +14,8 @@ import net.glxn.qrgen.android.QRCode
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
+import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.APIs.CBProDepositAddress
 
 
 /**

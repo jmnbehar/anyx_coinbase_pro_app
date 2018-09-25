@@ -1,5 +1,10 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.APIs.AnyApi
+import com.anyexchange.anyx.classes.APIs.BinanceAccountFill
+import com.anyexchange.anyx.classes.APIs.CBProFill
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import java.util.*
 
 class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String, val orderId: String, val price: Double, val amount: Double, val time: Date, val side: TradeSide, val fee: Double) {
@@ -33,4 +38,9 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
     }
 
 
+    companion object {
+        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
+            AnyApi.getAndStashFillList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
+        }
+    }
 }

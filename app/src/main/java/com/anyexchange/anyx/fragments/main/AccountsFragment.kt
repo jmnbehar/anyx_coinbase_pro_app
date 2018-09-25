@@ -16,6 +16,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.APIs.CBProApi
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
 

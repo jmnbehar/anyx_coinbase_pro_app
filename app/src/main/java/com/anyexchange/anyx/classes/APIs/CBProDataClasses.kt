@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes
+package com.anyexchange.anyx.classes.APIs
 
 import android.annotation.SuppressLint
 import android.os.Parcelable

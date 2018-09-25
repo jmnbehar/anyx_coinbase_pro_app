@@ -12,13 +12,15 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.CBProApi.ErrorMessage
+import com.anyexchange.anyx.classes.APIs.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
+import com.anyexchange.anyx.classes.APIs.AnyApi
+import com.anyexchange.anyx.classes.APIs.CBProApi
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -230,10 +232,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 toast(R.string.trade_invalid_stop)
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
-                    account?.let { account ->
-                        CBProApi.ticker(apiInitData, account.product.id).get(onFailure) { ticker ->
-                            val price = ticker.price.toDoubleOrNull()
-                            if (price != null) {
+                    account?.product?.defaultTradingPair?.let { tradingPair ->
+                        AnyApi.ticker(apiInitData, account!!.exchange, tradingPair, onFailure) { price ->
+                            if (price == null) {
+                                onFailure(Result.Failure(FuelError(Exception())))
+                            } else {
                                 confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
                             }
                         }

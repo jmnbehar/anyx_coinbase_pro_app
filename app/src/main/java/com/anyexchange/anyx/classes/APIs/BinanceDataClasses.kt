@@ -1,8 +1,4 @@
-package com.anyexchange.anyx.classes
-
-import android.annotation.SuppressLint
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+package com.anyexchange.anyx.classes.APIs
 
 //Data classes for Binance  Exchange Calls
 

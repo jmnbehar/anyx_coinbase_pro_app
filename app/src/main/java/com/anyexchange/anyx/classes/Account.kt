@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.classes
 
 
+import com.anyexchange.anyx.classes.APIs.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 
@@ -33,12 +34,9 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
 
     var depositInfo: CBProDepositAddress? = null
 
-    fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        CBProApi.account(apiInitData, id).get(onFailure) { apiAccount ->
-            if (apiAccount != null) {
-                this.apiAccount = apiAccount
-            }
-            onComplete()
+    fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        AnyApi.updateAccount(apiInitData, this, onFailure)  {
+            onSuccess()
         }
     }
 
