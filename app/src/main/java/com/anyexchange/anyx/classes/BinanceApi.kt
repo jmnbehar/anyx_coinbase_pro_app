@@ -314,7 +314,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double, val price: Double) : BinanceApi(initData)
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
-    class listOrders(initData: ApiInitData?, val productId: String? = null) : BinanceApi(initData) {
+    class listOrders(initData: ApiInitData?, val tradingPair: TradingPair?) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -322,9 +322,14 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     val generalOrderList = apiOrderList.map { Order(it) }
 
                     if (context != null) {
-                        Prefs(context).stashOrders(result.value)
+                        Prefs(context).stashOrders(generalOrderList)
                     }
-                    onComplete(generalOrderList)
+                    if (tradingPair != null) {
+                        val filteredOrderList = generalOrderList.filter { it.tradingPair == tradingPair }
+                        onComplete(filteredOrderList)
+                    } else {
+                        onComplete(generalOrderList)
+                    }
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }
@@ -587,8 +592,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is listOrders -> {
-                    if (productId != null) {
-                        paramList.add(Pair("symbol", productId))
+                    if (tradingPair != null) {
+                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
                     }
                     paramList.add(Pair("timestamp", Date().time.toString()))
                     return paramList.toList()

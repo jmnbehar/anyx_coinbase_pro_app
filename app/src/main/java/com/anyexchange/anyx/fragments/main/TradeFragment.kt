@@ -442,7 +442,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 }
             }
         }
-        CBProApi.listOrders(apiInitData).getAndStash({ /* do nothing */ }) {
+        CBProApi.listOrders(apiInitData, null).getAndStash({ /* do nothing */ }) {
             //do nothing here either
         }
     }

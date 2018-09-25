@@ -64,7 +64,7 @@ class AlertJobService : JobService() {
                 account.product.defaultTradingPair?.let { tradingPair ->
                     val stashedOrders = prefs.getStashedOrders(tradingPair, account.exchange)
                     if (stashedOrders.isNotEmpty()) {
-                        CBProApi.listOrders(apiInitData).getAndStash({ }) { }
+                        CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
                         CBProApi.fills(apiInitData, account.product.defaultTradingPair).getAndStash({ }) { }
                     }
                 }

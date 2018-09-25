@@ -243,8 +243,9 @@ class Prefs (var context: Context) {
         prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
     }
 
-    fun stashOrders(orderListString: String?) {
-        val stashDate = if (orderListString == null) { 0 } else { Date().time }
+    fun stashOrders(orderList: List<Order>?) {
+        val orderListString = Gson().toJson(orderList)
+        val stashDate = if (orderList == null) { 0 } else { Date().time }
         prefs.edit().putString(STASHED_ORDERS, orderListString)
                 .putLong(STASHED_ORDERS_DATE, stashDate).apply()
     }
@@ -252,7 +253,8 @@ class Prefs (var context: Context) {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
         return try {
             val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
-            apiOrderList.filter { it.tradingPair == tradingPair  && it.exchange == exchange}
+            val filteredOrders = apiOrderList.filter { it.tradingPair == tradingPair && it.exchange == exchange }
+            filteredOrders
         } catch (e: Exception) {
             listOf()
         }

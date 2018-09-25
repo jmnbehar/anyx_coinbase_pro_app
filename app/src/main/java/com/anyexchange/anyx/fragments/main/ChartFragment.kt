@@ -448,7 +448,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
-            CBProApi.listOrders(apiInitData).getAndStash({
+            CBProApi.listOrders(apiInitData, tradingPair).getAndStash({
                 updateFills(tradingPair, stashedOrders, stashedFills)
             }) { newOrderList ->
                 updateFills(tradingPair, newOrderList,  stashedFills)
@@ -608,9 +608,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
 
-            val fillFees = order.fill_fees?.toDoubleOrNull()?.format(quoteCurrency)
+            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
             val price = order.price.format(quoteCurrency)
-            val filledSize = order.filled_size?.toDoubleOrNull()?.toString()
+            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
             val size = order.amount.btcFormat()
             val status = order.status
 
@@ -805,19 +805,19 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             var filteredOrders: List<Order>? = null
             var filteredFills: List<Fill>? = null
-            CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
+            CBProApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure) { orderList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredOrders = apiOrderList.filter { it.tradingPair == tradingPair }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    filteredOrders = orderList
+                    if (filteredFills != null) {
+                        updateHistoryPagerAdapter(orderList, filteredFills!!)
                     }
                 }
             }
             CBProApi.fills(apiInitData, tradingPair).getAndStash(onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredFills = fillList.filter { it.tradingPair == tradingPair }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    filteredFills = fillList
+                    if (filteredOrders != null) {
+                        updateHistoryPagerAdapter(filteredOrders!!, fillList)
                     }
                 }
             }

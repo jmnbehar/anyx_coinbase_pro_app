@@ -114,7 +114,7 @@ class HistoryListViewAdapter(val context: Context, private val isOrderList: Bool
             tradeSide = order.side
             price = order.price
             val size = order.amount
-            val filled = order.filled_size.toDoubleOrZero()
+            val filled = order.filledSize.toDoubleOrZero()
             val unfilledSize = size - filled
             amount = unfilledSize
             currency = order.tradingPair.baseCurrency

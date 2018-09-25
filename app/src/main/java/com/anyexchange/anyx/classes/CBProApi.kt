@@ -331,7 +331,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     class orderStop(initData: ApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
     class cancelOrder(initData: ApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: ApiInitData) : CBProApi(initData)
-    class listOrders(initData: ApiInitData?, val status: String? = null) : CBProApi(initData) {
+    class listOrders(initData: ApiInitData?, val tradingPair: TradingPair?, val status: String? = null) : CBProApi(initData) {
         //For now don't use product ID, always get ALL orders
         val productId: String? = null
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
@@ -340,9 +340,14 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
                     val generalOrderList = apiOrderList.map { Order(it) }
                     if (context != null) {
-                        Prefs(context).stashOrders(result.value)
+                        Prefs(context).stashOrders(generalOrderList)
                     }
-                    onComplete(generalOrderList)
+                    if (tradingPair != null) {
+                        val filteredOrderList = generalOrderList.filter { it.tradingPair == tradingPair }
+                        onComplete(filteredOrderList)
+                    } else {
+                        onComplete(generalOrderList)
+                    }
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }
