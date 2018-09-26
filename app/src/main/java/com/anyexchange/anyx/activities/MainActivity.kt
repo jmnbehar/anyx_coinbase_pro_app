@@ -307,8 +307,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
-        for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(apiInitData, account.product.defaultTradingPair!!).get(onFailure) {
+        for (productPair in Product.hashMap) {
+            CBProApi.ticker(apiInitData, productPair.value.defaultTradingPair!!).get(onFailure) {
                 tickersUpdated++
                 if (tickersUpdated == accountListSize) {
                     onComplete()
@@ -322,7 +322,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
+                val currentPrice = Product.forCurrency(alert.currency)?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {

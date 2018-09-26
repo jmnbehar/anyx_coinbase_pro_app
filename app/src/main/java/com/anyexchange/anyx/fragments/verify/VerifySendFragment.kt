@@ -53,7 +53,7 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-        val verifyAccount = Account.forCurrency(currency)!!
+        val verifyAccount = Account.forCurrency(currency, Exchange.CBPro)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
             val productId = verifyAccount.product.defaultTradingPair?.idForExchange(Exchange.CBPro)
@@ -81,7 +81,7 @@ class VerifySendFragment : Fragment() {
         CBProApi.coinbaseAccounts(null).linkToAccounts({
             toast(R.string.verify_unknown_error)
         }, {
-            val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
+            val coinbaseAccount = Account.forCurrency(currency, Exchange.CBPro)?.coinbaseAccount
             val devAddress = currency.developerAddress
             if (coinbaseAccount == null) {
                 toast(R.string.verify_unknown_error)
@@ -126,7 +126,7 @@ class VerifySendFragment : Fragment() {
 
 
     fun updateViews() {
-        val account = Account.forCurrency(currency)
+        val account = Account.forCurrency(currency, Exchange.CBPro)
         sendInfoText.text = if (account?.balance ?: 0.0 > 0.0) {
             resources.getString(R.string.verify_explanation_message, currency.fullName)
         } else {

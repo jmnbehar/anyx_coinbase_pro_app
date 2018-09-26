@@ -61,7 +61,7 @@ class AlertJobService : JobService() {
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
         if (prefs.areAlertFillsActive && prefs.isLoggedIn) {
-            for (account in Account.cryptoAccounts) {
+            for (account in Account.cryptoAccounts.values) {
                 account.product.defaultTradingPair?.let { tradingPair ->
                     val stashedOrders = prefs.getStashedOrders(tradingPair, account.exchange)
                     if (stashedOrders.isNotEmpty()) {
@@ -95,7 +95,7 @@ class AlertJobService : JobService() {
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
+                val currentPrice = Product.forCurrency(alert.currency)?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
@@ -108,9 +108,9 @@ class AlertJobService : JobService() {
         var changeAlert: QuickChangeAlert? = null
         val setTimespan: QuickChangeAlert.AlertTimespan? = null
         for (currency in enabledCurrencies) {
-            val account = Account.forCurrency(currency)
-            if (account != null) {
-                val candles = account.product.candlesForTimespan(timespan, null)
+            val product = Product.forCurrency(currency)
+            if (product != null) {
+                val candles = product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
                     val minAlertPercentage = prefs.quickChangeThreshold.toDouble()
                     var alertPercentage = minAlertPercentage

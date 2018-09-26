@@ -61,17 +61,20 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 
+    data class CurrencyExchange(val currency: Currency, val exchange: Exchange)
+
     companion object {
-        var cryptoAccounts = listOf<Account>()
+        var cryptoAccounts = mapOf<CurrencyExchange, Account>()
+
+//        var cryptoAccounts = listOf<Account>()
         var fiatAccounts = listOf<Account>()
 
         val areAccountsOutOfDate: Boolean
             get() {
+                //TODO: rethink this, there is a high chance that this will not catch all accounts being out of date
                 val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
-                val areAccountsUnidentified = Account.cryptoAccounts.find { it.exchange == Exchange.CBPro && ( it.currency.knownCurrency == KnownCurrency.USD || it.currency.knownCurrency == KnownCurrency.OTHER ) } != null
-                val tradingPairs = Account.cryptoAccounts.firstOrNull()?.product?.tradingPairs
-                val areTradingPairsDuplicates = (tradingPairs?.distinct()?.size ?: 0) < (tradingPairs?.size ?: 1)
-                return areAccountsMissing || areAccountsUnidentified || areTradingPairsDuplicates
+
+                return areAccountsMissing
             }
 
         //TODO: stash this
@@ -87,26 +90,27 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
         var totalValue: Double = 0.0
-            get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
+            get() = Account.cryptoAccounts.map { a -> a.value.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
 
-        fun forCurrency(currency: Currency): Account? {
+        fun forCurrency(currency: Currency, exchange: Exchange): Account? {
             return if (currency.isFiat) {
                 fiatAccounts.find { a -> a.product.currency == currency }
             } else {
-                cryptoAccounts.find { a -> a.product.currency == currency }
+                cryptoAccounts[CurrencyExchange(currency, exchange)]
             }
         }
 
         fun updateAllAccountsCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
-            for (account in cryptoAccounts) {
+            for (pair in cryptoAccounts) {
+                val account = pair.value
                 val tradingPair = account.product.defaultTradingPair
                 //TODO: do we really need to call updateAllProducts here?
                 account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
                     candlesUpdated++
                     if (candlesUpdated == cryptoAccounts.size) {
                         if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts
+                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts.map { it.value }
                         }
                         onComplete()
                     }

@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.E
 
 
 /**
@@ -197,6 +198,15 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         return alertString
     }
 //
+    fun totalDefaultValueOfRelevantAccounts() : Double {
+        var totalValue = 0.0
+        for (exchange in Exchange.values()) {
+            val account = Account.forCurrency(currency, exchange)
+            totalValue += account?.defaultValue ?: 0.0
+        }
+        return totalValue
+    }
+
 //    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
 //        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
 //
@@ -209,10 +219,18 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 
     fun addToHashMap() {
         hashMap[currency] = this
+        currencyList.add(currency)
     }
 
     companion object {
         val hashMap = HashMap<Currency, Product>()
+        val currencyList = mutableSetOf<Currency>()
+
+        val dummyProduct = Product(Currency.USD, listOf())
+
+        fun forCurrency(currency: Currency) : Product? {
+            return hashMap[currency]
+        }
 
         fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
@@ -226,9 +244,9 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
                     val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
                     newProduct.addToHashMap()
                     val currency = Currency(baseCurrency)
-                    val relevantAccount = Account.forCurrency(currency)
-                    relevantAccount?.product?.currency = newProduct.currency
-                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
+//                    val relevantAccount = Account.forCurrency(currency)
+//                    relevantAccount?.product?.currency = newProduct.currency
+//                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
                 }
                 onComplete()
             }

@@ -74,7 +74,7 @@ class TransferFragment : RefreshFragment() {
 
         val hasRelevantData: Boolean
             get() {
-                val cryptoCBAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+                val cryptoCBAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
                 val fiatCBAccounts = Account.fiatAccounts.mapNotNull { account -> account.coinbaseAccount }
                 val cbAccountsAreMissing = ((cryptoCBAccounts.size < Account.cryptoAccounts.size) ||
                                             (fiatCBAccounts.size < Account.fiatAccounts.size))
@@ -159,7 +159,7 @@ class TransferFragment : RefreshFragment() {
 
         titleText.text = getString(R.string.transfer_in_title)
 
-        coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
 
         val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
@@ -196,7 +196,7 @@ class TransferFragment : RefreshFragment() {
                 isRefreshing = false
                 onComplete(false)
             }, {
-                coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+                coinbaseAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
                 val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
                 if (fiatCoinbaseAccount != null) {
                     coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
@@ -245,7 +245,7 @@ class TransferFragment : RefreshFragment() {
 
 
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
-        Account.forCurrency(currency)?.let {
+        Account.forCurrency(currency, Exchange.CBPro)?.let {
             tempRelevantAccounts.add(it)
         }
         if (currency.isFiat) {
@@ -285,7 +285,7 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun setDestAccounts() {
-        val cbproAccount = Account.forCurrency(currency)
+        val cbproAccount = Account.forCurrency(currency, Exchange.CBPro)
         destAccounts = when(sourceAccount) {
             is Account.CoinbaseAccount -> listOf(cbproAccount)
             is Account.PaymentMethod ->  listOf(cbproAccount)
@@ -429,7 +429,7 @@ class TransferFragment : RefreshFragment() {
                     when (destAccount) {
                         is Account.CoinbaseAccount -> {
                             val coinbaseAccount = destAccount as Account.CoinbaseAccount
-                            val cbproAccount = Account.forCurrency(currency)
+                            val cbproAccount = Account.forCurrency(currency, Exchange.CBPro)
 
                             if (amount > cbproAccount?.availableBalance ?: 0.0) {
                                 showPopup(R.string.transfer_funds_error)

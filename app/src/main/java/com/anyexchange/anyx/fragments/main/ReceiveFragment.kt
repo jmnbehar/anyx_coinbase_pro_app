@@ -37,6 +37,9 @@ class ReceiveFragment : RefreshFragment() {
         get() = ChartFragment.currency
         set(value) { ChartFragment.currency = value }
 
+    //TODO: make this changable
+    val exchange: Exchange = Exchange.CBPro
+
     companion object {
         fun newInstance(): ReceiveFragment {
             return ReceiveFragment()
@@ -118,7 +121,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     fun switchCurrency(forceRefresh: Boolean) {
-        val relevantAccount = Account.forCurrency(currency)
+        val relevantAccount = Account.forCurrency(currency, exchange)
         if (relevantAccount != null && (forceRefresh || relevantAccount.depositInfo == null)) {
             showProgressSpinner()
             if (relevantAccount.coinbaseAccount == null) {
@@ -137,7 +140,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     private fun getDepositAddress() {
-        val relevantAccount = Account.forCurrency(currency)
+        val relevantAccount = Account.forCurrency(currency, exchange)
         val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
         if (coinbaseAccountId != null) {
             CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
@@ -145,18 +148,18 @@ class ReceiveFragment : RefreshFragment() {
                 showAddressInfo(null)
             }) { depositInfo ->
                 dismissProgressSpinner()
-                Account.forCurrency(currency)?.depositInfo = depositInfo
+                Account.forCurrency(currency, exchange)?.depositInfo = depositInfo
                 showAddressInfo(depositInfo)
             }
             context?.let {
-                Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
+                Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts.values.toList()
             }
         }
     }
 
     private fun copyAddressToClipboard() {
         context?.let { context ->
-            Account.forCurrency(currency)?.depositInfo?.let { depositInfo ->
+            Account.forCurrency(currency, exchange)?.depositInfo?.let { depositInfo ->
                 val clipboard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
                 clipboard.primaryClip = clip

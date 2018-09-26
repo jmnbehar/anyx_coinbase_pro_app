@@ -190,15 +190,15 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            this.get(onFailure) { apiAccountList ->
-                for (account in Account.cryptoAccounts.plus(Account.fiatAccounts)) {
-                    val apiAccount = apiAccountList.find { a -> a.asset == account.currency.toString() }
-                    apiAccount?.let {
-                        account.updateWithApiAccount(it)
-                    }
-                }
-                onComplete()
-            }
+//            this.get(onFailure) { apiAccountList ->
+//                for (account in Account.cryptoAccounts.plus(Account.fiatAccounts)) {
+//                    val apiAccount = apiAccountList.find { a -> a.asset == account.currency.toString() }
+//                    apiAccount?.let {
+//                        account.updateWithApiAccount(it)
+//                    }
+//                }
+//                onComplete()
+//            }
         }
 
     }
@@ -247,7 +247,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) { result ->
                 try {
                     val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
-                    val account = Account.forCurrency(tradingPair.baseCurrency)
+                    val account = Account.forCurrency(tradingPair.baseCurrency, tradingPair.exchange)
                     account?.product?.setPriceForTradingPair(ticker.price, tradingPair)
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {

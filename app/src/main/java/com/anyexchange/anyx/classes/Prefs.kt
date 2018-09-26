@@ -277,7 +277,7 @@ class Prefs (var context: Context) {
     }
 
     fun nukeStashedFills() {
-        for (product in Account.cryptoAccounts.map { it.product }) {
+        for (product in Account.cryptoAccounts.values.map { it.product }) {
             for (exchange in Exchange.values()) {
                 for (tradingPair in product.tradingPairs) {
                     prefs.edit().remove(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange)).apply()
