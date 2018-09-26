@@ -6,16 +6,20 @@ import com.anyexchange.anyx.classes.APIs.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
+import kotlin.collections.HashMap
 
 
 /**
  * Created by anyexchange on 12/20/2017.
  */
 
-class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
+class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
-            : this(Currency(apiProduct.base_currency), apiProduct.id,
-            Currency(apiProduct.quote_currency), tradingPairs)
+            : this(Currency(apiProduct.base_currency), tradingPairs)
+
+    init {
+        hashMap[currency] = this
+    }
 
     var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
         set(value) {
@@ -191,8 +195,6 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
     override fun toString(): String {
         var alertString = currency.toString() + '\n'
-        alertString += id + '\n'
-        alertString += quoteCurrency.toString() + '\n'
         for (tradingPair in tradingPairs) {
             alertString += tradingPair.toString() + '\n'
         }
@@ -210,18 +212,10 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 //    }
 
     companion object {
-        fun forString(string: String): Product {
-            val splitString = string.split('\n')
-            val currency = Currency(splitString[0])
-            val id = splitString[1]
-            val quoteCurrency = if (splitString.size > 2) { Currency(splitString[2]) } else { Currency.USD }
-
-            val tradingPairs = listOf<TradingPair>()
-            return Product(currency, id, quoteCurrency, tradingPairs)
-        }
+        val hashMap = HashMap<Currency, Product>()
 
         fun fiatProduct(currency: Currency): Product {
-            val fiatProduct = Product(currency, currency.toString(), null, listOf())
+            val fiatProduct = Product(currency, listOf())
             
             fiatProduct.price.fill(1.0)
             return fiatProduct
@@ -241,8 +235,6 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                     val currency = Currency(baseCurrency)
                     val relevantAccount = Account.forCurrency(currency)
                     relevantAccount?.product?.currency = newProduct.currency
-                    relevantAccount?.product?.id = newProduct.id
-                    relevantAccount?.product?.quoteCurrency = newProduct.quoteCurrency
                     relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
                 }
                 onComplete()

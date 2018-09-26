@@ -70,7 +70,7 @@ class AnyApi {
                 Exchange.CBPro -> {
                     CBProApi.account(apiInitData, account.id).get(onFailure) {cbProAccount ->
                         if (cbProAccount != null) {
-                            account.apiAccount = cbProAccount
+                            account.updateWithApiAccount(cbProAccount)
                         }
                         onSuccess(account)
                     }

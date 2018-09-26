@@ -56,17 +56,21 @@ class VerifySendFragment : Fragment() {
         val verifyAccount = Account.forCurrency(currency)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
-            val productId = verifyAccount.product.id
-            CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
-                    timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
-                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                when (errorMessage) {
-                    CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
-                    else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
-                }
-            }, { _ ->
-                sendCryptoToVerify()
-            })
+            val productId = verifyAccount.product.defaultTradingPair?.idForExchange(Exchange.CBPro)
+            if (productId != null) {
+                CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
+                        timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
+                    val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                    when (errorMessage) {
+                        CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
+                        else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
+                    }
+                }, { _ ->
+                    sendCryptoToVerify()
+                })
+            } else {
+                goToVerificationComplete(VerificationStatus.UnknownError)
+            }
         }
 
         updateViews()

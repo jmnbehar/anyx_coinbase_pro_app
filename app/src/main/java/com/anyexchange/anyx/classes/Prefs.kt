@@ -99,9 +99,16 @@ class Prefs (var context: Context) {
         get() = prefs.getStringSet(ALERTS, setOf<String>())?.asSequence()?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(ALERTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
+    //TODO: change this to a hash map:
     var stashedProducts: List<Product>
-        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
-        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
+        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.mapNotNull {
+            try {
+                Gson().fromJson(it, Product::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        } ?: listOf()
+        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().mapNotNull { Gson().toJson(it) }.toSet()).apply()
 
 
     //For now assume all fiat accounts are CBPro
@@ -114,9 +121,7 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val newAccount = Account(product, apiAccount, Exchange.CBPro)
+                        val newAccount = gson.fromJson(accountString, Account::class.java)
                         newAccountList.add(newAccount)
                     } catch (e: Exception) {
                         return newAccountList
@@ -134,7 +139,7 @@ class Prefs (var context: Context) {
             } else {
                 val gson = Gson()
                 for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
+                    val accountJson = gson.toJson(account) ?: ""
                     val productJson = gson.toJson(account.product) ?: ""
                     prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
                             .putString(PRODUCT + account.currency.toString(), productJson).apply()
@@ -151,11 +156,10 @@ class Prefs (var context: Context) {
                 val productString = prefs.getString(PRODUCT + currency.toString(), "")
                 if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, CBProAccount::class.java)
+                        val newAccount = gson.fromJson(accountString, Account::class.java)
                         val product = gson.fromJson(productString, Product::class.java)
-                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.toString() != product.id }
+                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair != product.defaultTradingPair }
                         if (dayCandleOutliers.isEmpty()) {
-                            val newAccount = Account(product, apiAccount, Exchange.CBPro)
                             newAccountList.add(newAccount)
                         } else {
                             return mutableListOf()
@@ -176,7 +180,7 @@ class Prefs (var context: Context) {
             } else {
                 val gson = Gson()
                 for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
+                    val accountJson = gson.toJson(account) ?: ""
                     val productJson = gson.toJson(account.product) ?: ""
                     prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
                             .putString(PRODUCT + account.currency.toString(), productJson).apply()

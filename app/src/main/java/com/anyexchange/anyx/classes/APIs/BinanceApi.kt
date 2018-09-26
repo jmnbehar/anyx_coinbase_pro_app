@@ -170,10 +170,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     class accounts(private val initData: ApiInitData?) : BinanceApi(initData) {
 
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProAccount>) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceBalance>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val apiAccountList: List<CBProAccount> = Gson().fromJson(result.value, object : TypeToken<List<CBProAccount>>() {}.type)
+                    val apiAccountList: List<BinanceBalance> = Gson().fromJson(result.value, object : TypeToken<List<BinanceBalance>>() {}.type)
                     onComplete(apiAccountList)
                 } catch (e: Exception) {
                     onFailure(Result.Failure(FuelError(e)))
@@ -186,49 +186,15 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            if (CBProApi.credentials == null) {
-                val fiatCurrency = Account.defaultFiatCurrency
-                val filteredProductList = productList.filter { it.quoteCurrency == fiatCurrency }
-                val fiatAccount = CBProAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
-                Account.fiatAccounts = listOf(Account(Product.fiatProduct(fiatCurrency), fiatAccount, binanceExchange))
-                val tempCryptoAccounts = filteredProductList.map {
-                    val apiAccount = CBProAccount("", it.currency.toString(), "0.0", "", "0.0", "")
-                    Account(it, apiAccount, binanceExchange)
-                }
-                Account.cryptoAccounts = tempCryptoAccounts
-                Account.updateAllAccountsCandles(initData, onFailure, onComplete)
-            } else {
-                this.get(onFailure) { apiAccountList ->
-                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat == true }
-                    val tempFiatAccounts = fiatApiAccountList.map {
-                        Account(Product.fiatProduct(Currency(it.currency)), it, binanceExchange)
-                    }
 
-                    val cryptoApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat != true }
-                    val defaultFiatCurrency = Account.defaultFiatCurrency
-                    val tempCryptoAccounts = cryptoApiAccountList.mapNotNull {
-                        val currency = Currency(it.currency)
-                        val relevantProduct = productList.find { p -> p.currency == currency && p.quoteCurrency == defaultFiatCurrency }
-                        if (relevantProduct != null) {
-                            Account(relevantProduct, it, binanceExchange)
-                        } else {
-                            null
-                        }
-                    }
-                    Account.cryptoAccounts = tempCryptoAccounts
-                    Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
-
-                    Account.updateAllAccountsCandles(initData, onFailure, onComplete)
-                }
-            }
         }
 
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             this.get(onFailure) { apiAccountList ->
                 for (account in Account.cryptoAccounts.plus(Account.fiatAccounts)) {
-                    val apiAccount = apiAccountList.find { a -> a.currency == account.currency.toString() }
+                    val apiAccount = apiAccountList.find { a -> a.asset == account.currency.toString() }
                     apiAccount?.let {
-                        account.apiAccount = it
+                        account.updateWithApiAccount(it)
                     }
                 }
                 onComplete()

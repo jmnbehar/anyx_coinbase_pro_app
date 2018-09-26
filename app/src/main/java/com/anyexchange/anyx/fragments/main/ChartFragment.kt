@@ -424,19 +424,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             candles = newAccount.product.candlesForTimespan(timespan, tradingPair)
-            val prefs = Prefs(context)
-            if (prefs.isLoggedIn) {
-                if (account.apiAccount.balance.toDoubleOrNull() == null) {
-                    refresh {
-                        switchAccountCandlesCheck(newAccount)
-                        dismissProgressSpinner()
-                    }
-                } else {
-                    switchAccountCandlesCheck(newAccount)
-                }
-            } else {
-                switchAccountCandlesCheck(newAccount)
-            }
+            //TODO: make sure account has all valid info
+            switchAccountCandlesCheck(newAccount)
         }
     }
 

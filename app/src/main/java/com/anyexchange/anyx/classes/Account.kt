@@ -8,13 +8,24 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: CBProAccount, var exchange: Exchange): BaseAccount() {
-    override val balance: Double
-        get() = apiAccount.balance.toDoubleOrZero()
+class Account(var exchange: Exchange, override val currency: Currency, override var id: String, override var balance: Double, var holds: Double): BaseAccount() {
+    constructor(apiAccount: CBProAccount) : this(Exchange.CBPro, Currency(apiAccount.currency), apiAccount.id, apiAccount.balance.toDoubleOrZero(), apiAccount.holds.toDoubleOrZero())
+    constructor(apiAccount: BinanceBalance) : this(Exchange.Binance, Currency(apiAccount.asset), apiAccount.asset, apiAccount.free + apiAccount.locked, apiAccount.locked)
 
+    fun updateWithApiAccount(apiAccount: CBProAccount) {
+        assert(exchange == Exchange.CBPro)
+        id = apiAccount.id
+        balance = apiAccount.balance.toDoubleOrZero()
+        holds = apiAccount.holds.toDoubleOrZero()
+    }
+    fun updateWithApiAccount(binanceBalance: BinanceBalance) {
+        assert(exchange == Exchange.Binance)
+        id = binanceBalance.asset
+        balance = binanceBalance.free + binanceBalance.locked
+        holds = binanceBalance.locked
+    }
     val availableBalance: Double
         get() {
-            val holds = apiAccount.holds.toDoubleOrZero()
             return balance - holds
         }
 
@@ -24,11 +35,12 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
-    override val id: String
-        get() = apiAccount.id
 
-    override val currency: Currency
-        get() = product.currency
+    val product: Product
+        get() {
+            //TODO: if product is null, get product
+            return Product.hashMap[currency]!!
+        }
 
     var coinbaseAccount: CoinbaseAccount? = null
 
@@ -72,7 +84,7 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
-        val dummyAccount = Account(Product.fiatProduct(Currency.USD), CBProAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""), Exchange.CBPro)
+        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
