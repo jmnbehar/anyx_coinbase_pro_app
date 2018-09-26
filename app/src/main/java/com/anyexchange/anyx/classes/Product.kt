@@ -17,10 +17,6 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
             : this(Currency(apiProduct.base_currency), tradingPairs)
 
-    init {
-        hashMap[currency] = this
-    }
-
     var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
         set(value) {
             field = value
@@ -211,16 +207,12 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 //        yearCandles[tradingPairIndex] = basicYearCandles
 //    }
 
+    fun addToHashMap() {
+        hashMap[currency] = this
+    }
+
     companion object {
         val hashMap = HashMap<Currency, Product>()
-
-        fun fiatProduct(currency: Currency): Product {
-            val fiatProduct = Product(currency, listOf())
-            
-            fiatProduct.price.fill(1.0)
-            return fiatProduct
-        }
-
 
         fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
@@ -232,6 +224,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
                     val baseCurrency = apiProduct.base_currency
                     val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }
                     val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
+                    newProduct.addToHashMap()
                     val currency = Currency(baseCurrency)
                     val relevantAccount = Account.forCurrency(currency)
                     relevantAccount?.product?.currency = newProduct.currency

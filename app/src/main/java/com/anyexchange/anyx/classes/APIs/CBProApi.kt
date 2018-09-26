@@ -200,8 +200,11 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             Account.cryptoAccounts = listOf()
             val productList: MutableList<Product> = mutableListOf()
             if (!Account.areAccountsOutOfDate && context != null && Prefs(context).stashedProducts.isNotEmpty()) {
-                val stashedProductList = Prefs(context).stashedProducts
-                getAccountsWithProductList(stashedProductList, onFailure, onComplete)
+                val stashedProducts = Prefs(context).stashedProducts
+                for (product in stashedProducts) {
+                    product.addToHashMap()
+                }
+                getAccountsWithProductList(stashedProducts, onFailure, onComplete)
             } else {
                 products(initData).get(onFailure) { apiProductList ->
                     for (apiProduct in apiProductList) {
@@ -209,6 +212,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                             val baseCurrency = apiProduct.base_currency
                             val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it) }
                             val newProduct = Product(apiProduct, relevantProducts)
+                            newProduct.addToHashMap()
                             productList.add(newProduct)
                         }
                     }
