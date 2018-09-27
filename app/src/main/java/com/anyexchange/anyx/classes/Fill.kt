@@ -21,16 +21,16 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
 
 
     constructor(binanceFill: BinanceAccountFill) :
-            this(Exchange.Binance, TradingPair(binanceFill.symbol), binanceFill.id, binanceFill.orderId.toString(), binanceFill.price, binanceFill.qty,
+            this(Exchange.Binance, TradingPair(Exchange.Binance, binanceFill.symbol), binanceFill.id, binanceFill.orderId.toString(), binanceFill.price, binanceFill.qty,
                     Date(binanceFill.time), if (binanceFill.isBuyer) { TradeSide.BUY } else { TradeSide.SELL }, binanceFill.commission) {
-        commissionAsset = Currency.forString(binanceFill.commissionAsset)
+        commissionAsset = Currency(binanceFill.commissionAsset)
         isBestMatch = binanceFill.isBestMatch
 
         isMaker = binanceFill.isMaker
     }
     constructor(cbProFill: CBProFill) :
             //TODO: check back in on time
-            this(Exchange.CBPro, TradingPair(cbProFill.product_id), cbProFill.trade_id.toString(), cbProFill.order_id, cbProFill.price.toDouble(), cbProFill.size.toDouble(),
+            this(Exchange.CBPro, TradingPair(Exchange.CBPro, cbProFill.product_id), cbProFill.trade_id.toString(), cbProFill.order_id, cbProFill.price.toDouble(), cbProFill.size.toDouble(),
                     cbProFill.created_at.dateFromCBProApiDateString() ?: Date(), TradeSide.forString(cbProFill.side), cbProFill.fee.toDoubleOrZero()) {
         isSettled = cbProFill.settled
         liquidity = cbProFill.liquidity

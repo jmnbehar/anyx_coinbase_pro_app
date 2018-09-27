@@ -119,9 +119,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return
             }
         }
-        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
-        if (goToCurrency != null) {
-            goToChartFragment(goToCurrency)
+        (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
+            goToChartFragment(Currency(it))
         }
     }
 
@@ -172,7 +171,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
-        val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
+        val chartCurrency = Currency(chartCurrencyStr)
         ChartFragment.currency = chartCurrency
         setDrawerMenu()
     }
@@ -310,13 +309,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
-        for (account in Account.cryptoAccounts) {
-            account.product.defaultTradingPair?.let { tradingPair ->
-                AnyApi.ticker(apiInitData, account.exchange, tradingPair, onFailure) {
-                    tickersUpdated++
-                    if (tickersUpdated == accountListSize) {
-                        onComplete()
-                    }
+        for (productPair in Product.hashMap) {
+            CBProApi.ticker(apiInitData, productPair.value.defaultTradingPair!!).get(onFailure) {
+                tickersUpdated++
+                if (tickersUpdated == accountListSize) {
+                    onComplete()
                 }
             } ?: run {
                 onFailure(AnyApi.defaultFailure)
@@ -329,7 +326,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
+                val currentPrice = Product.forCurrency(alert.currency)?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {

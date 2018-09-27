@@ -8,13 +8,24 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var product: Product, var apiAccount: CBProAccount, var exchange: Exchange): BaseAccount() {
-    override val balance: Double
-        get() = apiAccount.balance.toDoubleOrZero()
+class Account(var exchange: Exchange, override val currency: Currency, override var id: String, override var balance: Double, var holds: Double): BaseAccount() {
+    constructor(apiAccount: CBProAccount) : this(Exchange.CBPro, Currency(apiAccount.currency), apiAccount.id, apiAccount.balance.toDoubleOrZero(), apiAccount.holds.toDoubleOrZero())
+    constructor(apiAccount: BinanceBalance) : this(Exchange.Binance, Currency(apiAccount.asset), apiAccount.asset, apiAccount.free + apiAccount.locked, apiAccount.locked)
 
+    fun updateWithApiAccount(apiAccount: CBProAccount) {
+        assert(exchange == Exchange.CBPro)
+        id = apiAccount.id
+        balance = apiAccount.balance.toDoubleOrZero()
+        holds = apiAccount.holds.toDoubleOrZero()
+    }
+    fun updateWithApiAccount(binanceBalance: BinanceBalance) {
+        assert(exchange == Exchange.Binance)
+        id = binanceBalance.asset
+        balance = binanceBalance.free + binanceBalance.locked
+        holds = binanceBalance.locked
+    }
     val availableBalance: Double
         get() {
-            val holds = apiAccount.holds.toDoubleOrZero()
             return balance - holds
         }
 
@@ -24,11 +35,12 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
     val defaultValue: Double
         get() = balance * product.defaultPrice
 
-    override val id: String
-        get() = apiAccount.id
 
-    override val currency: Currency
-        get() = product.currency
+    val product: Product
+        get() {
+            //TODO: if product is null, get product
+            return Product.hashMap[currency]!!
+        }
 
     var coinbaseAccount: CoinbaseAccount? = null
 
@@ -49,17 +61,20 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
         return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 
+    data class CurrencyExchange(val currency: Currency, val exchange: Exchange)
+
     companion object {
-        var cryptoAccounts = listOf<Account>()
+        var cryptoAccounts = mapOf<CurrencyExchange, Account>()
+
+//        var cryptoAccounts = listOf<Account>()
         var fiatAccounts = listOf<Account>()
 
         val areAccountsOutOfDate: Boolean
             get() {
+                //TODO: rethink this, there is a high chance that this will not catch all accounts being out of date
                 val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
-                val areAccountsUnidentified = Account.cryptoAccounts.find { it.currency == Currency.USD || it.currency == Currency.OTHER } != null
-                val tradingPairs = Account.cryptoAccounts.firstOrNull()?.product?.tradingPairs
-                val areTradingPairsDuplicates = (tradingPairs?.distinct()?.size ?: 0) < (tradingPairs?.size ?: 1)
-                return areAccountsMissing || areAccountsUnidentified || areTradingPairsDuplicates
+
+                return areAccountsMissing
             }
 
         //TODO: stash this
@@ -72,29 +87,30 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
-        val dummyAccount = Account(Product.fiatProduct(Currency.USD), CBProAccount("", Currency.USD.toString(), "0.0", "", "0.0", ""), Exchange.CBPro)
+        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
         var totalValue: Double = 0.0
-            get() = Account.cryptoAccounts.map { a -> a.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
+            get() = Account.cryptoAccounts.map { a -> a.value.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
 
-        fun forCurrency(currency: Currency): Account? {
+        fun forCurrency(currency: Currency, exchange: Exchange): Account? {
             return if (currency.isFiat) {
                 fiatAccounts.find { a -> a.product.currency == currency }
             } else {
-                cryptoAccounts.find { a -> a.product.currency == currency }
+                cryptoAccounts[CurrencyExchange(currency, exchange)]
             }
         }
 
         fun updateAllAccountsCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
-            for (account in cryptoAccounts) {
-                val tradingPair = TradingPair(account.product.id)
+            for (pair in cryptoAccounts) {
+                val account = pair.value
+                val tradingPair = account.product.defaultTradingPair
                 //TODO: do we really need to call updateAllProducts here?
                 account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
                     candlesUpdated++
                     if (candlesUpdated == cryptoAccounts.size) {
                         if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts
+                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts.map { it.value }
                         }
                         onComplete()
                     }
@@ -109,7 +125,7 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
     class CoinbaseAccount(apiCoinbaseAccount: ApiCoinbaseAccount) : BaseAccount() {
         override val id: String = apiCoinbaseAccount.id
         override val balance: Double = apiCoinbaseAccount.balance.toDoubleOrZero()
-        override val currency = Currency.forString(apiCoinbaseAccount.currency) ?: Currency.USD
+        override val currency = Currency(apiCoinbaseAccount.currency)
 
         override fun toString(): String {
             //TODO: use string resources
@@ -124,7 +140,7 @@ class Account(var product: Product, var apiAccount: CBProAccount, var exchange: 
     class PaymentMethod(val apiPaymentMethod: CBProPaymentMethod) : BaseAccount() {
         override val id: String = apiPaymentMethod.id
         override val balance = apiPaymentMethod.balance?.toDoubleOrNull()
-        override val currency = Currency.forString(apiPaymentMethod.currency) ?: Currency.USD
+        override val currency = Currency(apiPaymentMethod.currency)
 
         override fun toString(): String {
             return apiPaymentMethod.name

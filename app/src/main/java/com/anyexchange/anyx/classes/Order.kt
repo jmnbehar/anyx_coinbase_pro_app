@@ -29,7 +29,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     private var settled: Boolean? = null
 
     constructor(binanceOrder: BinanceOrder) :
-            this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
+            this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(Exchange.Binance, binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
                     binanceOrder.type, TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce) {
         cumulativeQuoteQty = binanceOrder.cummulativeQuoteQty
         status = binanceOrder.status
@@ -39,7 +39,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         isWorking = binanceOrder.isWorking
     }
     constructor(cbProOrder: CBProOrder) :
-            this(Exchange.CBPro, cbProOrder.id, TradingPair(cbProOrder.product_id), cbProOrder.price.toDouble(), cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDouble(),
+            this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price.toDouble(), cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDouble(),
                     cbProOrder.type, TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force) {
         status = cbProOrder.status
 

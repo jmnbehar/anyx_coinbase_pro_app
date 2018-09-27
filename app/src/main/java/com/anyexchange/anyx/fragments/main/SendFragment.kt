@@ -49,6 +49,9 @@ class SendFragment : RefreshFragment() {
         get() = ChartFragment.currency
         set(value) { ChartFragment.currency = value }
 
+    //TODO: make this changeable:
+    val exchange: Exchange = Exchange.CBPro
+
     companion object {
         fun newInstance(): SendFragment {
             return SendFragment()
@@ -119,7 +122,7 @@ class SendFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         super.refresh(onComplete)
 
-        Account.forCurrency(currency)?.let { account ->
+        Account.forCurrency(currency, exchange)?.let { account ->
             account.update(apiInitData, {//onFailure
                 onComplete(false)
             }) { //onSuccess
@@ -134,7 +137,7 @@ class SendFragment : RefreshFragment() {
     private fun setAccountBalanceText() {
         currencyTickerTextView?.text = currency.toString()
         iconImageView?.setImageResource(currency.iconId)
-        Account.forCurrency(currency)?.let {
+        Account.forCurrency(currency, exchange)?.let {
             accountBalanceTextView?.visibility = View.VISIBLE
             accountBalanceTextView?.text = resources.getString(R.string.send_balance_text, it.availableBalance.btcFormatShortened())
         } ?: run {

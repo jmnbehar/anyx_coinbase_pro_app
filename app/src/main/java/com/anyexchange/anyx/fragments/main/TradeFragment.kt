@@ -65,9 +65,24 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private var tradeType: TradeType = TradeType.MARKET
 
     var tradeSide: TradeSide = Companion.tradeSide
-    val account: Account?
+    val product: Product
         get() {
-            return ChartFragment.account
+            return ChartFragment.product
+        }
+    val currency: Currency
+        get() {
+            return product.currency
+        }
+
+    //TODO: improve this, make changeable
+    val tradingPair: TradingPair
+            get() = product.defaultTradingPair!!
+
+
+    private val relevantAccount: Account?
+        get() {
+            val exchange = tradingPair.exchange
+            return Account.forCurrency(ChartFragment.currency, exchange)
         }
 
     companion object {
@@ -230,8 +245,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 toast(R.string.trade_invalid_stop)
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
-                    account?.product?.defaultTradingPair?.let { tradingPair ->
-                        AnyApi.ticker(apiInitData, account!!.exchange, tradingPair, onFailure) { price ->
+                    product?.defaultTradingPair?.let { tradingPair ->
+                        AnyApi.ticker(apiInitData, tradingPair.exchange, tradingPair, onFailure) { price ->
                             if (price == null) {
                                 onFailure(Result.Failure(FuelError(Exception())))
                             } else {
@@ -272,6 +287,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
+        val account = relevantAccount
         account?.update(apiInitData, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
@@ -287,7 +303,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun updateButtonsAndText() {
-        account?.let { account ->
+        relevantAccount?.let { account ->
             context?.let { context ->
                 val buttonColors = account.currency.colorStateList(context)
                 val buttonTextColor = account.currency.buttonTextColor(context)
@@ -320,7 +336,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         val fiatCurrency = Account.defaultFiatCurrency
-        val currencyString = account?.currency?.toString() ?: ""
+        val currencyString = relevantAccount?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
             "less than $0.01"
         } else {
@@ -350,7 +366,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         val currency: Currency = when (errorMessage) {
-            //TODO: add in ETC errors, and/or make this smarter so it doesn't explicitly specify currencies
+            //TODO: \make this smarter so it doesn't explicitly specify currencies
             ErrorMessage.BuyAmountTooSmallBtc, ErrorMessage.BuyAmountTooLargeBtc -> Currency.BTC
             ErrorMessage.BuyAmountTooSmallEth, ErrorMessage.BuyAmountTooLargeEth -> Currency.ETH
             ErrorMessage.BuyAmountTooSmallBch, ErrorMessage.BuyAmountTooLargeBch -> Currency.BCH
@@ -405,7 +421,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             toast(R.string.toast_success)
             activity?.let { activity ->
                 activity.onBackPressed()
-                account?.let { account ->
+                relevantAccount?.let { account ->
                     val currency = account.currency
                     if (devFee > 0.0) {
                         val prefs = Prefs(activity)
@@ -419,6 +435,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
+        val account = relevantAccount
         val tradingPair = account?.product?.defaultTradingPair
         val exchange = account?.exchange
         if (tradingPair == null || exchange == null) {
@@ -443,12 +460,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun payFee(amount: Double) {
-        account?.currency?.let { currency ->
-            val destination = currency.developerAddress
+        currency.developerAddress?.let { developerAddress ->
             //TODO: make and use AnyApi call
 
             //TODO: only count fees as paid if they are successfully paid
-            CBProApi.sendCrypto(apiInitData, amount, currency, destination).executePost(
+            CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
                     {  /*  fail silently   */ },
                     {  /* succeed silently */ })
         }
@@ -478,7 +494,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 TradeType.STOP -> amount
             }
             TradeSide.SELL -> when (tradeType) {
-                TradeType.MARKET -> amount * (account?.product?.defaultPrice ?: 0.0)
+                TradeType.MARKET -> amount * (product.defaultPrice)
                 TradeType.LIMIT -> amount * limitPrice
                 TradeType.STOP -> amount * limitPrice
             }
@@ -488,7 +504,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun totalInCrypto(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
         return when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
-                TradeType.MARKET -> amount / (account?.product?.defaultPrice ?: 0.0)
+                TradeType.MARKET -> amount / (product.defaultPrice)
                 TradeType.LIMIT -> amount
                 TradeType.STOP -> if (limitPrice > 0.0) {
                     amount / limitPrice
@@ -501,34 +517,33 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun feeEstimate(amount: Double, limit: Double) : Double {
-        val price = account?.product?.defaultPrice
-        if (price != null) {
-            when (tradeSide) {
-                TradeSide.BUY -> {
-                    when (tradeType) {
-                        TradeType.MARKET -> { }
-                        TradeType.LIMIT -> if (limit <= price) {
-                            return 0.0
-                        }
-                        TradeType.STOP -> if (limit >= price) {
-                            return 0.0
-                        }
+        val price = product.defaultPrice
+        when (tradeSide) {
+            TradeSide.BUY -> {
+                when (tradeType) {
+                    TradeType.MARKET -> { }
+                    TradeType.LIMIT -> if (limit <= price) {
+                        return 0.0
+                    }
+                    TradeType.STOP -> if (limit >= price) {
+                        return 0.0
                     }
                 }
-                TradeSide.SELL -> {
-                    when (tradeType) {
-                        TradeType.MARKET -> { }
-                        TradeType.LIMIT -> if (limit >= price) {
-                            return 0.0
-                        }
-                        TradeType.STOP -> if (limit <= price) {
-                            return 0.0
-                        }
+            }
+            TradeSide.SELL -> {
+                when (tradeType) {
+                    TradeType.MARKET -> { }
+                    TradeType.LIMIT -> if (limit >= price) {
+                        return 0.0
+                    }
+                    TradeType.STOP -> if (limit <= price) {
+                        return 0.0
                     }
                 }
             }
         }
-        val cbproFee = amount * (account?.currency?.feePercentage ?: 0.005)
+        //TODO: change this to check exchange feePercentage
+        val cbproFee = amount * (currency.feePercentage)
         val devFee  = amount * DEV_FEE_PERCENTAGE
         return (devFee + cbproFee)
     }
@@ -603,28 +618,26 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
 
         if (context != null) {
-            account?.let { account ->
-                when (tradeSide) {
-                    TradeSide.BUY -> {
-                        submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
-                        tradeSideBuyRadioButton.isChecked = true
-                        when (tradeType) {
-                            TradeType.MARKET, TradeType.STOP -> {
-                                amountUnitText.text = fiatCurrency.toString()
-                                totalLabelText.text = resources.getString(R.string.trade_total_label, account.currency)
-                            }
-                            TradeType.LIMIT -> {
-                                amountUnitText.text = account.currency.toString()
-                                totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
-                            }
+            when (tradeSide) {
+                TradeSide.BUY -> {
+                    submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
+                    tradeSideBuyRadioButton.isChecked = true
+                    when (tradeType) {
+                        TradeType.MARKET, TradeType.STOP -> {
+                            amountUnitText.text = fiatCurrency.toString()
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, currency)
+                        }
+                        TradeType.LIMIT -> {
+                            amountUnitText.text = currency.toString()
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
                         }
                     }
-                    TradeSide.SELL -> {
-                        submitOrderButton.text = resources.getString(R.string.trade_sell_order_btn)
-                        tradeSideSellRadioButton.isChecked = true
-                        amountUnitText.text = account.currency.toString()
-                        totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
-                    }
+                }
+                TradeSide.SELL -> {
+                    submitOrderButton.text = resources.getString(R.string.trade_sell_order_btn)
+                    tradeSideSellRadioButton.isChecked = true
+                    amountUnitText.text = currency.toString()
+                    totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
                 }
             }
         }

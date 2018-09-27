@@ -105,7 +105,7 @@ class AlertsFragment : RefreshFragment() {
         val price = priceEditText.text.toString().toDoubleOrZero()
         context?.let { context ->
             if (price > 0) {
-                val productPrice = Account.forCurrency(currency)?.product?.defaultPrice ?: 0.0
+                val productPrice = Product.forCurrency(currency)?.defaultPrice ?: 0.0
                 val triggerIfAbove = price > productPrice
                 Prefs(context).addAlert(PriceAlert(price, currency, triggerIfAbove))
                 updatePagerAdapter()
@@ -116,7 +116,8 @@ class AlertsFragment : RefreshFragment() {
 
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
-        val price = Account.forCurrency(currency)?.product?.priceForQuoteCurrency(Account.defaultFiatCurrency)
+        val product = Product.forCurrency(currency)
+        val price = product?.priceForQuoteCurrency(Account.defaultFiatCurrency)
         if (price == null) {
             priceLabelText.text = ""
             currentPriceText.text = ""

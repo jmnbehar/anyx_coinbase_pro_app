@@ -30,7 +30,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
 
     private val sortedAccountList: List<Account>
         get() {
-            val sortedAccounts = Account.cryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+            val cryptoAccountList = Account.cryptoAccounts.map { it.value }.toList()
+            val sortedAccounts = cryptoAccountList.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
             val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
             sortedAccounts.addAll(sortedFiatAccounts)
 

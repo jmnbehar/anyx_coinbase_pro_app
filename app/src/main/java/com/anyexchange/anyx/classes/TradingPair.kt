@@ -1,9 +1,15 @@
 package com.anyexchange.anyx.classes
 
-class TradingPair(val baseCurrency: Currency, val quoteCurrency: Currency) {
-    constructor(id: String) : this(
-            if (id.length >= 3) { Currency.forString(id.substring(0, 3)) ?: Currency.BTC } else { Currency.BTC },
-            if (id.length >= 7) { Currency.forString(id.substring(4, 7)) ?: Currency.USD } else { Currency.USD })
+import com.anyexchange.anyx.classes.APIs.BinanceSymbol
+import com.anyexchange.anyx.classes.APIs.CBProProduct
+
+class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteCurrency: Currency, val id: String?, val orderTypes: List<TradeType>) {
+    constructor(product: CBProProduct) : this(Exchange.CBPro, Currency(product.base_currency), Currency(product.quote_currency), product.id, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
+    constructor(product: BinanceSymbol) : this(Exchange.Binance, Currency(product.baseAsset), Currency(product.quoteAsset), product.symbol, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
+    constructor(exchange: Exchange, id: String) : this(exchange, Currency(id.substring(0, 3)),
+            when (exchange) {
+                Exchange.Binance -> Currency(id.substring(3, 6))
+                Exchange.CBPro -> Currency(id.substring(4, 7)) }, id, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
 
     fun idForExchange(exchange: Exchange) : String {
         return when (exchange) {

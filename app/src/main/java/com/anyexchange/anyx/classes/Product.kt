@@ -7,16 +7,17 @@ import com.anyexchange.anyx.classes.api.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.math.E
 
 
 /**
  * Created by anyexchange on 12/20/2017.
  */
 
-class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
+class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
-            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
-            Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
+            : this(Currency(apiProduct.base_currency), tradingPairs)
 
     var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
         set(value) {
@@ -69,7 +70,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     private var yearCandles = Array<List<Candle>>(tradingPairCount) { listOf() }
 
     val defaultDayCandles: List<Candle>
-        get() = candlesForTimespan(Timespan.DAY, TradingPair(this.currency, Account.defaultFiatCurrency))
+        get() = candlesForTimespan(Timespan.DAY, defaultTradingPair)
 
     private var candlesTimespan = Timespan.DAY
 
@@ -88,7 +89,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     private fun candlesForTimespan(timespan: Timespan, quoteCurrency: Currency) : List<Candle> {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return candlesForTimespan(timespan, tradingPair)
     }
     fun candlesForTimespan(timespan: Timespan, tradingPair: TradingPair?): List<Candle> {
@@ -103,11 +104,11 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     fun priceForQuoteCurrency(quoteCurrency: Currency) : Double {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return priceForTradingPair(tradingPair)
     }
 
-    private fun priceForTradingPair(tradingPair: TradingPair) : Double {
+    private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
         return price[tradingPairIndex]
@@ -192,14 +193,21 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
     override fun toString(): String {
         var alertString = currency.toString() + '\n'
-        alertString += id + '\n'
-        alertString += quoteCurrency.toString() + '\n'
         for (tradingPair in tradingPairs) {
             alertString += tradingPair.toString() + '\n'
         }
         return alertString
     }
 //
+    fun totalDefaultValueOfRelevantAccounts() : Double {
+        var totalValue = 0.0
+        for (exchange in Exchange.values()) {
+            val account = Account.forCurrency(currency, exchange)
+            totalValue += account?.defaultValue ?: 0.0
+        }
+        return totalValue
+    }
+
 //    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
 //        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
 //
@@ -210,24 +218,20 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 //        yearCandles[tradingPairIndex] = basicYearCandles
 //    }
 
+    fun addToHashMap() {
+        hashMap[currency] = this
+        currencyList.add(currency)
+    }
+
     companion object {
-        fun forString(string: String): Product {
-            val splitString = string.split('\n')
-            val currency = Currency.forString(splitString[0]) ?: Currency.USD
-            val id = splitString[1]
-            val quoteCurrency = if (splitString.size > 2) { Currency.forString(splitString[2]) ?: Currency.USD } else { Currency.USD }
-            val tradingPairStrings = if (splitString.size > 3) { splitString.subList(3, splitString.size - 1) } else { listOf() }
-            val tradingPairs = tradingPairStrings.map { TradingPair(it) }
-            return Product(currency, id, quoteCurrency, tradingPairs)
-        }
+        val hashMap = HashMap<Currency, Product>()
+        val currencyList = mutableSetOf<Currency>()
 
-        fun fiatProduct(currency: Currency): Product {
-            val fiatProduct = Product(currency, currency.toString(), null, listOf())
-            
-            fiatProduct.price.fill(1.0)
-            return fiatProduct
-        }
+        val dummyProduct = Product(Currency.USD, listOf())
 
+        fun forCurrency(currency: Currency) : Product? {
+            return hashMap[currency]
+        }
 
         fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
@@ -237,14 +241,13 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                 }
                 for (apiProduct in apiProductList) {
                     val baseCurrency = apiProduct.base_currency
-                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }.map { it.id }
+                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }
                     val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
-                    val currency = Currency.forString(baseCurrency) ?: Currency.USD
-                    val relevantAccount = Account.forCurrency(currency)
-                    relevantAccount?.product?.currency = newProduct.currency
-                    relevantAccount?.product?.id = newProduct.id
-                    relevantAccount?.product?.quoteCurrency = newProduct.quoteCurrency
-                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
+                    newProduct.addToHashMap()
+                    val currency = Currency(baseCurrency)
+//                    val relevantAccount = Account.forCurrency(currency)
+//                    relevantAccount?.product?.currency = newProduct.currency
+//                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
                 }
                 onComplete()
             }

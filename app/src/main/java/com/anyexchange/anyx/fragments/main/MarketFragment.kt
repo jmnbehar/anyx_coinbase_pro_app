@@ -88,9 +88,10 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
-        for (account in Account.cryptoAccounts) {
-            account.product.defaultTradingPair?.let { tradingPair ->
-                account.product.updateCandles(time, tradingPair, apiInitData, {
+        for (product in Product.hashMap.values) {
+            //always check multiple exchanges?
+            product.defaultTradingPair?.let { tradingPair ->
+                product.updateCandles(time, tradingPair, apiInitData, {
                     //OnFailure
                     if (context != null) {
                         toast(R.string.error_message)
@@ -103,14 +104,14 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 context?.let {
-                                    Prefs(it).stashedCBProCryptoAccountList = Account.cryptoAccounts
+                                    Prefs(it).stashedProducts = Product.hashMap.values.toList()
                                 }
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                 updateAccountsFragment()
                                 onComplete(true)
                             }
                         } else {
-                            AnyApi.ticker(apiInitData, account.exchange, tradingPair, onFailure) {
+                            AnyApi.ticker(apiInitData, Exchange.CBPro, tradingPair, onFailure) {
                                 productsUpdated++
                                 if (productsUpdated == accountListSize) {
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()

@@ -50,12 +50,12 @@ class AnyApi {
         fun ticker(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (Double?) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
-                    CBProApi.ticker(apiInitData, tradingPair.idForExchange(Exchange.CBPro)).get(onFailure) {
+                    CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {
                         onSuccess(it.price.toDoubleOrNull())
                     }
                 }
                 Exchange.Binance -> {
-                    BinanceApi.ticker(apiInitData, tradingPair.idForExchange(Exchange.Binance)).get(onFailure) {
+                    BinanceApi.ticker(apiInitData, tradingPair).get(onFailure) {
                         onSuccess(it.price)
                     }
                 }
@@ -67,7 +67,7 @@ class AnyApi {
                 Exchange.CBPro -> {
                     CBProApi.account(apiInitData, account.id).get(onFailure) {cbProAccount ->
                         if (cbProAccount != null) {
-                            account.apiAccount = cbProAccount
+                            account.updateWithApiAccount(cbProAccount)
                         }
                         onSuccess(account)
                     }
@@ -82,14 +82,14 @@ class AnyApi {
         fun getCandles(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair, timespan: Long, timeOffset: Long, granularity: Long, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Candle>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
-                    CBProApi.candles(apiInitData, tradingPair.idForExchange(Exchange.CBPro), timespan, granularity, 0).getCandles(onFailure, onSuccess)
+                    CBProApi.candles(apiInitData, tradingPair, timespan, granularity, 0).getCandles(onFailure, onSuccess)
                 }
                 Exchange.Binance -> {
                     val interval = granularity.toString()
                     val now = Date().time
                     val startTime = now - (timespan + timeOffset)
                     val endTime = now - timeOffset
-                    BinanceApi.candles(apiInitData, tradingPair.idForExchange(Exchange.Binance), interval, startTime, endTime).getCandles(onFailure, onSuccess)
+                    BinanceApi.candles(apiInitData, tradingPair, interval, startTime, endTime).getCandles(onFailure, onSuccess)
                 }
             }
         }
