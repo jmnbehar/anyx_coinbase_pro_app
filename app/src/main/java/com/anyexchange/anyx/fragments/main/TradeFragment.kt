@@ -12,15 +12,15 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.APIs.CBProApi.ErrorMessage
+import com.anyexchange.anyx.classes.api.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
-import com.anyexchange.anyx.classes.APIs.AnyApi
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.CBProApi
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -135,8 +135,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
         limitEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(5, 2))
-
-
 
         tradeSideBuyRadioButton = rootView.rbtn_trade_buy
         tradeSideSellRadioButton = rootView.rbtn_trade_sell
@@ -428,25 +426,16 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {
-                    //TODO: use AnyApi
-                    when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
-                    }
+                    AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, amount,
+                            { onFailure(it) }, { onComplete(it) })
                 }
                 TradeType.LIMIT -> {
                     AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, timeInForce.toString(), cancelAfter, null,
                             { onFailure(it) }, { onComplete(it) })
                     }
                 TradeType.STOP -> {
-                    //TODO: make and use AnyApi call
-
-                    @Suppress("UnnecessaryVariable")
-                    val stopPrice = limitPrice
-                    when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onComplete(it) })
-                        TradeSide.SELL -> CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onComplete(it) })
-                    }
+                    AnyApi.orderStop(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, null,
+                            { onFailure(it) }, { onComplete(it) })
                 }
             }
             AnyApi.getAndStashOrderList(apiInitData, exchange, null, { }, { })

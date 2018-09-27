@@ -28,11 +28,13 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.classes.api.CBProApi
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
+import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -309,11 +311,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
         for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
-                tickersUpdated++
-                if (tickersUpdated == accountListSize) {
-                    onComplete()
+            account.product.defaultTradingPair?.let { tradingPair ->
+                AnyApi.ticker(apiInitData, account.exchange, tradingPair, onFailure) {
+                    tickersUpdated++
+                    if (tickersUpdated == accountListSize) {
+                        onComplete()
+                    }
                 }
+            } ?: run {
+                onFailure(AnyApi.defaultFailure)
             }
         }
     }

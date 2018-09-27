@@ -12,8 +12,7 @@ import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.APIs.AnyApi
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.AnyApi
 import kotlinx.android.synthetic.main.fragment_market.view.*
 
 /**

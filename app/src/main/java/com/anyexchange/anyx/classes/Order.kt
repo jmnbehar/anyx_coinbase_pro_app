@@ -1,6 +1,6 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.APIs.*
+import com.anyexchange.anyx.classes.api.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*

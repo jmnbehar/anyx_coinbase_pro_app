@@ -1,16 +1,13 @@
-package com.anyexchange.anyx.classes.APIs
+package com.anyexchange.anyx.classes.api
 
-import com.anyexchange.anyx.R
-import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.fragments.main.ChartFragment
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 
 class AnyApi {
     companion object {
-        private val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
+        val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
 
         fun getAndStashOrderList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
             when (exchange) {
@@ -111,7 +108,7 @@ class AnyApi {
                 }
             }
         }
-        fun orderMarket(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, amount: Double? = null, funds: Double? = null,
+        fun orderMarket(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, amount: Double?,
                         onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
@@ -121,13 +118,25 @@ class AnyApi {
                     }
                 }
                 Exchange.Binance -> {
-                    BinanceApi.orderMarket(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, amount!!, funds!!).executePost({ onFailure(it) }, { onSuccess(it) })
+                    BinanceApi.orderMarket(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, amount!!, amount).executePost({ onFailure(it) }, { onSuccess(it) })
                 }
             }
         }
-        fun orderStop(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, productId: String, price: Double, size: Double? = null, funds: Double? = null,
-                      onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        fun orderStop(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, stopPrice: Double, amount: Double, timeInForce: String?,
+                      onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
 
+            when (exchange) {
+                Exchange.CBPro -> {
+                    when (tradeSide) {
+                        TradeSide.BUY ->  CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = null, funds = amount).executePost({ onFailure(it) }, { onSuccess(it) })
+                        TradeSide.SELL -> CBProApi.orderStop(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), stopPrice, size = amount, funds = null).executePost({ onFailure(it) }, { onSuccess(it) })
+                    }
+                }
+                Exchange.Binance -> {
+                    //TODO: fix timeInForce
+                    BinanceApi.orderStop(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, null, amount, stopPrice).executePost({ onFailure(it) }, { onSuccess(it) })
+                }
+            }
         }
     }
 }

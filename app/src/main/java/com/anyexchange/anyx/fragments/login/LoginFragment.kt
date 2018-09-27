@@ -12,7 +12,7 @@ import android.widget.PopupMenu
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_login.view.*
 import se.simbio.encryption.Encryption
 

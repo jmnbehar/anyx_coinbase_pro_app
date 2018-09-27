@@ -2,8 +2,8 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.anyexchange.anyx.classes.APIs.CBProAccount
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.CBProAccount
+import com.anyexchange.anyx.classes.api.CBProApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*

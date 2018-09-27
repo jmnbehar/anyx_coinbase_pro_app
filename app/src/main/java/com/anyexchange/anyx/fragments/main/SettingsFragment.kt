@@ -13,7 +13,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor

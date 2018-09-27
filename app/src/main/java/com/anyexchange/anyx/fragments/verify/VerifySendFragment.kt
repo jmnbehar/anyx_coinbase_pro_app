@@ -11,7 +11,7 @@ import android.widget.TextView
 import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.APIs.CBProApi
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import com.anyexchange.anyx.classes.Currency
 
