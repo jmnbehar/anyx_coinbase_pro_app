@@ -19,6 +19,10 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
             : this(Currency(apiProduct.base_currency), tradingPairs)
 
+    init {
+        currency.addToList()
+    }
+
     var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
         set(value) {
             field = value
@@ -244,7 +248,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
                     val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }
                     val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
                     newProduct.addToHashMap()
-                    val currency = Currency(baseCurrency)
+//                    val currency = Currency(baseCurrency)
 //                    val relevantAccount = Account.forCurrency(currency)
 //                    relevantAccount?.product?.currency = newProduct.currency
 //                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs

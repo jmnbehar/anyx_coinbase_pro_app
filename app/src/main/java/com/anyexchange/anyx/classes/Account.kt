@@ -87,7 +87,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
 
-        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
+//        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
         var totalValue: Double = 0.0
             get() = Account.cryptoAccounts.map { a -> a.value.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()

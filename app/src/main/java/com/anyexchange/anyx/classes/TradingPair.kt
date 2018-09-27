@@ -1,7 +1,7 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.APIs.BinanceSymbol
-import com.anyexchange.anyx.classes.APIs.CBProProduct
+import com.anyexchange.anyx.classes.api.BinanceSymbol
+import com.anyexchange.anyx.classes.api.CBProProduct
 
 class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteCurrency: Currency, val id: String?, val orderTypes: List<TradeType>) {
     constructor(product: CBProProduct) : this(Exchange.CBPro, Currency(product.base_currency), Currency(product.quote_currency), product.id, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))

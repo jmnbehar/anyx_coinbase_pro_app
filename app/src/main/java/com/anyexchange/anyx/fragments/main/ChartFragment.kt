@@ -306,7 +306,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         blockNextProductChange = true
         showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
             if (!blockNextProductChange) {
-                Product.hashMap[currency]?.let {
+                Product.hashMap[selectedCurrency]?.let {
                     switchProduct(it)
                 }
             }
@@ -793,10 +793,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            AnyApi.updateAccount(apiInitData, account, onFailure) { account ->
+            AnyApi.updateAccount(apiInitData, account, onFailure) { updatedAccount ->
                 if (lifecycle.isCreatedOrResumed) {
-                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), account.currency)
-                    valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, updatedAccount.balance.btcFormat(), updatedAccount.currency)
+                    valueTextView?.text = updatedAccount.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
                     miniRefresh(onFailure) {
                         onComplete(true)
                     }
@@ -847,7 +847,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (tradingPairTemp == tradingPair) {
                         candles = product.candlesForTimespan(timespan, tradingPair)
                         tradingPair?.let { tradingPair ->
-                            AnyApi.ticker(apiInitData, tradingPair.exchange, tradingPair, onFailure) { _ ->
+                            AnyApi.ticker(apiInitData, tradingPair, onFailure) { _ ->
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

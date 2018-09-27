@@ -120,7 +120,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
-            goToChartFragment(Currency(it))
+            val currency = Currency(it)
+            currency.addToList()
+            goToChartFragment(currency)
         }
     }
 
@@ -309,11 +311,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
-        for (productPair in Product.hashMap) {
-            CBProApi.ticker(apiInitData, productPair.value.defaultTradingPair!!).get(onFailure) {
-                tickersUpdated++
-                if (tickersUpdated == accountListSize) {
-                    onComplete()
+        for (product in Product.hashMap.values) {
+            product.defaultTradingPair?.let { tradingPair ->
+                AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                    tickersUpdated++
+                    if (tickersUpdated == accountListSize) {
+                        onComplete()
+                    }
                 }
             } ?: run {
                 onFailure(AnyApi.defaultFailure)

@@ -36,8 +36,9 @@ class Currency(val id: String) {
     val isFiat = knownCurrency?.isFiat ?: false
 
     val minSendAmount: Double = knownCurrency?.minSendAmount ?: 0.0
-    init {
-        if (!isFiat && !cryptoList.contains(this)) {
+
+    fun addToList() {
+        if (!isFiat && !cryptoList.any { it.id == this.id }) {
             cryptoList.add(this)
         }
     }
@@ -91,14 +92,15 @@ class Currency(val id: String) {
 
 
     companion object {
-        val cryptoList: MutableList<Currency> = KnownCurrency.cryptoList.mapNotNull { Currency(it) }.toMutableList()
-        val fiatList = KnownCurrency.values().filter { it.isFiat && it != KnownCurrency.OTHER }
+        val cryptoList: MutableList<Currency> = KnownCurrency.values().filter { !it.isFiat }.asSequence().map { Currency(it) }.toMutableList()
+        val fiatList       = KnownCurrency.values().filter { it.isFiat  }
 
         val USD = Currency(KnownCurrency.USD)
-        val OTHER = Currency(KnownCurrency.OTHER)
         val BTC = Currency(KnownCurrency.BTC)
         val ETH = Currency(KnownCurrency.ETH)
         val BCH = Currency(KnownCurrency.BCH)
         val LTC = Currency(KnownCurrency.LTC)
+
+        val OTHER = Currency("Other")
     }
 }

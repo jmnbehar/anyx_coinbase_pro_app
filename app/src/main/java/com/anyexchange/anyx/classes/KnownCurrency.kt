@@ -18,9 +18,7 @@ enum class KnownCurrency {
     LTC,
     USD,
     EUR,
-    GBP,
-
-    OTHER;
+    GBP;
 
     override fun toString() : String {
         return when (this) {
@@ -32,8 +30,6 @@ enum class KnownCurrency {
             USD -> "USD"
             EUR -> "EUR"
             GBP -> "GBP"
-
-            OTHER -> "OTHER"
         }
     }
 
@@ -48,7 +44,6 @@ enum class KnownCurrency {
                 USD -> "$"
                 EUR -> "€"
                 GBP -> "£"
-                else -> ""
             }
         }
 
@@ -62,9 +57,6 @@ enum class KnownCurrency {
             USD -> "US Dollar"
             EUR -> "Euro"
             GBP -> "Pound sterling"
-
-
-            OTHER -> "OTHER"
         }
 
     val minSendAmount : Double
@@ -87,8 +79,6 @@ enum class KnownCurrency {
             USD -> R.drawable.icon_usd
             EUR -> R.drawable.icon_eur
             GBP -> R.drawable.icon_gbp
-
-            OTHER -> R.drawable.fail_icon
         }
 
     val isFiat : Boolean
@@ -127,7 +117,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.white)
-                OTHER -> ContextCompat.getColor(context, R.color.white)
             }
         } else {
             when (this) {
@@ -139,7 +128,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.black)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
             }
         }
     }
@@ -154,7 +142,6 @@ enum class KnownCurrency {
             USD,
             EUR,
             GBP -> ContextCompat.getColor(context, R.color.white_fade)
-            OTHER -> ContextCompat.getColor(context, R.color.black_fade)
         }
     }
 
@@ -170,7 +157,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.white)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
             }
         } else {
             when (this) {
@@ -182,7 +168,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.black)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
             }
         }
     }
@@ -199,7 +184,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
-                OTHER -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
             }
         } else {
             when (this) {
@@ -211,7 +195,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-                OTHER -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
             }
         }
     }
@@ -228,7 +211,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> Color.WHITE
-                OTHER -> Color.WHITE
             }
         } else {
             when (this) {
@@ -240,7 +222,6 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> Color.BLACK
-                OTHER -> Color.BLACK
             }
         }
     }
@@ -256,7 +237,6 @@ enum class KnownCurrency {
             USD,
             EUR,
             GBP -> "my irl address?"
-            OTHER -> "jinkies"
         }
 
 
@@ -271,12 +251,11 @@ enum class KnownCurrency {
                 EUR -> -1
                 GBP -> -2
                 USD -> -100
-                OTHER -> 9999
             }
         }
 
     companion object {
-        val cryptoList = KnownCurrency.values().filter { !it.isFiat && it != OTHER }
+        val cryptoList = KnownCurrency.values().filter { !it.isFiat }
 
         fun forString(string: String?) : KnownCurrency? {
             return when (string) {

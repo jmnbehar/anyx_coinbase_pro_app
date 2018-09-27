@@ -47,7 +47,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         }
 
         listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
-        listView?.setHeightBasedOnChildren()
+//        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView
@@ -111,7 +111,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                                 onComplete(true)
                             }
                         } else {
-                            AnyApi.ticker(apiInitData, Exchange.CBPro, tradingPair, onFailure) {
+                            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                                 productsUpdated++
                                 if (productsUpdated == accountListSize) {
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()

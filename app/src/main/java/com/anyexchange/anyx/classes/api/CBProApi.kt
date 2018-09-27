@@ -210,7 +210,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     for (apiProduct in apiProductList) {
                         if (apiProduct.quote_currency == Account.defaultFiatCurrency.id ) {
                             val baseCurrency = apiProduct.base_currency
-                            val relevantProducts = apiProductList.filter { it.base_currency == baseCurrency }.map { TradingPair(it) }
+                            val relevantProducts = apiProductList.asSequence().filter { it.base_currency == baseCurrency }.map { TradingPair(it) }.toList()
                             val newProduct = Product(apiProduct, relevantProducts)
                             newProduct.addToHashMap()
                             productList.add(newProduct)

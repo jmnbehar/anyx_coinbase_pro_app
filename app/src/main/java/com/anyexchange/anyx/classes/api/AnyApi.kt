@@ -47,8 +47,8 @@ class AnyApi {
             }
         }
 
-        fun ticker(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (Double?) -> Unit) {
-            when (exchange) {
+        fun ticker(apiInitData: ApiInitData?, tradingPair: TradingPair, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (Double?) -> Unit) {
+            when (tradingPair.exchange) {
                 Exchange.CBPro -> {
                     CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {
                         onSuccess(it.price.toDoubleOrNull())

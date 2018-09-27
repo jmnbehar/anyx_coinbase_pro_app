@@ -172,7 +172,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     private fun sumAccountCandles() : List<Candle> {
-        val btcProduct = Account.forCurrency(Currency(KnownCurrency.BTC), Exchange.CBPro)?.product
+        val btcProduct = Account.forCurrency(Currency.BTC, Exchange.CBPro)?.product
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()

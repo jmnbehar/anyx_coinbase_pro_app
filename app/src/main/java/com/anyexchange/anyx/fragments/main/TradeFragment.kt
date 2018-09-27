@@ -245,8 +245,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 toast(R.string.trade_invalid_stop)
             } else {
                 if (prefs.shouldShowTradeConfirmModal) {
-                    product?.defaultTradingPair?.let { tradingPair ->
-                        AnyApi.ticker(apiInitData, tradingPair.exchange, tradingPair, onFailure) { price ->
+                    product.defaultTradingPair?.let { tradingPair ->
+                        AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
                             if (price == null) {
                                 onFailure(Result.Failure(FuelError(Exception())))
                             } else {
@@ -295,7 +295,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
         account?.product?.defaultTradingPair?.let { tradingPair ->
-            AnyApi.ticker(apiInitData, account!!.exchange, tradingPair, onFailure) {
+            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                 updateButtonsAndText()
                 onComplete(true)
             }
