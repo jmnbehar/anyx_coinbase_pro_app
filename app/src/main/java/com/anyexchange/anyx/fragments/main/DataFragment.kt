@@ -64,15 +64,18 @@ class DataFragment : Fragment() {
                 }
             }
         }
+
+        Product.map = prefs.stashedProducts.associateBy { it.currency.id }.toMutableMap()
+
         if (backupFiatAccountList.isNotEmpty()) {
             Account.fiatAccounts = backupFiatAccountList
         } else if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList
         }
         if (backupCryptoAccountList.isNotEmpty()) {
-            Account.cryptoAccounts = backupCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange) }
+            Account.cryptoAccounts = backupCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
         } else if (Account.cryptoAccounts.isEmpty()){
-            Account.cryptoAccounts = prefs.stashedCBProCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange) }
+            Account.cryptoAccounts = prefs.stashedCBProCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
         }
         if (backupPaymentMethodList.isNotEmpty()) {
             Account.paymentMethods = backupPaymentMethodList

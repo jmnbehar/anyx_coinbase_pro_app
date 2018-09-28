@@ -47,7 +47,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         }
 
         listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
-//        listView?.setHeightBasedOnChildren()
+        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView
@@ -88,7 +88,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
-        for (product in Product.hashMap.values) {
+        for (product in Product.map.values) {
             //always check multiple exchanges?
             product.defaultTradingPair?.let { tradingPair ->
                 product.updateCandles(time, tradingPair, apiInitData, {
@@ -104,7 +104,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             productsUpdated++
                             if (productsUpdated == accountListSize) {
                                 context?.let {
-                                    Prefs(it).stashedProducts = Product.hashMap.values.toList()
+                                    Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                 updateAccountsFragment()

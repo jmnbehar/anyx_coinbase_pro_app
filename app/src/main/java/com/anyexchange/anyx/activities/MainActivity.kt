@@ -237,13 +237,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val isApiKeyValid = prefs.isApiKeyValid(apiKey)
                     CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 }
-            } else if (!Account.areAccountsOutOfDate) {
+            } else if (!Account.areAccountsOutOfDate && !Product.map.isEmpty()) {
                 setDrawerMenu()
                 onComplete()
                 goHome()
                 return
             }
         }
+        if (Product.map.isEmpty()) {
+            updateAllProducts(onFailure) {
+                if (Account.areAccountsOutOfDate) {
+                    updateAllAccounts(onFailure, onComplete)
+                } else {
+                    onComplete()
+                }
+            }
+
+        } else if (Account.areAccountsOutOfDate) {
+            updateAllAccounts(onFailure, onComplete)
+        }
+    }
+
+    private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        AnyApi.products(apiInitData, onFailure, onSuccess)
+    }
+    private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        val prefs = Prefs(this)
         showProgressBar()
         CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
             dismissProgressBar()
@@ -263,7 +282,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 prefs.isLoggedIn = true
             }
             setDrawerMenu()
-            onComplete()
+            onSuccess()
             goHome()
         })
     }
@@ -311,7 +330,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
         val accountListSize = Account.cryptoAccounts.size
-        for (product in Product.hashMap.values) {
+        for (product in Product.map.values) {
             product.defaultTradingPair?.let { tradingPair ->
                 AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                     tickersUpdated++

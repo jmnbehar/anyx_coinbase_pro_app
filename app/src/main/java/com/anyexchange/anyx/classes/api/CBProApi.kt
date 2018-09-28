@@ -197,41 +197,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            Account.cryptoAccounts = hashMapOf()
-            val productList: MutableList<Product> = mutableListOf()
-            if (!Account.areAccountsOutOfDate && context != null && Prefs(context).stashedProducts.isNotEmpty()) {
-                val stashedProducts = Prefs(context).stashedProducts
-                for (product in stashedProducts) {
-                    product.addToHashMap()
-                }
-                getAccountsWithProductList(stashedProducts, onFailure, onComplete)
-            } else {
-                products(initData).get(onFailure) { apiProductList ->
-                    for (apiProduct in apiProductList) {
-                        if (apiProduct.quote_currency == Account.defaultFiatCurrency.id ) {
-                            val baseCurrency = apiProduct.base_currency
-                            val relevantProducts = apiProductList.asSequence().filter { it.base_currency == baseCurrency }.map { TradingPair(it) }.toList()
-                            val newProduct = Product(apiProduct, relevantProducts)
-                            newProduct.addToHashMap()
-                            productList.add(newProduct)
-                        }
-                    }
-                    getAccountsWithProductList(productList, onFailure, onComplete)
-                }
-            }
-        }
-
-        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (credentials == null) {
-                val fiatCurrency = Account.defaultFiatCurrency
-                val fiatAccount = CBProAccount("", fiatCurrency.toString(), "0.0", "", "0.0", "")
-                Account.fiatAccounts = listOf(Account(fiatAccount))
-                val tempCryptoAccountList = productList.map {
-                    val apiAccount = CBProAccount("", it.currency.toString(), "0.0", "", "0.0", "")
-                    Account(apiAccount)
-                }
-                Account.cryptoAccounts = tempCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange) }
-                Account.updateAllAccountsCandles(initData, onFailure, onComplete)
+                Product.updateAllProductCandles(initData, onFailure, onComplete)
             } else {
                 this.get(onFailure) { apiAccountList ->
                     val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat }
@@ -239,10 +206,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
                     val tempCryptoAccounts = cryptoApiAccountList.map { Account(it) }
-                    Account.cryptoAccounts = tempCryptoAccounts.associateBy { Account.CurrencyExchange(it.currency, it.exchange) }
+                    Account.cryptoAccounts = tempCryptoAccounts.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
                     Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
 
-                    Account.updateAllAccountsCandles(initData, onFailure, onComplete)
+                    Product.updateAllProductCandles(initData, onFailure, onComplete)
                 }
             }
         }

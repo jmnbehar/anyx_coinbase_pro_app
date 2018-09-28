@@ -11,13 +11,20 @@ import com.anyexchange.anyx.R
  */
 
 class Currency(val id: String) {
-    constructor(knownCurrency: KnownCurrency): this(knownCurrency.symbol)
+    constructor(knownCurrency: KnownCurrency): this(knownCurrency.toString())
     val knownCurrency = KnownCurrency.forString(id)
 
     override fun toString() : String {
         return id
     }
 
+    override fun equals(other: Any?): Boolean {
+        return if (other is Currency) {
+            (other.id == this.id)
+        } else {
+            false
+        }
+    }
     val symbol = knownCurrency?.symbol ?: id
 
     val fullName = knownCurrency?.fullName ?: id
@@ -77,7 +84,7 @@ class Currency(val id: String) {
     }
 
     fun buttonTextColor(context: Context) : Int {
-        return knownCurrency?.colorAccent(context) ?: run {
+        return knownCurrency?.buttonTextColor(context) ?: run {
             //TODO: generate colors based on name and darkmode
             val isDarkModeOn = Prefs(context).isDarkModeOn
             Color.WHITE

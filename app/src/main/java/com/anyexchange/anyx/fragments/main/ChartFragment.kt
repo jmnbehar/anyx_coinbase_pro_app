@@ -100,7 +100,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         var currency: Currency
             get() = product.currency
             set(value) {
-                Product.hashMap[value]?.let {
+                Product.map[value.id]?.let {
                     product = it
                 } ?: run {
                     //TODO: don't change
@@ -306,7 +306,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         blockNextProductChange = true
         showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
             if (!blockNextProductChange) {
-                Product.hashMap[selectedCurrency]?.let {
+                Product.map[selectedCurrency.id]?.let {
                     switchProduct(it)
                 }
             }

@@ -8,7 +8,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.math.E
 
 
 /**
@@ -223,18 +222,16 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 //    }
 
     fun addToHashMap() {
-        hashMap[currency] = this
-        currencyList.add(currency)
+        map[currency.id] = this
     }
 
     companion object {
-        val hashMap = HashMap<Currency, Product>()
-        val currencyList = mutableSetOf<Currency>()
+        var map = mutableMapOf<String, Product>()
 
         val dummyProduct = Product(Currency.USD, listOf())
 
         fun forCurrency(currency: Currency) : Product? {
-            return hashMap[currency]
+            return map[currency.id]
         }
 
         fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
@@ -253,6 +250,26 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 //                    relevantAccount?.product?.currency = newProduct.currency
 //                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
                 }
+                onComplete()
+            }
+        }
+
+        fun updateAllProductCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            var candlesUpdated = 0
+            for (product in map.values) {
+                val tradingPair = product.defaultTradingPair
+                //TODO: do we really need to call updateAllProducts here?
+                product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
+                    candlesUpdated++
+                    if (candlesUpdated == map.size) {
+                        if (didUpdate && apiInitData?.context != null) {
+                            Prefs(apiInitData.context).stashedProducts = map.values.toList()
+                        }
+                        onComplete()
+                    }
+                }
+            }
+            if (map.isEmpty()) {
                 onComplete()
             }
         }

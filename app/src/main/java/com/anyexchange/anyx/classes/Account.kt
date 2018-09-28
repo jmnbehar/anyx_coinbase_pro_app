@@ -39,7 +39,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     val product: Product
         get() {
             //TODO: if product is null, get product
-            return Product.hashMap[currency]!!
+            return Product.map[currency.id]!!
         }
 
     var coinbaseAccount: CoinbaseAccount? = null
@@ -61,10 +61,14 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 
-    data class CurrencyExchange(val currency: Currency, val exchange: Exchange)
+    data class CurrencyExchange(val currency: Currency, val exchange: Exchange) {
+        override fun toString(): String {
+            return "$currency-$exchange"
+        }
+    }
 
     companion object {
-        var cryptoAccounts = mapOf<CurrencyExchange, Account>()
+        var cryptoAccounts = mapOf<String, Account>()
 
 //        var cryptoAccounts = listOf<Account>()
         var fiatAccounts = listOf<Account>()
@@ -82,7 +86,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
         //TODO: make this changeable
         val defaultFiatAccount: Account?
-            get() = fiatAccounts.sortedBy { it.balance }.lastOrNull()
+            get() = fiatAccounts.asSequence().sortedBy { it.balance }.lastOrNull()
 
         val defaultFiatCurrency: Currency
             get() = defaultFiatAccount?.currency ?: Currency.USD
@@ -96,28 +100,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
             return if (currency.isFiat) {
                 fiatAccounts.find { a -> a.product.currency == currency }
             } else {
-                cryptoAccounts[CurrencyExchange(currency, exchange)]
-            }
-        }
-
-        fun updateAllAccountsCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            var candlesUpdated = 0
-            for (pair in cryptoAccounts) {
-                val account = pair.value
-                val tradingPair = account.product.defaultTradingPair
-                //TODO: do we really need to call updateAllProducts here?
-                account.product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
-                    candlesUpdated++
-                    if (candlesUpdated == cryptoAccounts.size) {
-                        if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashedCBProCryptoAccountList = Account.cryptoAccounts.map { it.value }
-                        }
-                        onComplete()
-                    }
-                }
-            }
-            if (cryptoAccounts.isEmpty()) {
-                onComplete()
+                cryptoAccounts[CurrencyExchange(currency, exchange).toString()]
             }
         }
     }

@@ -229,15 +229,17 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
     class products(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProProduct>) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceSymbol>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val productList: List<CBProProduct> = Gson().fromJson(result.value, object : TypeToken<List<CBProProduct>>() {}.type)
+                    val productList: List<BinanceSymbol> = Gson().fromJson(result.value, object : TypeToken<List<BinanceSymbol>>() {}.type)
                     onComplete(productList)
                 } catch (e: JsonSyntaxException) {
-                    onFailure(Result.Failure(FuelError(e)))
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
                 } catch (e: IllegalStateException) {
-                    onFailure(Result.Failure(FuelError(e)))
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
                 }
             }
         }

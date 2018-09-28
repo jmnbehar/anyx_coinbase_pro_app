@@ -4,6 +4,7 @@ import com.anyexchange.anyx.classes.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
+import com.anyexchange.anyx.classes.Currency
 
 class AnyApi {
     companion object {
@@ -135,6 +136,53 @@ class AnyApi {
                 Exchange.Binance -> {
                     //TODO: fix timeInForce
                     BinanceApi.orderStop(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, null, amount, stopPrice).executePost({ onFailure(it) }, { onSuccess(it) })
+                }
+            }
+        }
+
+        fun products(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+            //Do ALL exchanges
+            var binanceProducts = listOf<BinanceSymbol>()
+            var cbProProducts = listOf<CBProProduct>()
+            CBProApi.products(apiInitData).get(onFailure) {
+//                if (binanceProducts.isEmpty()) {
+//                    cbProProducts = it
+//                } else {
+//                    compileAllProducts(it, binanceProducts)
+//                    onSuccess()
+//                }
+
+                compileAllProducts(it, binanceProducts)
+                onSuccess()
+            }
+//            BinanceApi.products(apiInitData).get(onFailure) {
+//                if (cbProProducts.isEmpty()) {
+//                    binanceProducts = it
+//                } else {
+//                    compileAllProducts(cbProProducts, it)
+//                    onSuccess()
+//                }
+//            }
+        }
+        private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
+            for (apiProduct in cbProProducts) {
+                val tradingPair = TradingPair(apiProduct)
+                Product.map[apiProduct.base_currency]?.let {  product ->
+                    product.tradingPairs = product.tradingPairs.plus(tradingPair)
+                } ?: run {
+                    val currency = Currency(apiProduct.base_currency)
+                    val newProduct = Product(currency, listOf(tradingPair))
+                    newProduct.addToHashMap()
+                }
+            }
+            for (apiProduct in binanceProducts) {
+                val tradingPair = TradingPair(apiProduct)
+                Product.map[apiProduct.symbol]?.let {  product ->
+                    product.tradingPairs = product.tradingPairs.plus(tradingPair)
+                } ?: run {
+                    val currency = Currency(apiProduct.symbol)
+                    val newProduct = Product(currency, listOf(tradingPair))
+                    newProduct.addToHashMap()
                 }
             }
         }

@@ -51,7 +51,7 @@ class AlertJobService : JobService() {
                 checkFillAlerts()
             })
         } else {
-            Account.updateAllAccountsCandles(apiInitData, { /* do nothing*/ }, {
+            Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
                 loopThroughAlerts()
             })
             checkFillAlerts()
