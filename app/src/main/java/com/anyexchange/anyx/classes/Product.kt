@@ -22,7 +22,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         currency.addToList()
     }
 
-    var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
+    var tradingPairs = tradingPairsIn.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
         set(value) {
             field = value
             if (dayCandles.size < tradingPairs.size) {
@@ -76,6 +76,8 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         get() = candlesForTimespan(Timespan.DAY, defaultTradingPair)
 
     private var candlesTimespan = Timespan.DAY
+
+    val accounts = mutableMapOf<Exchange, Account>()
 
     fun percentChange(timespan: Timespan, quoteCurrency: Currency) : Double {
         val currentPrice = priceForQuoteCurrency(quoteCurrency)

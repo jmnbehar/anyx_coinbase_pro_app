@@ -24,6 +24,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         balance = binanceBalance.free + binanceBalance.locked
         holds = binanceBalance.locked
     }
+    
     val availableBalance: Double
         get() {
             return balance - holds
@@ -36,7 +37,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         get() = balance * product.defaultPrice
 
 
-    val product: Product
+    private val product: Product
         get() {
             //TODO: if product is null, get product
             return Product.map[currency.id]!!
@@ -61,22 +62,13 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 
-    data class CurrencyExchange(val currency: Currency, val exchange: Exchange) {
-        override fun toString(): String {
-            return "$currency-$exchange"
-        }
-    }
-
     companion object {
-        var cryptoAccounts = mapOf<String, Account>()
-
-//        var cryptoAccounts = listOf<Account>()
         var fiatAccounts = listOf<Account>()
 
         val areAccountsOutOfDate: Boolean
             get() {
-                //TODO: rethink this, there is a high chance that this will not catch all accounts being out of date
-                val areAccountsMissing = Account.cryptoAccounts.size < Currency.cryptoList.size || Account.fiatAccounts.isEmpty()
+                //TODO: rethink this, there is no way this will not catch all out of date accounts
+                val areAccountsMissing = Account.fiatAccounts.isEmpty()
 
                 return areAccountsMissing
             }
@@ -93,15 +85,22 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
 //        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
-        var totalValue: Double = 0.0
-            get() = Account.cryptoAccounts.map { a -> a.value.defaultValue }.sum() + Account.fiatAccounts.map { a -> a.defaultValue }.sum()
+        fun totalValue() : Double {
+            val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
+            val fiatAccountsValue = Account.fiatAccounts.map { a -> a.defaultValue }.sum()
+            return cryptoAccountsValue + fiatAccountsValue
+        }
 
         fun forCurrency(currency: Currency, exchange: Exchange): Account? {
             return if (currency.isFiat) {
                 fiatAccounts.find { a -> a.product.currency == currency }
             } else {
-                cryptoAccounts[CurrencyExchange(currency, exchange).toString()]
+                Product.map[currency.id]?.accounts?.get(exchange)
             }
+        }
+
+        fun allCryptoAccounts() : List<Account> {
+            return Product.map.values.flatMap { product -> product.accounts.values }
         }
     }
 

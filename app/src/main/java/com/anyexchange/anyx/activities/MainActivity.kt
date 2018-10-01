@@ -253,13 +253,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
 
-        } else if (Account.areAccountsOutOfDate) {
+        } else if (Account.areAccountsOutOfDate && CBProApi.credentials != null) {
             updateAllAccounts(onFailure, onComplete)
+        } else {
+            setDrawerMenu()
+            onComplete()
+            goHome()
         }
     }
 
     private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        AnyApi.products(apiInitData, onFailure, onSuccess)
+        AnyApi.getAllProducts(apiInitData, onFailure, onSuccess)
     }
     private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         val prefs = Prefs(this)
@@ -329,12 +333,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
-        val accountListSize = Account.cryptoAccounts.size
         for (product in Product.map.values) {
             product.defaultTradingPair?.let { tradingPair ->
                 AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                     tickersUpdated++
-                    if (tickersUpdated == accountListSize) {
+                    if (tickersUpdated == Product.map.size) {
                         onComplete()
                     }
                 }

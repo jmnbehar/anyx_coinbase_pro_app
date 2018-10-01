@@ -137,7 +137,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     private fun setValueAndPercentChangeTexts() {
-        val totalValue = Account.totalValue
+        val totalValue = Account.totalValue()
         valueText?.text = totalValue.fiatFormat(Account.defaultFiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
@@ -172,7 +172,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     private fun sumAccountCandles() : List<Candle> {
-        val btcProduct = Account.forCurrency(Currency.BTC, Exchange.CBPro)?.product
+        val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
@@ -180,13 +180,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 var totalCandleValue = fiatValue
                 val openTime = btcProduct.defaultDayCandles[i].openTime
                 val closeTime = btcProduct.defaultDayCandles[i].closeTime
-                for (account in Account.cryptoAccounts.values) {
-                    val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
-                        account.product.defaultDayCandles[i].close
+                for (product in Product.map.values) {
+                    val accountCandleValue = if (product.defaultDayCandles.size > i) {
+                        product.defaultDayCandles[i].close
                     } else {
-                        account.product.defaultDayCandles.lastOrNull()?.close ?: 0.0
+                        product.defaultDayCandles.lastOrNull()?.close ?: 0.0
                     }
-                    totalCandleValue += (accountCandleValue * account.balance)
+                    for (accountPair in product.accounts) {
+                        totalCandleValue += (accountCandleValue * accountPair.value.balance)
+                    }
                 }
 
                 val usdCurrency = Currency.USD
@@ -217,7 +219,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()
 
-        if (Account.totalValue == 0.0) {
+        if (Account.totalValue() == 0.0) {
             lineChart?.visibility = View.GONE
         } else {
             lineChart?.visibility = View.VISIBLE

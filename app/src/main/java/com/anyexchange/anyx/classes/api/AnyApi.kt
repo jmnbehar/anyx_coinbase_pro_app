@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 import com.anyexchange.anyx.classes.Currency
+import com.anyexchange.anyx.fragments.main.ChartFragment
 
 class AnyApi {
     companion object {
@@ -140,7 +141,7 @@ class AnyApi {
             }
         }
 
-        fun products(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        fun getAllProducts(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
             //Do ALL exchanges
             var binanceProducts = listOf<BinanceSymbol>()
             var cbProProducts = listOf<CBProProduct>()
@@ -184,6 +185,9 @@ class AnyApi {
                     val newProduct = Product(currency, listOf(tradingPair))
                     newProduct.addToHashMap()
                 }
+            }
+            for (product in Product.map.values) {
+                product.tradingPairs = product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
             }
         }
     }

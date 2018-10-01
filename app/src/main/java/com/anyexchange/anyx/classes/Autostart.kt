@@ -8,6 +8,7 @@ import android.app.job.JobInfo
 import android.content.ComponentName
 import android.app.job.JobParameters
 import android.app.job.JobService
+import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.ApiInitData
 import com.anyexchange.anyx.classes.api.CBProApi
 import java.util.*
@@ -45,10 +46,12 @@ class AlertJobService : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
 //        AlertHub.triggerDummyAlert(this)
-        if (Account.cryptoAccounts.isEmpty()) {
-            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
-                loopThroughAlerts()
-                checkFillAlerts()
+        if (Product.map.isEmpty()) {
+            AnyApi.getAllProducts(apiInitData, { /* do nothing*/ }, {
+                //TODO: get all accounts here?
+                Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
+                    loopThroughAlerts()
+                })
             })
         } else {
             Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
@@ -62,12 +65,12 @@ class AlertJobService : JobService() {
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
         if (prefs.areAlertFillsActive && prefs.isLoggedIn) {
-            for (account in Account.cryptoAccounts.values) {
-                account.product.defaultTradingPair?.let { tradingPair ->
-                    val stashedOrders = prefs.getStashedOrders(tradingPair, account.exchange)
+            for (product in Product.map.values) {
+                product.defaultTradingPair?.let { tradingPair ->
+                    val stashedOrders = prefs.getStashedOrders(tradingPair, tradingPair.exchange)
                     if (stashedOrders.isNotEmpty()) {
                         CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
-                        CBProApi.fills(apiInitData, account.product.defaultTradingPair).getAndStash({ }) { }
+                        CBProApi.fills(apiInitData, product.defaultTradingPair).getAndStash({ }) { }
                     }
                 }
             }

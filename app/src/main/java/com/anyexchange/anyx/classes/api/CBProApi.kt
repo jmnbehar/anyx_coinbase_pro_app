@@ -197,26 +197,30 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            if (credentials == null) {
-                Product.updateAllProductCandles(initData, onFailure, onComplete)
-            } else {
-                this.get(onFailure) { apiAccountList ->
+            this.get(onFailure) { apiAccountList ->
+                if (credentials != null) {
+
                     val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
                     val tempCryptoAccounts = cryptoApiAccountList.map { Account(it) }
-                    Account.cryptoAccounts = tempCryptoAccounts.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
+                    for (account in tempCryptoAccounts) {
+                        Product.map[account.currency.id]?.accounts?.put(account.exchange, account)
+                    }
                     Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
 
                     Product.updateAllProductCandles(initData, onFailure, onComplete)
+                } else {
+                    onComplete()
                 }
             }
         }
 
         fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             this.get(onFailure) { apiAccountList ->
-                for (account in Account.cryptoAccounts.values.plus(Account.fiatAccounts)) {
+                val allCryptoAccount = Account.allCryptoAccounts()
+                for (account in allCryptoAccount.plus(Account.fiatAccounts)) {
                     val apiAccount = apiAccountList.find { a -> a.currency == account.currency.toString() }
                     apiAccount?.let {
                         account.updateWithApiAccount(it)
@@ -274,9 +278,9 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 try {
                     val ticker: CBProTicker = Gson().fromJson(result.value, object : TypeToken<CBProTicker>() {}.type)
                     val price = ticker.price.toDoubleOrNull()
-                    val account = Account.forCurrency(tradingPair.baseCurrency, tradingPair.exchange)
                     if (price != null) {
-                        account?.product?.setPriceForTradingPair(price, tradingPair)
+                        val product = Product.map[tradingPair.baseCurrency.id]
+                        product?.setPriceForTradingPair(price, tradingPair)
                     }
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {
@@ -390,16 +394,19 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             }
         }
 
-        fun linkToAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-           this.get(onFailure) { coinbaseAccounts ->
-                for (cbAccount in coinbaseAccounts) {
-                    val currency = Currency(cbAccount.currency)
-                    if (currency.knownCurrency != null && cbAccount.active) {
+        fun linkToAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Account.CoinbaseAccount>) -> Unit) {
+            this.get(onFailure) { apiCoinbaseAccounts ->
+                val coinbaseAccounts = mutableListOf<Account.CoinbaseAccount>()
+                for (apiCbAccount in apiCoinbaseAccounts) {
+                    val currency = Currency(apiCbAccount.currency)
+                    if (currency.knownCurrency != null && apiCbAccount.active) {
                         val account = Account.forCurrency(currency, cbProExchange)
-                        account?.coinbaseAccount = Account.CoinbaseAccount(cbAccount)
+                        val coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
+                        coinbaseAccounts.add(coinbaseAccount)
+                        account?.coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
                     }
                 }
-                onComplete()
+                onComplete(coinbaseAccounts)
             }
         }
     }

@@ -15,9 +15,18 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  */
 
 class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Unit) : BaseAdapter() {
+    private var sortedAccountList: List<Account>
+    init {
+        sortedAccountList = sortedAccountList()
+    }
+
+    override fun notifyDataSetChanged() {
+        super.notifyDataSetChanged()
+        sortedAccountList = sortedAccountList()
+    }
 
     override fun getCount(): Int {
-        return Account.cryptoAccounts.size + Account.fiatAccounts.size
+        return sortedAccountList.size
     }
 
     override fun getItem(i: Int): Any {
@@ -28,15 +37,16 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         return i.toLong()
     }
 
-    private val sortedAccountList: List<Account>
-        get() {
-            val cryptoAccountList = Account.cryptoAccounts.map { it.value }.toList()
-            val sortedAccounts = cryptoAccountList.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
-            val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
-            sortedAccounts.addAll(sortedFiatAccounts)
+    private fun sortedAccountList(): List<Account> {
+        val allCryptoAccounts = Account.allCryptoAccounts()
+        val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
-            return sortedAccounts
-        }
+        val sortedAccounts = nonEmptyCryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+        val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+        sortedAccounts.addAll(sortedFiatAccounts)
+
+        return sortedAccounts
+    }
 
     internal class ViewHolder {
         var iconView: ImageView? = null
@@ -73,7 +83,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                 viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
                 outputView.setOnClickListener { onClick(account) }
 
-                val percentChange = account.product.percentChange(Timespan.DAY, Account.defaultFiatCurrency)
+                val product = Product.map[account.currency.id]
+                val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0
 
                 if (account.defaultValue > 0) {
                     viewHolder.accountValueText?.text = account.defaultValue.fiatFormat(Account.defaultFiatCurrency)

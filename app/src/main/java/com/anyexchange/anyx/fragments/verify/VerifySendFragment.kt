@@ -56,7 +56,8 @@ class VerifySendFragment : Fragment() {
         val verifyAccount = Account.forCurrency(currency, Exchange.CBPro)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
-            val productId = verifyAccount.product.defaultTradingPair?.idForExchange(Exchange.CBPro)
+
+            val productId = Product.map[currency.id]?.defaultTradingPair?.idForExchange(Exchange.CBPro)
             if (productId != null) {
                 CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
                         timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->

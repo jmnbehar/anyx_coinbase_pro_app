@@ -69,6 +69,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         get() {
             return ChartFragment.product
         }
+
     val currency: Currency
         get() {
             return product.currency
@@ -77,7 +78,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     //TODO: improve this, make changeable
     val tradingPair: TradingPair
             get() = product.defaultTradingPair!!
-
 
     private val relevantAccount: Account?
         get() {
@@ -294,7 +294,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 onComplete(false)
             }
         }
-        account?.product?.defaultTradingPair?.let { tradingPair ->
+        product.defaultTradingPair?.let { tradingPair ->
             AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                 updateButtonsAndText()
                 onComplete(true)
@@ -325,7 +325,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
 
                 currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
-                currentPriceText.text = account.product.defaultPrice.fiatFormat(fiatCurrency)
+                currentPriceText.text = product.defaultPrice.fiatFormat(fiatCurrency)
             }
         }
         updateTotalText()
@@ -436,7 +436,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
 
         val account = relevantAccount
-        val tradingPair = account?.product?.defaultTradingPair
+        val tradingPair = product.defaultTradingPair
         val exchange = account?.exchange
         if (tradingPair == null || exchange == null) {
             toast(R.string.error_message)

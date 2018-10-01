@@ -34,7 +34,6 @@ class DataFragment : Fragment() {
             backupCredentials = CBProApi.credentials
         }
 
-        backupCryptoAccountList = Account.cryptoAccounts.values.toList()
         backupFiatAccountList = Account.fiatAccounts
 
         context?.let {
@@ -72,11 +71,7 @@ class DataFragment : Fragment() {
         } else if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList
         }
-        if (backupCryptoAccountList.isNotEmpty()) {
-            Account.cryptoAccounts = backupCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
-        } else if (Account.cryptoAccounts.isEmpty()){
-            Account.cryptoAccounts = prefs.stashedCBProCryptoAccountList.associateBy { Account.CurrencyExchange(it.currency, it.exchange).toString() }
-        }
+
         if (backupPaymentMethodList.isNotEmpty()) {
             Account.paymentMethods = backupPaymentMethodList
         } else if (Account.paymentMethods.isEmpty()){

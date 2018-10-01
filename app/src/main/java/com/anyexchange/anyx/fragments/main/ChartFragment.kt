@@ -277,12 +277,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
-    var blockNextProductChange = false
+    private var blockNextProductChange = false
     override fun onResume() {
         super.onResume()
         //TODO: reset trading pair and timespan
 
-        val tradingPairs = product.tradingPairs.sortedBy { it.quoteCurrency.orderValue }
+        val tradingPairs = product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
         val index = tradingPairs.indexOf(tradingPair)
         if (index != -1) {
             tradingPairSpinner?.setSelection(index)
@@ -419,7 +419,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceTextView?.text = price.format(quoteCurrency)
 
         context?.let { context ->
-            val tradingPairs = product.tradingPairs
+            val tradingPairs = product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
             val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }

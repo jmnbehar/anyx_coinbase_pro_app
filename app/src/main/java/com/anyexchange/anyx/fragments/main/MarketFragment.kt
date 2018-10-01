@@ -78,7 +78,6 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
-        val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
         skipNextRefresh = true
 
@@ -102,7 +101,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                     if (lifecycle.isCreatedOrResumed) {
                         if (didUpdate) {
                             productsUpdated++
-                            if (productsUpdated == accountListSize) {
+                            if (productsUpdated == Product.map.size) {
                                 context?.let {
                                     Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
@@ -113,7 +112,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                         } else {
                             AnyApi.ticker(apiInitData, tradingPair, onFailure) {
                                 productsUpdated++
-                                if (productsUpdated == accountListSize) {
+                                if (productsUpdated == Product.map.size) {
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                     updateAccountsFragment()
                                     onComplete(true)

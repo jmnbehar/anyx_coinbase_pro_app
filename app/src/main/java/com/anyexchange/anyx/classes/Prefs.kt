@@ -133,16 +133,13 @@ class Prefs (var context: Context) {
         set(value) {
             if (value.isEmpty()) {
                 for (currency in Currency.fiatList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                                .putString(PRODUCT + currency.toString(), null).apply()
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
                 }
             } else {
                 val gson = Gson()
                 for (account in value) {
                     val accountJson = gson.toJson(account) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
                 }
             }
         }
@@ -174,16 +171,13 @@ class Prefs (var context: Context) {
         set(value) {
             if (value.isEmpty()) {
                 for (currency in Currency.cryptoList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                            .putString(PRODUCT + currency.toString(), null).apply()
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
                 }
             } else {
                 val gson = Gson()
                 for (account in value) {
                     val accountJson = gson.toJson(account) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
                 }
             }
         }
@@ -277,7 +271,7 @@ class Prefs (var context: Context) {
     }
 
     fun nukeStashedFills() {
-        for (product in Account.cryptoAccounts.values.map { it.product }) {
+        for (product in Product.map.values) {
             for (exchange in Exchange.values()) {
                 for (tradingPair in product.tradingPairs) {
                     prefs.edit().remove(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange)).apply()

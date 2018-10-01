@@ -74,9 +74,10 @@ class TransferFragment : RefreshFragment() {
 
         val hasRelevantData: Boolean
             get() {
-                val cryptoCBAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
+                val cryptoCbProAccounts = Account.allCryptoAccounts().filter { it.exchange == Exchange.CBPro }
+                val cryptoCBAccounts = cryptoCbProAccounts.mapNotNull { account -> account.coinbaseAccount }
                 val fiatCBAccounts = Account.fiatAccounts.mapNotNull { account -> account.coinbaseAccount }
-                val cbAccountsAreMissing = ((cryptoCBAccounts.size < Account.cryptoAccounts.size) ||
+                val cbAccountsAreMissing = ((cryptoCBAccounts.size < cryptoCbProAccounts.size) ||
                                             (fiatCBAccounts.size < Account.fiatAccounts.size))
                 return (!cbAccountsAreMissing && Account.paymentMethods.isNotEmpty())
             }
@@ -159,7 +160,7 @@ class TransferFragment : RefreshFragment() {
 
         titleText.text = getString(R.string.transfer_in_title)
 
-        coinbaseAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = Account.allCryptoAccounts().mapNotNull { account -> account.coinbaseAccount }
 
         val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
@@ -195,11 +196,15 @@ class TransferFragment : RefreshFragment() {
                 toast(R.string.toast_coinbase_site_error)
                 isRefreshing = false
                 onComplete(false)
-            }, {
-                coinbaseAccounts = Account.cryptoAccounts.values.mapNotNull { account -> account.coinbaseAccount }
+            }, { cryptoCoinbaseAccounts ->
                 val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
+
+                var allCoinbaseAccounts = cryptoCoinbaseAccounts
+                Account.defaultFiatAccount?.coinbaseAccount?.let {
+                    allCoinbaseAccounts = allCoinbaseAccounts.plus(it)
+                }
                 if (fiatCoinbaseAccount != null) {
-                    coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
+                    allCoinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
                 }
                 didUpdateCoinbase = true
                 if (didUpdateCBPro && didUpdatePaymentMethods) {

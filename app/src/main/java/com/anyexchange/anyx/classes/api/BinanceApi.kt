@@ -249,8 +249,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) { result ->
                 try {
                     val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
-                    val account = Account.forCurrency(tradingPair.baseCurrency, tradingPair.exchange)
-                    account?.product?.setPriceForTradingPair(ticker.price, tradingPair)
+                    val product = Product.map[tradingPair.baseCurrency.id]
+                    product?.setPriceForTradingPair(ticker.price, tradingPair)
                     onComplete(ticker)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(e)))
