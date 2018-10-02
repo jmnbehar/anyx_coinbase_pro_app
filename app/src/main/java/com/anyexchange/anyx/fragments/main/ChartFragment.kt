@@ -521,11 +521,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             setButtonColors()
             val prefs = Prefs(it)
             val account = relevantAccount
-            if (prefs.isLoggedIn && account != null) {
-                val value = account.valueForQuoteCurrency(quoteCurrency)
+            if (prefs.isLoggedIn) {
+                val value = account?.valueForQuoteCurrency(quoteCurrency) ?: 0.0
+                val balance = account?.balance ?: 0.0
                 tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
                 accountIcon?.setImageResource(currency.iconId)
-                balanceTextView?.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
+                balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
                 valueTextView?.text = value.format(quoteCurrency)
 
                 historyPager?.visibility = View.VISIBLE
