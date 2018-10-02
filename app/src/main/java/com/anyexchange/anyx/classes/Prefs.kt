@@ -121,8 +121,7 @@ class Prefs (var context: Context) {
             val newAccountList = mutableListOf<Account>()
             for (currency in Currency.fiatList) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
+                if (accountString?.isNotBlank() == true) {
                     try {
                         val newAccount = gson.fromJson(accountString, Account::class.java)
                         newAccountList.add(newAccount)
