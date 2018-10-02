@@ -77,12 +77,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     //TODO: improve this, make changeable
     val tradingPair: TradingPair
-            get() = product.defaultTradingPair!!
+        get() = product.defaultTradingPair!!
 
     private val relevantAccount: Account?
         get() {
-            val exchange = tradingPair.exchange
-            return Account.forCurrency(ChartFragment.currency, exchange)
+            return product.accounts[tradingPair.exchange]
         }
 
     companion object {

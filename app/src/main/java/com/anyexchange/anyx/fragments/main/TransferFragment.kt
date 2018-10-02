@@ -63,6 +63,9 @@ class TransferFragment : RefreshFragment() {
         get() = ChartFragment.currency
         set(value) { ChartFragment.currency = value }
 
+    val product: Product?
+        get() = Product.map[currency.id]
+
     var blockNextSelectSource = false
     var blockNextSelectDest = false
 
@@ -250,7 +253,7 @@ class TransferFragment : RefreshFragment() {
 
 
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
-        Account.forCurrency(currency, Exchange.CBPro)?.let {
+        product?.accounts?.get(Exchange.CBPro)?.let {
             tempRelevantAccounts.add(it)
         }
         if (currency.isFiat) {
@@ -290,7 +293,7 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun setDestAccounts() {
-        val cbproAccount = Account.forCurrency(currency, Exchange.CBPro)
+        val cbproAccount = product?.accounts?.get(Exchange.CBPro)
         destAccounts = when(sourceAccount) {
             is Account.CoinbaseAccount -> listOf(cbproAccount)
             is Account.PaymentMethod ->  listOf(cbproAccount)
@@ -434,7 +437,7 @@ class TransferFragment : RefreshFragment() {
                     when (destAccount) {
                         is Account.CoinbaseAccount -> {
                             val coinbaseAccount = destAccount as Account.CoinbaseAccount
-                            val cbproAccount = Account.forCurrency(currency, Exchange.CBPro)
+                            val cbproAccount = product?.accounts?.get(Exchange.CBPro)
 
                             if (amount > cbproAccount?.availableBalance ?: 0.0) {
                                 showPopup(R.string.transfer_funds_error)

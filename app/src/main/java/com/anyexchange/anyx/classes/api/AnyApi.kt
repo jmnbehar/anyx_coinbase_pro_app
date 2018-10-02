@@ -186,9 +186,6 @@ class AnyApi {
                     newProduct.addToHashMap()
                 }
             }
-            for (product in Product.map.values) {
-                product.tradingPairs = product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
-            }
         }
     }
 }

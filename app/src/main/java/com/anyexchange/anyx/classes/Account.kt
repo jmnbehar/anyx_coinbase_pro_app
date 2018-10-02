@@ -24,23 +24,23 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         balance = binanceBalance.free + binanceBalance.locked
         holds = binanceBalance.locked
     }
-    
+
     val availableBalance: Double
         get() {
             return balance - holds
         }
 
     fun valueForQuoteCurrency(quoteCurrency: Currency) : Double {
-        return balance * product.priceForQuoteCurrency(quoteCurrency)
+        return balance * (product?.priceForQuoteCurrency(quoteCurrency) ?: 1.0)
     }
     val defaultValue: Double
-        get() = balance * product.defaultPrice
+        get() = balance * (product?.defaultPrice ?: 1.0)
 
 
-    private val product: Product
+    private val product: Product?
         get() {
             //TODO: if product is null, get product
-            return Product.map[currency.id]!!
+            return Product.map[currency.id]
         }
 
     var coinbaseAccount: CoinbaseAccount? = null
@@ -93,7 +93,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
         fun forCurrency(currency: Currency, exchange: Exchange): Account? {
             return if (currency.isFiat) {
-                fiatAccounts.find { a -> a.product.currency == currency }
+                fiatAccounts.find { a -> a.product?.currency == currency }
             } else {
                 Product.map[currency.id]?.accounts?.get(exchange)
             }

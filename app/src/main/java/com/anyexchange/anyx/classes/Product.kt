@@ -2,12 +2,10 @@ package com.anyexchange.anyx.classes
 
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProApi
 import com.anyexchange.anyx.classes.api.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
-import kotlin.collections.HashMap
 
 
 /**
@@ -206,22 +204,11 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 //
     fun totalDefaultValueOfRelevantAccounts() : Double {
         var totalValue = 0.0
-        for (exchange in Exchange.values()) {
-            val account = Account.forCurrency(currency, exchange)
-            totalValue += account?.defaultValue ?: 0.0
+        for (account in accounts.values) {
+            totalValue += account.defaultValue
         }
         return totalValue
     }
-
-//    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
-//        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
-//
-//        hourCandles[tradingPairIndex] = basicHourCandles
-//        dayCandles[tradingPairIndex]  = basicDayCandles
-//        weekCandles[tradingPairIndex] = basicWeekCandles
-//        monthCandles[tradingPairIndex] = basicMonthCandles
-//        yearCandles[tradingPairIndex] = basicYearCandles
-//    }
 
     fun addToHashMap() {
         map[currency.id] = this
@@ -236,31 +223,10 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return map[currency.id]
         }
 
-        fun updateAllProducts(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
-                val fiatCurrency = Account.defaultFiatCurrency
-                val apiProductList = unfilteredApiProductList.filter { s ->
-                    s.quote_currency == fiatCurrency.toString()
-                }
-                for (apiProduct in apiProductList) {
-                    val baseCurrency = apiProduct.base_currency
-                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }
-                    val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
-                    newProduct.addToHashMap()
-//                    val currency = Currency(baseCurrency)
-//                    val relevantAccount = Account.forCurrency(currency)
-//                    relevantAccount?.product?.currency = newProduct.currency
-//                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
-                }
-                onComplete()
-            }
-        }
-
         fun updateAllProductCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
             for (product in map.values) {
                 val tradingPair = product.defaultTradingPair
-                //TODO: do we really need to call updateAllProducts here?
                 product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
                     candlesUpdated++
                     if (candlesUpdated == map.size) {

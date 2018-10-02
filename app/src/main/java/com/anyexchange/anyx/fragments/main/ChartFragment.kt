@@ -119,7 +119,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         get() {
             val exchange = tradingPair?.exchange
             return if (exchange != null) {
-                Account.forCurrency(currency, exchange)
+                product.accounts[exchange]
             } else {
                 null
             }

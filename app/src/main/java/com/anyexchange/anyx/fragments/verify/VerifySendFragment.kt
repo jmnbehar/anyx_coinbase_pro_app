@@ -53,7 +53,6 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-        val verifyAccount = Account.forCurrency(currency, Exchange.CBPro)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
 

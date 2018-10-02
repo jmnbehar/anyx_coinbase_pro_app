@@ -400,10 +400,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 for (apiCbAccount in apiCoinbaseAccounts) {
                     val currency = Currency(apiCbAccount.currency)
                     if (currency.knownCurrency != null && apiCbAccount.active) {
-                        val account = Account.forCurrency(currency, cbProExchange)
+                        val account = Product.map[currency.id]?.accounts?.get(cbProExchange)
                         val coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
                         coinbaseAccounts.add(coinbaseAccount)
-                        account?.coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
+                        account?.coinbaseAccount = coinbaseAccount
                     }
                 }
                 onComplete(coinbaseAccounts)
