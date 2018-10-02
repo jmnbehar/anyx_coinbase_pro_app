@@ -205,9 +205,15 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
                     val tempCryptoAccounts = cryptoApiAccountList.map { Account(it) }
+
                     for (account in tempCryptoAccounts) {
-                        Product.map[account.currency.id]?.accounts?.put(account.exchange, account)
+                        val accounts = Product.map[account.currency.id]?.accounts?.toMutableMap()
+                        accounts?.put(account.exchange, account)
+                        if (accounts != null) {
+                            Product.map[account.currency.id]?.accounts = accounts
+                        }
                     }
+
                     Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
 
                     Product.updateAllProductCandles(initData, onFailure, onComplete)

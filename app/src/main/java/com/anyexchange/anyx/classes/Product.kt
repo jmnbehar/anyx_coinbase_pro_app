@@ -75,7 +75,12 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 
     private var candlesTimespan = Timespan.DAY
 
-    val accounts = mutableMapOf<Exchange, Account>()
+    var accounts : Map<Exchange, Account>
+        get() = accountsBackingMap ?: emptyMap()
+        set(value) {
+            accountsBackingMap = value
+        }
+    private var accountsBackingMap : Map<Exchange, Account>? = mapOf()
 
     fun percentChange(timespan: Timespan, quoteCurrency: Currency) : Double {
         val currentPrice = priceForQuoteCurrency(quoteCurrency)
@@ -202,10 +207,12 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         return alertString
     }
 //
+
+
     fun totalDefaultValueOfRelevantAccounts() : Double {
         var totalValue = 0.0
-        for (account in accounts.values) {
-            totalValue += account.defaultValue
+        for (accountPair in accounts) {
+            totalValue += accountPair.value.defaultValue
         }
         return totalValue
     }
