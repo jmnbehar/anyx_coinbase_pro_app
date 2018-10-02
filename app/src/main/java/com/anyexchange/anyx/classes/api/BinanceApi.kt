@@ -148,7 +148,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         val takerBuyBaseAssetVolume = (it[9] as? Double)
                         val takerBuyQuoteAssetVolume = (it[10] as? Double)
                         if (close != null && openTime != null && closeTime != null) {
-                            Candle(openTime, closeTime, low, high, open, close, volume, tradingPair, quoteAssetVolume, tradeCount, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume)
+                            Candle(openTime, closeTime, low, high, open, close, volume, quoteAssetVolume, tradeCount, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume)
                         } else { null }
                     }
                     val now = Calendar.getInstance()

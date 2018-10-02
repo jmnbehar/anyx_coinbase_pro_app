@@ -191,8 +191,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                     }
                 }
 
-                val usdCurrency = Currency.USD
-                val newCandle = Candle(openTime, closeTime, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Exchange.CBPro, usdCurrency, usdCurrency, "", listOf()))
+                val newCandle = Candle(openTime, closeTime, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0)
                 accountTotalCandleList.add(newCandle)
             }
             return accountTotalCandleList

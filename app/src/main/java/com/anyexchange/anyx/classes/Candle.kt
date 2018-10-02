@@ -8,7 +8,6 @@ data class Candle(
         val open: Double,
         val close: Double,
         val volume: Double,
-        val tradingPair: TradingPair,
         val quoteAssetVolume: Double? = null,
         val tradeCount: Long? = null,
         val takerBuyBaseAssetVolume: Double? = null,
@@ -61,7 +60,7 @@ fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
                     addedCandles++
                     val closeTime = candle.closeTime + (granularity * i)
                     val openTime = candle.openTime + (granularity * i)
-                    val fillCandle = Candle(openTime, closeTime, candle.close, candle.close, candle.close, candle.close, 0.0, candle.tradingPair)
+                    val fillCandle = Candle(openTime, closeTime, candle.close, candle.close, candle.close, candle.close, 0.0)
                     tempCandles.add(index + addedCandles, fillCandle)
                 }
             }
@@ -96,7 +95,7 @@ fun List<Candle>.compositeCandles(targetCandleCount: Int) : List<Candle> {
             volume += candle.volume
         }
         if (i >= compositeFactor || index == size - 1) {
-            compositeCandles.add(Candle(openTime, candle.closeTime, low, high, open, candle.close, volume, candle.tradingPair))
+            compositeCandles.add(Candle(openTime, candle.closeTime, low, high, open, candle.close, volume))
             i = -1
         }
         i++

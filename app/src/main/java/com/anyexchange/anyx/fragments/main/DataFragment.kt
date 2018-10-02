@@ -38,6 +38,7 @@ class DataFragment : Fragment() {
 
         context?.let {
             val prefs = Prefs(it)
+            prefs.stashedProducts = Product.map.values.toList()
             prefs.stashedCBProCryptoAccountList = backupCryptoAccountList
             prefs.stashedFiatAccountList = Account.fiatAccounts
             prefs.stashedPaymentMethodList = Account.paymentMethods
@@ -88,6 +89,9 @@ class DataFragment : Fragment() {
 //        prefs.apiKey = null
 //        prefs.apiSecret = null
 //        prefs.passphrase = null
+
+        prefs.stashedProducts = mutableListOf()
+
         prefs.stashedCBProCryptoAccountList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
 

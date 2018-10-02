@@ -155,7 +155,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                             if (close != null && time != null) {
                                 val closeTime = time.toLong()
                                 val openTime = closeTime - granularity
-                                Candle(openTime, closeTime, low, high, open, close, volume, tradingPair)
+                                Candle(openTime, closeTime, low, high, open, close, volume)
                             } else { null }
                         }
                         val now = Calendar.getInstance()

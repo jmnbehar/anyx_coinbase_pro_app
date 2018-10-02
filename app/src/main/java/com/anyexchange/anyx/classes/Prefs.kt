@@ -108,7 +108,10 @@ class Prefs (var context: Context) {
                 null
             }
         } ?: listOf()
-        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().mapNotNull { Gson().toJson(it) }.toSet()).apply()
+        set(value) {
+            val jsonValues = value.asSequence().mapNotNull { Gson().toJson(it) }.toSet()
+            prefs.edit().putStringSet(STASHED_PRODUCTS, jsonValues).apply()
+        }
 
 
     //For now assume all fiat accounts are CBPro
@@ -154,13 +157,7 @@ class Prefs (var context: Context) {
                 if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
                     try {
                         val newAccount = gson.fromJson(accountString, Account::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair != product.defaultTradingPair }
-                        if (dayCandleOutliers.isEmpty()) {
-                            newAccountList.add(newAccount)
-                        } else {
-                            return mutableListOf()
-                        }
+                        newAccountList.add(newAccount)
                     } catch (e: Exception) {
                         return mutableListOf()
                     }
