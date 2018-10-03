@@ -47,7 +47,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         }
 
         listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
-        listView?.setHeightBasedOnChildren()
+//        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView

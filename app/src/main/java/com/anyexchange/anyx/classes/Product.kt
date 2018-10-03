@@ -44,6 +44,8 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return tradingPairs.find { it.quoteCurrency == Account.defaultFiatCurrency }
         }
 
+    var isFavorite: Boolean =  true//(totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
+
     private fun tradingPairIndex(tradingPair: TradingPair?) : Int {
         //null trading pair will simply select the default fiat pair
         val tempIndex = tradingPairs.indexOf(tradingPair)
@@ -75,12 +77,13 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 
     private var candlesTimespan = Timespan.DAY
 
+    //TODO: this is extremely horribly inefficient, pls fix
     var accounts : Map<Exchange, Account>
-        get() = accountsBackingMap ?: emptyMap()
+        get() = accountsBackingMap?.associateBy { it.exchange } ?: emptyMap()
         set(value) {
-            accountsBackingMap = value
+            accountsBackingMap = value.values.toList()
         }
-    private var accountsBackingMap : Map<Exchange, Account>? = mapOf()
+    private var accountsBackingMap : List<Account>? = listOf()
 
     fun percentChange(timespan: Timespan, quoteCurrency: Currency) : Double {
         val currentPrice = priceForQuoteCurrency(quoteCurrency)

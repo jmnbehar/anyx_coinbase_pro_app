@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
-            if (!Account.areAccountsOutOfDate) {
+            if (!Account.areAccountsOutOfDate()) {
                 goHome()
                 setDrawerMenu()
             } else {
@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val isApiKeyValid = prefs.isApiKeyValid(apiKey)
                     CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 }
-            } else if (!Account.areAccountsOutOfDate && !Product.map.isEmpty()) {
+            } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
                 setDrawerMenu()
                 onComplete()
                 goHome()
@@ -246,14 +246,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
-                if (Account.areAccountsOutOfDate) {
-                    updateAllAccounts(onFailure, onComplete)
-                } else {
-                    onComplete()
-                }
+                updateAllAccounts(onFailure, onComplete)
             }
-
-        } else if (Account.areAccountsOutOfDate && CBProApi.credentials != null) {
+        } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
             updateAllAccounts(onFailure, onComplete)
         } else {
             setDrawerMenu()
@@ -273,7 +268,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             onFailure(error)
         }, {
             dismissProgressBar()
-
+            prefs.stashedProducts = Product.map.values.toList()
             setDrawerMenu()
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment

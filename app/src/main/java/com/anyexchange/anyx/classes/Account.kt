@@ -65,13 +65,22 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     companion object {
         var fiatAccounts = listOf<Account>()
 
-        val areAccountsOutOfDate: Boolean
-            get() {
-                //TODO: rethink this, there is no way this will not catch all out of date accounts
-                val areAccountsMissing = Account.fiatAccounts.isEmpty()
 
-                return areAccountsMissing
+        fun accountsOutOfDate(): List<Exchange> {
+            val exchangeList = mutableListOf<Exchange>()
+            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty()
+            val areCBProAccountsOutOfDate = Product.map.values.any { product ->
+                product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null }
+
+            if (areFiatAccountsMissing || areCBProAccountsOutOfDate) {
+                exchangeList.add(Exchange.CBPro)
             }
+            return exchangeList
+        }
+
+        fun areAccountsOutOfDate() : Boolean {
+            return Product.map.isEmpty() || accountsOutOfDate().isNotEmpty()
+        }
 
         //TODO: stash this
         var paymentMethods: List<Account.PaymentMethod> = listOf()

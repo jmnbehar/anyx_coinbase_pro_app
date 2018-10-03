@@ -88,8 +88,18 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         val granularity = Candle.granularityForTimespan(timespan)
         viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
-        viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
 
+        if (product.isFavorite) {
+            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
+            viewHolder.lineChart?.visibility = View.VISIBLE
+        } else {
+            viewHolder.lineChart?.visibility = View.GONE
+        }
+        outputView.setOnLongClickListener {
+            product.isFavorite = !product.isFavorite
+            notifyDataSetChanged()
+            true
+        }
         outputView.setOnClickListener { onClick(product) }
 
         return outputView
