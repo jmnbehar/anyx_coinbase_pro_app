@@ -114,15 +114,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast(R.string.error_message)
                     returnToLogin()
                 }, { //OnSuccess
-                    /* Do Nothing Extra */
+                    goHome()
+                    setDrawerMenu()
                 } )
-                return
             }
-        }
-        (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
-            val currency = Currency(it)
-            currency.addToList()
-            goToChartFragment(currency)
+            return
+        } else {
+            (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
+                val currency = Currency(it)
+                currency.addToList()
+                goToChartFragment(currency)
+            }
+            checkAllResources({//On Failure
+                toast(R.string.error_message)
+                returnToLogin()
+            }, { //OnSuccess
+                //do something maybe?
+            } )
         }
     }
 
@@ -244,6 +252,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return
             }
         }
+        checkAllResources(onFailure) {
+            setDrawerMenu()
+            onComplete()
+            goHome()
+        }
+    }
+
+    private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
                 updateAllAccounts(onFailure, onComplete)
@@ -251,10 +267,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
             updateAllAccounts(onFailure, onComplete)
         } else {
-            setDrawerMenu()
             onComplete()
-            goHome()
         }
+
     }
 
     private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
@@ -273,16 +288,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
                 dataFragment?.destroyData(this)
-                prefs.stashedCBProCryptoAccountList = mutableListOf()
                 prefs.stashedFiatAccountList = mutableListOf()
 
                 prefs.isLoggedIn = false
             } else {
                 prefs.isLoggedIn = true
             }
-            setDrawerMenu()
             onSuccess()
-            goHome()
         })
     }
 

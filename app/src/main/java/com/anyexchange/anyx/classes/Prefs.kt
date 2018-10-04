@@ -146,40 +146,6 @@ class Prefs (var context: Context) {
             }
         }
 
-    var stashedCBProCryptoAccountList: List<Account>
-        get() {
-            val gson = Gson()
-            val newAccountList = mutableListOf<Account>()
-            for (currency in Currency.cryptoList) {
-                val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
-                    try {
-                        val newAccount = gson.fromJson(accountString, Account::class.java)
-                        newAccountList.add(newAccount)
-                    } catch (e: Exception) {
-                        return mutableListOf()
-                    }
-                }
-            }
-            return newAccountList
-        }
-        set(value) {
-            if (value.isEmpty()) {
-                for (currency in Currency.cryptoList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
-                }
-            } else {
-                val gson = Gson()
-                for (account in value) {
-                    val accountJson = gson.toJson(account) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
-                }
-            }
-        }
-
-
-
     var stashedPaymentMethodList: List<Account.PaymentMethod>
         get() {
             val gson = Gson()

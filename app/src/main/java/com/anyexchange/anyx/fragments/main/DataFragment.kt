@@ -85,13 +85,9 @@ class DataFragment : Fragment() {
         backupFiatAccountList = mutableListOf()
 
         val prefs = Prefs(context)
-//        prefs.apiKey = null
-//        prefs.apiSecret = null
-//        prefs.passphrase = null
 
         prefs.stashedProducts = mutableListOf()
-
-        prefs.stashedCBProCryptoAccountList = mutableListOf()
+        prefs.stashedPaymentMethodList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
 
     }

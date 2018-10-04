@@ -205,10 +205,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             historyPager = rootView.history_view_pager
 
             //TODO: make this safer:
-            val tradingPair = product.defaultTradingPair!!
-            val exchange = tradingPair.exchange
-            val stashedFills: List<Fill> = prefs.getStashedFills(tradingPair, exchange)
-            val stashedOrders: List<Order> = prefs.getStashedOrders(tradingPair, exchange)
+            val stashedFills: List<Fill> = tradingPair?.let { tradingPair ->
+                 prefs.getStashedFills(tradingPair, tradingPair.exchange)
+            } ?: run { listOf<Fill>()}
+
+            val stashedOrders: List<Order> = tradingPair?.let { tradingPair ->
+                prefs.getStashedOrders(tradingPair, tradingPair.exchange)
+            } ?: run { listOf<Order>()}
 
             historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
                     { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
