@@ -4,6 +4,7 @@ import android.arch.lifecycle.Lifecycle
 import android.support.annotation.LayoutRes
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
 import android.text.style.QuoteSpan
 import android.view.LayoutInflater
 import android.widget.ListView
@@ -70,6 +71,31 @@ fun ListView.setHeightBasedOnChildren(): Int {
     }
     val params = layoutParams
     params.height = totalHeight + dividerHeight * (listAdapter.count - 1) + bottomPadding
+    layoutParams = params
+    return params.height
+}
+
+fun RecyclerView.setHeightBasedOnChildren(): Int {
+    val listAdapter = adapter ?: return 0
+    val bottomPadding = 66
+    val desiredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED)
+    var totalHeight = 0
+    var view: View?
+    for (i in 0 until listAdapter.itemCount) {
+        view = layoutManager.findViewByPosition(i)
+
+        if (i == 0) {
+            view?.layoutParams = (ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+
+        view?.measure(desiredWidth, MeasureSpec.UNSPECIFIED)
+        totalHeight += view?.measuredHeight ?: 0
+    }
+    val params = layoutParams
+
+    //TODO: figure out dividerHeight for recyclerView
+    val dividerHeight = 0
+    params.height = totalHeight + dividerHeight * (listAdapter.itemCount - 1) + bottomPadding
     layoutParams = params
     return params.height
 }

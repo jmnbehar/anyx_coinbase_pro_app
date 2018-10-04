@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.*
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
@@ -29,6 +31,8 @@ import org.jetbrains.anko.support.v4.alert
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.HistoryListViewAdapter
+import com.anyexchange.anyx.adapters.HistoryRecyclerViewAdapter
 import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
@@ -44,7 +48,14 @@ import java.util.*
  */
 class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
+
     private var historyPager: ViewPager? = null
+
+    private var orderListViewManager: RecyclerView.LayoutManager? = null
+    private var fillListViewManager: RecyclerView.LayoutManager? = null
+    private var orderListView: ListView? = null
+    private var fillListView: ListView? = null
+
     private var tradingPairSpinner: Spinner? = null
 
     private var candles = listOf<Candle>()
@@ -180,10 +191,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             valueTextView = rootView.txt_chart_account_value
             accountIcon = rootView.img_chart_account_icon
 
-            historyTabLayout = rootView.history_tab_layout
-
             sellButton = rootView.btn_chart_sell
-            historyPager = rootView.history_view_pager
+
+            orderListViewManager = LinearLayoutManager(context)
+            fillListViewManager = LinearLayoutManager(context)
+
+            orderListView = rootView.list_chart_orders
+            fillListView = rootView.list_chart_fills
+
         } else {
             openLabelTextView = rootView.txt_chart_open_label
             openTextView = rootView.txt_chart_open
@@ -202,7 +217,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             sellButton?.setOnClickListener { _ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
-            historyPager = rootView.history_view_pager
 
             //TODO: make this safer:
             val stashedFills: List<Fill> = tradingPair?.let { tradingPair ->
@@ -465,12 +479,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun updateFills(tradingPair: TradingPair, orderList: List<Order>, stashedFills: List<Fill>) {
         Fill.getAndStashList(apiInitData, tradingPair.exchange, tradingPair, { _ ->
-            if (lifecycle.isCreatedOrResumed) {
-                updateHistoryPagerAdapter(orderList, stashedFills)
+            context?.let {
+                if (lifecycle.isCreatedOrResumed) {
+                    updateHistoryPagerAdapter(it, orderList, stashedFills)
+                }
             }
         }) { apiFillList ->
-            if (lifecycle.isCreatedOrResumed) {
-                updateHistoryPagerAdapter(orderList, apiFillList)
+            context?.let {
+                if (lifecycle.isCreatedOrResumed) {
+                    updateHistoryPagerAdapter(it,orderList, apiFillList)
+                }
             }
         }
     }
@@ -512,7 +530,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 setPercentChangeText(timespan)
                 txt_chart_name.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
-                updateHistoryPagerAdapter(stashedOrders, stashedFills)
+                updateHistoryPagerAdapter(context, stashedOrders, stashedFills)
                 checkOrdersAndFills(tradingPair, context)
             }
         }
@@ -640,7 +658,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (lifecycle.isCreatedOrResumed) {
                         var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
-                        updateHistoryPagerAdapter(orders)
+                        context?.let { context ->
+                            updateHistoryPagerAdapter(context, orders)
+                        }
                         toast(R.string.chart_order_cancelled)
                     }
                 }
@@ -813,7 +833,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = orderList
                     if (filteredFills != null) {
-                        updateHistoryPagerAdapter(orderList, filteredFills!!)
+                        updateHistoryPagerAdapter(context, orderList, filteredFills!!)
                     }
                 }
             }
@@ -821,7 +841,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 if (lifecycle.isCreatedOrResumed) {
                     filteredFills = fillList
                     if (filteredOrders != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, fillList)
+                        updateHistoryPagerAdapter(context, filteredOrders!!, fillList)
                     }
                 }
             }
@@ -832,13 +852,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(orderList: List<Order>, fillList: List<Fill>? = null) {
-        (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
-        fillList?.let {
-            (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it
+    private fun updateHistoryPagerAdapter(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
+        orderListView?.adapter = HistoryListViewAdapter(context, true, orderList, resources, orderOnClick = { order -> orderOnClick(order) })
+        orderListView?.setHeightBasedOnChildren()
+
+        if (fillList != null) {
+            fillListView?.adapter = HistoryListViewAdapter(context, false, fillList, resources, fillOnClick = { fill -> fillOnClick(fill) })
+            fillListView?.setHeightBasedOnChildren()
         }
-        (historyPager?.adapter as? HistoryPagerAdapter)?.notifyDataSetChanged()
-        //historyList.setHeightBasedOnChildren()
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {

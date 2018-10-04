@@ -28,7 +28,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -68,14 +67,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="low:"
-                        android:textSize="12sp"/>
+                        android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/txt_chart_low"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="1dp"
                         android:paddingEnd="5dp"
+                        android:paddingStart="1dp"
                         android:text="5000.55"
                         android:textSize="18sp" />
 
@@ -90,8 +89,8 @@
                         android:id="@+id/txt_chart_high"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="1dp"
                         android:paddingEnd="5dp"
+                        android:paddingStart="1dp"
                         android:text="8000.45"
                         android:textSize="18sp" />
 
@@ -105,17 +104,18 @@
                         tools:layout_editor_absoluteY="16dp" />
 
                 </LinearLayout>
+
+
             </LinearLayout>
 
 
             <com.anyexchange.anyx.classes.PriceLineChart
                 android:id="@+id/chart_line_chart"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="-20dp"
-                android:layout_weight="20"
+                android:layout_height="200dp"
+                android:layout_marginTop="-10dp"
                 android:paddingLeft="-10dp"
-                android:paddingRight="-10dp" >
+                android:paddingRight="-10dp">
 
             </com.anyexchange.anyx.classes.PriceLineChart>
 
@@ -123,11 +123,11 @@
             <com.anyexchange.anyx.classes.PriceCandleChart
                 android:id="@+id/chart_candle_chart"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="-20dp"
-                android:layout_weight="20"
+                android:layout_height="200dp"
+                android:layout_marginTop="-10dp"
                 android:paddingLeft="-10dp"
-                android:paddingRight="-10dp" >
+                android:paddingRight="-10dp"
+                android:visibility="gone">
 
             </com.anyexchange.anyx.classes.PriceCandleChart>
 
@@ -136,7 +136,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_marginStart="10dp"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -261,9 +260,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="1"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="12dp"
                     android:gravity="center_vertical">
 
                     <ImageView
@@ -311,23 +309,17 @@
 
             </LinearLayout>
 
+            <ListView
+                android:id="@+id/list_chart_orders"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ListView
+                android:id="@+id/list_chart_fills"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
         </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/history_view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/history_tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="top">
-
-
-        </android.support.design.widget.TabLayout>
-
-    </android.support.v4.view.ViewPager>
 </LinearLayout>

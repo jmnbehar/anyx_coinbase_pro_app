@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.anyexchange.anyx.adapters.HistoryListViewAdapter
+import com.anyexchange.anyx.adapters.HistoryRecyclerViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.recycler_view.view.*
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.recycler_view.view.*
  */
 class HistoryListFragment : Fragment() {
     lateinit var historyList: RecyclerView
-    private lateinit var historyListAdapter: HistoryListViewAdapter
+    private lateinit var historyListAdapter: HistoryRecyclerViewAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     private var orders = listOf<Order>()
@@ -49,9 +49,9 @@ class HistoryListFragment : Fragment() {
         viewManager = LinearLayoutManager(context)
         context?.let {
             historyListAdapter = if (isOrderList) {
-                HistoryListViewAdapter(it, true, orders, resources, orderOnClick = { order -> onOrderClick(order) })
+                HistoryRecyclerViewAdapter(it, true, orders, resources, orderOnClick = { order -> onOrderClick(order) })
             } else {
-                HistoryListViewAdapter(it, false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
+                HistoryRecyclerViewAdapter(it, false, fills, resources, fillOnClick = { fill -> onFillClick(fill) })
             }
 
             historyList = rootView.recycler_view.apply {
