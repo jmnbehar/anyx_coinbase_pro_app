@@ -15,7 +15,8 @@
         android:layout_weight="3"
         android:orientation="vertical">
 
-        <ScrollView
+        <com.anyexchange.anyx.classes.LockableScrollView
+            android:id="@+id/lockscroll_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -308,21 +309,34 @@
                         </LinearLayout>
                     </LinearLayout>
 
-
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_chart_orders_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Orders" />
 
                 <ListView
                     android:id="@+id/list_chart_orders"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent" >
 
+                </ListView>
+
+
+                <TextView
+                    android:id="@+id/txt_chart_fills_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fills" />
                 <ListView
                     android:id="@+id/list_chart_fills"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
             </LinearLayout>
-        </ScrollView>
+        </com.anyexchange.anyx.classes.LockableScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

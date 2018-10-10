@@ -11,10 +11,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.support.v4.view.ViewPager
 import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.*
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.data.Entry
@@ -32,8 +29,6 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.HistoryListViewAdapter
-import com.anyexchange.anyx.adapters.HistoryRecyclerViewAdapter
-import com.anyexchange.anyx.adapters.HistoryPagerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
@@ -46,13 +41,11 @@ import java.util.*
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
+class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
 
-    private var historyPager: ViewPager? = null
+    private var lockableScrollView: LockableScrollView? = null
 
-    private var orderListViewManager: RecyclerView.LayoutManager? = null
-    private var fillListViewManager: RecyclerView.LayoutManager? = null
     private var orderListView: ListView? = null
     private var fillListView: ListView? = null
 
@@ -165,12 +158,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val granularity = Candle.granularityForTimespan(timespan)
         lineChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollLocked = true
         }
         lineChart?.setOnChartValueSelectedListener(this)
         lineChart?.onChartGestureListener = this
 
         candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollLocked = true
         }
         candleChart?.setOnChartValueSelectedListener(this)
         candleChart?.onChartGestureListener = this
@@ -193,11 +188,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             sellButton = rootView.btn_chart_sell
 
-            orderListViewManager = LinearLayoutManager(context)
-            fillListViewManager = LinearLayoutManager(context)
-
             orderListView = rootView.list_chart_orders
             fillListView = rootView.list_chart_fills
+
+            lockableScrollView = rootView.lockscroll_chart
 
         } else {
             openLabelTextView = rootView.txt_chart_open_label
@@ -227,9 +221,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 prefs.getStashedOrders(tradingPair, tradingPair.exchange)
             } ?: run { listOf<Order>()}
 
-            historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
-                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-            historyPager?.setOnTouchListener(this)
+            updateHistoryLists(it, stashedOrders, stashedFills)
 
 
             val tradingPairs: List<TradingPair> = if (product.tradingPairs.isNotEmpty()) {
@@ -427,6 +419,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
 
+    fun scrollToTop() {
+        lockableScrollView?.fullScroll(View.FOCUS_UP)
+    }
+
     private fun switchProduct(newProduct: Product) {
         product = newProduct
         blockRefresh = true
@@ -481,13 +477,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         Fill.getAndStashList(apiInitData, tradingPair.exchange, tradingPair, { _ ->
             context?.let {
                 if (lifecycle.isCreatedOrResumed) {
-                    updateHistoryPagerAdapter(it, orderList, stashedFills)
+                    updateHistoryLists(it, orderList, stashedFills)
                 }
             }
         }) { apiFillList ->
             context?.let {
                 if (lifecycle.isCreatedOrResumed) {
-                    updateHistoryPagerAdapter(it,orderList, apiFillList)
+                    updateHistoryLists(it,orderList, apiFillList)
                 }
             }
         }
@@ -526,11 +522,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 val exchange = tradingPair.exchange
                 val stashedFills = prefs.getStashedFills(tradingPair, exchange)
                 val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
+
+                scrollToTop()
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
                 txt_chart_name.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
-                updateHistoryPagerAdapter(context, stashedOrders, stashedFills)
+                updateHistoryLists(context, stashedOrders, stashedFills)
                 checkOrdersAndFills(tradingPair, context)
             }
         }
@@ -550,14 +548,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
                 valueTextView?.text = value.format(quoteCurrency)
 
-                historyPager?.visibility = View.VISIBLE
+                orderListView?.visibility = View.VISIBLE
+                fillListView?.visibility = View.VISIBLE
             } else {
                 tickerTextView?.visibility = View.GONE
                 accountIcon?.visibility = View.GONE
                 balanceTextView?.visibility = View.GONE
                 valueTextView?.visibility = View.GONE
 
-                historyPager?.visibility = View.INVISIBLE
+                orderListView?.visibility = View.GONE
+                fillListView?.visibility = View.GONE
             }
         }
     }
@@ -656,10 +656,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             negativeButton(R.string.chart_cancel_order) {
                 order.cancel(apiInitData, { _ -> }) { _ ->
                     if (lifecycle.isCreatedOrResumed) {
-                        var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
+                        var orders = (orderListView?.adapter as HistoryListViewAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
                         context?.let { context ->
-                            updateHistoryPagerAdapter(context, orders)
+                            updateHistoryLists(context, orders)
                         }
                         toast(R.string.chart_order_cancelled)
                     }
@@ -765,36 +765,39 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceTextView?.typeface = Typeface.DEFAULT
     }
 
-    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
-        when (view) {
-            historyPager -> {
-                when (motionEvent.action){
-                    MotionEvent.ACTION_MOVE -> {
-                        swipeRefreshLayout?.isEnabled = false
-                    }
-                    MotionEvent.ACTION_DOWN -> {
-                        swipeRefreshLayout?.isEnabled = false
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        swipeRefreshLayout?.isEnabled = true
-                    }
-                    MotionEvent.ACTION_CANCEL -> {
-                        swipeRefreshLayout?.isEnabled = true
-                    }
-                }
-            }
-        }
-        view.performClick()
-        return false
-    }
+//    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+//        when (view) {
+//            chart_line_chart -> {
+//                when (motionEvent.action){
+//                    MotionEvent.ACTION_MOVE -> {
+//                        swipeRefreshLayout?.isEnabled = false
+//                    }
+//                    MotionEvent.ACTION_DOWN -> {
+//                        swipeRefreshLayout?.isEnabled = false
+//                    }
+//                    MotionEvent.ACTION_UP -> {
+//                        swipeRefreshLayout?.isEnabled = true
+//                    }
+//                    MotionEvent.ACTION_CANCEL -> {
+//                        swipeRefreshLayout?.isEnabled = true
+//                    }
+//                }
+//            }
+//        }
+//        view.performClick()
+//        return false
+//    }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
+        lockableScrollView?.scrollLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
+        lockableScrollView?.scrollLocked = true
+        scrollToTop()
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
@@ -833,7 +836,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = orderList
                     if (filteredFills != null) {
-                        updateHistoryPagerAdapter(context, orderList, filteredFills!!)
+                        updateHistoryLists(context, orderList, filteredFills!!)
                     }
                 }
             }
@@ -841,7 +844,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 if (lifecycle.isCreatedOrResumed) {
                     filteredFills = fillList
                     if (filteredOrders != null) {
-                        updateHistoryPagerAdapter(context, filteredOrders!!, fillList)
+                        updateHistoryLists(context, filteredOrders!!, fillList)
                     }
                 }
             }
@@ -852,7 +855,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
+    private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
         orderListView?.adapter = HistoryListViewAdapter(context, true, orderList, resources, orderOnClick = { order -> orderOnClick(order) })
         orderListView?.setHeightBasedOnChildren()
 
