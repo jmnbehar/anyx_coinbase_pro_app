@@ -152,12 +152,13 @@ class HistoryListViewAdapter(val context: Context, private var isOrderList: Bool
         viewHolder.amountText?.text = amount.btcFormat()
         viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
         viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
-        if (tradeType == null) {
-            viewHolder.tradeTypeText?.visibility = View.GONE
-        } else {
-            viewHolder.tradeTypeText?.visibility = View.VISIBLE
-            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
-        }
+
+//        if (tradeType == null) {
+//            viewHolder.tradeTypeText?.visibility = View.GONE
+//        } else {
+//            viewHolder.tradeTypeText?.visibility = View.VISIBLE
+//            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
+//        }
 
         return outputView
     }

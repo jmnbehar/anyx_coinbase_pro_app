@@ -433,8 +433,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         context?.let { context ->
             val tradingPairs = product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
-            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
-            tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
             val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
             if (relevantTradingPair != null) {
                 val index = tradingPairs.indexOf(relevantTradingPair)
@@ -516,8 +514,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
     private fun completeSwitchProduct(product: Product) {
         blockRefresh = false
-        lockableScrollView?.scrollToTop(400)
+        lockableScrollView?.scrollToTop(200)
         context?.let { context ->
+            val tradingPairs = Companion.product.tradingPairs.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
+            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
+            tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
+
             product.defaultTradingPair?.let { tradingPair ->
                 val prefs = Prefs(context)
                 val exchange = tradingPair.exchange
