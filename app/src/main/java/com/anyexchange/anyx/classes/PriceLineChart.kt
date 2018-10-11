@@ -57,7 +57,7 @@ class PriceLineChart : LineChart {
                 val xCoefficient = if (defaultDragDirection == DefaultDragDirection.Horizontal) { 5.toFloat() } else { 1.25.toFloat() }
                 val yCoefficient = if (defaultDragDirection == DefaultDragDirection.Vertical)   { 5.toFloat() } else { 1.25.toFloat() }
 
-                if (isVerticalDrag == null && (xVelocity > 5 || yVelocity > 5)) {
+                if (isVerticalDrag == null && (xVelocity > 100 || yVelocity > 100)) {
                     if (yVelocity > (xVelocity * xCoefficient)) {
                         onVerticalDrag()
                         isVerticalDrag = true

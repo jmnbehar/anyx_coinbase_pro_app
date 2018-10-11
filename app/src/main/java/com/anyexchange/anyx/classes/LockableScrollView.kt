@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ScrollView
 import android.view.MotionEvent
-
+import android.animation.ObjectAnimator
 
 
 /**
@@ -40,4 +40,10 @@ class LockableScrollView: ScrollView {
         }
     }
 
+
+    fun scrollToTop(duration: Long) {
+        val animator: ObjectAnimator = ObjectAnimator.ofInt(this, "scrollY", 0)
+        animator.duration = duration
+        animator.start()
+    }
 }

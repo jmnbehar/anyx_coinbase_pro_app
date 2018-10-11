@@ -158,6 +158,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val granularity = Candle.granularityForTimespan(timespan)
         lineChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollToTop(800)
             lockableScrollView?.scrollLocked = true
         }
         lineChart?.setOnChartValueSelectedListener(this)
@@ -165,6 +166,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollToTop(800)
             lockableScrollView?.scrollLocked = true
         }
         candleChart?.setOnChartValueSelectedListener(this)
@@ -419,10 +421,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
 
-    fun scrollToTop() {
-        lockableScrollView?.fullScroll(View.FOCUS_UP)
-    }
-
     private fun switchProduct(newProduct: Product) {
         product = newProduct
         blockRefresh = true
@@ -516,6 +514,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
     private fun completeSwitchProduct(product: Product) {
         blockRefresh = false
+        lockableScrollView?.scrollToTop(400)
         context?.let { context ->
             product.defaultTradingPair?.let { tradingPair ->
                 val prefs = Prefs(context)
@@ -523,7 +522,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 val stashedFills = prefs.getStashedFills(tradingPair, exchange)
                 val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
 
-                scrollToTop()
+
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
                 txt_chart_name.text = product.currency.fullName
@@ -789,6 +788,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 //    }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
+
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
         lockableScrollView?.scrollLocked = false
@@ -797,7 +797,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
         lockableScrollView?.scrollLocked = true
-        scrollToTop()
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
