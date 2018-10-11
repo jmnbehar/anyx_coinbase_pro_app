@@ -150,6 +150,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
+        val tradingPairs: List<TradingPair> = if (product.tradingPairs.isNotEmpty()) {
+            product.tradingPairs.sortedBy { tempTradingPair -> tempTradingPair.quoteCurrency.orderValue }
+        } else {
+            listOf()
+        }
+
+        viewModel.tradingPair = tradingPairs.firstOrNull()
+
         candles = product.candlesForTimespan(timespan, tradingPair)
 
         lineChart = rootView.chart_line_chart
@@ -225,12 +233,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             updateHistoryLists(it, stashedOrders, stashedFills)
 
-
-            val tradingPairs: List<TradingPair> = if (product.tradingPairs.isNotEmpty()) {
-                product.tradingPairs.sortedBy { tempTradingPair -> tempTradingPair.quoteCurrency.orderValue }
-            } else {
-                listOf()
-            }
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
@@ -763,29 +765,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         volumeTextView?.typeface = Typeface.DEFAULT
         priceTextView?.typeface = Typeface.DEFAULT
     }
-
-//    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
-//        when (view) {
-//            chart_line_chart -> {
-//                when (motionEvent.action){
-//                    MotionEvent.ACTION_MOVE -> {
-//                        swipeRefreshLayout?.isEnabled = false
-//                    }
-//                    MotionEvent.ACTION_DOWN -> {
-//                        swipeRefreshLayout?.isEnabled = false
-//                    }
-//                    MotionEvent.ACTION_UP -> {
-//                        swipeRefreshLayout?.isEnabled = true
-//                    }
-//                    MotionEvent.ACTION_CANCEL -> {
-//                        swipeRefreshLayout?.isEnabled = true
-//                    }
-//                }
-//            }
-//        }
-//        view.performClick()
-//        return false
-//    }
 
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
 
