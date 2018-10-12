@@ -171,7 +171,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         onFailure(Result.Failure(FuelError(exception)))
                     }
 
-                    if (pagesReceived == pages && allCandles.isNotEmpty()) {
+                    if (pagesReceived == pages) {
                         if (pages > 1) {
                             allCandles = allCandles.sorted()
                         }

@@ -61,7 +61,9 @@ class SendReceiveFragment : RefreshFragment() {
 
     override fun onResume() {
         super.onResume()
-        showNavSpinner(ChartFragment.currency, Currency.cryptoList) { selectedCurrency ->
+
+        val currencyList = Product.map.keys.map { Currency(it) }
+        showNavSpinner(ChartFragment.currency, currencyList) { selectedCurrency ->
             ChartFragment.currency = selectedCurrency
             sendReceivePagerAdapter?.switchCurrency()
         }

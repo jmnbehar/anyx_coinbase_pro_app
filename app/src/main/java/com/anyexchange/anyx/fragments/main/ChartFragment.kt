@@ -317,7 +317,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         volumeTextView?.visibility = View.GONE
 
         blockNextProductChange = true
-        showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
+
+        val currencyList = Product.map.keys.map { Currency(it) }
+        showNavSpinner(currency, currencyList) { selectedCurrency ->
             if (!blockNextProductChange) {
                 Product.map[selectedCurrency.id]?.let {
                     switchProduct(it)
@@ -385,11 +387,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         when(chartStyle) {
             ChartStyle.Line -> {
                 lineChart?.visibility = View.VISIBLE
-                candleChart?.visibility = View.GONE
-            }
-            ChartStyle.Candle -> {
-                lineChart?.visibility = View.GONE
-                candleChart?.visibility = View.VISIBLE
+                    candleChart?.visibility = View.GONE
+                }
+                ChartStyle.Candle -> {
+                    lineChart?.visibility = View.GONE
+                    candleChart?.visibility = View.VISIBLE
             }
         }
     }

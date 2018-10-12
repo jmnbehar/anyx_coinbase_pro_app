@@ -13,7 +13,10 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
+import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
@@ -37,6 +40,7 @@ class SettingsFragment : RefreshFragment() {
     private var cbproEulaButton: Button? = null
     private var anyxEulaButton: Button? = null
     private var emailDevButton: Button? = null
+    private var updateProductsButton: Button? = null
     private var darkModeCheckBox: CheckBox? = null
     private var showTradeConfirmCheckBox: CheckBox? = null
     private var showSendConfirmCheckBox: CheckBox? = null
@@ -53,6 +57,7 @@ class SettingsFragment : RefreshFragment() {
         cbproEulaButton = rootView.btn_setting_show_cbpro_eula
         anyxEulaButton = rootView.btn_setting_show_anyx_eula
         emailDevButton = rootView.btn_setting_email_dev
+        updateProductsButton = rootView.btn_setting_update_products
         darkModeCheckBox = rootView.cb_setting_dark_mode
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
@@ -93,12 +98,28 @@ class SettingsFragment : RefreshFragment() {
             }
         }
 
-        anyxEulaButton?.visibility = View.GONE
+        updateProductsButton?.setOnClickListener { _ ->
+            showProgressSpinner()
+            val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
+                dismissProgressSpinner()
+                toast("Failed to update products")
+            }
+            AnyApi.getAllProducts(apiInitData, onFailure) {
+                CBProApi.accounts(apiInitData).getAllAccountInfo(onFailure, {
+                    dismissProgressSpinner()
+                    toast("Products updated")
+                })
+            }
+
+        }
+
         (activity as? MainActivity)?.let { activity ->
             anyxEulaButton?.visibility = View.VISIBLE
             anyxEulaButton?.setOnClickListener {
                 activity.goToFragment(FragmentType.EULA)
             }
+        } ?: run {
+            anyxEulaButton?.visibility = View.GONE
         }
 
         context?.let {

@@ -81,6 +81,13 @@
         </LinearLayout>
 
         <Button
+            android:id="@+id/btn_setting_update_products"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/settings_email_dev" />
+
+        <Button
             android:id="@+id/btn_setting_verify_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
