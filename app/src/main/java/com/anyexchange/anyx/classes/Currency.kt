@@ -53,9 +53,12 @@ class Currency(val id: String) {
     fun colorPrimary(context: Context) : Int {
         return knownCurrency?.colorPrimary(context) ?: run {
             //TODO: generate colors based on name and darkmode
-            val isDarkModeOn = Prefs(context).isDarkModeOn
 
-            ContextCompat.getColor(context, R.color.white)
+            if (Prefs(context).isDarkModeOn) {
+                Color.WHITE
+            } else {
+                Color.BLACK
+            }
         }
     }
 
@@ -86,8 +89,11 @@ class Currency(val id: String) {
     fun buttonTextColor(context: Context) : Int {
         return knownCurrency?.buttonTextColor(context) ?: run {
             //TODO: generate colors based on name and darkmode
-            val isDarkModeOn = Prefs(context).isDarkModeOn
-            Color.WHITE
+            if (Prefs(context).isDarkModeOn) {
+                Color.BLACK
+            } else {
+                Color.WHITE
+            }
         }
     }
 
