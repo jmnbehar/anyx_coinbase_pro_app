@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (!AutoStart.hasStarted) {
             AutoStart.scheduleCustomAlertJob(this)
         }
-        toolbar.setNavigationOnClickListener {
+        toolbar?.setNavigationOnClickListener {
             drawer_layout.openDrawer(Gravity.START, true)
         }
 
