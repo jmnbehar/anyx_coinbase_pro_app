@@ -20,9 +20,9 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         currency.addToList()
     }
 
-    var tradingPairs = tradingPairsIn.sorted()
+    var tradingPairs = tradingPairsIn.sortTradingPairs()
         set(value) {
-            field = value.sorted()
+            field = value.sortTradingPairs()
             if (dayCandles.size < tradingPairs.size) {
                 val candlesSizeTemp = dayCandles.size
                 val hourCandlesTemp = hourCandles

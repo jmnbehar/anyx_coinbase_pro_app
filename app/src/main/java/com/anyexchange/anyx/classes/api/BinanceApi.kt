@@ -160,7 +160,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     //TODO: edit chart library so it doesn't show below 0
                     candles = candles.reversed()
                     allCandles = allCandles.addingCandles(candles)
-                    onComplete(allCandles.sorted())
+                    onComplete(allCandles.sortCandles())
                 } catch (exception: Exception) {
                     onFailure(Result.Failure(FuelError(exception)))
                 }
@@ -264,7 +264,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double, val price: Double) : BinanceApi(initData)
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
-    class listOrders(initData: ApiInitData?, val tradingPair: TradingPair?) : BinanceApi(initData) {
+    class listOrders(initData: ApiInitData?, val currency: Currency?) : BinanceApi(initData) {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
@@ -272,10 +272,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     val generalOrderList = apiOrderList.map { Order(it) }
 
                     if (context != null) {
-                        Prefs(context).stashOrders(generalOrderList)
+                        Prefs(context).stashOrders(generalOrderList, Exchange.Binance)
                     }
-                    if (tradingPair != null) {
-                        val filteredOrderList = generalOrderList.filter { it.tradingPair == tradingPair }
+                    if (currency != null) {
+                        val filteredOrderList = generalOrderList.filter { it.tradingPair.baseCurrency == currency }
                         onComplete(filteredOrderList)
                     } else {
                         onComplete(generalOrderList)
@@ -541,9 +541,9 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is listOrders -> {
-                    if (tradingPair != null) {
-                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
-                    }
+//                    if (tradingPair != null) {
+//                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+//                    }
                     paramList.add(Pair("timestamp", Date().time.toString()))
                     return paramList.toList()
 

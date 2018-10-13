@@ -44,7 +44,7 @@ fun MutableList<Candle>.addingCandles(newList: List<Candle>) : MutableList<Candl
     }
 }
 
-fun MutableList<Candle>.sorted() : MutableList<Candle> {
+fun MutableList<Candle>.sortCandles() : MutableList<Candle> {
     return this.sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
 }
 

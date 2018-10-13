@@ -69,7 +69,8 @@ open class RefreshFragment: Fragment() {
     fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
         shouldHideSpinner = false
         (activity as? MainActivity)?.let { mainActivity ->
-            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, currencyList)
+            val sortedList = currencyList.sortCurrencies()
+            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, sortedList)
             mainActivity.spinnerNav.adapter = spinnerNavAdapter
 
             mainActivity.toolbar.title = ""

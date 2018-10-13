@@ -58,8 +58,24 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     companion object {
 
-        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
-            AnyApi.getAndStashOrderList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
+//        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, currency: Currency?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
+//            AnyApi.getAndStashOrderList(apiInitData, exchange, currency, onFailure, onSuccess)
+//        }
+        fun getAndStashList(apiInitData: ApiInitData?, currency: Currency, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
+            var exchangesChecked = 0
+            val fullOrderList = mutableListOf<Order>()
+
+            //TODO: use Exchange.values()
+            val exchangeList = listOf(Exchange.CBPro)
+            for (exchange in exchangeList) {
+                AnyApi.getAndStashOrderList(apiInitData, exchange, currency, onFailure) {
+                    exchangesChecked++
+                    fullOrderList.addAll(it)
+                    if (exchangesChecked == exchangeList.size) {
+                        onSuccess(fullOrderList)
+                    }
+                }
+            }
         }
     }
 

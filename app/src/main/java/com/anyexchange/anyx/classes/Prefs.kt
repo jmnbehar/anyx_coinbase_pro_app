@@ -205,25 +205,42 @@ class Prefs (var context: Context) {
         prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
     }
 
-    fun stashOrders(orderList: List<Order>?) {
+    fun stashOrders(orderList: List<Order>?, exchange: Exchange) {
         val orderListString = Gson().toJson(orderList)
         val stashDate = if (orderList == null) { 0 } else { Date().time }
-        prefs.edit().putString(STASHED_ORDERS, orderListString)
-                .putLong(STASHED_ORDERS_DATE, stashDate).apply()
+        prefs.edit().putString(STASHED_ORDERS + exchange.name, orderListString)
+                .putLong(STASHED_ORDERS_DATE + exchange.name, stashDate).apply()
     }
-    fun getStashedOrders(tradingPair: TradingPair, exchange: Exchange) : List<Order> {
-        val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
+    fun nukeStashedOrders() {
+        for (exchange in Exchange.values()) {
+            prefs.edit().remove(STASHED_FILLS + exchange.name).apply()
+        }
+    }
+    fun getStashedOrders(baseCurrency: Currency, exchange: Exchange) : List<Order> {
+        val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
         return try {
             val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
-            val filteredOrders = apiOrderList.filter { it.tradingPair == tradingPair && it.exchange == exchange }
+            val filteredOrders = apiOrderList.filter { it.tradingPair.baseCurrency == baseCurrency && it.exchange == exchange }
             filteredOrders
         } catch (e: Exception) {
             listOf()
         }
     }
+    fun getStashedOrders(baseCurrency: Currency) : List<Order> {
+        val orderList = mutableListOf<Order>()
+        for (exchange in Exchange.values()) {
+            val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
+            try {
+                val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
+                val filteredOrders = apiOrderList.filter { it.tradingPair.baseCurrency == baseCurrency}
+                orderList.addAll(filteredOrders)
+            } catch (e: Exception) { }
+        }
+        return orderList
+    }
 
-    fun getDateOrdersLastStashed(): Long {
-        return prefs.getLong(STASHED_FILLS_DATE, 0)
+    fun getDateOrdersLastStashed(exchange: Exchange): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + exchange.name, 0)
     }
 
     fun stashFills(fillList: List<Fill>, tradingPair: TradingPair, exchange: Exchange) {
@@ -249,6 +266,20 @@ class Prefs (var context: Context) {
         } catch (e: Exception) {
             listOf()
         }
+    }
+    fun getStashedFills(baseCurrency: Currency) : List<Fill> {
+        val tradingPairs = Product.map[baseCurrency.id]?.tradingPairs ?: listOf()
+        val fillList = mutableListOf<Fill>()
+        for (tradingPair in tradingPairs) {
+            val fillListJson = prefs.getString(STASHED_FILLS + tradingPair.exchange + tradingPair.idForExchange(tradingPair.exchange), null)
+            try {
+                val partialFillList: List<Fill> = Gson().fromJson(fillListJson, object : TypeToken<List<Fill>>() {}.type)
+                fillList.addAll(partialFillList)
+            } catch (e: Exception) {
+                //do nothing
+            }
+        }
+        return fillList
     }
     fun getDateFillsLastStashed(tradingPair: TradingPair, exchange: Exchange): Long {
         return prefs.getLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), 0)

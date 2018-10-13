@@ -66,13 +66,18 @@ class AlertJobService : JobService() {
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
         if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
+            val orderTradingPairs = mutableListOf<TradingPair>()
             for (product in Product.map.values) {
-                product.defaultTradingPair?.let { tradingPair ->
-                    val stashedOrders = prefs.getStashedOrders(tradingPair, tradingPair.exchange)
-                    if (stashedOrders.isNotEmpty()) {
-                        CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
-                        CBProApi.fills(apiInitData, product.defaultTradingPair).getAndStash({ }) { }
-                    }
+                //TODO: fix for multiple exchanges
+                val stashedOrders = prefs.getStashedOrders(product.currency, Exchange.CBPro)
+                val partialTradingPairs = stashedOrders.map { it.tradingPair }
+                orderTradingPairs.addAll(partialTradingPairs)
+            }
+
+            if (orderTradingPairs.isNotEmpty()) {
+                CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
+                for (tradingPair in orderTradingPairs) {
+                    CBProApi.fills(apiInitData, tradingPair).getAndStash({ }) { }
                 }
             }
         }

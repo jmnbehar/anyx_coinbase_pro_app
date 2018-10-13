@@ -43,5 +43,19 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
         fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
             AnyApi.getAndStashFillList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
         }
+        fun getAndStashList(apiInitData: ApiInitData?, currency: Currency, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
+            val tradingPairs = Product.map[currency.id]?.tradingPairs ?: listOf()
+            var tradingPairsChecked = 0
+            val fullFillList = mutableListOf<Fill>()
+            for (tradingPair in tradingPairs) {
+                AnyApi.getAndStashFillList(apiInitData, tradingPair.exchange, tradingPair, onFailure) {
+                    tradingPairsChecked++
+                    fullFillList.addAll(it)
+                    if (tradingPairsChecked == tradingPairs.size) {
+                        onSuccess(fullFillList)
+                    }
+                }
+            }
+        }
     }
 }

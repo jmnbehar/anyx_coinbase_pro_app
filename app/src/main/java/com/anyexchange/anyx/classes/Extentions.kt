@@ -208,8 +208,12 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
     })
 }
 
-fun List<TradingPair>.sorted() : List<TradingPair> {
+fun List<TradingPair>.sortTradingPairs() : List<TradingPair> {
     return this.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
+}
+
+fun List<Currency>.sortCurrencies() : List<Currency> {
+    return this.sortedWith(compareBy({ Product.map[it.id]?.totalDefaultValueOfRelevantAccounts() ?: 0.0 }, { it.orderValue })).reversed()
 }
 
 

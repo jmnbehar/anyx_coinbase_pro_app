@@ -173,7 +173,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
 
                     if (pagesReceived == pages) {
                         if (pages > 1) {
-                            allCandles = allCandles.sorted()
+                            allCandles = allCandles.sortCandles()
                         }
                         onComplete(allCandles)
                     }
@@ -302,7 +302,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     class orderStop(initData: ApiInitData?, val tradeSide: TradeSide, val productId: String, val price: Double, val size: Double? = null, val funds: Double? = null) : CBProApi(initData)
     class cancelOrder(initData: ApiInitData?, val orderId: String) : CBProApi(initData)
     class cancelAllOrders(initData: ApiInitData) : CBProApi(initData)
-    class listOrders(initData: ApiInitData?, val tradingPair: TradingPair?, val status: String? = null) : CBProApi(initData) {
+    class listOrders(initData: ApiInitData?, val currency: Currency?, val status: String? = null) : CBProApi(initData) {
         //For now don't use product ID, always get ALL orders
         val productId: String? = null
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
@@ -311,10 +311,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
                     val generalOrderList = apiOrderList.map { Order(it) }
                     if (context != null) {
-                        Prefs(context).stashOrders(generalOrderList)
+                        Prefs(context).stashOrders(generalOrderList, Exchange.CBPro)
                     }
-                    if (tradingPair != null) {
-                        val filteredOrderList = generalOrderList.filter { it.tradingPair == tradingPair }
+                    if (currency != null) {
+                        val filteredOrderList = generalOrderList.filter { it.tradingPair.baseCurrency == currency }
                         onComplete(filteredOrderList)
                     } else {
                         onComplete(generalOrderList)

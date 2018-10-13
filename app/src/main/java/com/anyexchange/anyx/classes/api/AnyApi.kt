@@ -11,13 +11,13 @@ class AnyApi {
     companion object {
         val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
 
-        fun getAndStashOrderList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
+        fun getAndStashOrderList(apiInitData: ApiInitData?, exchange: Exchange, currency: Currency?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
-                    CBProApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure, onSuccess)
+                    CBProApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
                 }
                 Exchange.Binance -> {
-                    BinanceApi.listOrders(apiInitData, tradingPair).getAndStash(onFailure, onSuccess)
+                    BinanceApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
                 }
             }
         }

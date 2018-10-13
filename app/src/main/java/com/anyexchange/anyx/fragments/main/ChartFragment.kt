@@ -222,16 +222,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
 
-            //TODO: make this safer:
-            val stashedFills: List<Fill> = tradingPair?.let { tradingPair ->
-                 prefs.getStashedFills(tradingPair, tradingPair.exchange)
-            } ?: run { listOf<Fill>()}
-
-            val stashedOrders: List<Order> = tradingPair?.let { tradingPair ->
-                prefs.getStashedOrders(tradingPair, tradingPair.exchange)
-            } ?: run { listOf<Order>()}
-
-            updateHistoryLists(it, stashedOrders, stashedFills)
+            updateHistoryListsFromStashes(it)
 
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -295,7 +286,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onResume()
         //TODO: reset trading pair and timespan
 
-        val tradingPairs = product.tradingPairs.sorted()
+        val tradingPairs = product.tradingPairs.sortTradingPairs()
         val index = tradingPairs.indexOf(tradingPair)
         if (index != -1) {
             tradingPairSpinner?.setSelection(index)
@@ -433,7 +424,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val price = newProduct.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
 
-        val tradingPairs = product.tradingPairs.sorted()
+        val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
         if (relevantTradingPair != null) {
             val index = tradingPairs.indexOf(relevantTradingPair)
@@ -451,28 +442,28 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun checkOrdersAndFills(tradingPair: TradingPair, context: Context) {
         val prefs = Prefs(context)
         val exchange = tradingPair.exchange
-        val stashedFills = prefs.getStashedFills(tradingPair, exchange)
-        val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
+        val stashedFills = prefs.getStashedFills(currency)
+        val stashedOrders = prefs.getStashedOrders(currency)
 
-        val dateOrdersLastStashed = prefs.getDateOrdersLastStashed()
+        val dateOrdersLastStashed = prefs.getDateOrdersLastStashed(exchange)
         val dateFillsLastStashed  = prefs.getDateFillsLastStashed(tradingPair, exchange)
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
-            Order.getAndStashList(apiInitData, exchange, tradingPair, { //OnFailure:
-                updateFills(tradingPair, stashedOrders, stashedFills)
+            Order.getAndStashList(apiInitData, currency, { //OnFailure:
+                updateFills(currency, stashedOrders, stashedFills)
             }) { newOrderList -> // OnSuccess:
-                updateFills(tradingPair, newOrderList,  stashedFills)
+                updateFills(currency, newOrderList,  stashedFills)
             }
         } else if (dateFillsLastStashed + TimeInMillis.fiveMinutes > nowInSeconds) {
-            updateFills(tradingPair, stashedOrders, stashedFills)
+            updateFills(currency, stashedOrders, stashedFills)
         } else if (dateFillsLastStashed + TimeInMillis.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
-            updateFills(tradingPair, stashedOrders, stashedFills)
+            updateFills(currency, stashedOrders, stashedFills)
         }
     }
 
-    private fun updateFills(tradingPair: TradingPair, orderList: List<Order>, stashedFills: List<Fill>) {
-        Fill.getAndStashList(apiInitData, tradingPair.exchange, tradingPair, { _ ->
+    private fun updateFills(currency: Currency, orderList: List<Order>, stashedFills: List<Fill>) {
+        Fill.getAndStashList(apiInitData, currency, { _ ->
             context?.let {
                 if (lifecycle.isCreatedOrResumed) {
                     updateHistoryLists(it, orderList, stashedFills)
@@ -516,22 +507,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         blockRefresh = false
         lockableScrollView?.scrollToTop(200)
         context?.let { context ->
-            val tradingPairs = Companion.product.tradingPairs.sorted()
+            val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
 
             product.defaultTradingPair?.let { tradingPair ->
-                val prefs = Prefs(context)
-                val exchange = tradingPair.exchange
-                val stashedFills = prefs.getStashedFills(tradingPair, exchange)
-                val stashedOrders = prefs.getStashedOrders(tradingPair, exchange)
-
-
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
                 txt_chart_name.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
-                updateHistoryLists(context, stashedOrders, stashedFills)
+                updateHistoryListsFromStashes(context)
                 checkOrdersAndFills(tradingPair, context)
             }
         }
@@ -815,7 +800,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             var filteredOrders: List<Order>? = null
             var filteredFills: List<Fill>? = null
-            Order.getAndStashList(apiInitData, account.exchange, tradingPair, onFailure) { orderList ->
+            Order.getAndStashList(apiInitData, currency, onFailure) { orderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = orderList
                     if (filteredFills != null) {
@@ -823,7 +808,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     }
                 }
             }
-            Fill.getAndStashList(apiInitData, account.exchange, tradingPair, onFailure) { fillList ->
+            Fill.getAndStashList(apiInitData, currency, onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredFills = fillList
                     if (filteredOrders != null) {
@@ -836,6 +821,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 onComplete(true)
             }
         }
+    }
+
+    private fun updateHistoryListsFromStashes(context: Context) {
+        val prefs = Prefs(context)
+        val stashedFills = prefs.getStashedFills(currency)
+        val stashedOrders = prefs.getStashedOrders(currency)
+        updateHistoryLists(context, stashedOrders, stashedFills)
     }
 
     private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
