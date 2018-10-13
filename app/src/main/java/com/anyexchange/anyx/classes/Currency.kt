@@ -25,11 +25,14 @@ class Currency(val id: String) {
             false
         }
     }
-    val symbol = knownCurrency?.symbol ?: id
+    val symbol
+        get() = knownCurrency?.symbol ?: id
 
-    val fullName = knownCurrency?.fullName ?: id
+    val fullName
+        get() = knownCurrency?.fullName ?: id
 
-    val iconId = knownCurrency?.iconId
+    val iconId
+        get() = knownCurrency?.iconId
 
     val feePercentage : Double
         get() {
