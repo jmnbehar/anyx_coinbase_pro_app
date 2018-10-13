@@ -20,9 +20,9 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         currency.addToList()
     }
 
-    var tradingPairs = tradingPairsIn.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
+    var tradingPairs = tradingPairsIn.sorted()
         set(value) {
-            field = value
+            field = value.sorted()
             if (dayCandles.size < tradingPairs.size) {
                 val candlesSizeTemp = dayCandles.size
                 val hourCandlesTemp = hourCandles

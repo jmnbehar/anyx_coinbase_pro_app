@@ -254,7 +254,7 @@ class Prefs (var context: Context) {
         return prefs.getLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), 0)
     }
 
-    var areAlertFillsActive: Boolean
+    var areFillAlertsActive: Boolean
         get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
         set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
 

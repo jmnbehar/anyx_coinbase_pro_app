@@ -73,7 +73,13 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val product = sortedProductList[i]
 
         //TODO: someday add ability to select values here
-        viewHolder.productIcon?.setImageResource(product.currency.iconId)
+
+        product.currency.iconId?.let {
+            viewHolder.productIcon?.visibility = View.VISIBLE
+            viewHolder.productIcon?.setImageResource(it)
+        } ?: run {
+            viewHolder.productIcon?.visibility = View.GONE
+        }
 
         viewHolder.productNameText?.text = product.currency.toString()
 

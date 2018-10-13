@@ -208,6 +208,11 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
     })
 }
 
+fun List<TradingPair>.sorted() : List<TradingPair> {
+    return this.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
+}
+
+
 fun String.dateFromCBProApiDateString(): Date? {
     return try {
         val locale = Locale.getDefault()

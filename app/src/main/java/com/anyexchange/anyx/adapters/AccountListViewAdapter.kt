@@ -103,7 +103,12 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                 viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                 viewHolder.percentChangeText?.text = ""
             }
-            viewHolder.iconView?.setImageResource(account.currency.iconId)
+            account.currency.iconId?.let {
+                viewHolder.iconView?.visibility = View.VISIBLE
+                viewHolder.iconView?.setImageResource(it)
+            } ?: run {
+                viewHolder.iconView?.visibility = View.GONE
+            }
         }
 
         return outputView

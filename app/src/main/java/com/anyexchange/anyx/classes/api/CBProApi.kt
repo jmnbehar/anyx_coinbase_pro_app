@@ -336,7 +336,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         val generalFillList = apiFillList.map { Fill(it) }
 
                         if (tradingPair != null) {
-                            if (prefs.areAlertFillsActive) {
+                            if (prefs.areFillAlertsActive) {
                                 checkForFillAlerts(generalFillList, tradingPair)
                             }
                             prefs.stashFills(generalFillList, tradingPair, cbProExchange)

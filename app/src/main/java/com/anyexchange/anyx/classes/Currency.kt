@@ -29,7 +29,7 @@ class Currency(val id: String) {
 
     val fullName = knownCurrency?.fullName ?: id
 
-    val iconId = knownCurrency?.iconId ?: R.drawable.fail_icon
+    val iconId = knownCurrency?.iconId
 
     val feePercentage : Double
         get() {

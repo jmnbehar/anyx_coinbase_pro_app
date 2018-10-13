@@ -106,7 +106,7 @@ class ReceiveFragment : RefreshFragment() {
             } else {
                 warning2TextView?.text = getString(R.string.receive_warning_2)
             }
-            warningIconImageView?.setImageResource(currency.iconId)
+            warningIconImageView?.setImageResource(currency.iconId ?: R.drawable.fail_icon)
         } else {
             qrCodeImageView?.visibility = View.GONE
             if (context != null){

@@ -52,6 +52,7 @@ class AlertJobService : JobService() {
                 Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
                     loopThroughAlerts()
                 })
+                checkFillAlerts()
             })
         } else {
             Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
@@ -64,7 +65,7 @@ class AlertJobService : JobService() {
     }
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
-        if (prefs.areAlertFillsActive && prefs.isLoggedIn) {
+        if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
             for (product in Product.map.values) {
                 product.defaultTradingPair?.let { tradingPair ->
                     val stashedOrders = prefs.getStashedOrders(tradingPair, tradingPair.exchange)

@@ -296,7 +296,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     try {
                         val prefs = Prefs(context)
                         val apiFillList: List<Fill> = Gson().fromJson(result.value, object : TypeToken<List<Fill>>() {}.type)
-                        if (prefs.areAlertFillsActive) {
+                        if (prefs.areFillAlertsActive) {
                             checkForFillAlerts(apiFillList, tradingPair)
                         }
                         prefs.stashFills(apiFillList, tradingPair, binanceExchange)

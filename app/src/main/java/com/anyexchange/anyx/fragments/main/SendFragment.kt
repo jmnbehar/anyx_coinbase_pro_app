@@ -139,7 +139,12 @@ class SendFragment : RefreshFragment() {
 
     private fun setAccountBalanceText() {
         currencyTickerTextView?.text = currency.toString()
-        iconImageView?.setImageResource(currency.iconId)
+        currency.iconId?.let {
+            iconImageView?.visibility = View.VISIBLE
+            iconImageView?.setImageResource(it)
+        } ?: run {
+            iconImageView?.visibility = View.GONE
+        }
         product?.accounts?.get(exchange)?.let {
             accountBalanceTextView?.visibility = View.VISIBLE
             accountBalanceTextView?.text = resources.getString(R.string.send_balance_text, it.availableBalance.btcFormatShortened())
