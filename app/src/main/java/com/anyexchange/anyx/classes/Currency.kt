@@ -16,6 +16,9 @@ enum class Currency {
     ETH,
     ETC,
     LTC,
+    ZRX,
+
+
     USD,
     EUR,
     GBP,
@@ -29,6 +32,9 @@ enum class Currency {
             ETH -> "ETH"
             ETC -> "ETC"
             LTC -> "LTC"
+            ZRX -> "ZRX"
+
+
             USD -> "USD"
             EUR -> "EUR"
             GBP -> "GBP"
@@ -45,6 +51,8 @@ enum class Currency {
                 ETH -> "ETH"
                 ETC -> "ETC"
                 LTC -> "LTC"
+                ZRX -> "ZRX"
+
                 USD -> "$"
                 EUR -> "€"
                 GBP -> "£"
@@ -59,6 +67,8 @@ enum class Currency {
             ETH -> "Ethereum"
             ETC -> "Ether Classic"
             LTC -> "Litecoin"
+            ZRX -> "0x"
+
             USD -> "US Dollar"
             EUR -> "Euro"
             GBP -> "Pound sterling"
@@ -74,6 +84,8 @@ enum class Currency {
             ETC -> R.drawable.icon_etc
             LTC -> R.drawable.icon_ltc
             BCH -> R.drawable.icon_bch
+            ZRX -> R.drawable.icon_zrx
+
             USD -> R.drawable.icon_usd
             EUR -> R.drawable.icon_eur
             GBP -> R.drawable.icon_gbp
@@ -103,6 +115,7 @@ enum class Currency {
             ETC -> .01
             BCH -> .01
             LTC -> .1
+            ZRX -> .1
             else -> 1.0
         }
 
@@ -113,6 +126,8 @@ enum class Currency {
             ETC -> .001
             BCH -> .001
             LTC -> .1
+            ZRX -> .1
+
             else -> 100.0
         }
 
@@ -143,6 +158,7 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_dk)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
                 ETC -> ContextCompat.getColor(context, R.color.etc_dk)
+                ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.white)
@@ -155,6 +171,7 @@ enum class Currency {
                 ETH -> ContextCompat.getColor(context, R.color.eth_light)
                 LTC -> ContextCompat.getColor(context, R.color.ltc_light)
                 ETC -> ContextCompat.getColor(context, R.color.etc_light)
+                ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.black)
@@ -170,6 +187,7 @@ enum class Currency {
             ETH -> ContextCompat.getColor(context, R.color.eth_fade)
             LTC -> ContextCompat.getColor(context, R.color.ltc_fade)
             ETC -> ContextCompat.getColor(context, R.color.etc_fade)
+            ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
             USD,
             EUR,
             GBP -> ContextCompat.getColor(context, R.color.white_fade)
@@ -179,29 +197,20 @@ enum class Currency {
 
     fun colorAccent(context: Context) : Int {
         val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_accent)
-                BCH -> ContextCompat.getColor(context, R.color.bch_accent)
-                ETH -> ContextCompat.getColor(context, R.color.eth_accent)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
-                ETC -> ContextCompat.getColor(context, R.color.etc_accent)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.white)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
-            }
-        } else {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_accent)
-                BCH -> ContextCompat.getColor(context, R.color.bch_accent)
-                ETH -> ContextCompat.getColor(context, R.color.eth_accent)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
-                ETC -> ContextCompat.getColor(context, R.color.etc_accent)
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.black)
-                OTHER -> ContextCompat.getColor(context, R.color.black)
+        return when (this) {
+            BTC -> ContextCompat.getColor(context, R.color.btc_accent)
+            BCH -> ContextCompat.getColor(context, R.color.bch_accent)
+            ETH -> ContextCompat.getColor(context, R.color.eth_accent)
+            LTC -> ContextCompat.getColor(context, R.color.ltc_accent)
+            ETC -> ContextCompat.getColor(context, R.color.etc_accent)
+            ZRX -> ContextCompat.getColor(context, R.color.zrx_accent)
+            USD,
+            EUR,
+            GBP,
+            OTHER -> if (prefs.isDarkModeOn) {
+                ContextCompat.getColor(context, R.color.white)
+            } else {
+                ContextCompat.getColor(context, R.color.black)
             }
         }
     }
@@ -215,6 +224,7 @@ enum class Currency {
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
                 ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
+                ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
@@ -227,6 +237,7 @@ enum class Currency {
                 ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
+                ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
@@ -244,10 +255,11 @@ enum class Currency {
                 ETC -> Color.WHITE
                 BCH -> Color.WHITE
                 LTC -> Color.BLACK
+                ZRX -> Color.BLACK
                 USD,
                 EUR,
-                GBP -> Color.WHITE
-                OTHER -> Color.WHITE
+                GBP -> Color.BLACK
+                OTHER -> Color.BLACK
             }
         } else {
             when (this) {
@@ -256,10 +268,11 @@ enum class Currency {
                 ETC -> Color.WHITE
                 BCH -> Color.WHITE
                 LTC -> Color.WHITE
+                ZRX -> Color.WHITE
                 USD,
                 EUR,
-                GBP -> Color.BLACK
-                OTHER -> Color.BLACK
+                GBP -> Color.WHITE
+                OTHER -> Color.WHITE
             }
         }
     }
@@ -272,6 +285,7 @@ enum class Currency {
             ETC -> "0x6e459139E65B4589e3F91c86D11143dBBA4570cf"
             BCH -> "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8"
             LTC -> "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD"
+            ZRX -> ""
             USD,
             EUR,
             GBP -> "my irl address?"
@@ -287,6 +301,7 @@ enum class Currency {
                 LTC -> 3
                 BCH -> 2
                 ETC -> 1
+                ZRX -> 0
                 EUR -> -1
                 GBP -> -2
                 USD -> -100
