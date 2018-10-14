@@ -8,7 +8,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 
-class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String, val orderId: String, val price: Double, val amount: Double, val time: Date, val side: TradeSide, val fee: Double) {
+open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String, val orderId: String, val price: Double, open val amount: Double, val time: Date, val side: TradeSide, open val fee: Double) {
     var isMaker: Boolean? = null
 
     //binance extra info:
@@ -40,9 +40,9 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
 
 
     companion object {
-        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
-            AnyApi.getAndStashFillList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
-        }
+//        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
+//            AnyApi.getAndStashFillList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
+//        }
         fun getAndStashList(apiInitData: ApiInitData?, currency: Currency, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
             val tradingPairs = Product.map[currency.id]?.tradingPairs ?: listOf()
             var tradingPairsChecked = 0
@@ -50,7 +50,8 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
             for (tradingPair in tradingPairs) {
                 AnyApi.getAndStashFillList(apiInitData, tradingPair.exchange, tradingPair, onFailure) {
                     tradingPairsChecked++
-                    fullFillList.addAll(it)
+                    val combinedList = it.combineFills()
+                    fullFillList.addAll(combinedList)
                     if (tradingPairsChecked == tradingPairs.size) {
                         onSuccess(fullFillList)
                     }
@@ -58,4 +59,30 @@ class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: String,
             }
         }
     }
+
+
+}
+
+class CombinedFill(exchange: Exchange, tradingPair: TradingPair, orderId: String, price: Double, side: TradeSide,
+                   override var amount: Double, override var fee: Double, val timeList: MutableList<Date> = mutableListOf(),
+                   val idList: MutableList<String> = mutableListOf()) : Fill(exchange, tradingPair, "", orderId, price, amount, Date(), side, fee)
+
+
+fun List<Fill>.combineFills() : List<CombinedFill> {
+    val mutableCopy = this.toMutableList()
+    val combinedList = mutableListOf<CombinedFill>()
+    while (mutableCopy.isNotEmpty()) {
+        val fill = mutableCopy.first()
+        val similarFills = mutableCopy.filter { it.orderId == fill.orderId && it.price == fill.price }
+        val combinedFill = CombinedFill(fill.exchange, fill.tradingPair, fill.orderId, fill.price, fill.side, 0.0, 0.0)
+        for (similarFill in similarFills) {
+            combinedFill.amount += similarFill.amount
+            combinedFill.fee += similarFill.fee
+            combinedFill.timeList.add(similarFill.time)
+            combinedFill.idList.add(similarFill.id)
+        }
+        combinedList.add(combinedFill)
+        mutableCopy.removeAll(similarFills)
+    }
+    return combinedList
 }
