@@ -26,8 +26,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             orders.size
         }
     }
-
-
+    
     override fun getItem(i: Int): Any {
         return i
     }
@@ -111,12 +110,8 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
         viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
         viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
 
-        if (tradeType == null) {
-            viewHolder.tradeTypeText?.visibility = View.GONE
-        } else {
-            viewHolder.tradeTypeText?.visibility = View.VISIBLE
-            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
-        }
+        viewHolder.tradeTypeText?.visibility = View.VISIBLE
+        viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
 
         return outputView
     }

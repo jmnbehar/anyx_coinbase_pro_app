@@ -412,7 +412,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (tradeFragment == null) {
             tradeFragment = TradeFragment.newInstance(tradeSide)
         } else {
-            tradeFragment?.tradeSide = tradeSide
+            TradeFragment.tradeSide = tradeSide
         }
         (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
