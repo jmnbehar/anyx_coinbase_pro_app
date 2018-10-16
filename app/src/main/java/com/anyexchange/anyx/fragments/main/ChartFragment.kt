@@ -28,7 +28,8 @@ import org.jetbrains.anko.support.v4.alert
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.adapters.HistoryListViewAdapter
+import com.anyexchange.anyx.adapters.FillListViewAdapter
+import com.anyexchange.anyx.adapters.OrderListViewAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
@@ -411,7 +412,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (tradeFragment == null) {
             tradeFragment = TradeFragment.newInstance(tradeSide)
         } else {
-            tradeFragment?.tradeSide = tradeSide
+            TradeFragment.tradeSide = tradeSide
         }
         (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
@@ -647,7 +648,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             negativeButton(R.string.chart_cancel_order) {
                 order.cancel(apiInitData, { _ -> }) { _ ->
                     if (lifecycle.isCreatedOrResumed) {
-                        var orders = (orderListView?.adapter as HistoryListViewAdapter).orders
+                        var orders = (orderListView?.adapter as OrderListViewAdapter).orders
                         orders = orders.filter { o -> o.id != order.id }
                         context?.let { context ->
                             updateHistoryLists(context, orders)
@@ -831,11 +832,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
-        orderListView?.adapter = HistoryListViewAdapter(context, true, orderList, resources, orderOnClick = { order -> orderOnClick(order) })
+        orderListView?.adapter = OrderListViewAdapter(context, orderList, resources) { order -> orderOnClick(order) }
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {
-            fillListView?.adapter = HistoryListViewAdapter(context, false, fillList, resources, fillOnClick = { fill -> fillOnClick(fill) })
+            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { fill -> fillOnClick(fill) }
             fillListView?.setHeightBasedOnChildren()
         }
     }

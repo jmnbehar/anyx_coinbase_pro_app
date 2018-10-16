@@ -11,7 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import kotlinx.android.synthetic.main.list_row_history.view.*
+import kotlinx.android.synthetic.main.list_row_order.view.*
 import org.jetbrains.anko.backgroundColor
 
 
@@ -67,17 +67,17 @@ class HistoryRecyclerViewAdapter(val context: Context, private val isOrderList: 
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): HistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_row_history, parent, false) as View
+                .inflate(R.layout.list_row_order, parent, false) as View
 
 //        view.layoutParams = LinearLayout.LayoutParams(Constraints.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
 
         return HistoryViewHolder(view,
-                view.img_history_icon,
-                view.txt_history_side,
-                view.txt_history_amount,
-                view.txt_history_currency,
-                view.txt_history_price,
-                view.txt_history_trade_type)
+                view.img_order_icon,
+                view.txt_order_side,
+                view.txt_order_amount,
+                view.txt_order_currency,
+                view.txt_order_price,
+                view.txt_order_trade_type)
     }
 
     private fun setViewsVisibility(viewHolder: HistoryViewHolder, setVisible: Boolean) {

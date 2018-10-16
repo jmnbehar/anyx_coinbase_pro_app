@@ -1,6 +1,8 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.text.Editable
@@ -30,8 +32,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
 
-    private lateinit var fiatBalanceText: TextView
-    private lateinit var fiatBalanceLabelText: TextView
+    private lateinit var quoteBalanceText: TextView
+    private lateinit var quoteBalanceLabelText: TextView
     private lateinit var cryptoBalanceText: TextView
     private lateinit var cryptoBalanceLabelText: TextView
     private lateinit var currentPriceLabelText: TextView
@@ -64,7 +66,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private var tradeType: TradeType = TradeType.MARKET
 
-    var tradeSide: TradeSide = Companion.tradeSide
     val product: Product
         get() {
             return ChartFragment.product
@@ -75,13 +76,19 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             return product.currency
         }
 
-    //TODO: improve this, make changeable
-    val tradingPair: TradingPair
-        get() = product.defaultTradingPair!!
+    private val tradingPair: TradingPair?
+        get() = viewModel.tradingPair ?: product.defaultTradingPair ?: product.tradingPairs.firstOrNull()
+
+    private lateinit var viewModel: TradeViewModel
+    class TradeViewModel : ViewModel() {
+        var tradingPair: TradingPair? = null
+    }
 
     private val relevantAccount: Account?
         get() {
-            return product.accounts[tradingPair.exchange]
+            return tradingPair?.let {
+                product.accounts[it.exchange]
+            } ?: run { null }
         }
 
     companion object {
@@ -96,6 +103,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_trade, container, false)
+
+        viewModel = ViewModelProviders.of(this).get(TradeViewModel::class.java)
 
         this.inflater = inflater
         val activity = activity!!
@@ -112,8 +121,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         limitEditText = rootView.etxt_trade_limit
         limitUnitText = rootView.txt_trade_limit_unit
 
-        fiatBalanceText = rootView.txt_trade_fiat_balance
-        fiatBalanceLabelText = rootView.txt_trade_fiat_balance_label
+        quoteBalanceText = rootView.txt_trade_fiat_balance
+        quoteBalanceLabelText = rootView.txt_trade_fiat_balance_label
         cryptoBalanceText = rootView.txt_trade_crypto_balance
         cryptoBalanceLabelText = rootView.txt_trade_crypto_balance_label
         currentPriceLabelText = rootView.txt_trade_crypto_current_price_label
@@ -267,16 +276,32 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     override fun onResume() {
         super.onResume()
 
+        switchCurrency(currency)
         val currencyList = Product.map.keys.map { Currency(it) }
         showNavSpinner(ChartFragment.currency, currencyList) { selectedCurrency ->
-            ChartFragment.currency = selectedCurrency
-            amountEditText.setText("")
-            limitEditText.setText("")
-            updateButtonsAndText()
+            switchCurrency(selectedCurrency)
         }
 
         updateButtonsAndText()
         refresh { endRefresh() }
+    }
+
+    private fun switchCurrency(newCurrency: Currency) {
+        ChartFragment.currency = newCurrency
+
+        val tradingPairs = product.tradingPairs.sortTradingPairs()
+        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
+        if (relevantTradingPair != null) {
+//            val index = tradingPairs.indexOf(relevantTradingPair)
+//            spinner_chart_trading_pair.setSelection(index)
+            viewModel.tradingPair = relevantTradingPair
+        } else {
+            viewModel.tradingPair = tradingPairs.firstOrNull()
+        }
+
+        amountEditText.setText("")
+        limitEditText.setText("")
+        updateButtonsAndText()
     }
 
 
@@ -315,17 +340,35 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
 
-                val fiatAccount = Account.defaultFiatAccount
-                val fiatCurrency = Account.defaultFiatCurrency
-                fiatBalanceText.text = fiatAccount?.availableBalance?.fiatFormat(fiatCurrency)
+                val quoteCurrency = tradingPair?.quoteCurrency
+                val quoteBalance: String? = when {
+                    quoteCurrency == null -> null
+                    quoteCurrency.isFiat -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.fiatFormat(quoteCurrency)
+                    else -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair?.exchange)?.availableBalance?.btcFormat() + " " + quoteCurrency.id
+                }
 
-                fiatBalanceLabelText.text = resources.getString(R.string.trade_balance_label, fiatCurrency.toString())
+                if (quoteCurrency == null) {
+                    quoteBalanceText.visibility = View.GONE
+                    quoteBalanceLabelText.visibility = View.GONE
+                } else {
+                    quoteBalanceText.visibility = View.GONE
+                    quoteBalanceLabelText.visibility = View.GONE
+
+                    quoteBalanceText.text = quoteBalance ?: "0.0"
+                    quoteBalanceLabelText.text = resources.getString(R.string.trade_balance_label, quoteCurrency.toString())
+                }
+
                 cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
 
                 cryptoBalanceText.text = account.availableBalance.btcFormat()
 
                 currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
-                currentPriceText.text = product.defaultPrice.fiatFormat(fiatCurrency)
+
+                currentPriceText.text = when {
+                    quoteCurrency == null -> product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
+                    quoteCurrency.isFiat -> product.priceForQuoteCurrency(quoteCurrency).fiatFormat(quoteCurrency)
+                    else -> product.priceForQuoteCurrency(quoteCurrency).btcFormat() + " " + quoteCurrency.id
+                }
             }
         }
         updateTotalText()
@@ -551,7 +594,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun switchTradeType(newTradeSide: TradeSide? = null, newTradeType: TradeType? = null) {
         if (newTradeSide != null) {
-            this.tradeSide = newTradeSide
+            tradeSide = newTradeSide
         }
         if (newTradeType != null) {
             this.tradeType = newTradeType
