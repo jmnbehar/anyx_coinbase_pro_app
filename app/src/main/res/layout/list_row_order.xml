@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
@@ -14,14 +15,23 @@
     <ImageView
         android:id="@+id/img_order_icon"
         android:layout_width="15dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="15dp"
-        android:contentDescription="@string/chart_history_order_side_buy" />
+        android:layout_height="0dp"
+        android:contentDescription="@string/chart_history_order_side_buy"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_order_info"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/layout_order_info"
+        app:layout_constraintTop_toTopOf="@+id/layout_order_info" />
 
     <LinearLayout
+        android:id="@+id/layout_order_info"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/img_order_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,8 +43,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingEnd="2dp"
                 android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:textSize="15sp" />
 
             <TextView
@@ -42,8 +52,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingEnd="2dp"
                 android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:textSize="13sp" />
 
             <TextView
@@ -51,8 +61,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingEnd="2dp"
                 android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:textSize="13sp" />
 
             <TextView
@@ -60,8 +70,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingEnd="2dp"
                 android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:textSize="15sp" />
         </LinearLayout>
 
@@ -75,8 +85,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingEnd="2dp"
                 android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:textSize="15sp" />
 
             <TextView
@@ -123,4 +133,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
@@ -17,7 +18,7 @@ import org.jetbrains.anko.backgroundColor
  * Created by anyexchange on 11/12/2017.
  */
 
-class FillListViewAdapter(val context: Context, var fills: List<Fill>, var resources: Resources, private var fillOnClick: (Fill) -> Unit = { }) : BaseAdapter() {
+class FillListViewAdapter(val context: Context, private var fills: List<Fill>, var resources: Resources, private var fillOnClick: (Fill) -> Unit = { }) : BaseAdapter() {
 
 
     override fun getCount(): Int {
@@ -40,11 +41,15 @@ class FillListViewAdapter(val context: Context, var fills: List<Fill>, var resou
 
     internal class ViewHolder {
         var colorView: ImageView? = null
-        var sideText: TextView? = null
-        var amountText: TextView? = null
-        var currencyText: TextView? = null
+        var mainLabelText: TextView? = null
+
         var priceText: TextView? = null
-        var tradeTypeText: TextView? = null
+
+        var feeText: TextView? = null
+
+        var dateText: TextView? = null
+
+        var extraInfoLayout: LinearLayout? = null
     }
 
     override fun getView(i: Int, convertView: View?, viewGroup: ViewGroup): View {
@@ -56,11 +61,13 @@ class FillListViewAdapter(val context: Context, var fills: List<Fill>, var resou
             val vi = viewGroup.inflate(R.layout.list_row_fill)
 
             viewHolder.colorView = vi.img_fill_icon
-            viewHolder.sideText = vi.txt_fill_side
-            viewHolder.amountText = vi.txt_fill_amount
+            viewHolder.mainLabelText = vi.txt_fill_label
+
             viewHolder.priceText = vi.txt_fill_price
-            viewHolder.currencyText = vi.txt_fill_currency
-            viewHolder.tradeTypeText = vi.txt_fill_trade_type
+            viewHolder.feeText = vi.txt_fill_fees
+            viewHolder.dateText = vi.txt_fill_date
+
+            viewHolder.extraInfoLayout = vi.layout_fill_extra_info
 
             vi.tag = viewHolder
             outputView = vi
@@ -77,36 +84,68 @@ class FillListViewAdapter(val context: Context, var fills: List<Fill>, var resou
 
         if (fills.isEmpty()) {
             viewHolder.colorView?.visibility = View.INVISIBLE
-            viewHolder.sideText?.visibility = View.GONE
-            viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_fills)
+            viewHolder.mainLabelText?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.GONE
-            viewHolder.currencyText?.visibility = View.GONE
-            viewHolder.tradeTypeText?.visibility = View.GONE
+            viewHolder.feeText?.visibility = View.GONE
+            viewHolder.dateText?.visibility = View.GONE
+            viewHolder.extraInfoLayout?.visibility = View.GONE
+            viewHolder.mainLabelText?.text = context.resources.getString(R.string.chart_history_no_fills)
+            return outputView
+        } else {
+            viewHolder.colorView?.visibility = View.VISIBLE
+            viewHolder.mainLabelText?.visibility = View.VISIBLE
+            viewHolder.priceText?.visibility = View.VISIBLE
+            viewHolder.feeText?.visibility = View.VISIBLE
+            viewHolder.dateText?.visibility = View.VISIBLE
+            val fill = fills[i]
+            tradeSide = fill.side
+            currency = fill.tradingPair.baseCurrency
+            price = fill.price
+            amount = fill.amount
+
+            outputView.setOnClickListener {
+                fill.showExtraInfo = !fill.showExtraInfo
+                fillOnClick(fill)
+            }
+
+            viewHolder.colorView?.backgroundColor = when (tradeSide) {
+                TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
+                TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
+            }
+
+            val sideString = when (tradeSide) {
+                TradeSide.BUY -> context.resources.getString(R.string.chart_history_fill_side_buy)
+                TradeSide.SELL -> context.resources.getString(R.string.chart_history_fill_side_sell)
+            }
+
+            val totalPrice = fill.price * fill.amount
+            val quoteCurrency = fill.tradingPair.quoteCurrency
+
+            viewHolder.mainLabelText?.text = context.resources.getString(R.string.chart_fill_main_label, sideString, amount.format(currency), totalPrice.format(quoteCurrency))
+            viewHolder.priceText?.text = context.resources.getString(R.string.chart_fill_price_label, price.format(quoteCurrency), currency)
+
+            if (fill.showExtraInfo) {
+                viewHolder.extraInfoLayout?.visibility = View.VISIBLE
+                val feeString = fill.feeAsset?.let {
+                    fill.fee.format(it)
+                } ?: run { fill.fee.format(quoteCurrency) }
+                viewHolder.feeText?.text = context.resources.getString(R.string.chart_fill_fee_label, feeString)
+
+                if (fill is CombinedFill && fill.timeList.size > 1) {
+                    var dateString = ""
+                    for (date in fill.timeList) {
+                        dateString += "\n" + date.format(Fill.dateFormat)
+                    }
+                    viewHolder.dateText?.text = context.resources.getString(R.string.chart_fill_date_multiple, dateString)
+                } else {
+                    val dateString = fill.time.format(Fill.dateFormat)
+                    viewHolder.dateText?.text = context.resources.getString(R.string.chart_fill_date_single, dateString)
+                }
+            } else {
+                viewHolder.extraInfoLayout?.visibility = View.GONE
+            }
+
             return outputView
         }
-        val fill = fills[i]
-        tradeSide = fill.side
-        currency = fill.tradingPair.baseCurrency
-        price = fill.price
-        amount = fill.amount
-
-        outputView.setOnClickListener { fillOnClick(fill) }
-
-        viewHolder.sideText?.text = when (tradeSide) {
-            TradeSide.BUY -> context.resources.getString(R.string.chart_history_fill_side_buy)
-            TradeSide.SELL -> context.resources.getString(R.string.chart_history_fill_side_sell)
-        }
-
-        viewHolder.colorView?.backgroundColor = when (tradeSide) {
-            TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
-            TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
-        }
-//        vi.img_history_icon.setImageResource(currency.iconId)
-
-        viewHolder.amountText?.text = amount.btcFormat()
-        viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
-        viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
-
-        return outputView
     }
 }

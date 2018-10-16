@@ -149,6 +149,13 @@
     <string name="chart_history_fill_side_buy">Bought</string>
     <string name="chart_history_fill_side_sell">Sold</string>
 
+    <string name="chart_fill_main_label">%s %s for %s</string>
+    <string name="chart_fill_price_label">Price: %s per %s</string>
+    <string name="chart_fill_fee_label">Fees paid: %s</string>
+
+    <string name="chart_fill_date_single">Date completed: %s</string>
+    <string name="chart_fill_date_multiple">Dates completed: %s</string>
+
     <string name="chart_history_currency_label"> %s at </string>
     <string name="chart_history_trade_type_label">(%s order)</string>
 

@@ -100,8 +100,16 @@ fun RecyclerView.setHeightBasedOnChildren(): Int {
     return params.height
 }
 
-fun Double.btcFormat(): String = "%.8f".format(this)
-fun Double.btcFormatShortened(): String {
+fun Double.btcFormat(currency: Currency? = null): String {
+    val btcString = "%.8f".format(this)
+    
+    return if (currency != null) {
+        "$btcString $currency"
+    } else {
+        btcString
+    }
+}
+fun Double.btcFormatShortened(currency: Currency? = null): String {
     var string = "%.8f".format(this)
     while (string.last() == '0') {
         string = string.substring(0, string.lastIndex)
@@ -109,8 +117,14 @@ fun Double.btcFormatShortened(): String {
     if (string.last() == '.') {
         string += '0'
     }
-    return string
+
+    return if (currency != null) {
+        "$string $currency"
+    } else {
+        string
+    }
 }
+
 fun Double.fiatFormat(currency: Currency): String {
     val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)

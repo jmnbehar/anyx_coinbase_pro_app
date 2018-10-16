@@ -532,9 +532,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             if (prefs.isLoggedIn) {
                 val balance = account?.balance ?: 0.0
                 tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
-                currency.iconId?.let {
+                currency.iconId?.let { iconId ->
                     accountIcon?.visibility = View.VISIBLE
-                    accountIcon?.setImageResource(it)
+                    accountIcon?.setImageResource(iconId)
                 } ?: run {
                     accountIcon?.visibility = View.GONE
                 }
@@ -836,7 +836,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {
-            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { fill -> fillOnClick(fill) }
+            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { _ ->
+                (fillListView?.adapter as? FillListViewAdapter)?.notifyDataSetChanged()
+                fillListView?.setHeightBasedOnChildren()
+            }
             fillListView?.setHeightBasedOnChildren()
         }
     }

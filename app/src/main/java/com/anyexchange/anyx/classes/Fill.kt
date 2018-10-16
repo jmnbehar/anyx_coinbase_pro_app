@@ -12,18 +12,19 @@ open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: St
     var isMaker: Boolean? = null
 
     //binance extra info:
-    var commissionAsset: Currency? = null
+    var feeAsset: Currency? = null
     var isBestMatch: Boolean? = null
 
     //cbpro extra info:
     var isSettled: Boolean? = null
     var liquidity: String? = null
 
+    var showExtraInfo = false
 
     constructor(binanceFill: BinanceAccountFill) :
             this(Exchange.Binance, TradingPair(Exchange.Binance, binanceFill.symbol), binanceFill.id, binanceFill.orderId.toString(), binanceFill.price, binanceFill.qty,
                     Date(binanceFill.time), if (binanceFill.isBuyer) { TradeSide.BUY } else { TradeSide.SELL }, binanceFill.commission) {
-        commissionAsset = Currency(binanceFill.commissionAsset)
+        feeAsset = Currency(binanceFill.commissionAsset)
         isBestMatch = binanceFill.isBestMatch
 
         isMaker = binanceFill.isMaker
@@ -43,6 +44,8 @@ open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: St
 //        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
 //            AnyApi.getAndStashFillList(apiInitData, exchange, tradingPair, onFailure, onSuccess)
 //        }
+
+        const val dateFormat = "h:mma, MM/dd/yyyy"
         fun getAndStashList(apiInitData: ApiInitData?, currency: Currency, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
             val tradingPairs = Product.map[currency.id]?.tradingPairs ?: listOf()
             var tradingPairsChecked = 0
@@ -64,8 +67,8 @@ open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: St
 }
 
 class CombinedFill(exchange: Exchange, tradingPair: TradingPair, orderId: String, price: Double, side: TradeSide,
-                   override var amount: Double, override var fee: Double, val timeList: MutableList<Date> = mutableListOf(),
-                   val idList: MutableList<String> = mutableListOf()) : Fill(exchange, tradingPair, "", orderId, price, amount, Date(), side, fee)
+                   override var amount: Double, override var fee: Double, defaultTime: Date, val timeList: MutableList<Date> = mutableListOf(),
+                   val idList: MutableList<String> = mutableListOf()) : Fill(exchange, tradingPair, "", orderId, price, amount, defaultTime, side, fee)
 
 
 fun List<Fill>.combineFills() : List<CombinedFill> {
@@ -74,7 +77,7 @@ fun List<Fill>.combineFills() : List<CombinedFill> {
     while (mutableCopy.isNotEmpty()) {
         val fill = mutableCopy.first()
         val similarFills = mutableCopy.filter { it.orderId == fill.orderId && it.price == fill.price }
-        val combinedFill = CombinedFill(fill.exchange, fill.tradingPair, fill.orderId, fill.price, fill.side, 0.0, 0.0)
+        val combinedFill = CombinedFill(fill.exchange, fill.tradingPair, fill.orderId, fill.price, fill.side, 0.0, 0.0, fill.time)
         for (similarFill in similarFills) {
             combinedFill.amount += similarFill.amount
             combinedFill.fee += similarFill.fee
