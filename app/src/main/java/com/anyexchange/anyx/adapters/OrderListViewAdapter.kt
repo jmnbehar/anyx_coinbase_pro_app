@@ -38,9 +38,8 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
     internal class ViewHolder {
         var colorView: ImageView? = null
-        var sideText: TextView? = null
-        var amountText: TextView? = null
-        var currencyText: TextView? = null
+        var mainLabelText: TextView? = null
+
         var priceText: TextView? = null
         var tradeTypeText: TextView? = null
     }
@@ -54,10 +53,9 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             val vi = viewGroup.inflate(R.layout.list_row_order)
 
             viewHolder.colorView = vi.img_order_icon
-            viewHolder.sideText = vi.txt_order_side
-            viewHolder.amountText = vi.txt_order_amount
+            viewHolder.mainLabelText = vi.txt_order_label
+
             viewHolder.priceText = vi.txt_order_price
-            viewHolder.currencyText = vi.txt_order_currency
             viewHolder.tradeTypeText = vi.txt_order_trade_type
 
             vi.tag = viewHolder
@@ -75,44 +73,50 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
         if (orders.isEmpty()) {
             viewHolder.colorView?.visibility = View.INVISIBLE
-            viewHolder.sideText?.visibility = View.GONE
-            viewHolder.amountText?.text = context.resources.getString(R.string.chart_history_no_orders)
+            viewHolder.mainLabelText?.text = context.resources.getString(R.string.chart_history_no_orders)
             viewHolder.priceText?.visibility = View.GONE
-            viewHolder.currencyText?.visibility = View.GONE
             viewHolder.tradeTypeText?.visibility = View.GONE
             return outputView
+        } else {
+            val order = orders[i]
+            tradeSide = order.side
+            price = order.price
+
+            val size = order.amount
+            val filled = order.filledAmount
+            val unfilledSize = size - filled
+            amount = unfilledSize
+            currency = order.tradingPair.baseCurrency
+            tradeType = TradeType.forString(order.type)
+            outputView.setOnClickListener { orderOnClick(order) }
+
+
+            viewHolder.colorView?.backgroundColor = when (tradeSide) {
+                TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
+                TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
+            }
+
+
+            val sideString = when (tradeSide) {
+                TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
+                TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
+            }
+
+            val totalPrice = order.funds?.toDoubleOrNull() ?: order.price * order.amount
+            val quoteCurrency = order.tradingPair.quoteCurrency
+
+            viewHolder.mainLabelText?.text = context.resources.getString(R.string.chart_fill_main_label, sideString, amount.format(currency), totalPrice.format(quoteCurrency))
+
+            viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
+
+            val tradeTypeString = order.type.capitalize()
+            viewHolder.priceText?.text = context.resources.getString(R.string.chart_order_price_label, tradeTypeString, price.format(quoteCurrency), currency)
+
+
+            viewHolder.tradeTypeText?.visibility = View.VISIBLE
+            viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
+
+            return outputView
         }
-        val order = orders[i]
-        tradeSide = order.side
-        price = order.price
-
-        val size = order.amount
-        val filled = order.filledAmount
-        val unfilledSize = size - filled
-        amount = unfilledSize
-        currency = order.tradingPair.baseCurrency
-        tradeType = TradeType.forString(order.type)
-        outputView.setOnClickListener { orderOnClick(order) }
-
-
-        viewHolder.sideText?.text = when (tradeSide) {
-            TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
-            TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
-        }
-
-        viewHolder.colorView?.backgroundColor = when (tradeSide) {
-            TradeSide.BUY -> ResourcesCompat.getColor(resources, R.color.anyx_green, null)
-            TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
-        }
-//        vi.img_history_icon.setImageResource(currency.iconId)
-
-        viewHolder.amountText?.text = amount.btcFormat()
-        viewHolder.currencyText?.text = context.resources.getString(R.string.chart_history_currency_label, currency)
-        viewHolder.priceText?.text = price.fiatFormat(Account.defaultFiatCurrency)
-
-        viewHolder.tradeTypeText?.visibility = View.VISIBLE
-        viewHolder.tradeTypeText?.text = context.resources.getString(R.string.chart_history_trade_type_label, tradeType)
-
-        return outputView
     }
 }

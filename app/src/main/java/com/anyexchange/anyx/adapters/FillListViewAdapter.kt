@@ -104,7 +104,6 @@ class FillListViewAdapter(val context: Context, private var fills: List<Fill>, v
             amount = fill.amount
 
             outputView.setOnClickListener {
-                fill.showExtraInfo = !fill.showExtraInfo
                 fillOnClick(fill)
             }
 

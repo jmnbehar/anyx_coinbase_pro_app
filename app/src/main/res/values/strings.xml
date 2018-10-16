@@ -153,6 +153,11 @@
     <string name="chart_fill_price_label">Price: %s per %s</string>
     <string name="chart_fill_fee_label">Fees paid: %s</string>
 
+
+    <string name="chart_order_main_label">%s %s for %s</string>
+    <string name="chart_order_price_label">%s at %s per %s</string>
+    <string name="chart_order_fee_label">Fees paid: %s</string>
+
     <string name="chart_fill_date_single">Date completed: %s</string>
     <string name="chart_fill_date_multiple">Dates completed: %s</string>
 

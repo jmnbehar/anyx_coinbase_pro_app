@@ -17,9 +17,9 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     private var isWorking: Boolean? = null
 
     //CbPro extras:
-    private var stp: String? = null
-    private var funds: String? = null
-    private var specifiedFunds: String? = null
+    private var stp: String? = null //should this be stop price?
+    var funds: String? = null
+    var specifiedFunds: String? = null
     private var postOnly: Boolean? = null
     private var doneAt: String? = null
     private var doneReason: String? = null
@@ -27,6 +27,9 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     var filledSize: String? = null
     private var executedValue: String? = null
     private var settled: Boolean? = null
+
+    var showExtraInfo = false
+
 
     constructor(binanceOrder: BinanceOrder) :
             this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(Exchange.Binance, binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,

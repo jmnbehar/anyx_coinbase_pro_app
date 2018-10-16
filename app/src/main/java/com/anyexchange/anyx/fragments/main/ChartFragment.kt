@@ -836,7 +836,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {
-            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { _ ->
+            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { fill ->
+                fill.showExtraInfo = !fill.showExtraInfo
                 (fillListView?.adapter as? FillListViewAdapter)?.notifyDataSetChanged()
                 fillListView?.setHeightBasedOnChildren()
             }
