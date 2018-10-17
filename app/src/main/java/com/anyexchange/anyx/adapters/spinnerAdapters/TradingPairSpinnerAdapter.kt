@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.adapters.spinnerAdapters
 
 import android.content.Context
+import android.graphics.Color
 import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +61,7 @@ class TradingPairSpinnerAdapter(context: Context, var tradingPairList: List<Trad
 
         val tradingPair = tradingPairList[position]
         viewHolder.tradingPairText?.text = tradingPair.toString()
+        viewHolder.tradingPairText?.textColor = Color.WHITE
         viewHolder.quoteCurrencyIcon?.visibility = View.GONE
         viewHolder.view?.backgroundColor = context.resources.getColor(R.color.dark_accent, null)
 
