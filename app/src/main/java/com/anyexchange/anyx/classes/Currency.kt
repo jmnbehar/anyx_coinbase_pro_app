@@ -255,7 +255,7 @@ enum class Currency {
                 ETC -> Color.WHITE
                 BCH -> Color.WHITE
                 LTC -> Color.BLACK
-                ZRX -> Color.BLACK
+                ZRX -> Color.WHITE
                 USD,
                 EUR,
                 GBP -> Color.BLACK
@@ -320,6 +320,8 @@ enum class Currency {
                 "ETH" -> ETH
                 "ETC" -> ETC
                 "LTC" -> LTC
+                "ZRX" -> ZRX
+
                 "USD" -> USD
                 "EUR" -> EUR
                 "GBP" -> GBP
