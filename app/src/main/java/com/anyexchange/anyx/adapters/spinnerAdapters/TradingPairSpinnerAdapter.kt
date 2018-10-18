@@ -58,6 +58,7 @@ class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: L
 
         val tradingPair = tradingPairList[position]
         viewHolder.tradingPairText?.text = tradingPair.toString()
+        viewHolder.tradingPairText?.textColor = Color.WHITE
         viewHolder.quoteCurrencyIcon?.visibility = View.GONE
         viewHolder.view?.backgroundColor = context.resources.getColor(R.color.dark_accent, null)
 

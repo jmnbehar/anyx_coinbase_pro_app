@@ -385,6 +385,10 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             feeEstimate.fiatFormat(fiatCurrency)
         }
+        val pricePlusFeeTotal = when (tradeSide) {
+            TradeSide.BUY ->  dollarTotal + feeEstimate
+            TradeSide.SELL -> dollarTotal - feeEstimate
+        }
         val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
             title = resources.getString(R.string.trade_confirm_popup_title)
@@ -396,7 +400,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         }
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), dollarTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), pricePlusFeeTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
@@ -471,7 +475,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         val unpaidFees = prefs.addUnpaidFee(devFee, currency)
                         if (unpaidFees > currency.minSendAmount) {
                             payFee(unpaidFees)
-                            prefs.wipeUnpaidFees(currency)
                         }
                     }
                 }
@@ -509,7 +512,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             //TODO: only count fees as paid if they are successfully paid
             CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
                     {  /*  fail silently   */ },
-                    {  /* succeed silently */ })
+                    { _ ->
+                        context?.let {
+                            Prefs(it).wipeUnpaidFees(currency)
+                        }
+                    })
         }
     }
 

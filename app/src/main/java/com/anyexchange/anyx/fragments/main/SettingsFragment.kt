@@ -68,7 +68,6 @@ class SettingsFragment : RefreshFragment() {
         val prefs = Prefs(activity!!)
 
         logoutButton?.setOnClickListener  {
-
             prefs.isLoggedIn = false
             CBProApi.credentials = null
             prefs.nukeStashedOrders()
