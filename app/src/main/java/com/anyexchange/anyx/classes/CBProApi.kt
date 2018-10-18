@@ -682,7 +682,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 }
                 is sendCrypto -> {
                     val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
+                    json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("crypto_address", cryptoAddress)
                     return json.toString()
@@ -690,7 +690,7 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getFromCoinbase -> {
                     val json = JSONObject()
 
-                    json.put("amount", amount.btcFormat())
+                    json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("coinbase_account_id", accountId)
                     return json.toString()
@@ -698,21 +698,21 @@ sealed class CBProApi(initData: CBProApiInitData?) : FuelRouting {
                 is getFromPayment -> {
                     val json = JSONObject()
 
-                    json.put("amount", amount.btcFormat())
+                    json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("payment_method_id", paymentMethodId)
                     return json.toString()
                 }
                 is sendToCoinbase -> {
                     val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
+                    json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("coinbase_account_id", accountId)
                     return json.toString()
                 }
                 is sendToPayment -> {
                     val json = JSONObject()
-                    json.put("amount", amount.btcFormat())
+                    json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("payment_method_id", paymentMethodId)
                     return json.toString()

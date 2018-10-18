@@ -95,7 +95,7 @@ enum class Currency {
 
     val feePercentage : Double
         get() {
-            return if (this.isFiat) {
+            return if (!this.isFiat) {
                 0.003
             } else {
                 0.0
@@ -115,7 +115,7 @@ enum class Currency {
             ETC -> .01
             BCH -> .01
             LTC -> .1
-            ZRX -> .1
+            ZRX -> 1.0
             else -> 1.0
         }
 
@@ -285,7 +285,7 @@ enum class Currency {
             ETC -> "0x6e459139E65B4589e3F91c86D11143dBBA4570cf"
             BCH -> "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8"
             LTC -> "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD"
-            ZRX -> ""
+            ZRX -> "0x18a0554aC9fb4E156F72f4f2bbE2f7B090D06089"
             USD,
             EUR,
             GBP -> "my irl address?"
