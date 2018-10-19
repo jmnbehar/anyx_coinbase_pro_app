@@ -225,7 +225,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             updateHistoryListsFromStashes(it)
 
-            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
+            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
@@ -509,7 +509,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lockableScrollView?.scrollToTop(200)
         context?.let { context ->
             val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
-            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
+            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
 
             product.defaultTradingPair?.let { tradingPair ->
@@ -618,7 +618,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun orderOnClick(order: Order) {
+    private fun confirmCancelOrder(order: Order) {
         alert {
             title = resources.getString(R.string.chart_history_order)
             val layoutWidth = 1000
@@ -631,6 +631,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val size = order.amount.btcFormat()
             val status = order.status
 
+            //TODO: fix allll dis shit
             customView {
                 linearLayout {
                     verticalLayout {
@@ -646,18 +647,22 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
             positiveButton(R.string.popup_ok_btn) {  }
             negativeButton(R.string.chart_cancel_order) {
-                order.cancel(apiInitData, { _ -> }) { _ ->
-                    if (lifecycle.isCreatedOrResumed) {
-                        var orders = (orderListView?.adapter as OrderListViewAdapter).orders
-                        orders = orders.filter { o -> o.id != order.id }
-                        context?.let { context ->
-                            updateHistoryLists(context, orders)
-                        }
-                        toast(R.string.chart_order_cancelled)
-                    }
-                }
+                cancelOrder(order)
             }
         }.show()
+    }
+
+    private fun cancelOrder(order: Order) {
+        order.cancel(apiInitData, { _ -> }) { _ ->
+            if (lifecycle.isCreatedOrResumed) {
+                var orders = (orderListView?.adapter as OrderListViewAdapter).orders
+                orders = orders.filter { o -> o.id != order.id }
+                context?.let { context ->
+                    updateHistoryLists(context, orders)
+                }
+                toast(R.string.chart_order_cancelled)
+            }
+        }
     }
 
     private fun fillOnClick(fill: Fill) {
@@ -832,7 +837,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
-        orderListView?.adapter = OrderListViewAdapter(context, orderList, resources) { order -> orderOnClick(order) }
+        orderListView?.adapter = OrderListViewAdapter(context, orderList, resources,
+                { order -> //Order On Click:
+                    order.showExtraInfo = !order.showExtraInfo
+                    (orderListView?.adapter as? OrderListViewAdapter)?.notifyDataSetChanged()
+                } , { order -> //Order Cancel:
+                    confirmCancelOrder(order)
+                })
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {

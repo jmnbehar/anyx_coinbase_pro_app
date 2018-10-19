@@ -21,6 +21,8 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
 
@@ -31,6 +33,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private lateinit var inflater: LayoutInflater
     private lateinit var titleText: TextView
+
+    private lateinit var tradingPairSpinner: Spinner
 
     private lateinit var quoteBalanceText: TextView
     private lateinit var quoteBalanceLabelText: TextView
@@ -45,13 +49,15 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private lateinit var tradeSideSellRadioButton: RadioButton
 
     private lateinit var amountEditText: EditText
-    private lateinit var amountUnitText: TextView
     private lateinit var amountLabelText: TextView
+    private lateinit var amountUnitText: TextView
+    private lateinit var amountUnitSpinner: Spinner
 
     private lateinit var limitLayout: LinearLayout
     private lateinit var limitEditText: EditText
-    private lateinit var limitUnitText: TextView
     private lateinit var limitLabelText: TextView
+    private lateinit var limitUnitText: TextView
+
 
     private lateinit var totalLabelText: TextView
     private lateinit var totalText: TextView
@@ -76,8 +82,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             return product.currency
         }
 
-    private val tradingPair: TradingPair?
+    private var tradingPair: TradingPair?
         get() = viewModel.tradingPair ?: product.defaultTradingPair ?: product.tradingPairs.firstOrNull()
+        set(value) {
+            viewModel.tradingPair = value
+        }
 
     private lateinit var viewModel: TradeViewModel
     class TradeViewModel : ViewModel() {
@@ -163,13 +172,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         tradeSideSellRadioButton = rootView.rbtn_trade_sell
 
         tradeSideBuyRadioButton.setOnClickListener {
-            switchTradeType(TradeSide.BUY)
+            switchTradeSide(TradeSide.BUY)
             if (tradeType != TradeType.LIMIT) {
                 amountEditText.setText("")
             }
         }
         tradeSideSellRadioButton.setOnClickListener {
-            switchTradeType(TradeSide.SELL)
+            switchTradeSide(TradeSide.SELL)
             if (tradeType != TradeType.LIMIT) {
                 amountEditText.setText("")
             }
@@ -294,9 +303,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         if (relevantTradingPair != null) {
 //            val index = tradingPairs.indexOf(relevantTradingPair)
 //            spinner_chart_trading_pair.setSelection(index)
-            viewModel.tradingPair = relevantTradingPair
+            tradingPair = relevantTradingPair
         } else {
-            viewModel.tradingPair = tradingPairs.firstOrNull()
+            tradingPair = tradingPairs.firstOrNull()
         }
 
         amountEditText.setText("")
@@ -328,14 +337,25 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun updateButtonsAndText() {
-        relevantAccount?.let { account ->
-            context?.let { context ->
+
+        context?.let { context ->
+                tradingPairSpinner.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.FullName)
+                tradingPairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                        switchTradingPair(product.tradingPairs[position])
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>) { }
+                }
+
+
+            relevantAccount?.let { account ->
                 val buttonColors = account.currency.colorStateList(context)
                 val buttonTextColor = account.currency.buttonTextColor(context)
                 submitOrderButton.backgroundTintList = buttonColors
                 submitOrderButton.textColor = buttonTextColor
 
-                val tabAccentColor = account.currency.colorAccent(activity!!)
+                val tabAccentColor = account.currency.colorAccent(context)
                 tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
                 titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
@@ -373,7 +393,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
         updateTotalText()
 
-        switchTradeType()
+        switchTradeInfo(null, null, null)
     }
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
@@ -389,7 +409,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             TradeSide.BUY ->  dollarTotal + feeEstimate
             TradeSide.SELL -> dollarTotal - feeEstimate
         }
-        val buySell = if (tradeSide == TradeSide.BUY) { "buy" } else { "sell" }
         alert {
             title = resources.getString(R.string.trade_confirm_popup_title)
             customView {
@@ -398,7 +417,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         if (tradeType == TradeType.MARKET) {
                             horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.fiatFormat(fiatCurrency)}").lparams(width = matchParent) {}
                         }
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, buySell), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), pricePlusFeeTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
@@ -598,8 +617,28 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         return (devFee + cbproFee)
     }
 
+    private fun switchTradingPair(newTradingPair: TradingPair) {
+        switchTradeInfo(newTradingPair, null, null)
+    }
 
-    private fun switchTradeType(newTradeSide: TradeSide? = null, newTradeType: TradeType? = null) {
+    private fun switchTradeSide(newTradeSide: TradeSide) {
+        switchTradeInfo(null, newTradeSide, null)
+    }
+
+    private fun switchTradeType(newTradeType: TradeType) {
+        switchTradeInfo(null, null, newTradeType)
+    }
+
+    private fun switchTradeInfo(newTradingPair: TradingPair?, newTradeSide: TradeSide?, newTradeType: TradeType?) {
+        if  (newTradingPair == null) {
+            if (tradingPair == null) {
+                //TODO: figure out something better to do here:
+                toast("Error")
+                return
+            }
+        } else {
+            tradingPair = newTradingPair
+        }
         if (newTradeSide != null) {
             tradeSide = newTradeSide
         }
@@ -614,7 +653,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             advancedOptionsLayout.visibility = View.GONE
         }
-        val fiatCurrency = Account.defaultFiatCurrency
+        //Trading pair cannot be null at this point
+        val quoteCurrency = tradingPair!!.quoteCurrency
         when (tradeType) {
             TradeType.MARKET -> {
                 val marketTab = tradeTypeTabLayout.getTabAt(0)
@@ -622,12 +662,32 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 marketTab?.select()
                 limitLayout.visibility = View.INVISIBLE
+
+                context?.let {
+                    amountUnitText.visibility = View.GONE
+                    amountUnitSpinner.visibility = View.VISIBLE
+
+//
+//                    val relevantCurrencies = listOf(tradingPair!!.baseCurrency, tradingPair!!.quoteCurrency)
+//                    amountUnitSpinner.adapter = NavigationSpinnerAdapter(it, relevantCurrencies)
+//                    amountUnitSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//                        override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+//                            tradingPair = product.tradingPairs[position]
+//
+//                        }
+//
+//                        override fun onNothingSelected(parent: AdapterView<*>) { }
+//                    }
+
+                    val endTimeList = listOf("min", "hour", "day")
+                    advancedOptionEndTimeSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
+                }
             }
             TradeType.LIMIT -> {
                 val limitTab = tradeTypeTabLayout.getTabAt(1)
                 amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 limitTab?.select()
-                limitUnitText.text = fiatCurrency.toString()
+                limitUnitText.text = quoteCurrency.toString()
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = resources.getString(R.string.trade_limit_label)
 
@@ -660,7 +720,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
                 val stopTab = tradeTypeTabLayout.getTabAt(2)
                 stopTab?.select()
-                limitUnitText.text = fiatCurrency.toString()
+                limitUnitText.text = quoteCurrency.toString()
                 limitLayout.visibility = View.VISIBLE
                 limitLabelText.text = resources.getString(R.string.trade_stop_label)
                 advancedOptionsCheckBox.visibility = View.INVISIBLE
@@ -674,12 +734,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     tradeSideBuyRadioButton.isChecked = true
                     when (tradeType) {
                         TradeType.MARKET, TradeType.STOP -> {
-                            amountUnitText.text = fiatCurrency.toString()
+                            amountUnitText.text = quoteCurrency.toString()
                             totalLabelText.text = resources.getString(R.string.trade_total_label, currency)
                         }
                         TradeType.LIMIT -> {
                             amountUnitText.text = currency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+                            totalLabelText.text = resources.getString(R.string.trade_total_label, quoteCurrency)
                         }
                     }
                 }
@@ -687,7 +747,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     submitOrderButton.text = resources.getString(R.string.trade_sell_order_btn)
                     tradeSideSellRadioButton.isChecked = true
                     amountUnitText.text = currency.toString()
-                    totalLabelText.text = resources.getString(R.string.trade_total_label, fiatCurrency)
+                    totalLabelText.text = resources.getString(R.string.trade_total_label, quoteCurrency)
                 }
             }
         }
