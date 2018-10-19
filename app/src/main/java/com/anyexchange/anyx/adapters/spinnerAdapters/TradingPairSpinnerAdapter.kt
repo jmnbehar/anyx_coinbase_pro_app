@@ -15,12 +15,18 @@ import org.jetbrains.anko.backgroundColor
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: List<TradingPair>) :
+class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: List<TradingPair>, private val exchangeDisplayType: ExchangeDisplayType) :
         ArrayAdapter<TradingPair>(context, layoutId, textResId, tradingPairList) {
 
     companion object {
         const val layoutId = R.layout.list_row_trading_pair
         const val textResId = R.id.txt_trading_pair_id
+    }
+
+    enum class ExchangeDisplayType {
+        None,
+        Image,
+        FullName
     }
 
     internal class ViewHolder {
@@ -57,8 +63,25 @@ class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: L
         }
 
         val tradingPair = tradingPairList[position]
-        viewHolder.tradingPairText?.text = tradingPair.toString()
-        viewHolder.quoteCurrencyIcon?.visibility = View.GONE
+        when (exchangeDisplayType) {
+            ExchangeDisplayType.None -> {
+                viewHolder.quoteCurrencyIcon?.visibility = View.GONE
+                viewHolder.tradingPairText?.text = tradingPair.toString()
+            }
+            ExchangeDisplayType.Image -> {
+                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
+                viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
+                viewHolder.tradingPairText?.text = tradingPair.toString()
+//                viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+            }
+            ExchangeDisplayType.FullName -> {
+                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
+                viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
+                //TODO: use string resource
+                viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+            }
+        }
+
         viewHolder.view?.backgroundColor = context.resources.getColor(R.color.dark_accent, null)
 
 //        viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.quoteCurrency.iconId)
