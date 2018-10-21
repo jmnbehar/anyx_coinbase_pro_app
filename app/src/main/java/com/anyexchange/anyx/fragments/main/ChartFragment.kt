@@ -841,6 +841,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 { order -> //Order On Click:
                     order.showExtraInfo = !order.showExtraInfo
                     (orderListView?.adapter as? OrderListViewAdapter)?.notifyDataSetChanged()
+                    orderListView?.setHeightBasedOnChildren()
                 } , { order -> //Order Cancel:
                     confirmCancelOrder(order)
                 })

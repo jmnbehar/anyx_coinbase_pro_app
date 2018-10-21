@@ -273,6 +273,9 @@
     <string name="trade_amount_buy_min_error_message">Error: Amount too small. Minimum %s buy amount is %s</string>
     <string name="trade_amount_buy_max_error_message">Error: Amount too small. Maximum %s buy amount is %s</string>
 
+    //For market buys with specified crypto value
+    <string name="trade_summary_market_buy">Buy %s %s at market value</string>
+
     //Transfer Fragments
     <string name="transfer_in_title">Transfer into Coinbase Pro</string>
     <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
