@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.list_row_order.view.*
 import org.jetbrains.anko.backgroundColor
 
@@ -43,7 +44,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
         var extraInfoLayout: LinearLayout? = null
 
         var timeInForceText: TextView? = null
-        var idDateText: TextView? = null
+        var dateText: TextView? = null
         var amountText: TextView? = null
 
         var cancelButton: Button? = null
@@ -64,7 +65,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
             viewHolder.extraInfoLayout = vi.layout_order_extra_info
 
-            viewHolder.idDateText = vi.txt_order_id_and_date
+            viewHolder.dateText = vi.txt_order_date
             viewHolder.amountText = vi.txt_order_amount
             viewHolder.timeInForceText = vi.txt_order_time_in_force
             viewHolder.cancelButton = vi.btn_order_cancel
@@ -118,10 +119,22 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             if (order.showExtraInfo) {
                 viewHolder.extraInfoLayout?.visibility = View.VISIBLE
 
-                //TODO: format this better:
-                viewHolder.idDateText?.text = order.id + " " + order.time.format(Fill.dateFormat)
-                viewHolder.amountText?.text = "Full Amount: ${order.amount}, Filled Amount: ${order.filledAmount}, remaining: $amount"
-                viewHolder.timeInForceText?.text = order.timeInForce.capitalize()
+                viewHolder.dateText?.text = "Date Created: ${order.time.format(Fill.dateFormat)}"
+
+                if (order.filledAmount > 0) {
+                    viewHolder.amountText?.text = "Original Amount: ${order.amount}, Filled Amount: ${order.filledAmount}"
+                    viewHolder.amountText?.visibility = View.VISIBLE
+                } else {
+                    viewHolder.amountText?.visibility = View.GONE
+                }
+
+                viewHolder.timeInForceText?.text = when (order.exchange) {
+                    Exchange.CBPro -> {
+                        val timeInForce = CBProApi.TimeInForce.forString(order.timeInForce)
+                        timeInForce?.userFriendlyString(order.expireTime) ?: ""
+                    }
+                    Exchange.Binance -> ""
+                }
 
                 viewHolder.cancelButton?.setOnClickListener {
                     cancelButtonClicked(order)

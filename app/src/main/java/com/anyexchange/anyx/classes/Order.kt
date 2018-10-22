@@ -17,11 +17,12 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     private var isWorking: Boolean? = null
 
     //CbPro extras:
-    private var stp: String? = null //should this be stop price?
+    private var stp: String? = null //self trade prevention
     var funds: String? = null
     var specifiedFunds: String? = null
     private var postOnly: Boolean? = null
-    private var doneAt: String? = null
+    private var doneAt: Date? = null
+    var expireTime: Date? = null
     private var doneReason: String? = null
     var fillFees: String? = null
     var filledSize: String? = null
@@ -50,7 +51,8 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         funds = cbProOrder.funds
         specifiedFunds = cbProOrder.specified_funds
         postOnly = cbProOrder.post_only
-        doneAt = cbProOrder.done_at
+        doneAt = cbProOrder.done_at?.dateFromCBProApiDateString()
+        expireTime = cbProOrder.expire_time?.dateFromCBProApiDateString()
         doneReason = cbProOrder.done_reason
         fillFees = cbProOrder.fill_fees
         filledSize = cbProOrder.filled_size

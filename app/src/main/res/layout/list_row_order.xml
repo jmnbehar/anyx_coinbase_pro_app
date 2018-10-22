@@ -54,10 +54,11 @@
             android:id="@+id/layout_order_extra_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="15dp">
 
             <TextView
-                android:id="@+id/txt_order_id_and_date"
+                android:id="@+id/txt_order_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
@@ -71,13 +72,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/txt_order_time_in_force"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:textAlignment="viewStart" />
 
                 <Button
                     android:id="@+id/btn_order_cancel"

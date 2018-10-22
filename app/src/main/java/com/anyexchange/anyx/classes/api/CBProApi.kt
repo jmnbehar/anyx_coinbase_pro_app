@@ -745,6 +745,20 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 FirstOrKill -> "FOK"
             }
         }
+        fun userFriendlyString(endDate: Date? = null): String {
+            return when (this) {
+                GoodTilCancelled -> "Good until cancelled"
+                GoodTilTime -> if (endDate == null) {
+                    "Good until time"
+                } else {
+                    val formattedDate = endDate.format(Fill.dateFormat)
+                    "Good until time:\n$formattedDate"
+                }
+                ImmediateOrCancel -> "Immediate or cancel"
+                FirstOrKill -> "First or kill"
+            }
+        }
+
         companion object {
             fun forString(string: String?) : TimeInForce? {
                 if (string == null) {

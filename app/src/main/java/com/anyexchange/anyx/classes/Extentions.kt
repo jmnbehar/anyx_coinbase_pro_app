@@ -232,13 +232,19 @@ fun List<Currency>.sortCurrencies() : List<Currency> {
 
 
 fun String.dateFromCBProApiDateString(): Date? {
+    val locale = Locale.getDefault()
     return try {
-        val locale = Locale.getDefault()
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", locale)
         format.timeZone = TimeZone.getTimeZone("UTC")
         format.parse(this)
     } catch (e: Exception) {
-        null
+        try {
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", locale)
+            format.timeZone = TimeZone.getTimeZone("UTC")
+            format.parse(this)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 fun Date.format(formatString: String): String {
