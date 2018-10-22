@@ -64,6 +64,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private var advancedOptionsCheckBox: CheckBox? = null
     private var advancedOptionsLayout: LinearLayout? = null
+    private lateinit var summaryText: TextView
+
 
     private var advancedOptionTimeInForceSpinner: Spinner? = null
     private var advancedOptionEndTimeSpinner: Spinner? = null
@@ -150,12 +152,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         totalLabelText = rootView.txt_trade_total_label
         totalText = rootView.txt_trade_total
 
+        summaryText = rootView.txt_trade_summary
+
         submitOrderButton = rootView.btn_place_order
 
         amountEditText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 val amount = p0.toString().toDoubleOrZero()
-                updateTotalText(amount)
+                updateTotalText(amount, null)
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -165,7 +169,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         limitEditText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 val limitPrice = p0.toString().toDoubleOrZero()
-                updateTotalText(limitPrice = limitPrice)
+                updateTotalText(null, limitPrice)
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -419,7 +423,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 }
             }
         }
-        updateTotalText()
+        updateTotalText(null, null)
 
         switchTradeInfo(null, null, null)
     }
@@ -567,11 +571,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun updateTotalText(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) {
+    private fun updateTotalText(amountIn: Double?, limitPriceIn: Double?) {
+        val amount = amountIn ?: amountEditText?.text.toString().toDoubleOrZero()
+        val limitPrice = limitPriceIn ?: limitEditText?.text.toString().toDoubleOrZero()
+
         val fiatCurrency = Account.defaultFiatCurrency
         totalText?.text = when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
-                TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
+                TradeType.MARKET -> totalInCrypto(amount, limitPrice).btcFormat()
                 TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
                 TradeType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
             }
@@ -581,6 +588,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 TradeType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
             }
         }
+//        summaryText.text = when (tradeType) {
+//            TradeType.MARKET -> {
+//                resources.getString(R.string.trade_summary_market_fixed_crypto)
+//            }
+//            TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
+//            TradeType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
+//        }
     }
 
     private fun totalInDollars(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
@@ -677,7 +691,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 this.tradeType = newTradeType
             }
 
-            updateTotalText()
+        updateTotalText(null, null)
 
             if (advancedOptionsCheckBox?.isChecked == true && tradeType == TradeType.LIMIT) {
                 advancedOptionsLayout?.visibility = View.VISIBLE
