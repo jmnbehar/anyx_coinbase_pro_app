@@ -77,7 +77,12 @@ class Currency(val id: String) {
         return knownCurrency?.colorAccent(context) ?: run {
             //TODO: generate colors based on name and darkmode
             val isDarkModeOn = Prefs(context).isDarkModeOn
-            ContextCompat.getColor(context, R.color.black)
+
+            if (Prefs(context).isDarkModeOn) {
+                Color.LTGRAY
+            } else {
+                Color.DKGRAY
+            }
         }
     }
 

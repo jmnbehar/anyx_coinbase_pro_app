@@ -129,7 +129,7 @@ class AlertsFragment : RefreshFragment() {
             quickChangeAlertCheckBox?.isChecked = Prefs(context).isQuickChangeAlertActive(currency)
             quickChangeAlertCheckBox?.text = resources.getString(R.string.alert_rapid_movement, currency.toString())
 
-            val tabAccentColor = currency.colorAccent(context)
+            val tabAccentColor = currency.colorPrimary(context)
             currencyTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
 
             val buttonColors = currency.colorStateList(context)

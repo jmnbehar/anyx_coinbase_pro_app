@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.adapters.spinnerAdapters
 
 import android.content.Context
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -11,6 +12,7 @@ import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.TradingPair
 import kotlinx.android.synthetic.main.list_row_trading_pair.view.*
 import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.textColor
 
 /**
  * Created by anyexchange on 3/14/2018.

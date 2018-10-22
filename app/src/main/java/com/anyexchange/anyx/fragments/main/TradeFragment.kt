@@ -21,7 +21,7 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
-import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.CurrencySpinnerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
@@ -31,44 +31,44 @@ import com.anyexchange.anyx.classes.api.CBProApi
  */
 class TradeFragment : RefreshFragment(), LifecycleOwner {
 
-    private lateinit var inflater: LayoutInflater
-    private lateinit var titleText: TextView
+    private var inflater: LayoutInflater? = null
+    private var titleText: TextView? = null
 
-    private lateinit var tradingPairSpinner: Spinner
+    private var tradingPairSpinner: Spinner? = null
 
-    private lateinit var quoteBalanceText: TextView
-    private lateinit var quoteBalanceLabelText: TextView
-    private lateinit var cryptoBalanceText: TextView
-    private lateinit var cryptoBalanceLabelText: TextView
-    private lateinit var currentPriceLabelText: TextView
-    private lateinit var currentPriceText: TextView
+    private var quoteBalanceText: TextView? = null
+    private var quoteBalanceLabelText: TextView? = null
+    private var cryptoBalanceText: TextView? = null
+    private var cryptoBalanceLabelText: TextView? = null
+    private var currentPriceLabelText: TextView? = null
+    private var currentPriceText: TextView? = null
 
-    private lateinit var tradeTypeTabLayout: TabLayout
+    private var tradeTypeTabLayout: TabLayout? = null
 
-    private lateinit var tradeSideBuyRadioButton : RadioButton
-    private lateinit var tradeSideSellRadioButton: RadioButton
+    private var tradeSideBuyRadioButton : RadioButton? = null
+    private var tradeSideSellRadioButton: RadioButton? = null
 
-    private lateinit var amountEditText: EditText
-    private lateinit var amountLabelText: TextView
-    private lateinit var amountUnitText: TextView
-    private lateinit var amountUnitSpinner: Spinner
+    private var amountEditText: EditText? = null
+    private var amountLabelText: TextView? = null
+    private var amountUnitText: TextView? = null
+    private var amountUnitSpinner: Spinner? = null
 
-    private lateinit var limitLayout: LinearLayout
-    private lateinit var limitEditText: EditText
-    private lateinit var limitLabelText: TextView
-    private lateinit var limitUnitText: TextView
+    private var limitLayout: LinearLayout? = null
+    private var limitEditText: EditText? = null
+    private var limitLabelText: TextView? = null
+    private var limitUnitText: TextView? = null
 
 
-    private lateinit var totalLabelText: TextView
-    private lateinit var totalText: TextView
+    private var totalLabelText: TextView? = null
+    private var totalText: TextView? = null
 
-    private lateinit var advancedOptionsCheckBox: CheckBox
-    private lateinit var advancedOptionsLayout: LinearLayout
+    private var advancedOptionsCheckBox: CheckBox? = null
+    private var advancedOptionsLayout: LinearLayout? = null
 
-    private lateinit var advancedOptionTimeInForceSpinner: Spinner
-    private lateinit var advancedOptionEndTimeSpinner: Spinner
+    private var advancedOptionTimeInForceSpinner: Spinner? = null
+    private var advancedOptionEndTimeSpinner: Spinner? = null
 
-    private lateinit var submitOrderButton: Button
+    private var submitOrderButton: Button? = null
 
     private var tradeType: TradeType = TradeType.MARKET
 
@@ -116,7 +116,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         viewModel = ViewModelProviders.of(this).get(TradeViewModel::class.java)
 
         this.inflater = inflater
-        val activity = activity!!
+
         setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         titleText = rootView.txt_trade_name
@@ -129,6 +129,10 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         limitLabelText = rootView.txt_trade_limit_label
         limitEditText = rootView.etxt_trade_limit
         limitUnitText = rootView.txt_trade_limit_unit
+
+        amountUnitSpinner = rootView.spinner_trade_amount_unit
+
+        tradingPairSpinner = rootView.spinner_trade_trading_pair
 
         quoteBalanceText = rootView.txt_trade_fiat_balance
         quoteBalanceLabelText = rootView.txt_trade_fiat_balance_label
@@ -148,7 +152,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         submitOrderButton = rootView.btn_place_order
 
-        amountEditText.addTextChangedListener(object : TextWatcher {
+        amountEditText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 val amount = p0.toString().toDoubleOrZero()
                 updateTotalText(amount)
@@ -156,9 +160,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
-        amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+        amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
 
-        limitEditText.addTextChangedListener(object : TextWatcher {
+        limitEditText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 val limitPrice = p0.toString().toDoubleOrZero()
                 updateTotalText(limitPrice = limitPrice)
@@ -166,27 +170,28 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
-        limitEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(5, 2))
+        limitEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(5, 2))
+
 
         tradeSideBuyRadioButton = rootView.rbtn_trade_buy
         tradeSideSellRadioButton = rootView.rbtn_trade_sell
 
-        tradeSideBuyRadioButton.setOnClickListener {
+        tradeSideBuyRadioButton?.setOnClickListener {
             switchTradeSide(TradeSide.BUY)
             if (tradeType != TradeType.LIMIT) {
-                amountEditText.setText("")
+                amountEditText?.setText("")
             }
         }
-        tradeSideSellRadioButton.setOnClickListener {
+        tradeSideSellRadioButton?.setOnClickListener {
             switchTradeSide(TradeSide.SELL)
             if (tradeType != TradeType.LIMIT) {
-                amountEditText.setText("")
+                amountEditText?.setText("")
             }
         }
 
 
         tradeTypeTabLayout = rootView.tabl_trade_type
-        tradeTypeTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        tradeTypeTabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 when(tab.position) {
                     0 -> switchTradeType(newTradeType =  TradeType.MARKET)
@@ -194,85 +199,100 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     2 -> switchTradeType(newTradeType =  TradeType.STOP)
                     else -> switchTradeType(newTradeType =  TradeType.MARKET)
                 }
-                amountEditText.setText("")
-                limitEditText.setText("")
+                amountEditText?.setText("")
+                limitEditText?.setText("")
             }
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        advancedOptionsCheckBox.setOnCheckedChangeListener { _, isChecked ->
+        advancedOptionsCheckBox?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                advancedOptionsLayout.visibility = View.VISIBLE
+                advancedOptionsLayout?.visibility = View.VISIBLE
             } else {
-                advancedOptionsLayout.visibility = View.GONE
+                advancedOptionsLayout?.visibility = View.GONE
             }
         }
 
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
 
-        submitOrderButton.setOnClickListener {
-            val prefs = Prefs(activity)
+        context?.let { context ->
 
-            var amount = amountEditText.text.toString().toDoubleOrZero()
-            val limit = limitEditText.text.toString().toDoubleOrZero()
+            val relevantCurrencies = tradingPair?.let { tradingPair ->
+                listOf(tradingPair.quoteCurrency, tradingPair.baseCurrency)
+            } ?: run { listOf<Currency>() }
 
-            var timeInForce: CBProApi.TimeInForce? = null
-            var cancelAfter: String? = null
-
-            val cryptoTotal = totalInCrypto(amount, limit)
-            val dollarTotal = totalInDollars(amount, limit)
-            val feeEstimate = feeEstimate(dollarTotal, limit)
-            val devFee: Double
-
-            if (feeEstimate > 0.0) {
-                //half fees for limit orders that are fuckin up? consider this later
-                devFee = cryptoTotal * DEV_FEE_PERCENTAGE
-
-                //TODO: test this more
-                if (tradeSide == TradeSide.SELL) {
-                    amount -= devFee
-                    //don't sell the devFee because it will be deducted by sending fees
-                    //amount is always in crypto for sell orders
+            amountUnitSpinner?.adapter = CurrencySpinnerAdapter(context, relevantCurrencies)
+            amountUnitSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    amountEditText?.setText("")
                 }
-                //should never need to change amount here, just buy it all and then deduct a bit
-            } else {
-                devFee = 0.0
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
-            if (advancedOptionsCheckBox.isChecked) {
-                when (tradeType) {
-                    TradeType.LIMIT -> {
-                        val tifIndex = advancedOptionTimeInForceSpinner.selectedItemPosition
-                        timeInForce = CBProApi.TimeInForce.values()[tifIndex]
-                        if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
-                            cancelAfter = advancedOptionEndTimeSpinner.selectedItem as String
-                        }
+            submitOrderButton?.setOnClickListener {
+                val prefs = Prefs(context)
+
+                var amount = amountEditText?.text.toString().toDoubleOrZero()
+                val limit = limitEditText?.text.toString().toDoubleOrZero()
+
+                var timeInForce: CBProApi.TimeInForce? = null
+                var cancelAfter: String? = null
+
+                val cryptoTotal = totalInCrypto(amount, limit)
+                val dollarTotal = totalInDollars(amount, limit)
+                val feeEstimate = feeEstimate(dollarTotal, limit)
+                val devFee: Double
+
+                if (feeEstimate > 0.0) {
+                    //half fees for limit orders that are fuckin up? consider this later
+                    devFee = cryptoTotal * DEV_FEE_PERCENTAGE
+
+                    //TODO: test this more
+                    if (tradeSide == TradeSide.SELL) {
+                        amount -= devFee
+                        //don't sell the devFee because it will be deducted by sending fees
+                        //amount is always in crypto for sell orders
                     }
-                    TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
-                    TradeType.MARKET -> { /* do nothing */ }
+                    //should never need to change amount here, just buy it all and then deduct a bit
+                } else {
+                    devFee = 0.0
                 }
-            }
 
-            if (amount <= 0) {
-                toast(R.string.trade_invalid_amount)
-            } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
-                toast(R.string.trade_invalid_limit)
-            } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
-                toast(R.string.trade_invalid_stop)
-            } else {
-                if (prefs.shouldShowTradeConfirmModal) {
-                    product.defaultTradingPair?.let { tradingPair ->
-                        AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
-                            if (price == null) {
-                                onFailure(Result.Failure(FuelError(Exception())))
-                            } else {
-                                confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
+                if (advancedOptionsCheckBox?.isChecked == true) {
+                    when (tradeType) {
+                        TradeType.LIMIT -> {
+                            val tifIndex = advancedOptionTimeInForceSpinner?.selectedItemPosition ?: 0
+                            timeInForce = CBProApi.TimeInForce.values()[tifIndex]
+                            if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
+                                cancelAfter = advancedOptionEndTimeSpinner?.selectedItem as String
                             }
                         }
+                        TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
+                        TradeType.MARKET -> { /* do nothing */ }
                     }
+                }
+
+                if (amount <= 0) {
+                    toast(R.string.trade_invalid_amount)
+                } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
+                    toast(R.string.trade_invalid_limit)
+                } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
+                    toast(R.string.trade_invalid_stop)
                 } else {
-                    submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
+                    if (prefs.shouldShowTradeConfirmModal) {
+                        product.defaultTradingPair?.let { tradingPair ->
+                            AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
+                                if (price == null) {
+                                    onFailure(Result.Failure(FuelError(Exception())))
+                                } else {
+                                    confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
+                                }
+                            }
+                        }
+                    } else {
+                        submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
+                    }
                 }
             }
         }
@@ -307,12 +327,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             tradingPair = tradingPairs.firstOrNull()
         }
+        updateCurrencySpinner()
 
-        amountEditText.setText("")
-        limitEditText.setText("")
+        amountEditText?.setText("")
+        limitEditText?.setText("")
         updateButtonsAndText()
     }
 
+    fun updateCurrencySpinner() {
+        val relevantCurrencies = tradingPair?.let { tradingPair ->
+            listOf(tradingPair.quoteCurrency, tradingPair.baseCurrency)
+        } ?: run { listOf<Currency>() }
+        (amountUnitSpinner?.adapter as CurrencySpinnerAdapter).currencyList = relevantCurrencies
+        (amountUnitSpinner?.adapter as CurrencySpinnerAdapter).notifyDataSetChanged()
+    }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
@@ -339,9 +367,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun updateButtonsAndText() {
 
         context?.let { context ->
-                tradingPairSpinner.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.FullName)
-                tradingPairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.FullName)
+                tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                         switchTradingPair(product.tradingPairs[position])
                     }
 
@@ -352,13 +380,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             relevantAccount?.let { account ->
                 val buttonColors = account.currency.colorStateList(context)
                 val buttonTextColor = account.currency.buttonTextColor(context)
-                submitOrderButton.backgroundTintList = buttonColors
-                submitOrderButton.textColor = buttonTextColor
+                submitOrderButton?.backgroundTintList = buttonColors
+                submitOrderButton?.textColor = buttonTextColor
 
-                val tabAccentColor = account.currency.colorAccent(context)
-                tradeTypeTabLayout.setSelectedTabIndicatorColor(tabAccentColor)
+                val tabAccentColor = account.currency.colorPrimary(context)
+                tradeTypeTabLayout?.setSelectedTabIndicatorColor(tabAccentColor)
 
-                titleText.text = resources.getString(R.string.trade_title_for_currency, account.currency.toString())
+                titleText?.text = resources.getString(R.string.trade_title_for_currency, account.currency.fullName)
 
                 val quoteCurrency = tradingPair?.quoteCurrency
                 val quoteBalance: String? = when {
@@ -368,23 +396,23 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 }
 
                 if (quoteCurrency == null) {
-                    quoteBalanceText.visibility = View.GONE
-                    quoteBalanceLabelText.visibility = View.GONE
+                    quoteBalanceText?.visibility = View.GONE
+                    quoteBalanceLabelText?.visibility = View.GONE
                 } else {
-                    quoteBalanceText.visibility = View.GONE
-                    quoteBalanceLabelText.visibility = View.GONE
+                    quoteBalanceText?.visibility = View.GONE
+                    quoteBalanceLabelText?.visibility = View.GONE
 
-                    quoteBalanceText.text = quoteBalance ?: "0.0"
-                    quoteBalanceLabelText.text = resources.getString(R.string.trade_balance_label, quoteCurrency.toString())
+                    quoteBalanceText?.text = quoteBalance ?: "0.0"
+                    quoteBalanceLabelText?.text = resources.getString(R.string.trade_balance_label, quoteCurrency.toString())
                 }
 
-                cryptoBalanceLabelText.text = resources.getString(R.string.trade_balance_label, account.currency)
+                cryptoBalanceLabelText?.text = resources.getString(R.string.trade_balance_label, account.currency)
 
-                cryptoBalanceText.text = account.availableBalance.btcFormat()
+                cryptoBalanceText?.text = account.availableBalance.btcFormat()
 
-                currentPriceLabelText.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
+                currentPriceLabelText?.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
 
-                currentPriceText.text = when {
+                currentPriceText?.text = when {
                     quoteCurrency == null -> product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
                     quoteCurrency.isFiat -> product.priceForQuoteCurrency(quoteCurrency).fiatFormat(quoteCurrency)
                     else -> product.priceForQuoteCurrency(quoteCurrency).btcFormat() + " " + quoteCurrency.id
@@ -539,9 +567,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun updateTotalText(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) {
+    private fun updateTotalText(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) {
         val fiatCurrency = Account.defaultFiatCurrency
-        totalText.text = when (tradeSide) {
+        totalText?.text = when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET ->  totalInCrypto(amount, limitPrice).btcFormat()
                 TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
@@ -555,7 +583,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun totalInDollars(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
+    private fun totalInDollars(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
         return when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET -> amount
@@ -570,7 +598,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun totalInCrypto(amount: Double = amountEditText.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText.text.toString().toDoubleOrZero()) : Double {
+    private fun totalInCrypto(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
         return when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET -> amount / (product.defaultPrice)
@@ -619,6 +647,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun switchTradingPair(newTradingPair: TradingPair) {
         switchTradeInfo(newTradingPair, null, null)
+        updateCurrencySpinner()
     }
 
     private fun switchTradeSide(newTradeSide: TradeSide) {
@@ -639,115 +668,112 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             tradingPair = newTradingPair
         }
-        if (newTradeSide != null) {
-            tradeSide = newTradeSide
-        }
-        if (newTradeType != null) {
-            this.tradeType = newTradeType
-        }
-
-        updateTotalText()
-
-        if (advancedOptionsCheckBox.isChecked && tradeType == TradeType.LIMIT) {
-            advancedOptionsLayout.visibility = View.VISIBLE
-        } else {
-            advancedOptionsLayout.visibility = View.GONE
-        }
-        //Trading pair cannot be null at this point
-        val quoteCurrency = tradingPair!!.quoteCurrency
-        when (tradeType) {
-            TradeType.MARKET -> {
-                val marketTab = tradeTypeTabLayout.getTabAt(0)
-                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
-
-                marketTab?.select()
-                limitLayout.visibility = View.INVISIBLE
-
-                context?.let {
-                    amountUnitText.visibility = View.GONE
-                    amountUnitSpinner.visibility = View.VISIBLE
-
-//
-//                    val relevantCurrencies = listOf(tradingPair!!.baseCurrency, tradingPair!!.quoteCurrency)
-//                    amountUnitSpinner.adapter = NavigationSpinnerAdapter(it, relevantCurrencies)
-//                    amountUnitSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//                        override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-//                            tradingPair = product.tradingPairs[position]
-//
-//                        }
-//
-//                        override fun onNothingSelected(parent: AdapterView<*>) { }
-//                    }
-
-                    val endTimeList = listOf("min", "hour", "day")
-                    advancedOptionEndTimeSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
-                }
+        val tradingPair = tradingPair
+        if (tradingPair != null) {
+            if (newTradeSide != null) {
+                tradeSide = newTradeSide
             }
-            TradeType.LIMIT -> {
-                val limitTab = tradeTypeTabLayout.getTabAt(1)
-                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
-                limitTab?.select()
-                limitUnitText.text = quoteCurrency.toString()
-                limitLayout.visibility = View.VISIBLE
-                limitLabelText.text = resources.getString(R.string.trade_limit_label)
+            if (newTradeType != null) {
+                this.tradeType = newTradeType
+            }
 
-                advancedOptionsCheckBox.visibility = View.VISIBLE
+            updateTotalText()
 
-                val timeInForceList = CBProApi.TimeInForce.values()
-                val spinnerList = timeInForceList.map { t -> t.label() }
-                context?.let {
-                    advancedOptionTimeInForceSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, spinnerList)
-                    advancedOptionTimeInForceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-                            val selectedItem = timeInForceList[position]
-                            if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
-                                advancedOptionEndTimeSpinner.visibility = View.VISIBLE
-                            } else {
-                                advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
+            if (advancedOptionsCheckBox?.isChecked == true && tradeType == TradeType.LIMIT) {
+                advancedOptionsLayout?.visibility = View.VISIBLE
+            } else {
+                advancedOptionsLayout?.visibility = View.GONE
+            }
+
+            //Trading pair cannot be null at this point
+            val quoteCurrency = tradingPair.quoteCurrency
+            when (tradeType) {
+                TradeType.MARKET -> {
+                    val marketTab = tradeTypeTabLayout?.getTabAt(0)
+                    amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
+
+                    marketTab?.select()
+                    limitLayout?.visibility = View.INVISIBLE
+
+                    context?.let {
+                        amountUnitText?.visibility = View.GONE
+                        amountUnitSpinner?.visibility = View.VISIBLE
+
+                        val endTimeList = listOf("min", "hour", "day")
+                        advancedOptionEndTimeSpinner?.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
+                    }
+                }
+                TradeType.LIMIT -> {
+                    amountUnitText?.visibility = View.VISIBLE
+                    amountUnitSpinner?.visibility = View.GONE
+
+                    val limitTab = tradeTypeTabLayout?.getTabAt(1)
+                    amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+                    limitTab?.select()
+                    limitUnitText?.text = quoteCurrency.toString()
+                    limitLayout?.visibility = View.VISIBLE
+                    limitLabelText?.text = resources.getString(R.string.trade_limit_label)
+
+                    advancedOptionsCheckBox?.visibility = View.VISIBLE
+
+                    val timeInForceList = CBProApi.TimeInForce.values()
+                    val spinnerList = timeInForceList.map { t -> t.label() }
+                    context?.let {
+                        advancedOptionTimeInForceSpinner?.adapter = AdvancedOptionsSpinnerAdapter(it, spinnerList)
+                        advancedOptionTimeInForceSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                                val selectedItem = timeInForceList[position]
+                                if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
+                                    advancedOptionEndTimeSpinner?.visibility = View.VISIBLE
+                                } else {
+                                    advancedOptionEndTimeSpinner?.visibility = View.INVISIBLE
+                                }
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>) {
+                                advancedOptionEndTimeSpinner?.visibility = View.INVISIBLE
                             }
                         }
 
-                        override fun onNothingSelected(parent: AdapterView<*>) {
-                            advancedOptionEndTimeSpinner.visibility = View.INVISIBLE
-                        }
-                    }
-
-                    val endTimeList = listOf("min", "hour", "day")
-                    advancedOptionEndTimeSpinner.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
-                }
-            }
-            TradeType.STOP -> {
-                amountEditText.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
-                val stopTab = tradeTypeTabLayout.getTabAt(2)
-                stopTab?.select()
-                limitUnitText.text = quoteCurrency.toString()
-                limitLayout.visibility = View.VISIBLE
-                limitLabelText.text = resources.getString(R.string.trade_stop_label)
-                advancedOptionsCheckBox.visibility = View.INVISIBLE
-            }
-        }
-
-        if (context != null) {
-            when (tradeSide) {
-                TradeSide.BUY -> {
-                    submitOrderButton.text = resources.getString(R.string.trade_buy_order_btn)
-                    tradeSideBuyRadioButton.isChecked = true
-                    when (tradeType) {
-                        TradeType.MARKET, TradeType.STOP -> {
-                            amountUnitText.text = quoteCurrency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, currency)
-                        }
-                        TradeType.LIMIT -> {
-                            amountUnitText.text = currency.toString()
-                            totalLabelText.text = resources.getString(R.string.trade_total_label, quoteCurrency)
-                        }
+                        val endTimeList = listOf("min", "hour", "day")
+                        advancedOptionEndTimeSpinner?.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
                     }
                 }
-                TradeSide.SELL -> {
-                    submitOrderButton.text = resources.getString(R.string.trade_sell_order_btn)
-                    tradeSideSellRadioButton.isChecked = true
-                    amountUnitText.text = currency.toString()
-                    totalLabelText.text = resources.getString(R.string.trade_total_label, quoteCurrency)
+                TradeType.STOP -> {
+                    amountUnitText?.visibility = View.VISIBLE
+                    amountUnitSpinner?.visibility = View.GONE
+                    amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+                    val stopTab = tradeTypeTabLayout?.getTabAt(2)
+                    stopTab?.select()
+                    limitUnitText?.text = quoteCurrency.toString()
+                    limitLayout?.visibility = View.VISIBLE
+                    limitLabelText?.text = resources.getString(R.string.trade_stop_label)
+                    advancedOptionsCheckBox?.visibility = View.INVISIBLE
+                }
+            }
+
+            if (context != null) {
+                when (tradeSide) {
+                    TradeSide.BUY -> {
+                        submitOrderButton?.text = resources.getString(R.string.trade_buy_order_btn)
+                        tradeSideBuyRadioButton?.isChecked = true
+                        when (tradeType) {
+                            TradeType.MARKET, TradeType.STOP -> {
+                                amountUnitText?.text = quoteCurrency.toString()
+                                totalLabelText?.text = resources.getString(R.string.trade_total_label, currency)
+                            }
+                            TradeType.LIMIT -> {
+                                amountUnitText?.text = currency.toString()
+                                totalLabelText?.text = resources.getString(R.string.trade_total_label, quoteCurrency)
+                            }
+                        }
+                    }
+                    TradeSide.SELL -> {
+                        submitOrderButton?.text = resources.getString(R.string.trade_sell_order_btn)
+                        tradeSideSellRadioButton?.isChecked = true
+                        amountUnitText?.text = currency.toString()
+                        totalLabelText?.text = resources.getString(R.string.trade_total_label, quoteCurrency)
+                    }
                 }
             }
         }
