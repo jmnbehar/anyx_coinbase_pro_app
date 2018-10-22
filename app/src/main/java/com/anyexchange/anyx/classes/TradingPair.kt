@@ -10,6 +10,8 @@ class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteC
             when (exchange) {
                 Exchange.Binance -> Currency(id.substring(3, 6))
                 Exchange.CBPro -> Currency(id.substring(4, 7)) }, id, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
+    constructor(exchange: Exchange, baseCurrency: Currency, quoteCurrency: Currency) : this(exchange, baseCurrency, quoteCurrency, "$baseCurrency-$quoteCurrency", listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
+
 
     fun idForExchange(exchange: Exchange) : String {
         return when (exchange) {
