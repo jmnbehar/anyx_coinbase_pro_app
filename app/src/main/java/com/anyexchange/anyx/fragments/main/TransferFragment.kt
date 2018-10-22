@@ -79,10 +79,11 @@ class TransferFragment : RefreshFragment() {
             get() {
                 val cryptoCbProAccounts = Account.allCryptoAccounts().filter { it.exchange == Exchange.CBPro }
                 val cryptoCBAccounts = cryptoCbProAccounts.mapNotNull { account -> account.coinbaseAccount }
-                val fiatCBAccounts = Account.fiatAccounts.mapNotNull { account -> account.coinbaseAccount }
-                val cbAccountsAreMissing = ((cryptoCBAccounts.size < cryptoCbProAccounts.size) ||
-                                            (fiatCBAccounts.size < Account.fiatAccounts.size))
-                return (!cbAccountsAreMissing && Account.paymentMethods.isNotEmpty())
+                val fiatCBProAccounts = Account.fiatAccounts.filter { it.exchange == Exchange.CBPro }
+                val fiatCBAccounts = fiatCBProAccounts.mapNotNull { account -> account.coinbaseAccount }
+                val cbAccountsAreMissing = (cryptoCBAccounts.size < cryptoCbProAccounts.size ||
+                                            fiatCBAccounts.size < fiatCBProAccounts.size)
+                return (!cbAccountsAreMissing && Account.paymentMethods.isNotEmpty() && fiatCBProAccounts.isNotEmpty())
             }
     }
 
@@ -92,7 +93,6 @@ class TransferFragment : RefreshFragment() {
         setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         this.inflater = inflater
-        val activity = activity!!
         titleText = rootView.txt_transfer_title
 
         transferDetailsLayout = rootView.layout_transfer_details
@@ -114,27 +114,29 @@ class TransferFragment : RefreshFragment() {
 
         submitTransferButton = rootView.btn_transfer_submit_transfer
 
-        val relatedAccountSpinnerAdapter = RelatedAccountSpinnerAdapter(activity, sourceAccounts)
-
-        sourceAccountsSpinner?.adapter = relatedAccountSpinnerAdapter
-        sourceAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (sourceAccounts.size > position && !blockNextSelectSource) {
-                    sourceAccountSelected()
+        context?.let {
+            sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
+            sourceAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (sourceAccounts.size > position && !blockNextSelectSource) {
+                        sourceAccountSelected()
+                    }
+                    blockNextSelectSource = false
                 }
-                blockNextSelectSource = false
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-        destAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!blockNextSelectDest) {
-                    setInfoAndButtons()
+            destAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, listOf())
+            destAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (!blockNextSelectDest) {
+                        setInfoAndButtons()
+                    }
+                    blockNextSelectDest = false
                 }
-                blockNextSelectDest = false
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         transferMaxButton?.setOnClickListener {
@@ -273,12 +275,9 @@ class TransferFragment : RefreshFragment() {
                 sourceAccountsSpinner?.visibility = View.GONE
             }
             else -> {
-                context?.let {
-                    sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
-                    sourceAccountText?.visibility = View.GONE
-                    sourceAccountsSpinner?.visibility = View.VISIBLE
-                    blockNextSelectSource = true
-                }
+                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = sourceAccounts
+                sourceAccountsSpinner?.visibility = View.VISIBLE
+                blockNextSelectSource = true
             }
         }
 
@@ -320,7 +319,7 @@ class TransferFragment : RefreshFragment() {
             else -> {
                 val destAccountsTemp = destAccounts.filterNotNull()
                 context?.let {
-                    destAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, destAccountsTemp)
+                    (destAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = destAccountsTemp
                     destBalanceText?.visibility = View.GONE
                     destAccountsSpinner?.visibility = View.VISIBLE
                     blockNextSelectDest = true
