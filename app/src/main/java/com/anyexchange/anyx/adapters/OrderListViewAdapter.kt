@@ -105,16 +105,13 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
                 TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
             }
 
-            val totalPrice = order.funds?.toDoubleOrNull() ?: order.price * order.amount
+//            val totalPrice = order.funds?.toDoubleOrNull() ?: order.price * order.amount
             val quoteCurrency = order.tradingPair.quoteCurrency
 
-            viewHolder.mainLabelText?.text = context.resources.getString(R.string.chart_fill_main_label, sideString, amount.format(currency), totalPrice.format(quoteCurrency))
+            viewHolder.mainLabelText?.text = order.summary(resources)
 
-            viewHolder.priceText?.text = order.price.fiatFormat(Account.defaultFiatCurrency)
-
-//            val tradeType = TradeType.forString(order.type)
             val tradeTypeString = order.type.toString().capitalize()
-            viewHolder.priceText?.text = context.resources.getString(R.string.chart_order_price_label, tradeTypeString, order.price.format(quoteCurrency), currency)
+            viewHolder.priceText?.visibility = View.GONE
 
             if (order.showExtraInfo) {
                 viewHolder.extraInfoLayout?.visibility = View.VISIBLE

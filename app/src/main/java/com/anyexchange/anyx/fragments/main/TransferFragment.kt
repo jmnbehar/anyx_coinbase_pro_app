@@ -64,7 +64,9 @@ class TransferFragment : RefreshFragment() {
         set(value) { ChartFragment.currency = value }
 
     val product: Product?
-        get() = Product.map[currency.id]
+        get() {
+            return Product.map[currency.id]
+        }
 
     var blockNextSelectSource = false
     var blockNextSelectDest = false
@@ -167,6 +169,7 @@ class TransferFragment : RefreshFragment() {
 
         coinbaseAccounts = Account.allCryptoAccounts().mapNotNull { account -> account.coinbaseAccount }
 
+
         val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
             coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
@@ -254,13 +257,14 @@ class TransferFragment : RefreshFragment() {
         amountEditText?.setText("")
 
 
-        val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
-        product?.accounts?.get(Exchange.CBPro)?.let {
-            tempRelevantAccounts.add(it)
+        val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
+        product?.accounts?.values?.let {
+            tempRelevantAccounts.addAll(it)
         }
         if (currency.isFiat) {
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
         }
+
         sourceAccounts = tempRelevantAccounts
 
         when (sourceAccounts.size) {
@@ -275,8 +279,14 @@ class TransferFragment : RefreshFragment() {
                 sourceAccountsSpinner?.visibility = View.GONE
             }
             else -> {
-                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = sourceAccounts
+//                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = sourceAccounts
+//                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.notifyDataSetChanged()
+
+                sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(context!!, sourceAccounts)
+
+
                 sourceAccountsSpinner?.visibility = View.VISIBLE
+                sourceAccountText?.visibility = View.GONE
                 blockNextSelectSource = true
             }
         }

@@ -152,6 +152,9 @@
     <string name="chart_history_fill_side_sell">Sold</string>
 
 
+    <string name="order_main_label">%s %s for %s</string>
+    <string name="order_price_label">%s at %s per %s</string>
+
     //For market buys with specified base currency value, ex: "(Buy) (30 ETH) at market value"
     <string name="order_summary_market_fixed_base">%s %s at market value</string>
 
@@ -175,8 +178,6 @@
     <string name="chart_fill_fee_label">Fees paid: %s</string>
 
 
-    <string name="chart_order_main_label">%s %s for %s</string>
-    <string name="chart_order_price_label">%s at %s per %s</string>
     <string name="chart_order_fee_label">Fees paid: %s</string>
 
     <string name="chart_fill_date_single">Date completed: %s</string>

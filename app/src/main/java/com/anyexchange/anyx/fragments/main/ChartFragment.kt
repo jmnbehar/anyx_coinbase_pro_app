@@ -626,7 +626,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
 
             val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
-            val price = order.price.format(quoteCurrency)
+            val price = (order.price ?: 0.0).format(quoteCurrency)
             val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
             val size = order.amount.btcFormat()
             val status = order.status

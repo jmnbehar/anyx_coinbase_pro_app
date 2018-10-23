@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.classes
 
 import android.content.Context
+import android.content.res.Resources
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.api.*
 import com.anyexchange.anyx.fragments.main.TradeFragment
@@ -8,7 +9,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 
-class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair, val price: Double, val amount: Double, val filledAmount: Double,
+class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair, val price: Double?, val amount: Double, val filledAmount: Double,
             val type: TradeType, val side: TradeSide, val time: Date, val timeInForce: String) {
     var status: String? = null
 
@@ -22,7 +23,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     //CbPro extras:
     private var stp: String? = null //self trade prevention
     var funds: String? = null
-    var specifiedFunds: String? = null
+    var specifiedFunds: Double? = null
     private var postOnly: Boolean? = null
     private var doneAt: Date? = null
     var expireTime: Date? = null
@@ -52,7 +53,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
         stp = cbProOrder.stp
         funds = cbProOrder.funds
-        specifiedFunds = cbProOrder.specified_funds
+        specifiedFunds = cbProOrder.specified_funds?.toDoubleOrNull()
         postOnly = cbProOrder.post_only
         doneAt = cbProOrder.done_at?.dateFromCBProApiDateString()
         expireTime = cbProOrder.expire_time?.dateFromCBProApiDateString()
@@ -63,32 +64,29 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         settled = cbProOrder.settled
     }
 
-//    fun summary(context: Context) : String {
-//            return when (type) {
-//                TradeType.MARKET -> {
-//                    val amountCurrency = amountUnitSpinner?.selectedItem as? Currency
-//                    when (amountCurrency) {
-//                        tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
-//                                sideString, amount.format(tradingPair.baseCurrency))
-//                        tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
-//                                sideString, amount.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                        else -> ""
-//                    }
-//                }
-//                TradeType.LIMIT -> when (TradeFragment.tradeSide) {
-//                    TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
-//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                    TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
-//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                }
-//                TradeType.STOP -> when (TradeFragment.tradeSide) {
-//                    TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
-//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                    TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
-//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                }
-//            }
-//        }
+    fun summary(resources: Resources) : String {
+            return when (type) {
+                TradeType.MARKET -> if (specifiedFunds != null) {
+                    resources.getString(R.string.order_summary_market_fixed_quote,
+                            side.toString().capitalize(), specifiedFunds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                } else {
+                    resources.getString(R.string.order_summary_market_fixed_base,
+                            side.toString().capitalize(), amount.format(tradingPair.baseCurrency))
+                }
+                TradeType.LIMIT -> when (side) {
+                    TradeSide.BUY -> resources.getString(R.string.order_summary_limit_buy,
+                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                    TradeSide.SELL -> resources.getString(R.string.order_summary_limit_sell,
+                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                }
+                TradeType.STOP -> when (side) {
+                    TradeSide.BUY -> resources.getString(R.string.order_summary_stop_buy,
+                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                    TradeSide.SELL -> resources.getString(R.string.order_summary_stop_sell,
+                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                }
+            }
+        }
 
     companion object {
 
