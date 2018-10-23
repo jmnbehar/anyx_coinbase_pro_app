@@ -113,7 +113,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             viewHolder.priceText?.text = order.price.fiatFormat(Account.defaultFiatCurrency)
 
 //            val tradeType = TradeType.forString(order.type)
-            val tradeTypeString = order.type.capitalize()
+            val tradeTypeString = order.type.toString().capitalize()
             viewHolder.priceText?.text = context.resources.getString(R.string.chart_order_price_label, tradeTypeString, order.price.format(quoteCurrency), currency)
 
             if (order.showExtraInfo) {

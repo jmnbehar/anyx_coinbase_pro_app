@@ -58,10 +58,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private var limitLabelText: TextView? = null
     private var limitUnitText: TextView? = null
 
-
-    private var totalLabelText: TextView? = null
-    private var totalText: TextView? = null
-
     private var advancedOptionsCheckBox: CheckBox? = null
     private var advancedOptionsLayout: LinearLayout? = null
     private lateinit var summaryText: TextView
@@ -98,6 +94,16 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private val relevantAccount: Account?
         get() {
             return product.accounts[tradingPair.exchange]
+        }
+
+    private val amountUnitCurrency: Currency?
+        get() {
+            return amountUnitSpinner?.selectedItem as? Currency
+        }
+
+    private val isAmountUnitQuoteCurrency: Boolean
+        get() {
+            return amountUnitCurrency == tradingPair.quoteCurrency
         }
 
     companion object {
@@ -146,9 +152,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         advancedOptionTimeInForceSpinner = rootView.spinner_trade_time_in_force
         advancedOptionEndTimeSpinner = rootView.spinner_trade_good_til_time
-
-        totalLabelText = rootView.txt_trade_total_label
-        totalText = rootView.txt_trade_total
 
         summaryText = rootView.txt_trade_summary
 
@@ -216,8 +219,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
-
         context?.let { context ->
 
             val relevantCurrencies = listOf(tradingPair.quoteCurrency, tradingPair.baseCurrency)
@@ -230,71 +231,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
-            submitOrderButton?.setOnClickListener {
-                val prefs = Prefs(context)
-
-                var amount = amountEditText?.text.toString().toDoubleOrZero()
-                val limit = limitEditText?.text.toString().toDoubleOrZero()
-
-                var timeInForce: CBProApi.TimeInForce? = null
-                var cancelAfter: String? = null
-
-                val cryptoTotal = totalInCrypto(amount, limit)
-                val dollarTotal = totalInDollars(amount, limit)
-                val feeEstimate = feeEstimate(dollarTotal, limit)
-                val devFee: Double
-
-                if (feeEstimate > 0.0) {
-                    //half fees for limit orders that are fuckin up? consider this later
-                    devFee = cryptoTotal * DEV_FEE_PERCENTAGE
-
-                    //TODO: test this more
-                    if (tradeSide == TradeSide.SELL) {
-                        amount -= devFee
-                        //don't sell the devFee because it will be deducted by sending fees
-                        //amount is always in crypto for sell orders
-                    }
-                    //should never need to change amount here, just buy it all and then deduct a bit
-                } else {
-                    devFee = 0.0
-                }
-
-                if (advancedOptionsCheckBox?.isChecked == true) {
-                    when (tradeType) {
-                        TradeType.LIMIT -> {
-                            val tifIndex = advancedOptionTimeInForceSpinner?.selectedItemPosition ?: 0
-                            timeInForce = CBProApi.TimeInForce.values()[tifIndex]
-                            if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
-                                cancelAfter = advancedOptionEndTimeSpinner?.selectedItem as String
-                            }
-                        }
-                        TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
-                        TradeType.MARKET -> { /* do nothing */ }
-                    }
-                }
-
-                if (amount <= 0) {
-                    toast(R.string.trade_invalid_amount)
-                } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
-                    toast(R.string.trade_invalid_limit)
-                } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
-                    toast(R.string.trade_invalid_stop)
-                } else {
-                    if (prefs.shouldShowTradeConfirmModal) {
-                        product.defaultTradingPair?.let { tradingPair ->
-                            AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
-                                if (price == null) {
-                                    onFailure(Result.Failure(FuelError(Exception())))
-                                } else {
-                                    confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
-                                }
-                            }
-                        }
-                    } else {
-                        submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
-                    }
-                }
-            }
+            submitOrderButton?.setOnClickListener { submitOrder() }
         }
 
         dismissProgressSpinner()
@@ -319,7 +256,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         ChartFragment.currency = newCurrency
 
         val tradingPairs = product.tradingPairs.sortTradingPairs()
-        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
+        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair.quoteCurrency }
         if (relevantTradingPair != null) {
 //            val index = tradingPairs.indexOf(relevantTradingPair)
 //            spinner_chart_trading_pair.setSelection(index)
@@ -416,6 +353,72 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         updateTotalText(null, null)
 
         switchTradeInfo(null, null, null)
+    }
+
+    private fun submitOrder() {
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error: ${result.errorMessage}") }
+
+        var amount = amountEditText?.text.toString().toDoubleOrZero()
+        val limit = limitEditText?.text.toString().toDoubleOrZero()
+
+        var timeInForce: CBProApi.TimeInForce? = null
+        var cancelAfter: String? = null
+
+        val totalBaseCurrency = totalBase(amount, limit)
+        val totalQuoteCurrency = totalQuote(amount, limit)
+        val feeEstimate = feeEstimate(totalQuoteCurrency, limit)
+        val devFee: Double
+
+        if (feeEstimate > 0.0) {
+            //half fees for limit orders that are fuckin up? consider this later
+            devFee = totalBaseCurrency * DEV_FEE_PERCENTAGE
+
+            //TODO: test this more
+            if (tradeSide == TradeSide.SELL) {
+                amount -= devFee
+                //don't sell the devFee because it will be deducted by sending fees
+                //amount is always in crypto for sell orders
+            }
+            //should never need to change amount here, just buy it all and then deduct a bit
+        } else {
+            devFee = 0.0
+        }
+
+        if (advancedOptionsCheckBox?.isChecked == true) {
+            when (tradeType) {
+                TradeType.LIMIT -> {
+                    val tifIndex = advancedOptionTimeInForceSpinner?.selectedItemPosition ?: 0
+                    timeInForce = CBProApi.TimeInForce.values()[tifIndex]
+                    if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
+                        cancelAfter = advancedOptionEndTimeSpinner?.selectedItem as String
+                    }
+                }
+                TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
+                TradeType.MARKET -> { /* do nothing */ }
+            }
+        }
+
+        if (amount <= 0) {
+            toast(R.string.trade_invalid_amount)
+        } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
+            toast(R.string.trade_invalid_limit)
+        } else if ((tradeType == TradeType.STOP) && (limit <= 0.0)) {
+            toast(R.string.trade_invalid_stop)
+        } else if (context != null){
+            if (Prefs(context!!).shouldShowTradeConfirmModal) {
+                product.defaultTradingPair?.let { tradingPair ->
+                    AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
+                        if (price == null) {
+                            onFailure(Result.Failure(FuelError(Exception())))
+                        } else {
+                            confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, totalBaseCurrency, totalQuoteCurrency, feeEstimate)
+                        }
+                    }
+                }
+            } else {
+                submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
+            }
+        }
     }
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
@@ -530,8 +533,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         } else {
             when(tradeType) {
                 TradeType.MARKET -> {
-                    AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, amount,
-                            { onFailure(it) }, { onComplete(it) })
+                    if (isAmountUnitQuoteCurrency) {
+                        AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, null, amount,
+                                { onFailure(it) }, { onComplete(it) })
+                    } else {
+                        AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, amount, null,
+                                { onFailure(it) }, { onComplete(it) })
+                    }
                 }
                 TradeType.LIMIT -> {
                     AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, timeInForce.toString(), cancelAfter, null,
@@ -566,23 +574,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         val limitPrice = limitPriceIn ?: limitEditText?.text.toString().toDoubleOrZero()
         val sideString = tradeSide.toString().capitalize()
 
-        val fiatCurrency = Account.defaultFiatCurrency
-        totalText?.text = when (tradeSide) {
-            TradeSide.BUY -> when (tradeType) {
-                TradeType.MARKET -> totalInCrypto(amount, limitPrice).btcFormat()
-                TradeType.LIMIT -> totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
-                TradeType.STOP ->  totalInCrypto(amount, limitPrice).btcFormat()
-            }
-            TradeSide.SELL -> when (tradeType) {
-                TradeType.MARKET ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
-                TradeType.LIMIT ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
-                TradeType.STOP ->  totalInDollars(amount, limitPrice).fiatFormat(fiatCurrency)
-            }
-        }
         summaryText.text = when (tradeType) {
             TradeType.MARKET -> {
-                val amountCurrency = amountUnitSpinner?.selectedItem as? Currency
-                when (amountCurrency) {
+                when (amountUnitCurrency) {
                     tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
                             sideString, amount.format(tradingPair.baseCurrency))
                     tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
@@ -605,7 +599,30 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun totalInDollars(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
+    private fun totalBase(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
+        return when (tradeSide) {
+            TradeSide.BUY -> when (tradeType) {
+                TradeType.MARKET -> if (isAmountUnitQuoteCurrency) { //fixed quote
+                    amount / (product.priceForQuoteCurrency(tradingPair.quoteCurrency))
+                } else { //fixed base
+                    amount
+                }
+                TradeType.LIMIT -> amount
+                TradeType.STOP -> if (limitPrice > 0.0) {
+                    amount / limitPrice
+                } else {
+                    0.00
+                }
+            }
+            TradeSide.SELL -> if (tradeType == TradeType.MARKET && isAmountUnitQuoteCurrency) { //fi
+                amount / (product.priceForQuoteCurrency(tradingPair.quoteCurrency))
+            } else {
+                amount
+            }
+        }
+    }
+
+    private fun totalQuote(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
         return when (tradeSide) {
             TradeSide.BUY -> when (tradeType) {
                 TradeType.MARKET -> amount
@@ -617,21 +634,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 TradeType.LIMIT -> amount * limitPrice
                 TradeType.STOP -> amount * limitPrice
             }
-        }
-    }
-
-    private fun totalInCrypto(amount: Double = amountEditText?.text.toString().toDoubleOrZero(), limitPrice: Double = limitEditText?.text.toString().toDoubleOrZero()) : Double {
-        return when (tradeSide) {
-            TradeSide.BUY -> when (tradeType) {
-                TradeType.MARKET -> amount / (product.defaultPrice)
-                TradeType.LIMIT -> amount
-                TradeType.STOP -> if (limitPrice > 0.0) {
-                    amount / limitPrice
-                } else {
-                    0.00
-                }
-            }
-            TradeSide.SELL -> amount
         }
     }
 
@@ -771,11 +773,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     when (tradeType) {
                         TradeType.MARKET, TradeType.STOP -> {
                             amountUnitText?.text = quoteCurrency.toString()
-                            totalLabelText?.text = resources.getString(R.string.trade_total_label, currency)
                         }
                         TradeType.LIMIT -> {
                             amountUnitText?.text = currency.toString()
-                            totalLabelText?.text = resources.getString(R.string.trade_total_label, quoteCurrency)
                         }
                     }
                 }
@@ -783,7 +783,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     submitOrderButton?.text = resources.getString(R.string.trade_sell_order_btn)
                     tradeSideSellRadioButton?.isChecked = true
                     amountUnitText?.text = currency.toString()
-                    totalLabelText?.text = resources.getString(R.string.trade_total_label, quoteCurrency)
                 }
             }
         }

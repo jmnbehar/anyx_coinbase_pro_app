@@ -5,7 +5,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.fragments.main.ChartFragment
 
 class AnyApi {
     companion object {
@@ -110,14 +109,11 @@ class AnyApi {
                 }
             }
         }
-        fun orderMarket(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, amount: Double?,
+        fun orderMarket(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, amount: Double?, funds: Double?,
                         onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
-                    when (tradeSide) {
-                        TradeSide.BUY ->  CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = null, funds = amount).executePost({ onFailure(it) }, { onSuccess(it) })
-                        TradeSide.SELL -> CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = amount, funds = null).executePost({ onFailure(it) }, { onSuccess(it) })
-                    }
+                    CBProApi.orderMarket(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), size = amount, funds = funds).executePost({ onFailure(it) }, { onSuccess(it) })
                 }
                 Exchange.Binance -> {
                     BinanceApi.orderMarket(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, amount!!, amount).executePost({ onFailure(it) }, { onSuccess(it) })

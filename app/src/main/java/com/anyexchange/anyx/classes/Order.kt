@@ -1,12 +1,15 @@
 package com.anyexchange.anyx.classes
 
+import android.content.Context
+import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.api.*
+import com.anyexchange.anyx.fragments.main.TradeFragment
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 
 class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair, val price: Double, val amount: Double, val filledAmount: Double,
-            val type: String, val side: TradeSide, val time: Date, val timeInForce: String) {
+            val type: TradeType, val side: TradeSide, val time: Date, val timeInForce: String) {
     var status: String? = null
 
     //Binance extras:
@@ -34,7 +37,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     constructor(binanceOrder: BinanceOrder) :
             this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(Exchange.Binance, binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
-                    binanceOrder.type, TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce) {
+                    TradeType.forString(binanceOrder.type), TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce) {
         cumulativeQuoteQty = binanceOrder.cummulativeQuoteQty
         status = binanceOrder.status
         stopPrice = binanceOrder.stopPrice
@@ -44,7 +47,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     }
     constructor(cbProOrder: CBProOrder) :
             this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price.toDouble(), cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDouble(),
-                    cbProOrder.type, TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force) {
+                    TradeType.forString(cbProOrder.type), TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force) {
         status = cbProOrder.status
 
         stp = cbProOrder.stp
@@ -60,6 +63,32 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         settled = cbProOrder.settled
     }
 
+//    fun summary(context: Context) : String {
+//            return when (type) {
+//                TradeType.MARKET -> {
+//                    val amountCurrency = amountUnitSpinner?.selectedItem as? Currency
+//                    when (amountCurrency) {
+//                        tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
+//                                sideString, amount.format(tradingPair.baseCurrency))
+//                        tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
+//                                sideString, amount.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                        else -> ""
+//                    }
+//                }
+//                TradeType.LIMIT -> when (TradeFragment.tradeSide) {
+//                    TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
+//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                    TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
+//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                }
+//                TradeType.STOP -> when (TradeFragment.tradeSide) {
+//                    TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
+//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                    TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
+//                            amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                }
+//            }
+//        }
 
     companion object {
 
