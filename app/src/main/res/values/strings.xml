@@ -246,6 +246,7 @@
     <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
 
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
+    <string name="settings_refresh_accounts">Refresh All Data</string>
 
     <string name="settings_quick_change_threshold_info">Minimum change in 1 hour to trigger price spike or drop notifications</string>
 
@@ -317,8 +318,7 @@
 
 
     //Transfer Fragments
-    <string name="transfer_in_title">Transfer into Coinbase Pro</string>
-    <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
+    <string name="transfer_title">Transfer</string>
     <string name="transfer_pro_wallet_balance">Coinbase Pro Wallet Balance</string>
     <string name="transfer_cb_wallet_balance">Coinbase Wallet Balance</string>
     <string name="transfer_destination">Destination</string>

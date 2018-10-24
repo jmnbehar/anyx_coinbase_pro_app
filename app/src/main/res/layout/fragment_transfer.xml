@@ -21,9 +21,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="20dp"
-            android:paddingRight="20dp"
             android:paddingTop="10dp"
-            android:text="@string/transfer_in_title"
+            android:paddingRight="20dp"
+            android:text="@string/transfer_title"
             android:textSize="30sp"
             tools:layout_editor_absoluteX="48dp"
             tools:layout_editor_absoluteY="16dp" />
@@ -58,6 +58,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="43dp"
                     android:layout_marginLeft="-10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginRight="-10dp"
                     android:visibility="gone" />
 
@@ -94,15 +95,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="43dp"
                     android:layout_marginLeft="-10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginRight="-10dp"
+                    android:layout_marginBottom="2dp"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/txt_transfer_destination_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
                     android:layout_marginBottom="20dp"
-                    android:layout_marginTop="10dp"
                     android:text="@string/transfer_pro_wallet_balance"
                     android:textSize="17sp" />
 
@@ -155,6 +158,7 @@
                     android:id="@+id/txt_transfer_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minLines="2"
                     android:text="@string/transfer_coinbase_info"
                     android:textSize="18sp" />
 
