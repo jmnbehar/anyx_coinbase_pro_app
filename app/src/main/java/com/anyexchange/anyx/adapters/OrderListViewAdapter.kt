@@ -127,7 +127,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
                 viewHolder.timeInForceText?.text = when (order.exchange) {
                     Exchange.CBPro -> {
-                        val timeInForce = CBProApi.TimeInForce.forString(order.timeInForce)
+                        val timeInForce = TimeInForce.forString(order.timeInForce)
                         timeInForce?.userFriendlyString(order.expireTime) ?: ""
                     }
                     Exchange.Binance -> ""

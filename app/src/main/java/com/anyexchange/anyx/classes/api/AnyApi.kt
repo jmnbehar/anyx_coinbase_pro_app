@@ -95,16 +95,15 @@ class AnyApi {
             }
         }
 
-        fun orderLimit(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, limitPrice: Double, amount: Double, timeInForceStr: String?,
-                       cancelAfter: String?, icebergQty: Double?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
+        fun orderLimit(apiInitData: ApiInitData?, exchange: Exchange, tradeSide: TradeSide, tradingPair: TradingPair, limitPrice: Double, amount: Double, timeInForce: TimeInForce?,
+                       cancelAfter: TimeInForce.CancelAfter?, icebergQty: Double?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
             when (exchange) {
                 Exchange.CBPro -> {
-                    val timeInForce = CBProApi.TimeInForce.forString(timeInForceStr)
-                    CBProApi.orderLimit(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter).executePost({ onFailure(it) }, { onSuccess(it) })
+                    CBProApi.orderLimit(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter.toString()).executePost({ onFailure(it) }, { onSuccess(it) })
                 }
                 Exchange.Binance -> {
-                    val timeInForce = BinanceApi.TimeInForce.forString(timeInForceStr)
-                    BinanceApi.orderLimit(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, timeInForce, amount, limitPrice, icebergQty).executePost({ onFailure(it) }, { onSuccess(it) })
+                    val binanceTimeInForce = BinanceApi.TimeInForce.forString(timeInForce.toString())
+                    BinanceApi.orderLimit(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, binanceTimeInForce, amount, limitPrice, icebergQty).executePost({ onFailure(it) }, { onSuccess(it) })
 
                 }
             }

@@ -22,7 +22,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     //CbPro extras:
     private var stp: String? = null //self trade prevention
-    var funds: String? = null
+    var funds: Double? = null
     var specifiedFunds: Double? = null
     private var postOnly: Boolean? = null
     private var doneAt: Date? = null
@@ -46,13 +46,14 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         updateTime = binanceOrder.updateTime
         isWorking = binanceOrder.isWorking
     }
+
     constructor(cbProOrder: CBProOrder) :
             this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price.toDouble(), cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDouble(),
                     TradeType.forString(cbProOrder.type), TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force) {
         status = cbProOrder.status
 
         stp = cbProOrder.stp
-        funds = cbProOrder.funds
+        funds = cbProOrder.funds?.toDoubleOrNull()
         specifiedFunds = cbProOrder.specified_funds?.toDoubleOrNull()
         postOnly = cbProOrder.post_only
         doneAt = cbProOrder.done_at?.dateFromCBProApiDateString()

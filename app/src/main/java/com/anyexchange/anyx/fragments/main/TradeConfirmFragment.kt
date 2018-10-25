@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.dialog_trade_confirm.view.*
 
@@ -28,11 +29,15 @@ class TradeConfirmFragment: DialogFragment() {
     var amount: Double? = null
     var limit: Double? = null
     var devFee: Double? = null
-    var timeInForce: CBProApi.TimeInForce? = null
+    var timeInForce: TimeInForce? = null
     var cancelAfter: String? = null
     var cryptoTotal: Double? = null
     var dollarTotal: Double? = null
     var feeEstimate: Double? = null
+
+    var tradingPair: TradingPair? = null
+    var tradeType: TradeType? = null
+    var tradeSide: TradeSide? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.dialog_trade_confirm, container, false)
@@ -50,7 +55,7 @@ class TradeConfirmFragment: DialogFragment() {
         return inflater.inflate(R.layout.dialog_trade_confirm, container, false)
     }
 
-    fun setInfo(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
+    fun setInfo(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: TimeInForce?, cancelAfter: String?,
                 cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         this.updatedTicker = updatedTicker
         this.amount = amount
@@ -73,5 +78,31 @@ class TradeConfirmFragment: DialogFragment() {
         this.cryptoTotal = cryptoTotal
         this.dollarTotal = dollarTotal
         this.feeEstimate = feeEstimate
+
+
+
+//        orderSummaryText?.text = when (tradeType) {
+//            TradeType.MARKET -> {
+//                when (amountUnitCurrency) {
+//                    tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
+//                            sideString, amount.format(tradingPair.baseCurrency))
+//                    tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
+//                            sideString, amount.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                    else -> ""
+//                }
+//            }
+//            TradeType.LIMIT -> when (TradeFragment.tradeSide) {
+//                TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
+//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
+//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//            }
+//            TradeType.STOP -> when (TradeFragment.tradeSide) {
+//                TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
+//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//                TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
+//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+//            }
+//        }
     }
 }

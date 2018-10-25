@@ -59,7 +59,7 @@ class VerifySendFragment : Fragment() {
             val productId = Product.map[currency.id]?.defaultTradingPair?.idForExchange(Exchange.CBPro)
             if (productId != null) {
                 CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
-                        timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
+                        timeInForce = TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     when (errorMessage) {
                         CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()

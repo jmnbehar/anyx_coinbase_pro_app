@@ -20,9 +20,8 @@ import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
-import com.anyexchange.anyx.adapters.spinnerAdapters.AdvancedOptionsSpinnerAdapter
-import com.anyexchange.anyx.adapters.spinnerAdapters.CurrencySpinnerAdapter
-import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
+import com.anyexchange.anyx.adapters.spinnerAdapters.*
+import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
 
@@ -294,16 +293,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 onComplete(false)
             }
         }
-        product.defaultTradingPair?.let { tradingPair ->
-            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
-                updateButtonsAndText()
-                onComplete(true)
-            }
+        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+            updateButtonsAndText()
+            onComplete(true)
         }
     }
 
     private fun updateButtonsAndText() {
-
         context?.let { context ->
                 tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.FullName)
                 tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -328,8 +324,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 val quoteCurrency = tradingPair.quoteCurrency
                 val quoteBalance: String? = when {
-                    quoteCurrency.isFiat -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.fiatFormat(quoteCurrency)
-                    else -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.btcFormat() + " " + quoteCurrency.id
+                    quoteCurrency.isFiat -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.format(quoteCurrency)
+                    else -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.format(currency) + " " + quoteCurrency.id
                 }
 
                 quoteBalanceText?.visibility = View.GONE
@@ -340,13 +336,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 cryptoBalanceLabelText?.text = resources.getString(R.string.trade_balance_label, account.currency)
 
-                cryptoBalanceText?.text = account.availableBalance.btcFormat()
+                cryptoBalanceText?.text = account.availableBalance.format(currency)
 
                 currentPriceLabelText?.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
 
                 currentPriceText?.text = when {
-                    quoteCurrency.isFiat -> product.priceForQuoteCurrency(quoteCurrency).fiatFormat(quoteCurrency)
-                    else -> product.priceForQuoteCurrency(quoteCurrency).btcFormat() + " " + quoteCurrency.id
+                    quoteCurrency.isFiat -> product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+                    else -> product.priceForQuoteCurrency(quoteCurrency).format(currency) + " " + quoteCurrency.id
                 }
             }
         }
@@ -361,16 +357,17 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         var amount = amountEditText?.text.toString().toDoubleOrZero()
         val limit = limitEditText?.text.toString().toDoubleOrZero()
 
-        var timeInForce: CBProApi.TimeInForce? = null
-        var cancelAfter: String? = null
+        var timeInForce: TimeInForce? = null
+        var cancelAfter: TimeInForce.CancelAfter? = null
 
         val totalBaseCurrency = totalBase(amount, limit)
         val totalQuoteCurrency = totalQuote(amount, limit)
+
+        //TODO: feed in the appropriate total based on other factors
         val feeEstimate = feeEstimate(totalQuoteCurrency, limit)
         val devFee: Double
 
         if (feeEstimate > 0.0) {
-            //half fees for limit orders that are fuckin up? consider this later
             devFee = totalBaseCurrency * DEV_FEE_PERCENTAGE
 
             //TODO: test this more
@@ -388,9 +385,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             when (tradeType) {
                 TradeType.LIMIT -> {
                     val tifIndex = advancedOptionTimeInForceSpinner?.selectedItemPosition ?: 0
-                    timeInForce = CBProApi.TimeInForce.values()[tifIndex]
-                    if (timeInForce == CBProApi.TimeInForce.GoodTilTime) {
-                        cancelAfter = advancedOptionEndTimeSpinner?.selectedItem as String
+                    timeInForce = TimeInForce.values()[tifIndex]
+                    if (timeInForce == TimeInForce.GoodTilTime) {
+                        cancelAfter = advancedOptionEndTimeSpinner?.selectedItem as TimeInForce.CancelAfter
                     }
                 }
                 TradeType.STOP -> { /* consider adding stop limit if that becomes possible */ }
@@ -398,6 +395,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
+        val newOrder = NewOrder(tradingPair, limit, amount, 0.0, tradeType, tradeSide, timeInForce, cancelAfter, null)
         if (amount <= 0) {
             toast(R.string.trade_invalid_amount)
         } else if ((tradeType == TradeType.LIMIT) &&  (limit <= 0.0)) {
@@ -406,13 +404,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             toast(R.string.trade_invalid_stop)
         } else if (context != null){
             if (Prefs(context!!).shouldShowTradeConfirmModal) {
-                product.defaultTradingPair?.let { tradingPair ->
-                    AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
-                        if (price == null) {
-                            onFailure(Result.Failure(FuelError(Exception())))
-                        } else {
-                            showDialog(price, amount, limit, devFee, timeInForce, cancelAfter, totalBaseCurrency, totalQuoteCurrency, feeEstimate)
-                        }
+                AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
+                    if (price == null) {
+                        onFailure(Result.Failure(FuelError(Exception())))
+                    } else {
+                        confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, totalBaseCurrency, totalQuoteCurrency, feeEstimate)
                     }
                 }
             } else {
@@ -421,37 +417,38 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun showDialog(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
+    private fun showDialog(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: TimeInForce?, cancelAfter: String?,
                            cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
         val confirmDialogFragment = TradeConfirmFragment()
         confirmDialogFragment.setInfo(updatedTicker, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
-        confirmDialogFragment.show(fragmentManager, "cofnirmDialog")
+        confirmDialogFragment.show(fragmentManager, "confirmDialog")
     }
 
-    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
+    private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: TimeInForce?, cancelAfter: TimeInForce.CancelAfter?,
                              cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
-        val fiatCurrency = Account.defaultFiatCurrency
+
         val currencyString = relevantAccount?.currency?.toString() ?: ""
         val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
             "less than $0.01"
         } else {
-            feeEstimate.fiatFormat(fiatCurrency)
+            feeEstimate.format(tradingPair.quoteCurrency)
         }
         val pricePlusFeeTotal = when (tradeSide) {
             TradeSide.BUY ->  dollarTotal + feeEstimate
             TradeSide.SELL -> dollarTotal - feeEstimate
         }
+        val quoteCurrency = tradingPair.quoteCurrency
         alert {
             title = resources.getString(R.string.trade_confirm_popup_title)
             customView {
                 linearLayout {
                     verticalLayout {
                         if (tradeType == TradeType.MARKET) {
-                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.fiatFormat(fiatCurrency)}").lparams(width = matchParent) {}
+                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.format(quoteCurrency)}").lparams(width = matchParent) {}
                         }
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), cryptoTotal.btcFormat()).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), cryptoTotal.format(currency)).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, fiatCurrency), pricePlusFeeTotal.fiatFormat(fiatCurrency)).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, quoteCurrency), pricePlusFeeTotal.format(quoteCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
                 }
             }
@@ -495,7 +492,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: CBProApi.TimeInForce? = null, cancelAfter: String?) {
+    private fun submitOrder(amount: Double, limitPrice: Double, devFee: Double, timeInForce: TimeInForce? = null, cancelAfter: TimeInForce.CancelAfter?) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
             when (errorMessage) {
@@ -531,34 +528,28 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 }
             }
         }
-
-        val account = relevantAccount
-        val tradingPair = product.defaultTradingPair
-        val exchange = account?.exchange
-        if (tradingPair == null || exchange == null) {
-            toast(R.string.error_message)
-        } else {
-            when(tradeType) {
-                TradeType.MARKET -> {
-                    if (isAmountUnitQuoteCurrency) {
-                        AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, null, amount,
-                                { onFailure(it) }, { onComplete(it) })
-                    } else {
-                        AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, amount, null,
-                                { onFailure(it) }, { onComplete(it) })
-                    }
-                }
-                TradeType.LIMIT -> {
-                    AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, timeInForce.toString(), cancelAfter, null,
+        val exchange = tradingPair.exchange
+        when(tradeType) {
+            TradeType.MARKET -> {
+                if (isAmountUnitQuoteCurrency) {
+                    AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, null, amount,
                             { onFailure(it) }, { onComplete(it) })
-                    }
-                TradeType.STOP -> {
-                    AnyApi.orderStop(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, null,
+                } else {
+                    AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, amount, null,
                             { onFailure(it) }, { onComplete(it) })
                 }
             }
-            AnyApi.getAndStashOrderList(apiInitData, exchange, null, { }, { })
+            TradeType.LIMIT -> {
+                AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, timeInForce, cancelAfter, null,
+                        { onFailure(it) }, { onComplete(it) })
+                }
+            TradeType.STOP -> {
+                AnyApi.orderStop(apiInitData, exchange, tradeSide, tradingPair, limitPrice, amount, null,
+                        { onFailure(it) }, { onComplete(it) })
+            }
         }
+        AnyApi.getAndStashOrderList(apiInitData, exchange, null, { }, { })
+
     }
 
     private fun payFee(amount: Double) {
@@ -637,7 +628,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 TradeType.STOP -> amount
             }
             TradeSide.SELL -> when (tradeType) {
-                TradeType.MARKET -> amount * (product.defaultPrice)
+                TradeType.MARKET -> amount * (product.priceForQuoteCurrency(tradingPair.quoteCurrency))
                 TradeType.LIMIT -> amount * limitPrice
                 TradeType.STOP -> amount * limitPrice
             }
@@ -645,7 +636,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun feeEstimate(amount: Double, limit: Double) : Double {
-        val price = product.defaultPrice
+        val price = product.priceForQuoteCurrency(tradingPair.quoteCurrency)
         when (tradeSide) {
             TradeSide.BUY -> {
                 when (tradeType) {
@@ -735,14 +726,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 advancedOptionsCheckBox?.visibility = View.VISIBLE
 
-                val timeInForceList = CBProApi.TimeInForce.values()
-                val spinnerList = timeInForceList.map { t -> t.label() }
+                val timeInForceList = TimeInForce.values().toList()
                 context?.let {
-                    advancedOptionTimeInForceSpinner?.adapter = AdvancedOptionsSpinnerAdapter(it, spinnerList)
+                    advancedOptionTimeInForceSpinner?.adapter = TimeInForceSpinnerAdapter(it, timeInForceList)
                     advancedOptionTimeInForceSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                             val selectedItem = timeInForceList[position]
-                            if (selectedItem == CBProApi.TimeInForce.GoodTilTime) {
+                            if (selectedItem == TimeInForce.GoodTilTime) {
                                 advancedOptionEndTimeSpinner?.visibility = View.VISIBLE
                             } else {
                                 advancedOptionEndTimeSpinner?.visibility = View.INVISIBLE
@@ -755,8 +745,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                     }
 
                     //TODO: make this an enum
-                    val endTimeList = listOf("min", "hour", "day")
-                    advancedOptionEndTimeSpinner?.adapter = AdvancedOptionsSpinnerAdapter(it, endTimeList)
+                    val endTimeList = TimeInForce.CancelAfter.values().toList()
+                    advancedOptionEndTimeSpinner?.adapter = TifCancelAfterSpinnerAdapter(it, endTimeList)
                 }
             }
             TradeType.STOP -> {
