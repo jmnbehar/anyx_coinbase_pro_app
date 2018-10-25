@@ -277,11 +277,9 @@ class TransferFragment : RefreshFragment() {
                 sourceAccountsSpinner?.visibility = View.GONE
             }
             else -> {
-//                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList = sourceAccounts
-//                (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.notifyDataSetChanged()
-
-                sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(context!!, sourceAccounts)
-
+                context?.let {
+                    sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
+                }
 
                 sourceAccountsSpinner?.visibility = View.VISIBLE
                 sourceAccountText?.visibility = View.GONE

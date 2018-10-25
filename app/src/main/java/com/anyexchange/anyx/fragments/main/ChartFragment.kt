@@ -809,16 +809,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             Order.getAndStashList(apiInitData, currency, onFailure) { orderList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredOrders = orderList
-                    if (filteredFills != null) {
-                        updateHistoryLists(context, orderList, filteredFills!!)
+                    filteredFills?.let {
+                        updateHistoryLists(context, orderList, it)
                     }
                 }
             }
             Fill.getAndStashList(apiInitData, currency, onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
                     filteredFills = fillList
-                    if (filteredOrders != null) {
-                        updateHistoryLists(context, filteredOrders!!, fillList)
+                    filteredOrders?.let {
+                        updateHistoryLists(context, it, fillList)
                     }
                 }
             }

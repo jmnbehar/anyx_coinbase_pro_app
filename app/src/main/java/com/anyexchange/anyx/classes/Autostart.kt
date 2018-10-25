@@ -34,7 +34,7 @@ class AutoStart : BroadcastReceiver() {
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
-            jobScheduler!!.schedule(builder.build())
+            jobScheduler?.schedule(builder.build())
         }
 
     }

@@ -66,10 +66,10 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     fun summary(resources: Resources) : String {
             return when (type) {
-                TradeType.MARKET -> if (specifiedFunds != null) {
+                TradeType.MARKET -> specifiedFunds?.let {
                     resources.getString(R.string.order_summary_market_fixed_quote,
-                            side.toString().capitalize(), specifiedFunds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                } else {
+                            side.toString().capitalize(), it.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                } ?: run {
                     resources.getString(R.string.order_summary_market_fixed_base,
                             side.toString().capitalize(), amount.format(tradingPair.baseCurrency))
                 }

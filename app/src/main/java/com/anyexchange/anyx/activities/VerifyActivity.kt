@@ -153,7 +153,9 @@ class VerifyActivity : AppCompatActivity() {
                 `object`.updateViews()
             }
             if (`object` is VerifyCompleteFragment && verifyStatus != null) {
-                `object`.updateText(verifyStatus!!)
+                verifyStatus?.let {
+                    `object`.updateText(it)
+                }
             }
             return super.getItemPosition(`object`)
         }

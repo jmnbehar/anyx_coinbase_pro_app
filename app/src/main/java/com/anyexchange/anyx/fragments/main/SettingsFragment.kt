@@ -180,25 +180,26 @@ class SettingsFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
         dismissProgressSpinner()
-        val prefs = Prefs(activity!!)
-        val apiKey = CBProApi.credentials?.apiKey
-
-        when {
-            apiKey == null -> verifyButton?.visibility = View.GONE
-            prefs.isApiKeyValid(apiKey) == true -> {
-                verifyButton?.visibility = View.GONE
-                txt_setting_verify_account.visibility = View.GONE
+        context?.let {
+            val prefs = Prefs(it)
+            val apiKey = CBProApi.credentials?.apiKey
+            when {
+                apiKey == null -> verifyButton?.visibility = View.GONE
+                prefs.isApiKeyValid(apiKey) == true -> {
+                    verifyButton?.visibility = View.GONE
+                    txt_setting_verify_account.visibility = View.GONE
+                }
+                else -> {
+                    verifyButton?.visibility = View.VISIBLE
+                    txt_setting_verify_account.visibility = View.VISIBLE
+                }
             }
-            else -> {
-                verifyButton?.visibility = View.VISIBLE
-                txt_setting_verify_account.visibility = View.VISIBLE
-            }
-        }
 
-        if (prefs.isLoggedIn) {
-            logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
-        } else {
-            logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
+            if (prefs.isLoggedIn) {
+                logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
+            } else {
+                logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
+            }
         }
     }
 }
