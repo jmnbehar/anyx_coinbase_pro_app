@@ -96,7 +96,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
         fun totalValue() : Double {
             val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
-            val fiatAccountsValue = Account.fiatAccounts.map { a -> a.defaultValue }.sum()
+            val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
             return cryptoAccountsValue + fiatAccountsValue
         }
 

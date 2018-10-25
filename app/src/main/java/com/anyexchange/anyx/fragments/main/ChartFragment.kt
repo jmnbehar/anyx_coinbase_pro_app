@@ -357,7 +357,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val shouldShowOptions = lifecycle.isCreatedOrResumed
         menu.findItem(R.id.chart_style_line).isVisible = shouldShowOptions
         menu.findItem(R.id.chart_style_candle).isVisible = shouldShowOptions
-        activity!!.invalidateOptionsMenu()
+        activity?.invalidateOptionsMenu()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

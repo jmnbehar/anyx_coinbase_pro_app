@@ -24,8 +24,8 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
         mScannerView = ZXingScannerView(this)   // Programmatically initialize the scanner view
         setContentView(mScannerView)
 
-        mScannerView!!.setResultHandler(this) // Register ourselves as a handler for scan results.
-        mScannerView!!.startCamera()         // Start camera
+        mScannerView?.setResultHandler(this) // Register ourselves as a handler for scan results.
+        mScannerView?.startCamera()         // Start camera
 
 
     }
@@ -35,7 +35,7 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
         super.onPause()
 
         try {
-            mScannerView!!.stopCamera() // Stop camera on pause
+            mScannerView?.stopCamera() // Stop camera on pause
         } catch (e: Exception) {
             Log.e("Error", e.message)
         }
@@ -49,7 +49,7 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
     override fun onBackPressed() {
 
         try {
-            mScannerView!!.stopCamera() // Stop camera on pause
+            mScannerView?.stopCamera() // Stop camera on pause
         } catch (e: Exception) {
             Log.e("Error", e.message)
         }
@@ -63,16 +63,15 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
 
     override fun handleResult(rawResult: Result) {
         // Do something with the result here
-
         Log.e("handler", rawResult.text) // Prints scan results
         Log.e("handler", rawResult.barcodeFormat.toString()) // Prints the scan format (qrcode)
 
         try {
-            mScannerView!!.stopCamera()
+            mScannerView?.stopCamera()
 
-            val resultintent = Intent()
-            resultintent.putExtra("BarCode", rawResult.text)
-            setResult(2, resultintent)
+            val resultIntent = Intent()
+            resultIntent.putExtra("BarCode", rawResult.text)
+            setResult(2, resultIntent)
             finish()
             // Stop camera on pause
         } catch (e: Exception) {
