@@ -411,7 +411,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         if (price == null) {
                             onFailure(Result.Failure(FuelError(Exception())))
                         } else {
-                            confirmPopup(price, amount, limit, devFee, timeInForce, cancelAfter, totalBaseCurrency, totalQuoteCurrency, feeEstimate)
+                            showDialog(price, amount, limit, devFee, timeInForce, cancelAfter, totalBaseCurrency, totalQuoteCurrency, feeEstimate)
                         }
                     }
                 }
@@ -419,6 +419,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 submitOrder(amount, limit, devFee, timeInForce, cancelAfter)
             }
         }
+    }
+
+    private fun showDialog(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,
+                           cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
+        val confirmDialogFragment = TradeConfirmFragment()
+        confirmDialogFragment.setInfo(updatedTicker, amount, limit, devFee, timeInForce, cancelAfter, cryptoTotal, dollarTotal, feeEstimate)
+        confirmDialogFragment.show(fragmentManager, "cofnirmDialog")
     }
 
     private fun confirmPopup(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: CBProApi.TimeInForce?, cancelAfter: String?,

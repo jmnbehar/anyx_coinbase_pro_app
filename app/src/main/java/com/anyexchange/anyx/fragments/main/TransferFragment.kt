@@ -154,7 +154,7 @@ class TransferFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
 
-        val relevantCurrencies = Account.fiatAccounts.map { it.currency }.toMutableList()
+        val relevantCurrencies = Account.fiatAccounts.asSequence().map { it.currency }.toMutableList()
         val cryptoList = Product.map.keys.map { Currency(it) }
         relevantCurrencies.addAll(cryptoList)
         showNavSpinner(currency, relevantCurrencies) { selectedCurrency ->

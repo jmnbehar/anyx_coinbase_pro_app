@@ -160,7 +160,8 @@
                     android:layout_height="wrap_content"
                     android:minLines="2"
                     android:text="@string/transfer_coinbase_info"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btn_transfer_submit_transfer"

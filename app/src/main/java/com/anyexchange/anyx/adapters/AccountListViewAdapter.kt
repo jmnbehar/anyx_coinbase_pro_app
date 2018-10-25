@@ -107,7 +107,7 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                 viewHolder.iconView?.visibility = View.VISIBLE
                 viewHolder.iconView?.setImageResource(it)
             } ?: run {
-                viewHolder.iconView?.visibility = View.GONE
+                viewHolder.iconView?.visibility = View.INVISIBLE
             }
         }
 
