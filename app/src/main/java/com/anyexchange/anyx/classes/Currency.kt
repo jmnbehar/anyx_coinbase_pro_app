@@ -107,9 +107,10 @@ class Currency(val id: String) {
 
     val developerAddress = knownCurrency?.developerAddress
 
-    //TODO: improve
-    val orderValue = knownCurrency?.orderValue ?: 999
-
+    val orderValue: Int
+        get() {
+            return knownCurrency?.orderValue ?: -999
+        }
 
 
     companion object {
