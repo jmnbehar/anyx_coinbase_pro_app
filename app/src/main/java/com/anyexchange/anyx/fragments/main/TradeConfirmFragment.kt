@@ -30,9 +30,9 @@ class TradeConfirmFragment: DialogFragment() {
     var limit: Double? = null
     var devFee: Double? = null
     var timeInForce: TimeInForce? = null
-    var cancelAfter: String? = null
-    var cryptoTotal: Double? = null
-    var dollarTotal: Double? = null
+    var cancelAfter: TimeInForce.CancelAfter? = null
+    var baseTotal: Double? = null
+    var quoteTotal: Double? = null
     var feeEstimate: Double? = null
 
     var tradingPair: TradingPair? = null
@@ -55,30 +55,20 @@ class TradeConfirmFragment: DialogFragment() {
         return inflater.inflate(R.layout.dialog_trade_confirm, container, false)
     }
 
-    fun setInfo(updatedTicker: Double, amount: Double, limit: Double, devFee: Double, timeInForce: TimeInForce?, cancelAfter: String?,
-                cryptoTotal: Double, dollarTotal: Double, feeEstimate: Double) {
+    fun setInfo(updatedTicker: Double, newOrder: NewOrder) {
         this.updatedTicker = updatedTicker
-        this.amount = amount
-        this.limit = limit
-        this.devFee = devFee
-        this.timeInForce = timeInForce
-        this.cancelAfter = cancelAfter
-        this.cryptoTotal = cryptoTotal
-        this.dollarTotal = dollarTotal
-        this.feeEstimate = feeEstimate
+        this.amount = newOrder.amount
+        this.limit = newOrder.priceLimit
+        this.devFee = newOrder.devFee(updatedTicker)
+        this.feeEstimate = newOrder.exchangeFee(updatedTicker)
+
+        this.timeInForce = newOrder.timeInForce
+        this.cancelAfter = newOrder.cancelAfter
+        this.baseTotal = newOrder.baseTotal
+        this.quoteTotal = newOrder.quoteTotal
     }
 
     fun setText() {
-        this.updatedTicker = updatedTicker
-        this.amount = amount
-        this.limit = limit
-        this.devFee = devFee
-        this.timeInForce = timeInForce
-        this.cancelAfter = cancelAfter
-        this.cryptoTotal = cryptoTotal
-        this.dollarTotal = dollarTotal
-        this.feeEstimate = feeEstimate
-
 
 
 //        orderSummaryText?.text = when (tradeType) {
