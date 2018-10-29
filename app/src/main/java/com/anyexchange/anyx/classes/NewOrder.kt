@@ -1,6 +1,10 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.ApiInitData
 import com.anyexchange.anyx.fragments.main.TradeFragment
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 
 class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount: Double?,
                val funds: Double?, val type: TradeType, val side: TradeSide,
@@ -21,49 +25,36 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         return true
     }
 
-    fun devFee(currentPrice: Double) : Pair<Double, Currency> {
+    fun devFee(currentPrice: Double) : Double {
+        // Dev fee is always in base currency
         return if (willIncurFee(currentPrice)) {
-            Pair(baseTotal * DEV_FEE_PERCENTAGE, tradingPair.baseCurrency)
+            totalBase(currentPrice) * DEV_FEE_PERCENTAGE
         } else {
-            Pair(0.0, tradingPair.baseCurrency)
+            0.0
         }
     }
 
     fun exchangeFee(currentPrice: Double) : Pair<Double, Currency> {
         return if (willIncurFee(currentPrice)) {
             //TODO: decide on whether this is in
-            if (amount != null) {
-                val fee = amount * tradingPair.baseCurrency.feePercentage
-                Pair(fee, tradingPair.baseCurrency)
-            } else {
-                val fee = funds!! * tradingPair.baseCurrency.feePercentage
-                Pair(fee, tradingPair.quoteCurrency)
-            }
+            val fee = totalQuote(currentPrice) * tradingPair.baseCurrency.feePercentage
+            Pair(fee, tradingPair.baseCurrency)
         } else {
-            Pair(0.0, tradingPair.quoteCurrency)
+            Pair(0.0, tradingPair.baseCurrency)
         }
     }
 
-    fun totalFees(currentPrice: Double) : Pair<Double, Currency> {
-        if (willIncurFee(currentPrice)) {
-            //TODO: change this to check exchange feePercentage
-            val exchangeFee = amount * tradingPair.baseCurrency.feePercentage
-            val devFee  = amount * DEV_FEE_PERCENTAGE
-            return (devFee + exchangeFee)
+    fun totalFees(currentPrice: Double) : Pair<Double, Currency>? {
+        val exchangeFee = exchangeFee(currentPrice)
+        val devFee = devFee(currentPrice)
+        return if (exchangeFee.second == tradingPair.baseCurrency) {
+            Pair(devFee + exchangeFee.first, tradingPair.baseCurrency)
         } else {
-            return 0.0
+            null
         }
     }
 
-
-
-    val baseTotal: Double
-        get() {
-            return 0.0
-        }
-
-
-    private fun totalBase(currentPrice: Double) : Double {
+    fun totalBase(currentPrice: Double) : Double {
         return when (side) {
             TradeSide.BUY -> when (type) {
                 TradeType.MARKET -> if (funds != null) { //fixed quote
@@ -87,7 +78,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         }
     }
 
-    private fun totalQuote(currentPrice: Double) : Double {
+    fun totalQuote(currentPrice: Double) : Double {
             return when (side) {
                 TradeSide.BUY -> when (type) {
                     TradeType.MARKET -> amount ?: (funds!! / currentPrice)
@@ -108,6 +99,29 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         return when (TradeFragment.tradeSide) {
             TradeSide.BUY ->  totalQuote(currentPrice) + totalFees
             TradeSide.SELL -> totalQuote(currentPrice) - totalFees
+        }
+    }
+
+    fun submit(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
+        when(type) {
+            TradeType.MARKET -> AnyApi.orderMarket(apiInitData, tradingPair.exchange, side, tradingPair, amount, funds,
+                    { onFailure(it) }, { onSuccess(it) })
+            TradeType.LIMIT -> {
+                priceLimit?.let { limitPrice ->
+                    AnyApi.orderLimit(apiInitData, tradingPair.exchange, side, tradingPair, limitPrice, amount!!, timeInForce, cancelAfter, null,
+                            { onFailure(it) }, { onSuccess(it) })
+                } ?: run {
+                    //TODO: toast about failure
+                }
+            }
+            TradeType.STOP -> {
+                priceLimit?.let { stopPrice ->
+                    AnyApi.orderStop(apiInitData, tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, amount!!, null,
+                            { onFailure(it) }, { onSuccess(it) })
+                } ?: run {
+                    //TODO: toast about failure
+                }
+            }
         }
     }
 }

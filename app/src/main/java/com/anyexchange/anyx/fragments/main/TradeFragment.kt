@@ -411,13 +411,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun confirmPopup(updatedTicker: Double, newOrder: NewOrder) {
 
         val currencyString = relevantAccount?.currency?.toString() ?: ""
-        val feeEstimate = newOrder.totalFees(updatedTicker)
-        val feeEstimateString = if (feeEstimate > 0 && feeEstimate < 0.01) {
+        val feeEstimate = newOrder.totalFees(updatedTicker)!!
+
+        val feeEstimateString = if (feeEstimate.second.isFiat && feeEstimate.first > 0 && feeEstimate.first < 0.01) {
             "less than $0.01"
         } else {
-            feeEstimate.format(tradingPair.quoteCurrency)
+            feeEstimate.first.format(feeEstimate.second)
         }
-        val pricePlusFeeTotal = newOrder.pricePlusFeeTotal(feeEstimate)
+        val pricePlusFeeTotal = newOrder.pricePlusFeeTotal(updatedTicker, feeEstimate.first)
 
         val quoteCurrency = tradingPair.quoteCurrency
         alert {
@@ -428,7 +429,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                         if (tradeType == TradeType.MARKET) {
                             horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.format(quoteCurrency)}").lparams(width = matchParent) {}
                         }
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), newOrder.baseTotal.format(currency)).lparams(width = matchParent) {}
+                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), newOrder.totalBase(updatedTicker).format(currency)).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
                         horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, quoteCurrency), pricePlusFeeTotal.format(quoteCurrency)).lparams(width = matchParent) {}
                     }.lparams(width = matchParent) {leftMargin = dip(10) }
@@ -512,29 +513,10 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 }
             }
         }
-        val exchange = newOrder.tradingPair.exchange
-        when(newOrder.type) {
-            TradeType.MARKET -> AnyApi.orderMarket(apiInitData, exchange, tradeSide, tradingPair, newOrder.amount, newOrder.funds,
-                    { onFailure(it) }, { onComplete(it) })
-            TradeType.LIMIT -> {
-                newOrder.priceLimit?.let { limitPrice ->
-                    AnyApi.orderLimit(apiInitData, exchange, tradeSide, tradingPair, limitPrice, newOrder.amount, newOrder.timeInForce, newOrder.cancelAfter, null,
-                            { onFailure(it) }, { onComplete(it) })
-                } ?: run {
-                    //TODO: toast about failure
-                }
-            }
-            TradeType.STOP -> {
-                newOrder.priceLimit?.let { stopPrice ->
-                    AnyApi.orderStop(apiInitData, exchange, tradeSide, tradingPair, stopPrice, newOrder.amount, null,
-                            { onFailure(it) }, { onComplete(it) })
-                } ?: run {
-                    //TODO: toast about failure
-                }
-            }
+        newOrder.submit(apiInitData, { onFailure(it) }) { result ->
+            AnyApi.getAndStashOrderList(apiInitData, newOrder.tradingPair.exchange, null, { }, { })
+            onComplete(result)
         }
-        AnyApi.getAndStashOrderList(apiInitData, exchange, null, { }, { })
-
     }
 
     private fun payFee(amount: Double) {

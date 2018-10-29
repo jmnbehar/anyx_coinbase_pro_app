@@ -60,12 +60,12 @@ class TradeConfirmFragment: DialogFragment() {
         this.amount = newOrder.amount
         this.limit = newOrder.priceLimit
         this.devFee = newOrder.devFee(updatedTicker)
-        this.feeEstimate = newOrder.exchangeFee(updatedTicker)
+//        this.feeEstimate = newOrder.exchangeFee(updatedTicker)
 
         this.timeInForce = newOrder.timeInForce
         this.cancelAfter = newOrder.cancelAfter
-        this.baseTotal = newOrder.baseTotal
-        this.quoteTotal = newOrder.quoteTotal
+        this.baseTotal = newOrder.totalBase(updatedTicker)
+        this.quoteTotal = newOrder.totalQuote(updatedTicker)
     }
 
     fun setText() {
