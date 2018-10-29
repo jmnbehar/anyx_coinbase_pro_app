@@ -396,7 +396,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 if (price == null) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 } else {
-                    confirmPopup(price, newOrder)
+                    showDialog(price, newOrder)
                 }
             }
         }
@@ -408,39 +408,38 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         confirmDialogFragment.show(fragmentManager, "confirmDialog")
     }
 
-    private fun confirmPopup(updatedTicker: Double, newOrder: NewOrder) {
-
-        val currencyString = relevantAccount?.currency?.toString() ?: ""
-        val feeEstimate = newOrder.totalFees(updatedTicker)!!
-
-        val feeEstimateString = if (feeEstimate.second.isFiat && feeEstimate.first > 0 && feeEstimate.first < 0.01) {
-            "less than $0.01"
-        } else {
-            feeEstimate.first.format(feeEstimate.second)
-        }
-        val pricePlusFeeTotal = newOrder.pricePlusFeeTotal(updatedTicker, feeEstimate.first)
-
-        val quoteCurrency = tradingPair.quoteCurrency
-        alert {
-            title = resources.getString(R.string.trade_confirm_popup_title)
-            customView {
-                linearLayout {
-                    verticalLayout {
-                        if (tradeType == TradeType.MARKET) {
-                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.format(quoteCurrency)}").lparams(width = matchParent) {}
-                        }
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), newOrder.totalBase(updatedTicker).format(currency)).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, quoteCurrency), pricePlusFeeTotal.format(quoteCurrency)).lparams(width = matchParent) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(10) }
-                }
-            }
-            positiveButton(R.string.trade_confirm_popup_confirm_btn) {
-                submitOrder(newOrder)
-            }
-            negativeButton(R.string.trade_confirm_popup_cancel_btn) { }
-        }.show()
-    }
+//    private fun confirmPopup(updatedTicker: Double, newOrder: NewOrder) {
+//
+//        val currencyString = relevantAccount?.currency?.toString() ?: ""
+//
+//        val feeEstimateString = if (feeEstimate.second.isFiat && feeEstimate.first > 0 && feeEstimate.first < 0.01) {
+//            "less than $0.01"
+//        } else {
+//            feeEstimate.first.format(feeEstimate.second)
+//        }
+//        val pricePlusFeeTotal = newOrder.pricePlusFeeTotal(updatedTicker, feeEstimate.first)
+//
+//        val quoteCurrency = tradingPair.quoteCurrency
+//        alert {
+//            title = resources.getString(R.string.trade_confirm_popup_title)
+//            customView {
+//                linearLayout {
+//                    verticalLayout {
+//                        if (tradeType == TradeType.MARKET) {
+//                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.format(quoteCurrency)}").lparams(width = matchParent) {}
+//                        }
+//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), newOrder.totalBase(updatedTicker).format(currency)).lparams(width = matchParent) {}
+//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
+//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, quoteCurrency), pricePlusFeeTotal.format(quoteCurrency)).lparams(width = matchParent) {}
+//                    }.lparams(width = matchParent) {leftMargin = dip(10) }
+//                }
+//            }
+//            positiveButton(R.string.trade_confirm_popup_confirm_btn) {
+//                submitOrder(newOrder)
+//            }
+//            negativeButton(R.string.trade_confirm_popup_cancel_btn) { }
+//        }.show()
+//    }
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         val currency: Currency = when (errorMessage) {

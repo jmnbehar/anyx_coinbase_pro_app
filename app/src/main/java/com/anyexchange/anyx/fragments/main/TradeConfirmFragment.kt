@@ -17,38 +17,34 @@ class TradeConfirmFragment: DialogFragment() {
 
     private var orderSummaryText: TextView? = null
 
-    private var totalLabelText: TextView? = null
-    private var totalText: TextView? = null
+    private var row1Label: TextView? = null
+    private var row1Text: TextView? = null
 
-    private var feesLabelText: TextView? = null
-    private var feesText: TextView? = null
+    private var row2Label: TextView? = null
+    private var row2Text: TextView? = null
+
+    private var row3Label: TextView? = null
+    private var row3Text: TextView? = null
 
     private var confirmButton: Button? = null
 
     var updatedTicker: Double? = null
-    var amount: Double? = null
-    var limit: Double? = null
-    var devFee: Double? = null
-    var timeInForce: TimeInForce? = null
-    var cancelAfter: TimeInForce.CancelAfter? = null
-    var baseTotal: Double? = null
-    var quoteTotal: Double? = null
-    var feeEstimate: Double? = null
+    var newOrder: NewOrder? = null
 
-    var tradingPair: TradingPair? = null
-    var tradeType: TradeType? = null
-    var tradeSide: TradeSide? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.dialog_trade_confirm, container, false)
 
         orderSummaryText = rootView.txt_trade_confirm_summary
 
-        totalLabelText = rootView.txt_trade_confirm_est_total_label
-        totalText = rootView.txt_trade_confirm_est_total
+        row1Label = rootView.txt_trade_confirm_row_1_label
+        row1Text  = rootView.txt_trade_confirm_row_1_text
 
-        feesLabelText = rootView.txt_trade_confirm_est_fees_label
-        feesText = rootView.txt_trade_confirm_est_fees
+        row2Label = rootView.txt_trade_confirm_row_2_label
+        row2Text  = rootView.txt_trade_confirm_row_2_text
+
+        row3Label = rootView.txt_trade_confirm_row_3_label
+        row3Text  = rootView.txt_trade_confirm_row_3_text
 
         confirmButton = rootView.btn_dialog_confirm
 
@@ -57,42 +53,55 @@ class TradeConfirmFragment: DialogFragment() {
 
     fun setInfo(updatedTicker: Double, newOrder: NewOrder) {
         this.updatedTicker = updatedTicker
-        this.amount = newOrder.amount
-        this.limit = newOrder.priceLimit
-        this.devFee = newOrder.devFee(updatedTicker)
-//        this.feeEstimate = newOrder.exchangeFee(updatedTicker)
+        this.newOrder = newOrder
 
-        this.timeInForce = newOrder.timeInForce
-        this.cancelAfter = newOrder.cancelAfter
-        this.baseTotal = newOrder.totalBase(updatedTicker)
-        this.quoteTotal = newOrder.totalQuote(updatedTicker)
+        val tradingPair = newOrder.tradingPair
+
+        orderSummaryText?.text = when (newOrder.type) {
+            TradeType.MARKET -> if (newOrder.amount != null) {
+                resources.getString(R.string.trade_summary_market_fixed_base, newOrder.side.name, newOrder.amount.format(tradingPair.baseCurrency))
+            } else {
+                resources.getString(R.string.trade_summary_market_fixed_quote, newOrder.side.name, newOrder.funds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+            }
+            TradeType.LIMIT -> when (newOrder.side) {
+                TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
+                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
+                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+            }
+            TradeType.STOP -> when (newOrder.side) {
+                TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
+                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
+                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+            }
+        }
+
+        val exchangeFee = newOrder.exchangeFee(updatedTicker)
+        val devFee = newOrder.devFee(updatedTicker)
+
+        //TODO: approximate =
+        row1Label?.text = "${tradingPair.exchange.name} fee: "
+        row1Text?.text = exchangeFee.first.format(exchangeFee.second)
+
+        row2Label?.text = "AnyX fee:"
+        row2Text?.text = devFee.format(tradingPair.baseCurrency)
+
+        row3Label?.text = "Total:"
+        row3Text?.text = when (newOrder.side) {
+            TradeSide.BUY -> when (newOrder.type) {
+                TradeType.MARKET -> if (newOrder.amount == null) {
+                    newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
+                } else {
+                    newOrder.totalBase(updatedTicker).format(tradingPair.baseCurrency)
+                }
+                TradeType.LIMIT -> newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
+                TradeType.STOP -> newOrder.totalBase(updatedTicker).format(tradingPair.baseCurrency)
+            }
+            TradeSide.SELL -> newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
+        }
+
+
     }
 
-    fun setText() {
-
-
-//        orderSummaryText?.text = when (tradeType) {
-//            TradeType.MARKET -> {
-//                when (amountUnitCurrency) {
-//                    tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
-//                            sideString, amount.format(tradingPair.baseCurrency))
-//                    tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
-//                            sideString, amount.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                    else -> ""
-//                }
-//            }
-//            TradeType.LIMIT -> when (TradeFragment.tradeSide) {
-//                TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
-//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
-//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//            }
-//            TradeType.STOP -> when (TradeFragment.tradeSide) {
-//                TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
-//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//                TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
-//                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-//            }
-//        }
-    }
 }

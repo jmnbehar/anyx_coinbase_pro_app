@@ -44,16 +44,6 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         }
     }
 
-    fun totalFees(currentPrice: Double) : Pair<Double, Currency>? {
-        val exchangeFee = exchangeFee(currentPrice)
-        val devFee = devFee(currentPrice)
-        return if (exchangeFee.second == tradingPair.baseCurrency) {
-            Pair(devFee + exchangeFee.first, tradingPair.baseCurrency)
-        } else {
-            null
-        }
-    }
-
     fun totalBase(currentPrice: Double) : Double {
         return when (side) {
             TradeSide.BUY -> when (type) {
@@ -111,7 +101,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
                     AnyApi.orderLimit(apiInitData, tradingPair.exchange, side, tradingPair, limitPrice, amount!!, timeInForce, cancelAfter, null,
                             { onFailure(it) }, { onSuccess(it) })
                 } ?: run {
-                    //TODO: toast about failure
+                    //TODO: call onFailure
                 }
             }
             TradeType.STOP -> {
@@ -119,7 +109,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
                     AnyApi.orderStop(apiInitData, tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, amount!!, null,
                             { onFailure(it) }, { onSuccess(it) })
                 } ?: run {
-                    //TODO: toast about failure
+                    //TODO: call onFailure
                 }
             }
         }
