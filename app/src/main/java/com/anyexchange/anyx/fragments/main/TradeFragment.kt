@@ -18,7 +18,6 @@ import com.anyexchange.anyx.classes.api.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.alert
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.*
 import com.anyexchange.anyx.classes.Currency
@@ -164,7 +163,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
-        amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+        amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
 
         limitEditText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -174,7 +173,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
-        limitEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(5, 2))
+        limitEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
 
 
         tradeSideBuyRadioButton = rootView.rbtn_trade_buy
@@ -614,7 +613,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 amountUnitSpinner?.visibility = View.GONE
 
                 val limitTab = tradeTypeTabLayout?.getTabAt(1)
-                amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+                amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
                 limitTab?.select()
                 limitUnitText?.text = quoteCurrency.toString()
                 limitLayout?.visibility = View.VISIBLE
@@ -648,7 +647,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             TradeType.STOP -> {
                 amountUnitText?.visibility = View.VISIBLE
                 amountUnitSpinner?.visibility = View.GONE
-                amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(4, 8))
+                amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
                 val stopTab = tradeTypeTabLayout?.getTabAt(2)
                 stopTab?.select()
                 limitUnitText?.text = quoteCurrency.toString()
