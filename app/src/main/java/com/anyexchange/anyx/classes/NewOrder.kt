@@ -38,7 +38,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         return if (willIncurFee(currentPrice)) {
             //TODO: decide on whether this is in
             val fee = totalQuote(currentPrice) * tradingPair.baseCurrency.feePercentage
-            Pair(fee, tradingPair.baseCurrency)
+            Pair(fee, tradingPair.quoteCurrency)
         } else {
             Pair(0.0, tradingPair.baseCurrency)
         }

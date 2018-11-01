@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.graphics.Color
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.view.ViewGroup
@@ -28,7 +29,7 @@ class TradeConfirmFragment: DialogFragment() {
 
     private var confirmButton: Button? = null
 
-    var updatedTicker: Double? = null
+    var currentPrice: Double? = null
     var newOrder: NewOrder? = null
 
 
@@ -48,13 +49,29 @@ class TradeConfirmFragment: DialogFragment() {
 
         confirmButton = rootView.btn_dialog_confirm
 
-        return inflater.inflate(R.layout.dialog_trade_confirm, container, false)
+        currentPrice?.let { currentPrice ->
+            newOrder?.let { newOrder ->
+                setText(currentPrice, newOrder)
+            }
+        }
+
+        confirmButton?.setOnClickListener {_ ->
+            currentPrice?.let { currentPrice ->
+                newOrder?.let { newOrder ->
+                    setText(currentPrice, newOrder)
+                }
+            }
+        }
+
+        return rootView
     }
 
-    fun setInfo(updatedTicker: Double, newOrder: NewOrder) {
-        this.updatedTicker = updatedTicker
+    fun setInfo(currentPrice: Double, newOrder: NewOrder) {
+        this.currentPrice = currentPrice
         this.newOrder = newOrder
+    }
 
+    private fun setText(currentPrice: Double, newOrder: NewOrder) {
         val tradingPair = newOrder.tradingPair
 
         orderSummaryText?.text = when (newOrder.type) {
@@ -77,31 +94,30 @@ class TradeConfirmFragment: DialogFragment() {
             }
         }
 
-        val exchangeFee = newOrder.exchangeFee(updatedTicker)
-        val devFee = newOrder.devFee(updatedTicker)
+        val exchangeFee = newOrder.exchangeFee(currentPrice)
 
         //TODO: approximate =
         row1Label?.text = "${tradingPair.exchange.name} fee: "
         row1Text?.text = exchangeFee.first.format(exchangeFee.second)
 
         row2Label?.text = "AnyX fee:"
-        row2Text?.text = devFee.format(tradingPair.baseCurrency)
+        row2Text?.text = newOrder.devFee(currentPrice).format(tradingPair.baseCurrency)
 
         row3Label?.text = "Total:"
         row3Text?.text = when (newOrder.side) {
             TradeSide.BUY -> when (newOrder.type) {
-                TradeType.MARKET -> if (newOrder.amount == null) {
-                    newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
+                TradeType.MARKET -> if (newOrder.amount != null) {
+                    newOrder.totalQuote(currentPrice).format(tradingPair.quoteCurrency)
                 } else {
-                    newOrder.totalBase(updatedTicker).format(tradingPair.baseCurrency)
+                    newOrder.totalBase(currentPrice).format(tradingPair.baseCurrency)
                 }
-                TradeType.LIMIT -> newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
-                TradeType.STOP -> newOrder.totalBase(updatedTicker).format(tradingPair.baseCurrency)
+                TradeType.LIMIT -> newOrder.totalQuote(currentPrice).format(tradingPair.quoteCurrency)
+                TradeType.STOP -> newOrder.totalBase(currentPrice).format(tradingPair.baseCurrency)
             }
-            TradeSide.SELL -> newOrder.totalQuote(updatedTicker).format(tradingPair.quoteCurrency)
+            TradeSide.SELL -> newOrder.totalQuote(currentPrice).format(tradingPair.quoteCurrency)
         }
 
-
+        confirmButton?.text = "Submit ${newOrder.side} order"
     }
 
 }

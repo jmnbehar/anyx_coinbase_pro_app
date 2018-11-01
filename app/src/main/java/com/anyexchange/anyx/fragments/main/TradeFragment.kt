@@ -376,9 +376,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         val amount = amountEditText?.text.toString().toDoubleOrZero()
 
         val newOrder = if (isAmountFunds) {
-            NewOrder(tradingPair, limit, amount, null, tradeType, tradeSide, timeInForce, cancelAfter, null)
-        } else {
             NewOrder(tradingPair, limit, null, amount, tradeType, tradeSide, timeInForce, cancelAfter, null)
+        } else {
+            NewOrder(tradingPair, limit, amount, null, tradeType, tradeSide, timeInForce, cancelAfter, null)
         }
 
         if (amount <= 0) {
@@ -404,41 +404,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun showDialog(updatedTicker: Double, newOrder: NewOrder) {
         val confirmDialogFragment = TradeConfirmFragment()
         confirmDialogFragment.setInfo(updatedTicker, newOrder)
-        confirmDialogFragment.show(fragmentManager, "confirmDialog")
+        confirmDialogFragment.showNow(fragmentManager, "confirmDialog")
     }
-
-//    private fun confirmPopup(updatedTicker: Double, newOrder: NewOrder) {
-//
-//        val currencyString = relevantAccount?.currency?.toString() ?: ""
-//
-//        val feeEstimateString = if (feeEstimate.second.isFiat && feeEstimate.first > 0 && feeEstimate.first < 0.01) {
-//            "less than $0.01"
-//        } else {
-//            feeEstimate.first.format(feeEstimate.second)
-//        }
-//        val pricePlusFeeTotal = newOrder.pricePlusFeeTotal(updatedTicker, feeEstimate.first)
-//
-//        val quoteCurrency = tradingPair.quoteCurrency
-//        alert {
-//            title = resources.getString(R.string.trade_confirm_popup_title)
-//            customView {
-//                linearLayout {
-//                    verticalLayout {
-//                        if (tradeType == TradeType.MARKET) {
-//                            horizontalLayout(resources.getString(R.string.trade_confirm_popup_price_label, currencyString), "≈${updatedTicker.format(quoteCurrency)}").lparams(width = matchParent) {}
-//                        }
-//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_currency_label, currencyString, tradeSide.toString()), newOrder.totalBase(updatedTicker).format(currency)).lparams(width = matchParent) {}
-//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_estimated_fees_label), feeEstimateString).lparams(width = matchParent) {}
-//                        horizontalLayout(resources.getString(R.string.trade_confirm_popup_total_label, quoteCurrency), pricePlusFeeTotal.format(quoteCurrency)).lparams(width = matchParent) {}
-//                    }.lparams(width = matchParent) {leftMargin = dip(10) }
-//                }
-//            }
-//            positiveButton(R.string.trade_confirm_popup_confirm_btn) {
-//                submitOrder(newOrder)
-//            }
-//            negativeButton(R.string.trade_confirm_popup_cancel_btn) { }
-//        }.show()
-//    }
 
     private fun tradeAmountSizeError(errorMessage: CBProApi.ErrorMessage) : String {
         val currency: Currency = when (errorMessage) {
