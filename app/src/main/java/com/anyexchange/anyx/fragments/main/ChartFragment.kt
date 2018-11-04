@@ -152,7 +152,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
         val tradingPairs: List<TradingPair> = if (product.tradingPairs.isNotEmpty()) {
-            product.tradingPairs.sortedBy { tempTradingPair -> tempTradingPair.quoteCurrency.orderValue }
+            product.tradingPairs.sortTradingPairs()
         } else {
             listOf()
         }

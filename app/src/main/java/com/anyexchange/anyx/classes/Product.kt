@@ -41,7 +41,8 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         }
     val defaultTradingPair: TradingPair?
         get() {
-            return tradingPairs.find { it.quoteCurrency == Account.defaultFiatCurrency }
+            val defaultFiatPair = tradingPairs.find { it.quoteCurrency == Account.defaultFiatCurrency }
+            return defaultFiatPair ?: tradingPairs.firstOrNull()
         }
 
     var isFavorite: Boolean =  true//(totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
