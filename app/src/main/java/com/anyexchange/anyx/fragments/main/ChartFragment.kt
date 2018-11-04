@@ -24,7 +24,6 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.alert
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
@@ -628,39 +627,38 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun confirmCancelOrder(order: Order) {
-        alert {
-            title = resources.getString(R.string.chart_history_order)
-            val layoutWidth = 1000
-
-            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
-
-            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
-            val price = (order.price ?: 0.0).format(quoteCurrency)
-            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
-            val size = order.amount.btcFormat()
-            val status = order.status
-
-            //TODO: fix allll dis shit
-            customView {
-                linearLayout {
-                    verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
-                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
-                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
-                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(20) }
-                }
-            }
-            positiveButton(R.string.popup_ok_btn) {  }
-            negativeButton(R.string.chart_cancel_order) {
-                cancelOrder(order)
-            }
-        }.show()
-    }
+//    private fun confirmCancelOrder(order: Order) {
+//        alert {
+//            title = resources.getString(R.string.chart_history_order)
+//            val layoutWidth = 1000
+//
+//            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
+//
+//            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
+//            val price = (order.price ?: 0.0).format(quoteCurrency)
+//            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
+//            val size = order.amount.btcFormat()
+//            val status = order.status
+//
+//            customView {
+//                linearLayout {
+//                    verticalLayout {
+//                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
+//                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
+//                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
+//                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
+//                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
+//                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
+//                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
+//                    }.lparams(width = matchParent) {leftMargin = dip(20) }
+//                }
+//            }
+//            positiveButton(R.string.popup_ok_btn) {  }
+//            negativeButton(R.string.chart_cancel_order) {
+//                cancelOrder(order)
+//            }
+//        }.show()
+//    }
 
     private fun cancelOrder(order: Order) {
         order.cancel(apiInitData, { _ -> }) { _ ->
@@ -673,31 +671,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 toast(R.string.chart_order_cancelled)
             }
         }
-    }
-
-    private fun fillOnClick(fill: Fill) {
-        alert {
-            title = resources.getString(R.string.chart_history_fill)
-
-            val layoutWidth = 1000
-            val createdTimeString = fill.time.format("h:mma, MM/dd/yyyy")
-
-            val fee = fill.fee.format(quoteCurrency)
-            val price = fill.price.format(quoteCurrency)
-            val size = fill.amount.btcFormat()
-            customView {
-                linearLayout {
-                    verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, fill.side.toString()).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_fee_label, fee).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(20) }
-                }
-            }
-            positiveButton(R.string.popup_ok_btn) {  }
-        }.show()
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
@@ -853,8 +826,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     (orderListView?.adapter as? OrderListViewAdapter)?.notifyDataSetChanged()
                     orderListView?.setHeightBasedOnChildren()
                 } , { order -> //Order Cancel:
-                    confirmCancelOrder(order)
-                })
+                    //confirmCancelOrder(order)
+                    cancelOrder(order)
+        })
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {

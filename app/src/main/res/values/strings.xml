@@ -124,6 +124,15 @@
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
 
+    <string name="chart_low_label">low:</string>
+    <string name="chart_high_label">high:</string>
+    <string name="chart_volume_label">volume:</string>
+    <string name="chart_close_label">close:</string>
+    <string name="chart_open_label">open:</string>
+
+
+
+
     <string name="chart_update_error">Error updating chart</string>
 
     <string name="chart_order_cancel_button">Cancel</string>
@@ -131,12 +140,15 @@
     <string name="chart_order_cancelled">Order cancelled</string>
     <string name="chart_cancel_order">Cancel Order</string>
 
+    <string name="chart_orders_label">Orders</string>
+    <string name="chart_fills_label">Fills</string>
+
     <string name="chart_history_order">Order</string>
     <string name="chart_history_fill">Fill</string>
 
     <string name="chart_history_side_label">Side:  </string>
     <string name="chart_history_size_label">Size:  </string>
-    <string name="chart_history_filled_size_label">FilledSize:  </string>
+    <string name="chart_history_filled_size_label">Filled Size:  </string>
     <string name="chart_history_price_label">Price:  </string>
     <string name="chart_history_status_label">Status:  </string>
     <string name="chart_history_filled_fees_label">Filled Fees:  </string>
@@ -144,6 +156,8 @@
     <string name="chart_history_time_label">Time:  </string>
     <string name="chart_history_no_orders">You have no open orders</string>
     <string name="chart_history_no_fills">You have no filled orders</string>
+
+    <string name="chart_history_cancel_confirm">Are you sure you want to cancel this order?</string>
 
     <string name="chart_history_order_side_buy">Buy </string>
     <string name="chart_history_order_side_sell">Sell </string>
@@ -432,5 +446,13 @@ You\'re good to go!</item>
     <string name="send_warning_2_eth">Warning: Do not send ETH from Coinbase Pro directly to an Ethereum contract. Sending to a contract may result in lost ETH. Read more here:\nhttps://support.Coinbase Pro.com/customer/en/portal/articles/2430150</string>
 
     <string name="send_balance_text">Available Balance: %s</string>
+    <string name="chart_currency_icon_description">Currency icon</string>
 
+
+    <string name="trade_confirm_anyx_fee_label">AnyX fee ≈</string>
+    <string name="trade_confirm_exchange_fee_label">%s fee ≈</string>
+    <string name="trade_confirm_total_label">Total ≈</string>
+
+    <string name="trade_confirm_button_text">Submit %s order</string>
+    <string name="trade_confirm_very_small_fee">Less than %s</string>
 </resources>

@@ -8,7 +8,7 @@ import com.github.kittinunf.result.Result
 
 class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount: Double?,
                val funds: Double?, val type: TradeType, val side: TradeSide,
-               val timeInForce: TimeInForce?, val cancelAfter: TimeInForce.CancelAfter?, val iceBergQty: String?) {
+               private val timeInForce: TimeInForce?, private val cancelAfter: TimeInForce.CancelAfter?, private val iceBergQty: String?) {
 
     private fun willIncurFee(currentPrice: Double): Boolean {
         if (priceLimit != null) {
@@ -69,40 +69,12 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
     }
 
     fun totalQuote(currentPrice: Double) : Double {
-        return when (side) {
-            TradeSide.BUY -> when (type) {
-                TradeType.MARKET -> amount ?: (funds!! / currentPrice)
-                TradeType.LIMIT -> amount!! * priceLimit!!
-                TradeType.STOP -> amount!!
-            }
-            TradeSide.SELL -> when (type) {
-                TradeType.MARKET -> funds ?: (amount!! * currentPrice)
-                TradeType.LIMIT -> amount!! * priceLimit!!
-                TradeType.STOP -> amount!! * priceLimit!!
-            }
+        return when (type) {
+            TradeType.MARKET -> funds ?: (amount!! * currentPrice)
+            TradeType.LIMIT -> amount!! * priceLimit!!
+            TradeType.STOP -> amount!! * priceLimit!!
         }
     }
-//    fun totaFeesInBase(currentPrice: Double) : Double {
-//        var totalFees = devFee(currentPrice)
-//        val exchangeFee = exchangeFee(currentPrice)
-//        totalFees += if (exchangeFee.second == tradingPair.baseCurrency) {
-//            exchangeFee.first
-//        } else {
-//            exchangeFee.first / currentPrice
-//        }
-//        return totalFees
-//    }
-//    fun totalFeesInQuote(currentPrice: Double) : Double {
-//        var totalFees = devFee(currentPrice) * currentPrice
-//        val exchangeFee = exchangeFee(currentPrice)
-//        totalFees += if (exchangeFee.second == tradingPair.quoteCurrency) {
-//            exchangeFee.first
-//        } else {
-//            exchangeFee.first * currentPrice
-//        }
-//        return totalFees
-//    }
-
 
     fun submit(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
         when(type) {

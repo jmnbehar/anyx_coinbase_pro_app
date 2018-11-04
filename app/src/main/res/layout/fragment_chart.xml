@@ -28,6 +28,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp">
 
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -43,15 +44,14 @@
                             android:id="@+id/txt_chart_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:text=""
                             android:textSize="30sp" />
 
                         <TextView
                             android:id="@+id/txt_chart_price"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:lines="1"
                             android:text=""
                             android:textAlignment="textEnd"
                             android:textSize="30sp"
@@ -69,32 +69,30 @@
                             android:id="@+id/txt_chart_low_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="low:"
+                            android:text="@string/chart_low_label"
                             android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/txt_chart_low"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingEnd="5dp"
                             android:paddingStart="1dp"
-                            android:text="5000.55"
+                            android:paddingEnd="5dp"
                             android:textSize="18sp" />
 
                         <TextView
                             android:id="@+id/txt_chart_high_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="high:"
+                            android:text="@string/chart_high_label"
                             android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/txt_chart_high"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingEnd="5dp"
                             android:paddingStart="1dp"
-                            android:text="8000.45"
+                            android:paddingEnd="5dp"
                             android:textSize="18sp" />
 
                         <TextView
@@ -110,7 +108,6 @@
 
 
                 </LinearLayout>
-
 
                 <com.anyexchange.anyx.classes.PriceLineChart
                     android:id="@+id/chart_line_chart"
@@ -144,8 +141,8 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
                         android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
                         android:gravity="center"
                         android:orientation="horizontal">
 
@@ -160,8 +157,8 @@
                             android:id="@+id/rgroup_chart_timespans"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="2dp"
                             android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
                             android:orientation="horizontal">
 
                             <RadioButton
@@ -174,8 +171,8 @@
                                 android:background="@drawable/timespan_radio_button"
                                 android:button="@android:color/transparent"
                                 android:gravity="center_horizontal"
-                                android:paddingBottom="3dp"
                                 android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
                                 android:text="@string/chart_timespan_1h" />
 
                             <RadioButton
@@ -188,8 +185,8 @@
                                 android:background="@drawable/timespan_radio_button"
                                 android:button="@android:color/transparent"
                                 android:gravity="center_horizontal"
-                                android:paddingBottom="3dp"
                                 android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
                                 android:text="@string/chart_timespan_1d" />
 
                             <RadioButton
@@ -202,8 +199,8 @@
                                 android:background="@drawable/timespan_radio_button"
                                 android:button="@android:color/transparent"
                                 android:gravity="center_horizontal"
-                                android:paddingBottom="3dp"
                                 android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
                                 android:text="@string/chart_timespan_1w" />
 
                             <RadioButton
@@ -216,8 +213,8 @@
                                 android:background="@drawable/timespan_radio_button"
                                 android:button="@android:color/transparent"
                                 android:gravity="center_horizontal"
-                                android:paddingBottom="3dp"
                                 android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
                                 android:text="@string/chart_timespan_1m" />
 
                             <RadioButton
@@ -230,8 +227,8 @@
                                 android:background="@drawable/timespan_radio_button"
                                 android:button="@android:color/transparent"
                                 android:gravity="center_horizontal"
-                                android:paddingBottom="3dp"
                                 android:paddingTop="3dp"
+                                android:paddingBottom="3dp"
                                 android:text="@string/chart_timespan_1y" />
 
                         </RadioGroup>
@@ -270,29 +267,27 @@
                         <ImageView
                             android:id="@+id/img_chart_account_icon"
                             android:layout_width="30dp"
-                            android:layout_height="35dp" />
+                            android:layout_height="35dp"
+                            android:contentDescription="@string/chart_currency_icon_description" />
 
                         <TextView
                             android:id="@+id/txt_chart_ticker"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
+                            android:layout_marginStart="10dp"
                             android:text="@string/chart_default_account"
                             android:textSize="24sp" />
 
-                        <android.support.v4.widget.Space
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="5" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/txt_chart_account_balance"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/chart_default_balance"
@@ -300,7 +295,7 @@
 
                             <TextView
                                 android:id="@+id/txt_chart_account_value"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/chart_default_balance"
@@ -315,7 +310,8 @@
                     android:id="@+id/txt_chart_orders_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Orders" />
+                    android:text="@string/chart_orders_label"
+                    android:textSize="18sp" />
 
                 <ListView
                     android:id="@+id/list_chart_orders"
@@ -329,7 +325,8 @@
                     android:id="@+id/txt_chart_fills_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Fills" />
+                    android:text="@string/chart_fills_label"
+                    android:textSize="18sp" />
                 <ListView
                     android:id="@+id/list_chart_fills"
                     android:layout_width="match_parent"

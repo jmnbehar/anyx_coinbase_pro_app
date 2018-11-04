@@ -39,7 +39,7 @@
             android:layout_weight="1"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            android:textSize="15sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/txt_order_price"
@@ -55,7 +55,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="15dp">
+            android:paddingStart="15dp"
+            android:paddingEnd="0dp">
 
             <TextView
                 android:id="@+id/txt_order_date"
@@ -87,7 +88,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/chart_order_cancelled" />
+                    android:text="@string/trade_confirm_popup_cancel_btn" />
             </LinearLayout>
         </LinearLayout>
 
