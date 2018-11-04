@@ -161,9 +161,10 @@ class AnyApi {
 //            }
         }
         private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
+            Product.map.clear()
             for (apiProduct in cbProProducts) {
                 val tradingPair = TradingPair(apiProduct)
-                Product.map[apiProduct.base_currency]?.let {  product ->
+                Product.map[apiProduct.base_currency]?.let { product ->
                     product.tradingPairs = product.tradingPairs.plus(tradingPair)
                 } ?: run {
                     val currency = Currency(apiProduct.base_currency)

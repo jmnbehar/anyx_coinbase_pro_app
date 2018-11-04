@@ -149,9 +149,6 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         val lastCandleTime = candles.lastOrNull()?.closeTime ?: longAgoInSeconds
         val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
 
-//        if (timespan != product.candlesTimespan) {
-//            nextCandleTime = longAgoInSeconds
-//        }
         candlesTimespan = timespan
 
         if (nextCandleTime < nowInSeconds) {

@@ -47,7 +47,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var lockableScrollView: LockableScrollView? = null
 
+    private var orderListLabel: TextView? = null
     private var orderListView: ListView? = null
+
+    private var fillListLabel: TextView? = null
     private var fillListView: ListView? = null
 
     private var tradingPairSpinner: Spinner? = null
@@ -199,7 +202,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
             sellButton = rootView.btn_chart_sell
 
+            orderListLabel = rootView.txt_chart_orders_label
             orderListView = rootView.list_chart_orders
+
+            fillListLabel = rootView.txt_chart_fills_label
             fillListView = rootView.list_chart_fills
 
             lockableScrollView = rootView.lockscroll_chart
@@ -540,7 +546,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
                 balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
                 updateValueText()
+                orderListLabel?.visibility = View.VISIBLE
                 orderListView?.visibility = View.VISIBLE
+                fillListLabel?.visibility = View.VISIBLE
                 fillListView?.visibility = View.VISIBLE
             } else {
                 tickerTextView?.visibility = View.GONE
@@ -548,7 +556,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 balanceTextView?.visibility = View.GONE
                 valueTextView?.visibility = View.GONE
 
+                orderListLabel?.visibility = View.GONE
                 orderListView?.visibility = View.GONE
+                fillListLabel?.visibility = View.GONE
                 fillListView?.visibility = View.GONE
             }
         }
