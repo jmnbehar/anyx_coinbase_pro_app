@@ -290,8 +290,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var blockNextProductChange = false
     override fun onResume() {
         super.onResume()
-        //TODO: reset trading pair and timespan
-
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val index = tradingPairs.indexOf(tradingPair)
         if (index != -1) {
@@ -432,7 +430,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
-        
+
         viewModel.tradingPair = relevantTradingPair ?: tradingPairs.firstOrNull()
 
         candles = newProduct.candlesForTimespan(timespan, tradingPair)

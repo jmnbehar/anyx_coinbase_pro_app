@@ -97,9 +97,10 @@ enum class KnownCurrency {
             BCH -> R.drawable.icon_bch
             ZRX -> R.drawable.icon_zrx
 
-            BAT -> R.drawable.icon_usd
+            BAT -> R.drawable.icon_bat
 
-            USDC -> R.drawable.icon_usd
+            USDC -> R.drawable.icon_usdc
+
             USD -> R.drawable.icon_usd
             EUR -> R.drawable.icon_eur
             GBP -> R.drawable.icon_gbp
@@ -139,7 +140,7 @@ enum class KnownCurrency {
                 LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
                 ETC -> ContextCompat.getColor(context, R.color.etc_dk)
                 ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
-                BAT -> ContextCompat.getColor(context, R.color.white)
+                BAT -> ContextCompat.getColor(context, R.color.bat_color)
 
                 USDC,
                 USD,
@@ -154,7 +155,7 @@ enum class KnownCurrency {
                 LTC -> ContextCompat.getColor(context, R.color.ltc_light)
                 ETC -> ContextCompat.getColor(context, R.color.etc_light)
                 ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
-                BAT -> ContextCompat.getColor(context, R.color.black)
+                BAT -> ContextCompat.getColor(context, R.color.bat_color)
 
                 USDC,
                 USD,
@@ -174,7 +175,7 @@ enum class KnownCurrency {
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
                 ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
                 ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
-                BAT -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
+                BAT -> context.resources.getColorStateList(R.color.bat_color_state_list, context.resources.newTheme())
 
                 USDC,
                 USD,
@@ -189,7 +190,7 @@ enum class KnownCurrency {
                 BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
                 LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
                 ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
-                BAT -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
+                BAT -> context.resources.getColorStateList(R.color.bat_color_state_list, context.resources.newTheme())
 
                 USDC,
                 USD,
