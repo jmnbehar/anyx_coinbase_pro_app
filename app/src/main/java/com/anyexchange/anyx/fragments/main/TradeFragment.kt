@@ -534,6 +534,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun switchTradingPair(newTradingPair: TradingPair) {
 
         AnyApi.ticker(apiInitData, newTradingPair, {
+            //Reset to the previous trading pair
             val tradingPairs = product.tradingPairs.sortTradingPairs()
             val index = tradingPairs.indexOf(tradingPair)
             if (index != -1) {

@@ -64,26 +64,28 @@ class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: L
             outputView = convertView
         }
 
-        val tradingPair = tradingPairList[position]
-        viewHolder.tradingPairText?.textColor = Color.WHITE
-        when (exchangeDisplayType) {
-            ExchangeDisplayType.None -> {
-                viewHolder.quoteCurrencyIcon?.visibility = View.GONE
-                viewHolder.tradingPairText?.text = tradingPair.toString()
-            }
-            ExchangeDisplayType.Image -> {
+        if (tradingPairList.size > position) {
+            val tradingPair = tradingPairList[position]
+            viewHolder.tradingPairText?.textColor = Color.WHITE
+            when (exchangeDisplayType) {
+                ExchangeDisplayType.None -> {
+                    viewHolder.quoteCurrencyIcon?.visibility = View.GONE
+                    viewHolder.tradingPairText?.text = tradingPair.toString()
+                }
+                ExchangeDisplayType.Image -> {
 //                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
-                viewHolder.quoteCurrencyIcon?.visibility = View.GONE
-                viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
-                viewHolder.tradingPairText?.text = tradingPair.toString()
+                    viewHolder.quoteCurrencyIcon?.visibility = View.GONE
+                    viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
+                    viewHolder.tradingPairText?.text = tradingPair.toString()
 //                viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
-            }
-            ExchangeDisplayType.FullName -> {
+                }
+                ExchangeDisplayType.FullName -> {
 //                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
-                viewHolder.quoteCurrencyIcon?.visibility = View.GONE
-                viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
-                //TODO: use string resource
-                viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+                    viewHolder.quoteCurrencyIcon?.visibility = View.GONE
+                    viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
+                    //TODO: use string resource
+                    viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+                }
             }
         }
 

@@ -172,9 +172,9 @@ class Prefs (var context: Context) {
         get() = prefs.getLong(QUICK_CHANGE_ALERT_TIME, 0)
         set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
 
-    var quickChangeAlertCurrencies: Set<Currency>
-        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency(string) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
+    var quickChangeAlertCurrencies: Set<String>
+        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>()) ?: setOf()
+        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value).apply()
 
     var quickChangeThreshold: Float
         get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
@@ -182,15 +182,15 @@ class Prefs (var context: Context) {
 
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
-        if (isActive && !quickChangeAlertCurrencies.contains(currency)) {
-            currentActiveAlerts.add(currency)
-        } else if (!isActive && quickChangeAlertCurrencies.contains(currency)) {
-            currentActiveAlerts.remove(currency)
+        if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {
+            currentActiveAlerts.add(currency.id)
+        } else if (!isActive && quickChangeAlertCurrencies.contains(currency.id)) {
+            currentActiveAlerts.remove(currency.id)
         }
         quickChangeAlertCurrencies = currentActiveAlerts
     }
     fun isQuickChangeAlertActive(currency: Currency): Boolean {
-        return quickChangeAlertCurrencies.contains(currency)
+        return quickChangeAlertCurrencies.contains(currency.id)
     }
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {

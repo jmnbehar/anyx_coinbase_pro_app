@@ -117,7 +117,8 @@ class AlertJobService : JobService() {
         val enabledCurrencies = prefs.quickChangeAlertCurrencies
         var changeAlert: QuickChangeAlert? = null
         val setTimespan: QuickChangeAlert.AlertTimespan? = null
-        for (currency in enabledCurrencies) {
+        for (currencyId in enabledCurrencies) {
+            val currency = Currency(currencyId)
             val product = Product.forCurrency(currency)
             if (product != null) {
                 val candles = product.candlesForTimespan(timespan, null)
