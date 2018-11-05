@@ -163,7 +163,7 @@ enum class KnownCurrency {
             }
         }
     }
-    
+
     fun colorStateList(context: Context) : ColorStateList {
         val prefs = Prefs(context)
         return if (prefs.isDarkModeOn) {

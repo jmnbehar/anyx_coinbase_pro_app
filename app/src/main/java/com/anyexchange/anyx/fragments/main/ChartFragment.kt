@@ -432,13 +432,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
-        if (relevantTradingPair != null) {
-            val index = tradingPairs.indexOf(relevantTradingPair)
-            spinner_chart_trading_pair.setSelection(index)
-            viewModel.tradingPair = relevantTradingPair
-        } else {
-            viewModel.tradingPair = tradingPairs.firstOrNull()
-        }
+        
+        viewModel.tradingPair = relevantTradingPair ?: tradingPairs.firstOrNull()
 
         candles = newProduct.candlesForTimespan(timespan, tradingPair)
         //TODO: make sure account has all valid info
@@ -517,6 +512,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
 
+            val index = tradingPairs.indexOf(tradingPair)
+            if (index != -1) {
+                tradingPairSpinner?.setSelection(index)
+            }
             product.defaultTradingPair?.let { tradingPair ->
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
