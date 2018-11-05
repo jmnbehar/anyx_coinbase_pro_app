@@ -119,7 +119,8 @@ class Prefs (var context: Context) {
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()
-            for (currency in Currency.fiatList) {
+            val fiatAndStableCoins = Currency.fiatList.asSequence().plus(Currency.stableCoinList).toList()
+            for (currency in fiatAndStableCoins) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
                 if (accountString?.isNotBlank() == true) {
                     try {

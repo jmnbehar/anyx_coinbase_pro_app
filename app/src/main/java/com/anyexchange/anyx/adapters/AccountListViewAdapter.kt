@@ -41,11 +41,11 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         val allCryptoAccounts = Account.allCryptoAccounts()
         val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
-        val sortedAccounts = nonEmptyCryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
-        val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
-        sortedAccounts.addAll(sortedFiatAccounts)
+        val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+        val sortedCryptoAccounts = nonEmptyCryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+        sortedFiatAccounts.addAll(sortedCryptoAccounts)
 
-        return sortedAccounts
+        return sortedFiatAccounts
     }
 
     internal class ViewHolder {
@@ -79,29 +79,34 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         if(i < accounts.size) {
             val account = accounts[i]
 
-            if (!account.currency.isFiat) {
-                viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
+            if (account.currency.isFiat) {
+                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                viewHolder.balanceText?.text = account.currency.toString()
+                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                viewHolder.percentChangeText?.text = ""
+            } else if (account.currency.isStableCoin) {
+                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                viewHolder.balanceText?.text = account.defaultValue.format(account.currency)
+                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                viewHolder.percentChangeText?.text = ""
+            } else {
+                viewHolder.balanceText?.text =  account.balance.format(account.currency)
                 outputView.setOnClickListener { onClick(account) }
 
                 val product = Product.map[account.currency.id]
                 val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0
 
                 if (account.defaultValue > 0) {
-                    viewHolder.accountValueText?.text = account.defaultValue.fiatFormat(Account.defaultFiatCurrency)
+                    viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
                     val accountChange = (percentChange * account.defaultValue) / 100
                     val sign = if (percentChange >= 0) { "+" } else { "" }
-                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.fiatFormat(Account.defaultFiatCurrency))
+                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
                     viewHolder.accountValueText?.visibility = View.VISIBLE
                     viewHolder.percentChangeText?.visibility = View.VISIBLE
                 } else {
                     viewHolder.accountValueText?.visibility = View.INVISIBLE
                     viewHolder.percentChangeText?.visibility = View.INVISIBLE
                 }
-            } else {
-                viewHolder.accountValueText?.text = account.defaultValue.fiatFormat(Account.defaultFiatCurrency)
-                viewHolder.balanceText?.text = account.currency.toString()
-                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                viewHolder.percentChangeText?.text = ""
             }
             account.currency.iconId?.let {
                 viewHolder.iconView?.visibility = View.VISIBLE

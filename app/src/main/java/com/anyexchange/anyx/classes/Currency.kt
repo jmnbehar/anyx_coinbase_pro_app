@@ -44,6 +44,7 @@ class Currency(val id: String) {
         }
 
     val isFiat = knownCurrency?.isFiat ?: false
+    val isStableCoin = knownCurrency?.isStableCoin ?: false
 
     val minSendAmount: Double = knownCurrency?.minSendAmount ?: 0.0
 
@@ -95,6 +96,7 @@ class Currency(val id: String) {
     companion object {
         val cryptoList: MutableList<Currency> = KnownCurrency.values().filter { !it.isFiat }.asSequence().map { Currency(it) }.toMutableList()
         val fiatList       = KnownCurrency.values().filter { it.isFiat  }
+        val stableCoinList = KnownCurrency.values().filter { it.isStableCoin  }
 
         val USD = Currency(KnownCurrency.USD)
         val BTC = Currency(KnownCurrency.BTC)

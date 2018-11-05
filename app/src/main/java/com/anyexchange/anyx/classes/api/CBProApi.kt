@@ -200,7 +200,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             this.get(onFailure) { apiAccountList ->
                 if (credentials != null) {
 
-                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat }
+                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat || Currency(it.currency).isStableCoin  }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
@@ -215,6 +215,9 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     }
 
                     Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+                    context?.let {
+                        Prefs(it).stashedFiatAccountList = Account.fiatAccounts
+                    }
 
                     Product.updateAllProductCandles(initData, onFailure, onComplete)
                 } else {

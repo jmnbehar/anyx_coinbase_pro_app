@@ -112,6 +112,12 @@ enum class KnownCurrency {
             else -> false
         }
 
+    val isStableCoin : Boolean
+        get() = when(this) {
+            USDC -> true
+            else -> false
+        }
+
 //    private val startDate : Date
 //        get() = when (this) {
 //            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
@@ -255,6 +261,11 @@ enum class KnownCurrency {
     val orderValue : Int
         get() {
             return when (this) {
+                USD -> 5 * 1000
+                EUR -> 3 * 1000
+                GBP -> 2 * 1000
+                USDC -> 1 * 1000
+
                 BTC -> 500
                 ETH -> 400
                 LTC -> 300
@@ -262,10 +273,6 @@ enum class KnownCurrency {
                 ETC -> 100
                 ZRX -> 90
                 BAT -> 80
-                USDC -> 0
-                EUR -> -1
-                GBP -> -2
-                USD -> -100
             }
         }
 

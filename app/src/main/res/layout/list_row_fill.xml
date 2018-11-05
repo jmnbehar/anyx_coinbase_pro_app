@@ -41,14 +41,6 @@
             android:layout_height="wrap_content"
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/txt_fill_price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="2dp"
-            android:textSize="13sp" />
-
         <LinearLayout
             android:id="@+id/layout_fill_extra_info"
             android:layout_width="match_parent"
@@ -60,6 +52,12 @@
             android:paddingTop="3dp"
             android:paddingBottom="3dp"
             android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txt_fill_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/txt_fill_fees"
