@@ -79,12 +79,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
 
     private var tradingPair: TradingPair
-        get() = viewModel.tradingPair ?: product.defaultTradingPair ?: product.tradingPairs.firstOrNull() ?: TradingPair(Exchange.CBPro, currency, Account.defaultFiatCurrency)
+        get() = viewModel?.tradingPair ?: product.defaultTradingPair ?: product.tradingPairs.firstOrNull() ?: TradingPair(Exchange.CBPro, currency, Account.defaultFiatCurrency)
         set(value) {
-            viewModel.tradingPair = value
+            viewModel?.tradingPair = value
         }
 
-    private lateinit var viewModel: TradeViewModel
+    private var viewModel: TradeViewModel? = null
     class TradeViewModel : ViewModel() {
         var tradingPair: TradingPair? = null
     }
@@ -300,15 +300,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun updateButtonsAndText() {
         context?.let { context ->
-                tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.FullName)
-                tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        switchTradingPair(product.tradingPairs[position])
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>) { }
+            tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.None)
+            tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    switchTradingPair(product.tradingPairs[position])
                 }
 
+                override fun onNothingSelected(parent: AdapterView<*>) { }
+            }
+
+            val tradingPairs = product.tradingPairs.sortTradingPairs()
+            val index = tradingPairs.indexOf(tradingPair)
+            if (index != -1) {
+                tradingPairSpinner?.setSelection(index)
+            }
 
             relevantAccount?.let { account ->
                 val buttonColors = account.currency.colorStateList(context)
@@ -339,10 +344,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 currentPriceLabelText?.text = resources.getString(R.string.trade_last_trade_price_label, account.currency)
 
-                currentPriceText?.text = when {
-                    quoteCurrency.isFiat -> product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-                    else -> product.priceForQuoteCurrency(quoteCurrency).format(currency) + " " + quoteCurrency.id
-                }
+                currentPriceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
             }
         }
         updateTotalText(null, null)
@@ -530,8 +532,19 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun switchTradingPair(newTradingPair: TradingPair) {
-        switchTradeInfo(newTradingPair, null, null)
-        updateCurrencySpinner()
+
+        AnyApi.ticker(apiInitData, newTradingPair, {
+            val tradingPairs = product.tradingPairs.sortTradingPairs()
+            val index = tradingPairs.indexOf(tradingPair)
+            if (index != -1) {
+                tradingPairSpinner?.setSelection(index)
+            }
+            toast(getString(R.string.error_generic_message, it.errorMessage))
+        }) {
+            switchTradeInfo(newTradingPair, null, null)
+            updateCurrencySpinner()
+            currentPriceText?.text = product.priceForQuoteCurrency(newTradingPair.quoteCurrency).format(newTradingPair.quoteCurrency)
+        }
     }
 
     private fun switchTradeSide(newTradeSide: TradeSide) {
