@@ -65,27 +65,6 @@ class Currency(val id: String) {
         }
     }
 
-    fun colorFade(context: Context): Int {
-        return knownCurrency?.colorFade(context) ?: run {
-            //TODO: generate colors based on name and darkmode
-            val isDarkModeOn = Prefs(context).isDarkModeOn
-            ContextCompat.getColor(context, R.color.black_fade)
-        }
-    }
-
-    fun colorAccent(context: Context) : Int {
-        return knownCurrency?.colorAccent(context) ?: run {
-            //TODO: generate colors based on name and darkmode
-            val isDarkModeOn = Prefs(context).isDarkModeOn
-
-            if (Prefs(context).isDarkModeOn) {
-                Color.LTGRAY
-            } else {
-                Color.DKGRAY
-            }
-        }
-    }
-
     fun colorStateList(context: Context) : ColorStateList {
         return knownCurrency?.colorStateList(context) ?: run {
             //TODO: generate colors based on name and darkmode
