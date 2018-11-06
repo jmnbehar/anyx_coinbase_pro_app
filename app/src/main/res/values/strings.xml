@@ -124,17 +124,31 @@
     <string name="chart_default_account">Account</string>
     <string name="chart_default_balance">0.0</string>
 
+    <string name="chart_low_label">low:</string>
+    <string name="chart_high_label">high:</string>
+    <string name="chart_volume_label">volume:</string>
+    <string name="chart_close_label">close:</string>
+    <string name="chart_open_label">open:</string>
+
+
+
+
     <string name="chart_update_error">Error updating chart</string>
+
+    <string name="chart_order_cancel_button">Cancel</string>
 
     <string name="chart_order_cancelled">Order cancelled</string>
     <string name="chart_cancel_order">Cancel Order</string>
+
+    <string name="chart_orders_label">Orders</string>
+    <string name="chart_fills_label">Fills</string>
 
     <string name="chart_history_order">Order</string>
     <string name="chart_history_fill">Fill</string>
 
     <string name="chart_history_side_label">Side:  </string>
     <string name="chart_history_size_label">Size:  </string>
-    <string name="chart_history_filled_size_label">FilledSize:  </string>
+    <string name="chart_history_filled_size_label">Filled Size:  </string>
     <string name="chart_history_price_label">Price:  </string>
     <string name="chart_history_status_label">Status:  </string>
     <string name="chart_history_filled_fees_label">Filled Fees:  </string>
@@ -143,11 +157,45 @@
     <string name="chart_history_no_orders">You have no open orders</string>
     <string name="chart_history_no_fills">You have no filled orders</string>
 
+    <string name="chart_history_cancel_confirm">Are you sure you want to cancel this order?</string>
+
     <string name="chart_history_order_side_buy">Buy </string>
     <string name="chart_history_order_side_sell">Sell </string>
 
     <string name="chart_history_fill_side_buy">Bought</string>
     <string name="chart_history_fill_side_sell">Sold</string>
+
+
+    <string name="order_main_label">%s %s for %s</string>
+    <string name="order_price_label">%s at %s per %s</string>
+
+    //For market buys with specified base currency value, ex: "(Buy) (30 ETH) at market value"
+    <string name="order_summary_market_fixed_base">%s %s at market value</string>
+
+    //For market buys w specified quote currency value, ex: "(Buy) ($40) worth of (ETH) at market value"
+    <string name="order_summary_market_fixed_quote">%s %s worth of %s at market value</string>
+
+    //For limit buys, ex: "Buy (2 ETH) for up to ($200) per (ETH)"
+    <string name="order_summary_limit_buy">Buy %s for up to %s per %s</string>
+
+    //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
+    <string name="order_summary_limit_sell">Sell %s for at least %s per %s</string>
+
+    //For limit buys, ex: "Buy (2 ETH) for up to ($200) per (ETH)"
+    <string name="order_summary_stop_buy">Buy %s when the price rises above %s per %s</string>
+
+    //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
+    <string name="order_summary_stop_sell">Sell %s when the price falls below %s per %s</string>
+
+    <string name="chart_fill_main_label">%s %s for %s</string>
+    <string name="chart_fill_price_label">Price: %s per %s</string>
+    <string name="chart_fill_fee_label">Fees paid: %s</string>
+
+
+    <string name="chart_order_fee_label">Fees paid: %s</string>
+
+    <string name="chart_fill_date_single">Date completed: %s</string>
+    <string name="chart_fill_date_multiple">Dates completed: %s</string>
 
     <string name="chart_history_currency_label"> %s at </string>
     <string name="chart_history_trade_type_label">(%s order)</string>
@@ -212,6 +260,7 @@
     <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
 
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
+    <string name="settings_refresh_accounts">Refresh All Data</string>
 
     <string name="settings_quick_change_threshold_info">Minimum change in 1 hour to trigger price spike or drop notifications</string>
 
@@ -239,7 +288,10 @@
     <string name="trade_buy_order_btn">Place Buy Order</string>
     <string name="trade_sell_order_btn">Place Sell Order</string>
     <string name="trade_blank_total">Total =</string>
-    <string name="trade_total_label">Total (%s) =</string>
+
+    <string name="trade_total_cost_label">Estimated cost in %s:</string>
+
+    <string name="trade_total_income_label">Estimated cost in %s:</string>
 
     <string name="trade_invalid_amount">Invalid Amount</string>
     <string name="trade_invalid_limit">Invalid Limit Price</string>
@@ -259,9 +311,28 @@
     <string name="trade_amount_buy_min_error_message">Error: Amount too small. Minimum %s buy amount is %s</string>
     <string name="trade_amount_buy_max_error_message">Error: Amount too small. Maximum %s buy amount is %s</string>
 
+    //For market buys with specified base currency value, ex: "(Buy) (30 ETH) at market value"
+    <string name="trade_summary_market_fixed_base">%s %s at market value</string>
+
+    //For market buys w specified quote currency value, ex: "(Buy) ($40) worth of (ETH) at market value"
+    <string name="trade_summary_market_fixed_quote">%s %s worth of %s at market value</string>
+
+    //For limit buys, ex: "Buy (2 ETH) for up to ($200) per (ETH)"
+    <string name="trade_summary_limit_buy">Buy %s for up to %s per %s</string>
+
+    //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
+    <string name="trade_summary_limit_sell">Sell %s for at least %s per %s</string>
+
+    //For limit buys, ex: "Buy ($12) worth of (ETH) for up to ($200) per (ETH)"
+    <string name="trade_summary_stop_buy">Buy %s worth of %s when the price rises above %s per %s</string>
+
+    //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
+    <string name="trade_summary_stop_sell">Sell %s when the price falls below %s per %s</string>
+
+
+
     //Transfer Fragments
-    <string name="transfer_in_title">Transfer into Coinbase Pro</string>
-    <string name="transfer_out_title">Transfer out of Coinbase Pro</string>
+    <string name="transfer_title">Transfer</string>
     <string name="transfer_pro_wallet_balance">Coinbase Pro Wallet Balance</string>
     <string name="transfer_cb_wallet_balance">Coinbase Wallet Balance</string>
     <string name="transfer_destination">Destination</string>
@@ -375,5 +446,13 @@ You\'re good to go!</item>
     <string name="send_warning_2_eth">Warning: Do not send ETH from Coinbase Pro directly to an Ethereum contract. Sending to a contract may result in lost ETH. Read more here:\nhttps://support.Coinbase Pro.com/customer/en/portal/articles/2430150</string>
 
     <string name="send_balance_text">Available Balance: %s</string>
+    <string name="chart_currency_icon_description">Currency icon</string>
 
+
+    <string name="trade_confirm_anyx_fee_label">AnyX fee ≈</string>
+    <string name="trade_confirm_exchange_fee_label">%s fee ≈</string>
+    <string name="trade_confirm_total_label">Total ≈</string>
+
+    <string name="trade_confirm_button_text">Submit %s order</string>
+    <string name="trade_confirm_very_small_fee">Less than %s</string>
 </resources>

@@ -11,6 +11,7 @@ import android.widget.TextView
 import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_verify_send.view.*
 import com.anyexchange.anyx.classes.Currency
 
@@ -52,20 +53,24 @@ class VerifySendFragment : Fragment() {
         progressBar = rootView.progress_bar_verify_send
         verifySendButton = rootView.btn_verify_send
 
-        val verifyAccount = Account.forCurrency(currency)!!
         verifySendButton.setOnClickListener  {
             progressBar.visibility = View.VISIBLE
-            val productId = verifyAccount.product.id
-            CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
-                    timeInForce = CBProApi.TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
-                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                when (errorMessage) {
-                    CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
-                    else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
-                }
-            }, { _ ->
-                sendCryptoToVerify()
-            })
+
+            val productId = Product.map[currency.id]?.defaultTradingPair?.idForExchange(Exchange.CBPro)
+            if (productId != null) {
+                CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
+                        timeInForce = TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
+                    val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                    when (errorMessage) {
+                        CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
+                        else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
+                    }
+                }, { _ ->
+                    sendCryptoToVerify()
+                })
+            } else {
+                goToVerificationComplete(VerificationStatus.UnknownError)
+            }
         }
 
         updateViews()
@@ -76,13 +81,13 @@ class VerifySendFragment : Fragment() {
         CBProApi.coinbaseAccounts(null).linkToAccounts({
             toast(R.string.verify_unknown_error)
         }, {
-            val coinbaseAccount = Account.forCurrency(currency)?.coinbaseAccount
+            val coinbaseAccount = Account.forCurrency(currency, Exchange.CBPro)?.coinbaseAccount
+            val devAddress = currency.developerAddress
             if (coinbaseAccount == null) {
                 toast(R.string.verify_unknown_error)
-            } else {
-
+            } else if (devAddress != null){
                 val sendAmount = 0.000001
-                CBProApi.sendCrypto(null, sendAmount, currency, currency.developerAddress).executePost({ result ->
+                CBProApi.sendCrypto(null, sendAmount, currency, devAddress).executePost({ result ->
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {
@@ -121,7 +126,7 @@ class VerifySendFragment : Fragment() {
 
 
     fun updateViews() {
-        val account = Account.forCurrency(currency)
+        val account = Account.forCurrency(currency, Exchange.CBPro)
         sendInfoText.text = if (account?.balance ?: 0.0 > 0.0) {
             resources.getString(R.string.verify_explanation_message, currency.fullName)
         } else {

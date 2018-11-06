@@ -15,9 +15,18 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  */
 
 class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Unit) : BaseAdapter() {
+    private var sortedAccountList: List<Account>
+    init {
+        sortedAccountList = sortedAccountList()
+    }
+
+    override fun notifyDataSetChanged() {
+        super.notifyDataSetChanged()
+        sortedAccountList = sortedAccountList()
+    }
 
     override fun getCount(): Int {
-        return Account.cryptoAccounts.size + Account.fiatAccounts.size
+        return sortedAccountList.size
     }
 
     override fun getItem(i: Int): Any {
@@ -28,14 +37,16 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         return i.toLong()
     }
 
-    private val sortedAccountList: List<Account>
-        get() {
-            val sortedAccounts = Account.cryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
-            val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
-            sortedAccounts.addAll(sortedFiatAccounts)
+    private fun sortedAccountList(): List<Account> {
+        val allCryptoAccounts = Account.allCryptoAccounts()
+        val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
-            return sortedAccounts
-        }
+        val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
+        val sortedCryptoAccounts = nonEmptyCryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+        sortedFiatAccounts.addAll(sortedCryptoAccounts)
+
+        return sortedFiatAccounts
+    }
 
     internal class ViewHolder {
         var iconView: ImageView? = null
@@ -68,30 +79,41 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         if(i < accounts.size) {
             val account = accounts[i]
 
-            if (!account.currency.isFiat) {
-                viewHolder.balanceText?.text = context.resources.getString(R.string.accounts_balance_text, account.balance.btcFormat(), account.currency.toString())
+            if (account.currency.isFiat) {
+                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                viewHolder.balanceText?.text = account.currency.toString()
+                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                viewHolder.percentChangeText?.text = ""
+            } else if (account.currency.isStableCoin) {
+                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                viewHolder.balanceText?.text = account.defaultValue.format(account.currency)
+                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                viewHolder.percentChangeText?.text = ""
+            } else {
+                viewHolder.balanceText?.text =  account.balance.format(account.currency)
                 outputView.setOnClickListener { onClick(account) }
 
-                val percentChange = account.product.percentChange(Timespan.DAY, Account.defaultFiatCurrency)
+                val product = Product.map[account.currency.id]
+                val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0
 
                 if (account.defaultValue > 0) {
-                    viewHolder.accountValueText?.text = account.defaultValue.fiatFormat(Account.defaultFiatCurrency)
+                    viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
                     val accountChange = (percentChange * account.defaultValue) / 100
                     val sign = if (percentChange >= 0) { "+" } else { "" }
-                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.fiatFormat(Account.defaultFiatCurrency))
+                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
                     viewHolder.accountValueText?.visibility = View.VISIBLE
                     viewHolder.percentChangeText?.visibility = View.VISIBLE
                 } else {
                     viewHolder.accountValueText?.visibility = View.INVISIBLE
                     viewHolder.percentChangeText?.visibility = View.INVISIBLE
                 }
-            } else {
-                viewHolder.accountValueText?.text = account.defaultValue.fiatFormat(Account.defaultFiatCurrency)
-                viewHolder.balanceText?.text = account.currency.toString()
-                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                viewHolder.percentChangeText?.text = ""
             }
-            viewHolder.iconView?.setImageResource(account.currency.iconId)
+            account.currency.iconId?.let {
+                viewHolder.iconView?.visibility = View.VISIBLE
+                viewHolder.iconView?.setImageResource(it)
+            } ?: run {
+                viewHolder.iconView?.visibility = View.INVISIBLE
+            }
         }
 
         return outputView

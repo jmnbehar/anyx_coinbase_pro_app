@@ -11,7 +11,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.support.v4.view.ViewPager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.*
 import com.github.kittinunf.result.Result
@@ -25,12 +24,14 @@ import kotlinx.android.synthetic.main.fragment_chart.view.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.alert
 import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.adapters.HistoryPagerAdapter
+import com.anyexchange.anyx.adapters.FillListViewAdapter
+import com.anyexchange.anyx.adapters.OrderListViewAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.CBProApi
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -40,9 +41,17 @@ import java.util.*
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, View.OnTouchListener, LifecycleOwner {
+class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGestureListener, LifecycleOwner {
     private lateinit var inflater: LayoutInflater
-    private var historyPager: ViewPager? = null
+
+    private var lockableScrollView: LockableScrollView? = null
+
+    private var orderListLabel: TextView? = null
+    private var orderListView: ListView? = null
+
+    private var fillListLabel: TextView? = null
+    private var fillListView: ListView? = null
+
     private var tradingPairSpinner: Spinner? = null
 
     private var candles = listOf<Candle>()
@@ -79,6 +88,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var blockRefresh = false
     private var didTouchTradingPairSpinner = false
+    private var skipNextOrderFillCheck = false
 
     val timespan: Timespan
         get() = viewModel.timeSpan
@@ -93,13 +103,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         get() = viewModel.tradingPair?.quoteCurrency ?: Currency.USD
 
     companion object {
-        var account: Account = Account.dummyAccount
+        var product: Product = Product.dummyProduct
 
         var currency: Currency
-            get() = account.currency
+            get() = product.currency
             set(value) {
-                Account.forCurrency(value)?.let {
-                    account = it
+                Product.map[value.id]?.let {
+                    product = it
+                } ?: run {
+                    //TODO: don't change
                 }
             }
     }
@@ -110,6 +122,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         var chartStyle = ChartStyle.Line
         var tradingPair: TradingPair? = null
     }
+
+    private val relevantAccount: Account?
+        get() {
+            val exchange = tradingPair?.exchange
+            return if (exchange != null) {
+                product.accounts[exchange]
+            } else {
+                null
+            }
+        }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -132,10 +154,15 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
-        val tempAccount = account
+        val tradingPairs: List<TradingPair> = if (product.tradingPairs.isNotEmpty()) {
+            product.tradingPairs.sortTradingPairs()
+        } else {
+            listOf()
+        }
 
-        candles = tempAccount.product.candlesForTimespan(timespan, tradingPair)
-        val currency = tempAccount.currency
+        viewModel.tradingPair = tradingPairs.firstOrNull()
+
+        candles = product.candlesForTimespan(timespan, tradingPair)
 
         lineChart = rootView.chart_line_chart
         candleChart = rootView.chart_candle_chart
@@ -143,12 +170,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val granularity = Candle.granularityForTimespan(timespan)
         lineChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollToTop(800)
+            lockableScrollView?.scrollLocked = true
         }
         lineChart?.setOnChartValueSelectedListener(this)
         lineChart?.onChartGestureListener = this
 
         candleChart?.configure(candles, currency, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
+            lockableScrollView?.scrollToTop(800)
+            lockableScrollView?.scrollLocked = true
         }
         candleChart?.setOnChartValueSelectedListener(this)
         candleChart?.onChartGestureListener = this
@@ -169,10 +200,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             valueTextView = rootView.txt_chart_account_value
             accountIcon = rootView.img_chart_account_icon
 
-            historyTabLayout = rootView.history_tab_layout
-
             sellButton = rootView.btn_chart_sell
-            historyPager = rootView.history_view_pager
+
+            orderListLabel = rootView.txt_chart_orders_label
+            orderListView = rootView.list_chart_orders
+
+            fillListLabel = rootView.txt_chart_fills_label
+            fillListView = rootView.list_chart_fills
+
+            lockableScrollView = rootView.lockscroll_chart
+
         } else {
             openLabelTextView = rootView.txt_chart_open_label
             openTextView = rootView.txt_chart_open
@@ -191,22 +228,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             sellButton?.setOnClickListener { _ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
-            historyPager = rootView.history_view_pager
 
-            val stashedFills: List<ApiFill> = prefs.getStashedFills(tempAccount.product.id)
-            val stashedOrders: List<ApiOrder> = prefs.getStashedOrders(tempAccount.product.id)
+            updateHistoryListsFromStashes(it)
+            skipNextOrderFillCheck = true
 
-            historyPager?.adapter = HistoryPagerAdapter(childFragmentManager, stashedOrders, stashedFills,
-                    { order -> orderOnClick(order)}, { fill -> fillOnClick(fill) })
-            historyPager?.setOnTouchListener(this)
-
-
-            val tradingPairs: List<TradingPair> = if (tempAccount.product.tradingPairs.isNotEmpty()) {
-                tempAccount.product.tradingPairs.sortedBy { tradingPair ->  tradingPair.quoteCurrency.orderValue }
-            } else {
-                listOf()
-            }
-            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
+            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
@@ -217,7 +243,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 }
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (lifecycle.currentState == Lifecycle.State.RESUMED && didTouchTradingPairSpinner) {
-                        val tempTradingPairIndex = account.product.tradingPairs.indexOf(tradingPair)
+                        val tempTradingPairIndex = product.tradingPairs.indexOf(tradingPair)
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
                         miniRefresh({ _ ->
@@ -263,12 +289,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         return rootView
     }
 
-    var blockNextAccountChange = false
+    private var blockNextProductChange = false
     override fun onResume() {
         super.onResume()
-        //TODO: reset trading pair and timespan
-
-        val tradingPairs = account.product.tradingPairs.sortedBy { it.quoteCurrency.orderValue }
+        val tradingPairs = product.tradingPairs.sortTradingPairs()
         val index = tradingPairs.indexOf(tradingPair)
         if (index != -1) {
             tradingPairSpinner?.setSelection(index)
@@ -289,20 +313,21 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         volumeLabelTextView?.visibility = View.GONE
         volumeTextView?.visibility = View.GONE
 
-        blockNextAccountChange = true
-        showNavSpinner(currency, Currency.cryptoList) { selectedCurrency ->
-            if (!blockNextAccountChange) {
-                Account.forCurrency(selectedCurrency)?.let { tempAccount ->
-                    account = tempAccount
-                    switchAccount(tempAccount)
+        blockNextProductChange = true
+
+        val currencyList = Product.map.keys.map { Currency(it) }
+        showNavSpinner(currency, currencyList) { selectedCurrency ->
+            if (!blockNextProductChange) {
+                Product.map[selectedCurrency.id]?.let {
+                    switchProduct(it)
                 }
             }
-            blockNextAccountChange = false
+            blockNextProductChange = false
         }
 
         if (!currency.isFiat) {
-            setButtonsAndBalanceText(account)
-            switchAccount(account)
+            setButtonsAndBalanceText(product)
+            switchProduct(product)
         } else {
             val mainActivity = activity as? MainActivity
             val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
@@ -312,8 +337,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 System.out.println("Account reset to BTC")
                 Currency.BTC
             }
-            setButtonsAndBalanceText(account)
-            switchAccount(account)
+            setButtonsAndBalanceText(product)
+            switchProduct(product)
         }
 
         autoRefresh = Runnable {
@@ -337,7 +362,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val shouldShowOptions = lifecycle.isCreatedOrResumed
         menu.findItem(R.id.chart_style_line).isVisible = shouldShowOptions
         menu.findItem(R.id.chart_style_candle).isVisible = shouldShowOptions
-        activity!!.invalidateOptionsMenu()
+        activity?.invalidateOptionsMenu()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -359,11 +384,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         when(chartStyle) {
             ChartStyle.Line -> {
                 lineChart?.visibility = View.VISIBLE
-                candleChart?.visibility = View.GONE
-            }
-            ChartStyle.Candle -> {
-                lineChart?.visibility = View.GONE
-                candleChart?.visibility = View.VISIBLE
+                    candleChart?.visibility = View.GONE
+                }
+                ChartStyle.Candle -> {
+                    lineChart?.visibility = View.GONE
+                    candleChart?.visibility = View.VISIBLE
             }
         }
     }
@@ -392,142 +417,153 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (tradeFragment == null) {
             tradeFragment = TradeFragment.newInstance(tradeSide)
         } else {
-            tradeFragment?.tradeSide = tradeSide
+            TradeFragment.tradeSide = tradeSide
         }
         (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
     }
 
-    private fun switchAccount(newAccount: Account) {
-        account = newAccount
+    private fun switchProduct(newProduct: Product) {
+        product = newProduct
         blockRefresh = true
         didTouchTradingPairSpinner = false
 
-        val price = newAccount.product.priceForQuoteCurrency(quoteCurrency)
+        val price = newProduct.priceForQuoteCurrency(quoteCurrency)
         priceTextView?.text = price.format(quoteCurrency)
 
-        context?.let { context ->
-            val tradingPairs = account.product.tradingPairs
-            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
-            tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
-            val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
-            if (relevantTradingPair != null) {
-                val index = tradingPairs.indexOf(relevantTradingPair)
-                spinner_chart_trading_pair.setSelection(index)
-                viewModel.tradingPair = relevantTradingPair
-            } else {
-                viewModel.tradingPair = tradingPairs.firstOrNull()
-            }
+        val tradingPairs = product.tradingPairs.sortTradingPairs()
+        val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
 
-            candles = newAccount.product.candlesForTimespan(timespan, tradingPair)
-            val prefs = Prefs(context)
-            if (prefs.isLoggedIn) {
-                if (account.apiAccount.balance.toDoubleOrNull() == null) {
-                    refresh {
-                        switchAccountCandlesCheck(newAccount)
-                        dismissProgressSpinner()
-                    }
-                } else {
-                    switchAccountCandlesCheck(newAccount)
-                }
-            } else {
-                switchAccountCandlesCheck(newAccount)
-            }
-        }
+        viewModel.tradingPair = relevantTradingPair ?: tradingPairs.firstOrNull()
+
+        candles = newProduct.candlesForTimespan(timespan, tradingPair)
+        //TODO: make sure account has all valid info
+        switchProductCandlesCheck(product)
     }
 
-    private fun checkOrdersAndFills(productId: String, context: Context) {
+    private fun checkOrdersAndFills(tradingPair: TradingPair, context: Context) {
         val prefs = Prefs(context)
-        val stashedFills = prefs.getStashedFills(productId)
-        val stashedOrders = prefs.getStashedOrders(productId)
+        val exchange = tradingPair.exchange
+        val stashedFills = prefs.getStashedFills(currency)
+        val stashedOrders = prefs.getStashedOrders(currency)
 
-        val dateOrdersLastStashed = prefs.getDateOrdersLastStashed()
-        val dateFillsLastStashed  = prefs.getDateFillsLastStashed(productId)
+        val dateOrdersLastStashed = prefs.getDateOrdersLastStashed(exchange)
+        val dateFillsLastStashed  = prefs.getDateFillsLastStashed(tradingPair, exchange)
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
 
         if (dateOrdersLastStashed + TimeInMillis.oneHour > nowInSeconds) {
-            CBProApi.listOrders(apiInitData).getAndStash({
-                updateFills(productId, stashedOrders, stashedFills)
-            }) { newOrderList ->
-                updateFills(productId, newOrderList,  stashedFills)
+            Order.getAndStashList(apiInitData, currency, { //OnFailure:
+                updateFills(currency, stashedOrders, stashedFills)
+            }) { newOrderList -> // OnSuccess:
+                updateFills(currency, newOrderList,  stashedFills)
             }
         } else if (dateFillsLastStashed + TimeInMillis.fiveMinutes > nowInSeconds) {
-            updateFills(productId, stashedOrders, stashedFills)
+            updateFills(currency, stashedOrders, stashedFills)
         } else if (dateFillsLastStashed + TimeInMillis.oneDay > nowInSeconds && stashedOrders.isNotEmpty()) {
-            updateFills(productId, stashedOrders, stashedFills)
+            updateFills(currency, stashedOrders, stashedFills)
         }
     }
-    private fun updateFills(productId: String, orderList: List<ApiOrder>, stashedFills: List<ApiFill>) {
-        CBProApi.fills(apiInitData, productId = productId).getAndStash({ _ ->
-            if (lifecycle.isCreatedOrResumed) {
-                updateHistoryPagerAdapter(orderList, stashedFills)
+
+    private fun updateFills(currency: Currency, orderList: List<Order>, stashedFills: List<Fill>) {
+        Fill.getAndStashList(apiInitData, currency, { _ ->
+            context?.let {
+                if (lifecycle.isCreatedOrResumed) {
+                    updateHistoryLists(it, orderList, stashedFills)
+                }
             }
         }) { apiFillList ->
-            if (lifecycle.isCreatedOrResumed) {
-                updateHistoryPagerAdapter(orderList, apiFillList)
+            context?.let {
+                if (lifecycle.isCreatedOrResumed) {
+                    updateHistoryLists(it,orderList, apiFillList)
+                }
             }
         }
     }
+
     private fun areCandlesUpToDate(timespan: Timespan): Boolean {
         val nowInSeconds = Calendar.getInstance().timeInSeconds()
-        val candles = account.product.candlesForTimespan(timespan, tradingPair)
-        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: 0
+        val candles = product.candlesForTimespan(timespan, tradingPair)
+        val lastCandleTime = candles.lastOrNull()?.closeTime ?: 0
         val nextCandleTime = lastCandleTime + Candle.granularityForTimespan(timespan)
         return candles.isNotEmpty() && (nextCandleTime > nowInSeconds)
     }
 
-    private fun switchAccountCandlesCheck(account: Account) {
+    private fun switchProductCandlesCheck(product: Product) {
         if (areCandlesUpToDate(timespan)) {
-            completeSwitchAccount(account)
+            completeSwitchProduct(product)
         } else {
             showProgressSpinner()
             miniRefresh({   //onFailure
                 //Even if miniRefresh fails here, switch anyways
                 dismissProgressSpinner()
-                candles = account.product.candlesForTimespan(timespan, tradingPair)
-                completeSwitchAccount(account)
+                candles = product.candlesForTimespan(timespan, tradingPair)
+                completeSwitchProduct(product)
             }, {    //success
                 dismissProgressSpinner()
-                candles = account.product.candlesForTimespan(timespan, tradingPair)
-                completeSwitchAccount(account)
+                candles = product.candlesForTimespan(timespan, tradingPair)
+                completeSwitchProduct(product)
             })
         }
     }
-    private fun completeSwitchAccount(account: Account) {
+    private fun completeSwitchProduct(product: Product) {
         blockRefresh = false
-        context?.let {
-            val prefs = Prefs(it)
-            val productId = account.product.id
-            val stashedFills = prefs.getStashedFills(productId)
-            val stashedOrders = prefs.getStashedOrders(productId)
-            addCandlesToActiveChart(candles, account.currency)
-            setPercentChangeText(timespan)
-            txt_chart_name.text = account.currency.fullName
-            setButtonsAndBalanceText(account)
-            updateHistoryPagerAdapter(stashedOrders, stashedFills)
-            checkOrdersAndFills(productId, it)
+        lockableScrollView?.scrollToTop(200)
+        context?.let { context ->
+            val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
+            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
+            tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
+
+            val index = tradingPairs.indexOf(tradingPair)
+            if (index != -1) {
+                tradingPairSpinner?.setSelection(index)
+            }
+
+            product.defaultTradingPair?.let { tradingPair ->
+                addCandlesToActiveChart(candles, product.currency)
+                setPercentChangeText(timespan)
+                txt_chart_name.text = product.currency.fullName
+                setButtonsAndBalanceText(product)
+
+                if (!skipNextOrderFillCheck) {
+                    updateHistoryListsFromStashes(context)
+                    checkOrdersAndFills(tradingPair, context)
+                }
+                skipNextOrderFillCheck = false
+            }
+            return@let
         }
     }
 
-    private fun setButtonsAndBalanceText(account: Account) {
+    private fun setButtonsAndBalanceText(product: Product) {
         context?.let {
-            val currency = account.currency
+            val currency = product.currency
             setButtonColors()
             val prefs = Prefs(it)
+            val account = relevantAccount
             if (prefs.isLoggedIn) {
-                val value = account.valueForQuoteCurrency(quoteCurrency)
+                val balance = account?.balance ?: 0.0
                 tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
-                accountIcon?.setImageResource(currency.iconId)
-                balanceTextView?.text = resources.getString(R.string.chart_balance_text, account.balance.btcFormat(), currency)
-                valueTextView?.text = value.format(quoteCurrency)
-
-                historyPager?.visibility = View.VISIBLE
+                currency.iconId?.let { iconId ->
+                    accountIcon?.visibility = View.VISIBLE
+                    accountIcon?.setImageResource(iconId)
+                } ?: run {
+                    accountIcon?.visibility = View.GONE
+                }
+                balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
+                updateValueText()
+                orderListLabel?.visibility = View.VISIBLE
+                orderListView?.visibility = View.VISIBLE
+                fillListLabel?.visibility = View.VISIBLE
+                fillListView?.visibility = View.VISIBLE
             } else {
                 tickerTextView?.visibility = View.GONE
                 accountIcon?.visibility = View.GONE
                 balanceTextView?.visibility = View.GONE
                 valueTextView?.visibility = View.GONE
 
-                historyPager?.visibility = View.INVISIBLE
+                orderListLabel?.visibility = View.GONE
+                orderListView?.visibility = View.GONE
+                fillListLabel?.visibility = View.GONE
+                fillListView?.visibility = View.GONE
             }
         }
     }
@@ -564,8 +600,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             viewModel.timeSpan = newTimespan
             showProgressSpinner()
             if (areCandlesUpToDate(timespan)) {
-                candles = account.product.candlesForTimespan(timespan, tradingPair)
-                val price = account.product.priceForQuoteCurrency(quoteCurrency)
+                candles = product.candlesForTimespan(timespan, tradingPair)
+                val price = product.priceForQuoteCurrency(quoteCurrency)
                 completeMiniRefresh(price, candles) {
                     dismissProgressSpinner()
                     timespanRadioGroup?.isEnabled = true
@@ -587,7 +623,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
 
     private fun setPercentChangeText(timespan: Timespan) {
-        val percentChange = account.product.percentChange(timespan, quoteCurrency)
+        val percentChange = product.percentChange(timespan, quoteCurrency)
         txt_chart_change_or_date.text = percentChange.percentFormat()
         txt_chart_change_or_date.textColor = if (percentChange >= 0) {
             Color.GREEN
@@ -596,75 +632,54 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun orderOnClick(order: ApiOrder) {
-        alert {
-            title = resources.getString(R.string.chart_history_order)
-            val layoutWidth = 1000
-            val createdTimeRaw = order.created_at
-            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
-            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
+//    private fun confirmCancelOrder(order: Order) {
+//        alert {
+//            title = resources.getString(R.string.chart_history_order)
+//            val layoutWidth = 1000
+//
+//            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
+//
+//            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
+//            val price = (order.price ?: 0.0).format(quoteCurrency)
+//            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
+//            val size = order.amount.btcFormat()
+//            val status = order.status
+//
+//            customView {
+//                linearLayout {
+//                    verticalLayout {
+//                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
+//                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
+//                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
+//                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
+//                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
+//                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
+//                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
+//                    }.lparams(width = matchParent) {leftMargin = dip(20) }
+//                }
+//            }
+//            positiveButton(R.string.popup_ok_btn) {  }
+//            negativeButton(R.string.chart_cancel_order) {
+//                cancelOrder(order)
+//            }
+//        }.show()
+//    }
 
-            val fillFees = order.fill_fees.toDoubleOrNull()?.format(quoteCurrency)
-            val price = order.price.toDoubleOrNull()?.format(quoteCurrency)
-            val filledSize = order.filled_size.toDoubleOrNull()?.toString()
-            val size = (order.size ?: "0").toDoubleOrNull()?.btcFormat()
-
-            customView {
-                linearLayout {
-                    verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, order.side).lparams(width = layoutWidth) {}
-                        if (size != null)       { horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {} }
-                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
-                        if (price != null)      { horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {} }
-                                                  horizontalLayout(R.string.chart_history_status_label, order.status).lparams(width = layoutWidth) {}
-                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
-                                                  horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(20) }
+    private fun cancelOrder(order: Order) {
+        order.cancel(apiInitData, { _ -> }) { _ ->
+            if (lifecycle.isCreatedOrResumed) {
+                var orders = (orderListView?.adapter as OrderListViewAdapter).orders
+                orders = orders.filter { o -> o.id != order.id }
+                context?.let { context ->
+                    updateHistoryLists(context, orders)
                 }
+                toast(R.string.chart_order_cancelled)
             }
-            positiveButton(R.string.popup_ok_btn) {  }
-            negativeButton(R.string.chart_cancel_order) {
-                CBProApi.cancelOrder(apiInitData, order.id).executeRequest({ _ -> }) { _ ->
-                    if (lifecycle.isCreatedOrResumed) {
-                        var orders = (historyPager?.adapter as HistoryPagerAdapter).orders
-                        orders = orders.filter { o -> o.id != order.id }
-                        updateHistoryPagerAdapter(orders)
-                        toast(R.string.chart_order_cancelled)
-                    }
-                }
-            }
-        }.show()
-    }
-
-    private fun fillOnClick(fill: ApiFill) {
-        alert {
-            title = resources.getString(R.string.chart_history_fill)
-
-            val layoutWidth = 1000
-            val createdTimeRaw = fill.created_at
-            val createdTimeDate = createdTimeRaw.dateFromApiDateString()
-            val createdTimeString = createdTimeDate?.format("h:mma, MM/dd/yyyy") ?: createdTimeRaw
-
-            val fee = fill.fee.toDouble().format(quoteCurrency)
-            val price = fill.price.toDouble().format(quoteCurrency)
-            val size = fill.size.toDouble().btcFormat()
-            customView {
-                linearLayout {
-                    verticalLayout {
-                        horizontalLayout(R.string.chart_history_side_label, fill.side).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_fee_label, fee).lparams(width = layoutWidth) {}
-                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-                    }.lparams(width = matchParent) {leftMargin = dip(20) }
-                }
-            }
-            positiveButton(R.string.popup_ok_btn) {  }
-        }.show()
+        }
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        val time = entry.data as? Double
+        val time = entry.data as? Long
         priceTextView?.text = entry.y.toDouble().format(quoteCurrency)
         txt_chart_change_or_date.text = time?.toStringWithTimespan(timespan)
         context?.let {
@@ -709,7 +724,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onNothingSelected() {
-        priceTextView?.text = account.product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+        priceTextView?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
         setPercentChangeText(timespan)
         when (chartStyle) {
             ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
@@ -735,36 +750,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         priceTextView?.typeface = Typeface.DEFAULT
     }
 
-    override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
-        when (view) {
-            historyPager -> {
-                when (motionEvent.action){
-                    MotionEvent.ACTION_MOVE -> {
-                        swipeRefreshLayout?.isEnabled = false
-                    }
-                    MotionEvent.ACTION_DOWN -> {
-                        swipeRefreshLayout?.isEnabled = false
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        swipeRefreshLayout?.isEnabled = true
-                    }
-                    MotionEvent.ACTION_CANCEL -> {
-                        swipeRefreshLayout?.isEnabled = true
-                    }
-                }
-            }
-        }
-        view.performClick()
-        return false
-    }
-
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
+
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
+        lockableScrollView?.scrollLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
+        lockableScrollView?.scrollLocked = true
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
@@ -781,40 +776,37 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         val context = context
-        if (context != null && Prefs(context).isLoggedIn) {
+
+        val account = relevantAccount
+        if (context != null && Prefs(context).isLoggedIn && account != null) {
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            CBProApi.account(apiInitData, account.id).get( onFailure) { apiAccount ->
+            AnyApi.updateAccount(apiInitData, account, onFailure) { updatedAccount ->
                 if (lifecycle.isCreatedOrResumed) {
-                    var newBalance = account.balance
-                    if (apiAccount != null) {
-                        newBalance = apiAccount.balance.toDoubleOrZero()
-                        account.apiAccount = apiAccount
-                    }
-                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, newBalance.btcFormat(), account.currency)
-                    valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, updatedAccount.balance.btcFormat(), updatedAccount.currency)
+                    updateValueText()
                     miniRefresh(onFailure) {
                         onComplete(true)
                     }
                 }
             }
 
-            var filteredOrders: List<ApiOrder>? = null
-            var filteredFills: List<ApiFill>? = null
-            CBProApi.listOrders(apiInitData).getAndStash(onFailure) { apiOrderList ->
+            var filteredOrders: List<Order>? = null
+            var filteredFills: List<Fill>? = null
+            Order.getAndStashList(apiInitData, currency, onFailure) { orderList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredOrders = apiOrderList.filter { it.product_id == account.product.id }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    filteredOrders = orderList
+                    filteredFills?.let {
+                        updateHistoryLists(context, orderList, it)
                     }
                 }
             }
-            CBProApi.fills(apiInitData, productId = account.product.id).getAndStash(onFailure) { apiFillList ->
+            Fill.getAndStashList(apiInitData, currency, onFailure) { fillList ->
                 if (lifecycle.isCreatedOrResumed) {
-                    filteredFills = apiFillList.filter { it.product_id == account.product.id }
-                    if (filteredOrders != null && filteredFills != null) {
-                        updateHistoryPagerAdapter(filteredOrders!!, filteredFills!!)
+                    filteredFills = fillList
+                    filteredOrders?.let {
+                        updateHistoryLists(context, it, fillList)
                     }
                 }
             }
@@ -825,28 +817,49 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateHistoryPagerAdapter(orderList: List<ApiOrder>, fillList: List<ApiFill>? = null) {
-        (historyPager?.adapter as? HistoryPagerAdapter)?.orders = orderList
-        fillList?.let {
-            (historyPager?.adapter as? HistoryPagerAdapter)?.fills = it
+    private fun updateHistoryListsFromStashes(context: Context) {
+        val prefs = Prefs(context)
+        val stashedFills = prefs.getStashedFills(currency)
+        val combinedFills = stashedFills.combineFills()
+        val stashedOrders = prefs.getStashedOrders(currency)
+        updateHistoryLists(context, stashedOrders, combinedFills)
+    }
+
+    private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
+        orderListView?.adapter = OrderListViewAdapter(context, orderList, resources,
+                { order -> //Order On Click:
+                    order.showExtraInfo = !order.showExtraInfo
+                    (orderListView?.adapter as? OrderListViewAdapter)?.notifyDataSetChanged()
+                    orderListView?.setHeightBasedOnChildren()
+                } , { order -> //Order Cancel:
+                    //confirmCancelOrder(order)
+                    cancelOrder(order)
+        })
+        orderListView?.setHeightBasedOnChildren()
+
+        if (fillList != null) {
+            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { fill ->
+                fill.showExtraInfo = !fill.showExtraInfo
+                (fillListView?.adapter as? FillListViewAdapter)?.notifyDataSetChanged()
+                fillListView?.setHeightBasedOnChildren()
+            }
+            fillListView?.setHeightBasedOnChildren()
         }
-        (historyPager?.adapter as? HistoryPagerAdapter)?.notifyDataSetChanged()
-        //historyList.setHeightBasedOnChildren()
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        val tradingPairTemp = tradingPair
         if (currency.isFiat) {
             onComplete()
-        } else {
-            val tradingPairTemp = tradingPair
-            account.product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
+        } else if (tradingPairTemp != null){
+            product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {
-                        candles = account.product.candlesForTimespan(timespan, tradingPair)
-                        tradingPair?.let {
-                            CBProApi.ticker(apiInitData, it).get(onFailure) {_ ->
+                        candles = product.candlesForTimespan(timespan, tradingPair)
+                        tradingPair?.let { tradingPair ->
+                            AnyApi.ticker(apiInitData, tradingPair, onFailure) { _ ->
                                 if (lifecycle.isCreatedOrResumed) {
-                                    val price = account.product.priceForQuoteCurrency(quoteCurrency)
+                                    val price = product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)
                                 }
                             }
@@ -863,10 +876,18 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
+    private fun updateValueText() {
+        relevantAccount?.let { account ->
+            valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
+            valueTextView?.visibility = View.VISIBLE
+        } ?: run {
+            valueTextView?.visibility = View.GONE
+        }
+    }
+
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         priceTextView?.text = price.format(quoteCurrency)
-        valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-
+        updateValueText()
         addCandlesToActiveChart(candles, currency)
         setPercentChangeText(timespan)
         checkTimespanButton()

@@ -20,7 +20,7 @@ import android.widget.TextView
 class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return Account.cryptoAccounts.size
+        return Product.map.size
     }
 
     override fun getItem(i: Int): Any {
@@ -33,8 +33,8 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
     private val sortedProductList: List<Product>
         get() {
-            val sortedAccounts = Account.cryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
-            return sortedAccounts.map { a -> a.product }
+            val productList = Product.map.values.toList()
+            return productList.sortedWith(compareBy({ it.totalDefaultValueOfRelevantAccounts() }, { it.currency.orderValue }, { it.currency.id })).reversed()
         }
 
     internal class ViewHolder {
@@ -73,23 +73,44 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val product = sortedProductList[i]
 
         //TODO: someday add ability to select values here
-        viewHolder.productIcon?.setImageResource(product.currency.iconId)
+
+        product.currency.iconId?.let {
+            viewHolder.productIcon?.visibility = View.VISIBLE
+            viewHolder.productIcon?.setImageResource(it)
+        } ?: run {
+            viewHolder.productIcon?.visibility = View.GONE
+        }
 
         viewHolder.productNameText?.text = product.currency.toString()
 
         val timespan = Timespan.DAY
-        val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
-        viewHolder.percentChangeText?.text = percentChange.percentFormat()
-        viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
-            Color.GREEN
-        } else {
-            Color.RED
-        }
 
         val granularity = Candle.granularityForTimespan(timespan)
-        viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
-        viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
 
+        if (product.isFavorite && product.defaultDayCandles.isNotEmpty()) {
+            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
+            viewHolder.lineChart?.visibility = View.VISIBLE
+            viewHolder.priceText?.visibility = View.VISIBLE
+            viewHolder.percentChangeText?.visibility = View.VISIBLE
+            viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
+
+            val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
+            viewHolder.percentChangeText?.text = percentChange.percentFormat()
+            viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
+                Color.GREEN
+            } else {
+                Color.RED
+            }
+        } else {
+            viewHolder.lineChart?.visibility = View.GONE
+            viewHolder.priceText?.visibility = View.GONE
+            viewHolder.percentChangeText?.visibility = View.GONE
+        }
+        outputView.setOnLongClickListener {
+            product.isFavorite = !product.isFavorite
+            notifyDataSetChanged()
+            true
+        }
         outputView.setOnClickListener { onClick(product) }
 
         return outputView

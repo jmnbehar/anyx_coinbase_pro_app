@@ -59,7 +59,7 @@ class PriceAlert(var price: Double, val currency: Currency, val triggerIfAbove: 
         fun forString(string: String): PriceAlert {
             val splitString = string.split('\n')
             val price = splitString[0].toDoubleOrZero()
-            val currency = Currency.forString(splitString[1]) ?: Currency.USD
+            val currency = Currency(splitString[1])
             val triggerIfAbove = splitString[2].toBoolean()
             val hasTriggered = splitString[3].toBoolean()
             return PriceAlert(price, currency, triggerIfAbove, hasTriggered)

@@ -8,6 +8,9 @@ import android.app.job.JobInfo
 import android.content.ComponentName
 import android.app.job.JobParameters
 import android.app.job.JobService
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.classes.api.CBProApi
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -31,7 +34,7 @@ class AutoStart : BroadcastReceiver() {
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
-            jobScheduler!!.schedule(builder.build())
+            jobScheduler?.schedule(builder.build())
         }
 
     }
@@ -39,17 +42,20 @@ class AutoStart : BroadcastReceiver() {
 
 
 class AlertJobService : JobService() {
-    val apiInitData = CBProApi.CBProApiInitData(this) { }
+    val apiInitData = ApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
 //        AlertHub.triggerDummyAlert(this)
-        if (Account.cryptoAccounts.isEmpty()) {
-            CBProApi.accounts(apiInitData).getAllAccountInfo({ /* do nothing*/ }, {
-                loopThroughAlerts()
+        if (Product.map.isEmpty()) {
+            AnyApi.getAllProducts(apiInitData, { /* do nothing*/ }, {
+                //TODO: get all accounts here?
+                Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
+                    loopThroughAlerts()
+                })
                 checkFillAlerts()
             })
         } else {
-            Account.updateAllAccountsCandles(apiInitData, { /* do nothing*/ }, {
+            Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
                 loopThroughAlerts()
             })
             checkFillAlerts()
@@ -59,12 +65,19 @@ class AlertJobService : JobService() {
     }
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
-        if (prefs.areAlertFillsActive && prefs.isLoggedIn) {
-            for (account in Account.cryptoAccounts) {
-                val stashedOrders = prefs.getStashedOrders(account.product.id)
-                if (stashedOrders.isNotEmpty()) {
-                    CBProApi.listOrders(apiInitData).getAndStash({ }) { }
-                    CBProApi.fills(apiInitData, productId = account.product.id).getAndStash({ }) { }
+        if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
+            val orderTradingPairs = mutableListOf<TradingPair>()
+            for (product in Product.map.values) {
+                //TODO: fix for multiple exchanges
+                val stashedOrders = prefs.getStashedOrders(product.currency, Exchange.CBPro)
+                val partialTradingPairs = stashedOrders.map { it.tradingPair }
+                orderTradingPairs.addAll(partialTradingPairs)
+            }
+
+            if (orderTradingPairs.isNotEmpty()) {
+                CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
+                for (tradingPair in orderTradingPairs) {
+                    CBProApi.fills(apiInitData, tradingPair).getAndStash({ }) { }
                 }
             }
         }
@@ -92,7 +105,7 @@ class AlertJobService : JobService() {
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
+                val currentPrice = Product.forCurrency(alert.currency)?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {
@@ -104,10 +117,11 @@ class AlertJobService : JobService() {
         val enabledCurrencies = prefs.quickChangeAlertCurrencies
         var changeAlert: QuickChangeAlert? = null
         val setTimespan: QuickChangeAlert.AlertTimespan? = null
-        for (currency in enabledCurrencies) {
-            val account = Account.forCurrency(currency)
-            if (account != null) {
-                val candles = account.product.candlesForTimespan(timespan, null)
+        for (currencyId in enabledCurrencies) {
+            val currency = Currency(currencyId)
+            val product = Product.forCurrency(currency)
+            if (product != null) {
+                val candles = product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
                     val minAlertPercentage = prefs.quickChangeThreshold.toDouble()
                     var alertPercentage = minAlertPercentage

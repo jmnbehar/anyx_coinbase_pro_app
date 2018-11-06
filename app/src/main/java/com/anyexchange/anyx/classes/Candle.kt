@@ -1,13 +1,17 @@
 package com.anyexchange.anyx.classes
 
 data class Candle(
-        val time: Double,
+        val openTime: Long,
+        val closeTime: Long,
         val low: Double,
         val high: Double,
         val open: Double,
         val close: Double,
         val volume: Double,
-        val tradingPair: TradingPair)  {
+        val quoteAssetVolume: Double? = null,
+        val tradeCount: Long? = null,
+        val takerBuyBaseAssetVolume: Double? = null,
+        val takerBuyQuoteAssetVolume: Double? = null)  {
 
 //    val tradingPair: TradingPair? = null
 
@@ -35,13 +39,13 @@ fun MutableList<Candle>.addingCandles(newList: List<Candle>) : MutableList<Candl
     return if (previouslyEmpty) {
         this
     } else {
-        val distinctList = this.distinctBy { it.time }
+        val distinctList = this.distinctBy { it.closeTime }
         distinctList.toMutableList()
     }
 }
 
-fun MutableList<Candle>.sorted() : MutableList<Candle> {
-    return this.sortedWith(compareBy({ it.time }, { it.close })).toMutableList()
+fun MutableList<Candle>.sortCandles() : MutableList<Candle> {
+    return this.sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
 }
 
 fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
@@ -49,14 +53,14 @@ fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
     var addedCandles = 0
     for ((index, candle) in this.withIndex()) {
         if (index < size - 2) {
-            val missingTimeToNextCandle = this[index + 1].time - candle.time - granularity
+            val missingTimeToNextCandle = this[index + 1].closeTime - candle.closeTime - granularity
             if (missingTimeToNextCandle > 0) {
                 val missingCandles = (missingTimeToNextCandle / granularity).toInt()
                 for (i in 1..missingCandles) {
                     addedCandles++
-                    val time = candle.time + (granularity * i)
-
-                    val fillCandle = Candle(time, candle.close, candle.close, candle.close, candle.close, 0.0, candle.tradingPair)
+                    val closeTime = candle.closeTime + (granularity * i)
+                    val openTime = candle.openTime + (granularity * i)
+                    val fillCandle = Candle(openTime, closeTime, candle.close, candle.close, candle.close, candle.close, 0.0)
                     tempCandles.add(index + addedCandles, fillCandle)
                 }
             }
@@ -73,8 +77,10 @@ fun List<Candle>.compositeCandles(targetCandleCount: Int) : List<Candle> {
     var high = 0.0
     var open = 0.0
     var volume = 0.0
+    var openTime = 0L
     for ((index, candle) in this.withIndex()) {
         if (i == 0) {
+            openTime = candle.openTime
             low = candle.low
             high = candle.high
             open = candle.open
@@ -89,7 +95,7 @@ fun List<Candle>.compositeCandles(targetCandleCount: Int) : List<Candle> {
             volume += candle.volume
         }
         if (i >= compositeFactor || index == size - 1) {
-            compositeCandles.add(Candle(candle.time, low, high, open, candle.close, volume, candle.tradingPair))
+            compositeCandles.add(Candle(openTime, candle.closeTime, low, high, open, candle.close, volume))
             i = -1
         }
         i++

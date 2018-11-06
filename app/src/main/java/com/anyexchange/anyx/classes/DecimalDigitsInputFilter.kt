@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.fragments.main
+package com.anyexchange.anyx.classes
 
 import android.text.Spanned
 import android.text.InputFilter
@@ -8,7 +8,8 @@ import android.text.InputFilter
  * Created by anyexchange on 3/27/2018.
  */
 
-class DecimalDigitsInputFilter(val digitsBeforeZero: Int, val digitsAfterZero: Int) : InputFilter {
+class DecimalDigitsInputFilter(private val digitsBeforeZero: Int, private
+val digitsAfterZero: Int) : InputFilter {
 
 
     override fun filter(source: CharSequence,

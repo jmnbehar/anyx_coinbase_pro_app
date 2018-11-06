@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ScrollView
 import android.view.MotionEvent
-
+import android.animation.ObjectAnimator
 
 
 /**
@@ -17,7 +17,7 @@ class LockableScrollView: ScrollView {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private var scrollLocked = false
+    var scrollLocked = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -40,4 +40,10 @@ class LockableScrollView: ScrollView {
         }
     }
 
+
+    fun scrollToTop(duration: Long) {
+        val animator: ObjectAnimator = ObjectAnimator.ofInt(this, "scrollY", 0)
+        animator.duration = duration
+        animator.start()
+    }
 }

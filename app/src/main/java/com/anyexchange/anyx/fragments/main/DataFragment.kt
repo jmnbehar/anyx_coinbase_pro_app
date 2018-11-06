@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import com.anyexchange.anyx.classes.*
+import com.anyexchange.anyx.classes.api.CBProApi
 import se.simbio.encryption.Encryption
 
 /**
@@ -33,10 +34,11 @@ class DataFragment : Fragment() {
             backupCredentials = CBProApi.credentials
         }
 
-        backupCryptoAccountList = Account.cryptoAccounts
+        backupFiatAccountList = Account.fiatAccounts
+
         context?.let {
             val prefs = Prefs(it)
-            prefs.stashedCryptoAccountList = Account.cryptoAccounts
+            prefs.stashedProducts = Product.map.values.toList()
             prefs.stashedFiatAccountList = Account.fiatAccounts
             prefs.stashedPaymentMethodList = Account.paymentMethods
         }
@@ -61,16 +63,15 @@ class DataFragment : Fragment() {
                 }
             }
         }
+
+        Product.map = prefs.stashedProducts.associateBy { it.currency.id }.toMutableMap()
+
         if (backupFiatAccountList.isNotEmpty()) {
             Account.fiatAccounts = backupFiatAccountList
         } else if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList
         }
-        if (backupCryptoAccountList.isNotEmpty()) {
-            Account.cryptoAccounts = backupCryptoAccountList
-        } else if (Account.cryptoAccounts.isEmpty()){
-            Account.cryptoAccounts = prefs.stashedCryptoAccountList
-        }
+
         if (backupPaymentMethodList.isNotEmpty()) {
             Account.paymentMethods = backupPaymentMethodList
         } else if (Account.paymentMethods.isEmpty()){
@@ -84,10 +85,9 @@ class DataFragment : Fragment() {
         backupFiatAccountList = mutableListOf()
 
         val prefs = Prefs(context)
-//        prefs.apiKey = null
-//        prefs.apiSecret = null
-//        prefs.passphrase = null
-        prefs.stashedCryptoAccountList = mutableListOf()
+
+        prefs.stashedProducts = mutableListOf()
+        prefs.stashedPaymentMethodList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
 
     }

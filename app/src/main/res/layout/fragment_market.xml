@@ -7,33 +7,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.anyexchange.anyx.classes.LockableScrollView
-        android:id="@+id/lockable_scrollview_market"
+    <ListView
+        android:id="@+id/list_products"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:paddingBottom="30dp" />
 
-        <LinearLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical" >
-
-            <ListView
-                android:id="@+id/list_products"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="0dp"
-                android:paddingBottom="50dp"
-                android:clipToPadding="false" />
-
-
-        </LinearLayout>
-
-    </com.anyexchange.anyx.classes.LockableScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

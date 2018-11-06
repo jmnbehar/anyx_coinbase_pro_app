@@ -13,6 +13,10 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
@@ -66,7 +70,7 @@ class SettingsFragment : RefreshFragment() {
         logoutButton?.setOnClickListener  {
             prefs.isLoggedIn = false
             CBProApi.credentials = null
-            prefs.stashOrders(null)
+            prefs.nukeStashedOrders()
             prefs.nukeStashedFills()
             (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
         }
@@ -95,13 +99,15 @@ class SettingsFragment : RefreshFragment() {
 
         updateProductsButton?.setOnClickListener { _ ->
             showProgressSpinner()
-            Prefs(activity!!).stashedProducts = listOf()
-            CBProApi.accounts(apiInitData).getAllAccountInfo( {
+            val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
                 dismissProgressSpinner()
                 toast("Failed to update products")
-            }) {
-                dismissProgressSpinner()
-                toast("Products updated")
+            }
+            AnyApi.getAllProducts(apiInitData, onFailure) {
+                CBProApi.accounts(apiInitData).getAllAccountInfo(onFailure, {
+                    dismissProgressSpinner()
+                    toast("Products updated")
+                })
             }
 
         }
@@ -174,25 +180,26 @@ class SettingsFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
         dismissProgressSpinner()
-        val prefs = Prefs(activity!!)
-        val apiKey = CBProApi.credentials?.apiKey
-
-        when {
-            apiKey == null -> verifyButton?.visibility = View.GONE
-            prefs.isApiKeyValid(apiKey) == true -> {
-                verifyButton?.visibility = View.GONE
-                txt_setting_verify_account.visibility = View.GONE
+        context?.let {
+            val prefs = Prefs(it)
+            val apiKey = CBProApi.credentials?.apiKey
+            when {
+                apiKey == null -> verifyButton?.visibility = View.GONE
+                prefs.isApiKeyValid(apiKey) == true -> {
+                    verifyButton?.visibility = View.GONE
+                    txt_setting_verify_account.visibility = View.GONE
+                }
+                else -> {
+                    verifyButton?.visibility = View.VISIBLE
+                    txt_setting_verify_account.visibility = View.VISIBLE
+                }
             }
-            else -> {
-                verifyButton?.visibility = View.VISIBLE
-                txt_setting_verify_account.visibility = View.VISIBLE
-            }
-        }
 
-        if (prefs.isLoggedIn) {
-            logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
-        } else {
-            logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
+            if (prefs.isLoggedIn) {
+                logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
+            } else {
+                logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
+            }
         }
     }
 }

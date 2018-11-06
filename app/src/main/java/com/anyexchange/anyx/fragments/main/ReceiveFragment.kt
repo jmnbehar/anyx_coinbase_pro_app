@@ -14,6 +14,8 @@ import net.glxn.qrgen.android.QRCode
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
+import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.classes.api.CBProDepositAddress
 
 
 /**
@@ -34,6 +36,9 @@ class ReceiveFragment : RefreshFragment() {
     var currency: Currency
         get() = ChartFragment.currency
         set(value) { ChartFragment.currency = value }
+
+    //TODO: make this changable
+    val exchange: Exchange = Exchange.CBPro
 
     companion object {
         fun newInstance(): ReceiveFragment {
@@ -76,7 +81,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun showAddressInfo(addressInfo: ApiDepositAddress?) {
+    private fun showAddressInfo(addressInfo: CBProDepositAddress?) {
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)
@@ -101,7 +106,7 @@ class ReceiveFragment : RefreshFragment() {
             } else {
                 warning2TextView?.text = getString(R.string.receive_warning_2)
             }
-            warningIconImageView?.setImageResource(currency.iconId)
+            warningIconImageView?.setImageResource(currency.iconId ?: R.drawable.fail_icon)
         } else {
             qrCodeImageView?.visibility = View.GONE
             if (context != null){
@@ -116,7 +121,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     fun switchCurrency(forceRefresh: Boolean) {
-        val relevantAccount = Account.forCurrency(currency)
+        val relevantAccount = Account.forCurrency(currency, exchange)
         if (relevantAccount != null && (forceRefresh || relevantAccount.depositInfo == null)) {
             showProgressSpinner()
             if (relevantAccount.coinbaseAccount == null) {
@@ -135,7 +140,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     private fun getDepositAddress() {
-        val relevantAccount = Account.forCurrency(currency)
+        val relevantAccount = Account.forCurrency(currency, exchange)
         val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
         if (coinbaseAccountId != null) {
             CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
@@ -143,18 +148,18 @@ class ReceiveFragment : RefreshFragment() {
                 showAddressInfo(null)
             }) { depositInfo ->
                 dismissProgressSpinner()
-                Account.forCurrency(currency)?.depositInfo = depositInfo
+                Account.forCurrency(currency, exchange)?.depositInfo = depositInfo
                 showAddressInfo(depositInfo)
             }
             context?.let {
-                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
+                Prefs(it).stashedProducts = Product.map.values.toList()
             }
         }
     }
 
     private fun copyAddressToClipboard() {
         context?.let { context ->
-            Account.forCurrency(currency)?.depositInfo?.let { depositInfo ->
+            Account.forCurrency(currency, exchange)?.depositInfo?.let { depositInfo ->
                 val clipboard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
                 clipboard.primaryClip = clip

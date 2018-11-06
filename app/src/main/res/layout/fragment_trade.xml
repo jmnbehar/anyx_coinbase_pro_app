@@ -23,15 +23,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="10dp">
+                android:paddingTop="10dp"
+                android:paddingRight="20dp">
 
 
                 <TextView
                     android:id="@+id/txt_trade_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="10dp"
                     android:text="@string/trade_title"
                     android:textSize="30sp"
                     tools:layout_editor_absoluteX="48dp"
@@ -40,29 +39,33 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="-20dp"
-                    android:layout_marginRight="-20dp"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical"
-                    android:paddingBottom="8dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingTop="8dp">
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
-                        android:orientation="horizontal">
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+
+                        <Spinner
+                            android:id="@+id/spinner_trade_trading_pair"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:visibility="visible" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/txt_trade_fiat_balance_label"
@@ -72,75 +75,64 @@
                                 android:text="@string/currency_USD" />
 
                             <TextView
+                                android:id="@+id/txt_trade_fiat_balance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text=""
+                                android:textAlignment="textEnd" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
                                 android:id="@+id/txt_trade_crypto_balance_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1" />
 
                             <TextView
-                                android:text=""
+                                android:id="@+id/txt_trade_crypto_balance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAlignment="textEnd" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/txt_trade_crypto_current_price_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1" />
 
                             <TextView
-                                android:id="@+id/txt_trade_crypto_current_price_label"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-                        </LinearLayout>
-
-                        <Space
-                            android:layout_width="30dp"
-                            android:layout_height="wrap_content" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/txt_trade_fiat_balance"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text=""
-                                android:textAlignment="textEnd" />
-
-                            <TextView
-                                android:id="@+id/txt_trade_crypto_balance"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:textAlignment="textEnd" />
-
-                            <TextView
-                                android:text=""
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:textAlignment="textEnd" />
-
-                            <TextView
                                 android:id="@+id/txt_trade_crypto_current_price"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:textAlignment="textEnd" />
+
                         </LinearLayout>
 
                     </LinearLayout>
-
                 </LinearLayout>
 
                 <RadioGroup
                     android:id="@+id/rbtngroup_trade_buy_sell"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
 
                     <RadioButton
@@ -154,8 +146,8 @@
                         android:background="@drawable/buy_radio_button"
                         android:button="@android:color/transparent"
                         android:gravity="center_horizontal"
-                        android:paddingBottom="10dp"
                         android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
                         android:text="@string/trade_buy_btn"
                         android:textAlignment="center"
                         android:textColor="@color/trade_rbtn_text" />
@@ -171,8 +163,8 @@
                         android:background="@drawable/sell_radio_button"
                         android:button="@android:color/transparent"
                         android:gravity="center_horizontal"
-                        android:paddingBottom="10dp"
                         android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
                         android:text="@string/trade_sell_btn"
                         android:textAlignment="center"
                         android:textColor="@color/trade_rbtn_text" />
@@ -232,6 +224,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="20"
+                                android:importantForAutofill="no"
                                 android:inputType="numberDecimal" />
 
                             <TextView
@@ -240,7 +233,15 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/currency_USD" />
+
+
+                            <Spinner
+                                android:id="@+id/spinner_trade_amount_unit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone" />
                         </LinearLayout>
+
 
                     </LinearLayout>
 
@@ -267,6 +268,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="20"
+                                android:importantForAutofill="no"
                                 android:inputType="numberDecimal" />
 
                             <TextView
@@ -316,33 +318,15 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/txt_trade_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:paddingTop="5dp">
-
-                    <TextView
-                        android:id="@+id/txt_trade_total_label"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="5"
-                        android:text="@string/trade_blank_total"
-                        android:textAlignment="textEnd"
-                        android:textSize="16sp" />
-
-                    <Space
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/txt_trade_total"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="5"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textAlignment="center"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btn_place_order"

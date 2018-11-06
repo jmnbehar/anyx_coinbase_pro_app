@@ -50,7 +50,7 @@
 ////        setupSwipeRefresh(rootView)
 //
 //        this.inflater = inflater
-//        val activity = activity!!
+//        val activity = activity
 //
 ////        val buttonColors = account.currency.colorStateList(activity)
 ////        submitDepositButton.backgroundTintList = buttonColors

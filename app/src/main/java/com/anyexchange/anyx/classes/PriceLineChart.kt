@@ -57,7 +57,7 @@ class PriceLineChart : LineChart {
                 val xCoefficient = if (defaultDragDirection == DefaultDragDirection.Horizontal) { 5.toFloat() } else { 1.25.toFloat() }
                 val yCoefficient = if (defaultDragDirection == DefaultDragDirection.Vertical)   { 5.toFloat() } else { 1.25.toFloat() }
 
-                if (isVerticalDrag == null && (xVelocity > 5 || yVelocity > 5)) {
+                if (isVerticalDrag == null && (xVelocity > 100 || yVelocity > 100)) {
                     if (yVelocity > (xVelocity * xCoefficient)) {
                         onVerticalDrag()
                         isVerticalDrag = true
@@ -130,13 +130,13 @@ class PriceLineChart : LineChart {
 
     fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
         val entries = if (candles.isEmpty()) {
-            val now = Date().time.toDouble()
+            val now = Date().time
             val blankEntry = Entry(0.0f, 0.0f, 0.0f, now)
             listOf(blankEntry, blankEntry)
         } else {
             //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
             val filledInCandles = candles.filledInBlanks(granularity)
-            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.time) }.toList()
+            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.closeTime) }.toList()
         }
         val dataSet = LineDataSet(entries, "Chart")
 

@@ -8,6 +8,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import org.jetbrains.anko.textColor
 
@@ -48,7 +49,7 @@ class TransferFragment : RefreshFragment() {
             val spinnerSelection = sourceAccountsSpinner?.selectedItem as? BaseAccount
             return spinnerSelection ?: sourceAccounts.firstOrNull()
         }
-    private var destAccounts:   List<BaseAccount?> = mutableListOf()
+    private var destAccounts: List<BaseAccount> = mutableListOf()
     private val destAccount: BaseAccount?
         get() {
             return if (destAccounts.size > 1) {
@@ -58,9 +59,11 @@ class TransferFragment : RefreshFragment() {
             }
         }
 
-    var currency: Currency
-        get() = ChartFragment.currency
-        set(value) { ChartFragment.currency = value }
+    var currency: Currency = ChartFragment.currency
+        set(value) {
+            field = value
+            ChartFragment.currency = value
+        }
 
     var blockNextSelectSource = false
     var blockNextSelectDest = false
@@ -73,11 +76,13 @@ class TransferFragment : RefreshFragment() {
 
         val hasRelevantData: Boolean
             get() {
-                val cryptoCBAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
-                val fiatCBAccounts = Account.fiatAccounts.mapNotNull { account -> account.coinbaseAccount }
-                val cbAccountsAreMissing = ((cryptoCBAccounts.size < Account.cryptoAccounts.size) ||
-                                            (fiatCBAccounts.size < Account.fiatAccounts.size))
-                return (!cbAccountsAreMissing && Account.paymentMethods.isNotEmpty())
+                val cryptoCbProAccounts = Account.allCryptoAccounts().filter { it.exchange == Exchange.CBPro }
+                val cryptoCBAccounts = cryptoCbProAccounts.mapNotNull { account -> account.coinbaseAccount }
+                val fiatCBProAccounts = Account.fiatAccounts.filter { it.exchange == Exchange.CBPro }
+                val fiatCBAccounts = fiatCBProAccounts.mapNotNull { account -> account.coinbaseAccount }
+                val cbAccountsAreMissing = (cryptoCBAccounts.size < cryptoCbProAccounts.size ||
+                                            fiatCBAccounts.size < fiatCBProAccounts.size)
+                return (!cbAccountsAreMissing && Account.paymentMethods.isNotEmpty() && fiatCBProAccounts.isNotEmpty())
             }
     }
 
@@ -87,7 +92,6 @@ class TransferFragment : RefreshFragment() {
         setupSwipeRefresh(rootView.swipe_refresh_layout)
 
         this.inflater = inflater
-        val activity = activity!!
         titleText = rootView.txt_transfer_title
 
         transferDetailsLayout = rootView.layout_transfer_details
@@ -109,27 +113,29 @@ class TransferFragment : RefreshFragment() {
 
         submitTransferButton = rootView.btn_transfer_submit_transfer
 
-        val relatedAccountSpinnerAdapter = RelatedAccountSpinnerAdapter(activity, sourceAccounts)
-
-        sourceAccountsSpinner?.adapter = relatedAccountSpinnerAdapter
-        sourceAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (sourceAccounts.size > position && !blockNextSelectSource) {
-                    sourceAccountSelected()
+        context?.let {
+            sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
+            sourceAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (sourceAccounts.size > position && !blockNextSelectSource) {
+                        sourceAccountSelected()
+                    }
+                    blockNextSelectSource = false
                 }
-                blockNextSelectSource = false
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-        destAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!blockNextSelectDest) {
-                    setInfoAndButtons()
+            destAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, listOf())
+            destAccountsSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (!blockNextSelectDest) {
+                        setInfoAndButtons()
+                    }
+                    blockNextSelectDest = false
                 }
-                blockNextSelectDest = false
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         transferMaxButton?.setOnClickListener {
@@ -148,17 +154,18 @@ class TransferFragment : RefreshFragment() {
     override fun onResume() {
         super.onResume()
 
-        val relevantCurrencies = Account.fiatAccounts.map { it.currency }.toMutableList()
-        relevantCurrencies.addAll(Currency.cryptoList)
-
+        val relevantCurrencies = Account.fiatAccounts.asSequence().map { it.currency }.toMutableList()
+        val cryptoList = Product.map.keys.map { Currency(it) }
+        relevantCurrencies.addAll(cryptoList)
         showNavSpinner(currency, relevantCurrencies) { selectedCurrency ->
             currency = selectedCurrency
             switchCurrency(selectedCurrency)
         }
 
-        titleText.text = getString(R.string.transfer_in_title)
+        titleText.text = getString(R.string.transfer_title)
 
-        coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts = Account.allCryptoAccounts().mapNotNull { account -> account.coinbaseAccount }
+
 
         val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
         if (fiatCoinbaseAccount != null) {
@@ -194,11 +201,15 @@ class TransferFragment : RefreshFragment() {
                 toast(R.string.toast_coinbase_site_error)
                 isRefreshing = false
                 onComplete(false)
-            }, {
-                coinbaseAccounts = Account.cryptoAccounts.mapNotNull { account -> account.coinbaseAccount }
+            }, { cryptoCoinbaseAccounts ->
                 val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
+
+                var allCoinbaseAccounts = cryptoCoinbaseAccounts
+                Account.defaultFiatAccount?.coinbaseAccount?.let {
+                    allCoinbaseAccounts = allCoinbaseAccounts.plus(it)
+                }
                 if (fiatCoinbaseAccount != null) {
-                    coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
+                    allCoinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
                 }
                 didUpdateCoinbase = true
                 if (didUpdateCBPro && didUpdatePaymentMethods) {
@@ -243,13 +254,15 @@ class TransferFragment : RefreshFragment() {
         amountEditText?.setText("")
 
 
-        val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
-        Account.forCurrency(currency)?.let {
-            tempRelevantAccounts.add(it)
+        val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
+        Product.map[currency.id]?.accounts?.values?.let {
+            tempRelevantAccounts.addAll(it)
         }
         if (currency.isFiat) {
+            tempRelevantAccounts.addAll(Account.fiatAccounts.filter { it.currency == currency })
             tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
         }
+
         sourceAccounts = tempRelevantAccounts
 
         when (sourceAccounts.size) {
@@ -266,10 +279,11 @@ class TransferFragment : RefreshFragment() {
             else -> {
                 context?.let {
                     sourceAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, sourceAccounts)
-                    sourceAccountText?.visibility = View.GONE
-                    sourceAccountsSpinner?.visibility = View.VISIBLE
-                    blockNextSelectSource = true
                 }
+
+                sourceAccountsSpinner?.visibility = View.VISIBLE
+                sourceAccountText?.visibility = View.GONE
+                blockNextSelectSource = true
             }
         }
 
@@ -284,12 +298,16 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun setDestAccounts() {
-        val cbproAccount = Account.forCurrency(currency)
+        val cbproAccount = if (currency.isFiat) {
+            Account.fiatAccounts.find { it.currency == currency }
+        } else {
+            Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
+        }
         destAccounts = when(sourceAccount) {
-            is Account.CoinbaseAccount -> listOf(cbproAccount)
-            is Account.PaymentMethod ->  listOf(cbproAccount)
+            is Account.CoinbaseAccount -> listOf(cbproAccount).filterNotNull()
+            is Account.PaymentMethod ->  listOf(cbproAccount).filterNotNull()
             is Account -> {
-                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.filter { account -> account.currency == currency }.toMutableList()
+                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { it.currency == currency }.toMutableList()
                 if (currency.isFiat) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
@@ -309,9 +327,8 @@ class TransferFragment : RefreshFragment() {
                 destAccountsSpinner?.visibility = View.GONE
             }
             else -> {
-                val destAccountsTemp = destAccounts.filterNotNull()
                 context?.let {
-                    destAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, destAccountsTemp)
+                    destAccountsSpinner?.adapter = RelatedAccountSpinnerAdapter(it, destAccounts)
                     destBalanceText?.visibility = View.GONE
                     destAccountsSpinner?.visibility = View.VISIBLE
                     blockNextSelectDest = true
@@ -428,7 +445,7 @@ class TransferFragment : RefreshFragment() {
                     when (destAccount) {
                         is Account.CoinbaseAccount -> {
                             val coinbaseAccount = destAccount as Account.CoinbaseAccount
-                            val cbproAccount = Account.forCurrency(currency)
+                            val cbproAccount = Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
 
                             if (amount > cbproAccount?.availableBalance ?: 0.0) {
                                 showPopup(R.string.transfer_funds_error)

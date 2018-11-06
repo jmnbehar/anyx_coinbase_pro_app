@@ -2,6 +2,8 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.anyexchange.anyx.classes.api.CBProAccount
+import com.anyexchange.anyx.classes.api.CBProApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
@@ -97,23 +99,32 @@ class Prefs (var context: Context) {
         get() = prefs.getStringSet(ALERTS, setOf<String>())?.asSequence()?.map { s -> PriceAlert.forString(s) }?.toSet() ?: setOf()
         set(value) = prefs.edit().putStringSet(ALERTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
 
+    //TODO: change this to a hash map:
     var stashedProducts: List<Product>
-        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.map { s -> Product.forString(s) } ?: listOf()
-        set(value) = prefs.edit().putStringSet(STASHED_PRODUCTS, value.asSequence().map { a -> a.toString() }.toSet()).apply()
+        get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.mapNotNull {
+            try {
+                Gson().fromJson(it, Product::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        } ?: listOf()
+        set(value) {
+            val jsonValues = value.asSequence().mapNotNull { Gson().toJson(it) }.toSet()
+            prefs.edit().putStringSet(STASHED_PRODUCTS, jsonValues).apply()
+        }
 
 
+    //For now assume all fiat accounts are CBPro
     var stashedFiatAccountList: List<Account>
         get() {
             val gson = Gson()
             val newAccountList = mutableListOf<Account>()
-            for (currency in Currency.fiatList) {
+            val fiatAndStableCoins = Currency.fiatList.asSequence().plus(Currency.stableCoinList).toList()
+            for (currency in fiatAndStableCoins) {
                 val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
+                if (accountString?.isNotBlank() == true) {
                     try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val newAccount = Account(product, apiAccount)
+                        val newAccount = gson.fromJson(accountString, Account::class.java)
                         newAccountList.add(newAccount)
                     } catch (e: Exception) {
                         return newAccountList
@@ -125,63 +136,16 @@ class Prefs (var context: Context) {
         set(value) {
             if (value.isEmpty()) {
                 for (currency in Currency.fiatList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                                .putString(PRODUCT + currency.toString(), null).apply()
+                    prefs.edit().putString(ACCOUNT + currency.toString(), null).apply()
                 }
             } else {
                 val gson = Gson()
                 for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
+                    val accountJson = gson.toJson(account) ?: ""
+                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson).apply()
                 }
             }
         }
-
-    var stashedCryptoAccountList: List<Account>
-        get() {
-            val gson = Gson()
-            val newAccountList = mutableListOf<Account>()
-            for (currency in Currency.cryptoList) {
-                val accountString = prefs.getString(ACCOUNT + currency.toString(), "")
-                val productString = prefs.getString(PRODUCT + currency.toString(), "")
-                if (accountString?.isNotBlank() == true && productString?.isNotBlank() == true) {
-                    try {
-                        val apiAccount = gson.fromJson(accountString, ApiAccount::class.java)
-                        val product = gson.fromJson(productString, Product::class.java)
-                        val dayCandleOutliers = product.defaultDayCandles.filter { it.tradingPair.id != product.id }
-                        if (dayCandleOutliers.isEmpty()) {
-                            val newAccount = Account(product, apiAccount)
-                            newAccountList.add(newAccount)
-                        } else {
-                            return mutableListOf()
-                        }
-                    } catch (e: Exception) {
-                        return mutableListOf()
-                    }
-                }
-            }
-            return newAccountList
-        }
-        set(value) {
-            if (value.isEmpty()) {
-                for (currency in Currency.cryptoList) {
-                    prefs.edit().putString(ACCOUNT + currency.toString(), null)
-                            .putString(PRODUCT + currency.toString(), null).apply()
-                }
-            } else {
-                val gson = Gson()
-                for (account in value) {
-                    val accountJson = gson.toJson(account.apiAccount) ?: ""
-                    val productJson = gson.toJson(account.product) ?: ""
-                    prefs.edit().putString(ACCOUNT + account.currency.toString(), accountJson)
-                            .putString(PRODUCT + account.currency.toString(), productJson).apply()
-                }
-            }
-        }
-
-
 
     var stashedPaymentMethodList: List<Account.PaymentMethod>
         get() {
@@ -209,9 +173,9 @@ class Prefs (var context: Context) {
         get() = prefs.getLong(QUICK_CHANGE_ALERT_TIME, 0)
         set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
 
-    var quickChangeAlertCurrencies: Set<Currency>
-        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>())?.mapNotNull { string -> Currency.forString(string) }?.toSet() ?: setOf()
-        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value.map { currency -> currency.toString() }.toSet()).apply()
+    var quickChangeAlertCurrencies: Set<String>
+        get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>()) ?: setOf()
+        set(value) = prefs.edit().putStringSet(QUICK_CHANGE_ALERTS_ACTIVE, value).apply()
 
     var quickChangeThreshold: Float
         get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
@@ -219,15 +183,15 @@ class Prefs (var context: Context) {
 
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
-        if (isActive && !quickChangeAlertCurrencies.contains(currency)) {
-            currentActiveAlerts.add(currency)
-        } else if (!isActive && quickChangeAlertCurrencies.contains(currency)) {
-            currentActiveAlerts.remove(currency)
+        if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {
+            currentActiveAlerts.add(currency.id)
+        } else if (!isActive && quickChangeAlertCurrencies.contains(currency.id)) {
+            currentActiveAlerts.remove(currency.id)
         }
         quickChangeAlertCurrencies = currentActiveAlerts
     }
     fun isQuickChangeAlertActive(currency: Currency): Boolean {
-        return quickChangeAlertCurrencies.contains(currency)
+        return quickChangeAlertCurrencies.contains(currency.id)
     }
 
     fun addUnpaidFee(unpaidFee: Double, currency: Currency): Double {
@@ -242,52 +206,87 @@ class Prefs (var context: Context) {
         prefs.edit().putFloat(UNPAID_FEES + currency.toString(), 0.0f).apply()
     }
 
-    fun stashOrders(orderListString: String?) {
-        val stashDate = if (orderListString == null) { 0 } else { Date().time }
-        prefs.edit().putString(STASHED_ORDERS, orderListString)
-                .putLong(STASHED_ORDERS_DATE, stashDate).apply()
+    fun stashOrders(orderList: List<Order>?, exchange: Exchange) {
+        val orderListString = Gson().toJson(orderList)
+        val stashDate = if (orderList == null) { 0 } else { Date().time }
+        prefs.edit().putString(STASHED_ORDERS + exchange.name, orderListString)
+                .putLong(STASHED_ORDERS_DATE + exchange.name, stashDate).apply()
     }
-    fun getStashedOrders(productId: String) : List<ApiOrder> {
-        val apiOrdersJson = prefs.getString(STASHED_ORDERS, null)
+    fun nukeStashedOrders() {
+        for (exchange in Exchange.values()) {
+            prefs.edit().remove(STASHED_FILLS + exchange.name).apply()
+        }
+    }
+    fun getStashedOrders(baseCurrency: Currency, exchange: Exchange) : List<Order> {
+        val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
         return try {
-            val apiOrderList: List<ApiOrder> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<ApiOrder>>() {}.type)
-            apiOrderList.filter { it.product_id == productId }
+            val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
+            val filteredOrders = apiOrderList.filter { it.tradingPair.baseCurrency == baseCurrency && it.exchange == exchange }
+            filteredOrders
         } catch (e: Exception) {
             listOf()
         }
     }
-    fun getDateOrdersLastStashed(): Long {
-        return prefs.getLong(STASHED_FILLS_DATE, 0)
+    fun getStashedOrders(baseCurrency: Currency) : List<Order> {
+        val orderList = mutableListOf<Order>()
+        for (exchange in Exchange.values()) {
+            val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
+            try {
+                val apiOrderList: List<Order> = Gson().fromJson(apiOrdersJson, object : TypeToken<List<Order>>() {}.type)
+                val filteredOrders = apiOrderList.filter { it.tradingPair.baseCurrency == baseCurrency}
+                orderList.addAll(filteredOrders)
+            } catch (e: Exception) { }
+        }
+        return orderList
     }
 
-
-    fun stashFills(fillListJson: String?, productId: String) {
-        //TODO: remove this line in the next version, its just there to delete old stuff
-        prefs.edit().remove(STASHED_FILLS).apply()
-        prefs.edit().putString(STASHED_FILLS + productId, fillListJson)
-                    .putLong(STASHED_FILLS_DATE + productId, Date().time).apply()
+    fun getDateOrdersLastStashed(exchange: Exchange): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + exchange.name, 0)
     }
+
+    fun stashFills(fillList: List<Fill>, tradingPair: TradingPair, exchange: Exchange) {
+        val fillListJson = Gson().toJson(fillList)
+        prefs.edit().putString(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange), fillListJson)
+                    .putLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), Date().time).apply()
+    }
+
     fun nukeStashedFills() {
-        for (product in Account.cryptoAccounts.map { it.product }) {
-            for (tradingPair in product.tradingPairs) {
-                prefs.edit().remove(STASHED_FILLS + tradingPair.id).apply()
+        for (product in Product.map.values) {
+            for (exchange in Exchange.values()) {
+                for (tradingPair in product.tradingPairs) {
+                    prefs.edit().remove(STASHED_FILLS + exchange.toString() + tradingPair.idForExchange(exchange)).apply()
+                }
             }
         }
     }
-    fun getStashedFills(productId: String) : List<ApiFill> {
-        val fillListJson = prefs.getString(STASHED_FILLS + productId, null)
+    fun getStashedFills(tradingPair: TradingPair, exchange: Exchange) : List<Fill> {
+        val fillListJson = prefs.getString(STASHED_FILLS + exchange + tradingPair.idForExchange(exchange), null)
         return try {
-            val apiFillList: List<ApiFill> = Gson().fromJson(fillListJson, object : TypeToken<List<ApiFill>>() {}.type)
-            apiFillList.filter { it.product_id == productId }
+            val apiFillList: List<Fill> = Gson().fromJson(fillListJson, object : TypeToken<List<Fill>>() {}.type)
+            apiFillList.filter { it.tradingPair == tradingPair }
         } catch (e: Exception) {
             listOf()
         }
     }
-    fun getDateFillsLastStashed(productId: String): Long {
-        return prefs.getLong(STASHED_FILLS_DATE + productId, 0)
+    fun getStashedFills(baseCurrency: Currency) : List<Fill> {
+        val tradingPairs = Product.map[baseCurrency.id]?.tradingPairs ?: listOf()
+        val fillList = mutableListOf<Fill>()
+        for (tradingPair in tradingPairs) {
+            val fillListJson = prefs.getString(STASHED_FILLS + tradingPair.exchange + tradingPair.idForExchange(tradingPair.exchange), null)
+            try {
+                val partialFillList: List<Fill> = Gson().fromJson(fillListJson, object : TypeToken<List<Fill>>() {}.type)
+                fillList.addAll(partialFillList)
+            } catch (e: Exception) {
+                //do nothing
+            }
+        }
+        return fillList
+    }
+    fun getDateFillsLastStashed(tradingPair: TradingPair, exchange: Exchange): Long {
+        return prefs.getLong(STASHED_FILLS_DATE + exchange.toString() + tradingPair.idForExchange(exchange), 0)
     }
 
-    var areAlertFillsActive: Boolean
+    var areFillAlertsActive: Boolean
         get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
         set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
 

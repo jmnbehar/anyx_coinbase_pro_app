@@ -14,6 +14,7 @@ import android.widget.*
 import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_send.view.*
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.textColor
@@ -47,6 +48,12 @@ class SendFragment : RefreshFragment() {
     var currency: Currency
         get() = ChartFragment.currency
         set(value) { ChartFragment.currency = value }
+
+    val product: Product?
+        get() = Product.map[currency.id]
+
+    //TODO: make this changeable:
+    val exchange: Exchange = Exchange.CBPro
 
     companion object {
         fun newInstance(): SendFragment {
@@ -118,7 +125,7 @@ class SendFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         super.refresh(onComplete)
 
-        Account.forCurrency(currency)?.let { account ->
+        product?.accounts?.get(exchange)?.let { account ->
             account.update(apiInitData, {//onFailure
                 onComplete(false)
             }) { //onSuccess
@@ -132,8 +139,13 @@ class SendFragment : RefreshFragment() {
 
     private fun setAccountBalanceText() {
         currencyTickerTextView?.text = currency.toString()
-        iconImageView?.setImageResource(currency.iconId)
-        Account.forCurrency(currency)?.let {
+        currency.iconId?.let {
+            iconImageView?.visibility = View.VISIBLE
+            iconImageView?.setImageResource(it)
+        } ?: run {
+            iconImageView?.visibility = View.GONE
+        }
+        product?.accounts?.get(exchange)?.let {
             accountBalanceTextView?.visibility = View.VISIBLE
             accountBalanceTextView?.text = resources.getString(R.string.send_balance_text, it.availableBalance.btcFormatShortened())
         } ?: run {

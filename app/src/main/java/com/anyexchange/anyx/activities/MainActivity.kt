@@ -28,10 +28,13 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.classes.api.CBProApi
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
+import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -46,7 +49,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
 
-    val apiInitData = CBProApi.CBProApiInitData(this) {
+    val apiInitData = ApiInitData(this) {
         returnToLogin()
     }
 
@@ -103,7 +106,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
-            if (!Account.areAccountsOutOfDate) {
+            if (!Account.areAccountsOutOfDate()) {
                 goHome()
                 setDrawerMenu()
             } else {
@@ -111,14 +114,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     toast(R.string.error_message)
                     returnToLogin()
                 }, { //OnSuccess
-                    /* Do Nothing Extra */
+                    goHome()
+                    setDrawerMenu()
                 } )
-                return
             }
-        }
-        val goToCurrency = Currency.forString(intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)
-        if (goToCurrency != null) {
-            goToChartFragment(goToCurrency)
+            return
+        } else {
+            (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
+                val currency = Currency(it)
+                currency.addToList()
+                goToChartFragment(currency)
+            }
+            checkAllResources({//On Failure
+                toast(R.string.error_message)
+                returnToLogin()
+            }, { //OnSuccess
+                //do something maybe?
+            } )
         }
     }
 
@@ -169,7 +181,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         dataFragment?.restoreData(this)
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
-        val chartCurrency = Currency.forString(chartCurrencyStr) ?: Currency.BTC
+        val chartCurrency = Currency(chartCurrencyStr)
         ChartFragment.currency = chartCurrency
         setDrawerMenu()
     }
@@ -233,34 +245,56 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val isApiKeyValid = prefs.isApiKeyValid(apiKey)
                     CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
                 }
-            } else if (!Account.areAccountsOutOfDate) {
+            } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
                 setDrawerMenu()
                 onComplete()
                 goHome()
                 return
             }
         }
+        checkAllResources(onFailure) {
+            setDrawerMenu()
+            onComplete()
+            goHome()
+        }
+    }
+
+    private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        if (Product.map.isEmpty()) {
+            updateAllProducts(onFailure) {
+                updateAllAccounts(onFailure, onComplete)
+            }
+        } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
+            updateAllAccounts(onFailure, onComplete)
+        } else {
+            onComplete()
+        }
+
+    }
+
+    private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        AnyApi.getAllProducts(apiInitData, onFailure, onSuccess)
+    }
+    private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        val prefs = Prefs(this)
         showProgressBar()
         CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
             dismissProgressBar()
             onFailure(error)
         }, {
             dismissProgressBar()
-
+            prefs.stashedProducts = Product.map.values.toList()
             setDrawerMenu()
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
                 dataFragment?.destroyData(this)
-                prefs.stashedCryptoAccountList = mutableListOf()
                 prefs.stashedFiatAccountList = mutableListOf()
 
                 prefs.isLoggedIn = false
             } else {
                 prefs.isLoggedIn = true
             }
-            setDrawerMenu()
-            onComplete()
-            goHome()
+            onSuccess()
         })
     }
 
@@ -306,13 +340,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun updatePrices(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         var tickersUpdated = 0
-        val accountListSize = Account.cryptoAccounts.size
-        for (account in Account.cryptoAccounts) {
-            CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
-                tickersUpdated++
-                if (tickersUpdated == accountListSize) {
-                    onComplete()
+        for (product in Product.map.values) {
+            product.defaultTradingPair?.let { tradingPair ->
+                AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                    tickersUpdated++
+                    if (tickersUpdated == Product.map.size) {
+                        onComplete()
+                    }
                 }
+            } ?: run {
+                onFailure(AnyApi.defaultFailure)
             }
         }
     }
@@ -322,7 +359,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alerts = prefs.alerts
         for (alert in alerts) {
             if (!alert.hasTriggered) {
-                val currentPrice = Account.forCurrency(alert.currency)?.product?.defaultPrice
+                val currentPrice = Product.forCurrency(alert.currency)?.defaultPrice
                 if (alert.triggerIfAbove && (currentPrice != null) && (currentPrice >= alert.price)) {
                     AlertHub.triggerPriceAlert(alert, this)
                 } else if (!alert.triggerIfAbove && (currentPrice != null) && (currentPrice <= alert.price)) {

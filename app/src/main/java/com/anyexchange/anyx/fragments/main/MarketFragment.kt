@@ -12,6 +12,7 @@ import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.AnyApi
 import kotlinx.android.synthetic.main.fragment_market.view.*
 
 /**
@@ -46,7 +47,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         }
 
         listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
-        listView?.setHeightBasedOnChildren()
+//        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView
@@ -77,7 +78,6 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
-        val accountListSize = Account.cryptoAccounts.size
         val time = Timespan.DAY
         skipNextRefresh = true
 
@@ -87,35 +87,42 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
-        for (account in Account.cryptoAccounts) {
-            account.product.updateCandles(time, null, apiInitData, {//OnFailure
-                if (context != null) {
-                    toast(R.string.error_message)
-                }
-                onComplete(false)
-            }) { didUpdate ->   //OnSuccess
-                if (lifecycle.isCreatedOrResumed) {
-                    if (didUpdate) {
-                        productsUpdated++
-                        if (productsUpdated == accountListSize) {
-                            context?.let {
-                                Prefs(it).stashedCryptoAccountList = Account.cryptoAccounts
-                            }
-                            (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                            updateAccountsFragment()
-                            onComplete(true)
-                        }
-                    } else {
-                        CBProApi.ticker(apiInitData, account.product.id).get(onFailure) {
+        for (product in Product.map.values) {
+            //always check multiple exchanges?
+            product.defaultTradingPair?.let { tradingPair ->
+                product.updateCandles(time, tradingPair, apiInitData, {
+                    //OnFailure
+                    if (context != null) {
+                        toast(R.string.error_message)
+                    }
+                    onComplete(false)
+                }) { didUpdate ->
+                    //OnSuccess
+                    if (lifecycle.isCreatedOrResumed) {
+                        if (didUpdate) {
                             productsUpdated++
-                            if (productsUpdated == accountListSize) {
+                            if (productsUpdated == Product.map.size) {
+                                context?.let {
+                                    Prefs(it).stashedProducts = Product.map.values.toList()
+                                }
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                 updateAccountsFragment()
                                 onComplete(true)
                             }
+                        } else {
+                            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                                productsUpdated++
+                                if (productsUpdated == Product.map.size) {
+                                    (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+                                    updateAccountsFragment()
+                                    onComplete(true)
+                                }
+                            }
                         }
                     }
                 }
+            } ?: run {
+                onFailure(Result.Failure(FuelError(Exception())))
             }
         }
     }

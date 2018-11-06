@@ -11,6 +11,7 @@ import android.widget.AdapterView
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.classes.api.ApiInitData
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
@@ -29,13 +30,13 @@ open class RefreshFragment: Fragment() {
 
     var shouldHideSpinner = true
 
-    val apiInitData: CBProApi.CBProApiInitData?
+    val apiInitData: ApiInitData?
         get() {
             val activity = activity
             return when (activity) {
                 is MainActivity -> activity.apiInitData
                 null -> null
-                else -> CBProApi.CBProApiInitData(activity) { /* do nothing */ }
+                else -> ApiInitData(activity) { /* do nothing */ }
             }
         }
 
@@ -68,7 +69,8 @@ open class RefreshFragment: Fragment() {
     fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
         shouldHideSpinner = false
         (activity as? MainActivity)?.let { mainActivity ->
-            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, currencyList)
+            val sortedList = currencyList.sortCurrencies()
+            val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, sortedList)
             mainActivity.spinnerNav.adapter = spinnerNavAdapter
 
             mainActivity.toolbar.title = ""

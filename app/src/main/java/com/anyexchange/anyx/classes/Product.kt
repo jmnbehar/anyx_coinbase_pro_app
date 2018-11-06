@@ -1,5 +1,8 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.classes.api.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
@@ -9,14 +12,17 @@ import java.util.*
  * Created by anyexchange on 12/20/2017.
  */
 
-class Product(var currency: Currency, var id: String, var quoteCurrency: Currency?, tradingPairsIn: List<TradingPair>) {
-    constructor(apiProduct: ApiProduct, tradingPairs: List<TradingPair>)
-            : this(Currency.forString(apiProduct.base_currency) ?: Currency.USD, apiProduct.id,
-            Currency.forString(apiProduct.quote_currency) ?: Currency.USD, tradingPairs)
+class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
+    constructor(apiProduct: CBProProduct, tradingPairs: List<TradingPair>)
+            : this(Currency(apiProduct.base_currency), tradingPairs)
 
-    var tradingPairs = tradingPairsIn.sortedBy { it.quoteCurrency.orderValue }
+    init {
+        currency.addToList()
+    }
+
+    var tradingPairs = tradingPairsIn.sortTradingPairs()
         set(value) {
-            field = value
+            field = value.sortTradingPairs()
             if (dayCandles.size < tradingPairs.size) {
                 val candlesSizeTemp = dayCandles.size
                 val hourCandlesTemp = hourCandles
@@ -33,7 +39,13 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
                 yearCandles = Array(tradingPairCount) { i -> if (i < candlesSizeTemp) { yearCandlesTemp[i] } else { listOf() } }
             }
         }
+    val defaultTradingPair: TradingPair?
+        get() {
+            val defaultFiatPair = tradingPairs.find { it.quoteCurrency == Account.defaultFiatCurrency }
+            return defaultFiatPair ?: tradingPairs.firstOrNull()
+        }
 
+    var isFavorite: Boolean =  true//(totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
 
     private fun tradingPairIndex(tradingPair: TradingPair?) : Int {
         //null trading pair will simply select the default fiat pair
@@ -62,9 +74,17 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     private var yearCandles = Array<List<Candle>>(tradingPairCount) { listOf() }
 
     val defaultDayCandles: List<Candle>
-        get() = candlesForTimespan(Timespan.DAY, TradingPair(this.currency, Account.defaultFiatCurrency))
+        get() = candlesForTimespan(Timespan.DAY, defaultTradingPair)
 
     private var candlesTimespan = Timespan.DAY
+
+    //TODO: this is extremely horribly inefficient, pls fix
+    var accounts : Map<Exchange, Account>
+        get() = accountsBackingMap?.associateBy { it.exchange } ?: emptyMap()
+        set(value) {
+            accountsBackingMap = value.values.toList()
+        }
+    private var accountsBackingMap : List<Account>? = listOf()
 
     fun percentChange(timespan: Timespan, quoteCurrency: Currency) : Double {
         val currentPrice = priceForQuoteCurrency(quoteCurrency)
@@ -81,7 +101,7 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     private fun candlesForTimespan(timespan: Timespan, quoteCurrency: Currency) : List<Candle> {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return candlesForTimespan(timespan, tradingPair)
     }
     fun candlesForTimespan(timespan: Timespan, tradingPair: TradingPair?): List<Candle> {
@@ -96,11 +116,11 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
     }
 
     fun priceForQuoteCurrency(quoteCurrency: Currency) : Double {
-        val tradingPair = TradingPair(this.currency, quoteCurrency)
+        val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
         return priceForTradingPair(tradingPair)
     }
 
-    private fun priceForTradingPair(tradingPair: TradingPair) : Double {
+    private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
         return price[tradingPairIndex]
@@ -112,21 +132,23 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
         price[tradingPairIndex] = newPrice
     }
 
-    fun updateCandles(timespan: Timespan, tradingPair: TradingPair?, apiInitData: CBProApi.CBProApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
+    fun updateCandles(timespan: Timespan, tradingPairOpt: TradingPair?, apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (didUpdate: Boolean) -> Unit) {
         val now = Calendar.getInstance()
         val longAgo = Calendar.getInstance()
         longAgo.add(Calendar.YEAR, -2)
         val longAgoInSeconds = longAgo.timeInSeconds()
         val nowInSeconds = now.timeInSeconds()
+        val tradingPair = tradingPairOpt ?: defaultTradingPair
+        if (tradingPair == null) {
+            onFailure(Result.Failure(FuelError(Exception())))
+            return
+        }
 
-        var candles = candlesForTimespan(timespan, tradingPair).toMutableList()
+        var candles = candlesForTimespan(timespan, tradingPairOpt).toMutableList()
 
-        val lastCandleTime = candles.lastOrNull()?.time?.toLong() ?: longAgoInSeconds
+        val lastCandleTime = candles.lastOrNull()?.closeTime ?: longAgoInSeconds
         val nextCandleTime: Long = lastCandleTime + Candle.granularityForTimespan(timespan)
 
-//        if (timespan != product.candlesTimespan) {
-//            nextCandleTime = longAgoInSeconds
-//        }
         candlesTimespan = timespan
 
         if (nextCandleTime < nowInSeconds) {
@@ -138,16 +160,16 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            CBProApi.candles(apiInitData,tradingPair?.id ?: id, missingTime, granularity, 0).getCandles(onFailure) { candleList ->
+            AnyApi.getCandles(apiInitData, Exchange.CBPro, tradingPair, missingTime, 0, granularity, onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
-                    val newLastCandleTime = candleList.lastOrNull()?.time?.toInt() ?: 0.0
+                    val newLastCandleTime = candleList.lastOrNull()?.closeTime?.toInt() ?: 0.0
                     didGetNewCandle = (lastCandleTime != newLastCandleTime)
                     if (didGetNewCandle) {
                         val timespanStart = nowInSeconds - timespanLong
 
                         if (candles.isNotEmpty()) {
-                            val firstInTimespan = candles.indexOfFirst { candle -> candle.time >= timespanStart }
+                            val firstInTimespan = candles.indexOfFirst { candle -> candle.closeTime >= timespanStart }
                             candles = if (firstInTimespan >= 0) {
                                 candles.subList(firstInTimespan, candles.lastIndex).toMutableList()
                             } else {
@@ -180,60 +202,50 @@ class Product(var currency: Currency, var id: String, var quoteCurrency: Currenc
 
     override fun toString(): String {
         var alertString = currency.toString() + '\n'
-        alertString += id + '\n'
-        alertString += quoteCurrency.toString() + '\n'
         for (tradingPair in tradingPairs) {
             alertString += tradingPair.toString() + '\n'
         }
         return alertString
     }
 //
-//    fun setAllBasicCandles(basicHourCandles: List<Candle>, basicDayCandles: List<Candle>, basicWeekCandles: List<Candle>, basicMonthCandles: List<Candle>, basicYearCandles: List<Candle>) {
-//        val tradingPairIndex: Int = tradingPairs.indexOf(TradingPair(this.currency, Account.defaultFiatCurrency))
-//
-//        hourCandles[tradingPairIndex] = basicHourCandles
-//        dayCandles[tradingPairIndex]  = basicDayCandles
-//        weekCandles[tradingPairIndex] = basicWeekCandles
-//        monthCandles[tradingPairIndex] = basicMonthCandles
-//        yearCandles[tradingPairIndex] = basicYearCandles
-//    }
+
+
+    fun totalDefaultValueOfRelevantAccounts() : Double {
+        var totalValue = 0.0
+        for (accountPair in accounts) {
+            totalValue += accountPair.value.defaultValue
+        }
+        return totalValue
+    }
+
+    fun addToHashMap() {
+        map[currency.id] = this
+    }
 
     companion object {
-        fun forString(string: String): Product {
-            val splitString = string.split('\n')
-            val currency = Currency.forString(splitString[0]) ?: Currency.USD
-            val id = splitString[1]
-            val quoteCurrency = if (splitString.size > 2) { Currency.forString(splitString[2]) ?: Currency.USD } else { Currency.USD }
-            val tradingPairStrings = if (splitString.size > 3) { splitString.subList(3, splitString.size - 1) } else { listOf() }
-            val tradingPairs = tradingPairStrings.map { TradingPair(it) }
-            return Product(currency, id, quoteCurrency, tradingPairs)
+        var map = mutableMapOf<String, Product>()
+
+        val dummyProduct = Product(Currency.USD, listOf())
+
+        fun forCurrency(currency: Currency) : Product? {
+            return map[currency.id]
         }
 
-        fun fiatProduct(currency: Currency): Product {
-            val fiatProduct = Product(currency, currency.toString(), null, listOf())
-            
-            fiatProduct.price.fill(1.0)
-            return fiatProduct
-        }
-
-
-        fun updateAllProducts(apiInitData: CBProApi.CBProApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            CBProApi.products(apiInitData).get(onFailure) { unfilteredApiProductList ->
-                val fiatCurrency = Account.defaultFiatCurrency
-                val apiProductList = unfilteredApiProductList.filter { s ->
-                    s.quote_currency == fiatCurrency.toString()
+        fun updateAllProductCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            var candlesUpdated = 0
+            for (product in map.values) {
+                val tradingPair = product.defaultTradingPair
+                product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
+                    candlesUpdated++
+                    if (candlesUpdated == map.size) {
+                        if (didUpdate && apiInitData?.context != null) {
+                            Prefs(apiInitData.context).stashedProducts = map.values.toList()
+                        }
+                        onComplete()
+                    }
                 }
-                for (apiProduct in apiProductList) {
-                    val baseCurrency = apiProduct.base_currency
-                    val relevantProducts = unfilteredApiProductList.filter { it.base_currency == baseCurrency }.map { it.id }
-                    val newProduct = Product(apiProduct, relevantProducts.map { TradingPair(it) })
-                    val currency = Currency.forString(baseCurrency) ?: Currency.USD
-                    val relevantAccount = Account.forCurrency(currency)
-                    relevantAccount?.product?.currency = newProduct.currency
-                    relevantAccount?.product?.id = newProduct.id
-                    relevantAccount?.product?.quoteCurrency = newProduct.quoteCurrency
-                    relevantAccount?.product?.tradingPairs = newProduct.tradingPairs
-                }
+            }
+            if (map.isEmpty()) {
                 onComplete()
             }
         }

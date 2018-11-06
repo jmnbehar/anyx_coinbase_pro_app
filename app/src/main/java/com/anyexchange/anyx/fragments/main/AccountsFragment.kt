@@ -16,6 +16,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
 
@@ -100,7 +101,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         if (accountTotalCandles.size > entry.x) {
             val candle = accountTotalCandles[entry.x.toInt()]
 
-            var timeString = candle.time.toStringWithTimespan(chartTimeSpan)
+            var timeString = candle.closeTime.toStringWithTimespan(chartTimeSpan)
             timeString = timeString.replace(" ", "\n")
             percentChangeText?.text = timeString
         }
@@ -136,7 +137,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     private fun setValueAndPercentChangeTexts() {
-        val totalValue = Account.totalValue
+        val totalValue = Account.totalValue()
         valueText?.text = totalValue.fiatFormat(Account.defaultFiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
@@ -171,22 +172,26 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     private fun sumAccountCandles() : List<Candle> {
-        val btcProduct = Account.forCurrency(Currency.BTC)?.product
+        val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
             val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
-                val time = btcProduct.defaultDayCandles[i].time
-                for (account in Account.cryptoAccounts) {
-                    val accountCandleValue = if (account.product.defaultDayCandles.size > i) {
-                        account.product.defaultDayCandles[i].close
+                val openTime = btcProduct.defaultDayCandles[i].openTime
+                val closeTime = btcProduct.defaultDayCandles[i].closeTime
+                for (product in Product.map.values) {
+                    val accountCandleValue = if (product.defaultDayCandles.size > i) {
+                        product.defaultDayCandles[i].close
                     } else {
-                        account.product.defaultDayCandles.lastOrNull()?.close ?: 0.0
+                        product.defaultDayCandles.lastOrNull()?.close ?: 0.0
                     }
-                    totalCandleValue += (accountCandleValue * account.balance)
+                    for (accountPair in product.accounts) {
+                        totalCandleValue += (accountCandleValue * accountPair.value.balance)
+                    }
                 }
-                val newCandle = Candle(time, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0, TradingPair(Currency.USD, Currency.USD))
+
+                val newCandle = Candle(openTime, closeTime, 0.0, 0.0, totalCandleValue, totalCandleValue, 0.0)
                 accountTotalCandleList.add(newCandle)
             }
             return accountTotalCandleList
@@ -213,7 +218,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()
 
-        if (Account.totalValue == 0.0) {
+        if (Account.totalValue() == 0.0) {
             lineChart?.visibility = View.GONE
         } else {
             lineChart?.visibility = View.VISIBLE
