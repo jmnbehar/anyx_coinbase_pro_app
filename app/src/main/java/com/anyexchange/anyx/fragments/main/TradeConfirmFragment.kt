@@ -29,6 +29,8 @@ class TradeConfirmFragment: DialogFragment() {
 
     private var confirmButton: Button? = null
 
+    private var submitOrder: (NewOrder?) -> Unit = { }
+
     var currentPrice: Double? = null
     var newOrder: NewOrder? = null
 
@@ -56,19 +58,16 @@ class TradeConfirmFragment: DialogFragment() {
         }
 
         confirmButton?.setOnClickListener {_ ->
-            currentPrice?.let { currentPrice ->
-                newOrder?.let { newOrder ->
-                    setText(currentPrice, newOrder)
-                }
-            }
+            submitOrder(newOrder)
         }
 
         return rootView
     }
 
-    fun setInfo(currentPrice: Double, newOrder: NewOrder) {
+    fun setInfo(currentPrice: Double, newOrder: NewOrder, submitOrder: (NewOrder?) -> Unit) {
         this.currentPrice = currentPrice
         this.newOrder = newOrder
+        this.submitOrder = submitOrder
     }
 
     private fun setText(currentPrice: Double, newOrder: NewOrder) {

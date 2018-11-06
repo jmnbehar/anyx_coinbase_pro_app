@@ -13,6 +13,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
                private val timeInForce: TimeInForce?, private val cancelAfter: TimeInForce.CancelAfter?, private val iceBergQty: String?) {
 
     private fun willIncurFee(currentPrice: Double): Boolean {
+        //TODO: use new version of willIncurFee with new stop logic
         if (priceLimit != null) {
             if (priceLimit <= currentPrice &&
                     ((type == TradeType.LIMIT && side == TradeSide.BUY) ||
@@ -38,7 +39,6 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
 
     fun exchangeFee(currentPrice: Double) : Pair<Double, Currency> {
         return if (willIncurFee(currentPrice)) {
-            //TODO: decide on whether this is in
             val fee = totalQuote(currentPrice) * tradingPair.baseCurrency.feePercentage
             Pair(fee, tradingPair.quoteCurrency)
         } else {
@@ -112,8 +112,9 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
                 }
             }
             TradeType.STOP -> {
+                val fundsOrAmount = amount ?: funds
                 priceLimit?.let { stopPrice ->
-                    AnyApi.orderStop(apiInitData, tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, amount!!, null,
+                    AnyApi.orderStop(apiInitData, tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, fundsOrAmount!!, null,
                             { onFailure(it) }, { onSuccess(it) })
                 } ?: run {
                     //TODO: call onFailure

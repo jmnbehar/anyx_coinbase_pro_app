@@ -100,14 +100,6 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
                 TradeSide.SELL -> ResourcesCompat.getColor(resources, R.color.anyx_red, null)
             }
 
-            val sideString = when (order.side) {
-                TradeSide.BUY -> context.resources.getString(R.string.chart_history_order_side_buy)
-                TradeSide.SELL -> context.resources.getString(R.string.chart_history_order_side_sell)
-            }
-
-//            val totalPrice = order.funds?.toDoubleOrNull() ?: order.price * order.amount
-            val quoteCurrency = order.tradingPair.quoteCurrency
-
             viewHolder.mainLabelText?.text = order.summary(resources)
 
             val tradeTypeString = order.type.toString().capitalize()

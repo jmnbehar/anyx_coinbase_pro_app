@@ -218,7 +218,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
-            submitOrderButton?.setOnClickListener { submitOrder() }
+            submitOrderButton?.setOnClickListener { compileOrder() }
         }
 
         dismissProgressSpinner()
@@ -339,7 +339,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         switchTradeInfo(null, null, null)
     }
 
-    private fun submitOrder() {
+    private fun compileOrder() {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error: ${result.errorMessage}") }
 
 
@@ -392,7 +392,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun showDialog(updatedTicker: Double, newOrder: NewOrder) {
         val confirmDialogFragment = TradeConfirmFragment()
-        confirmDialogFragment.setInfo(updatedTicker, newOrder)
+        confirmDialogFragment.setInfo(updatedTicker, newOrder) {
+            if (it != null) {
+                submitOrder(it)
+            }
+            confirmDialogFragment.dismiss()
+        }
         confirmDialogFragment.showNow(fragmentManager, "confirmDialog")
     }
 

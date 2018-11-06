@@ -19,7 +19,7 @@ data class CBProProduct(
 
 data class CBProOrder(
         val id: String,
-        val price: String,
+        val price: String?,
         val size: String?,
         val product_id: String,
         val side: String,
@@ -37,7 +37,9 @@ data class CBProOrder(
         val filled_size: String,
         val executed_value: String,
         val status: String,
-        val settled: Boolean)
+        val settled: Boolean,
+        val stop: String?,
+        val stop_price: String?)
 
 data class CBProFill(
         val trade_id: Int,

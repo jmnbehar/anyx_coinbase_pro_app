@@ -1,55 +1,54 @@
 package com.anyexchange.anyx.classes
 
-import android.content.Context
 import android.content.res.Resources
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.api.*
-import com.anyexchange.anyx.fragments.main.TradeFragment
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 
 class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair, val price: Double?, val amount: Double, val filledAmount: Double,
-            val type: TradeType, val side: TradeSide, val time: Date, val timeInForce: String) {
+            var type: TradeType, val side: TradeSide, val time: Date, val timeInForce: String?, private val stopPrice: Double?) {
     var status: String? = null
 
     //Binance extras:
     private var cumulativeQuoteQty: Double? = null
-    private var stopPrice: Double? = null
     private var icebergQty: Double? = null
     private var updateTime: Long? = null
     private var isWorking: Boolean? = null
 
     //CbPro extras:
     private var stp: String? = null //self trade prevention
-    var funds: Double? = null
-    var specifiedFunds: Double? = null
+    private var funds: Double? = null
+    private var specifiedFunds: Double? = null
     private var postOnly: Boolean? = null
     private var doneAt: Date? = null
     var expireTime: Date? = null
     private var doneReason: String? = null
-    var fillFees: String? = null
-    var filledSize: String? = null
+    private var fillFees: String? = null
+    private var filledSize: String? = null
     private var executedValue: String? = null
     private var settled: Boolean? = null
+    private var stopType: String? = null
 
     var showExtraInfo = false
 
 
     constructor(binanceOrder: BinanceOrder) :
             this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(Exchange.Binance, binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
-                    TradeType.forString(binanceOrder.type), TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce) {
+                    TradeType.forString(binanceOrder.type), TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce, binanceOrder.stopPrice) {
         cumulativeQuoteQty = binanceOrder.cummulativeQuoteQty
         status = binanceOrder.status
-        stopPrice = binanceOrder.stopPrice
         icebergQty = binanceOrder.icebergQty
         updateTime = binanceOrder.updateTime
         isWorking = binanceOrder.isWorking
     }
 
     constructor(cbProOrder: CBProOrder) :
-            this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price.toDouble(), cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDouble(),
-                    TradeType.forString(cbProOrder.type), TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force) {
+            this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price?.toDoubleOrNull(),
+                    cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDoubleOrZero(), if (cbProOrder.stop_price != null) { TradeType.STOP } else { TradeType.forString(cbProOrder.type) },
+                    TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force, cbProOrder.stop_price?.toDoubleOrNull()) {
+
         status = cbProOrder.status
 
         stp = cbProOrder.stp
@@ -63,6 +62,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
         filledSize = cbProOrder.filled_size
         executedValue = cbProOrder.executed_value
         settled = cbProOrder.settled
+        stopType = cbProOrder.stop
     }
 
     fun summary(resources: Resources) : String {
@@ -82,9 +82,9 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
                 }
                 TradeType.STOP -> when (side) {
                     TradeSide.BUY -> resources.getString(R.string.order_summary_stop_buy,
-                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                            (specifiedFunds ?: funds)!!.format(tradingPair.baseCurrency), stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
                     TradeSide.SELL -> resources.getString(R.string.order_summary_stop_sell,
-                            amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                            amount.format(tradingPair.baseCurrency), stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
                 }
             }
         }

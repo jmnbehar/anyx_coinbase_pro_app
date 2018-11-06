@@ -12,7 +12,7 @@ import com.anyexchange.anyx.R
 
 class Currency(val id: String) {
     constructor(knownCurrency: KnownCurrency): this(knownCurrency.toString())
-    val knownCurrency = KnownCurrency.forString(id)
+    private val knownCurrency = KnownCurrency.forString(id)
 
     override fun toString() : String {
         return id
@@ -56,8 +56,6 @@ class Currency(val id: String) {
 
     fun colorPrimary(context: Context) : Int {
         return knownCurrency?.colorPrimary(context) ?: run {
-            //TODO: generate colors based on name and darkmode
-
             if (Prefs(context).isDarkModeOn) {
                 Color.WHITE
             } else {
@@ -68,21 +66,22 @@ class Currency(val id: String) {
 
     fun colorStateList(context: Context) : ColorStateList {
         return knownCurrency?.colorStateList(context) ?: run {
-            //TODO: generate colors based on name and darkmode
-            val isDarkModeOn = Prefs(context).isDarkModeOn
             context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
         }
     }
 
     fun buttonTextColor(context: Context) : Int {
         return knownCurrency?.buttonTextColor(context) ?: run {
-            //TODO: generate colors based on name and darkmode
             if (Prefs(context).isDarkModeOn) {
                 Color.BLACK
             } else {
                 Color.WHITE
             }
         }
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     val developerAddress = knownCurrency?.developerAddress
@@ -94,7 +93,7 @@ class Currency(val id: String) {
 
 
     companion object {
-        val cryptoList: MutableList<Currency> = KnownCurrency.values().filter { !it.isFiat }.asSequence().map { Currency(it) }.toMutableList()
+        val cryptoList: MutableList<Currency> = KnownCurrency.values().filter { !it.isFiat && !it.isStableCoin }.asSequence().map { Currency(it) }.toMutableList()
         val fiatList       = KnownCurrency.values().filter { it.isFiat  }
         val stableCoinList = KnownCurrency.values().filter { it.isStableCoin  }
 
