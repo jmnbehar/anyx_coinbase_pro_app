@@ -88,6 +88,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var blockRefresh = false
     private var didTouchTradingPairSpinner = false
+    private var skipNextOrderFillCheck = false
 
     val timespan: Timespan
         get() = viewModel.timeSpan
@@ -229,6 +230,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             updateHistoryListsFromStashes(it)
+            skipNextOrderFillCheck = true
 
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -514,14 +516,20 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             if (index != -1) {
                 tradingPairSpinner?.setSelection(index)
             }
+
             product.defaultTradingPair?.let { tradingPair ->
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
                 txt_chart_name.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
-                updateHistoryListsFromStashes(context)
-                checkOrdersAndFills(tradingPair, context)
+
+                if (!skipNextOrderFillCheck) {
+                    updateHistoryListsFromStashes(context)
+                    checkOrdersAndFills(tradingPair, context)
+                }
+                skipNextOrderFillCheck = false
             }
+            return@let
         }
     }
 
@@ -812,8 +820,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun updateHistoryListsFromStashes(context: Context) {
         val prefs = Prefs(context)
         val stashedFills = prefs.getStashedFills(currency)
+        val combinedFills = stashedFills.combineFills()
         val stashedOrders = prefs.getStashedOrders(currency)
-        updateHistoryLists(context, stashedOrders, stashedFills)
+        updateHistoryLists(context, stashedOrders, combinedFills)
     }
 
     private fun updateHistoryLists(context: Context, orderList: List<Order>, fillList: List<Fill>? = null) {
