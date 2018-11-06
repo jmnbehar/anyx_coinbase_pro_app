@@ -5,8 +5,6 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,7 +94,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private val amountUnitCurrency: Currency?
         get() {
-            return amountUnitSpinner?.selectedItem as? Currency
+            return when (tradeType) {
+                TradeType.MARKET -> amountUnitSpinner?.selectedItem as? Currency
+                TradeType.LIMIT -> tradingPair.baseCurrency
+                TradeType.STOP -> when (tradeSide) {
+                    TradeSide.BUY -> tradingPair.quoteCurrency
+                    TradeSide.SELL -> tradingPair.baseCurrency
+                }
+            }
         }
 
     private val isAmountFunds: Boolean
@@ -155,24 +160,8 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         submitOrderButton = rootView.btn_place_order
 
-        amountEditText?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-                val amount = p0.toString().toDoubleOrZero()
-                updateTotalText(amount, null)
-            }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-        })
         amountEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
 
-        limitEditText?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-                val limitPrice = p0.toString().toDoubleOrZero()
-                updateTotalText(null, limitPrice)
-            }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-        })
         limitEditText?.filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(10, 8))
 
 
@@ -347,8 +336,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 currentPriceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
             }
         }
-        updateTotalText(null, null)
-
         switchTradeInfo(null, null, null)
     }
 
@@ -501,35 +488,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun updateTotalText(amountIn: Double?, limitPriceIn: Double?) {
-        val amount = amountIn ?: amountEditText?.text.toString().toDoubleOrZero()
-        val limitPrice = limitPriceIn ?: limitEditText?.text.toString().toDoubleOrZero()
-        val sideString = tradeSide.toString().capitalize()
-
-        summaryText.text = when (tradeType) {
-            TradeType.MARKET -> {
-                when (amountUnitCurrency) {
-                    tradingPair.baseCurrency -> resources.getString(R.string.trade_summary_market_fixed_base,
-                            sideString, amount.format(tradingPair.baseCurrency))
-                    tradingPair.quoteCurrency -> resources.getString(R.string.trade_summary_market_fixed_quote,
-                            sideString, amount.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                    else -> ""
-                }
-            }
-            TradeType.LIMIT -> when (tradeSide) {
-                TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
-                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
-                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-            }
-            TradeType.STOP -> when (tradeSide) {
-                TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
-                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
-                        amount.format(tradingPair.baseCurrency), limitPrice.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-            }
-        }
-    }
 
     private fun switchTradingPair(newTradingPair: TradingPair) {
 
@@ -566,8 +524,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         if (newTradeType != null) {
             this.tradeType = newTradeType
         }
-
-        updateTotalText(null, null)
 
         if (advancedOptionsCheckBox?.isChecked == true && tradeType == TradeType.LIMIT) {
             advancedOptionsLayout?.visibility = View.VISIBLE

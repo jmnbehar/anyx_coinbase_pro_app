@@ -1,5 +1,7 @@
 package com.anyexchange.anyx.classes
 
+import android.content.Context
+import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.ApiInitData
 import com.anyexchange.anyx.fragments.main.TradeFragment
@@ -55,7 +57,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
                 TradeType.LIMIT -> amount!!
                 TradeType.STOP ->
                     if (priceLimit!! > 0) {
-                        amount!! / priceLimit
+                        funds!! / priceLimit
                     } else {
                         0.00
                     }
@@ -72,7 +74,28 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         return when (type) {
             TradeType.MARKET -> funds ?: (amount!! * currentPrice)
             TradeType.LIMIT -> amount!! * priceLimit!!
-            TradeType.STOP -> amount!! * priceLimit!!
+            TradeType.STOP -> funds ?: amount!! * priceLimit!!
+        }
+    }
+
+    fun summaryText(context: Context) : String {
+        return when (type) {
+            TradeType.MARKET -> when (amount) {
+                null -> context.getString(R.string.trade_summary_market_fixed_quote, side.name, funds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                else -> context.getString(R.string.trade_summary_market_fixed_base, side.name, amount.format(tradingPair.baseCurrency))
+            }
+            TradeType.LIMIT -> when (side) {
+                TradeSide.BUY -> context.getString(R.string.trade_summary_limit_buy, amount!!.format(tradingPair.baseCurrency),
+                        priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                TradeSide.SELL -> context.getString(R.string.trade_summary_limit_sell, amount!!.format(tradingPair.baseCurrency),
+                        priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+            }
+            TradeType.STOP -> when (side) {
+                TradeSide.BUY -> context.getString(R.string.trade_summary_stop_buy, funds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency,
+                        priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                TradeSide.SELL -> context.getString(R.string.trade_summary_stop_sell, amount!!.format(tradingPair.baseCurrency),
+                        priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+            }
         }
     }
 

@@ -74,29 +74,15 @@ class TradeConfirmFragment: DialogFragment() {
     private fun setText(currentPrice: Double, newOrder: NewOrder) {
         val tradingPair = newOrder.tradingPair
 
-        orderSummaryText?.text = when (newOrder.type) {
-            TradeType.MARKET -> if (newOrder.amount != null) {
-                resources.getString(R.string.trade_summary_market_fixed_base, newOrder.side.name, newOrder.amount.format(tradingPair.baseCurrency))
-            } else {
-                resources.getString(R.string.trade_summary_market_fixed_quote, newOrder.side.name, newOrder.funds!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-            }
-            TradeType.LIMIT -> when (newOrder.side) {
-                TradeSide.BUY -> resources.getString(R.string.trade_summary_limit_buy,
-                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                TradeSide.SELL -> resources.getString(R.string.trade_summary_limit_sell,
-                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-            }
-            TradeType.STOP -> when (newOrder.side) {
-                TradeSide.BUY -> resources.getString(R.string.trade_summary_stop_buy,
-                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-                TradeSide.SELL -> resources.getString(R.string.trade_summary_stop_sell,
-                        newOrder.amount!!.format(tradingPair.baseCurrency), newOrder.priceLimit!!.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
-            }
+        context?.let {
+            orderSummaryText?.text = newOrder.summaryText(it)
+            orderSummaryText?.visibility = View.VISIBLE
+        } ?: run {
+            orderSummaryText?.visibility = View.GONE
         }
 
         val exchangeFee = newOrder.exchangeFee(currentPrice)
 
-        //TODO: approximate =
         row1Label?.text = getString(R.string.trade_confirm_exchange_fee_label, newOrder.tradingPair.exchange)
         if (exchangeFee.first > 0.0 && exchangeFee.first < 0.01 && exchangeFee.second.isFiat) {
             val oneCent = 0.01.format(exchangeFee.second)

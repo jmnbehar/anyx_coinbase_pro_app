@@ -323,8 +323,8 @@
     //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
     <string name="trade_summary_limit_sell">Sell %s for at least %s per %s</string>
 
-    //For limit buys, ex: "Buy (2 ETH) for up to ($200) per (ETH)"
-    <string name="trade_summary_stop_buy">Buy %s when the price rises above %s per %s</string>
+    //For limit buys, ex: "Buy ($12) worth of (ETH) for up to ($200) per (ETH)"
+    <string name="trade_summary_stop_buy">Buy %s worth of %s when the price rises above %s per %s</string>
 
     //For limit sells, ex: "Sell (2 ETH) for at least ($220) per (ETH)"
     <string name="trade_summary_stop_sell">Sell %s when the price falls below %s per %s</string>
