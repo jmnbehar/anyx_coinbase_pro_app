@@ -262,7 +262,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
-                updateAllAccounts(onFailure, onComplete)
+                if (CBProApi.credentials != null) {
+                    updateAllAccounts(onFailure, onComplete)
+                } else {
+                    onComplete()
+                }
             }
         } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
             updateAllAccounts(onFailure, onComplete)

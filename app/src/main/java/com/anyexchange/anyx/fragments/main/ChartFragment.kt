@@ -229,9 +229,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
 
-            updateHistoryListsFromStashes(it)
-            skipNextOrderFillCheck = true
-
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
@@ -325,6 +322,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             blockNextProductChange = false
         }
 
+        context?.let {
+            updateHistoryListsFromStashes(it)
+            skipNextOrderFillCheck = true
+        }
         if (!currency.isFiat) {
             setButtonsAndBalanceText(product)
             switchProduct(product)
