@@ -196,10 +196,9 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            this.get(onFailure) { apiAccountList ->
-                if (credentials != null) {
-
-                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat || Currency(it.currency).isStableCoin  }
+            if (credentials != null) {
+                this.get(onFailure) { apiAccountList ->
+                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat || Currency(it.currency).isStableCoin }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
@@ -219,9 +218,9 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     }
 
                     Product.updateAllProductCandles(initData, onFailure, onComplete)
-                } else {
-                    onComplete()
                 }
+            } else {
+                onComplete()
             }
         }
 
@@ -706,7 +705,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         get() {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
-            if (credentials != null) {
+            if (credentials != null && credentials.apiKey.isNotBlank() && credentials.apiSecret.isNotBlank()) {
                 val timestamp = (Date().timeInSeconds()).toString()
                 val message = if (this is fills || this is listOrders) {
                     timestamp + method + fullPath + body

@@ -68,11 +68,7 @@ class SettingsFragment : RefreshFragment() {
         val prefs = Prefs(activity!!)
 
         logoutButton?.setOnClickListener  {
-            prefs.isLoggedIn = false
-            CBProApi.credentials = null
-            prefs.nukeStashedOrders()
-            prefs.nukeStashedFills()
-            (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
+            logOut()
         }
 
         verifyButton?.setOnClickListener  {
@@ -174,6 +170,21 @@ class SettingsFragment : RefreshFragment() {
         showDarkMode()
 
         return rootView
+    }
+
+    private fun logOut() {
+        context?.let {
+            val prefs = Prefs(it)
+            prefs.isLoggedIn = false
+            CBProApi.credentials = null
+            for (product in Product.map.values) {
+                product.accounts = mapOf()
+            }
+            prefs.stashedProducts = Product.map.values.toList()
+            prefs.nukeStashedOrders()
+            prefs.nukeStashedFills()
+            (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
+        }
     }
 
 

@@ -59,7 +59,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         titleText = rootView.account_text
 
         val context = context
-        if (context!= null && Prefs(context).isLoggedIn) {
+        if (context != null && Prefs(context).isLoggedIn) {
             rootView.layout_accounts_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_accounts_label.text = resources.getString(R.string.accounts_title)

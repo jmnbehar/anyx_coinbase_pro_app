@@ -106,6 +106,7 @@ class LoginFragment : RefreshFragment()  {
 //        }
 
         btnSkipLogin.setOnClickListener { _ ->
+            CBProApi.credentials = null
             (activity as? MainActivity)?.signIn(true, {
                 toast(R.string.error_message)
             }, {

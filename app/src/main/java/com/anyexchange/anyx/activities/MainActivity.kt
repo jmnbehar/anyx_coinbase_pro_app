@@ -253,9 +253,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         checkAllResources(onFailure) {
+            if (CBProApi.credentials != null) {
+                prefs.isLoggedIn = true
+            }
             setDrawerMenu()
             onComplete()
-            prefs.isLoggedIn = true
             goHome()
         }
     }
