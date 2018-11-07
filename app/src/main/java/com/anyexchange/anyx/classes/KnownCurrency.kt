@@ -118,6 +118,18 @@ enum class KnownCurrency {
             else -> false
         }
 
+    val relevantStableCoin : KnownCurrency?
+        get() = when (this) {
+            USD -> USDC
+            else -> null
+        }
+
+    val relevantFiat : KnownCurrency?
+        get() = when (this) {
+            USDC -> USD
+            else -> null
+        }
+
 //    private val startDate : Date
 //        get() = when (this) {
 //            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime

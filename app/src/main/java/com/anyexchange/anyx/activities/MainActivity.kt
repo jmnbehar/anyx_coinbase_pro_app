@@ -255,6 +255,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         checkAllResources(onFailure) {
             setDrawerMenu()
             onComplete()
+            prefs.isLoggedIn = true
             goHome()
         }
     }

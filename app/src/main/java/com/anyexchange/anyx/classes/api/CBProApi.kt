@@ -184,7 +184,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accounts(private val initData: ApiInitData?) : CBProApi(initData) {
-
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProAccount>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
