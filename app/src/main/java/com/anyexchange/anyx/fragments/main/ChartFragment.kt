@@ -428,9 +428,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         blockRefresh = true
         didTouchTradingPairSpinner = false
 
-        val price = newProduct.priceForQuoteCurrency(quoteCurrency)
-        priceTextView?.text = price.format(quoteCurrency)
-
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
 
@@ -508,6 +505,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun completeSwitchProduct(product: Product) {
         blockRefresh = false
         lockableScrollView?.scrollToTop(200)
+
+        val price = product.priceForQuoteCurrency(quoteCurrency)
+        priceTextView?.text = price.format(quoteCurrency)
+
         context?.let { context ->
             val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)

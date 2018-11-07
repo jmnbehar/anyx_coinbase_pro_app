@@ -72,10 +72,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 HomeFragment.viewPager?.isLocked = true
             }
 
-            val selectGroup = lambda@ { account: Account ->
+            accountList?.adapter = AccountListViewAdapter(context) { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
-            accountList?.adapter = AccountListViewAdapter(context, selectGroup)
             titleText?.visibility = View.GONE
 
         } else {
@@ -175,7 +174,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
+            val fiatValue = Account.fiatAccounts.asSequence().map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
                 val openTime = btcProduct.defaultDayCandles[i].openTime

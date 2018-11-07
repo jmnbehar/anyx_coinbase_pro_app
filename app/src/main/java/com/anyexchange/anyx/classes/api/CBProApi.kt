@@ -706,6 +706,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
             if (credentials != null && credentials.apiKey.isNotBlank() && credentials.apiSecret.isNotBlank()) {
+                //TODO: add in auto-corrections if phone's clock is off:
                 val timestamp = (Date().timeInSeconds()).toString()
                 val message = if (this is fills || this is listOrders) {
                     timestamp + method + fullPath + body
