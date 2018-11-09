@@ -82,7 +82,7 @@ fun RecyclerView.setHeightBasedOnChildren(): Int {
     var totalHeight = 0
     var view: View?
     for (i in 0 until listAdapter.itemCount) {
-        view = layoutManager.findViewByPosition(i)
+        view = layoutManager?.findViewByPosition(i)
 
         if (i == 0) {
             view?.layoutParams = (ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT))

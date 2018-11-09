@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (dataFragment == null) {
             // add the fragment
             dataFragment = DataFragment.newInstance()
-            supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
+            supportFragmentManager.beginTransaction().add(dataFragment!!, Constants.dataFragmentTag).commit()
         }
         dataFragment?.restoreData(this)
 
