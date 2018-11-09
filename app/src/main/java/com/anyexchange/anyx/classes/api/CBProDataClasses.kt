@@ -60,6 +60,10 @@ data class CBProTicker(
         val volume: String,
         val time: String)
 
+data class CBProTime(
+        val iso: String,
+        val epoch: Double)
+
 //data class ApiCurrencies(
 //        val id: String,
 //        val name: String,
