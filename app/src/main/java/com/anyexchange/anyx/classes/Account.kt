@@ -54,11 +54,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     }
 
     override fun toString(): String {
-        val cbproAccountBalanceString =  if (currency.isFiat) {
-            balance.fiatFormat(Account.defaultFiatCurrency)
-        } else {
-            "${balance.btcFormatShortened()} $currency"
-        }
+        val cbproAccountBalanceString = balance.format(currency)
         return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
     }
 
@@ -66,7 +62,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         var fiatAccounts = listOf<Account>()
 
 
-        fun accountsOutOfDate(): List<Exchange> {
+        private fun accountsOutOfDate(): List<Exchange> {
             val exchangeList = mutableListOf<Exchange>()
             val areFiatAccountsMissing = Account.fiatAccounts.isEmpty()
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
@@ -101,10 +97,10 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
 
         fun forCurrency(currency: Currency, exchange: Exchange): Account? {
-            return if (currency.isFiat) {
-                fiatAccounts.find { a -> a.product?.currency == currency }
-            } else {
-                Product.map[currency.id]?.accounts?.get(exchange)
+            return when (currency.type) {
+                Currency.Type.FIAT -> fiatAccounts.find { a -> a.product?.currency == currency }
+                Currency.Type.STABLECOIN -> fiatAccounts.find { a -> a.product?.currency == currency }
+                else -> Product.map[currency.id]?.accounts?.get(exchange)
             }
         }
 
@@ -120,11 +116,8 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
         override fun toString(): String {
             //TODO: use string resources
-            return if (currency.isFiat) {
-                "Coinbase $currency Balance: ${balance.fiatFormat(defaultFiatCurrency)}"
-            } else {
-                "Coinbase $currency Balance: ${balance.btcFormatShortened()} $currency"
-            }
+            val cbproAccountBalanceString = balance.format(currency)
+            return "Coinbase $currency Balance: $cbproAccountBalanceString"
         }
     }
 

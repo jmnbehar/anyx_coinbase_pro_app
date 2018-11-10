@@ -298,17 +298,16 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun setDestAccounts() {
-        val cbproAccount = if (currency.isFiat) {
-            Account.fiatAccounts.find { it.currency == currency }
-        } else {
-            Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
+        val cbproAccount = when (currency.type) {
+            Currency.Type.CRYPTO -> Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
+            else -> Account.fiatAccounts.find { it.currency == currency }
         }
         destAccounts = when(sourceAccount) {
             is Account.CoinbaseAccount -> listOf(cbproAccount).filterNotNull()
             is Account.PaymentMethod ->  listOf(cbproAccount).filterNotNull()
             is Account -> {
                 val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { it.currency == currency }.toMutableList()
-                if (currency.isFiat) {
+                if (currency.type == Currency.Type.FIAT) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
                 tempDestAccounts.toList()

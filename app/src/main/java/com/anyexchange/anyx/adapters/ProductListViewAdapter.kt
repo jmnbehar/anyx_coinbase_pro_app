@@ -92,7 +92,9 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             viewHolder.lineChart?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.VISIBLE
-            viewHolder.priceText?.text = product.defaultPrice.fiatFormat(Account.defaultFiatCurrency)
+
+            val defaultQuoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+            viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
 
             val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()

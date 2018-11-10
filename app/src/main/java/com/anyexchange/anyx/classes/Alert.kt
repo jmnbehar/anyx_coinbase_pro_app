@@ -42,7 +42,8 @@ class PriceAlert(var price: Double, val currency: Currency, val triggerIfAbove: 
                 true  -> "over"
                 false -> "under"
             }
-            return "$currency is $overUnder ${price.fiatFormat(Account.defaultFiatCurrency)}"
+            //TODO: get the actual quote currency here
+            return "$currency is $overUnder ${price.format(Account.defaultFiatCurrency)}"
         }
 
     override val tag = "PriceAlert_${currency}_$price"

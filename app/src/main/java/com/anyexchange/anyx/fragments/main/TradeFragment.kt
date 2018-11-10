@@ -316,9 +316,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 titleText?.text = resources.getString(R.string.trade_title_for_currency, account.currency.fullName)
 
                 val quoteCurrency = tradingPair.quoteCurrency
-                val quoteBalance: String? = when {
-                    quoteCurrency.isFiat -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.format(quoteCurrency)
-                    else -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.format(currency) + " " + quoteCurrency.id
+                val quoteBalance: String? = when (quoteCurrency.type) {
+                    Currency.Type.CRYPTO -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.format(currency) + " " + quoteCurrency.id
+                    else -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.format(quoteCurrency)
                 }
 
                 quoteBalanceText?.visibility = View.GONE

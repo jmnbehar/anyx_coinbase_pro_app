@@ -218,7 +218,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).type != Currency.Type.CRYPTO }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
-                    val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
+                    val cryptoApiAccountList = apiAccountList.filter { Currency(it.currency).type == Currency.Type.CRYPTO }
                     val tempCryptoAccounts = cryptoApiAccountList.map { Account(it) }
 
                     for (account in tempCryptoAccounts) {
@@ -438,10 +438,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 for (apiCbAccount in apiCoinbaseAccounts) {
                     val currency = Currency(apiCbAccount.currency)
                     if (apiCbAccount.active) {
-                        val account = if (currency.isFiat) {
-                            Account.fiatAccounts.find { it.currency == currency }
-                        } else {
+                        val account = if (currency.type == Currency.Type.CRYPTO) {
                             Product.map[currency.id]?.accounts?.get(cbProExchange)
+                        } else {
+                            Account.fiatAccounts.find { it.currency == currency }
                         }
                         val coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
                         coinbaseAccounts.add(coinbaseAccount)
