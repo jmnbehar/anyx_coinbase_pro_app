@@ -215,7 +215,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             if (credentials != null) {
                 this.get(onFailure) { apiAccountList ->
-                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat || Currency(it.currency).isStableCoin }
+                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).type != Currency.Type.CRYPTO }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
                     val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }

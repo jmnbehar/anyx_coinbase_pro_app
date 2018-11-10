@@ -106,16 +106,11 @@ enum class KnownCurrency {
             GBP -> R.drawable.icon_gbp
         }
 
-    val isFiat : Boolean
+    val type: Currency.Type
         get() = when(this) {
-            USD, EUR, GBP -> true
-            else -> false
-        }
-
-    val isStableCoin : Boolean
-        get() = when(this) {
-            USDC -> true
-            else -> false
+            USD, EUR, GBP -> Currency.Type.FIAT
+            USDC -> Currency.Type.STABLECOIN
+            else -> Currency.Type.CRYPTO
         }
 
     val relevantStableCoin : KnownCurrency?
@@ -289,8 +284,6 @@ enum class KnownCurrency {
         }
 
     companion object {
-        val cryptoList = KnownCurrency.values().filter { !it.isFiat }
-
         fun forString(string: String?) : KnownCurrency? {
             return when (string) {
                 "BTC" -> BTC

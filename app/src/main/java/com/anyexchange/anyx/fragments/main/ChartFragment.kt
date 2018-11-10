@@ -59,6 +59,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var candleChart: PriceCandleChart? = null
     private var lineChart: PriceLineChart? = null
 
+    private var currencyNameTextView: TextView? = null
+
     private var tickerTextView: TextView? = null
     private var priceTextView: TextView? = null
 
@@ -184,6 +186,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         candleChart?.setOnChartValueSelectedListener(this)
         candleChart?.onChartGestureListener = this
 
+        currencyNameTextView = rootView.txt_chart_name
+
         priceTextView = rootView.txt_chart_price
 
         buyButton = rootView.btn_chart_buy
@@ -295,7 +299,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairSpinner?.setSelection(index)
         }
 
-        txt_chart_name.text = currency.fullName
+        currencyNameTextView?.text = currency.fullName
         setPercentChangeText(timespan)
         checkTimespanButton()
         updateChartStyle()
@@ -326,7 +330,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             updateHistoryListsFromStashes(it)
             skipNextOrderFillCheck = true
         }
-        if (!currency.isFiat) {
+        if (currency.type != Currency.Type.CRYPTO) {
             setButtonsAndBalanceText(product)
             switchProduct(product)
         } else {
@@ -522,7 +526,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             product.defaultTradingPair?.let { tradingPair ->
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
-                txt_chart_name.text = product.currency.fullName
+                currencyNameTextView?.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
 
                 if (!skipNextOrderFillCheck) {
@@ -691,6 +695,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 txt_chart_change_or_date.textColor = Color.BLACK
             }
         }
+        if (tradingPair?.quoteCurrency?.type != Currency.Type.FIAT &&
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            currencyNameTextView?.visibility = View.GONE
+        }
+
         if (chartStyle == ChartStyle.Candle && entry is CandleEntry) {
             highLabelTextView?.visibility = View.VISIBLE
             highTextView?.visibility = View.VISIBLE
@@ -712,15 +721,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 priceTextView?.typeface = Typeface.MONOSPACE
             }
 
-            if (quoteCurrency.isFiat) {
-                highTextView?.text = entry.high.toDouble().fiatFormat(quoteCurrency)
-                lowTextView?.text = entry.low.toDouble().fiatFormat(quoteCurrency)
-                openTextView?.text = entry.open.toDouble().fiatFormat(quoteCurrency)
-            } else {
-                highTextView?.text = entry.high.toDouble().btcFormatShortened()
-                lowTextView?.text = entry.low.toDouble().btcFormatShortened()
-                openTextView?.text = entry.open.toDouble().btcFormatShortened()
-            }
+            highTextView?.text = entry.high.toDouble().format(quoteCurrency)
+            lowTextView?.text = entry.low.toDouble().format(quoteCurrency)
+            openTextView?.text = entry.open.toDouble().format(quoteCurrency)
+
             volumeTextView?.text = entry.volume.volumeFormat()
         }
     }
@@ -732,6 +736,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
             ChartStyle.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
         }
+        currencyNameTextView?.visibility = View.VISIBLE
 
         highLabelTextView?.visibility = View.GONE
         highTextView?.visibility = View.GONE
@@ -851,7 +856,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val tradingPairTemp = tradingPair
-        if (currency.isFiat) {
+        if (currency.type == Currency.Type.FIAT) {
             onComplete()
         } else if (tradingPairTemp != null){
             product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
