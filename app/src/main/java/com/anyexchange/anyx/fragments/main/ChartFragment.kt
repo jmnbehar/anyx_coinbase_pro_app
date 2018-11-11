@@ -627,7 +627,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-
     private fun setPercentChangeText(timespan: Timespan) {
         val percentChange = product.percentChange(timespan, quoteCurrency)
         txt_chart_change_or_date.text = percentChange.percentFormat()
@@ -637,39 +636,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             Color.RED
         }
     }
-
-//    private fun confirmCancelOrder(order: Order) {
-//        alert {
-//            title = resources.getString(R.string.chart_history_order)
-//            val layoutWidth = 1000
-//
-//            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
-//
-//            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
-//            val price = (order.price ?: 0.0).format(quoteCurrency)
-//            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
-//            val size = order.amount.btcFormat()
-//            val status = order.status
-//
-//            customView {
-//                linearLayout {
-//                    verticalLayout {
-//                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
-//                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-//                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-//                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
-//                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
-//                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
-//                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-//                    }.lparams(width = matchParent) {leftMargin = dip(20) }
-//                }
-//            }
-//            positiveButton(R.string.popup_ok_btn) {  }
-//            negativeButton(R.string.chart_cancel_order) {
-//                cancelOrder(order)
-//            }
-//        }.show()
-//    }
 
     private fun cancelOrder(order: Order) {
         order.cancel(apiInitData, { _ -> }) { _ ->
@@ -701,17 +667,20 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         if (chartStyle == ChartStyle.Candle && entry is CandleEntry) {
-            highLabelTextView?.visibility = View.VISIBLE
-            highTextView?.visibility = View.VISIBLE
-            lowLabelTextView?.visibility = View.VISIBLE
-            lowTextView?.visibility = View.VISIBLE
 
-            openLabelTextView?.visibility = View.VISIBLE
-            openTextView?.visibility = View.VISIBLE
-            closeLabelTextView?.visibility = View.VISIBLE
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE || tradingPair?.quoteCurrency?.isFiat == true) {
+                highLabelTextView?.visibility = View.VISIBLE
+                highTextView?.visibility = View.VISIBLE
+                lowLabelTextView?.visibility = View.VISIBLE
+                lowTextView?.visibility = View.VISIBLE
 
-            volumeLabelTextView?.visibility = View.VISIBLE
-            volumeTextView?.visibility = View.VISIBLE
+                openLabelTextView?.visibility = View.VISIBLE
+                openTextView?.visibility = View.VISIBLE
+                closeLabelTextView?.visibility = View.VISIBLE
+
+                volumeLabelTextView?.visibility = View.VISIBLE
+                volumeTextView?.visibility = View.VISIBLE
+            }
 
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 highTextView?.typeface = Typeface.MONOSPACE
@@ -719,6 +688,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 openTextView?.typeface = Typeface.MONOSPACE
                 volumeTextView?.typeface = Typeface.MONOSPACE
                 priceTextView?.typeface = Typeface.MONOSPACE
+                currencyNameTextView?.visibility = View.INVISIBLE
             }
 
             highTextView?.text = entry.high.toDouble().format(quoteCurrency)

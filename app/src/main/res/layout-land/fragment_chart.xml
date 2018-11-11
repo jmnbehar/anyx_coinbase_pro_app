@@ -37,13 +37,16 @@
 
                     <TextView
                         android:id="@+id/txt_chart_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="10"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
                         android:text=""
-                        android:textSize="30sp"
+                        app:autoSizeMaxTextSize="30sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="2sp"
+                        app:autoSizeTextType="uniform"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintWidth_percent=".5" />
 
                     <TextView
                         android:id="@+id/txt_chart_open_label"
