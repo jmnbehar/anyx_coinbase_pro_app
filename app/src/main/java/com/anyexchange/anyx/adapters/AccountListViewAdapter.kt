@@ -21,8 +21,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
     }
 
     override fun notifyDataSetChanged() {
-        super.notifyDataSetChanged()
         sortedAccountList = sortedAccountList()
+        super.notifyDataSetChanged()
     }
 
     override fun getCount(): Int {
@@ -82,14 +82,12 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
             when (account.currency.type) {
                 Currency.Type.FIAT -> {
                     viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
-                    viewHolder.balanceText?.text = account.currency.toString()
-                    viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    viewHolder.balanceText?.text = "${account.defaultValue.fiatFormat()} ${account.currency}"
                     viewHolder.percentChangeText?.text = ""
                 }
                 Currency.Type.STABLECOIN -> {
                     viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
                     viewHolder.balanceText?.text = account.defaultValue.format(account.currency)
-                    viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                     viewHolder.percentChangeText?.text = ""
                 }
                 Currency.Type.CRYPTO -> {

@@ -125,14 +125,17 @@ fun Double.btcFormatShortened(currency: Currency? = null): String {
     }
 }
 
-fun Double.fiatFormat(currency: Currency): String {
+fun Double.fiatFormat(currency: Currency? = null): String {
     val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
     val sign = if (this >= 0) { "" } else { "-" }
-    val currencySymbol = currency.symbol
-    return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
+    return if (currency != null) {
+        "$sign${currency.symbol}${numberFormat.format(this.absoluteValue)}"
+    } else {
+        "$sign${numberFormat.format(this.absoluteValue)}"
+    }
 }
 fun Double.format(currency: Currency): String {
     return if (currency.isFiat) {

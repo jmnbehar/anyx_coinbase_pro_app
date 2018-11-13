@@ -32,6 +32,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var percentChangeText: TextView? = null
     private var titleText: TextView? = null
     private var accountList: ListView? = null
+    private var lockableScrollView: LockableScrollView? = null
 
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
@@ -57,6 +58,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         percentChangeText = rootView.txt_accounts_percent_change
         accountList = rootView.list_accounts
         titleText = rootView.account_text
+        lockableScrollView = rootView.lockscroll_accounts
 
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
@@ -69,12 +71,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
             lineChart?.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
+                lockableScrollView?.scrollToTop(800)
+                lockableScrollView?.scrollLocked = true
                 HomeFragment.viewPager?.isLocked = true
             }
 
             accountList?.adapter = AccountListViewAdapter(context) { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
+            accountList?.setHeightBasedOnChildren()
             titleText?.visibility = View.GONE
 
         } else {
@@ -86,7 +91,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             titleText?.text = resources.getString(R.string.accounts_logged_out_message)
             dismissProgressSpinner()
         }
-
         return rootView
     }
 
@@ -157,12 +161,14 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
+        lockableScrollView?.scrollLocked = false
         HomeFragment.viewPager?.isLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
-        HomeFragment.viewPager?.isLocked = false
+        lockableScrollView?.scrollLocked = true
+        HomeFragment.viewPager?.isLocked = true
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
@@ -213,6 +219,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     fun refreshComplete() {
         (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
+        accountList?.setHeightBasedOnChildren()
 
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()
