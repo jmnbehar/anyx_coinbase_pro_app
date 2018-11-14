@@ -328,6 +328,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         context?.let {
             updateHistoryListsFromStashes(it)
+            product.defaultTradingPair?.let { defaultTradingPair ->
+                checkOrdersAndFills(defaultTradingPair, it)
+            }
             skipNextOrderFillCheck = true
         }
         if (currency.type != Currency.Type.CRYPTO) {
@@ -335,6 +338,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             switchProduct(product)
         } else {
             val mainActivity = activity as? MainActivity
+
             val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
             currency = if (selectedCurrency != null) {
                 selectedCurrency
