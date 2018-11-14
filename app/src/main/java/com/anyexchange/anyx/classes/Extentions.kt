@@ -223,6 +223,7 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
         override fun onTabUnselected(tab: TabLayout.Tab) {}
         override fun onTabReselected(tab: TabLayout.Tab) {}
     })
+    tabMode = TabLayout.MODE_SCROLLABLE
 }
 
 fun List<TradingPair>.sortTradingPairs() : List<TradingPair> {
