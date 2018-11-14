@@ -33,18 +33,19 @@
             android:id="@+id/layout_transfer_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:orientation="vertical"
-            android:paddingBottom="10dp"
             android:paddingLeft="20dp"
+            android:paddingTop="5dp"
             android:paddingRight="20dp"
-            android:paddingTop="10dp">
+            android:paddingBottom="10dp">
 
             <LinearLayout
                 android:id="@+id/layout_transfer_source"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -56,7 +57,7 @@
                 <Spinner
                     android:id="@+id/spinner_transfer_accounts"
                     android:layout_width="match_parent"
-                    android:layout_height="43dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="-10dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="-10dp"
@@ -66,8 +67,8 @@
                     android:id="@+id/txt_transfer_account_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
+                    android:layout_marginBottom="14dp"
                     android:text="@string/transfer_cb_wallet_balance"
                     android:textSize="17sp"
                     android:visibility="visible" />
@@ -79,8 +80,8 @@
                 android:id="@+id/layout_transfer_amount_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:orientation="vertical">
 
 
@@ -93,7 +94,7 @@
                 <Spinner
                     android:id="@+id/spinner_transfer_destination_accounts"
                     android:layout_width="match_parent"
-                    android:layout_height="43dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="-10dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="-10dp"
@@ -105,7 +106,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="7dp"
-                    android:layout_marginBottom="20dp"
+                    android:layout_marginBottom="18dp"
                     android:text="@string/transfer_pro_wallet_balance"
                     android:textSize="17sp" />
 
@@ -116,8 +117,8 @@
                 android:id="@+id/layout_transfer_interactive_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:orientation="vertical">
 
                 <TextView

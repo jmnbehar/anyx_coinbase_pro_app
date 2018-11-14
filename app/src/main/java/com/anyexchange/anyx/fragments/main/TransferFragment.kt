@@ -47,7 +47,11 @@ class TransferFragment : RefreshFragment() {
     private val sourceAccount: BaseAccount?
         get() {
             val spinnerSelection = sourceAccountsSpinner?.selectedItem as? BaseAccount
-            return spinnerSelection ?: sourceAccounts.firstOrNull()
+            return if (spinnerSelection?.currency == currency) {
+                spinnerSelection
+            } else {
+                sourceAccounts.firstOrNull()
+            }
         }
     private var destAccounts: List<BaseAccount> = mutableListOf()
     private val destAccount: BaseAccount?
@@ -164,13 +168,9 @@ class TransferFragment : RefreshFragment() {
 
         titleText.text = getString(R.string.transfer_title)
 
-        coinbaseAccounts = Account.allCryptoAccounts().mapNotNull { account -> account.coinbaseAccount }
-
-
-        val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
-        if (fiatCoinbaseAccount != null) {
-            coinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
-        }
+        val cryptoCBAccounts = Account.allCryptoAccounts().mapNotNull { account -> account.coinbaseAccount }
+        val stableCBAccounts = Account.fiatAccounts.mapNotNull { account -> account.coinbaseAccount }
+        coinbaseAccounts =  cryptoCBAccounts.plus(stableCBAccounts)
 
         amountUnitText?.text = currency.toString()
 
@@ -253,14 +253,18 @@ class TransferFragment : RefreshFragment() {
         this.currency = currency
         amountEditText?.setText("")
 
-
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
-        Product.map[currency.id]?.accounts?.values?.let {
-            tempRelevantAccounts.addAll(it)
-        }
-        if (currency.isFiat) {
-            tempRelevantAccounts.addAll(Account.fiatAccounts.filter { it.currency == currency })
-            tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
+
+        when (currency.type) {
+            Currency.Type.CRYPTO -> {
+                Product.map[currency.id]?.accounts?.values?.let {
+                    tempRelevantAccounts.addAll(it)
+                }
+            }
+            Currency.Type.FIAT, Currency.Type.STABLECOIN -> {
+                tempRelevantAccounts.addAll(Account.fiatAccounts.filter { it.currency == currency })
+                tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
+            }
         }
 
         sourceAccounts = tempRelevantAccounts
@@ -359,6 +363,9 @@ class TransferFragment : RefreshFragment() {
                 interactiveLayout.visibility = View.GONE
                 infoText?.visibility = View.GONE
             }
+        }
+        if (destAccounts.isEmpty()) {
+            setInteractiveLayoutEnabled(false)
         }
 
         context?.let { context ->
