@@ -65,6 +65,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private var submitOrderButton: Button? = null
 
     private var tradeType: TradeType = TradeType.MARKET
+    private var blockRefresh = false
 
     val product: Product
         get() {
@@ -235,8 +236,22 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             switchCurrency(selectedCurrency)
         }
 
+        autoRefresh = Runnable {
+            if (!blockRefresh) {
+                miniRefresh({ }, { })
+            }
+            handler.postDelayed(autoRefresh, TimeInMillis.threeSeconds)
+            blockRefresh = false
+        }
+        handler.postDelayed(autoRefresh, TimeInMillis.threeSeconds)
+
         updateButtonsAndText()
         refresh { endRefresh() }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(autoRefresh)
     }
 
     private fun switchCurrency(newCurrency: Currency) {
@@ -272,18 +287,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             if (context != null) {
                 toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             }
+            onComplete(false)
         }
+        relevantAccount?.update(apiInitData, onFailure) {
+            miniRefresh(onFailure, onComplete)
+            blockRefresh = true
+        }
+    }
 
-        val account = relevantAccount
-        account?.update(apiInitData, onFailure) {
+    private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit,  onComplete: (Boolean) -> Unit) {
+        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
-                onComplete(false)
+                onComplete(true)
             }
-        }
-        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
-            updateButtonsAndText()
-            onComplete(true)
         }
     }
 

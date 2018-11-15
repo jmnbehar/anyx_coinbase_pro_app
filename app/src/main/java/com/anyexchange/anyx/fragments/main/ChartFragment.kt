@@ -353,10 +353,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         autoRefresh = Runnable {
             if (!blockRefresh) {
                 miniRefresh({ }, { })
-                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
             }
+            handler.postDelayed(autoRefresh, TimeInMillis.tenSeconds)
+            blockRefresh = false
         }
-        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+        handler.postDelayed(autoRefresh, TimeInMillis.tenSeconds)
         dismissProgressSpinner()
         refresh { endRefresh() }
     }
@@ -830,9 +831,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val tradingPairTemp = tradingPair
-        if (currency.type == Currency.Type.FIAT) {
+        if (currency.type == Currency.Type.FIAT || tradingPairTemp == null) {
             onComplete()
-        } else if (tradingPairTemp != null){
+        } else {
             product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {

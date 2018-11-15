@@ -44,6 +44,8 @@ object TimeInSeconds {
     const val fiveYears: Long = 158112000
 }
 object TimeInMillis {
+    const val threeSeconds: Long = 3 * 1000
+    const val tenSeconds: Long = 10 * 1000
     const val halfMinute: Long = 30 * 1000
     const val oneMinute: Long = 60 * 1000
     const val fiveMinutes: Long = 300 * 1000
