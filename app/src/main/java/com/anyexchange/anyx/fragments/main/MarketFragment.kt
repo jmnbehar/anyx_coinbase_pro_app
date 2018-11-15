@@ -110,7 +110,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                                 onComplete(true)
                             }
                         } else {
-                            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                            AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                                 productsUpdated++
                                 if (productsUpdated == Product.map.size) {
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()

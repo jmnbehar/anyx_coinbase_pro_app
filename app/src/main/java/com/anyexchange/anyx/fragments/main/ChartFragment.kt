@@ -764,7 +764,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            AnyApi.updateAccount(apiInitData, account, onFailure) { updatedAccount ->
+            AnyApi(apiInitData).updateAccount(account, onFailure) { updatedAccount ->
                 if (lifecycle.isCreatedOrResumed) {
                     balanceTextView?.text = resources.getString(R.string.chart_balance_text, updatedAccount.balance.btcFormat(), updatedAccount.currency)
                     updateValueText()
@@ -839,7 +839,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                     if (tradingPairTemp == tradingPair) {
                         candles = product.candlesForTimespan(timespan, tradingPair)
                         tradingPair?.let { tradingPair ->
-                            AnyApi.ticker(apiInitData, tradingPair, onFailure) { _ ->
+                            AnyApi(apiInitData).ticker(tradingPair, onFailure) { _ ->
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

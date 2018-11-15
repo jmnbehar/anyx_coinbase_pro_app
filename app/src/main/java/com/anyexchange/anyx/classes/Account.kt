@@ -48,7 +48,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     var depositInfo: CBProDepositAddress? = null
 
     fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        AnyApi.updateAccount(apiInitData, this, onFailure)  {
+        AnyApi(apiInitData).updateAccount(this, onFailure)  {
             onSuccess()
         }
     }

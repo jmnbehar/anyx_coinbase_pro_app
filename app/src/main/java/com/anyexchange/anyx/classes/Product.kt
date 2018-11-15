@@ -160,7 +160,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             }
 
             val granularity = Candle.granularityForTimespan(timespan)
-            AnyApi.getCandles(apiInitData, Exchange.CBPro, tradingPair, missingTime, 0, granularity, onFailure) { candleList ->
+            AnyApi(apiInitData).getCandles(tradingPair.exchange, tradingPair, missingTime, 0, granularity, onFailure) { candleList ->
                 var didGetNewCandle = false
                 if (candleList.isNotEmpty()) {
                     val newLastCandleTime = candleList.lastOrNull()?.closeTime?.toInt() ?: 0.0
@@ -233,6 +233,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 
         fun updateAllProductCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
+
             for (product in map.values) {
                 val tradingPair = product.defaultTradingPair
                 product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->

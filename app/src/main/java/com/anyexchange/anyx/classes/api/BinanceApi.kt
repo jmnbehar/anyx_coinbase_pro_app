@@ -181,8 +181,18 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
 
-        fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            //TODO: fix this
+        fun getAndLink(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            this.get(onFailure) {
+                for (binanceBalance in it) {
+                    val account = Account(binanceBalance)
+                    val accounts = Product.map[account.currency.id]?.accounts?.toMutableMap()
+                    accounts?.put(account.exchange, account)
+                    if (accounts != null) {
+                        Product.map[account.currency.id]?.accounts = accounts
+                    }
+                }
+                onComplete()
+            }
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
@@ -228,22 +238,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
-    class products(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceSymbol>) -> Unit) {
-            this.executeRequest(onFailure) { result ->
-                try {
-                    val productList: List<BinanceSymbol> = Gson().fromJson(result.value, object : TypeToken<List<BinanceSymbol>>() {}.type)
-                    onComplete(productList)
-                } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
-//                    onFailure(Result.Failure(FuelError(e)))
-                } catch (e: IllegalStateException) {
-                    onComplete(listOf())
-//                    onFailure(Result.Failure(FuelError(e)))
-                }
-            }
-        }
-    }
     class ticker(initData: ApiInitData?, val tradingPair: TradingPair) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker) -> Unit) {
             this.executeRequest(onFailure) { result ->
@@ -338,7 +332,23 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class ping(initData: ApiInitData?) : BinanceApi(initData)
     class time(initData: ApiInitData?) : BinanceApi(initData)
 
-    class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData)
+    class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData) {
+        fun getProducts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceSymbol>) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val exchangeInfo : BinanceExchangeInfo = Gson().fromJson(result.value, object : TypeToken<BinanceExchangeInfo>() {}.type)
+                    val productList = exchangeInfo.symbols
+                    onComplete(productList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: IllegalStateException) {
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
+                }
+            }
+        }
+    }
     class orderBookDepth(initData: ApiInitData?, val productId: String, val limit: Int? = null) : BinanceApi(initData)
     class recentTrades(initData: ApiInitData?, val productId: String, val limit: Int?) : BinanceApi(initData)
     class historicalTrades(initData: ApiInitData?, val productId: String, val limit: Int?, val fromTradeId: Long? = null) : BinanceApi(initData)
@@ -362,7 +372,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             return when (this) {
                 is account -> Method.GET
                 is accountHistory -> Method.GET
-                is products -> Method.GET
 
                 is cancelOrder -> Method.DELETE
                 is listOrders -> Method.GET
@@ -416,7 +425,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
             tempPath += when (this) {
                 is accountHistory -> "/accounts/$accountId/ledger"
-                is products -> "/products"
 
                 is sendCrypto -> "v3/withdraw.html"
                 is depositHistory -> "v3/depositHistory.html"

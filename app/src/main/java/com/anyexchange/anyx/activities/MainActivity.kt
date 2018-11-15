@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        AnyApi.getAllProducts(apiInitData, onFailure, onSuccess)
+        AnyApi(apiInitData).getAllProducts(onFailure, onSuccess)
     }
     private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         val prefs = Prefs(this)
@@ -349,7 +349,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         for (product in Product.map.values) {
             product.defaultTradingPair?.let { tradingPair ->
-                AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                     tickersUpdated++
                     if (tickersUpdated == Product.map.size) {
                         onComplete()

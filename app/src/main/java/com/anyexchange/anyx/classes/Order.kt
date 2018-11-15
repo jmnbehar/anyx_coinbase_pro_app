@@ -101,7 +101,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
             //TODO: use Exchange.values()
             val exchangeList = listOf(Exchange.CBPro)
             for (exchange in exchangeList) {
-                AnyApi.getAndStashOrderList(apiInitData, exchange, currency, onFailure) {
+                AnyApi(apiInitData).getAndStashOrderList(exchange, currency, onFailure) {
                     exchangesChecked++
                     fullOrderList.addAll(it)
                     if (exchangesChecked == exchangeList.size) {
@@ -113,6 +113,6 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     }
 
     fun cancel(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: (Result.Success<String, FuelError>) -> Unit) {
-        AnyApi.cancelOrder(apiInitData, this, onFailure, onSuccess)
+        AnyApi(apiInitData).cancelOrder(this, onFailure, onSuccess)
     }
 }
