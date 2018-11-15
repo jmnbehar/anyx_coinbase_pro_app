@@ -449,7 +449,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 ErrorMessage.PriceTooAccurate,
                 ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
-                else -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
+                else -> showPopup(context?.getString(R.string.error_generic_message, result.errorMessage) ?: "Error") { }
             }
         }
 
@@ -481,8 +481,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun payFee(amount: Double) {
         currency.developerAddress?.let { developerAddress ->
             //TODO: make and use AnyApi call
-
-            //TODO: only count fees as paid if they are successfully paid
+            val context = context
             CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
                     {  /*  fail silently   */ },
                     { _ ->
@@ -503,7 +502,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             if (index != -1) {
                 tradingPairSpinner?.setSelection(index)
             }
-            toast(getString(R.string.error_generic_message, it.errorMessage))
+            toast(context?.getString(R.string.error_generic_message, it.errorMessage) ?: "Error")
         }) {
             switchTradeInfo(newTradingPair, null, null)
             updateCurrencySpinner()
