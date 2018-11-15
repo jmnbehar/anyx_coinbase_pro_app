@@ -34,11 +34,7 @@ object AlertHub {
         val side = fill.side
         val size = fill.amount
         val notificationTitle = "${tradingPair.baseCurrency} Fill Alert"
-        val price = if (tradingPair.quoteCurrency.isFiat) {
-            fill.price.fiatFormat(tradingPair.quoteCurrency)
-        } else {
-            "${fill.price.btcFormat()} ${tradingPair.quoteCurrency}"
-        }
+        val price = fill.price.format(tradingPair.quoteCurrency)
 
         val notificationText = "${side.toString().capitalize()} order of $size ${tradingPair.baseCurrency} filled at $price"
         val notificationTag = "FillAlert_" + fill.id

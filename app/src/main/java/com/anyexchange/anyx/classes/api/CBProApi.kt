@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
+import java.lang.Error
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
@@ -29,11 +30,13 @@ import javax.crypto.spec.SecretKeySpec
 sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     val context = initData?.context
     val returnToLogin = initData?.returnToLogin ?:  { }
+    var hasCheckedTime = false
 
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
     companion object {
         var credentials: ApiCredentials? = null
+        var timeOffset: Long = 0
 
         val cbProExchange = Exchange.CBPro
         const val basePath = "https://api.pro.coinbase.com"
@@ -89,9 +92,23 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                                         Prefs(context).isLoggedIn = false
                                     }
                                     returnToLogin()
+                                    onFailure(result)
+                                }
+                                ErrorMessage.TimestampExpired.toString()  -> {
+                                    if (!hasCheckedTime) {
+                                        CBProApi.time(null).get(onFailure) {
+                                            timeOffset = it.toInt() - Date().timeInSeconds()
+                                            this.executeRequest(onFailure, onSuccess)
+                                        }
+                                        hasCheckedTime = true
+                                    } else {
+                                        onFailure(result)
+                                    }
+                                }
+                                else -> {
+                                    onFailure(result)
                                 }
                             }
-                            onFailure(result)
                         }
                         else -> onFailure(result)
                     }
@@ -184,7 +201,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accounts(private val initData: ApiInitData?) : CBProApi(initData) {
-
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<CBProAccount>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
@@ -197,13 +213,12 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            this.get(onFailure) { apiAccountList ->
-                if (credentials != null) {
-
-                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).isFiat || Currency(it.currency).isStableCoin  }
+            if (credentials != null) {
+                this.get(onFailure) { apiAccountList ->
+                    val fiatApiAccountList = apiAccountList.filter { Currency(it.currency).type != Currency.Type.CRYPTO }
                     val tempFiatAccounts = fiatApiAccountList.map { Account(it) }
 
-                    val cryptoApiAccountList = apiAccountList.filter { !Currency(it.currency).isFiat }
+                    val cryptoApiAccountList = apiAccountList.filter { Currency(it.currency).type == Currency.Type.CRYPTO }
                     val tempCryptoAccounts = cryptoApiAccountList.map { Account(it) }
 
                     for (account in tempCryptoAccounts) {
@@ -220,9 +235,9 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     }
 
                     Product.updateAllProductCandles(initData, onFailure, onComplete)
-                } else {
-                    onComplete()
                 }
+            } else {
+                onComplete()
             }
         }
 
@@ -273,6 +288,20 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 try {
                     val productList: List<CBProProduct> = Gson().fromJson(result.value, object : TypeToken<List<CBProProduct>>() {}.type)
                     onComplete(productList)
+                } catch (e: JsonSyntaxException) {
+                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: IllegalStateException) {
+                    onFailure(Result.Failure(FuelError(e)))
+                }
+            }
+        }
+    }
+    class time(initData: ApiInitData?) : CBProApi(initData) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Double) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val timeInfo: CBProTime = Gson().fromJson(result.value, object : TypeToken<CBProTime>() {}.type)
+                    onComplete(timeInfo.epoch)
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(e)))
                 } catch (e: IllegalStateException) {
@@ -409,10 +438,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 for (apiCbAccount in apiCoinbaseAccounts) {
                     val currency = Currency(apiCbAccount.currency)
                     if (apiCbAccount.active) {
-                        val account = if (currency.isFiat) {
-                            Account.fiatAccounts.find { it.currency == currency }
-                        } else {
+                        val account = if (currency.type == Currency.Type.CRYPTO) {
                             Product.map[currency.id]?.accounts?.get(cbProExchange)
+                        } else {
+                            Account.fiatAccounts.find { it.currency == currency }
                         }
                         val coinbaseAccount = Account.CoinbaseAccount(apiCbAccount)
                         coinbaseAccounts.add(coinbaseAccount)
@@ -477,6 +506,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is accountHistory -> Method.GET
                 is products -> Method.GET
                 is ticker -> Method.GET
+                is time -> Method.GET
                 is candles -> Method.GET
                 is orderLimit -> Method.POST
                 is orderMarket -> Method.POST
@@ -506,6 +536,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is account -> "/accounts/$accountId"
                 is accountHistory -> "/accounts/$accountId/ledger"
                 is products -> "/products"
+                is time -> "/time"
                 is ticker -> "/products/${tradingPair.idForExchange(cbProExchange)}/ticker"
                 is candles -> "/products/${tradingPair.idForExchange(cbProExchange)}/candles"
                 is orderLimit -> "/orders"
@@ -707,8 +738,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         get() {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
-            if (credentials != null) {
-                val timestamp = (Date().timeInSeconds()).toString()
+            if (credentials != null && credentials.apiKey.isNotBlank() && credentials.apiSecret.isNotBlank()) {
+                val timestamp = (Date().timeInSeconds() + timeOffset).toString()
                 val message = if (this is fills || this is listOrders) {
                     timestamp + method + fullPath + body
                 } else {
@@ -747,6 +778,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         MissingApiSignature,
         MissingApiKey,
 
+        TimestampExpired,
+
         //Permissions:
 
         //Trade:
@@ -776,6 +809,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 InvalidApiSignature -> "invalid signature"
                 MissingApiSignature -> "CB-ACCESS-SIGN header is required"
                 MissingApiKey -> "CB-ACCESS-KEY header is required"
+
+                TimestampExpired -> "request timestamp expired"
 
                 BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
                 BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"

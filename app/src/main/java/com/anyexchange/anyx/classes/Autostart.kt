@@ -29,8 +29,8 @@ class AutoStart : BroadcastReceiver() {
             hasStarted = true
             val serviceComponent = ComponentName(context, AlertJobService::class.java)
             val builder = JobInfo.Builder(0, serviceComponent)
-            builder.setMinimumLatency(TimeInMillis.oneMinute) // wait at least
-            builder.setOverrideDeadline(TimeInMillis.eightMinutes) // maximum delay
+            builder.setMinimumLatency(TimeInMillis.threeSeconds) // wait at least
+            builder.setOverrideDeadline(TimeInMillis.halfMinute) // maximum delay
             builder.setRequiresDeviceIdle(true) // device should be idle
             builder.setRequiresCharging(false) // we don't care if the device is charging or not
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
@@ -63,6 +63,7 @@ class AlertJobService : JobService() {
         AutoStart.scheduleCustomAlertJob(applicationContext) // reschedule the job
         return true
     }
+
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
         if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
@@ -124,19 +125,19 @@ class AlertJobService : JobService() {
                 val candles = product.candlesForTimespan(timespan, null)
                 if (candles.size > 12) {
                     val minAlertPercentage = prefs.quickChangeThreshold.toDouble()
-                    var alertPercentage = minAlertPercentage
+                    var alertPercentage = 0.0
                     var alertTimespan: QuickChangeAlert.AlertTimespan? = null
                     var changeIsPositive = false
                     val timestamp = Date().timeInSeconds()
 
                     val mostRecentPrice = candles.last().close
-                    val tenMinutePrice = candles[candles.size - 2].close
-                    val halfHourPrice = candles[candles.size - 6].close
-                    val hourPrice = candles[candles.size - 12].close
+                    val lastIndex = candles.size - 1
+                    val tenMinutePrice = candles[lastIndex - 2].close
+                    val halfHourPrice = candles[lastIndex - 6].close
+                    val hourPrice = candles[lastIndex - 12].close
 
                     val tenMinuteChange = percentChange(mostRecentPrice, tenMinutePrice)
                     if (tenMinuteChange > minAlertPercentage
-                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.TEN_MINUTES)) {
                         alertPercentage = tenMinuteChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.TEN_MINUTES
@@ -144,7 +145,6 @@ class AlertJobService : JobService() {
                     }
                     val halfHourChange = percentChange(mostRecentPrice, halfHourPrice)
                     if ((halfHourChange > minAlertPercentage) && (halfHourChange > alertPercentage + 0.5)
-                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HALF_HOUR)) {
                         alertPercentage = halfHourChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.HALF_HOUR
@@ -152,14 +152,14 @@ class AlertJobService : JobService() {
                     }
                     val hourChange = percentChange(mostRecentPrice, hourPrice)
                     if ((hourChange > minAlertPercentage) && (hourChange > alertPercentage + 0.5)
-                            && (lastQuickChangeAlertTimestamp + TimeInMillis.oneHour < timestamp)
                             && (setTimespan == null || setTimespan == QuickChangeAlert.AlertTimespan.HOUR)) {
                         alertPercentage = hourChange
                         alertTimespan = QuickChangeAlert.AlertTimespan.HOUR
                         changeIsPositive = mostRecentPrice > hourPrice
                     }
                     //Make sure alert Percent is high enough to be interesting but low enough to not be an error
-                    if (alertPercentage > minAlertPercentage && alertPercentage < 80 && alertTimespan != null) {
+                    if (alertPercentage > minAlertPercentage && alertPercentage < 80 && alertTimespan != null
+                            && (lastQuickChangeAlertTimestamp + TimeInSeconds.oneHour < timestamp)) {
                         lastQuickChangeAlertTimestamp = timestamp
 
                         if (changeAlert == null) {

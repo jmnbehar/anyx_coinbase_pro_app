@@ -23,11 +23,14 @@ class LockableScrollView: ScrollView {
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                if (scrollLocked) false else super.onTouchEvent(ev)
                 // only continue to handle the touch event if scrolling enabled
+                if (scrollLocked) {
+                    false
+                } else {
+                    super.onTouchEvent(ev)
+                }
             }
             else -> super.onTouchEvent(ev)
-            //else -> return super.onTouchEvent(ev)
         }
     }
 
@@ -39,7 +42,6 @@ class LockableScrollView: ScrollView {
             super.onInterceptTouchEvent(ev)
         }
     }
-
 
     fun scrollToTop(duration: Long) {
         val animator: ObjectAnimator = ObjectAnimator.ofInt(this, "scrollY", 0)

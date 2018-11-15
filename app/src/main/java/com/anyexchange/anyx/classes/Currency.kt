@@ -3,7 +3,6 @@ package com.anyexchange.anyx.classes
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.support.v4.content.ContextCompat
 import com.anyexchange.anyx.R
 
 /**
@@ -36,20 +35,22 @@ class Currency(val id: String) {
 
     val feePercentage : Double
         get() {
-            return if (!isFiat) {
+            return if (type == Type.CRYPTO) {
                 0.003
             } else {
                 0.0
             }
         }
 
-    val isFiat = knownCurrency?.isFiat ?: false
-    val isStableCoin = knownCurrency?.isStableCoin ?: false
+    val type: Type
+        get() { return knownCurrency?.type ?: Type.CRYPTO }
+    val isFiat: Boolean
+        get() { return type == Type.FIAT }
 
     val minSendAmount: Double = knownCurrency?.minSendAmount ?: 0.0
 
     fun addToList() {
-        if (!isFiat && !cryptoList.any { it.id == this.id }) {
+        if (type == Type.CRYPTO && !cryptoList.any { it.id == this.id }) {
             cryptoList.add(this)
         }
     }
@@ -93,9 +94,9 @@ class Currency(val id: String) {
 
 
     companion object {
-        val cryptoList: MutableList<Currency> = KnownCurrency.values().filter { !it.isFiat && !it.isStableCoin }.asSequence().map { Currency(it) }.toMutableList()
-        val fiatList       = KnownCurrency.values().filter { it.isFiat  }
-        val stableCoinList = KnownCurrency.values().filter { it.isStableCoin  }
+        val cryptoList = KnownCurrency.values().filter { it.type == Type.CRYPTO }.asSequence().map { Currency(it) }.toMutableList()
+        val fiatList    = KnownCurrency.values().filter { it.type == Type.FIAT }
+        val stableCoinList = KnownCurrency.values().filter { it.type == Type.STABLECOIN }
 
         val USD = Currency(KnownCurrency.USD)
         val BTC = Currency(KnownCurrency.BTC)
@@ -104,5 +105,12 @@ class Currency(val id: String) {
         val LTC = Currency(KnownCurrency.LTC)
 
         val OTHER = Currency("Other")
+    }
+
+
+    enum class Type {
+        FIAT,
+        STABLECOIN,
+        CRYPTO
     }
 }

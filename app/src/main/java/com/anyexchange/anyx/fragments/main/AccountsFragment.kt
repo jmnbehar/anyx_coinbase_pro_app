@@ -32,6 +32,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var percentChangeText: TextView? = null
     private var titleText: TextView? = null
     private var accountList: ListView? = null
+    private var lockableScrollView: LockableScrollView? = null
 
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
@@ -57,9 +58,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         percentChangeText = rootView.txt_accounts_percent_change
         accountList = rootView.list_accounts
         titleText = rootView.account_text
+        lockableScrollView = rootView.lockscroll_accounts
 
         val context = context
-        if (context!= null && Prefs(context).isLoggedIn) {
+        if (context != null && Prefs(context).isLoggedIn) {
             rootView.layout_accounts_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_accounts_label.text = resources.getString(R.string.accounts_title)
@@ -69,13 +71,15 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
             lineChart?.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
+                lockableScrollView?.scrollToTop(800)
+                lockableScrollView?.scrollLocked = true
                 HomeFragment.viewPager?.isLocked = true
             }
 
-            val selectGroup = lambda@ { account: Account ->
+            accountList?.adapter = AccountListViewAdapter(context) { account: Account ->
                 (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
             }
-            accountList?.adapter = AccountListViewAdapter(context, selectGroup)
+            accountList?.setHeightBasedOnChildren()
             titleText?.visibility = View.GONE
 
         } else {
@@ -87,7 +91,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             titleText?.text = resources.getString(R.string.accounts_logged_out_message)
             dismissProgressSpinner()
         }
-
         return rootView
     }
 
@@ -97,7 +100,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
-        valueText?.text = entry.y.toDouble().fiatFormat(Account.defaultFiatCurrency)
+        valueText?.text = entry.y.toDouble().format(Account.defaultFiatCurrency)
         if (accountTotalCandles.size > entry.x) {
             val candle = accountTotalCandles[entry.x.toInt()]
 
@@ -126,7 +129,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val sign = if (change >= 0) { "+" } else { "" }
         context?.let {
             percentChangeText?.text = resources.getString(R.string.accounts_percent_change_text,
-                    percentChange.percentFormat(), sign, change.fiatFormat(Account.defaultFiatCurrency))
+                    percentChange.percentFormat(), sign, change.format(Account.defaultFiatCurrency))
 
             percentChangeText?.textColor = if (percentChange >= 0) {
                 Color.GREEN
@@ -138,7 +141,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private fun setValueAndPercentChangeTexts() {
         val totalValue = Account.totalValue()
-        valueText?.text = totalValue.fiatFormat(Account.defaultFiatCurrency)
+        valueText?.text = totalValue.format(Account.defaultFiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
             accountTotalCandles.first().close
@@ -158,12 +161,14 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartGestureStart(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) { }
     override fun onChartGestureEnd(me: MotionEvent, lastPerformedGesture: ChartTouchListener.ChartGesture) {
         swipeRefreshLayout?.isEnabled = true
+        lockableScrollView?.scrollLocked = false
         HomeFragment.viewPager?.isLocked = false
         onNothingSelected()
     }
     override fun onChartLongPressed(me: MotionEvent) {
         swipeRefreshLayout?.isEnabled = false
-        HomeFragment.viewPager?.isLocked = false
+        lockableScrollView?.scrollLocked = true
+        HomeFragment.viewPager?.isLocked = true
     }
     override fun onChartDoubleTapped(me: MotionEvent) { }
     override fun onChartSingleTapped(me: MotionEvent) { }
@@ -175,7 +180,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            val fiatValue = Account.fiatAccounts.map { it.defaultValue }.sum()
+            val fiatValue = Account.fiatAccounts.asSequence().map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
                 val openTime = btcProduct.defaultDayCandles[i].openTime
@@ -214,6 +219,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     fun refreshComplete() {
         (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
+        accountList?.setHeightBasedOnChildren()
 
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()

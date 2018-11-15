@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (dataFragment == null) {
             // add the fragment
             dataFragment = DataFragment.newInstance()
-            supportFragmentManager.beginTransaction().add(dataFragment, Constants.dataFragmentTag).commit()
+            supportFragmentManager.beginTransaction().add(dataFragment!!, Constants.dataFragmentTag).commit()
         }
         dataFragment?.restoreData(this)
 
@@ -253,6 +253,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         checkAllResources(onFailure) {
+            if (CBProApi.credentials != null) {
+                prefs.isLoggedIn = true
+            }
             setDrawerMenu()
             onComplete()
             goHome()
@@ -262,7 +265,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
-                updateAllAccounts(onFailure, onComplete)
+                if (CBProApi.credentials != null) {
+                    updateAllAccounts(onFailure, onComplete)
+                } else {
+                    onComplete()
+                }
             }
         } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
             updateAllAccounts(onFailure, onComplete)

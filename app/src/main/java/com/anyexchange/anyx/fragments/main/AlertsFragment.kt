@@ -123,7 +123,7 @@ class AlertsFragment : RefreshFragment() {
             currentPriceText.text = ""
         } else {
             priceLabelText.text = resources.getString(R.string.alerts_current_price_label, currency.fullName)
-            currentPriceText.text = price.fiatFormat(Account.defaultFiatCurrency)
+            currentPriceText.text = price.format(Account.defaultFiatCurrency)
         }
         context?.let { context ->
             quickChangeAlertCheckBox?.isChecked = Prefs(context).isQuickChangeAlertActive(currency)

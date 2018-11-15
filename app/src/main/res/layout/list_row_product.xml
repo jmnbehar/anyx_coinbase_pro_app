@@ -20,16 +20,18 @@
 
         <ImageView
             android:id="@+id/img_product_icon"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             app:srcCompat="@android:drawable/btn_star" />
 
         <TextView
             android:id="@+id/txt_product_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="6"
-            android:paddingLeft="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:ellipsize="none"
+            android:singleLine="true"
             android:text="Bitcoin"
             android:textSize="24sp" />
 
@@ -37,9 +39,9 @@
             android:id="@+id/txt_product_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:paddingLeft="3dp"
-            android:text="100"
+            android:layout_weight="6"
+            android:ellipsize="end"
+            android:text="100.0000000 USDC"
             android:textAlignment="textEnd"
             android:textSize="24sp" />
 

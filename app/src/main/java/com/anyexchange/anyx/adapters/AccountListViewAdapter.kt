@@ -21,8 +21,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
     }
 
     override fun notifyDataSetChanged() {
-        super.notifyDataSetChanged()
         sortedAccountList = sortedAccountList()
+        super.notifyDataSetChanged()
     }
 
     override fun getCount(): Int {
@@ -79,33 +79,35 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         if(i < accounts.size) {
             val account = accounts[i]
 
-            if (account.currency.isFiat) {
-                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
-                viewHolder.balanceText?.text = account.currency.toString()
-                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                viewHolder.percentChangeText?.text = ""
-            } else if (account.currency.isStableCoin) {
-                viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
-                viewHolder.balanceText?.text = account.defaultValue.format(account.currency)
-                viewHolder.balanceText?.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                viewHolder.percentChangeText?.text = ""
-            } else {
-                viewHolder.balanceText?.text =  account.balance.format(account.currency)
-                outputView.setOnClickListener { onClick(account) }
-
-                val product = Product.map[account.currency.id]
-                val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0
-
-                if (account.defaultValue > 0) {
+            when (account.currency.type) {
+                Currency.Type.FIAT -> {
                     viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
-                    val accountChange = (percentChange * account.defaultValue) / 100
-                    val sign = if (percentChange >= 0) { "+" } else { "" }
-                    viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
-                    viewHolder.accountValueText?.visibility = View.VISIBLE
-                    viewHolder.percentChangeText?.visibility = View.VISIBLE
-                } else {
-                    viewHolder.accountValueText?.visibility = View.INVISIBLE
-                    viewHolder.percentChangeText?.visibility = View.INVISIBLE
+                    viewHolder.balanceText?.text = "${account.defaultValue.fiatFormat()} ${account.currency}"
+                    viewHolder.percentChangeText?.text = ""
+                }
+                Currency.Type.STABLECOIN -> {
+                    viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                    viewHolder.balanceText?.text = account.defaultValue.format(account.currency)
+                    viewHolder.percentChangeText?.text = ""
+                }
+                Currency.Type.CRYPTO -> {
+                    viewHolder.balanceText?.text =  account.balance.format(account.currency)
+                    outputView.setOnClickListener { onClick(account) }
+
+                    val product = Product.map[account.currency.id]
+                    val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0
+
+                    if (account.defaultValue > 0) {
+                        viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
+                        val accountChange = (percentChange * account.defaultValue) / 100
+                        val sign = if (percentChange >= 0) { "+" } else { "" }
+                        viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
+                        viewHolder.accountValueText?.visibility = View.VISIBLE
+                        viewHolder.percentChangeText?.visibility = View.VISIBLE
+                    } else {
+                        viewHolder.accountValueText?.visibility = View.INVISIBLE
+                        viewHolder.percentChangeText?.visibility = View.INVISIBLE
+                    }
                 }
             }
             account.currency.iconId?.let {

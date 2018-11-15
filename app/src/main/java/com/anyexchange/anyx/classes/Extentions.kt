@@ -82,7 +82,7 @@ fun RecyclerView.setHeightBasedOnChildren(): Int {
     var totalHeight = 0
     var view: View?
     for (i in 0 until listAdapter.itemCount) {
-        view = layoutManager.findViewByPosition(i)
+        view = layoutManager?.findViewByPosition(i)
 
         if (i == 0) {
             view?.layoutParams = (ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT))
@@ -125,14 +125,17 @@ fun Double.btcFormatShortened(currency: Currency? = null): String {
     }
 }
 
-fun Double.fiatFormat(currency: Currency): String {
+fun Double.fiatFormat(currency: Currency? = null): String {
     val numberFormat = NumberFormat.getNumberInstance(Locale.US)
     numberFormat.currency = java.util.Currency.getInstance(Locale.US)
     numberFormat.minimumFractionDigits = 2
     numberFormat.maximumFractionDigits = 2
     val sign = if (this >= 0) { "" } else { "-" }
-    val currencySymbol = currency.symbol
-    return "$sign$currencySymbol${numberFormat.format(this.absoluteValue)}"
+    return if (currency != null) {
+        "$sign${currency.symbol}${numberFormat.format(this.absoluteValue)}"
+    } else {
+        "$sign${numberFormat.format(this.absoluteValue)}"
+    }
 }
 fun Double.format(currency: Currency): String {
     return if (currency.isFiat) {
@@ -220,6 +223,7 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
         override fun onTabUnselected(tab: TabLayout.Tab) {}
         override fun onTabReselected(tab: TabLayout.Tab) {}
     })
+    tabMode = TabLayout.MODE_SCROLLABLE
 }
 
 fun List<TradingPair>.sortTradingPairs() : List<TradingPair> {
@@ -256,7 +260,6 @@ fun Date.format(formatString: String): String {
 fun List<TradingPair>.withQuoteCurrency(quoteCurrency: Currency) : TradingPair?  {
     return this.find { it.quoteCurrency == quoteCurrency }
 }
-
 
 fun Fragment.toast(textResource: Int) = activity?.toast(textResource)
 fun Fragment.toast(text: CharSequence) = activity?.toast(text)

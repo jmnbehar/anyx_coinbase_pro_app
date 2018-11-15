@@ -2,58 +2,69 @@
 
 <android.support.v4.widget.SwipeRefreshLayout
     android:id="@+id/swipe_refresh_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/account_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Accounts page"
-            android:textSize="30sp"
-            tools:layout_editor_absoluteX="48dp"
-            tools:layout_editor_absoluteY="16dp" />
+    <com.anyexchange.anyx.classes.LockableScrollView
+        android:id="@+id/lockscroll_accounts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:descendantFocusability="blocksDescendants"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/account_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Accounts page"
+                android:textSize="30sp"
+                tools:layout_editor_absoluteX="48dp"
+                tools:layout_editor_absoluteY="16dp" />
 
             <LinearLayout
                 android:id="@+id/layout_accounts_chart_info"
                 android:layout_width="match_parent"
-                android:layout_height="35dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingLeft="15dp"
+                android:paddingTop="4dp"
                 android:paddingRight="15dp">
 
                 <TextView
                     android:id="@+id/txt_all_accounts_label"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="6"
+                    android:layout_weight="5"
                     android:paddingLeft="5dp"
-                    android:text="All accounts"
                     android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/txt_accounts_total_value"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="3"
+                    android:layout_weight="5"
                     android:paddingLeft="3dp"
-                    android:text="10,000"
                     android:textAlignment="textEnd"
-                    android:textSize="22sp" />
+                    app:autoSizeMaxTextSize="22sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform" />
 
                 <TextView
                     android:id="@+id/txt_accounts_percent_change"
-                    android:layout_width="95dp"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:paddingLeft="8dp"
                     android:text="20%"
@@ -61,23 +72,24 @@
 
             </LinearLayout>
 
-        <com.anyexchange.anyx.classes.PriceLineChart
-            android:id="@+id/chart_accounts"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:paddingTop="-80dp" />
+            <com.anyexchange.anyx.classes.PriceLineChart
+                android:id="@+id/chart_accounts"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:paddingTop="-80dp" />
 
-        <ListView
-            android:id="@+id/list_accounts"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:clickable="true"
-            tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="8dp">
+            <ListView
+                android:id="@+id/list_accounts"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:clickable="true"
+                tools:layout_editor_absoluteX="8dp"
+                tools:layout_editor_absoluteY="8dp">
 
-        </ListView>
+            </ListView>
 
     </LinearLayout>
+    </com.anyexchange.anyx.classes.LockableScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

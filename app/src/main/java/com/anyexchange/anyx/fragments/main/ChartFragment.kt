@@ -59,6 +59,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private var candleChart: PriceCandleChart? = null
     private var lineChart: PriceLineChart? = null
 
+    private var currencyNameTextView: TextView? = null
+
     private var tickerTextView: TextView? = null
     private var priceTextView: TextView? = null
 
@@ -184,6 +186,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         candleChart?.setOnChartValueSelectedListener(this)
         candleChart?.onChartGestureListener = this
 
+        currencyNameTextView = rootView.txt_chart_name
+
         priceTextView = rootView.txt_chart_price
 
         buyButton = rootView.btn_chart_buy
@@ -228,9 +232,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             sellButton?.setOnClickListener { _ ->
                 buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
             }
-
-            updateHistoryListsFromStashes(it)
-            skipNextOrderFillCheck = true
 
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -298,7 +299,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             tradingPairSpinner?.setSelection(index)
         }
 
-        txt_chart_name.text = currency.fullName
+        currencyNameTextView?.text = currency.fullName
         setPercentChangeText(timespan)
         checkTimespanButton()
         updateChartStyle()
@@ -325,11 +326,19 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             blockNextProductChange = false
         }
 
-        if (!currency.isFiat) {
+        context?.let {
+            updateHistoryListsFromStashes(it)
+            product.defaultTradingPair?.let { defaultTradingPair ->
+                checkOrdersAndFills(defaultTradingPair, it)
+            }
+            skipNextOrderFillCheck = true
+        }
+        if (currency.type != Currency.Type.CRYPTO) {
             setButtonsAndBalanceText(product)
             switchProduct(product)
         } else {
             val mainActivity = activity as? MainActivity
+
             val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
             currency = if (selectedCurrency != null) {
                 selectedCurrency
@@ -344,10 +353,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         autoRefresh = Runnable {
             if (!blockRefresh) {
                 miniRefresh({ }, { })
-                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
             }
+            handler.postDelayed(autoRefresh, TimeInMillis.tenSeconds)
+            blockRefresh = false
         }
-        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+        handler.postDelayed(autoRefresh, TimeInMillis.tenSeconds)
         dismissProgressSpinner()
         refresh { endRefresh() }
     }
@@ -427,9 +437,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         blockRefresh = true
         didTouchTradingPairSpinner = false
 
-        val price = newProduct.priceForQuoteCurrency(quoteCurrency)
-        priceTextView?.text = price.format(quoteCurrency)
-
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair?.quoteCurrency }
 
@@ -507,6 +514,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun completeSwitchProduct(product: Product) {
         blockRefresh = false
         lockableScrollView?.scrollToTop(200)
+
+        val price = product.priceForQuoteCurrency(quoteCurrency)
+        priceTextView?.text = price.format(quoteCurrency)
+
         context?.let { context ->
             val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
@@ -520,7 +531,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             product.defaultTradingPair?.let { tradingPair ->
                 addCandlesToActiveChart(candles, product.currency)
                 setPercentChangeText(timespan)
-                txt_chart_name.text = product.currency.fullName
+                currencyNameTextView?.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
 
                 if (!skipNextOrderFillCheck) {
@@ -621,7 +632,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-
     private fun setPercentChangeText(timespan: Timespan) {
         val percentChange = product.percentChange(timespan, quoteCurrency)
         txt_chart_change_or_date.text = percentChange.percentFormat()
@@ -631,39 +641,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             Color.RED
         }
     }
-
-//    private fun confirmCancelOrder(order: Order) {
-//        alert {
-//            title = resources.getString(R.string.chart_history_order)
-//            val layoutWidth = 1000
-//
-//            val createdTimeString = order.time.format("h:mma, MM/dd/yyyy")
-//
-//            val fillFees = order.fillFees?.toDoubleOrNull()?.format(quoteCurrency)
-//            val price = (order.price ?: 0.0).format(quoteCurrency)
-//            val filledSize = order.filledSize?.toDoubleOrNull()?.toString()
-//            val size = order.amount.btcFormat()
-//            val status = order.status
-//
-//            customView {
-//                linearLayout {
-//                    verticalLayout {
-//                        horizontalLayout(R.string.chart_history_side_label, order.side.toString()).lparams(width = layoutWidth) {}
-//                        horizontalLayout(R.string.chart_history_size_label, size).lparams(width = layoutWidth) {}
-//                        horizontalLayout(R.string.chart_history_price_label, price).lparams(width = layoutWidth) {}
-//                        if (filledSize != null) { horizontalLayout(R.string.chart_history_filled_size_label, filledSize).lparams(width = layoutWidth) {} }
-//                        if (status != null)     { horizontalLayout(R.string.chart_history_status_label, status).lparams(width = layoutWidth) {} }
-//                        if (fillFees != null)   { horizontalLayout(R.string.chart_history_filled_fees_label, fillFees).lparams(width = layoutWidth) {} }
-//                        horizontalLayout(R.string.chart_history_time_label, createdTimeString).lparams(width = layoutWidth) {}
-//                    }.lparams(width = matchParent) {leftMargin = dip(20) }
-//                }
-//            }
-//            positiveButton(R.string.popup_ok_btn) {  }
-//            negativeButton(R.string.chart_cancel_order) {
-//                cancelOrder(order)
-//            }
-//        }.show()
-//    }
 
     private fun cancelOrder(order: Order) {
         order.cancel(apiInitData, { _ -> }) { _ ->
@@ -689,18 +666,26 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 txt_chart_change_or_date.textColor = Color.BLACK
             }
         }
+        if (tradingPair?.quoteCurrency?.type != Currency.Type.FIAT &&
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            currencyNameTextView?.visibility = View.GONE
+        }
+
         if (chartStyle == ChartStyle.Candle && entry is CandleEntry) {
-            highLabelTextView?.visibility = View.VISIBLE
-            highTextView?.visibility = View.VISIBLE
-            lowLabelTextView?.visibility = View.VISIBLE
-            lowTextView?.visibility = View.VISIBLE
 
-            openLabelTextView?.visibility = View.VISIBLE
-            openTextView?.visibility = View.VISIBLE
-            closeLabelTextView?.visibility = View.VISIBLE
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE || tradingPair?.quoteCurrency?.isFiat == true) {
+                highLabelTextView?.visibility = View.VISIBLE
+                highTextView?.visibility = View.VISIBLE
+                lowLabelTextView?.visibility = View.VISIBLE
+                lowTextView?.visibility = View.VISIBLE
 
-            volumeLabelTextView?.visibility = View.VISIBLE
-            volumeTextView?.visibility = View.VISIBLE
+                openLabelTextView?.visibility = View.VISIBLE
+                openTextView?.visibility = View.VISIBLE
+                closeLabelTextView?.visibility = View.VISIBLE
+
+                volumeLabelTextView?.visibility = View.VISIBLE
+                volumeTextView?.visibility = View.VISIBLE
+            }
 
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 highTextView?.typeface = Typeface.MONOSPACE
@@ -708,17 +693,13 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 openTextView?.typeface = Typeface.MONOSPACE
                 volumeTextView?.typeface = Typeface.MONOSPACE
                 priceTextView?.typeface = Typeface.MONOSPACE
+                currencyNameTextView?.visibility = View.INVISIBLE
             }
 
-            if (quoteCurrency.isFiat) {
-                highTextView?.text = entry.high.toDouble().fiatFormat(quoteCurrency)
-                lowTextView?.text = entry.low.toDouble().fiatFormat(quoteCurrency)
-                openTextView?.text = entry.open.toDouble().fiatFormat(quoteCurrency)
-            } else {
-                highTextView?.text = entry.high.toDouble().btcFormatShortened()
-                lowTextView?.text = entry.low.toDouble().btcFormatShortened()
-                openTextView?.text = entry.open.toDouble().btcFormatShortened()
-            }
+            highTextView?.text = entry.high.toDouble().format(quoteCurrency)
+            lowTextView?.text = entry.low.toDouble().format(quoteCurrency)
+            openTextView?.text = entry.open.toDouble().format(quoteCurrency)
+
             volumeTextView?.text = entry.volume.volumeFormat()
         }
     }
@@ -730,6 +711,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             ChartStyle.Line -> lineChart?.highlightValues(arrayOf<Highlight>())
             ChartStyle.Candle -> candleChart?.highlightValues(arrayOf<Highlight>())
         }
+        currencyNameTextView?.visibility = View.VISIBLE
 
         highLabelTextView?.visibility = View.GONE
         highTextView?.visibility = View.GONE
@@ -849,9 +831,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         val tradingPairTemp = tradingPair
-        if (currency.isFiat) {
+        if (currency.type == Currency.Type.FIAT || tradingPairTemp == null) {
             onComplete()
-        } else if (tradingPairTemp != null){
+        } else {
             product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {

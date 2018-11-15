@@ -65,6 +65,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private var submitOrderButton: Button? = null
 
     private var tradeType: TradeType = TradeType.MARKET
+    private var blockRefresh = false
 
     val product: Product
         get() {
@@ -235,8 +236,22 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             switchCurrency(selectedCurrency)
         }
 
+        autoRefresh = Runnable {
+            if (!blockRefresh) {
+                miniRefresh({ }, { })
+            }
+            handler.postDelayed(autoRefresh, TimeInMillis.threeSeconds)
+            blockRefresh = false
+        }
+        handler.postDelayed(autoRefresh, TimeInMillis.threeSeconds)
+
         updateButtonsAndText()
         refresh { endRefresh() }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(autoRefresh)
     }
 
     private fun switchCurrency(newCurrency: Currency) {
@@ -272,18 +287,20 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             if (context != null) {
                 toast(resources.getString(R.string.error_generic_message, result.errorMessage))
             }
+            onComplete(false)
         }
+        relevantAccount?.update(apiInitData, onFailure) {
+            miniRefresh(onFailure, onComplete)
+            blockRefresh = true
+        }
+    }
 
-        val account = relevantAccount
-        account?.update(apiInitData, onFailure) {
+    private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit,  onComplete: (Boolean) -> Unit) {
+        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
-                onComplete(false)
+                onComplete(true)
             }
-        }
-        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
-            updateButtonsAndText()
-            onComplete(true)
         }
     }
 
@@ -316,9 +333,9 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 titleText?.text = resources.getString(R.string.trade_title_for_currency, account.currency.fullName)
 
                 val quoteCurrency = tradingPair.quoteCurrency
-                val quoteBalance: String? = when {
-                    quoteCurrency.isFiat -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.format(quoteCurrency)
-                    else -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.format(currency) + " " + quoteCurrency.id
+                val quoteBalance: String? = when (quoteCurrency.type) {
+                    Currency.Type.CRYPTO -> Product.map[quoteCurrency.id]?.accounts?.get(tradingPair.exchange)?.availableBalance?.format(currency) + " " + quoteCurrency.id
+                    else -> Account.fiatAccounts.find { it.currency == quoteCurrency }?.availableBalance?.format(quoteCurrency)
                 }
 
                 quoteBalanceText?.visibility = View.GONE
@@ -449,7 +466,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
                 ErrorMessage.PriceTooAccurate,
                 ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
-                else -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
+                else -> showPopup(context?.getString(R.string.error_generic_message, result.errorMessage) ?: "Error") { }
             }
         }
 
@@ -481,8 +498,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun payFee(amount: Double) {
         currency.developerAddress?.let { developerAddress ->
             //TODO: make and use AnyApi call
-
-            //TODO: only count fees as paid if they are successfully paid
+            val context = context
             CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
                     {  /*  fail silently   */ },
                     { _ ->
@@ -503,7 +519,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             if (index != -1) {
                 tradingPairSpinner?.setSelection(index)
             }
-            toast(getString(R.string.error_generic_message, it.errorMessage))
+            toast(context?.getString(R.string.error_generic_message, it.errorMessage) ?: "Error")
         }) {
             switchTradeInfo(newTradingPair, null, null)
             updateCurrencySpinner()

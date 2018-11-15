@@ -62,7 +62,7 @@ class AlertListViewAdapter(val context: Context, var inflater: LayoutInflater?, 
             viewHolder.currencyIcon?.visibility = View.GONE
         }
         viewHolder.productNameText?.text = alert.currency.toString()
-        viewHolder.triggerPriceText?.text = alert.price.fiatFormat(Account.defaultFiatCurrency)
+        viewHolder.triggerPriceText?.text = alert.price.format(Account.defaultFiatCurrency)
         if (alert.triggerIfAbove) {
             viewHolder.alertSideText?.text = context.resources.getString(R.string.alert_above)
         } else {
