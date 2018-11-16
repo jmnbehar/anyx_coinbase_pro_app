@@ -41,8 +41,8 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         val allCryptoAccounts = Account.allCryptoAccounts()
         val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
-        val sortedFiatAccounts = Account.fiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed().toMutableList()
-        val sortedCryptoAccounts = nonEmptyCryptoAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+        val sortedFiatAccounts = Account.fiatAccounts.sortAccounts().toMutableList()
+        val sortedCryptoAccounts = nonEmptyCryptoAccounts.sortAccounts()
         sortedFiatAccounts.addAll(sortedCryptoAccounts)
 
         return sortedFiatAccounts

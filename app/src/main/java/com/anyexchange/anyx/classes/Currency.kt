@@ -89,7 +89,7 @@ class Currency(val id: String) {
 
     val orderValue: Int
         get() {
-            return knownCurrency?.orderValue ?: -999
+            return knownCurrency?.orderValue ?: 99999
         }
 
 

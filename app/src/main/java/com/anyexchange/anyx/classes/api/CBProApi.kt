@@ -229,7 +229,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         }
                     }
 
-                    Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+                    Account.fiatAccounts = tempFiatAccounts.sortAccounts()
                     context?.let {
                         Prefs(it).stashedFiatAccountList = Account.fiatAccounts
                     }

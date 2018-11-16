@@ -280,7 +280,7 @@ enum class KnownCurrency {
                 ETC -> 100
                 ZRX -> 90
                 BAT -> 80
-            }
+            } * -1
         }
 
     companion object {
