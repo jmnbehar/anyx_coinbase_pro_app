@@ -87,7 +87,8 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 CBProApi.candles(apiInitData, tradingPair, timespan, granularity, 0).getCandles(onFailure, onSuccess)
             }
             Exchange.Binance -> {
-                val interval = granularity.toString()
+                //TODO: fix interval here, or extrapolate for timespan for cbpro also
+                val interval = BinanceApi.Interval.FiveMinutes
                 val now = Date().time
                 val startTime = now - (timespan + timeOffset)
                 val endTime = now - timeOffset

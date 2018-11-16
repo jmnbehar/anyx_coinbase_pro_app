@@ -234,7 +234,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         Prefs(it).stashedFiatAccountList = Account.fiatAccounts
                     }
 
-                    Product.updateAllProductCandles(initData, onFailure, onComplete)
+                    Product.updateImportantCandles(initData, onFailure, onComplete)
                 }
             } else {
                 onComplete()

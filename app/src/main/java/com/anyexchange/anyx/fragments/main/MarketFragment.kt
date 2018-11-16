@@ -87,7 +87,9 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
-        for (product in Product.map.values) {
+        val favoriteProducts = Product.favorites()
+        val count = favoriteProducts.count()
+        for (product in favoriteProducts) {
             //always check multiple exchanges?
             product.defaultTradingPair?.let { tradingPair ->
                 product.updateCandles(time, tradingPair, apiInitData, {
@@ -101,7 +103,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                     if (lifecycle.isCreatedOrResumed) {
                         if (didUpdate) {
                             productsUpdated++
-                            if (productsUpdated == Product.map.size) {
+                            if (productsUpdated == count) {
                                 context?.let {
                                     Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
@@ -112,7 +114,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                         } else {
                             AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                                 productsUpdated++
-                                if (productsUpdated == Product.map.size) {
+                                if (productsUpdated == count) {
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                     updateAccountsFragment()
                                     onComplete(true)

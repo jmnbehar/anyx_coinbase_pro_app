@@ -45,7 +45,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return defaultFiatPair ?: tradingPairs.firstOrNull()
         }
 
-    var isFavorite: Boolean =  true//(totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
+    var isFavorite: Boolean = (totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
 
     private fun tradingPairIndex(tradingPair: TradingPair?) : Int {
         //null trading pair will simply select the default fiat pair
@@ -225,20 +225,33 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     companion object {
         var map = mutableMapOf<String, Product>()
 
+        fun favorites() : List<Product> {
+            return map.values.filter { it.isFavorite }
+        }
+
         val dummyProduct = Product(Currency.USD, listOf())
 
         fun forCurrency(currency: Currency) : Product? {
             return map[currency.id]
         }
 
-        fun updateAllProductCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+        fun updateImportantCandles(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
             var candlesUpdated = 0
 
-            for (product in map.values) {
+            var alertCurrencies: Set<Currency> = setOf()
+            apiInitData?.let { apiInitData ->
+                val prefs = Prefs(apiInitData.context)
+                val basicAlertCurrencies = prefs.alerts.map { it.currency }
+                val quickChangeCurrencies = prefs.quickChangeAlertCurrencies.asSequence().map { Currency(it) }.toSet()
+                alertCurrencies = quickChangeCurrencies.plus(basicAlertCurrencies)
+            }
+            val importantProducts = map.values.filter { it.isFavorite || alertCurrencies.contains(it.currency) }
+            val count = importantProducts.size
+            for (product in importantProducts) {
                 val tradingPair = product.defaultTradingPair
                 product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
                     candlesUpdated++
-                    if (candlesUpdated == map.size) {
+                    if (candlesUpdated == count) {
                         if (didUpdate && apiInitData?.context != null) {
                             Prefs(apiInitData.context).stashedProducts = map.values.toList()
                         }

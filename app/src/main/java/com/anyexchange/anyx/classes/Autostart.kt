@@ -49,13 +49,13 @@ class AlertJobService : JobService() {
         if (Product.map.isEmpty()) {
             AnyApi(apiInitData).getAllProducts({ /* do nothing*/ }, {
                 //TODO: get all accounts here?
-                Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
+                Product.updateImportantCandles(apiInitData, { /* do nothing*/ }, {
                     loopThroughAlerts()
                 })
                 checkFillAlerts()
             })
         } else {
-            Product.updateAllProductCandles(apiInitData, { /* do nothing*/ }, {
+            Product.updateImportantCandles(apiInitData, { /* do nothing*/ }, {
                 loopThroughAlerts()
             })
             checkFillAlerts()

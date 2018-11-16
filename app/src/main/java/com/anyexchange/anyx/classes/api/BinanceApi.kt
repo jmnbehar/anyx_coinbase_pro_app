@@ -116,7 +116,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
     }
 
-    class candles(initData: ApiInitData?, val tradingPair: TradingPair, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
+    class candles(initData: ApiInitData?, val tradingPair: TradingPair, val interval: Interval, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
         //limit default = 500, max is 1000
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var pagesReceived = 0
@@ -509,7 +509,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
                 is candles -> {
                     paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
-                    paramList.add(Pair("interval", interval))
+                    paramList.add(Pair("interval", interval.toString()))
                     if (startTime != null) {
                         paramList.add(Pair("startTime", startTime.toString()))
                     }
@@ -741,6 +741,43 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             return headers
         }
 
+    enum class Interval {
+        OneMinute,
+        ThreeMinutes,
+        FiveMinutes,
+        FifteenMinutes,
+        ThirtyMinutes,
+        OneHour,
+        TwoHours,
+        FourHours,
+        SixHours,
+        EightHouts,
+        TwelveHours,
+        OneDay,
+        ThreeDays,
+        OneWeek,
+        OneMonth;
+
+        override fun toString(): String {
+            return when (this) {
+                OneMinute -> "1m"
+                ThreeMinutes -> "3m"
+                FiveMinutes -> "5m"
+                FifteenMinutes -> "15m"
+                ThirtyMinutes -> "30m"
+                OneHour -> "1h"
+                TwoHours -> "2h"
+                FourHours -> "4h"
+                SixHours -> "6h"
+                EightHouts -> "8h"
+                TwelveHours -> "12h"
+                OneDay -> "1d"
+                ThreeDays -> "3d"
+                OneWeek -> "1w"
+                OneMonth -> "1M"
+            }
+        }
+    }
 
     enum class TimeInForce {
         GoodTilCancelled,
