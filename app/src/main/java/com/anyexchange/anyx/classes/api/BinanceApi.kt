@@ -136,20 +136,24 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 try {
                     val candleDoubleList: List<List<Any>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                     var candles = candleDoubleList.mapNotNull {
-                        val openTime = (it[0] as? Long)
-                        val open = (it[1] as? Double) ?: 0.0
-                        val high = (it[2] as? Double) ?: 0.0
-                        val low = (it[3] as? Double) ?: 0.0
-                        val close = (it[4] as? Double)
-                        val volume = (it[5] as? Double) ?: 0.0
-                        val closeTime = (it[6] as? Long)
-                        val quoteAssetVolume = (it[7] as? Double)
-                        val tradeCount = (it[8] as? Long)
-                        val takerBuyBaseAssetVolume = (it[9] as? Double)
-                        val takerBuyQuoteAssetVolume = (it[10] as? Double)
-                        if (close != null && openTime != null && closeTime != null) {
+                        val openTimeMillis = (it[0] as? Double)?.toLong()
+                        val open = (it[1] as? String)?.toDoubleOrNull() ?: 0.0
+                        val high = (it[2] as? String)?.toDoubleOrNull() ?: 0.0
+                        val low = (it[3] as? String)?.toDoubleOrNull() ?: 0.0
+                        val close = (it[4] as? String)?.toDoubleOrNull()
+                        val volume = (it[5] as? String)?.toDoubleOrNull() ?: 0.0
+                        val closeTimeMillis = (it[6] as? Double)?.toLong()
+                        val quoteAssetVolume = (it[7] as? String)?.toDoubleOrNull()
+                        val tradeCount = (it[8] as? Double)?.toLong()
+                        val takerBuyBaseAssetVolume = (it[9] as? String)?.toDoubleOrNull()
+                        val takerBuyQuoteAssetVolume = (it[10] as? String)?.toDoubleOrNull()
+                        if (close != null && openTimeMillis != null && closeTimeMillis != null) {
+                            val openTime = openTimeMillis / 1000
+                            val closeTime = closeTimeMillis / 1000 + 1
                             Candle(openTime, closeTime, low, high, open, close, volume, quoteAssetVolume, tradeCount, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume)
-                        } else { null }
+                        } else {
+                            null
+                        }
                     }
                     val now = Calendar.getInstance()
 
@@ -516,9 +520,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (endTime != null) {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
-                    if (limit != null) {
-                        paramList.add(Pair("limit", limit.toString()))
-                    }
+                    paramList.add(Pair("limit", (limit ?: 500).toString()))
                     return paramList.toList()
                 }
                 is ticker -> {

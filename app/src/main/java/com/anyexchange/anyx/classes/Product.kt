@@ -45,7 +45,14 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return defaultFiatPair ?: tradingPairs.firstOrNull()
         }
 
-    var isFavorite: Boolean = (totalDefaultValueOfRelevantAccounts() > 0) || (accounts[Exchange.CBPro] != null)
+    private var isFavoriteBackingBool: Boolean? = null
+    var isFavorite: Boolean
+        get() {
+            return isFavoriteBackingBool ?: (totalDefaultValueOfRelevantAccounts() > 0 || accounts[Exchange.CBPro] != null || tradingPairs.any { it.exchange == Exchange.CBPro })
+        }
+        set(value) {
+            isFavoriteBackingBool = value
+        }
 
     private fun tradingPairIndex(tradingPair: TradingPair?) : Int {
         //null trading pair will simply select the default fiat pair
