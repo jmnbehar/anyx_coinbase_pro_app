@@ -187,11 +187,10 @@ class AnyApi(val apiInitData: ApiInitData?) {
         }
         for (apiProduct in binanceProducts) {
             val tradingPair = TradingPair(apiProduct)
-            Product.map[apiProduct.symbol]?.let {  product ->
+            Product.map[tradingPair.baseCurrency.id]?.let {  product ->
                 product.tradingPairs = product.tradingPairs.plus(tradingPair)
             } ?: run {
-                val currency = Currency(apiProduct.symbol)
-                val newProduct = Product(currency, listOf(tradingPair))
+                val newProduct = Product(tradingPair.baseCurrency, listOf(tradingPair))
                 newProduct.addToHashMap()
             }
         }
