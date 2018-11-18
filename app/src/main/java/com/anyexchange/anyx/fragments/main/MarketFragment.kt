@@ -81,9 +81,6 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         val time = Timespan.DAY
         skipNextRefresh = true
 
-        //TODO: add this back occasionally
-//        Product.updateAllProducts({ }, {})
-
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
