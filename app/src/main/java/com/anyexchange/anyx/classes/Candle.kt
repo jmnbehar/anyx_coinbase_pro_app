@@ -1,5 +1,7 @@
 package com.anyexchange.anyx.classes
 
+import java.util.*
+
 data class Candle(
         val openTime: Long,
         val closeTime: Long,
@@ -45,24 +47,32 @@ fun MutableList<Candle>.addingCandles(newList: List<Candle>) : MutableList<Candl
 }
 
 fun MutableList<Candle>.sortCandles() : MutableList<Candle> {
-    return this.sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
+    return this.asSequence().sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
 }
 
 fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
     val tempCandles = this.toMutableList()
     var addedCandles = 0
     for ((index, candle) in this.withIndex()) {
-        if (index < size - 2) {
-            val missingTimeToNextCandle = this[index + 1].closeTime - candle.closeTime - granularity
-            if (missingTimeToNextCandle > 0) {
-                val missingCandles = (missingTimeToNextCandle / granularity).toInt()
-                for (i in 1..missingCandles) {
-                    addedCandles++
-                    val closeTime = candle.closeTime + (granularity * i)
-                    val openTime = candle.openTime + (granularity * i)
-                    val fillCandle = Candle(openTime, closeTime, candle.close, candle.close, candle.close, candle.close, 0.0)
-                    tempCandles.add(index + addedCandles, fillCandle)
-                }
+        val missingTimeToNextCandle = if (index < size - 2) {
+            //fill in blanks in between candles
+            this[index + 1].closeTime - candle.closeTime - granularity
+        } else if (index == size - 1){
+            //flatline at end
+            val lastExpectedCandleTime = (Date().time / 1000) - granularity
+            val nextCandleTime = candle.closeTime + granularity
+            lastExpectedCandleTime - nextCandleTime
+        } else {
+            0
+        }
+        if (missingTimeToNextCandle > 0) {
+            val missingCandles = (missingTimeToNextCandle / granularity).toInt()
+            for (i in 1..missingCandles) {
+                addedCandles++
+                val closeTime = candle.closeTime + (granularity * i)
+                val openTime = candle.openTime + (granularity * i)
+                val fillCandle = Candle(openTime, closeTime, candle.close, candle.close, candle.close, candle.close, 0.0)
+                tempCandles.add(index + addedCandles, fillCandle)
             }
         }
     }
