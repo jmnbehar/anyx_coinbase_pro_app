@@ -59,9 +59,9 @@ fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
             this[index + 1].closeTime - candle.closeTime - granularity
         } else if (index == size - 1){
             //flatline at end
-            val lastExpectedCandleTime = (Date().time / 1000) - granularity
+            val now = Date().timeInSeconds()
             val nextCandleTime = candle.closeTime + granularity
-            lastExpectedCandleTime - nextCandleTime
+            now - nextCandleTime
         } else {
             0
         }
