@@ -88,7 +88,8 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val granularity = Candle.granularityForTimespan(timespan)
 
         if (product.isFavorite && product.defaultDayCandles.isNotEmpty()) {
-            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
+            val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
             viewHolder.lineChart?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.VISIBLE

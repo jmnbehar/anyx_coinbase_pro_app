@@ -83,7 +83,7 @@ class PriceLineChart : LineChart {
         }
     }
 
-    fun configure(candles: List<Candle>, granularity: Long, currency: Currency, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
+    fun configure(candles: List<Candle>, granularity: Long, timespan: Timespan, tradingPair: TradingPair, touchEnabled: Boolean, defaultDragDirection: DefaultDragDirection, onDefaultDrag: () -> Unit) {
         setDrawGridBackground(false)
         setDrawBorders(false)
         val newDescription = Description()
@@ -125,22 +125,25 @@ class PriceLineChart : LineChart {
         setScaleEnabled(false)
         isDoubleTapToZoomEnabled = false
 
-        addCandles(candles, granularity, currency)
+        addCandles(candles, granularity, timespan, tradingPair)
     }
 
-    fun addCandles(candles: List<Candle>, granularity: Long, currency: Currency) {
-        val entries = if (candles.isEmpty()) {
-            val now = Date().timeInSeconds()
-            val blankEntry = Entry(0.0f, 0.0f, 0.0f, now)
-            listOf(blankEntry, blankEntry)
+    fun addCandles(candles: List<Candle>, granularity: Long, timespan: Timespan, tradingPair: TradingPair) {
+        val filledInCandles = if (candles.isEmpty()) {
+            val startTime = Date().timeInSeconds() - timespan.value()
+            val closeTime = startTime + granularity
+            val price = Product.map[tradingPair.baseCurrency.id]?.priceForQuoteCurrency(tradingPair.quoteCurrency) ?: 0.0
+            val defaultCandle = Candle(startTime, closeTime, price, price, price, price, 0.0)
+            listOf(defaultCandle).filledInBlanks(granularity, timespan, tradingPair)
         } else {
             //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
-            val filledInCandles = candles.filledInBlanks(granularity)
-            filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.closeTime) }.toList()
+            candles.filledInBlanks(granularity, timespan, tradingPair)
         }
+        val entries = filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.closeTime) }.toList()
+
         val dataSet = LineDataSet(entries, "Chart")
 
-        val color = currency.colorPrimary(context)
+        val color = tradingPair.baseCurrency.colorPrimary(context)
 
         val strokeWidth = 2.toFloat()
         dataSet.color = color

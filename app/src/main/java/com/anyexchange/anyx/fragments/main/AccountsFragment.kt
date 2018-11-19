@@ -41,6 +41,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         fun newInstance(): AccountsFragment {
             return AccountsFragment()
         }
+        val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
+
     }
 
     private val granularity = Candle.granularityForTimespan(Timespan.DAY)
@@ -69,7 +71,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart?.setOnChartValueSelectedListener(this)
             lineChart?.onChartGestureListener = this
 
-            lineChart?.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
+            lineChart?.configure(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
                 lockableScrollView?.scrollToTop(800)
                 lockableScrollView?.scrollLocked = true
@@ -229,7 +231,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         } else {
             lineChart?.visibility = View.VISIBLE
             //doesn't matter which fiat currency you use here:
-            lineChart?.addCandles(accountTotalCandles, granularity, Currency.USD)
+
+            lineChart?.addCandles(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair)
         }
     }
 }

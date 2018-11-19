@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.classes
 
+import com.anyexchange.anyx.classes.api.CBProApi
 import java.util.*
 
 data class Candle(
@@ -50,10 +51,19 @@ fun MutableList<Candle>.sortCandles() : MutableList<Candle> {
     return this.asSequence().sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
 }
 
-fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
+fun List<Candle>.filledInBlanks(granularity: Long, timespan: Timespan, tradingPair: TradingPair) : List<Candle> {
+    val candles = if (this.isEmpty()) {
+        val startTime = Date().timeInSeconds() - timespan.value()
+        val closeTime = startTime + granularity
+        val price = Product.map[tradingPair.baseCurrency.id]?.priceForQuoteCurrency(tradingPair.quoteCurrency) ?: 0.0
+        val defaultCandle = Candle(startTime, closeTime, price, price, price, price, 0.0)
+        listOf(defaultCandle)
+    } else {
+        this
+    }
     val tempCandles = this.toMutableList()
     var addedCandles = 0
-    for ((index, candle) in this.withIndex()) {
+    for ((index, candle) in candles.withIndex()) {
         val missingTimeToNextCandle = if (index < size - 2) {
             //fill in blanks in between candles
             this[index + 1].closeTime - candle.closeTime - granularity
@@ -63,6 +73,7 @@ fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
             val nextCandleTime = candle.closeTime + granularity
             now - nextCandleTime
         } else {
+            //leave the 2nd to last candle alone
             0
         }
         if (missingTimeToNextCandle > 0) {
