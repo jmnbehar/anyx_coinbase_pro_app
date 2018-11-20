@@ -93,12 +93,20 @@ class Currency(val id: String) {
         }
 
 
+    val relevantStableCoin: Currency?
+        get() = knownCurrency?.relevantStableCoin
+
+    val relevantFiat : Currency?
+        get() = knownCurrency?.relevantFiat
+
+
     companion object {
         val cryptoList = KnownCurrency.values().filter { it.type == Type.CRYPTO }.asSequence().map { Currency(it) }.toMutableList()
         val fiatList    = KnownCurrency.values().filter { it.type == Type.FIAT }
         val stableCoinList = KnownCurrency.values().filter { it.type == Type.STABLECOIN }
 
         val USD = Currency(KnownCurrency.USD)
+        val USDC = Currency(KnownCurrency.USDC)
         val BTC = Currency(KnownCurrency.BTC)
         val ETH = Currency(KnownCurrency.ETH)
         val BCH = Currency(KnownCurrency.BCH)

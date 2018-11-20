@@ -170,7 +170,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         candleChart = rootView.chart_candle_chart
 
         val granularity = Candle.granularityForTimespan(timespan)
-        lineChart?.configure(candles, granularity, currency, true, DefaultDragDirection.Horizontal) {
+        val tradingPair = tradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+        lineChart?.configure(candles, granularity, timespan, tradingPair, true, DefaultDragDirection.Horizontal) {
             swipeRefreshLayout?.isEnabled = false
             lockableScrollView?.scrollToTop(800)
             lockableScrollView?.scrollLocked = true
@@ -529,7 +530,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             }
 
             product.defaultTradingPair?.let { tradingPair ->
-                addCandlesToActiveChart(candles, product.currency)
+                addCandlesToActiveChart(candles, tradingPair)
                 setPercentChangeText(timespan)
                 currencyNameTextView?.text = product.currency.fullName
                 setButtonsAndBalanceText(product)
@@ -870,16 +871,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         priceTextView?.text = price.format(quoteCurrency)
         updateValueText()
-        addCandlesToActiveChart(candles, currency)
+        val tradingPair = tradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+        addCandlesToActiveChart(candles, tradingPair)
         setPercentChangeText(timespan)
         checkTimespanButton()
         onComplete()
     }
 
-    private fun addCandlesToActiveChart(candles: List<Candle>, currency: Currency) {
+    private fun addCandlesToActiveChart(candles: List<Candle>, tradingPair: TradingPair) {
         val granularity = Candle.granularityForTimespan(timespan)
         when (chartStyle) {
-            ChartStyle.Line   ->   lineChart?.addCandles(candles, granularity, currency)
+            ChartStyle.Line   ->   lineChart?.addCandles(candles, granularity, timespan, tradingPair)
             ChartStyle.Candle -> candleChart?.addCandles(candles, currency)
         }
     }

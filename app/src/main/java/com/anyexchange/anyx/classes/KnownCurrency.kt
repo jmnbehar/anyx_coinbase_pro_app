@@ -113,15 +113,15 @@ enum class KnownCurrency {
             else -> Currency.Type.CRYPTO
         }
 
-    val relevantStableCoin : KnownCurrency?
+    val relevantStableCoin : Currency?
         get() = when (this) {
-            USD -> USDC
+            USD -> Currency(USDC)
             else -> null
         }
 
-    val relevantFiat : KnownCurrency?
+    val relevantFiat : Currency?
         get() = when (this) {
-            USDC -> USD
+            USDC -> Currency(USD)
             else -> null
         }
 

@@ -99,7 +99,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         val open = if (candles.isNotEmpty()) {
             candles.first().close
         } else {
-            0.0
+            currentPrice
         }
         val change = currentPrice - open
 
@@ -130,7 +130,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
-        return price[tradingPairIndex]
+        return price.getOrNull(tradingPairIndex) ?: 0.0
     }
 
     fun setPriceForTradingPair(newPrice: Double, tradingPair: TradingPair) {

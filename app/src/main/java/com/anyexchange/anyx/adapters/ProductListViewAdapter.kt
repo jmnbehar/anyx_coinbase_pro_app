@@ -73,7 +73,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val product = sortedProductList[i]
 
         //TODO: someday add ability to select values here
-
         product.currency.iconId?.let {
             viewHolder.productIcon?.visibility = View.VISIBLE
             viewHolder.productIcon?.setImageResource(it)
@@ -87,14 +86,12 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         val granularity = Candle.granularityForTimespan(timespan)
 
-        if (product.isFavorite && product.defaultDayCandles.isNotEmpty()) {
-            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, product.currency, false, DefaultDragDirection.Vertical) {}
+        if (product.isFavorite) {
+            val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+            viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
             viewHolder.lineChart?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.VISIBLE
-
-            val defaultQuoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
-            viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
 
             val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()
@@ -105,9 +102,12 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             }
         } else {
             viewHolder.lineChart?.visibility = View.GONE
-            viewHolder.priceText?.visibility = View.GONE
+            viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.GONE
         }
+        val defaultQuoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+        viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
+
         outputView.setOnLongClickListener {
             product.isFavorite = !product.isFavorite
             notifyDataSetChanged()

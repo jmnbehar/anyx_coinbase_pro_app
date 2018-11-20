@@ -16,6 +16,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
@@ -41,6 +42,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         fun newInstance(): AccountsFragment {
             return AccountsFragment()
         }
+        val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
+
     }
 
     private val granularity = Candle.granularityForTimespan(Timespan.DAY)
@@ -69,7 +72,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart?.setOnChartValueSelectedListener(this)
             lineChart?.onChartGestureListener = this
 
-            lineChart?.configure(accountTotalCandles, granularity, Currency.USD, true, DefaultDragDirection.Horizontal) {
+            lineChart?.configure(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair, true, DefaultDragDirection.Horizontal) {
                 swipeRefreshLayout?.isEnabled = false
                 lockableScrollView?.scrollToTop(800)
                 lockableScrollView?.scrollLocked = true
@@ -77,7 +80,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             }
 
             accountList?.adapter = AccountListViewAdapter(context) { account: Account ->
-                (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(account.currency)
+                onClickAccount(account)
             }
             accountList?.setHeightBasedOnChildren()
             titleText?.visibility = View.GONE
@@ -92,6 +95,37 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             dismissProgressSpinner()
         }
         return rootView
+    }
+
+    private fun onClickAccount(account: Account) {
+        when (account.currency.type) {
+            Currency.Type.CRYPTO -> {
+                (activity as MainActivity).goToChartFragment(account.currency)
+            }
+            Currency.Type.STABLECOIN -> {
+                val relevantFiat = account.currency.relevantFiat ?: account.currency
+                val tradingPair = TradingPair(account.exchange, account.currency, relevantFiat)
+                if (StablecoinConversionFragment.supportedTradingPairs.contains(tradingPair)) {
+                    showStablecoinConversionDialog(tradingPair)
+                }
+            }
+            Currency.Type.FIAT -> {
+                val relevantFiat = account.currency.relevantStableCoin ?: account.currency
+                val tradingPair = TradingPair(account.exchange, account.currency, relevantFiat)
+                if (StablecoinConversionFragment.supportedTradingPairs.contains(tradingPair)) {
+                    showStablecoinConversionDialog(tradingPair)
+                }
+            }
+        }
+    }
+
+    private fun showStablecoinConversionDialog(tradingPair: TradingPair) {
+        val dialogFragment = StablecoinConversionFragment()
+        dialogFragment.setInfo(tradingPair) { returnedTradingPair, amount ->
+            CBProApi.stablecoinConversion(apiInitData, amount, returnedTradingPair ?: tradingPair)
+            dialogFragment.dismiss()
+        }
+        dialogFragment.showNow(fragmentManager, "stablecoinConversionDialog")
     }
 
     override fun onResume() {
@@ -229,7 +263,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         } else {
             lineChart?.visibility = View.VISIBLE
             //doesn't matter which fiat currency you use here:
-            lineChart?.addCandles(accountTotalCandles, granularity, Currency.USD)
+
+            lineChart?.addCandles(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair)
         }
     }
 }
