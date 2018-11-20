@@ -51,19 +51,10 @@ fun MutableList<Candle>.sortCandles() : MutableList<Candle> {
     return this.asSequence().sortedWith(compareBy({ it.closeTime }, { it.close })).toMutableList()
 }
 
-fun List<Candle>.filledInBlanks(granularity: Long, timespan: Timespan, tradingPair: TradingPair) : List<Candle> {
-    val candles = if (this.isEmpty()) {
-        val startTime = Date().timeInSeconds() - timespan.value()
-        val closeTime = startTime + granularity
-        val price = Product.map[tradingPair.baseCurrency.id]?.priceForQuoteCurrency(tradingPair.quoteCurrency) ?: 0.0
-        val defaultCandle = Candle(startTime, closeTime, price, price, price, price, 0.0)
-        listOf(defaultCandle)
-    } else {
-        this
-    }
+fun List<Candle>.filledInBlanks(granularity: Long) : List<Candle> {
     val tempCandles = this.toMutableList()
     var addedCandles = 0
-    for ((index, candle) in candles.withIndex()) {
+    for ((index, candle) in this.withIndex()) {
         val missingTimeToNextCandle = if (index < size - 2) {
             //fill in blanks in between candles
             this[index + 1].closeTime - candle.closeTime - granularity

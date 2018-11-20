@@ -130,14 +130,15 @@ class PriceLineChart : LineChart {
 
     fun addCandles(candles: List<Candle>, granularity: Long, timespan: Timespan, tradingPair: TradingPair) {
         val filledInCandles = if (candles.isEmpty()) {
-            val startTime = Date().timeInSeconds() - timespan.value()
+            val startTimeRaw = Date().timeInSeconds() - timespan.value()
+            val startTime = (startTimeRaw / 300) * 300
             val closeTime = startTime + granularity
             val price = Product.map[tradingPair.baseCurrency.id]?.priceForQuoteCurrency(tradingPair.quoteCurrency) ?: 0.0
             val defaultCandle = Candle(startTime, closeTime, price, price, price, price, 0.0)
-            listOf(defaultCandle).filledInBlanks(granularity, timespan, tradingPair)
+            listOf(defaultCandle).filledInBlanks(granularity)
         } else {
             //TODO: add a bool on whether or not to fill in blanks - it is expensive time wise
-            candles.filledInBlanks(granularity, timespan, tradingPair)
+            candles.filledInBlanks(granularity)
         }
         val entries = filledInCandles.asSequence().withIndex().map { Entry(it.index.toFloat(), it.value.close.toFloat(), it.value.volume.toFloat(), it.value.closeTime) }.toList()
 
