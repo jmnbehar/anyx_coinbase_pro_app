@@ -123,7 +123,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
         var tradingPairIndex: Int = tradingPairs.indexOf(tradingPair)
         if (tradingPairIndex == -1) { tradingPairIndex = 0 }
-        return price[tradingPairIndex]
+        return price.getOrNull(tradingPairIndex) ?: 0.0
     }
 
     fun setPriceForTradingPair(newPrice: Double, tradingPair: TradingPair) {
