@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.graphics.Color
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.view.ViewGroup
@@ -20,11 +19,12 @@ class StablecoinConversionFragment: DialogFragment() {
 
     private var detailsText: TextView? = null
 
+    private var amountLabel: TextView? = null
     private var amountEditText: EditText? = null
 
     private var confirmButton: Button? = null
 
-    private var submitConversion: (TradingPair, Double) -> Unit = { _, _ -> }
+    private var submitConversion: (TradingPair?, Double) -> Unit = { _, _ -> }
 
     var tradingPair: TradingPair? = null
 
@@ -42,6 +42,7 @@ class StablecoinConversionFragment: DialogFragment() {
         detailsText = rootView.txt_stablecoin_details
         confirmButton = rootView.btn_conversion_confirm
         amountEditText = rootView.etxt_conversion_amount
+        amountLabel = rootView.txt_stablecoin_amount_label
 
         tradingPair?.let { tradingPair ->
             setText(tradingPair)
@@ -49,15 +50,13 @@ class StablecoinConversionFragment: DialogFragment() {
 
         confirmButton?.setOnClickListener { _ ->
             val amount = amountEditText?.text.toString().toDoubleOrZero()
-            tradingPair?.let {
-                submitConversion(it, amount)
-            }
+            submitConversion(tradingPair, amount)
         }
 
         return rootView
     }
 
-    fun setInfo(tradingPair: TradingPair, submitConversion: (TradingPair, Double) -> Unit) {
+    fun setInfo(tradingPair: TradingPair, submitConversion: (TradingPair?, Double) -> Unit) {
         this.tradingPair = tradingPair
         this.submitConversion = submitConversion
     }
@@ -72,12 +71,16 @@ class StablecoinConversionFragment: DialogFragment() {
                 else -> ""
             }
             detailsText?.visibility = View.VISIBLE
+            amountLabel?.text = getString(R.string.stable_coin_conversion_amount_label)
+            amountLabel?.visibility = View.VISIBLE
+            confirmButton?.text = getString(R.string.stable_coin_conversion_button)
+
         } ?: run {
             titleText?.visibility = View.GONE
             detailsText?.visibility = View.GONE
+            amountLabel?.visibility = View.GONE
         }
 
-        confirmButton?.text = getString(R.string.trade_confirm_button_text)
     }
 
 }

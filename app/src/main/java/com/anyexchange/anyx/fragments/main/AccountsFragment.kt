@@ -121,8 +121,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private fun showStablecoinConversionDialog(tradingPair: TradingPair) {
         val dialogFragment = StablecoinConversionFragment()
-        dialogFragment.setInfo(tradingPair) { tradingPair, amount ->
-            CBProApi.stablecoinConversion(apiInitData, amount, tradingPair)
+        dialogFragment.setInfo(tradingPair) { returnedTradingPair, amount ->
+            CBProApi.stablecoinConversion(apiInitData, amount, returnedTradingPair ?: tradingPair)
             dialogFragment.dismiss()
         }
         dialogFragment.showNow(fragmentManager, "stablecoinConversionDialog")

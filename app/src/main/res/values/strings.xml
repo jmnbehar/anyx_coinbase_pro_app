@@ -462,5 +462,9 @@ You\'re good to go!</item>
 
     <string name="stable_coin_conversion_usdc_usd">Coinbase customers with US dollar accounts may convert US$1.00 to 1 USDC to (and vice versa) in jurisdictions where USDC support is available.</string>
 
+    <string name="stable_coin_conversion_button">Submit conversion</string>
+
+    <string name="stable_coin_conversion_amount_label">Amount: </string>
+
 
 </resources>
