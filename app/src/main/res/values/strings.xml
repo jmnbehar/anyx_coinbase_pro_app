@@ -209,6 +209,7 @@
 
     //Home Fragment
     <string name="home_market_tab">Market</string>
+    <string name="home_favorites_tab">Favorites</string>
     <string name="home_account_tab">Account</string>
     <string name="home_other_tab">Screen #%d</string>
 

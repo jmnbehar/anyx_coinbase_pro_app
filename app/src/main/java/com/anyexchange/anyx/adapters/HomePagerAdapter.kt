@@ -19,7 +19,8 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
-    val marketFragment = MarketFragment()
+    val marketFragment = MarketFragment.newInstance(false)
+    val favoritesFragment = MarketFragment.newInstance(true)
     val accountsFragment = AccountsFragment()
 
     override fun getItem(i: Int): Fragment {
@@ -31,6 +32,12 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
                 return marketFragment
             }
             1 -> {
+                val args = Bundle()
+                args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
+                favoritesFragment.arguments = args
+                return favoritesFragment
+            }
+            2 -> {
                 val args = Bundle()
                 args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
                 accountsFragment.arguments = args
@@ -48,13 +55,14 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     }
 
     override fun getCount(): Int {
-        return 2
+        return 3
     }
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> context.resources.getString(R.string.home_market_tab)
-            1 -> context.resources.getString(R.string.home_account_tab)
+            1 -> context.resources.getString(R.string.home_favorites_tab)
+            2 -> context.resources.getString(R.string.home_account_tab)
             else -> context.resources.getString(R.string.home_other_tab, position + 1)
         }
     }

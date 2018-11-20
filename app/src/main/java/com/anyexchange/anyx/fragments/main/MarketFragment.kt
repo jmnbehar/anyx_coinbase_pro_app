@@ -4,14 +4,17 @@ import android.arch.lifecycle.LifecycleOwner
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.PopupMenu
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.api.AnyApi
 import kotlinx.android.synthetic.main.fragment_market.view.*
 
@@ -19,19 +22,30 @@ import kotlinx.android.synthetic.main.fragment_market.view.*
  * Created by anyexchange on 11/5/2017.
  */
 class MarketFragment : RefreshFragment(), LifecycleOwner {
-    private var currentProduct: Product? = null
     private var listView: ListView? = null
 
     lateinit var inflater: LayoutInflater
 
+    private var onlyShowFavorites = false
     var updateAccountsFragment = { }
 
     companion object {
-        fun newInstance(): MarketFragment
+        fun newInstance(onlyShowFavorites: Boolean): MarketFragment
         {
-            return MarketFragment()
+            val newMarketFragment = MarketFragment()
+            newMarketFragment.onlyShowFavorites = onlyShowFavorites
+            return newMarketFragment
         }
     }
+
+    private val productList: List<Product>
+        get() {
+            return if (onlyShowFavorites) {
+                Product.map.values.filter { it.isFavorite }
+            } else {
+                Product.map.values
+            }.toList().sortProducts()
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -41,12 +55,13 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
-        val selectGroup = lambda@ { product: Product ->
-            currentProduct = product
-            (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(product.currency)
+        val onClick = lambda@ { product: Product ->
+            (activity as MainActivity).goToChartFragment(product.currency)
         }
 
-        listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
+        listView?.adapter = ProductListViewAdapter(inflater, productList, onlyShowFavorites, onClick) { view, product ->
+            setIsFavorite(view, product)
+        }
 //        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
@@ -75,12 +90,39 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         super.onPause()
     }
 
+    private fun setIsFavorite(view: View, product: Product) {
+        val popup = PopupMenu(activity, view)
+        //Inflating the Popup using xml file
+        popup.menuInflater.inflate(R.menu.product_popup_menu, popup.menu)
+        popup.menu.findItem(R.id.setFavorite).isVisible = !product.isFavorite
+        popup.menu.findItem(R.id.removeFavorite).isVisible = product.isFavorite
+
+        popup.setOnMenuItemClickListener { item: MenuItem? ->
+            when (item?.itemId) {
+                R.id.setFavorite -> {
+                    product.isFavorite = true
+                }
+                R.id.removeFavorite -> {
+                    product.isFavorite = false
+                }
+            }
+            if (onlyShowFavorites) {
+                (listView?.adapter as ProductListViewAdapter).productList = productList
+                (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+            } else {
+                //refresh other fragments
+            }
+            true
+        }
+        popup.show()
+    }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
         val time = Timespan.DAY
         skipNextRefresh = true
 
+        //TODO: move this entire refresh block up to a homeFragment level refresh that properly refreshes everything in homeFragment
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
@@ -104,6 +146,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                                 context?.let {
                                     Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
+                                (listView?.adapter as ProductListViewAdapter).productList = productList
                                 (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                 updateAccountsFragment()
                                 onComplete(true)
@@ -112,6 +155,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                             AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                                 productsUpdated++
                                 if (productsUpdated == count) {
+                                    (listView?.adapter as ProductListViewAdapter).productList = productList
                                     (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
                                     updateAccountsFragment()
                                     onComplete(true)

@@ -17,10 +17,10 @@ import android.widget.TextView
  * Created by anyexchange on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean, var onClick: (Product) -> Unit, var onLongPress: (View, Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return Product.map.size
+        return productList.size
     }
 
     override fun getItem(i: Int): Any {
@@ -31,11 +31,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         return i.toLong()
     }
 
-    private val sortedProductList: List<Product>
-        get() {
-            val productList = Product.map.values.toList()
-            return productList.sortProducts()
-        }
 
     internal class ViewHolder {
         var productNameText: TextView? = null
@@ -67,10 +62,10 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             outputView = convertView
         }
 
-        if (i >= sortedProductList.size) {
+        if (i >= productList.size) {
             return outputView
         }
-        val product = sortedProductList[i]
+        val product = productList[i]
 
         //TODO: someday add ability to select values here
         product.currency.iconId?.let {
@@ -86,7 +81,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
         val granularity = Candle.granularityForTimespan(timespan)
 
-        if (product.isFavorite) {
+        if (isFavorites) {
             val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
             viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
             viewHolder.lineChart?.visibility = View.VISIBLE
@@ -95,8 +90,10 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
 
             val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()
-            viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
+            viewHolder.percentChangeText?.textColor = if (percentChange > 0) {
                 Color.GREEN
+            } else if (percentChange == 0.0) {
+                Color.WHITE
             } else {
                 Color.RED
             }
@@ -109,6 +106,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
 
         outputView.setOnLongClickListener {
+            onLongPress(it, product)
             product.isFavorite = !product.isFavorite
             notifyDataSetChanged()
             true
