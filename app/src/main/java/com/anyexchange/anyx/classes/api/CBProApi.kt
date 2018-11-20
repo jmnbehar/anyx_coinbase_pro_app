@@ -16,7 +16,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
-import java.lang.Error
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.crypto.Mac
@@ -470,6 +469,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     class getFromPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi(initData)
     class sendToCoinbase(initData: ApiInitData?, val amount: Double, val currency: Currency, val accountId: String) : CBProApi(initData)
     class sendToPayment(initData: ApiInitData?, val amount: Double, val currency: Currency, val paymentMethodId: String) : CBProApi(initData)
+    class stablecoinConversion(initData: ApiInitData?, val amount: Double, val tradingPair: TradingPair) : CBProApi(initData)
+
     class createReport(initData: ApiInitData, val type: String, val startDate: Date, val endDate: Date, val productId: String?, val accountId: String?) : CBProApi(initData)
 //    {
 //        fun createAndGetInfo(onComplete: (Boolean) -> Unit) {
@@ -526,6 +527,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is sendToPayment -> Method.POST
                 is createReport -> Method.POST
                 is getReport -> Method.GET
+                is stablecoinConversion -> Method.POST
             }
         }
 
@@ -557,6 +559,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 is sendToPayment -> "/withdrawals/payment-method"
                 is createReport -> "/reports"
                 is getReport -> "/reports/$reportId"
+                is stablecoinConversion -> "/conversions"
             }
         }
 
@@ -708,6 +711,13 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     json.put("amount", amount.btcFormatShortened())
                     json.put("currency", currency.toString())
                     json.put("payment_method_id", paymentMethodId)
+                    return json.toString()
+                }
+                is stablecoinConversion -> {
+                    val json = JSONObject()
+                    json.put("from", tradingPair.quoteCurrency)
+                    json.put("to", tradingPair.baseCurrency)
+                    json.put("amount", amount.btcFormatShortened())
                     return json.toString()
                 }
                 is createReport -> {

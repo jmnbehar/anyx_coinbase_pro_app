@@ -78,6 +78,7 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         val accounts = sortedAccountList
         if(i < accounts.size) {
             val account = accounts[i]
+            outputView.setOnClickListener { onClick(account) }
 
             when (account.currency.type) {
                 Currency.Type.FIAT -> {
@@ -92,7 +93,6 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
                 }
                 Currency.Type.CRYPTO -> {
                     viewHolder.balanceText?.text =  account.balance.format(account.currency)
-                    outputView.setOnClickListener { onClick(account) }
 
                     val product = Product.map[account.currency.id]
                     val percentChange = product?.percentChange(Timespan.DAY, Account.defaultFiatCurrency) ?: 0.0

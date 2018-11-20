@@ -455,4 +455,12 @@ You\'re good to go!</item>
 
     <string name="trade_confirm_button_text">Submit %s order</string>
     <string name="trade_confirm_very_small_fee">Less than %s</string>
+
+    <string name="stable_coin_conversion_title">Convert %s to %s</string>
+
+    <string name="stable_coin_conversion_usd_usdc">Coinbase customers with US dollar accounts may convert 1 USDC to US$1.00 (and vice versa) in jurisdictions where USDC support is available.</string>
+
+    <string name="stable_coin_conversion_usdc_usd">Coinbase customers with US dollar accounts may convert US$1.00 to 1 USDC to (and vice versa) in jurisdictions where USDC support is available.</string>
+
+
 </resources>
