@@ -246,7 +246,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             var candlesUpdated = 0
 
             var alertCurrencies: Set<Currency> = setOf()
-            apiInitData?.let { apiInitData ->
+            if (apiInitData != null) {
                 val prefs = Prefs(apiInitData.context)
                 val basicAlertCurrencies = prefs.alerts.map { it.currency }
                 val quickChangeCurrencies = prefs.quickChangeAlertCurrencies.asSequence().map { Currency(it) }.toSet()

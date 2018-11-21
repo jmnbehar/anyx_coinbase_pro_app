@@ -276,7 +276,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<BinanceOrder> = Gson().fromJson(result.value, object : TypeToken<List<BinanceOrder>>() {}.type)
-                    val generalOrderList = apiOrderList.map { Order(it) }
+                    val generalOrderList = apiOrderList.mapNotNull { Order.fromBinanceOrder(it) }
 
                     if (context != null) {
                         Prefs(context).stashOrders(generalOrderList, Exchange.Binance)
