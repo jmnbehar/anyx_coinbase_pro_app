@@ -58,8 +58,37 @@ class AnyApi(val apiInitData: ApiInitData?) {
             }
             Exchange.Binance -> {
                 BinanceApi.ticker(apiInitData, tradingPair).get(onFailure) {
-                    onSuccess(it.price)
+                    onSuccess(it?.price)
                 }
+            }
+        }
+    }
+    fun updateAllTickers(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        var hasCbProCompleted = false
+        var hasBinanceCompleted = false
+
+        //CBPro:
+        val cbProProducts = Product.map.values.filter { product -> product.tradingPairs.any { it.exchange == Exchange.CBPro } }
+        var completedProducts = 0
+        for (product in cbProProducts) {
+            product.defaultTradingPair?.let { tradingPair ->
+                CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {
+                    completedProducts++
+                    if (completedProducts >= cbProProducts.size) {
+                        hasCbProCompleted = true
+                        if (hasBinanceCompleted) {
+                            onSuccess()
+                        }
+                    }
+                }
+            }
+        }
+
+        //Binance:
+        BinanceApi.ticker(apiInitData, null).get(onFailure) {
+            hasBinanceCompleted = true
+            if (hasCbProCompleted) {
+                onSuccess()
             }
         }
     }

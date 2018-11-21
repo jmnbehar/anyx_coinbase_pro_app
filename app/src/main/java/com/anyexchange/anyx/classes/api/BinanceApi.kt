@@ -242,14 +242,23 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
-    class ticker(initData: ApiInitData?, val tradingPair: TradingPair) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker) -> Unit) {
+    class ticker(initData: ApiInitData?, val tradingPair: TradingPair?) : BinanceApi(initData) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker?) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
-                    val product = Product.map[tradingPair.baseCurrency.id]
-                    product?.setPriceForTradingPair(ticker.price, tradingPair)
-                    onComplete(ticker)
+                    tradingPair?.let {
+                        val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
+                        Product.map[tradingPair.baseCurrency.id]?.setPriceForTradingPair(ticker.price, tradingPair)
+                        onComplete(ticker)
+                    } ?: run {
+                        val tickerList: List<BinanceTicker> = Gson().fromJson(result.value, object : TypeToken<List<BinanceTicker>>() {}.type)
+                        for (ticker in tickerList) {
+                            TradingPair.tradingPairFromId(Exchange.Binance, ticker.symbol)?.let {
+                                Product.map[it.baseCurrency.id]?.setPriceForTradingPair(ticker.price, it)
+                            }
+                        }
+                        onComplete(null)
+                    }
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(e)))
                 } catch (e: IllegalStateException) {
@@ -444,7 +453,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is recentTrades -> "v1/trades"
                 is historicalTrades -> "v1/historicalTrades"
                 is aggregatedTrades -> "v1/aggTrades"
-                is dayChangeStats -> "v3/ticker/24hr"
+                is dayChangeStats -> "v1/ticker/24hr"
                 is ticker -> "v3/ticker/price"
                 is bookTicker -> "v3/ticker/bookTicker"
 
@@ -524,7 +533,11 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     return paramList.toList()
                 }
                 is ticker -> {
-                    return listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+                    return if (tradingPair == null) {
+                        listOf()
+                    } else {
+                        listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+                    }
                 }
                 is bookTicker -> {
                     if (productId != null) {

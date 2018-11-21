@@ -41,10 +41,10 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
     private val productList: List<Product>
         get() {
             return if (onlyShowFavorites) {
-                Product.map.values.filter { it.isFavorite }
+                Product.map.values.filter { it.isFavorite }.toList().sortProducts()
             } else {
-                Product.map.values
-            }.toList().sortProducts()
+                Product.map.values.toList().alphabeticalProducts()
+            }
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -128,6 +128,10 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         //TODO: use Account's updateAllCandles
         val favoriteProducts = Product.favorites()
         val count = favoriteProducts.count()
+        AnyApi(apiInitData).updateAllTickers({ }) {
+            (listView?.adapter as ProductListViewAdapter).productList = productList
+            (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+        }
         for (product in favoriteProducts) {
             //always check multiple exchanges?
             product.defaultTradingPair?.let { tradingPair ->

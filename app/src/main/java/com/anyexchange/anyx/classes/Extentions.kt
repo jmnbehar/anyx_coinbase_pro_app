@@ -238,6 +238,10 @@ fun List<Product>.sortProducts() : List<Product> {
     return this.sortedWith(compareBy({ it.totalDefaultValueOfRelevantAccounts() * -1 }, { it.currency.orderValue }, { it.currency.id }))
 }
 
+fun List<Product>.alphabeticalProducts() : List<Product> {
+    return this.sortedWith(compareBy { it.currency.id })
+}
+
 fun List<Account>.sortAccounts() : List<Account> {
     return this.sortedWith(compareBy({ it.defaultValue * -1 }, { it.currency.orderValue }, { it.currency.id }))
 }

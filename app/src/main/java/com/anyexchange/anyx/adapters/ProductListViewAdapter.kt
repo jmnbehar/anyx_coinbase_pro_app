@@ -72,7 +72,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
             viewHolder.productIcon?.visibility = View.VISIBLE
             viewHolder.productIcon?.setImageResource(it)
         } ?: run {
-            viewHolder.productIcon?.visibility = View.GONE
+            viewHolder.productIcon?.visibility = View.INVISIBLE
         }
 
         viewHolder.productNameText?.text = product.currency.toString()
