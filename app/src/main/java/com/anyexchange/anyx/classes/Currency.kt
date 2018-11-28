@@ -107,12 +107,18 @@ class Currency(val id: String) {
 
         val USD = Currency(KnownCurrency.USD)
         val USDC = Currency(KnownCurrency.USDC)
+        val EUR = Currency(KnownCurrency.EUR)
+        val GBP = Currency(KnownCurrency.GBP)
+
         val BTC = Currency(KnownCurrency.BTC)
         val ETH = Currency(KnownCurrency.ETH)
         val BCH = Currency(KnownCurrency.BCH)
         val LTC = Currency(KnownCurrency.LTC)
 
+
         val OTHER = Currency("Other")
+
+        val validDefaultQuotes: List<Currency> = listOf(USD, EUR, GBP, BTC)
     }
 
 

@@ -46,7 +46,13 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
             (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(product.currency)
         }
 
-        listView?.adapter = ProductListViewAdapter(inflater, selectGroup)
+        val quoteCurrency = context?.let {
+            val prefs = Prefs(it)
+            prefs.defaultQuoteCurrency
+        } ?: run {
+            Account.defaultFiatCurrency
+        }
+        listView?.adapter = ProductListViewAdapter(inflater, quoteCurrency, selectGroup)
 //        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()

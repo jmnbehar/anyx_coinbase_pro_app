@@ -89,6 +89,8 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
                     nonEmptyAccounts.asSequence().sortedBy { it.balance }.lastOrNull()?.let {
                         return it.currency.relevantFiat ?: it.currency
                     }
+                } else if (fiatAccounts.size == 1) {
+                    return fiatAccounts.first().currency
                 }
                 return Currency.USD
             }

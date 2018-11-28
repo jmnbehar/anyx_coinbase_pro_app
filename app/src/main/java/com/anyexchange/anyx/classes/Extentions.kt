@@ -231,7 +231,8 @@ fun List<TradingPair>.sortTradingPairs() : List<TradingPair> {
 }
 
 fun List<Currency>.sortCurrencies() : List<Currency> {
-    return this.sortedWith(compareBy({ Product.map[it.id]?.totalDefaultValueOfRelevantAccounts() ?: 0.0 }, { it.orderValue })).reversed()
+    //TODO: consider switching this to BTC:
+    return this.sortedWith(compareBy({ Product.map[it.id]?.totalValueOfRelevantAccounts(Currency.USD) ?: 0.0 }, { it.orderValue })).reversed()
 }
 
 

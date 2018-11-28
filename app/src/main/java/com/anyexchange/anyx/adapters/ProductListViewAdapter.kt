@@ -17,7 +17,7 @@ import android.widget.TextView
  * Created by anyexchange on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: Currency, var onClick: (Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return Product.map.size
@@ -34,7 +34,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
     private val sortedProductList: List<Product>
         get() {
             val productList = Product.map.values.toList()
-            return productList.sortedWith(compareBy({ it.totalDefaultValueOfRelevantAccounts() }, { it.currency.orderValue }, { it.currency.id })).reversed()
+            return productList.sortedWith(compareBy({ it.totalValueOfRelevantAccounts(quoteCurrency) }, { it.currency.orderValue }, { it.currency.id })).reversed()
         }
 
     internal class ViewHolder {
@@ -87,13 +87,15 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
         val granularity = Candle.granularityForTimespan(timespan)
 
         if (product.isFavorite) {
-            val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+            // TODO: scale down prices for default currency if needed
+            val tradingPair = product.tradingPairs.find { it.quoteCurrency == quoteCurrency } ?: product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+
             viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
             viewHolder.lineChart?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.VISIBLE
 
-            val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
+            val percentChange = product.percentChange(timespan, quoteCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()
             viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
                 Color.GREEN
@@ -105,8 +107,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var onClick: (Produc
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.GONE
         }
-        val defaultQuoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
-        viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
+        viewHolder.priceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
 
         outputView.setOnLongClickListener {
             product.isFavorite = !product.isFavorite

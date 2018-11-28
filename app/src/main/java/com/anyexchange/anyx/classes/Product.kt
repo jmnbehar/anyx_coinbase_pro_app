@@ -116,8 +116,34 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     }
 
     fun priceForQuoteCurrency(quoteCurrency: Currency) : Double {
+        // First, check for a straight up trading pair for quote currency
         val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
-        return priceForTradingPair(tradingPair)
+        if (tradingPair != null) {
+            return priceForTradingPair(tradingPair)
+        }
+        // If the trading pair is not available, check for a relevant
+        val stablecoinTradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency.relevantStableCoin }
+        if (stablecoinTradingPair != null) {
+            return priceForTradingPair(stablecoinTradingPair)
+        }
+        // Next, check against bitcoin
+        val btcTradingPair = tradingPairs.find { it.quoteCurrency == Currency.BTC }
+        val btcPrice = Product.map[Currency.BTC.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+        if (btcTradingPair != null && btcPrice > 0) {
+            val priceInBtc = priceForTradingPair(btcTradingPair)
+            return priceInBtc * btcPrice
+        }
+
+        // Last resort, check against ether
+        val ethTradingPair = tradingPairs.find { it.quoteCurrency == Currency.ETH }
+        val ethPrice = Product.map[Currency.ETH.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+        if (ethTradingPair != null && btcPrice > 0) {
+            val priceInEth = priceForTradingPair(ethTradingPair)
+            return priceInEth * ethPrice
+        }
+
+        // If all that fails, return 0 and hang your head in shame
+        return 0.0
     }
 
     private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
@@ -207,13 +233,11 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         }
         return alertString
     }
-//
 
-
-    fun totalDefaultValueOfRelevantAccounts() : Double {
+    fun totalValueOfRelevantAccounts(quoteCurrency: Currency) : Double {
         var totalValue = 0.0
         for (accountPair in accounts) {
-            totalValue += accountPair.value.defaultValue
+            totalValue += accountPair.value.valueForQuoteCurrency(quoteCurrency)
         }
         return totalValue
     }
