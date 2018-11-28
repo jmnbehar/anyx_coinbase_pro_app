@@ -127,19 +127,23 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return priceForTradingPair(stablecoinTradingPair)
         }
         // Next, check against bitcoin
-        val btcTradingPair = tradingPairs.find { it.quoteCurrency == Currency.BTC }
-        val btcPrice = Product.map[Currency.BTC.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
-        if (btcTradingPair != null && btcPrice > 0) {
-            val priceInBtc = priceForTradingPair(btcTradingPair)
-            return priceInBtc * btcPrice
+        if (quoteCurrency != Currency.BTC) {
+            val btcTradingPair = tradingPairs.find { it.quoteCurrency == Currency.BTC }
+            val btcPrice = Product.map[Currency.BTC.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+            if (btcTradingPair != null && btcPrice > 0) {
+                val priceInBtc = priceForTradingPair(btcTradingPair)
+                return priceInBtc * btcPrice
+            }
         }
 
         // Last resort, check against ether
-        val ethTradingPair = tradingPairs.find { it.quoteCurrency == Currency.ETH }
-        val ethPrice = Product.map[Currency.ETH.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
-        if (ethTradingPair != null && btcPrice > 0) {
-            val priceInEth = priceForTradingPair(ethTradingPair)
-            return priceInEth * ethPrice
+        if (quoteCurrency != Currency.ETH) {
+            val ethTradingPair = tradingPairs.find { it.quoteCurrency == Currency.ETH }
+            val ethPrice = Product.map[Currency.ETH.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+            if (ethTradingPair != null && ethPrice > 0) {
+                val priceInEth = priceForTradingPair(ethTradingPair)
+                return priceInEth * ethPrice
+            }
         }
 
         // If all that fails, return 0 and hang your head in shame

@@ -35,7 +35,7 @@ private const val UNPAID_FEES = "unpaid_fees_"
 private const val APPROVED_API_KEYS = "approved_api_keys"
 private const val REJECTED_API_KEYS = "rejected_api_keys"
 private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
-private const val PREFERRED_FIAT = "preferred_fiat"
+private const val DEFAULT_QUOTE = "DEFAULT_QUOTE"
 private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
 
 private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
@@ -172,6 +172,13 @@ class Prefs (var context: Context) {
     var lastQuickChangeAlertTimestamp: Long
         get() = prefs.getLong(QUICK_CHANGE_ALERT_TIME, 0)
         set(value) = prefs.edit().putLong(QUICK_CHANGE_ALERT_TIME, value).apply()
+
+    var defaultQuoteCurrency: Currency
+        get() {
+            val currencyStr = prefs.getString(DEFAULT_QUOTE, Currency.USD.id) ?: Currency.USD.id
+            return Currency(currencyStr)
+        }
+        set(value) = prefs.edit().putString(DEFAULT_QUOTE, value.id).apply()
 
     var quickChangeAlertCurrencies: Set<String>
         get() = prefs.getStringSet(QUICK_CHANGE_ALERTS_ACTIVE, setOf<String>()) ?: setOf()

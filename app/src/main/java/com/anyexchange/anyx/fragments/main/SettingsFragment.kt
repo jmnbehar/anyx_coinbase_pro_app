@@ -12,6 +12,7 @@ import com.anyexchange.anyx.activities.VerifyActivity
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.spinnerAdapters.CurrencySpinnerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
@@ -45,6 +46,7 @@ class SettingsFragment : RefreshFragment() {
     private var showTradeConfirmCheckBox: CheckBox? = null
     private var showSendConfirmCheckBox: CheckBox? = null
     private var quickChangeThresholdSpinner: Spinner? = null
+    private var defaultQuoteCurrencySpinner: Spinner? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -62,10 +64,10 @@ class SettingsFragment : RefreshFragment() {
         showTradeConfirmCheckBox = rootView.cb_setting_show_trade_confirm
         showSendConfirmCheckBox = rootView.cb_setting_show_send_confirm
         quickChangeThresholdSpinner = rootView.spinner_settings_quick_change_threshold
+        defaultQuoteCurrencySpinner = rootView.spinner_settings_default_quote
 
         showDarkMode(rootView)
 
-        val prefs = Prefs(activity!!)
 
         logoutButton?.setOnClickListener  {
             logOut()
@@ -117,27 +119,42 @@ class SettingsFragment : RefreshFragment() {
             anyxEulaButton?.visibility = View.GONE
         }
 
-        context?.let {
-            val tempThreshold = prefs.quickChangeThreshold
-            quickChangeThresholdSpinner?.visibility = View.VISIBLE
-            val floatList = listOf(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
-            val arrayAdapter = FloatSpinnerAdapter(it, floatList)
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            quickChangeThresholdSpinner?.adapter = arrayAdapter
-            quickChangeThresholdSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    prefs.quickChangeThreshold = floatList[position]
-                }
+        val context = context!!
+        val prefs = Prefs(context)
 
-                override fun onNothingSelected(parent: AdapterView<*>) {}
+        val tempThreshold = prefs.quickChangeThreshold
+        quickChangeThresholdSpinner?.visibility = View.VISIBLE
+        val floatList = listOf(1.0f, 2.0f, 3.0f, 4.0f, 5.0f)
+        val arrayAdapter = FloatSpinnerAdapter(context, floatList)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        quickChangeThresholdSpinner?.adapter = arrayAdapter
+        quickChangeThresholdSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                prefs.quickChangeThreshold = floatList[position]
             }
-            val index = floatList.indexOf(tempThreshold)
-            if (index != -1) {
-                quickChangeThresholdSpinner?.setSelection(index)
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+        val quickChangeThresholdIndex = floatList.indexOf(tempThreshold)
+        if (quickChangeThresholdIndex != -1) {
+            quickChangeThresholdSpinner?.setSelection(quickChangeThresholdIndex)
+        }
+
+
+        val tempDefaultQuote = prefs.defaultQuoteCurrency
+        val defaultQuoteList = Currency.validDefaultQuotes
+        defaultQuoteCurrencySpinner?.visibility = View.VISIBLE
+        val currencyAdapter = CurrencySpinnerAdapter(context, defaultQuoteList)
+        defaultQuoteCurrencySpinner?.adapter = currencyAdapter
+        defaultQuoteCurrencySpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                prefs.defaultQuoteCurrency = defaultQuoteList[position]
             }
-            quickChangeThresholdSpinner?.visibility = View.VISIBLE
-        } ?: run {
-            quickChangeThresholdSpinner?.visibility = View.GONE
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+        val defaultQuoteIndex = defaultQuoteList.indexOf(tempDefaultQuote)
+        if (defaultQuoteIndex != -1) {
+            defaultQuoteCurrencySpinner?.setSelection(defaultQuoteIndex)
         }
 
         showTradeConfirmCheckBox?.isChecked = prefs.shouldShowTradeConfirmModal
