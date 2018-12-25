@@ -201,16 +201,8 @@ class TransferFragment : RefreshFragment() {
                 toast(R.string.toast_coinbase_site_error)
                 isRefreshing = false
                 onComplete(false)
-            }, { cryptoCoinbaseAccounts ->
-                val fiatCoinbaseAccount = Account.defaultFiatAccount?.coinbaseAccount
-
-                var allCoinbaseAccounts = cryptoCoinbaseAccounts
-                Account.defaultFiatAccount?.coinbaseAccount?.let {
-                    allCoinbaseAccounts = allCoinbaseAccounts.plus(it)
-                }
-                if (fiatCoinbaseAccount != null) {
-                    allCoinbaseAccounts = coinbaseAccounts.plus(fiatCoinbaseAccount)
-                }
+            }, { allCoinbaseAccounts ->
+                coinbaseAccounts = allCoinbaseAccounts
                 didUpdateCoinbase = true
                 if (didUpdateCBPro && didUpdatePaymentMethods) {
                     completeRefresh(onComplete)
