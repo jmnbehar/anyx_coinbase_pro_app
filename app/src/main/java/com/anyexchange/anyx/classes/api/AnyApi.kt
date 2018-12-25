@@ -84,11 +84,13 @@ class AnyApi(val apiInitData: ApiInitData?) {
             }
         }
 
-        //Binance:
-        BinanceApi.ticker(apiInitData, null).get(onFailure) {
-            hasBinanceCompleted = true
-            if (hasCbProCompleted) {
-                onSuccess()
+        if (isAnyXProActive) {
+            //Binance:
+            BinanceApi.ticker(apiInitData, null).get(onFailure) {
+                hasBinanceCompleted = true
+                if (hasCbProCompleted) {
+                    onSuccess()
+                }
             }
         }
     }
@@ -179,12 +181,14 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 onSuccess()
             }
         }
-        BinanceApi.exchangeInfo(apiInitData).getProducts(onFailure) {
-            if (cbProProducts.isEmpty()) {
-                binanceProducts = it
-            } else {
-                compileAllProducts(cbProProducts, it)
-                onSuccess()
+        if (isAnyXProActive) {
+            BinanceApi.exchangeInfo(apiInitData).getProducts(onFailure) {
+                if (cbProProducts.isEmpty()) {
+                    binanceProducts = it
+                } else {
+                    compileAllProducts(cbProProducts, it)
+                    onSuccess()
+                }
             }
         }
     }
@@ -196,8 +200,11 @@ class AnyApi(val apiInitData: ApiInitData?) {
             if (CBProApi.credentials != null) {
                 CBProApi.accounts(apiInitData).getAllAccountInfo(onFailure, onSuccess)
             }
-            if (BinanceApi.credentials != null) {
-                BinanceApi.accounts(apiInitData).getAndLink(onFailure, onSuccess)
+
+            if (isAnyXProActive) {
+                if (BinanceApi.credentials != null) {
+                    BinanceApi.accounts(apiInitData).getAndLink(onFailure, onSuccess)
+                }
             }
         }
     }
@@ -225,4 +232,14 @@ class AnyApi(val apiInitData: ApiInitData?) {
             }
         }
     }
+
+    private val isAnyXProActive: Boolean
+        get() {
+            apiInitData?.context?.let {
+                val prefs = Prefs(it)
+                return prefs.isAnyXProActive
+            } ?: run {
+                return false
+            }
+        }
 }

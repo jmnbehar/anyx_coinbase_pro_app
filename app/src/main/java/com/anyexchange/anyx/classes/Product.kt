@@ -45,10 +45,13 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             return defaultFiatPair ?: tradingPairs.firstOrNull()
         }
 
+    private val defaultFavorites: List<Currency>
+        get() = listOf(Currency.BTC, Currency.ETH, Currency.LTC, Currency.BCH)
+
     private var isFavoriteBackingBool: Boolean? = null
     var isFavorite: Boolean
         get() {
-            return isFavoriteBackingBool ?: (totalDefaultValueOfRelevantAccounts() > 0 || accounts[Exchange.CBPro] != null || tradingPairs.any { it.exchange == Exchange.CBPro })
+            return isFavoriteBackingBool ?: (totalDefaultValueOfRelevantAccounts() > 0 || defaultFavorites.contains(currency))
         }
         set(value) {
             isFavoriteBackingBool = value

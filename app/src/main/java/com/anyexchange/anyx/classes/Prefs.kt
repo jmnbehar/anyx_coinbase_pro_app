@@ -181,6 +181,12 @@ class Prefs (var context: Context) {
         get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
         set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, value).apply()
 
+    // someday this will actually work
+    val isAnyXProActive: Boolean
+        get() = false
+//        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
+//        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
+
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
         if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {
