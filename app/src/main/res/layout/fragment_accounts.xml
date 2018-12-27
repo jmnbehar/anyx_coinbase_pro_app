@@ -67,7 +67,7 @@
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:paddingLeft="8dp"
-                    android:text="20%"
+                    android:text=""
                     android:textAlignment="center" />
 
             </LinearLayout>

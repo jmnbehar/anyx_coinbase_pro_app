@@ -76,7 +76,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
                     completedProducts++
                     if (completedProducts >= cbProProducts.size) {
                         hasCbProCompleted = true
-                        if (hasBinanceCompleted) {
+                        if (hasBinanceCompleted || !isAnyXProActive) {
                             onSuccess()
                         }
                     }

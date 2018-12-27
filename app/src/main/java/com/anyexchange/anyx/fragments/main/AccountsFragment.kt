@@ -130,7 +130,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onResume() {
         super.onResume()
-        refresh { endRefresh() }
+        setValueAndPercentChangeTexts()
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
@@ -240,18 +240,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        val context = context
-        if (context != null && Prefs(context).isLoggedIn) {
-            CBProApi.accounts(apiInitData).updateAllAccounts({ onComplete(false) }) {
-                refreshComplete()
-                onComplete(true)
-            }
-        } else {
-            onComplete(true)
-        }
+        HomeFragment.refresh(2, onComplete)
     }
 
-    fun refreshComplete() {
+    fun completeRefresh() {
         (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
         accountList?.setHeightBasedOnChildren()
 

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.classes.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
@@ -28,7 +27,9 @@ class HomeFragment : RefreshFragment() {
         {
             return HomeFragment()
         }
+
         var viewPager: LockableViewPager? = null
+        var refresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -49,7 +50,11 @@ class HomeFragment : RefreshFragment() {
             homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
             viewPager?.adapter = homePagerAdapter
 
-            homePagerAdapter?.marketFragment?.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.refreshComplete() }
+            MarketFragment.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.completeRefresh() }
+            MarketFragment.updateFavoritesFragment = { homePagerAdapter?.favoritesFragment?.completeRefresh() }
+
+            Companion.refresh = { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
+
             viewPager?.setCurrentItem(1)
         }
 
@@ -57,45 +62,49 @@ class HomeFragment : RefreshFragment() {
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        skipNextRefresh = true
+        /// after completing the first page run the other 2, only hide the spinner once all 3 are completed
+        val currentPage = viewPager?.currentItem ?: 1
 
+        refresh(currentPage, onComplete)
+    }
+
+    fun refresh(currentPageIndex: Int, onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
             toast("Error: ${result.errorMessage}")
             onComplete(false)
         }
 
-        ///TODO: run all 3 sub-refreshes, preferably run the active page's first
-        /// after completing the first page run the other 2, only hide the spinner once all 3 are completed
-        val currentPage = viewPager?.currentItem ?: 1
-
-        when (currentPage) {
-            0 -> marketRefresh(onFailure, onComplete)
-            1 -> favoritesRefresh(onFailure, onComplete)
-            2 -> accountsRefresh(onFailure, onComplete)
-        }
-        when (currentPage) {
+        when (currentPageIndex) {
             0 -> {
-                favoritesRefresh({ }, { })
-                accountsRefresh({ }, { })
+                marketRefresh(onFailure, {
+                    favoritesRefresh({ }, { })
+                    accountsRefresh({ }, { })
+                    onComplete(it)
+                })
             }
             1 -> {
-                marketRefresh({ }, { })
-                accountsRefresh({ }, { })
+                favoritesRefresh(onFailure, {
+                    marketRefresh({ }, { })
+                    accountsRefresh({ }, { })
+                    onComplete(it)
+                })
             }
             2 -> {
-                favoritesRefresh({ }, { })
-                marketRefresh({ }, { })
+                accountsRefresh(onFailure, {
+                    marketRefresh({ }, { })
+                    favoritesRefresh({ }, { })
+                    onComplete(it)
+                })
             }
         }
-
-        super.refresh(onComplete)
-
     }
+
 
     private fun marketRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
         AnyApi(apiInitData).updateAllTickers(onFailure) {
             //Complete Market Refresh
-            homePagerAdapter?.marketFragment?.refresh(onComplete)
+            homePagerAdapter?.marketFragment?.completeRefresh()
+            onComplete(true)
         }
     }
 
@@ -104,7 +113,8 @@ class HomeFragment : RefreshFragment() {
         if (context != null && Prefs(context).isLoggedIn) {
             CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
                 //Complete accounts refresh
-                homePagerAdapter?.accountsFragment?.refresh(onComplete)
+                homePagerAdapter?.accountsFragment?.completeRefresh()
+                onComplete(true)
             }
         } else {
             onComplete(true)
@@ -130,7 +140,7 @@ class HomeFragment : RefreshFragment() {
                                     Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
                                 //update Favorites Tab
-                                homePagerAdapter?.favoritesFragment?.refresh(onComplete)
+                                homePagerAdapter?.favoritesFragment?.completeRefresh()
                                 onComplete(true)
                             }
                         } else {
@@ -138,7 +148,7 @@ class HomeFragment : RefreshFragment() {
                                 productsUpdated++
                                 if (productsUpdated == count) {
                                     //update Favorites Tab
-                                    homePagerAdapter?.favoritesFragment?.refresh(onComplete)
+                                    homePagerAdapter?.favoritesFragment?.completeRefresh()
                                     onComplete(true)
                                 }
                             }
@@ -151,6 +161,23 @@ class HomeFragment : RefreshFragment() {
         }
     }
 
+    override fun onResume() {
+        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
+        swipeRefreshLayout?.isRefreshing = true
+
+        super.onResume()
+
+        autoRefresh = Runnable {
+            if (!skipNextRefresh) {
+                refresh {}
+            }
+            skipNextRefresh = false
+            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+        }
+        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+
+        refresh { endRefresh() }
+    }
 
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)
