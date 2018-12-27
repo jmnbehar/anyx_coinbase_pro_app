@@ -21,20 +21,18 @@ import kotlinx.android.synthetic.main.fragment_market.view.*
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class MarketFragment : RefreshFragment(), LifecycleOwner {
+open class MarketFragment : RefreshFragment(), LifecycleOwner {
     private var listView: ListView? = null
 
     lateinit var inflater: LayoutInflater
 
-    private var onlyShowFavorites = false
+    open val onlyShowFavorites = false
     var updateAccountsFragment = { }
 
     companion object {
-        fun newInstance(onlyShowFavorites: Boolean): MarketFragment
+        fun newInstance(): MarketFragment
         {
-            val newMarketFragment = MarketFragment()
-            newMarketFragment.onlyShowFavorites = onlyShowFavorites
-            return newMarketFragment
+            return MarketFragment()
         }
     }
 

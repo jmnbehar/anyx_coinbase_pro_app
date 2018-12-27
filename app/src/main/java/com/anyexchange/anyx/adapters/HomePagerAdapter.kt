@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.RefreshFragment
 import com.anyexchange.anyx.fragments.main.AccountsFragment
+import com.anyexchange.anyx.fragments.main.FavoritesFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
 
 
@@ -19,8 +20,8 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
-    val marketFragment = MarketFragment.newInstance(false)
-    val favoritesFragment = MarketFragment.newInstance(true)
+    val marketFragment = MarketFragment.newInstance()
+    val favoritesFragment = FavoritesFragment.newInstance()
     val accountsFragment = AccountsFragment()
 
     override fun getItem(i: Int): Fragment {
