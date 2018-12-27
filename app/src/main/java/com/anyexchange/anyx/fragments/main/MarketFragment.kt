@@ -121,7 +121,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
         skipNextRefresh = true
 
         //TODO: move this entire refresh block up to a homeFragment level refresh that properly refreshes everything in homeFragment
-        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error: ${result.errorMessage}") }
         //TODO: check in about refreshing product list
         //TODO: use Account's updateAllCandles
         val favoriteProducts = Product.favorites()

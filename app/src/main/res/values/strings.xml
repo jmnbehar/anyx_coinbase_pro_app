@@ -220,8 +220,8 @@
     <string name="send_destination_label">Destination (%s address)</string>
     <string name="send_amount_label">Amount</string>
     <string name="send_camera_btn">Camera Button</string>
-    <string name="send_amount_error">Error! Trying to send less than minimum which is %s</string>
-    <string name="send_invalid_destination_error">Error! Invalid %s address</string>
+    <string name="send_amount_error">Error: Trying to send less than minimum which is %s</string>
+    <string name="send_invalid_destination_error">Error: Invalid %s address</string>
 
     <string name="send_enter_amount_warning">Please enter amount to send</string>
     <string name="send_address_not_found_warning">Address not found</string>

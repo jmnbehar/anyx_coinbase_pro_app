@@ -50,9 +50,8 @@ class HomeFragment : RefreshFragment() {
             viewPager?.adapter = homePagerAdapter
 
             homePagerAdapter?.marketFragment?.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.refreshComplete() }
+            viewPager?.setCurrentItem(1)
         }
-
-
 
         return rootView
     }
@@ -61,35 +60,57 @@ class HomeFragment : RefreshFragment() {
         skipNextRefresh = true
 
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
-            toast("Error!: ${result.errorMessage}")
+            toast("Error: ${result.errorMessage}")
             onComplete(false)
         }
 
         ///TODO: run all 3 sub-refreshes, preferably run the active page's first
         /// after completing the first page run the other 2, only hide the spinner once all 3 are completed
+        val currentPage = viewPager?.currentItem ?: 1
+
+        when (currentPage) {
+            0 -> marketRefresh(onFailure, onComplete)
+            1 -> favoritesRefresh(onFailure, onComplete)
+            2 -> accountsRefresh(onFailure, onComplete)
+        }
+        when (currentPage) {
+            0 -> {
+                favoritesRefresh({ }, { })
+                accountsRefresh({ }, { })
+            }
+            1 -> {
+                marketRefresh({ }, { })
+                accountsRefresh({ }, { })
+            }
+            2 -> {
+                favoritesRefresh({ }, { })
+                marketRefresh({ }, { })
+            }
+        }
 
         super.refresh(onComplete)
 
     }
 
-    fun marketRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
+    private fun marketRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
         AnyApi(apiInitData).updateAllTickers(onFailure) {
             //Complete Market Refresh
+            homePagerAdapter?.marketFragment?.refresh(onComplete)
         }
     }
 
-    fun accountsRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
+    private fun accountsRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
             CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
                 //Complete accounts refresh
+                homePagerAdapter?.accountsFragment?.refresh(onComplete)
             }
         } else {
             onComplete(true)
         }
     }
-    fun favoritesRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
-        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result -> toast("Error!: ${result.errorMessage}") }
+    private fun favoritesRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
         var productsUpdated = 0
         val time = Timespan.DAY
         val favoriteProducts = Product.favorites()
@@ -109,6 +130,7 @@ class HomeFragment : RefreshFragment() {
                                     Prefs(it).stashedProducts = Product.map.values.toList()
                                 }
                                 //update Favorites Tab
+                                homePagerAdapter?.favoritesFragment?.refresh(onComplete)
                                 onComplete(true)
                             }
                         } else {
@@ -116,6 +138,7 @@ class HomeFragment : RefreshFragment() {
                                 productsUpdated++
                                 if (productsUpdated == count) {
                                     //update Favorites Tab
+                                    homePagerAdapter?.favoritesFragment?.refresh(onComplete)
                                     onComplete(true)
                                 }
                             }
