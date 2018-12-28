@@ -38,10 +38,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
 
+    var homeRefresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
+
     companion object {
-        fun newInstance(): AccountsFragment {
-            return AccountsFragment()
-        }
+
         val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
 
     }
@@ -240,7 +240,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        HomeFragment.refresh(2, onComplete)
+        homeRefresh(2, onComplete)
     }
 
     fun completeRefresh() {

@@ -29,7 +29,6 @@ class HomeFragment : RefreshFragment() {
         }
 
         var viewPager: LockableViewPager? = null
-        var refresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -48,12 +47,12 @@ class HomeFragment : RefreshFragment() {
             }
 
             homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
-            viewPager?.adapter = homePagerAdapter
-
-            MarketFragment.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.completeRefresh() }
+            homePagerAdapter!!.marketFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
+            homePagerAdapter!!.accountsFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
             MarketFragment.updateFavoritesFragment = { homePagerAdapter?.favoritesFragment?.completeRefresh() }
 
-            Companion.refresh = { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
+            viewPager!!.adapter = homePagerAdapter
+
 
             viewPager?.setCurrentItem(1)
         }
@@ -162,10 +161,11 @@ class HomeFragment : RefreshFragment() {
     }
 
     override fun onResume() {
-        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
-        swipeRefreshLayout?.isRefreshing = true
 
         super.onResume()
+
+        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
+        swipeRefreshLayout?.isRefreshing = true
 
         autoRefresh = Runnable {
             if (!skipNextRefresh) {

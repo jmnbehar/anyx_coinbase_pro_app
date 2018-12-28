@@ -19,21 +19,14 @@ import kotlinx.android.synthetic.main.fragment_market.view.*
  * Created by anyexchange on 11/5/2017.
  */
 open class MarketFragment : RefreshFragment(), LifecycleOwner {
-    private var listView: ListView? = null
-
+    var listView: ListView? = null
     lateinit var inflater: LayoutInflater
-
     open val onlyShowFavorites = false
 
+    var homeRefresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
 
     companion object {
-        var updateAccountsFragment = { }
         var updateFavoritesFragment = { }
-
-        fun newInstance(): MarketFragment
-        {
-            return MarketFragment()
-        }
     }
 
     private val productList: List<Product>
@@ -67,43 +60,58 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun setIsFavorite(view: View, product: Product) {
-        val popup = PopupMenu(activity, view)
-        //Inflating the Popup using xml file
-        popup.menuInflater.inflate(R.menu.product_popup_menu, popup.menu)
-        popup.menu.findItem(R.id.setFavorite).isVisible = !product.isFavorite
-        popup.menu.findItem(R.id.removeFavorite).isVisible = product.isFavorite
+        context?.let {
+            val popup = PopupMenu(it, view)
+            //Inflating the Popup using xml file
+            popup.menuInflater.inflate(R.menu.product_popup_menu, popup.menu)
+            popup.menu.findItem(R.id.setFavorite).isVisible = !product.isFavorite
+            popup.menu.findItem(R.id.removeFavorite).isVisible = product.isFavorite
 
-        popup.setOnMenuItemClickListener { item: MenuItem? ->
-            when (item?.itemId) {
-                R.id.setFavorite -> {
-                    product.isFavorite = true
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                when (item?.itemId) {
+                    R.id.setFavorite -> {
+                        product.isFavorite = true
+                    }
+                    R.id.removeFavorite -> {
+                        product.isFavorite = false
+                    }
                 }
-                R.id.removeFavorite -> {
-                    product.isFavorite = false
-                }
-            }
-            if (onlyShowFavorites) {
-                (listView?.adapter as ProductListViewAdapter).productList = productList
-                (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
-            } else {
-                updateFavoritesFragment()
+                if (onlyShowFavorites) {
+                    completeRefresh()
+                } else {
+                    updateFavoritesFragment()
 
+                }
+                true
             }
-            true
+            popup.show()
         }
-        popup.show()
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
         if (onlyShowFavorites) {
-            HomeFragment.refresh(1, onComplete)
+            homeRefresh(1, onComplete)
         } else {
-            HomeFragment.refresh(0, onComplete)
+            homeRefresh(0, onComplete)
         }
     }
 
     fun completeRefresh() {
-        (listView?.adapter as ProductListViewAdapter).productList = productList
-        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+        (listView?.adapter as? ProductListViewAdapter)?.productList = productList
+//        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+
+        (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
+        listView?.invalidateViews()
+        listView?.refreshDrawableState()
+
+        listView?.visibility = View.GONE
+
+//        val run = Runnable {
+//            //reload content
+//            (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
+//            listView?.invalidateViews()
+//            listView?.refreshDrawableState()
+//        }
+//        activity?.runOnUiThread(run)
     }
 }
