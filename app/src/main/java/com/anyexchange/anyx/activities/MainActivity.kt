@@ -413,7 +413,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> ChartFragment()
-            FragmentType.ACCOUNT -> AccountsFragment.newInstance()
+            FragmentType.ACCOUNT -> AccountsFragment()
             FragmentType.SEND, FragmentType.RECEIVE, FragmentType.SEND_RECEIVE -> {
 
                 if (!prefs.isLoggedIn) {

@@ -52,7 +52,7 @@ class AnyApi {
             when (tradingPair.exchange) {
                 Exchange.CBPro -> {
                     CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {
-                        onSuccess(it.price.toDoubleOrNull())
+                        onSuccess(it.price?.toDoubleOrNull())
                     }
                 }
                 Exchange.Binance -> {

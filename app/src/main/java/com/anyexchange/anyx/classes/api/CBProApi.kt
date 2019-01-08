@@ -314,7 +314,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) { result ->
                 try {
                     val ticker: CBProTicker = Gson().fromJson(result.value, object : TypeToken<CBProTicker>() {}.type)
-                    val price = ticker.price.toDoubleOrNull()
+                    val price = ticker.price?.toDoubleOrNull()
                     if (price != null) {
                         val product = Product.map[tradingPair.baseCurrency.id]
                         product?.setPriceForTradingPair(price, tradingPair)
