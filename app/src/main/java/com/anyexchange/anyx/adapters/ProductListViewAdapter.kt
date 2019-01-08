@@ -34,7 +34,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
     private val sortedProductList: List<Product>
         get() {
             val productList = Product.map.values.toList()
-            return productList.sortedWith(compareBy({ it.totalValueOfRelevantAccounts(quoteCurrency) }, { it.currency.orderValue }, { it.currency.id })).reversed()
+            return productList.sortedWith(compareBy({ 0 - it.totalValueOfRelevantAccounts(quoteCurrency) }, { 0 - it.currency.orderValue }, { it.currency.id }))
         }
 
     internal class ViewHolder {
