@@ -53,7 +53,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
         when (tradingPair.exchange) {
             Exchange.CBPro -> {
                 CBProApi.ticker(apiInitData, tradingPair).get(onFailure) {
-                    onSuccess(it.price.toDoubleOrNull())
+                    onSuccess(it.price?.toDoubleOrNull())
                 }
             }
             Exchange.Binance -> {
@@ -174,7 +174,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
         var binanceProducts = listOf<BinanceSymbol>()
         var cbProProducts = listOf<CBProProduct>()
         CBProApi.products(apiInitData).get(onFailure) {
-            if (binanceProducts.isEmpty()) {
+            if (binanceProducts.isEmpty() && isAnyXProActive) {
                 cbProProducts = it
             } else {
                 compileAllProducts(it, binanceProducts)

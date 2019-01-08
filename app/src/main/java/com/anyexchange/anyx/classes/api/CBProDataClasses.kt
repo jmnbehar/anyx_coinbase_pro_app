@@ -55,10 +55,10 @@ data class CBProFill(
 
 data class CBProTicker(
         val trade_id: Int,
-        val price: String,
-        val size: String,
+        val price: String?,
+        val size: String?,
         val volume: String,
-        val time: String)
+        val time: String?)
 
 data class CBProTime(
         val iso: String,
