@@ -80,7 +80,6 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                     completeRefresh()
                 } else {
                     updateFavoritesFragment()
-
                 }
                 true
             }
@@ -103,8 +102,6 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
         (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
         listView?.invalidateViews()
         listView?.refreshDrawableState()
-
-        listView?.visibility = View.GONE
 
 //        val run = Runnable {
 //            //reload content

@@ -48,7 +48,9 @@ class HomeFragment : RefreshFragment() {
 
             homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
             homePagerAdapter!!.marketFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
+            homePagerAdapter!!.favoritesFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
             homePagerAdapter!!.accountsFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
+
             MarketFragment.updateFavoritesFragment = { homePagerAdapter?.favoritesFragment?.completeRefresh() }
 
             viewPager!!.adapter = homePagerAdapter
