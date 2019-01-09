@@ -34,7 +34,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
     private val sortedProductList: List<Product>
         get() {
             val productList = Product.map.values.toList()
-            return productList.sortedWith(compareBy({ 0 - it.totalValueOfRelevantAccounts(quoteCurrency) }, { 0 - it.currency.orderValue }, { it.currency.id }))
+            return productList.sortedWith(compareBy({ 0 - it.totalValueOfRelevantAccounts(quoteCurrency) }, { it.defaultPrice == 0.0 }, { 0 - it.currency.orderValue }, { it.currency.id }))
         }
 
     internal class ViewHolder {
@@ -86,7 +86,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
 
         val granularity = Candle.granularityForTimespan(timespan)
 
-        if (product.isFavorite) {
+        if (product.defaultPrice > 0) {
             // TODO: scale down prices for default currency if needed
             val tradingPair = product.tradingPairs.find { it.quoteCurrency == quoteCurrency } ?: product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
 
