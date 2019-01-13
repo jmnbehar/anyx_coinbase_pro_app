@@ -13,7 +13,11 @@ import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.classes.api.AnyApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_market.view.*
+import java.util.*
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -22,8 +26,6 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     var listView: ListView? = null
     lateinit var inflater: LayoutInflater
     open val onlyShowFavorites = false
-
-    var homeRefresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
 
     companion object {
         var updateFavoritesFragment = { }
@@ -79,7 +81,8 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                 if (onlyShowFavorites) {
                     completeRefresh()
                 } else {
-                    updateFavoritesFragment()
+//                    updateFavoritesFragment()
+                    listener?.favoritesUpdated()
                 }
                 true
             }
@@ -88,10 +91,55 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
+            toast("Error: ${result.errorMessage}")
+            onComplete(false)
+        }
         if (onlyShowFavorites) {
-            homeRefresh(1, onComplete)
+            var productsUpdated = 0
+            val time = Timespan.DAY
+            val favoriteProducts = Product.favorites()
+            val count = favoriteProducts.count()
+            for (product in favoriteProducts) {
+                //always check multiple exchanges?
+                product.defaultTradingPair?.let { tradingPair ->
+                    product.updateCandles(time, tradingPair, apiInitData, {
+                        //OnFailure
+                    }) { didUpdate ->
+                        //OnSuccess
+                        if (lifecycle.isCreatedOrResumed) {
+                            if (didUpdate) {
+                                productsUpdated++
+                                if (productsUpdated == count) {
+                                    context?.let {
+                                        Prefs(it).stashedProducts = Product.map.values.toList()
+                                    }
+                                    //update Favorites Tab
+                                    completeRefresh()
+                                    onComplete(true)
+                                }
+                            } else {
+                                AnyApi(apiInitData).ticker(tradingPair, onFailure) {
+                                    productsUpdated++
+                                    if (productsUpdated == count) {
+                                        //update Favorites Tab
+                                        completeRefresh()
+                                        onComplete(true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } ?: run {
+                    onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
         } else {
-            homeRefresh(0, onComplete)
+            AnyApi(apiInitData).updateAllTickers(onFailure) {
+                //Complete Market Refresh
+                completeRefresh()
+                onComplete(true)
+            }
         }
     }
 
@@ -111,4 +159,16 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
 //        }
 //        activity?.runOnUiThread(run)
     }
+
+
+    var listener: FavoritesUpdateListener? = null
+
+    interface FavoritesUpdateListener {
+        fun favoritesUpdated()
+    }
+
+    fun setFavoritesListener(listener: FavoritesUpdateListener) {
+        this.listener = listener
+    }
+
 }

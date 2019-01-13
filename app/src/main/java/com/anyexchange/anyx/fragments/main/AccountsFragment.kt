@@ -17,9 +17,13 @@ import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
+import java.util.*
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -37,8 +41,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
-
-    var homeRefresh: (pageIndex: Int, onComplete: (Boolean) -> Unit) -> Unit = { _, _ ->  }
 
     companion object {
 
@@ -240,7 +242,20 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        homeRefresh(2, onComplete)
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
+            toast("Error: ${result.errorMessage}")
+            onComplete(false)
+        }
+        val context = context
+        if (context != null && Prefs(context).isLoggedIn) {
+            CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
+                //Complete accounts refresh
+                completeRefresh()
+                onComplete(true)
+            }
+        } else {
+            onComplete(true)
+        }
     }
 
     fun completeRefresh() {

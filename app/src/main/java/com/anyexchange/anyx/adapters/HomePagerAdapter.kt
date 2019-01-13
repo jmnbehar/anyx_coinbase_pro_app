@@ -10,6 +10,7 @@ import com.anyexchange.anyx.classes.RefreshFragment
 import com.anyexchange.anyx.fragments.main.AccountsFragment
 import com.anyexchange.anyx.fragments.main.FavoritesFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
+import java.util.*
 
 
 /**
@@ -19,10 +20,18 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 // Since this is an object collection, use a FragmentStatePagerAdapter,
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    private val marketFragment = MarketFragment()
+    private val favoritesFragment = FavoritesFragment()
+    private val accountsFragment = AccountsFragment()
 
-    val marketFragment = MarketFragment()
-    val favoritesFragment = FavoritesFragment()
-    val accountsFragment = AccountsFragment()
+    init {
+        marketFragment.setFavoritesListener(object : MarketFragment.FavoritesUpdateListener {
+            override fun favoritesUpdated() {
+                favoritesFragment.completeRefresh()
+            }
+        })
+    }
+
 
     override fun getItem(i: Int): Fragment {
         val args = Bundle()

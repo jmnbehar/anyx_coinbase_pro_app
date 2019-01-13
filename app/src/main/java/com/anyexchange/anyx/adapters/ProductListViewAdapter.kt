@@ -107,7 +107,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
 
         outputView.setOnLongClickListener {
             onLongPress(it, product)
-            product.isFavorite = !product.isFavorite
             notifyDataSetChanged()
             true
         }

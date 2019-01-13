@@ -47,11 +47,6 @@ class HomeFragment : RefreshFragment() {
             }
 
             homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
-            homePagerAdapter!!.marketFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
-            homePagerAdapter!!.favoritesFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
-            homePagerAdapter!!.accountsFragment.homeRefresh =  { pageIndex, onComplete ->  refresh(pageIndex, onComplete) }
-
-            MarketFragment.updateFavoritesFragment = { homePagerAdapter?.favoritesFragment?.completeRefresh() }
 
             viewPager!!.adapter = homePagerAdapter
 
@@ -63,103 +58,6 @@ class HomeFragment : RefreshFragment() {
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        /// after completing the first page run the other 2, only hide the spinner once all 3 are completed
-        val currentPage = viewPager?.currentItem ?: 1
-
-        refresh(currentPage, onComplete)
-    }
-
-    fun refresh(currentPageIndex: Int, onComplete: (Boolean) -> Unit) {
-        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
-            toast("Error: ${result.errorMessage}")
-            onComplete(false)
-        }
-
-        when (currentPageIndex) {
-            0 -> {
-                marketRefresh(onFailure, {
-                    favoritesRefresh({ }, { })
-                    accountsRefresh({ }, { })
-                    onComplete(it)
-                })
-            }
-            1 -> {
-                favoritesRefresh(onFailure, {
-                    marketRefresh({ }, { })
-                    accountsRefresh({ }, { })
-                    onComplete(it)
-                })
-            }
-            2 -> {
-                accountsRefresh(onFailure, {
-                    marketRefresh({ }, { })
-                    favoritesRefresh({ }, { })
-                    onComplete(it)
-                })
-            }
-        }
-    }
-
-
-    private fun marketRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
-        AnyApi(apiInitData).updateAllTickers(onFailure) {
-            //Complete Market Refresh
-            homePagerAdapter?.marketFragment?.completeRefresh()
-            onComplete(true)
-        }
-    }
-
-    private fun accountsRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
-        val context = context
-        if (context != null && Prefs(context).isLoggedIn) {
-            CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
-                //Complete accounts refresh
-                homePagerAdapter?.accountsFragment?.completeRefresh()
-                onComplete(true)
-            }
-        } else {
-            onComplete(true)
-        }
-    }
-    private fun favoritesRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (Boolean) -> Unit) {
-        var productsUpdated = 0
-        val time = Timespan.DAY
-        val favoriteProducts = Product.favorites()
-        val count = favoriteProducts.count()
-        for (product in favoriteProducts) {
-            //always check multiple exchanges?
-            product.defaultTradingPair?.let { tradingPair ->
-                product.updateCandles(time, tradingPair, apiInitData, {
-                    //OnFailure
-                }) { didUpdate ->
-                    //OnSuccess
-                    if (lifecycle.isCreatedOrResumed) {
-                        if (didUpdate) {
-                            productsUpdated++
-                            if (productsUpdated == count) {
-                                context?.let {
-                                    Prefs(it).stashedProducts = Product.map.values.toList()
-                                }
-                                //update Favorites Tab
-                                homePagerAdapter?.favoritesFragment?.completeRefresh()
-                                onComplete(true)
-                            }
-                        } else {
-                            AnyApi(apiInitData).ticker(tradingPair, onFailure) {
-                                productsUpdated++
-                                if (productsUpdated == count) {
-                                    //update Favorites Tab
-                                    homePagerAdapter?.favoritesFragment?.completeRefresh()
-                                    onComplete(true)
-                                }
-                            }
-                        }
-                    }
-                }
-            } ?: run {
-                onFailure(Result.Failure(FuelError(Exception())))
-            }
-        }
     }
 
     override fun onResume() {
