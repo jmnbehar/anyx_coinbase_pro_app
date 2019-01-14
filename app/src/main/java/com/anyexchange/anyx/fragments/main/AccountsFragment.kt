@@ -23,7 +23,6 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
-import java.util.*
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -128,11 +127,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             dialogFragment.dismiss()
         }
         dialogFragment.showNow(fragmentManager, "stablecoinConversionDialog")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setValueAndPercentChangeTexts()
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
@@ -242,14 +236,21 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        refresh(true, onComplete)
+    }
+    fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
             toast("Error: ${result.errorMessage}")
             onComplete(false)
         }
+        swipeRefreshLayout?.isRefreshing = true
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
             CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
                 //Complete accounts refresh
+                if (fullRefresh) {
+                    refreshCompleteListener?.refreshComplete()
+                }
                 completeRefresh()
                 onComplete(true)
             }
@@ -258,7 +259,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         }
     }
 
-    fun completeRefresh() {
+    private fun completeRefresh() {
+        endRefresh()
         (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
         accountList?.setHeightBasedOnChildren()
 
@@ -274,4 +276,19 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart?.addCandles(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair)
         }
     }
+
+    private var refreshCompleteListener: MarketFragment.RefreshCompleteListener? = null
+
+    fun setRefreshListener(listener: MarketFragment.RefreshCompleteListener) {
+        this.refreshCompleteListener = listener
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        setValueAndPercentChangeTexts()
+
+        refresh(false) { endRefresh() }
+    }
+
 }

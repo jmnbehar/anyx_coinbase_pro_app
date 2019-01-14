@@ -57,30 +57,11 @@ class HomeFragment : RefreshFragment() {
         return rootView
     }
 
-    override fun refresh(onComplete: (Boolean) -> Unit) {
-    }
+    override fun refresh(onComplete: (Boolean) -> Unit) { }
 
     override fun onResume() {
-
         super.onResume()
 
-        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
-        swipeRefreshLayout?.isRefreshing = true
-
-        autoRefresh = Runnable {
-            if (!skipNextRefresh) {
-                refresh {}
-            }
-            skipNextRefresh = false
-            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
-        }
-        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
-
-        refresh { endRefresh() }
-    }
-
-    override fun onPause() {
-        handler.removeCallbacks(autoRefresh)
-        super.onPause()
+        homePagerAdapter?.setListeners()
     }
 }

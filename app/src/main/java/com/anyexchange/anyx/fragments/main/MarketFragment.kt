@@ -17,7 +17,6 @@ import com.anyexchange.anyx.classes.api.AnyApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_market.view.*
-import java.util.*
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -26,10 +25,6 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     var listView: ListView? = null
     lateinit var inflater: LayoutInflater
     open val onlyShowFavorites = false
-
-    companion object {
-        var updateFavoritesFragment = { }
-    }
 
     private val productList: List<Product>
         get() {
@@ -81,8 +76,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                 if (onlyShowFavorites) {
                     completeRefresh()
                 } else {
-//                    updateFavoritesFragment()
-                    listener?.favoritesUpdated()
+                    favoritesUpdateListener?.favoritesUpdated()
                 }
                 true
             }
@@ -91,10 +85,14 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        refresh(true, onComplete)
+    }
+    fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
             toast("Error: ${result.errorMessage}")
             onComplete(false)
         }
+        swipeRefreshLayout?.isRefreshing = true
         if (onlyShowFavorites) {
             var productsUpdated = 0
             val time = Timespan.DAY
@@ -115,6 +113,9 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                                         Prefs(it).stashedProducts = Product.map.values.toList()
                                     }
                                     //update Favorites Tab
+                                    if (fullRefresh) {
+                                        refreshCompleteListener?.refreshComplete()
+                                    }
                                     completeRefresh()
                                     onComplete(true)
                                 }
@@ -123,6 +124,9 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                                     productsUpdated++
                                     if (productsUpdated == count) {
                                         //update Favorites Tab
+                                        if (fullRefresh) {
+                                            refreshCompleteListener?.refreshComplete()
+                                        }
                                         completeRefresh()
                                         onComplete(true)
                                     }
@@ -137,6 +141,9 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
         } else {
             AnyApi(apiInitData).updateAllTickers(onFailure) {
                 //Complete Market Refresh
+                if (fullRefresh) {
+                    refreshCompleteListener?.refreshComplete()
+                }
                 completeRefresh()
                 onComplete(true)
             }
@@ -144,6 +151,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     fun completeRefresh() {
+        endRefresh()
         (listView?.adapter as? ProductListViewAdapter)?.productList = productList
 //        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
 
@@ -160,15 +168,41 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
 //        activity?.runOnUiThread(run)
     }
 
-
-    var listener: FavoritesUpdateListener? = null
-
+    private var favoritesUpdateListener: FavoritesUpdateListener? = null
     interface FavoritesUpdateListener {
         fun favoritesUpdated()
     }
-
     fun setFavoritesListener(listener: FavoritesUpdateListener) {
-        this.listener = listener
+        this.favoritesUpdateListener = listener
     }
 
+
+    private var refreshCompleteListener: RefreshCompleteListener? = null
+    interface RefreshCompleteListener {
+        fun refreshComplete()
+    }
+    fun setRefreshListener(listener: RefreshCompleteListener) {
+        this.refreshCompleteListener = listener
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (onlyShowFavorites) {
+            autoRefresh = Runnable {
+                if (!skipNextRefresh) {
+                    refresh {}
+                }
+                skipNextRefresh = false
+
+                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+            }
+            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+        }
+        refresh(false) { endRefresh() }
+    }
+
+    override fun onPause() {
+        handler.removeCallbacks(autoRefresh)
+        super.onPause()
+    }
 }

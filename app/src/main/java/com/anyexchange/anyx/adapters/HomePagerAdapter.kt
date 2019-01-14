@@ -10,7 +10,6 @@ import com.anyexchange.anyx.classes.RefreshFragment
 import com.anyexchange.anyx.fragments.main.AccountsFragment
 import com.anyexchange.anyx.fragments.main.FavoritesFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
-import java.util.*
 
 
 /**
@@ -24,14 +23,31 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     private val favoritesFragment = FavoritesFragment()
     private val accountsFragment = AccountsFragment()
 
-    init {
+    fun setListeners() {
         marketFragment.setFavoritesListener(object : MarketFragment.FavoritesUpdateListener {
             override fun favoritesUpdated() {
                 favoritesFragment.completeRefresh()
             }
         })
+        marketFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+            override fun refreshComplete() {
+                favoritesFragment.refresh(false) {  }
+                accountsFragment.refresh(false) {  }
+            }
+        })
+        favoritesFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+            override fun refreshComplete() {
+                marketFragment.refresh(false) {  }
+                accountsFragment.refresh(false) {  }
+            }
+        })
+        accountsFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+            override fun refreshComplete() {
+                favoritesFragment.refresh(false) {  }
+                marketFragment.refresh(false) {  }
+            }
+        })
     }
-
 
     override fun getItem(i: Int): Fragment {
         val args = Bundle()
@@ -39,14 +55,17 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         when (i) {
             0 -> {
                 marketFragment.arguments = args
+                setListeners()
                 return marketFragment
             }
             1 -> {
                 favoritesFragment.arguments = args
+                setListeners()
                 return favoritesFragment
             }
             2 -> {
                 accountsFragment.arguments = args
+                setListeners()
                 return accountsFragment
             }
             else -> {
