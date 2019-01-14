@@ -144,7 +144,6 @@ open class RefreshFragment: Fragment() {
         }
     }
 
-
     open fun refresh(onComplete: (Boolean) -> Unit) {   //The boolean indicates whether or not refresh was successful
         skipNextRefresh = false
         onComplete(true)
