@@ -81,6 +81,9 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
 
         val granularity = Candle.granularityForTimespan(timespan)
 
+            // TODO: scale down prices for default currency if needed
+        val quoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+
         if (isFavorites) {
             val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
             viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
@@ -88,7 +91,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.VISIBLE
 
-            val percentChange = product.percentChange(timespan, Account.defaultFiatCurrency)
+            val percentChange = product.percentChange(timespan, quoteCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()
             viewHolder.percentChangeText?.textColor = if (percentChange > 0) {
                 Color.GREEN
@@ -102,8 +105,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
             viewHolder.priceText?.visibility = View.VISIBLE
             viewHolder.percentChangeText?.visibility = View.GONE
         }
-        val defaultQuoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
-        viewHolder.priceText?.text = product.priceForQuoteCurrency(defaultQuoteCurrency).format(defaultQuoteCurrency)
+        viewHolder.priceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
 
         outputView.setOnLongClickListener {
             onLongPress(it, product)

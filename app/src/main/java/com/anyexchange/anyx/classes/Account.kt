@@ -82,11 +82,18 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         var paymentMethods: List<Account.PaymentMethod> = listOf()
 
         //TODO: make this changeable
-        val defaultFiatAccount: Account?
-            get() = fiatAccounts.asSequence().sortedBy { it.balance }.lastOrNull()
-
         val defaultFiatCurrency: Currency
-            get() = defaultFiatAccount?.currency ?: Currency.USD
+            get() {
+                val nonEmptyAccounts = fiatAccounts.filter { it.balance > 0 }
+                if (nonEmptyAccounts.isNotEmpty()) {
+                    nonEmptyAccounts.asSequence().sortedBy { it.balance }.lastOrNull()?.let {
+                        return it.currency.relevantFiat ?: it.currency
+                    }
+                } else if (fiatAccounts.size == 1) {
+                    return fiatAccounts.first().currency
+                }
+                return Currency.USD
+            }
 
 //        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 

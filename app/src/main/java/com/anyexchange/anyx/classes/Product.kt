@@ -51,7 +51,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     private var isFavoriteBackingBool: Boolean? = null
     var isFavorite: Boolean
         get() {
-            return isFavoriteBackingBool ?: (totalDefaultValueOfRelevantAccounts() > 0 || defaultFavorites.contains(currency))
+            return isFavoriteBackingBool ?: (totalBalanceAcrossAllAccounts() > 0 || defaultFavorites.contains(currency))
         }
         set(value) {
             isFavoriteBackingBool = value
@@ -126,8 +126,38 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
     }
 
     fun priceForQuoteCurrency(quoteCurrency: Currency) : Double {
+        // First, check for a straight up trading pair for quote currency
         val tradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency }
-        return priceForTradingPair(tradingPair)
+        if (tradingPair != null) {
+            return priceForTradingPair(tradingPair)
+        }
+        // If the trading pair is not available, check for a relevant
+        val stablecoinTradingPair = tradingPairs.find { it.quoteCurrency == quoteCurrency.relevantStableCoin }
+        if (stablecoinTradingPair != null) {
+            return priceForTradingPair(stablecoinTradingPair)
+        }
+        // Next, check against bitcoin
+        if (quoteCurrency != Currency.BTC) {
+            val btcTradingPair = tradingPairs.find { it.quoteCurrency == Currency.BTC }
+            val btcPrice = Product.map[Currency.BTC.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+            if (btcTradingPair != null && btcPrice > 0) {
+                val priceInBtc = priceForTradingPair(btcTradingPair)
+                return priceInBtc * btcPrice
+            }
+        }
+
+        // Last resort, check against ether
+        if (quoteCurrency != Currency.ETH) {
+            val ethTradingPair = tradingPairs.find { it.quoteCurrency == Currency.ETH }
+            val ethPrice = Product.map[Currency.ETH.id]?.priceForQuoteCurrency(quoteCurrency) ?: 0.0
+            if (ethTradingPair != null && ethPrice > 0) {
+                val priceInEth = priceForTradingPair(ethTradingPair)
+                return priceInEth * ethPrice
+            }
+        }
+
+        // If all that fails, return 0 and hang your head in shame
+        return 0.0
     }
 
     private fun priceForTradingPair(tradingPair: TradingPair?) : Double {
@@ -217,15 +247,18 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
         }
         return alertString
     }
-//
 
+    fun totalValueOfRelevantAccounts(quoteCurrency: Currency) : Double {
+        val totalBalance = totalBalanceAcrossAllAccounts()
+        return totalBalance * priceForQuoteCurrency(quoteCurrency)
+    }
 
-    fun totalDefaultValueOfRelevantAccounts() : Double {
-        var totalValue = 0.0
+    fun totalBalanceAcrossAllAccounts() : Double {
+        var totalBalance = 0.0
         for (accountPair in accounts) {
-            totalValue += accountPair.value.defaultValue
+            totalBalance += accountPair.value.balance
         }
-        return totalValue
+        return totalBalance
     }
 
     fun addToHashMap() {

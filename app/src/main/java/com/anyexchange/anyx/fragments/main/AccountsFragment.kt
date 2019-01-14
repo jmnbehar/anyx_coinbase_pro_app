@@ -123,8 +123,12 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private fun showStablecoinConversionDialog(tradingPair: TradingPair) {
         val dialogFragment = StablecoinConversionFragment()
         dialogFragment.setInfo(tradingPair) { returnedTradingPair, amount ->
-            CBProApi.stablecoinConversion(apiInitData, amount, returnedTradingPair ?: tradingPair)
-            dialogFragment.dismiss()
+            CBProApi.stablecoinConversion(apiInitData, amount, returnedTradingPair ?: tradingPair).executePost({
+                toast(resources.getString(R.string.error_generic_message, it.errorMessage))
+                dialogFragment.dismiss()
+            }, {
+                refresh { dialogFragment.dismiss() }
+            })
         }
         dialogFragment.showNow(fragmentManager, "stablecoinConversionDialog")
     }
