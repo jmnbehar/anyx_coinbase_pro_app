@@ -31,7 +31,7 @@ class VerifyCompleteFragment : Fragment() {
     private lateinit var infoText: TextView
     private lateinit var statusImageView: ImageView
 
-    var bypassClicks = 0
+    private var bypassClicks = 0
 
     private val currency: Currency
         get() {
@@ -95,7 +95,7 @@ class VerifyCompleteFragment : Fragment() {
             VerificationStatus.NoTradePermission -> resources.getString(R.string.verify_missing_permission_trade_message)
             VerificationStatus.NoViewPermission -> resources.getString(R.string.verify_missing_permission_view_message)
             VerificationStatus.NoPaymentMethods -> resources.getString(R.string.verify_payment_method_error_message)
-            VerificationStatus.CBProError,
+            VerificationStatus.CBProError -> resources.getString(R.string.verify_cbpro_error_message)
             VerificationStatus.UnknownError -> resources.getString(R.string.verify_unknown_error_message)
         }
     }
