@@ -10,6 +10,7 @@ import com.anyexchange.anyx.classes.RefreshFragment
 import com.anyexchange.anyx.fragments.main.AccountsFragment
 import com.anyexchange.anyx.fragments.main.FavoritesFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
+import android.view.ViewGroup
 
 
 /**
@@ -19,9 +20,9 @@ import com.anyexchange.anyx.fragments.main.MarketFragment
 // Since this is an object collection, use a FragmentStatePagerAdapter,
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-    private val marketFragment = MarketFragment()
-    private val favoritesFragment = FavoritesFragment()
-    private val accountsFragment = AccountsFragment()
+    private var marketFragment : MarketFragment? = null
+    private var favoritesFragment : FavoritesFragment? = null
+    private var accountsFragment : AccountsFragment? = null
 
     init {
         MarketFragment.resetHomeListeners = { setListeners() }
@@ -29,27 +30,27 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     }
 
     fun setListeners() {
-        marketFragment.setFavoritesListener(object : MarketFragment.FavoritesUpdateListener {
+        marketFragment?.setFavoritesListener(object : MarketFragment.FavoritesUpdateListener {
             override fun favoritesUpdated() {
-                favoritesFragment.completeRefresh()
+                favoritesFragment?.completeRefresh()
             }
         })
-        marketFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+        marketFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
             override fun refreshComplete() {
-                favoritesFragment.refresh(false) {  }
-                accountsFragment.refresh(false) {  }
+                favoritesFragment?.refresh(false) {  }
+                accountsFragment?.refresh(false) {  }
             }
         })
-        favoritesFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+        favoritesFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
             override fun refreshComplete() {
-                marketFragment.refresh(false) {  }
-                accountsFragment.refresh(false) {  }
+                marketFragment?.refresh(false) {  }
+                accountsFragment?.refresh(false) {  }
             }
         })
-        accountsFragment.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
+        accountsFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
             override fun refreshComplete() {
-                favoritesFragment.refresh(false) {  }
-                marketFragment.refresh(false) {  }
+                favoritesFragment?.refresh(false) {  }
+                marketFragment?.refresh(false) {  }
             }
         })
     }
@@ -57,19 +58,15 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     override fun getItem(i: Int): Fragment {
         val args = Bundle()
         args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
-        setListeners()
         when (i) {
             0 -> {
-                marketFragment.arguments = args
-                return marketFragment
+                return MarketFragment()
             }
             1 -> {
-                favoritesFragment.arguments = args
-                return favoritesFragment
+                return FavoritesFragment()
             }
             2 -> {
-                accountsFragment.arguments = args
-                return accountsFragment
+                return AccountsFragment()
             }
             else -> {
                 //do something here
@@ -78,6 +75,19 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
                 return fragment
             }
         }
+    }
+
+    // Save new Fragment, created from either getItem() or FragmentManger. 
+    override fun instantiateItem(container: ViewGroup, position: Int): Any {
+        val createdFragment = super.instantiateItem(container, position) as Fragment
+        // save the appropriate reference depending on position
+        when (position) {
+            0 -> marketFragment = createdFragment as MarketFragment
+            1 -> favoritesFragment = createdFragment as FavoritesFragment
+            2 -> accountsFragment = createdFragment as AccountsFragment
+        }
+        setListeners()
+        return createdFragment
     }
 
     override fun getCount(): Int {
