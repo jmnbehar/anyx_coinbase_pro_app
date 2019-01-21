@@ -65,7 +65,7 @@ class VerifySendFragment : Fragment() {
                         CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
                         else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
                     }
-                }, { _ ->
+                }, {
                     sendCryptoToVerify()
                 })
             } else {

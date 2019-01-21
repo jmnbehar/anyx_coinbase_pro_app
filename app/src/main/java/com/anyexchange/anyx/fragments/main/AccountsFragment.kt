@@ -42,9 +42,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var accountTotalCandles = listOf<Candle>()
 
     companion object {
-
         val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
-
+        var resetHomeListeners = { }
     }
 
     private val granularity = Candle.granularityForTimespan(Timespan.DAY)
@@ -290,6 +289,7 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onResume() {
         super.onResume()
+        resetHomeListeners()
         setValueAndPercentChangeTexts()
 
         refresh(false) { endRefresh() }
