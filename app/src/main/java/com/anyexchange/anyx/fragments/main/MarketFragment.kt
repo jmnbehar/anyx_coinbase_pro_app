@@ -110,31 +110,14 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                     }) { didUpdate ->
                         //OnSuccess
                         if (lifecycle.isCreatedOrResumed) {
-                            if (didUpdate) {
-                                productsUpdated++
-                                if (productsUpdated == count) {
-                                    context?.let {
-                                        Prefs(it).stashedProducts = Product.map.values.toList()
-                                    }
-                                    //update Favorites Tab
-                                    if (fullRefresh) {
-                                        refreshCompleteListener?.refreshComplete()
-                                    }
-                                    completeRefresh()
-                                    onComplete(true)
+                            productsUpdated++
+                            if (productsUpdated == count) {
+                                //update Favorites Tab
+                                if (fullRefresh) {
+                                    refreshCompleteListener?.refreshComplete()
                                 }
-                            } else {
-                                AnyApi(apiInitData).ticker(tradingPair, onFailure) {
-                                    productsUpdated++
-                                    if (productsUpdated == count) {
-                                        //update Favorites Tab
-                                        if (fullRefresh) {
-                                            refreshCompleteListener?.refreshComplete()
-                                        }
-                                        completeRefresh()
-                                        onComplete(true)
-                                    }
-                                }
+                                completeRefresh()
+                                onComplete(true)
                             }
                         }
                     }
@@ -148,6 +131,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                 if (fullRefresh) {
                     refreshCompleteListener?.refreshComplete()
                 }
+                favoritesUpdateListener?.favoritesUpdated()
                 completeRefresh()
                 onComplete(true)
             }
@@ -159,6 +143,9 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
         (listView?.adapter as? ProductListViewAdapter)?.productList = productList
 //        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
 
+        context?.let {
+            Prefs(it).stashedProducts = Product.map.values.toList()
+        }
         (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
         listView?.invalidateViews()
         listView?.refreshDrawableState()

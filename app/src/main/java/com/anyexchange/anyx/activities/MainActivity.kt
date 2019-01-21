@@ -95,9 +95,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
-        val prefs = Prefs(this)
-        prefs.shouldSavePassphrase = true
-
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
@@ -132,6 +129,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //do something maybe?
             } )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        dataFragment?.restoreData(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        dataFragment?.backupData()
     }
 
     private fun hideDrawerMenu() {
@@ -196,11 +203,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
             outState?.putLong(CHART_TIMESPAN, chartFragment.timespan.value())
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        dataFragment?.backupData()
     }
 
    private fun goHome() {
