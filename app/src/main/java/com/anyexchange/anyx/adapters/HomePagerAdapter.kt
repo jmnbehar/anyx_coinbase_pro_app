@@ -23,6 +23,11 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     private val favoritesFragment = FavoritesFragment()
     private val accountsFragment = AccountsFragment()
 
+    init {
+        MarketFragment.resetHomeListeners = { setListeners() }
+        AccountsFragment.resetHomeListeners = { setListeners() }
+    }
+
     fun setListeners() {
         marketFragment.setFavoritesListener(object : MarketFragment.FavoritesUpdateListener {
             override fun favoritesUpdated() {
@@ -52,20 +57,18 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
     override fun getItem(i: Int): Fragment {
         val args = Bundle()
         args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
+        setListeners()
         when (i) {
             0 -> {
                 marketFragment.arguments = args
-                setListeners()
                 return marketFragment
             }
             1 -> {
                 favoritesFragment.arguments = args
-                setListeners()
                 return favoritesFragment
             }
             2 -> {
                 accountsFragment.arguments = args
-                setListeners()
                 return accountsFragment
             }
             else -> {

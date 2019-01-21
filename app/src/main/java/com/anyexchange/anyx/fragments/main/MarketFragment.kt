@@ -22,9 +22,13 @@ import kotlinx.android.synthetic.main.fragment_market.view.*
  * Created by anyexchange on 11/5/2017.
  */
 open class MarketFragment : RefreshFragment(), LifecycleOwner {
-    var listView: ListView? = null
+    private var listView: ListView? = null
     lateinit var inflater: LayoutInflater
     open val onlyShowFavorites = false
+
+    companion object {
+        var resetHomeListeners = { }
+    }
 
     private val productList: List<Product>
         get() {
@@ -187,6 +191,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     override fun onResume() {
         super.onResume()
+        resetHomeListeners()
         if (onlyShowFavorites) {
             autoRefresh = Runnable {
                 if (!skipNextRefresh) {
