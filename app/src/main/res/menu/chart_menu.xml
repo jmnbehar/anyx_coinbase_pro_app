@@ -11,4 +11,15 @@
         android:title="@string/chart_style_candle"
         android:visible="false"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/home_sort_alphabetical"
+        android:title="@string/home_sort_alphabetical"
+        android:visible="true"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/home_sort_balance"
+        android:title="@string/home_sort_balance"
+        android:visible="true"
+        app:showAsAction="never" />
+
 </menu>

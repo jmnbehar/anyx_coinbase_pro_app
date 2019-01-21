@@ -213,6 +213,9 @@
     <string name="home_account_tab">Account</string>
     <string name="home_other_tab">Screen #%d</string>
 
+    <string name="home_sort_alphabetical">Sort Favorites Alphabetically</string>
+    <string name="home_sort_balance">Sort Favorites By Account Balance</string>
+
     //Send Fragment
     <string name="send_title">Send</string>
     <string name="send_send_btn">Send</string>

@@ -21,7 +21,7 @@ import android.view.ViewGroup
 // and NOT a FragmentPagerAdapter.
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private var marketFragment : MarketFragment? = null
-    private var favoritesFragment : FavoritesFragment? = null
+    var favoritesFragment : FavoritesFragment? = null
     private var accountsFragment : AccountsFragment? = null
 
     init {
@@ -77,7 +77,7 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         }
     }
 
-    // Save new Fragment, created from either getItem() or FragmentManger. 
+    // Save new Fragment, created from either getItem() or FragmentManger.
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val createdFragment = super.instantiateItem(container, position) as Fragment
         // save the appropriate reference depending on position

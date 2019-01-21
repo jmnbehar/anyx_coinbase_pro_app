@@ -37,6 +37,7 @@ private const val REJECTED_API_KEYS = "rejected_api_keys"
 private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
 private const val DEFAULT_QUOTE = "DEFAULT_QUOTE"
 private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
+private const val SORT_FAVORITES_ALPHABETICAL = "SORT_FAVORITES_ALPHABETICAL"
 
 private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
 
@@ -301,6 +302,10 @@ class Prefs (var context: Context) {
 
     var areFillAlertsActive: Boolean
         get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
+        set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
+
+    var sortFavoritesAlphabetical: Boolean
+        get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, false)
         set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
 
     fun isApiKeyValid(apiKey: String) : Boolean? {
