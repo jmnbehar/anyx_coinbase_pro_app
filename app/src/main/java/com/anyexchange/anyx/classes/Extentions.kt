@@ -240,7 +240,7 @@ fun List<Product>.sortProducts() : List<Product> {
     return this.sortedWith(compareBy({ it.totalValueOfRelevantAccounts(Currency.USD) * -1 }, { it.currency.orderValue }, { it.currency.id }))
 }
 
-fun List<Product>.alphabeticalProducts() : List<Product> {
+fun List<Product>.sortProductsAlphabetical() : List<Product> {
     return this.sortedWith(compareBy { it.currency.id })
 }
 

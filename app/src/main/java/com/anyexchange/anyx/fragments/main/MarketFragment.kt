@@ -33,9 +33,14 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     private val productList: List<Product>
         get() {
             return if (onlyShowFavorites) {
-                Product.map.values.filter { it.isFavorite }.toList().sortProducts()
+                val context = context
+                if (context != null && Prefs(context).sortFavoritesAlphabetical) {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProductsAlphabetical()
+                } else {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProducts()
+                }
             } else {
-                Product.map.values.toList().alphabeticalProducts()
+                Product.map.values.toList().sortProductsAlphabetical()
             }
         }
 

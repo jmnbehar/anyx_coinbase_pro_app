@@ -2,16 +2,10 @@ package com.anyexchange.anyx.fragments.main
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 /**
@@ -53,6 +47,7 @@ class HomeFragment : RefreshFragment() {
 
             viewPager?.setCurrentItem(1)
         }
+        setHasOptionsMenu(true)
 
         return rootView
     }
@@ -63,5 +58,22 @@ class HomeFragment : RefreshFragment() {
         super.onResume()
 
         homePagerAdapter?.setListeners()
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        val shouldShowOptions = lifecycle.isCreatedOrResumed
+        menu.findItem(R.id.home_sort_alphabetical).isVisible = shouldShowOptions
+        menu.findItem(R.id.home_sort_balance).isVisible = shouldShowOptions
+        activity?.invalidateOptionsMenu()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        context?.let {
+            val prefs = Prefs(it)
+            prefs.sortFavoritesAlphabetical = (item.itemId == R.id.home_sort_alphabetical)
+        }
+        homePagerAdapter?.favoritesFragment?.completeRefresh()
+        return false
     }
 }
