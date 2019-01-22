@@ -63,17 +63,33 @@ class HomeFragment : RefreshFragment() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val shouldShowOptions = lifecycle.isCreatedOrResumed
-        menu.findItem(R.id.home_sort_alphabetical).isVisible = shouldShowOptions
-        menu.findItem(R.id.home_sort_balance).isVisible = shouldShowOptions
-        activity?.invalidateOptionsMenu()
+        menu.setGroupVisible(R.id.group_chart_style, false)
+        menu.setGroupVisible(R.id.group_home_sort, shouldShowOptions)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        val context = context
+        val shouldSortAlphabetical = if (context == null) {
+            false
+        } else {
+            Prefs(context).sortFavoritesAlphabetical
+        }
+        if (shouldSortAlphabetical) {
+            menu?.getItem(2)?.isChecked = true
+        } else {
+            menu?.getItem(3)?.isChecked = true
+        }
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         context?.let {
             val prefs = Prefs(it)
             prefs.sortFavoritesAlphabetical = (item.itemId == R.id.home_sort_alphabetical)
         }
+        item.isChecked = true
         homePagerAdapter?.favoritesFragment?.completeRefresh()
-        return false
+        return super.onOptionsItemSelected(item)
     }
 }

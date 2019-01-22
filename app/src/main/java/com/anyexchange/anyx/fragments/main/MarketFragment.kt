@@ -112,7 +112,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
                 product.defaultTradingPair?.let { tradingPair ->
                     product.updateCandles(time, tradingPair, apiInitData, {
                         //OnFailure
-                    }) { didUpdate ->
+                    }) {
                         //OnSuccess
                         if (lifecycle.isCreatedOrResumed) {
                             productsUpdated++

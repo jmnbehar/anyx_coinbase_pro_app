@@ -371,9 +371,17 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val shouldShowOptions = lifecycle.isCreatedOrResumed
-        menu.findItem(R.id.chart_style_line).isVisible = shouldShowOptions
-        menu.findItem(R.id.chart_style_candle).isVisible = shouldShowOptions
-        activity?.invalidateOptionsMenu()
+        menu.setGroupVisible(R.id.group_chart_style, shouldShowOptions)
+        menu.setGroupVisible(R.id.group_home_sort, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        if (chartStyle == ChartStyle.Line) {
+            menu?.findItem(R.id.chart_style_line)?.isChecked = true
+        } else {
+            menu?.findItem(R.id.chart_style_candle)?.isChecked = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -381,6 +389,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             R.id.chart_style_line   -> viewModel.chartStyle = ChartStyle.Line
             R.id.chart_style_candle -> viewModel.chartStyle = ChartStyle.Candle
         }
+        item.isChecked = true
+
         showProgressSpinner()
         miniRefresh({
             dismissProgressSpinner()

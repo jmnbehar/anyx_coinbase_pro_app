@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/chart_style_line"
-        android:title="@string/chart_style_line"
-        android:visible="false"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/chart_style_candle"
-        android:title="@string/chart_style_candle"
-        android:visible="false"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/home_sort_alphabetical"
-        android:title="@string/home_sort_alphabetical"
-        android:visible="true"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/home_sort_balance"
-        android:title="@string/home_sort_balance"
-        android:visible="true"
-        app:showAsAction="never" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/group_chart_style"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/chart_style_line"
+            android:title="@string/chart_style_line" />
+        <item
+            android:id="@+id/chart_style_candle"
+            android:title="@string/chart_style_candle" />
+    </group>
+
+    <group android:id="@+id/group_home_sort"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/home_sort_alphabetical"
+            android:title="@string/home_sort_alphabetical" />
+        <item
+            android:id="@+id/home_sort_balance"
+            android:title="@string/home_sort_balance" />
+    </group>
 
 </menu>
