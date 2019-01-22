@@ -207,7 +207,7 @@ class LoginFragment : RefreshFragment()  {
         activity?.supportFragmentManager?.let {
             val transaction = it.beginTransaction()
             transaction.remove(this)
-            transaction.commit()
+            transaction.commitAllowingStateLoss()
             it.popBackStack()
 //                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
