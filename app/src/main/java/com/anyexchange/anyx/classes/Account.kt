@@ -67,7 +67,8 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
             val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && CBProApi.credentials != null
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
-                product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null }
+                !Currency.brokenCoinIds.contains(product.currency.id) && product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null
+            }
 
             if (areFiatAccountsMissing || areCBProAccountsOutOfDate) {
                 exchangeList.add(Exchange.CBPro)

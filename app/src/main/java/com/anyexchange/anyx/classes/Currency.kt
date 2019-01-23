@@ -105,6 +105,10 @@ class Currency(val id: String) {
         val fiatList    = KnownCurrency.values().filter { it.type == Type.FIAT }
         val stableCoinList = KnownCurrency.values().filter { it.type == Type.STABLECOIN }
 
+        //TODO: remove this when coins stop being broken... and fix the underlying issues with showing blank coins
+        val brokenCoinList = listOf(KnownCurrency.MKR, KnownCurrency.ZIL)
+        val brokenCoinIds = brokenCoinList.map { it.symbol }
+
         val USD = Currency(KnownCurrency.USD)
         val USDC = Currency(KnownCurrency.USDC)
         val EUR = Currency(KnownCurrency.EUR)
