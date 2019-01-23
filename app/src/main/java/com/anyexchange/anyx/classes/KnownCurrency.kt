@@ -19,28 +19,38 @@ enum class KnownCurrency {
     ZRX,
     BAT,
 
+    CVC,
+    DAI,
+    DNT,
+    GNT,
+    LOOM,
+    MANA,
+    MKR,
+    ZEC,
+    ZIL,
+
     USDC,
 
     USD,
     EUR,
     GBP;
 
+    //TODO: this class desperately needs a refactor
+
     override fun toString() : String {
-        return when (this) {
-            BTC -> "BTC"
-            BCH -> "BCH"
-            ETH -> "ETH"
-            ETC -> "ETC"
-            LTC -> "LTC"
-            ZRX -> "ZRX"
-            BAT -> "BAT"
+        if (type == Currency.Type.CRYPTO) {
+            return symbol
+        } else {
+            return when (this) {
+                USDC -> "USDC"
 
-            USDC -> "USDC"
-
-            USD -> "USD"
-            EUR -> "EUR"
-            GBP -> "GBP"
+                USD -> "USD"
+                EUR -> "EUR"
+                GBP -> "GBP"
+                else -> ""
+            }
         }
+
     }
 
     val symbol : String
@@ -51,8 +61,18 @@ enum class KnownCurrency {
                 ETH -> "ETH"
                 ETC -> "ETC"
                 LTC -> "LTC"
-                ZRX -> "0x"
+                ZRX -> "ZRX"
                 BAT -> "BAT"
+
+                CVC -> "CVC"
+                DAI -> "DAI"
+                DNT -> "DNT"
+                GNT -> "GNT"
+                LOOM -> "LOOM"
+                MANA -> "MANA"
+                MKR -> "MKR"
+                ZEC -> "ZEC"
+                ZIL -> "ZIL"
 
                 USDC -> "USDC"
 
@@ -72,6 +92,16 @@ enum class KnownCurrency {
             ZRX -> "0x"
             BAT -> "Basic Attention Token"
 
+            CVC -> "Civic"
+            DAI -> "Dai"
+            DNT -> "district0x"
+            GNT -> "Golem"
+            LOOM -> "Loom Network"
+            MANA -> "Decentraland"
+            MKR -> "Maker"
+            ZEC -> "Zcash"
+            ZIL -> "Zilliqa"
+
             USDC -> "USD Coin"
             USD -> "US Dollar"
             EUR -> "Euro"
@@ -88,7 +118,7 @@ enum class KnownCurrency {
             else -> 0.0
         }
 
-    val iconId
+    val iconId: Int?
         get() = when(this) {
             BTC -> R.drawable.icon_btc
             ETH -> R.drawable.icon_eth
@@ -104,6 +134,8 @@ enum class KnownCurrency {
             USD -> R.drawable.icon_usd
             EUR -> R.drawable.icon_eur
             GBP -> R.drawable.icon_gbp
+
+            else -> null
         }
 
     val type: Currency.Type
@@ -125,24 +157,6 @@ enum class KnownCurrency {
             else -> null
         }
 
-//    private val startDate : Date
-//        get() = when (this) {
-//            BTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//            ETH -> GregorianCalendar(2015, Calendar.AUGUST, 6).closeTime
-//            BCH -> GregorianCalendar(2017, Calendar.JULY, 1).closeTime
-//            LTC -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//            else -> GregorianCalendar(2013, Calendar.JANUARY, 1).closeTime
-//        }
-//
-//    val lifetimeInSeconds : Long
-//        get() {
-//            val utcTimeZone = TimeZone.getTimeZone("UTC")
-//            val now = Calendar.getInstance(utcTimeZone)
-//            val nowTime = now.timeInSeconds()
-//            val startTime = startDate.closeTime / 1000
-//            return (nowTime - startTime)
-//        }
-
     fun colorPrimary(context: Context) : Int {
         val prefs = Prefs(context)
         return if (prefs.isDarkModeOn) {
@@ -159,6 +173,8 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.white)
+
+                else -> Color.WHITE
             }
         } else {
             when (this) {
@@ -174,6 +190,7 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> ContextCompat.getColor(context, R.color.black)
+                else -> Color.BLACK
             }
         }
     }
@@ -194,6 +211,9 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
+
+                else -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
+
             }
         } else {
             when (this) {
@@ -209,6 +229,7 @@ enum class KnownCurrency {
                 USD,
                 EUR,
                 GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
+                else -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
             }
         }
     }
@@ -228,7 +249,8 @@ enum class KnownCurrency {
                 USDC,
                 USD,
                 EUR,
-                GBP -> Color.WHITE
+                GBP -> Color.BLACK
+                else -> Color.BLACK
             }
         } else {
             when (this) {
@@ -243,7 +265,8 @@ enum class KnownCurrency {
                 USDC,
                 USD,
                 EUR,
-                GBP -> Color.BLACK
+                GBP -> Color.WHITE
+                else -> Color.WHITE
             }
         }
     }
@@ -259,6 +282,17 @@ enum class KnownCurrency {
             ZRX -> "0x43e781a556DD3DECF64670740EE661b8d766d86c"
             BAT -> "0xF6D0aaB48BECf69f0cfF1c4693CE67a20295B02B"
             USDC -> "0x1aCfECe40ccbac06A183d67A1CDC7fb3aF1ad906"
+
+            CVC -> "0xbdF431184Dc6b3e7fbF1Eaf60ef3ce3D741946b2"
+            DAI -> "0x7B5EFa1038934677be26417d190fF426E5bFC0da"
+            DNT -> "0xFd07a94cCbcc262080df2c21241077264C338929"
+            GNT -> "0x0D4Ae61164Ead343758A63A6eF02410f66c73310"
+            LOOM -> "0xE15897bc9Ec549068694512F464B2892BAE6a866"
+            MANA -> "0x0E0403d06638d3cad4c4E622F7a262b6e1f8d4a1"
+            MKR -> ""
+            ZEC -> "t1azwZhxdz5LaGgxfH9FC2pnfjnBrVJPgfT"
+            ZIL -> ""
+
             USD,
             EUR,
             GBP -> "my irl address?"
@@ -280,6 +314,8 @@ enum class KnownCurrency {
                 ETC -> 100
                 ZRX -> 90
                 BAT -> 80
+
+                else -> -99999
             } * -1
         }
 
@@ -293,6 +329,16 @@ enum class KnownCurrency {
                 "LTC" -> LTC
                 "ZRX" -> ZRX
                 "BAT" -> BAT
+
+                "CVC" -> CVC
+                "DAI" -> DAI
+                "DNT" -> DNT
+                "GNT" -> GNT
+                "LOOM" -> LOOM
+                "MANA" -> MANA
+                "MKR" -> MKR
+                "ZEC" -> ZEC
+                "ZIL" -> ZIL
 
                 "USDC" -> USDC
                 "USD" -> USD
