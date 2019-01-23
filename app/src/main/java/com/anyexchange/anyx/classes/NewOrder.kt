@@ -100,12 +100,13 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
     }
 
     fun submit(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (Result<ByteArray, FuelError>) -> Unit) {
+        val anyApi = AnyApi(apiInitData)
         when(type) {
-            TradeType.MARKET -> AnyApi.orderMarket(apiInitData, tradingPair.exchange, side, tradingPair, amount, funds,
+            TradeType.MARKET -> anyApi.orderMarket(tradingPair.exchange, side, tradingPair, amount, funds,
                     { onFailure(it) }, { onSuccess(it) })
             TradeType.LIMIT -> {
                 priceLimit?.let { limitPrice ->
-                    AnyApi.orderLimit(apiInitData, tradingPair.exchange, side, tradingPair, limitPrice, amount!!, timeInForce, cancelAfter, null,
+                    anyApi.orderLimit(tradingPair.exchange, side, tradingPair, limitPrice, amount!!, timeInForce, cancelAfter, null,
                             { onFailure(it) }, { onSuccess(it) })
                 } ?: run {
                     //TODO: call onFailure
@@ -114,7 +115,7 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
             TradeType.STOP -> {
                 val fundsOrAmount = amount ?: funds
                 priceLimit?.let { stopPrice ->
-                    AnyApi.orderStop(apiInitData, tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, fundsOrAmount!!, null,
+                    anyApi.orderStop(tradingPair.exchange, TradeFragment.tradeSide, tradingPair, stopPrice, fundsOrAmount!!, null,
                             { onFailure(it) }, { onSuccess(it) })
                 } ?: run {
                     //TODO: call onFailure

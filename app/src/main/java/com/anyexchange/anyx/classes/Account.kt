@@ -48,7 +48,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     var depositInfo: CBProDepositAddress? = null
 
     fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        AnyApi.updateAccount(apiInitData, this, onFailure)  {
+        AnyApi(apiInitData).updateAccount(this, onFailure)  {
             onSuccess()
         }
     }
@@ -64,9 +64,11 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
         private fun accountsOutOfDate(): List<Exchange> {
             val exchangeList = mutableListOf<Exchange>()
-            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty()
+
+            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && CBProApi.credentials != null
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
-                product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null }
+                !Currency.brokenCoinIds.contains(product.currency.id) && product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null
+            }
 
             if (areFiatAccountsMissing || areCBProAccountsOutOfDate) {
                 exchangeList.add(Exchange.CBPro)

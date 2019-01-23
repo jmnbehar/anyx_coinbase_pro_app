@@ -209,8 +209,12 @@
 
     //Home Fragment
     <string name="home_market_tab">Market</string>
+    <string name="home_favorites_tab">Favorites</string>
     <string name="home_account_tab">Account</string>
     <string name="home_other_tab">Screen #%d</string>
+
+    <string name="home_sort_alphabetical">Sort Favorites Alphabetically</string>
+    <string name="home_sort_balance">Sort Favorites By Account Balance</string>
 
     //Send Fragment
     <string name="send_title">Send</string>
@@ -219,8 +223,8 @@
     <string name="send_destination_label">Destination (%s address)</string>
     <string name="send_amount_label">Amount</string>
     <string name="send_camera_btn">Camera Button</string>
-    <string name="send_amount_error">Error! Trying to send less than minimum which is %s</string>
-    <string name="send_invalid_destination_error">Error! Invalid %s address</string>
+    <string name="send_amount_error">Error: Trying to send less than minimum which is %s</string>
+    <string name="send_invalid_destination_error">Error: Invalid %s address</string>
 
     <string name="send_enter_amount_warning">Please enter amount to send</string>
     <string name="send_address_not_found_warning">Address not found</string>
@@ -378,6 +382,7 @@
     <string name="verify_repay_error_message">Due to an unknown error, you may have lost a very small quantity of %s. Please reach out to our verification support at anyx.verify@gmail.com</string>
     <string name="verify_payment_method_error_message">Could not verify at this time because your account is unfunded.\n\nPlease add funds and try again.</string>
     <string name="verify_unknown_error_message">An unknown error occurred. Try again later.</string>
+    <string name="verify_cbpro_error_message">An unknown error occurred with Coinbase Pro\'s servers. Try again later.</string>
 
     <string name="verify_accept">I Accept</string>
     <string name="verify_done">Done</string>

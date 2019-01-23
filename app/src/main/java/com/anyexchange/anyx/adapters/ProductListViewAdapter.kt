@@ -17,10 +17,10 @@ import android.widget.TextView
  * Created by anyexchange on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: Currency, var onClick: (Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean, var onClick: (Product) -> Unit, var onLongPress: (View, Product) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return Product.map.size
+        return productList.size
     }
 
     override fun getItem(i: Int): Any {
@@ -31,11 +31,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
         return i.toLong()
     }
 
-    private val sortedProductList: List<Product>
-        get() {
-            val productList = Product.map.values.toList()
-            return productList.sortedWith(compareBy({ 0 - it.totalValueOfRelevantAccounts(quoteCurrency) }, { it.defaultPrice == 0.0 }, { 0 - it.currency.orderValue }, { it.currency.id }))
-        }
 
     internal class ViewHolder {
         var productNameText: TextView? = null
@@ -67,17 +62,17 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
             outputView = convertView
         }
 
-        if (i >= sortedProductList.size) {
+        if (i >= productList.size) {
             return outputView
         }
-        val product = sortedProductList[i]
+        val product = productList[i]
 
         //TODO: someday add ability to select values here
         product.currency.iconId?.let {
             viewHolder.productIcon?.visibility = View.VISIBLE
             viewHolder.productIcon?.setImageResource(it)
         } ?: run {
-            viewHolder.productIcon?.visibility = View.GONE
+            viewHolder.productIcon?.visibility = View.INVISIBLE
         }
 
         viewHolder.productNameText?.text = product.currency.toString()
@@ -86,10 +81,11 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
 
         val granularity = Candle.granularityForTimespan(timespan)
 
-        if (product.defaultPrice > 0) {
             // TODO: scale down prices for default currency if needed
-            val tradingPair = product.tradingPairs.find { it.quoteCurrency == quoteCurrency } ?: product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
+        val quoteCurrency = product.defaultTradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
 
+        if (isFavorites) {
+            val tradingPair = product.defaultTradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
             viewHolder.lineChart?.configure(product.defaultDayCandles, granularity, timespan, tradingPair, false, DefaultDragDirection.Vertical) {}
             viewHolder.lineChart?.visibility = View.VISIBLE
             viewHolder.priceText?.visibility = View.VISIBLE
@@ -97,8 +93,10 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
 
             val percentChange = product.percentChange(timespan, quoteCurrency)
             viewHolder.percentChangeText?.text = percentChange.percentFormat()
-            viewHolder.percentChangeText?.textColor = if (percentChange >= 0) {
+            viewHolder.percentChangeText?.textColor = if (percentChange > 0) {
                 Color.GREEN
+            } else if (percentChange == 0.0) {
+                Color.WHITE
             } else {
                 Color.RED
             }
@@ -110,7 +108,7 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, val quoteCurrency: C
         viewHolder.priceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
 
         outputView.setOnLongClickListener {
-            product.isFavorite = !product.isFavorite
+            onLongPress(it, product)
             notifyDataSetChanged()
             true
         }

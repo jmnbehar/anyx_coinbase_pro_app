@@ -228,12 +228,12 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         }
                     }
 
-                    Account.fiatAccounts = tempFiatAccounts.sortedWith(compareBy({ it.defaultValue }, { it.currency.orderValue })).reversed()
+                    Account.fiatAccounts = tempFiatAccounts.sortAccounts()
                     context?.let {
                         Prefs(it).stashedFiatAccountList = Account.fiatAccounts
                     }
 
-                    Product.updateAllProductCandles(initData, onFailure, onComplete)
+                    Product.updateImportantCandles(initData, onFailure, onComplete)
                 }
             } else {
                 onComplete()
@@ -340,7 +340,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
-                    val generalOrderList = apiOrderList.map { Order(it) }
+                    val generalOrderList = apiOrderList.mapNotNull { Order.fromCbProOrder(it) }
                     if (context != null) {
                         Prefs(context).stashOrders(generalOrderList, Exchange.CBPro)
                     }
@@ -364,7 +364,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     try {
                         val prefs = Prefs(context)
                         val apiFillList: List<CBProFill> = Gson().fromJson(result.value, object : TypeToken<List<CBProFill>>() {}.type)
-                        val generalFillList = apiFillList.map { Fill(it) }
+                        val generalFillList = apiFillList.mapNotNull { Fill.fromCBProFill(it) }
 
                         if (tradingPair != null) {
                             if (prefs.areFillAlertsActive) {

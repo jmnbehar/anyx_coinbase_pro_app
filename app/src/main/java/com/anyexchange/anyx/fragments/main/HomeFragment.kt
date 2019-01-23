@@ -2,9 +2,7 @@ package com.anyexchange.anyx.fragments.main
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
@@ -23,6 +21,7 @@ class HomeFragment : RefreshFragment() {
         {
             return HomeFragment()
         }
+
         var viewPager: LockableViewPager? = null
     }
 
@@ -42,18 +41,55 @@ class HomeFragment : RefreshFragment() {
             }
 
             homePagerAdapter = HomePagerAdapter(it, childFragmentManager)
-            viewPager?.adapter = homePagerAdapter
 
-            homePagerAdapter?.marketFragment?.updateAccountsFragment = { homePagerAdapter?.accountsFragment?.refreshComplete() }
+            viewPager!!.adapter = homePagerAdapter
+
+
+            viewPager?.setCurrentItem(1)
         }
-
-
+        setHasOptionsMenu(true)
 
         return rootView
     }
 
-    override fun onPause() {
-        handler.removeCallbacks(autoRefresh)
-        super.onPause()
+    override fun refresh(onComplete: (Boolean) -> Unit) { }
+
+    override fun onResume() {
+        super.onResume()
+
+        homePagerAdapter?.setListeners()
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        val shouldShowOptions = lifecycle.isCreatedOrResumed
+        menu.setGroupVisible(R.id.group_chart_style, false)
+        menu.setGroupVisible(R.id.group_home_sort, shouldShowOptions)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        val context = context
+        val shouldSortAlphabetical = if (context == null) {
+            false
+        } else {
+            Prefs(context).sortFavoritesAlphabetical
+        }
+        if (shouldSortAlphabetical) {
+            menu?.getItem(2)?.isChecked = true
+        } else {
+            menu?.getItem(3)?.isChecked = true
+        }
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        context?.let {
+            val prefs = Prefs(it)
+            prefs.sortFavoritesAlphabetical = (item.itemId == R.id.home_sort_alphabetical)
+        }
+        item.isChecked = true
+        homePagerAdapter?.favoritesFragment?.completeRefresh()
+        return super.onOptionsItemSelected(item)
     }
 }

@@ -296,7 +296,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun miniRefresh(onFailure: (result: Result.Failure<String, FuelError>) -> Unit,  onComplete: (Boolean) -> Unit) {
-        AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+        AnyApi(apiInitData).ticker(tradingPair, onFailure) {
             if (lifecycle.isCreatedOrResumed) {
                 updateButtonsAndText()
                 onComplete(true)
@@ -397,7 +397,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             submitOrder(newOrder)
         } else {
 
-            AnyApi.ticker(apiInitData, tradingPair, onFailure) { price ->
+            AnyApi(apiInitData).ticker(tradingPair, onFailure) { price ->
                 if (price == null) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 } else {
@@ -490,7 +490,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
         newOrder.submit(apiInitData, { onFailure(it) }) { result ->
-            AnyApi.getAndStashOrderList(apiInitData, newOrder.tradingPair.exchange, null, { }, { })
+            AnyApi(apiInitData).getAndStashOrderList(newOrder.tradingPair.exchange, null, { }, { })
             onComplete(result)
         }
     }
@@ -512,7 +512,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun switchTradingPair(newTradingPair: TradingPair) {
 
-        AnyApi.ticker(apiInitData, newTradingPair, {
+        AnyApi(apiInitData).ticker(newTradingPair, {
             //Reset to the previous trading pair
             val tradingPairs = product.tradingPairs.sortTradingPairs()
             val index = tradingPairs.indexOf(tradingPair)

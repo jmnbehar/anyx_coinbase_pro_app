@@ -89,7 +89,7 @@ class Currency(val id: String) {
 
     val orderValue: Int
         get() {
-            return knownCurrency?.orderValue ?: -999
+            return knownCurrency?.orderValue ?: 99999
         }
 
 
@@ -104,6 +104,10 @@ class Currency(val id: String) {
         val cryptoList = KnownCurrency.values().filter { it.type == Type.CRYPTO }.asSequence().map { Currency(it) }.toMutableList()
         val fiatList    = KnownCurrency.values().filter { it.type == Type.FIAT }
         val stableCoinList = KnownCurrency.values().filter { it.type == Type.STABLECOIN }
+
+        //TODO: remove this when coins stop being broken... and fix the underlying issues with showing blank coins
+        val brokenCoinList = listOf(KnownCurrency.MKR, KnownCurrency.ZIL)
+        val brokenCoinIds = brokenCoinList.map { it.symbol }
 
         val USD = Currency(KnownCurrency.USD)
         val USDC = Currency(KnownCurrency.USDC)

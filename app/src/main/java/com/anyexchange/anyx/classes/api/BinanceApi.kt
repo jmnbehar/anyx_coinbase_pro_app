@@ -116,7 +116,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
     }
 
-    class candles(initData: ApiInitData?, val tradingPair: TradingPair, val interval: String, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
+    class candles(initData: ApiInitData?, val tradingPair: TradingPair, val interval: Interval, var startTime: Long? = null, var endTime: Long? = null, var limit: Int? = null) : BinanceApi(initData) {
         //limit default = 500, max is 1000
         fun getCandles(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Candle>) -> Unit) {
             var pagesReceived = 0
@@ -136,20 +136,24 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 try {
                     val candleDoubleList: List<List<Any>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                     var candles = candleDoubleList.mapNotNull {
-                        val openTime = (it[0] as? Long)
-                        val open = (it[1] as? Double) ?: 0.0
-                        val high = (it[2] as? Double) ?: 0.0
-                        val low = (it[3] as? Double) ?: 0.0
-                        val close = (it[4] as? Double)
-                        val volume = (it[5] as? Double) ?: 0.0
-                        val closeTime = (it[6] as? Long)
-                        val quoteAssetVolume = (it[7] as? Double)
-                        val tradeCount = (it[8] as? Long)
-                        val takerBuyBaseAssetVolume = (it[9] as? Double)
-                        val takerBuyQuoteAssetVolume = (it[10] as? Double)
-                        if (close != null && openTime != null && closeTime != null) {
+                        val openTimeMillis = (it[0] as? Double)?.toLong()
+                        val open = (it[1] as? String)?.toDoubleOrNull() ?: 0.0
+                        val high = (it[2] as? String)?.toDoubleOrNull() ?: 0.0
+                        val low = (it[3] as? String)?.toDoubleOrNull() ?: 0.0
+                        val close = (it[4] as? String)?.toDoubleOrNull()
+                        val volume = (it[5] as? String)?.toDoubleOrNull() ?: 0.0
+                        val closeTimeMillis = (it[6] as? Double)?.toLong()
+                        val quoteAssetVolume = (it[7] as? String)?.toDoubleOrNull()
+                        val tradeCount = (it[8] as? Double)?.toLong()
+                        val takerBuyBaseAssetVolume = (it[9] as? String)?.toDoubleOrNull()
+                        val takerBuyQuoteAssetVolume = (it[10] as? String)?.toDoubleOrNull()
+                        if (close != null && openTimeMillis != null && closeTimeMillis != null) {
+                            val openTime = openTimeMillis / 1000
+                            val closeTime = closeTimeMillis / 1000 + 1
                             Candle(openTime, closeTime, low, high, open, close, volume, quoteAssetVolume, tradeCount, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume)
-                        } else { null }
+                        } else {
+                            null
+                        }
                     }
                     val now = Calendar.getInstance()
 
@@ -181,8 +185,18 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
 
-        fun getAllAccountInfo(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            //TODO: fix this
+        fun getAndLink(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
+            this.get(onFailure) {
+                for (binanceBalance in it) {
+                    val account = Account(binanceBalance)
+                    val accounts = Product.map[account.currency.id]?.accounts?.toMutableMap()
+                    accounts?.put(account.exchange, account)
+                    if (accounts != null) {
+                        Product.map[account.currency.id]?.accounts = accounts
+                    }
+                }
+                onComplete()
+            }
         }
 
         private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
@@ -228,30 +242,23 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accountHistory(initData: ApiInitData?, val accountId: String) : BinanceApi(initData)
-    class products(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceSymbol>) -> Unit) {
+    class ticker(initData: ApiInitData?, val tradingPair: TradingPair?) : BinanceApi(initData) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker?) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val productList: List<BinanceSymbol> = Gson().fromJson(result.value, object : TypeToken<List<BinanceSymbol>>() {}.type)
-                    onComplete(productList)
-                } catch (e: JsonSyntaxException) {
-                    onComplete(listOf())
-//                    onFailure(Result.Failure(FuelError(e)))
-                } catch (e: IllegalStateException) {
-                    onComplete(listOf())
-//                    onFailure(Result.Failure(FuelError(e)))
-                }
-            }
-        }
-    }
-    class ticker(initData: ApiInitData?, val tradingPair: TradingPair) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceTicker) -> Unit) {
-            this.executeRequest(onFailure) { result ->
-                try {
-                    val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
-                    val product = Product.map[tradingPair.baseCurrency.id]
-                    product?.setPriceForTradingPair(ticker.price, tradingPair)
-                    onComplete(ticker)
+                    tradingPair?.let {
+                        val ticker: BinanceTicker = Gson().fromJson(result.value, object : TypeToken<BinanceTicker>() {}.type)
+                        Product.map[tradingPair.baseCurrency.id]?.setPriceForTradingPair(ticker.price, tradingPair)
+                        onComplete(ticker)
+                    } ?: run {
+                        val tickerList: List<BinanceTicker> = Gson().fromJson(result.value, object : TypeToken<List<BinanceTicker>>() {}.type)
+                        for (ticker in tickerList) {
+                            TradingPair.tradingPairFromId(Exchange.Binance, ticker.symbol)?.let {
+                                Product.map[it.baseCurrency.id]?.setPriceForTradingPair(ticker.price, it)
+                            }
+                        }
+                        onComplete(null)
+                    }
                 } catch (e: JsonSyntaxException) {
                     onFailure(Result.Failure(FuelError(e)))
                 } catch (e: IllegalStateException) {
@@ -269,7 +276,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             this.executeRequest(onFailure) {result ->
                 try {
                     val apiOrderList: List<BinanceOrder> = Gson().fromJson(result.value, object : TypeToken<List<BinanceOrder>>() {}.type)
-                    val generalOrderList = apiOrderList.map { Order(it) }
+                    val generalOrderList = apiOrderList.mapNotNull { Order.fromBinanceOrder(it) }
 
                     if (context != null) {
                         Prefs(context).stashOrders(generalOrderList, Exchange.Binance)
@@ -338,7 +345,23 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class ping(initData: ApiInitData?) : BinanceApi(initData)
     class time(initData: ApiInitData?) : BinanceApi(initData)
 
-    class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData)
+    class exchangeInfo(initData: ApiInitData?) : BinanceApi(initData) {
+        fun getProducts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceSymbol>) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                try {
+                    val exchangeInfo : BinanceExchangeInfo = Gson().fromJson(result.value, object : TypeToken<BinanceExchangeInfo>() {}.type)
+                    val productList = exchangeInfo.symbols
+                    onComplete(productList)
+                } catch (e: JsonSyntaxException) {
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: IllegalStateException) {
+                    onComplete(listOf())
+//                    onFailure(Result.Failure(FuelError(e)))
+                }
+            }
+        }
+    }
     class orderBookDepth(initData: ApiInitData?, val productId: String, val limit: Int? = null) : BinanceApi(initData)
     class recentTrades(initData: ApiInitData?, val productId: String, val limit: Int?) : BinanceApi(initData)
     class historicalTrades(initData: ApiInitData?, val productId: String, val limit: Int?, val fromTradeId: Long? = null) : BinanceApi(initData)
@@ -362,7 +385,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             return when (this) {
                 is account -> Method.GET
                 is accountHistory -> Method.GET
-                is products -> Method.GET
 
                 is cancelOrder -> Method.DELETE
                 is listOrders -> Method.GET
@@ -416,7 +438,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
             tempPath += when (this) {
                 is accountHistory -> "/accounts/$accountId/ledger"
-                is products -> "/products"
 
                 is sendCrypto -> "v3/withdraw.html"
                 is depositHistory -> "v3/depositHistory.html"
@@ -432,7 +453,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is recentTrades -> "v1/trades"
                 is historicalTrades -> "v1/historicalTrades"
                 is aggregatedTrades -> "v1/aggTrades"
-                is dayChangeStats -> "v3/ticker/24hr"
+                is dayChangeStats -> "v1/ticker/24hr"
                 is ticker -> "v3/ticker/price"
                 is bookTicker -> "v3/ticker/bookTicker"
 
@@ -501,20 +522,22 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
                 is candles -> {
                     paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
-                    paramList.add(Pair("interval", interval))
+                    paramList.add(Pair("interval", interval.toString()))
                     if (startTime != null) {
                         paramList.add(Pair("startTime", startTime.toString()))
                     }
                     if (endTime != null) {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
-                    if (limit != null) {
-                        paramList.add(Pair("limit", limit.toString()))
-                    }
+                    paramList.add(Pair("limit", (limit ?: 500).toString()))
                     return paramList.toList()
                 }
                 is ticker -> {
-                    return listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+                    return if (tradingPair == null) {
+                        listOf()
+                    } else {
+                        listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+                    }
                 }
                 is bookTicker -> {
                     if (productId != null) {
@@ -733,6 +756,43 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             return headers
         }
 
+    enum class Interval {
+        OneMinute,
+        ThreeMinutes,
+        FiveMinutes,
+        FifteenMinutes,
+        ThirtyMinutes,
+        OneHour,
+        TwoHours,
+        FourHours,
+        SixHours,
+        EightHouts,
+        TwelveHours,
+        OneDay,
+        ThreeDays,
+        OneWeek,
+        OneMonth;
+
+        override fun toString(): String {
+            return when (this) {
+                OneMinute -> "1m"
+                ThreeMinutes -> "3m"
+                FiveMinutes -> "5m"
+                FifteenMinutes -> "15m"
+                ThirtyMinutes -> "30m"
+                OneHour -> "1h"
+                TwoHours -> "2h"
+                FourHours -> "4h"
+                SixHours -> "6h"
+                EightHouts -> "8h"
+                TwelveHours -> "12h"
+                OneDay -> "1d"
+                ThreeDays -> "3d"
+                OneWeek -> "1w"
+                OneMonth -> "1M"
+            }
+        }
+    }
 
     enum class TimeInForce {
         GoodTilCancelled,

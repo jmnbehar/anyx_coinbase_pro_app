@@ -4,34 +4,45 @@ import android.arch.lifecycle.LifecycleOwner
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
+import android.widget.PopupMenu
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.api.AnyApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_market.view.*
 
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class MarketFragment : RefreshFragment(), LifecycleOwner {
-    private var currentProduct: Product? = null
+open class MarketFragment : RefreshFragment(), LifecycleOwner {
     private var listView: ListView? = null
-
     lateinit var inflater: LayoutInflater
-
-    var updateAccountsFragment = { }
+    open val onlyShowFavorites = false
 
     companion object {
-        fun newInstance(): MarketFragment
-        {
-            return MarketFragment()
-        }
+        var resetHomeListeners = { }
     }
+
+    private val productList: List<Product>
+        get() {
+            return if (onlyShowFavorites) {
+                val context = context
+                if (context != null && Prefs(context).sortFavoritesAlphabetical) {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProductsAlphabetical()
+                } else {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProducts()
+                }
+            } else {
+                Product.map.values.toList().sortProductsAlphabetical()
+            }
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -41,95 +52,154 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
-        val selectGroup = lambda@ { product: Product ->
-            currentProduct = product
-            (activity as com.anyexchange.anyx.activities.MainActivity).goToChartFragment(product.currency)
+        val onClick = lambda@ { product: Product ->
+            (activity as MainActivity).goToChartFragment(product.currency)
         }
 
-        val quoteCurrency = context?.let {
-            val prefs = Prefs(it)
-            prefs.defaultQuoteCurrency
-        } ?: run {
-            Account.defaultFiatCurrency
+        listView?.adapter = ProductListViewAdapter(inflater, productList, onlyShowFavorites, onClick) { view, product ->
+            setIsFavorite(view, product)
         }
-        listView?.adapter = ProductListViewAdapter(inflater, quoteCurrency, selectGroup)
 //        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView
     }
 
-    override fun onResume() {
-        //be smarter about only showing this when necessary, and maybe only refresh when necessary as well
-        swipeRefreshLayout?.isRefreshing = true
+    private fun setIsFavorite(view: View, product: Product) {
+        context?.let {
+            val popup = PopupMenu(it, view)
+            //Inflating the Popup using xml file
+            popup.menuInflater.inflate(R.menu.product_popup_menu, popup.menu)
+            popup.menu.findItem(R.id.setFavorite).isVisible = !product.isFavorite
+            popup.menu.findItem(R.id.removeFavorite).isVisible = product.isFavorite
 
-        super.onResume()
-        autoRefresh = Runnable {
-            if (!skipNextRefresh) {
-                refresh {}
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                when (item?.itemId) {
+                    R.id.setFavorite -> {
+                        product.isFavorite = true
+                    }
+                    R.id.removeFavorite -> {
+                        product.isFavorite = false
+                    }
+                }
+                if (onlyShowFavorites) {
+                    completeRefresh()
+                } else {
+                    favoritesUpdateListener?.favoritesUpdated()
+                }
+                true
             }
-            skipNextRefresh = false
+            popup.show()
+        }
+    }
+
+    override fun refresh(onComplete: (Boolean) -> Unit) {
+        refresh(true, onComplete)
+    }
+    fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
+            toast("Error: ${result.errorMessage}")
+            onComplete(false)
+        }
+        swipeRefreshLayout?.isRefreshing = true
+        if (onlyShowFavorites) {
+            var productsUpdated = 0
+            val time = Timespan.DAY
+            val favoriteProducts = Product.favorites()
+            val count = favoriteProducts.count()
+            for (product in favoriteProducts) {
+                //always check multiple exchanges?
+                product.defaultTradingPair?.let { tradingPair ->
+                    product.updateCandles(time, tradingPair, apiInitData, {
+                        //OnFailure
+                    }) {
+                        //OnSuccess
+                        if (lifecycle.isCreatedOrResumed) {
+                            productsUpdated++
+                            if (productsUpdated == count) {
+                                //update Favorites Tab
+                                if (fullRefresh) {
+                                    refreshCompleteListener?.refreshComplete()
+                                }
+                                completeRefresh()
+                                onComplete(true)
+                            }
+                        }
+                    }
+                } ?: run {
+                    onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+        } else {
+            AnyApi(apiInitData).updateAllTickers(onFailure) {
+                //Complete Market Refresh
+                if (fullRefresh) {
+                    refreshCompleteListener?.refreshComplete()
+                }
+                favoritesUpdateListener?.favoritesUpdated()
+                completeRefresh()
+                onComplete(true)
+            }
+        }
+    }
+
+    fun completeRefresh() {
+        endRefresh()
+        (listView?.adapter as? ProductListViewAdapter)?.productList = productList
+//        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+
+        context?.let {
+            Prefs(it).stashedProducts = Product.map.values.toList()
+        }
+        (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
+        listView?.invalidateViews()
+        listView?.refreshDrawableState()
+
+//        val run = Runnable {
+//            //reload content
+//            (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
+//            listView?.invalidateViews()
+//            listView?.refreshDrawableState()
+//        }
+//        activity?.runOnUiThread(run)
+    }
+
+    private var favoritesUpdateListener: FavoritesUpdateListener? = null
+    interface FavoritesUpdateListener {
+        fun favoritesUpdated()
+    }
+    fun setFavoritesListener(listener: FavoritesUpdateListener) {
+        this.favoritesUpdateListener = listener
+    }
+
+
+    private var refreshCompleteListener: RefreshCompleteListener? = null
+    interface RefreshCompleteListener {
+        fun refreshComplete()
+    }
+    fun setRefreshListener(listener: RefreshCompleteListener) {
+        this.refreshCompleteListener = listener
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resetHomeListeners()
+        if (onlyShowFavorites) {
+            autoRefresh = Runnable {
+                if (!skipNextRefresh) {
+                    refresh {}
+                }
+                skipNextRefresh = false
+
+                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+            }
             handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
         }
-        handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
-
-        refresh { endRefresh() }
+        refresh(false) { endRefresh() }
     }
 
     override fun onPause() {
         handler.removeCallbacks(autoRefresh)
         super.onPause()
-    }
-
-
-    override fun refresh(onComplete: (Boolean) -> Unit) {
-        var productsUpdated = 0
-        val time = Timespan.DAY
-        skipNextRefresh = true
-
-        //TODO: add this back occasionally
-//        Product.updateAllProducts({ }, {})
-
-        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error!: ${result.errorMessage}") }
-        //TODO: check in about refreshing product list
-        //TODO: use Account's updateAllCandles
-        for (product in Product.map.values) {
-            //always check multiple exchanges?
-            product.defaultTradingPair?.let { tradingPair ->
-                product.updateCandles(time, tradingPair, apiInitData, {
-                    //OnFailure
-                    if (context != null) {
-                        toast(R.string.error_message)
-                    }
-                    onComplete(false)
-                }) { didUpdate ->
-                    //OnSuccess
-                    if (lifecycle.isCreatedOrResumed) {
-                        if (didUpdate) {
-                            productsUpdated++
-                            if (productsUpdated == Product.map.size) {
-                                context?.let {
-                                    Prefs(it).stashedProducts = Product.map.values.toList()
-                                }
-                                (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                                updateAccountsFragment()
-                                onComplete(true)
-                            }
-                        } else {
-                            AnyApi.ticker(apiInitData, tradingPair, onFailure) {
-                                productsUpdated++
-                                if (productsUpdated == Product.map.size) {
-                                    (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
-                                    updateAccountsFragment()
-                                    onComplete(true)
-                                }
-                            }
-                        }
-                    }
-                }
-            } ?: run {
-                onFailure(Result.Failure(FuelError(Exception())))
-            }
-        }
     }
 }

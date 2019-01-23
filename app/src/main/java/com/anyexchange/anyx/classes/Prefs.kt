@@ -37,6 +37,8 @@ private const val REJECTED_API_KEYS = "rejected_api_keys"
 private const val QUICK_CHANGE_ALERTS_ACTIVE = "rapid_price_movement"
 private const val DEFAULT_QUOTE = "DEFAULT_QUOTE"
 private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
+private const val SORT_FAVORITES_ALPHABETICAL = "SORT_FAVORITES_ALPHABETICAL"
+private const val LAST_VERSION_CODE = "LAST_VERSION_CODE"
 
 private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
 
@@ -188,6 +190,12 @@ class Prefs (var context: Context) {
         get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
         set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, value).apply()
 
+    // someday this will actually work
+    val isAnyXProActive: Boolean
+        get() = false
+//        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
+//        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
+
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
         if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {
@@ -296,6 +304,14 @@ class Prefs (var context: Context) {
     var areFillAlertsActive: Boolean
         get() = prefs.getBoolean(ARE_ALERT_FILLS_ON, true)
         set(value) = prefs.edit().putBoolean(ARE_ALERT_FILLS_ON, value).apply()
+
+    var sortFavoritesAlphabetical: Boolean
+        get() = prefs.getBoolean(SORT_FAVORITES_ALPHABETICAL, false)
+        set(value) = prefs.edit().putBoolean(SORT_FAVORITES_ALPHABETICAL, value).apply()
+
+    var lastVersionCode: Int
+        get() = prefs.getInt(LAST_VERSION_CODE, 0)
+        set(value) = prefs.edit().putInt(LAST_VERSION_CODE, value).apply()
 
     fun isApiKeyValid(apiKey: String) : Boolean? {
         val approvedApiKeys = prefs.getStringSet(APPROVED_API_KEYS, setOf<String>())?.toMutableSet() ?: mutableSetOf()

@@ -101,8 +101,9 @@ class SettingsFragment : RefreshFragment() {
                 dismissProgressSpinner()
                 toast("Failed to update products")
             }
-            AnyApi.getAllProducts(apiInitData, onFailure) {
-                CBProApi.accounts(apiInitData).getAllAccountInfo(onFailure, {
+            val anyApi = AnyApi(apiInitData)
+            anyApi.getAllProducts(onFailure) {
+                anyApi.getAllAccounts(onFailure, {
                     dismissProgressSpinner()
                     toast("Products updated")
                 })

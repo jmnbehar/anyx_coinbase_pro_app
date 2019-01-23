@@ -41,7 +41,6 @@ import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
-
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     lateinit var spinnerNav: Spinner
     var defaultSpinnerColorFilter: ColorFilter? = null
@@ -56,6 +55,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarLayout: ConstraintLayout
 
+    companion object {
+        const val currentAppVersion = 17
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -95,28 +97,55 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
-        val prefs = Prefs(this)
-        prefs.shouldSavePassphrase = true
-
         defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
         spinnerNav.adapter = spinnerNavAdapter
 
+
+        val prefs = Prefs(this)
+        val isAppOutOfDate = (prefs.lastVersionCode < currentAppVersion)
+
+        val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
+            //On Failure
+            toast(R.string.error_message)
+            returnToLogin()
+        }
+        val anyApi = AnyApi(apiInitData)
         if (savedInstanceState == null) {
             spinnerNav.visibility = View.GONE
-            if (!Account.areAccountsOutOfDate()) {
+            if (Account.areAccountsOutOfDate()) {
+                signIn(false, onFailure, {
+                    //OnSuccess
+                    if (isAppOutOfDate) {
+                        showProgressBar()
+                        anyApi.getAllProducts(onFailure) {
+                            anyApi.getAllAccounts(onFailure, {
+                                prefs.lastVersionCode = currentAppVersion
+                                dismissProgressBar()
+                                goHome()
+                                setDrawerMenu()
+                            })
+                        }
+                    } else {
+                        goHome()
+                        setDrawerMenu()
+                    }
+                })
+            } else if (isAppOutOfDate) {
+                showProgressBar()
+                anyApi.getAllProducts(onFailure) {
+                    anyApi.getAllAccounts(onFailure, {
+                        prefs.lastVersionCode = currentAppVersion
+                        dismissProgressBar()
+                        goHome()
+                        setDrawerMenu()
+                    })
+                }
+            } else {
                 goHome()
                 setDrawerMenu()
-            } else {
-                signIn(false,  {//On Failure
-                    toast(R.string.error_message)
-                    returnToLogin()
-                }, { //OnSuccess
-                    goHome()
-                    setDrawerMenu()
-                } )
             }
             return
         } else {
@@ -125,13 +154,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 currency.addToList()
                 goToChartFragment(currency)
             }
-            checkAllResources({//On Failure
-                toast(R.string.error_message)
-                returnToLogin()
-            }, { //OnSuccess
+            checkAllResources(onFailure, { //OnSuccess
                 //do something maybe?
             } )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        dataFragment?.restoreData(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        dataFragment?.backupData()
     }
 
     private fun hideDrawerMenu() {
@@ -196,11 +232,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             outState?.putString(CHART_STYLE, chartFragment.chartStyle.toString())
             outState?.putLong(CHART_TIMESPAN, chartFragment.timespan.value())
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        dataFragment?.backupData()
     }
 
    private fun goHome() {
@@ -280,7 +311,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun updateAllProducts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        AnyApi.getAllProducts(apiInitData, onFailure, onSuccess)
+        AnyApi(apiInitData).getAllProducts(onFailure, onSuccess)
     }
     private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         val prefs = Prefs(this)
@@ -349,7 +380,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var tickersUpdated = 0
         for (product in Product.map.values) {
             product.defaultTradingPair?.let { tradingPair ->
-                AnyApi.ticker(apiInitData, tradingPair, onFailure) {
+                AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                     tickersUpdated++
                     if (tickersUpdated == Product.map.size) {
                         onComplete()

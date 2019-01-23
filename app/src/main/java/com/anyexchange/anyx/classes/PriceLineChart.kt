@@ -131,7 +131,7 @@ class PriceLineChart : LineChart {
     fun addCandles(candles: List<Candle>, granularity: Long, timespan: Timespan, tradingPair: TradingPair) {
         val filledInCandles = if (candles.isEmpty()) {
             val startTimeRaw = Date().timeInSeconds() - timespan.value()
-            val startTime = (startTimeRaw / 300) * 300
+            val startTime = (startTimeRaw / granularity) * granularity
             val closeTime = startTime + granularity
             val price = Product.map[tradingPair.baseCurrency.id]?.priceForQuoteCurrency(tradingPair.quoteCurrency) ?: 0.0
             val defaultCandle = Candle(startTime, closeTime, price, price, price, price, 0.0)

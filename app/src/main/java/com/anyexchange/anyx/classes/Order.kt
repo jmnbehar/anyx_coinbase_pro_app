@@ -33,38 +33,6 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     var showExtraInfo = false
 
-
-    constructor(binanceOrder: BinanceOrder) :
-            this(Exchange.Binance, binanceOrder.orderId.toString(), TradingPair(Exchange.Binance, binanceOrder.symbol), binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
-                    TradeType.forString(binanceOrder.type), TradeSide.forString(binanceOrder.side), Date(binanceOrder.time), binanceOrder.timeInForce, binanceOrder.stopPrice) {
-        cumulativeQuoteQty = binanceOrder.cummulativeQuoteQty
-        status = binanceOrder.status
-        icebergQty = binanceOrder.icebergQty
-        updateTime = binanceOrder.updateTime
-        isWorking = binanceOrder.isWorking
-    }
-
-    constructor(cbProOrder: CBProOrder) :
-            this(Exchange.CBPro, cbProOrder.id, TradingPair(Exchange.CBPro, cbProOrder.product_id), cbProOrder.price?.toDoubleOrNull(),
-                    cbProOrder.size.toDoubleOrZero(), cbProOrder.filled_size.toDoubleOrZero(), if (cbProOrder.stop_price != null) { TradeType.STOP } else { TradeType.forString(cbProOrder.type) },
-                    TradeSide.forString(cbProOrder.side), cbProOrder.created_at.dateFromCBProApiDateString() ?: Date(), cbProOrder.time_in_force, cbProOrder.stop_price?.toDoubleOrNull()) {
-
-        status = cbProOrder.status
-
-        stp = cbProOrder.stp
-        funds = cbProOrder.funds?.toDoubleOrNull()
-        specifiedFunds = cbProOrder.specified_funds?.toDoubleOrNull()
-        postOnly = cbProOrder.post_only
-        doneAt = cbProOrder.done_at?.dateFromCBProApiDateString()
-        expireTime = cbProOrder.expire_time?.dateFromCBProApiDateString()
-        doneReason = cbProOrder.done_reason
-        fillFees = cbProOrder.fill_fees
-        filledSize = cbProOrder.filled_size
-        executedValue = cbProOrder.executed_value
-        settled = cbProOrder.settled
-        stopType = cbProOrder.stop
-    }
-
     fun summary(resources: Resources) : String {
             return when (type) {
                 TradeType.MARKET -> specifiedFunds?.let {
@@ -91,6 +59,65 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
 
     companion object {
 
+        fun fromBinanceOrder(binanceOrder: BinanceOrder) : Order? {
+            val tradingPair = TradingPair.tradingPairFromId(Exchange.Binance, binanceOrder.symbol)
+            return if (tradingPair != null) {
+                val type = TradeType.forString(binanceOrder.type)
+                val side = TradeSide.forString(binanceOrder.side)
+                val id = binanceOrder.orderId.toString()
+                val tempOrder = Order(Exchange.Binance, id, tradingPair, binanceOrder.price, binanceOrder.origQty, binanceOrder.executedQty,
+                        type, side, Date(binanceOrder.time), binanceOrder.timeInForce, binanceOrder.stopPrice)
+                tempOrder.cumulativeQuoteQty = binanceOrder.cummulativeQuoteQty
+                tempOrder.status = binanceOrder.status
+                tempOrder.icebergQty = binanceOrder.icebergQty
+                tempOrder.updateTime = binanceOrder.updateTime
+                tempOrder.isWorking = binanceOrder.isWorking
+
+                tempOrder
+            } else {
+                null
+            }
+        }
+
+
+        fun fromCbProOrder(cbProOrder: CBProOrder) : Order? {
+            val tradingPair = TradingPair.tradingPairFromId(Exchange.CBPro, cbProOrder.product_id)
+
+            return if (tradingPair != null) {
+                val price = cbProOrder.price?.toDoubleOrNull()
+                val size = cbProOrder.size.toDoubleOrZero()
+                val filledSize = cbProOrder.filled_size.toDoubleOrZero()
+                val type = if (cbProOrder.stop_price != null) {
+                    TradeType.STOP
+                } else {
+                    TradeType.forString(cbProOrder.type)
+                }
+                val side = TradeSide.forString(cbProOrder.side)
+                val date = cbProOrder.created_at.dateFromCBProApiDateString() ?: Date()
+                val tempOrder = Order(Exchange.CBPro, cbProOrder.id, tradingPair, price, size, filledSize, type,
+                        side, date, cbProOrder.time_in_force, cbProOrder.stop_price?.toDoubleOrNull())
+
+                tempOrder.status = cbProOrder.status
+
+                tempOrder.stp = cbProOrder.stp
+                tempOrder.funds = cbProOrder.funds?.toDoubleOrNull()
+                tempOrder.specifiedFunds = cbProOrder.specified_funds?.toDoubleOrNull()
+                tempOrder.postOnly = cbProOrder.post_only
+                tempOrder.doneAt = cbProOrder.done_at?.dateFromCBProApiDateString()
+                tempOrder.expireTime = cbProOrder.expire_time?.dateFromCBProApiDateString()
+                tempOrder.doneReason = cbProOrder.done_reason
+                tempOrder.fillFees = cbProOrder.fill_fees
+                tempOrder.filledSize = cbProOrder.filled_size
+                tempOrder.executedValue = cbProOrder.executed_value
+                tempOrder.settled = cbProOrder.settled
+                tempOrder.stopType = cbProOrder.stop
+
+                tempOrder
+            } else {
+                null
+            }
+            }
+
 //        fun getAndStashList(apiInitData: ApiInitData?, exchange: Exchange, currency: Currency?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
 //            AnyApi.getAndStashOrderList(apiInitData, exchange, currency, onFailure, onSuccess)
 //        }
@@ -101,7 +128,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
             //TODO: use Exchange.values()
             val exchangeList = listOf(Exchange.CBPro)
             for (exchange in exchangeList) {
-                AnyApi.getAndStashOrderList(apiInitData, exchange, currency, onFailure) {
+                AnyApi(apiInitData).getAndStashOrderList(exchange, currency, onFailure) {
                     exchangesChecked++
                     fullOrderList.addAll(it)
                     if (exchangesChecked == exchangeList.size) {
@@ -113,6 +140,6 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
     }
 
     fun cancel(apiInitData: ApiInitData?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: (Result.Success<String, FuelError>) -> Unit) {
-        AnyApi.cancelOrder(apiInitData, this, onFailure, onSuccess)
+        AnyApi(apiInitData).cancelOrder(this, onFailure, onSuccess)
     }
 }

@@ -227,12 +227,25 @@ fun TabLayout.setupCryptoTabs(onSelected: (Currency) -> Unit) {
 }
 
 fun List<TradingPair>.sortTradingPairs() : List<TradingPair> {
-    return this.sortedWith(compareBy({ it.quoteCurrency == Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue })).reversed()
+    return this.sortedWith(compareBy({ it.quoteCurrency != Account.defaultFiatCurrency }, { it.quoteCurrency.orderValue }))
 }
 
 fun List<Currency>.sortCurrencies() : List<Currency> {
-    //TODO: consider switching this to BTC:
-    return this.sortedWith(compareBy({ Product.map[it.id]?.totalValueOfRelevantAccounts(Currency.USD) ?: 0.0 }, { it.orderValue })).reversed()
+    //TODO: consider switching to BTC:
+    return this.sortedWith(compareBy({ (Product.map[it.id]?.totalValueOfRelevantAccounts(Currency.USD) ?: 0.0) * -1 }, { it.orderValue }, { it.id }))
+}
+
+fun List<Product>.sortProducts() : List<Product> {
+    //TODO: consider switching to BTC:
+    return this.sortedWith(compareBy({ it.totalValueOfRelevantAccounts(Currency.USD) * -1 }, { it.currency.orderValue }, { it.currency.id }))
+}
+
+fun List<Product>.sortProductsAlphabetical() : List<Product> {
+    return this.sortedWith(compareBy { it.currency.id })
+}
+
+fun List<Account>.sortAccounts() : List<Account> {
+    return this.sortedWith(compareBy({ it.defaultValue * -1 }, { it.currency.orderValue }, { it.currency.id }))
 }
 
 

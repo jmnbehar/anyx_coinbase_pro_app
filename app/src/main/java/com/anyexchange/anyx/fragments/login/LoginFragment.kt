@@ -198,7 +198,6 @@ class LoginFragment : RefreshFragment()  {
                 }, {
                     //TODO: destroy and remove self from backstack
                     removeSelfFromBackstack()
-//                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 } )
             }
         }
@@ -208,7 +207,7 @@ class LoginFragment : RefreshFragment()  {
         activity?.supportFragmentManager?.let {
             val transaction = it.beginTransaction()
             transaction.remove(this)
-            transaction.commit()
+            transaction.commitAllowingStateLoss()
             it.popBackStack()
 //                activity?.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }

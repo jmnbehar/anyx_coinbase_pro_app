@@ -17,7 +17,10 @@ import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.textColor
 
@@ -39,11 +42,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var accountTotalCandles = listOf<Candle>()
 
     companion object {
-        fun newInstance(): AccountsFragment {
-            return AccountsFragment()
-        }
         val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
-
+        var resetHomeListeners = { }
     }
 
     private val granularity = Candle.granularityForTimespan(Timespan.DAY)
@@ -130,11 +130,6 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             })
         }
         dialogFragment.showNow(fragmentManager, "stablecoinConversionDialog")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refresh { endRefresh() }
     }
 
     override fun onValueSelected(entry: Entry, h: Highlight) {
@@ -244,10 +239,22 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        refresh(true, onComplete)
+    }
+    fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
+        val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
+            toast("Error: ${result.errorMessage}")
+            onComplete(false)
+        }
+        swipeRefreshLayout?.isRefreshing = true
         val context = context
         if (context != null && Prefs(context).isLoggedIn) {
-            CBProApi.accounts(apiInitData).updateAllAccounts({ onComplete(false) }) {
-                refreshComplete()
+            CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
+                //Complete accounts refresh
+                if (fullRefresh) {
+                    refreshCompleteListener?.refreshComplete()
+                }
+                completeRefresh()
                 onComplete(true)
             }
         } else {
@@ -255,7 +262,8 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         }
     }
 
-    fun refreshComplete() {
+    private fun completeRefresh() {
+        endRefresh()
         (accountList?.adapter as? AccountListViewAdapter)?.notifyDataSetChanged()
         accountList?.setHeightBasedOnChildren()
 
@@ -271,4 +279,20 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             lineChart?.addCandles(accountTotalCandles, granularity, Timespan.DAY, dummyTradingPair)
         }
     }
+
+    private var refreshCompleteListener: MarketFragment.RefreshCompleteListener? = null
+
+    fun setRefreshListener(listener: MarketFragment.RefreshCompleteListener) {
+        this.refreshCompleteListener = listener
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        resetHomeListeners()
+        setValueAndPercentChangeTexts()
+
+        refresh(false) { endRefresh() }
+    }
+
 }
