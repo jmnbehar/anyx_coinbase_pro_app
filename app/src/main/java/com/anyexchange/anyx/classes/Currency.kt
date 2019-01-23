@@ -87,11 +87,11 @@ class Currency(val id: String) {
 
     val developerAddress = knownCurrency?.developerAddress
 
-    //Order Value sucks and should be removed whenever possible
     val orderValue: Int
         get() {
             return knownCurrency?.orderValue ?: 99999
         }
+
 
     val relevantStableCoin: Currency?
         get() = knownCurrency?.relevantStableCoin
@@ -101,19 +101,19 @@ class Currency(val id: String) {
 
 
     companion object {
-        val cryptoList = KnownCurrency.cryptoList().map { Currency(it) }.toMutableList()
-        val fiatList   = KnownCurrency.fiatList().map { Currency(it) }.toMutableList()
-        val stableCoinList = listOf(Currency(CurrencyUSDC()))
+        val cryptoList = KnownCurrency.values().filter { it.type == Type.CRYPTO }.asSequence().map { Currency(it) }.toMutableList()
+        val fiatList    = KnownCurrency.values().filter { it.type == Type.FIAT }
+        val stableCoinList = KnownCurrency.values().filter { it.type == Type.STABLECOIN }
 
-        val USD = Currency(CurrencyUSD())
-        val USDC = Currency(CurrencyUSDC())
-        val EUR = Currency(CurrencyEUR())
-        val GBP = Currency(CurrencyGBP())
+        val USD = Currency(KnownCurrency.USD)
+        val USDC = Currency(KnownCurrency.USDC)
+        val EUR = Currency(KnownCurrency.EUR)
+        val GBP = Currency(KnownCurrency.GBP)
 
-        val BTC = Currency(CurrencyBTC())
-        val ETH = Currency(CurrencyETH())
-        val BCH = Currency(CurrencyBCH())
-        val LTC = Currency(CurrencyLTC())
+        val BTC = Currency(KnownCurrency.BTC)
+        val ETH = Currency(KnownCurrency.ETH)
+        val BCH = Currency(KnownCurrency.BCH)
+        val LTC = Currency(KnownCurrency.LTC)
 
 
         val OTHER = Currency("Other")
