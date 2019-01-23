@@ -29,7 +29,7 @@ class PriceAlert(var price: Double, val currency: Currency, val triggerIfAbove: 
         } else {
             1
         }
-        val currencyCode = currency.orderValue
+        val currencyCode = currency.id.hashCode()
         val priceCode = (price * 100).toInt()
         return (triggerCode * 10000000) + (currencyCode * 1000000) + priceCode
     }
