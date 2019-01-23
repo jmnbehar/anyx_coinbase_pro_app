@@ -34,15 +34,7 @@ class LoginHelpActivity : AppCompatActivity() {
     internal var currentPage = 0   //  to track page position
     val pageCount = 5
 
-    /**
-     * The [android.support.v4.view.PagerAdapter] that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * [android.support.v4.app.FragmentStatePagerAdapter].
-     */
-    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+    private var sectionsPagerAdapter: SectionsPagerAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +42,7 @@ class LoginHelpActivity : AppCompatActivity() {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+        sectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
 
         indicators = listOf(intro_indicator_0, intro_indicator_1, intro_indicator_2, intro_indicator_3, intro_indicator_4, intro_indicator_5, intro_indicator_6, intro_indicator_7)
@@ -71,7 +63,7 @@ class LoginHelpActivity : AppCompatActivity() {
 
         // Set up the ViewPager with the sections adapter.
         viewPager = home_view_pager
-        viewPager.adapter = mSectionsPagerAdapter
+        viewPager.adapter = sectionsPagerAdapter
 
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
@@ -139,10 +131,6 @@ class LoginHelpActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * A [FragmentPagerAdapter] that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
@@ -157,9 +145,6 @@ class LoginHelpActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     class PlaceholderFragment : Fragment() {
         private var mobileTitles = arrayOf<String>()
         private var mobileStrings = arrayOf<String>()
@@ -195,16 +180,8 @@ class LoginHelpActivity : AppCompatActivity() {
         }
 
         companion object {
-            /**
-             * The fragment argument representing the section number for this
-             * fragment.
-             */
             private const val ARG_SECTION_NUMBER = "section_number"
 
-            /**
-             * Returns a new instance of this fragment for the given section
-             * number.
-             */
             fun newInstance(sectionNumber: Int): PlaceholderFragment {
                 val fragment = PlaceholderFragment()
                 val args = Bundle()

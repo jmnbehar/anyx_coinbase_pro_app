@@ -37,15 +37,7 @@ class OnboardActivity : AppCompatActivity() {
     internal var currentPage = 0   //  to track page position
     val pageCount = 5
 
-    /**
-     * The [android.support.v4.view.PagerAdapter] that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * [android.support.v4.app.FragmentStatePagerAdapter].
-     */
-    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+    private var sectionsPagerAdapter: SectionsPagerAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +45,7 @@ class OnboardActivity : AppCompatActivity() {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+        sectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
         val color1 = ResourcesCompat.getColor(resources, R.color.ltc_light, null)
         val color2 = ResourcesCompat.getColor(resources, R.color.btc_light, null)
@@ -79,7 +71,7 @@ class OnboardActivity : AppCompatActivity() {
 
         // Set up the ViewPager with the sections adapter.
         viewPager = home_view_pager
-        viewPager.adapter = mSectionsPagerAdapter
+        viewPager.adapter = sectionsPagerAdapter
 
         val evaluator = ArgbEvaluator()
 
