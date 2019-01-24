@@ -18,12 +18,14 @@ import android.widget.Filter
 
 
 
+
+
 /**
  * Created by anyexchange on 3/14/2018.
  */
 class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int, private var currencyList: List<Currency>) :
         ArrayAdapter<Currency>(context, resource, textViewId, currencyList), Filterable, ISpinnerSelectedView {
-    private var filteredCurrencyList = currencyList
+    private var backupCurrencyList = currencyList
     private val mStringFilter = StringFilter()
 
     internal class ViewHolder {
@@ -34,7 +36,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         val view = getViewGeneric(position, convertView, parent)
         view.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_accent))
 
-        return getViewGeneric(position, convertView, parent)
+        return view
     }
 
     override fun getSelectedView(position: Int): View {
@@ -42,7 +44,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
 
         view = View.inflate(context, R.layout.list_row_spinner_nav, null)
         val displayName = view!!.findViewById(R.id.txt_currency) as TextView
-        val currency = filteredCurrencyList[position]
+        val currency = currencyList[position]
         displayName.text = "$currency - ${currency.fullName}"
 
         return view
@@ -53,7 +55,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-//        val currency = currencyList[position]
+//        val currency = backupCurrencyList[position]
 //        val dropDownView = getViewGeneric(position, convertView, parent)
 //        dropDownView.backgroundColor = currency.colorFade(context)
         return getViewGeneric(position, convertView, parent)
@@ -74,8 +76,8 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
             outputView = convertView
         }
 
-        if (filteredCurrencyList.size > position) {
-            val currency = filteredCurrencyList[position]
+        if (currencyList.size > position) {
+            val currency = currencyList[position]
 
             viewHolder.currencyTxt?.text = "$currency - ${currency.fullName}"
             viewHolder.currencyTxt?.visibility = View.VISIBLE
@@ -89,18 +91,30 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         return mStringFilter
     }
 
+
+    override fun getCount(): Int {
+        return if (currencyList == null) 0 else currencyList.size + 1
+    }
+
+    override fun getItem(position: Int): Currency? {
+        return if (currencyList != null)
+            currencyList[position]
+        else
+            null
+    }
+
     inner class StringFilter : Filter() {
 
         override fun performFiltering(constraint: CharSequence): FilterResults {
             val filterResults = FilterResults()
             if (TextUtils.isEmpty(constraint)) {
-                filterResults.count = currencyList.size
-                filterResults.values = currencyList
+                filterResults.count = backupCurrencyList.size
+                filterResults.values = backupCurrencyList
                 return filterResults
             }
             val filteredCurrencies = mutableListOf<Currency>()
             val searchTerm = constraint.toString().toLowerCase()
-            for (currency in currencyList) {
+            for (currency in backupCurrencyList) {
                 if (currency.id.toLowerCase().contains(searchTerm)) {
                     filteredCurrencies.add(currency)
                 } else if (currency.fullName.toLowerCase().contains(searchTerm)) {
@@ -113,7 +127,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         }
 
         override fun publishResults(constraint: CharSequence, results: FilterResults) {
-            filteredCurrencyList = results.values as List<Currency>
+            currencyList = results.values as List<Currency>
             notifyDataSetChanged()
         }
     }
