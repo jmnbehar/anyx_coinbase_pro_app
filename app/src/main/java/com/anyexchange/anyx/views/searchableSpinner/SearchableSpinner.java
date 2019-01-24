@@ -678,6 +678,10 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
             });
             spinnerListContainerAnimator.setDuration(closeAnimationTime);
             spinnerListContainerAnimator.start();
+            if (mSpinnerListView.getAdapter().getCount() <= 1) {
+                mSpinnerListContainer.setVisibility(View.GONE);
+                mPopupWindow.dismiss();
+            }
         }
     }
 
