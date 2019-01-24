@@ -12,13 +12,19 @@ import com.anyexchange.anyx.classes.inflate
 import com.anyexchange.anyx.R
 import gr.escsoft.michaelprimez.searchablespinner.interfaces.ISpinnerSelectedView
 import kotlinx.android.synthetic.main.list_row_spinner_nav.view.*
+import android.text.TextUtils
+import android.widget.Filter
+
+
+
 
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class NavigationSpinnerAdapter(context: Context, var resource: Int, textViewId: Int, var currencyList: List<Currency>) :
+class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int, private var currencyList: List<Currency>) :
         ArrayAdapter<Currency>(context, resource, textViewId, currencyList), Filterable, ISpinnerSelectedView {
-
+    private var filteredCurrencyList = currencyList
+    private val mStringFilter = StringFilter()
 
     internal class ViewHolder {
         var currencyTxt: TextView? = null
@@ -33,14 +39,12 @@ class NavigationSpinnerAdapter(context: Context, var resource: Int, textViewId: 
 
     override fun getSelectedView(position: Int): View {
         var view: View? = null
-        if (position == 0) {
-            view = noSelectionView
-        } else {
-            view = View.inflate(context, R.layout.list_row_spinner_nav, null)
-            val displayName = view!!.findViewById(R.id.txt_currency) as TextView
-            val currency = currencyList[position]
-            displayName.text = "$currency - ${currency.fullName}"
-        }
+
+        view = View.inflate(context, R.layout.list_row_spinner_nav, null)
+        val displayName = view!!.findViewById(R.id.txt_currency) as TextView
+        val currency = filteredCurrencyList[position]
+        displayName.text = "$currency - ${currency.fullName}"
+
         return view
     }
 
@@ -70,10 +74,48 @@ class NavigationSpinnerAdapter(context: Context, var resource: Int, textViewId: 
             outputView = convertView
         }
 
-        val currency = currencyList[position]
+        if (filteredCurrencyList.size > position) {
+            val currency = filteredCurrencyList[position]
 
-        viewHolder.currencyTxt?.text = "$currency - ${currency.fullName}"
-
+            viewHolder.currencyTxt?.text = "$currency - ${currency.fullName}"
+            viewHolder.currencyTxt?.visibility = View.VISIBLE
+        } else {
+            viewHolder.currencyTxt?.visibility = View.GONE
+        }
         return outputView
     }
+
+    override fun getFilter(): Filter {
+        return mStringFilter
+    }
+
+    inner class StringFilter : Filter() {
+
+        override fun performFiltering(constraint: CharSequence): FilterResults {
+            val filterResults = FilterResults()
+            if (TextUtils.isEmpty(constraint)) {
+                filterResults.count = currencyList.size
+                filterResults.values = currencyList
+                return filterResults
+            }
+            val filteredCurrencies = mutableListOf<Currency>()
+            val searchTerm = constraint.toString().toLowerCase()
+            for (currency in currencyList) {
+                if (currency.id.toLowerCase().contains(searchTerm)) {
+                    filteredCurrencies.add(currency)
+                } else if (currency.fullName.toLowerCase().contains(searchTerm)) {
+                    filteredCurrencies.add(currency)
+                }
+            }
+            filterResults.count = filteredCurrencies.size
+            filterResults.values = filteredCurrencies
+            return filterResults
+        }
+
+        override fun publishResults(constraint: CharSequence, results: FilterResults) {
+            filteredCurrencyList = results.values as List<Currency>
+            notifyDataSetChanged()
+        }
+    }
+
 }

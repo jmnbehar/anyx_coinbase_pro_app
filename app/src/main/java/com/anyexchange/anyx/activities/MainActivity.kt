@@ -15,10 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.ListAdapter
@@ -173,6 +170,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onPause() {
         super.onPause()
         dataFragment?.backupData()
+    }
+
+    override fun onTouchEvent(event: MotionEvent) : Boolean {
+        if (!spinnerNav.isInsideSearchEditText(event)) {
+            spinnerNav.hideEdit()
+        }
+        return super.onTouchEvent(event);
     }
 
     private fun hideDrawerMenu() {
