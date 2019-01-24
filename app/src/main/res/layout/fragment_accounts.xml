@@ -10,7 +10,7 @@
     android:orientation="vertical">
 
 
-    <com.anyexchange.anyx.classes.LockableScrollView
+    <com.anyexchange.anyx.views.LockableScrollView
         android:id="@+id/lockscroll_accounts"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -91,5 +91,5 @@
             </ListView>
 
     </LinearLayout>
-    </com.anyexchange.anyx.classes.LockableScrollView>
+    </com.anyexchange.anyx.views.LockableScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

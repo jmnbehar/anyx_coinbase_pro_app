@@ -16,6 +16,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.anyexchange.anyx.adapters.AccountListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.api.CBProApi

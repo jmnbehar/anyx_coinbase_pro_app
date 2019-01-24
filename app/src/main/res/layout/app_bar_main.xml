@@ -19,7 +19,7 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" >
 
 
-            <gr.escsoft.michaelprimez.searchablespinner.SearchableSpinner
+            <com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
                 android:id="@+id/toolbar_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

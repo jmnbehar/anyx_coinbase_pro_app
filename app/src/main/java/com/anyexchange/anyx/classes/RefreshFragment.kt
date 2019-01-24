@@ -2,7 +2,6 @@ package com.anyexchange.anyx.classes
 
 import android.content.pm.ActivityInfo
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
@@ -11,7 +10,7 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.api.ApiInitData
-import gr.escsoft.michaelprimez.searchablespinner.interfaces.OnItemSelectedListener
+import com.anyexchange.anyx.views.searchableSpinner.OnItemSelectedListener
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert

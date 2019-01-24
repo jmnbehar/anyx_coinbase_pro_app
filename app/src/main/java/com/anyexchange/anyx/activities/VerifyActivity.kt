@@ -12,6 +12,7 @@ import android.view.View
 import com.anyexchange.anyx.R
 
 import android.widget.Button
+import com.anyexchange.anyx.views.LockableViewPager
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.verify.VerifyCompleteFragment
 import com.anyexchange.anyx.fragments.verify.VerifyIntroFragment

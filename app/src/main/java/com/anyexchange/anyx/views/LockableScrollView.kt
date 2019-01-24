@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes
+package com.anyexchange.anyx.views
 
 import android.annotation.SuppressLint
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes
+package com.anyexchange.anyx.views
 
 /**
  * Created by anyexchange on 2/18/2018.

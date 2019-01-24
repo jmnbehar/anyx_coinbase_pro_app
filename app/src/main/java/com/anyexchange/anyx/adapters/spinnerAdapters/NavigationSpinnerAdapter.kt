@@ -10,14 +10,10 @@ import android.widget.TextView
 import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.inflate
 import com.anyexchange.anyx.R
-import gr.escsoft.michaelprimez.searchablespinner.interfaces.ISpinnerSelectedView
 import kotlinx.android.synthetic.main.list_row_spinner_nav.view.*
 import android.text.TextUtils
 import android.widget.Filter
-
-
-
-
+import com.anyexchange.anyx.views.searchableSpinner.ISpinnerSelectedView
 
 
 /**

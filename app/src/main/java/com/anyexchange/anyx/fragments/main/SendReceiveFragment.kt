@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.views.LockableViewPager
 import com.anyexchange.anyx.adapters.SendRecievePagerAdapter
 import kotlinx.android.synthetic.main.fragment_home.view.*
 

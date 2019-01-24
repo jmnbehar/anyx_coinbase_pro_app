@@ -17,10 +17,7 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.*
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
 import android.widget.ProgressBar
-import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
@@ -35,7 +32,7 @@ import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
-import gr.escsoft.michaelprimez.searchablespinner.SearchableSpinner
+import com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -67,8 +64,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = object : ActionBarDrawerToggle(
                 this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             override fun onDrawerOpened(drawerView: View) {
-                super.onDrawerOpened(drawerView)
+                spinnerNav.hideEdit()
                 hideSoftKeyboard()
+                super.onDrawerOpened(drawerView)
             }
         }
 
@@ -173,7 +171,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onTouchEvent(event: MotionEvent) : Boolean {
-        if (!spinnerNav.isInsideSearchEditText(event)) {
+        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
             spinnerNav.hideEdit()
         }
         return super.onTouchEvent(event);
@@ -214,6 +212,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 drawer_layout.closeDrawer(GravityCompat.START)
                 goToFragment(FragmentType.LOGIN)
             }
+
         }
     }
 
@@ -346,20 +345,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            spinnerNav.hideEdit()
+        } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-            //super.onBackPressed()
-            if (supportFragmentManager.backStackEntryCount > 1) {
-                supportFragmentManager.popBackStack()
-                val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
-                currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
-                if (currentFragment !is LoginFragment) {
-                    setDrawerMenu()
-                }
-            } else {
-                finishAffinity()
+        } else if (supportFragmentManager.backStackEntryCount > 1) {
+            supportFragmentManager.popBackStack()
+            val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
+            currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
+            if (currentFragment !is LoginFragment) {
+                setDrawerMenu()
             }
+        } else {
+            finishAffinity()
         }
     }
 
