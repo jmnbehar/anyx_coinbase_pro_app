@@ -13,7 +13,7 @@ import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.api.AnyApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_market.view.*

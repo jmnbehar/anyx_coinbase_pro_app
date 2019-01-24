@@ -8,9 +8,9 @@ import android.app.job.JobInfo
 import android.content.ComponentName
 import android.app.job.JobParameters
 import android.app.job.JobService
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.api.CBProApi
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt

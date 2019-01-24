@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes.api
+package com.anyexchange.anyx.api
 
 import android.content.Context
 import android.os.Handler

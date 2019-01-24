@@ -1,9 +1,9 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.BinanceAccountFill
-import com.anyexchange.anyx.classes.api.CBProFill
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.api.BinanceAccountFill
+import com.anyexchange.anyx.api.CBProFill
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*

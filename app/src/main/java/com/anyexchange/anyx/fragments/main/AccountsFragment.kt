@@ -18,7 +18,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_accounts.view.*

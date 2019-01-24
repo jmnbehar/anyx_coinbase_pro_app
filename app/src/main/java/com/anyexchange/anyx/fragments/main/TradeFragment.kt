@@ -12,15 +12,15 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.api.CBProApi.ErrorMessage
+import com.anyexchange.anyx.api.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.*
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
 
 /**
  * Created by anyexchange on 11/5/2017.

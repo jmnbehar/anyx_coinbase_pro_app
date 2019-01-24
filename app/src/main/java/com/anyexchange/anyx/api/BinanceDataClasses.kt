@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes.api
+package com.anyexchange.anyx.api
 
 //Data classes for Binance  Exchange Calls
 

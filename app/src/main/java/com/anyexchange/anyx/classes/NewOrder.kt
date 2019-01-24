@@ -2,8 +2,8 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
 import com.anyexchange.anyx.fragments.main.TradeFragment
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result

@@ -8,7 +8,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import org.jetbrains.anko.textColor
 

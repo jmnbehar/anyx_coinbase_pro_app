@@ -2,7 +2,7 @@ package com.anyexchange.anyx.classes
 
 import android.content.res.Resources
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.*
+import com.anyexchange.anyx.api.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*

@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import se.simbio.encryption.Encryption
 
 /**

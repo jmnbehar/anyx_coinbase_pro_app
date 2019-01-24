@@ -2,8 +2,7 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.anyexchange.anyx.classes.api.CBProAccount
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
@@ -192,7 +191,7 @@ class Prefs (var context: Context) {
 
     // someday this will actually work
     val isAnyXProActive: Boolean
-        get() = false
+        get() = true
 //        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
 //        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
 
