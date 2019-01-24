@@ -7,15 +7,16 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
-import android.widget.AdapterView
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.classes.api.ApiInitData
+import gr.escsoft.michaelprimez.searchablespinner.interfaces.OnItemSelectedListener
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
+
 
 /**
  * Created by anyexchange on 1/15/2018.
@@ -59,7 +60,7 @@ open class RefreshFragment: Fragment() {
 
         if (shouldHideSpinner) {
             (activity as? MainActivity)?.let { mainActivity ->
-                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+//                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
                 mainActivity.spinnerNav.visibility = View.GONE
                 mainActivity.toolbar.title = resources.getString(R.string.app_name)
             }
@@ -71,26 +72,32 @@ open class RefreshFragment: Fragment() {
         (activity as? MainActivity)?.let { mainActivity ->
             val sortedList = currencyList.sortCurrencies()
             val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, sortedList)
-            mainActivity.spinnerNav.adapter = spinnerNavAdapter
+
+            mainActivity.spinnerNav.setAdapter(spinnerNavAdapter)
 
             mainActivity.toolbar.title = ""
-            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+//            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
             mainActivity.spinnerNav.isEnabled = true
             mainActivity.spinnerNav.visibility = View.VISIBLE
-            mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (parent?.getItemAtPosition(position) is Currency) {
-                        val selectedItem = parent.getItemAtPosition(position) as Currency
-                        onItemSelected(selectedItem)
+
+            val spinnerNavItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(view: View, position: Int, id: Long) {
+                    (mainActivity.spinnerNav.selectedItem as? Currency)?.let {
+                        onItemSelected(it)
                     }
+//                    if (parent?.getItemAtPosition(position) is Currency) {
+//                        val selectedItem = parent.getItemAtPosition(position) as Currency
+//                        onItemSelected(selectedItem)
+//                    }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {}
+                override fun onNothingSelected() { }
             }
+            mainActivity.spinnerNav.setOnItemSelectedListener(spinnerNavItemSelectedListener)
+
+
             if (defaultSelection != null) {
-                val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-                val currentIndex = spinnerList.indexOf(defaultSelection)
-                mainActivity.spinnerNav.setSelection(currentIndex)
+                mainActivity.spinnerNav.selectedItem = defaultSelection
             }
         }
     }

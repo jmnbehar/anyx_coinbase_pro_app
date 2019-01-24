@@ -20,6 +20,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import android.widget.ProgressBar
 import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
@@ -36,13 +38,15 @@ import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.classes.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
+import gr.escsoft.michaelprimez.searchablespinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
+
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    lateinit var spinnerNav: Spinner
+    lateinit var spinnerNav: SearchableSpinner
     var defaultSpinnerColorFilter: ColorFilter? = null
 
     private var currentFragment: RefreshFragment? = null
@@ -97,11 +101,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
-        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+//        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
-        spinnerNav.adapter = spinnerNavAdapter
+
+        spinnerNav.setAdapter(spinnerNavAdapter)
 
 
         val prefs = Prefs(this)
