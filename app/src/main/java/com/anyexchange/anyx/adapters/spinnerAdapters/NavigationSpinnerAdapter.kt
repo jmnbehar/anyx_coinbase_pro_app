@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.adapters.spinnerAdapters
 
 import android.content.Context
+import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
@@ -36,12 +37,11 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
     }
 
     override fun getSelectedView(position: Int): View {
-        var view: View? = null
-
-        view = View.inflate(context, R.layout.list_row_spinner_nav, null)
-        val displayName = view!!.findViewById(R.id.txt_currency) as TextView
+        val view = View.inflate(context, R.layout.list_row_spinner_nav, null)
+        val displayName = view.findViewById(R.id.txt_currency) as TextView
         val currency = currencyList[position]
         displayName.text = "$currency - ${currency.fullName}"
+        displayName.setTextColor(Color.WHITE)
 
         return view
     }
@@ -114,6 +114,8 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
                 if (currency.id.toLowerCase().contains(searchTerm)) {
                     filteredCurrencies.add(currency)
                 } else if (currency.fullName.toLowerCase().contains(searchTerm)) {
+                    filteredCurrencies.add(currency)
+                } else if (currency.symbol.toLowerCase().contains(searchTerm)) {
                     filteredCurrencies.add(currency)
                 }
             }

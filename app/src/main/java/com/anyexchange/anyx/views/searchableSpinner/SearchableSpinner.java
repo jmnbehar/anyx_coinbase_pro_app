@@ -583,6 +583,8 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
 
     }
 
+
+    //TODO: fix hiding empty editView
     private void hideEditView() {
         mViewState = ViewState.ShowingAnimation;
         if (mStatusListener != null)
