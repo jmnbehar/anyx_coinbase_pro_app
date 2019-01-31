@@ -6,7 +6,9 @@ import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.views.LockableViewPager
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 /**
@@ -48,6 +50,7 @@ class HomeFragment : RefreshFragment() {
 
             viewPager?.setCurrentItem(1)
         }
+
         setHasOptionsMenu(true)
 
         return rootView
@@ -56,6 +59,11 @@ class HomeFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) { }
 
     override fun onResume() {
+        val currencyList = Product.map.keys.map { Currency(it) }
+        showNavSpinner(null, currencyList) { selectedCurrency ->
+            (activity as MainActivity).goToChartFragment(selectedCurrency)
+        }
+
         super.onResume()
 
         homePagerAdapter?.setListeners()

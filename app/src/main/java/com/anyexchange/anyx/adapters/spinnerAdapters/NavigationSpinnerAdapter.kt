@@ -89,14 +89,11 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
 
 
     override fun getCount(): Int {
-        return if (currencyList == null) 0 else currencyList.size + 1
+        return currencyList.size
     }
 
     override fun getItem(position: Int): Currency? {
-        return if (currencyList != null)
-            currencyList[position]
-        else
-            null
+        return currencyList[position]
     }
 
     inner class StringFilter : Filter() {
@@ -125,7 +122,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         }
 
         override fun publishResults(constraint: CharSequence, results: FilterResults) {
-            currencyList = results.values as List<Currency>
+            currencyList = results.values as? List<Currency> ?: listOf()
             notifyDataSetChanged()
         }
     }

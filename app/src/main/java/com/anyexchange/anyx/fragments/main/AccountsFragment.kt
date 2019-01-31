@@ -289,7 +289,9 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun onResume() {
+        shouldHideSpinner = false
         super.onResume()
+
         resetHomeListeners()
         setValueAndPercentChangeTexts()
 

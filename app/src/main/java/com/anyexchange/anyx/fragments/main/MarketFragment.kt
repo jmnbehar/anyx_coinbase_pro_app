@@ -60,6 +60,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
             }
         })
 //        listView?.setHeightBasedOnChildren()
+        shouldHideSpinner = false
 
         dismissProgressSpinner()
         return rootView
@@ -139,6 +140,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun onResume() {
+        shouldHideSpinner = false
         super.onResume()
         resetHomeListeners()
         refresh(false) { endRefresh() }

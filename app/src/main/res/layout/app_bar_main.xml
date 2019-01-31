@@ -28,7 +28,7 @@
                 app:RevealViewBackgroundColor="?attr/colorPrimary"
                 app:SearchViewBackgroundColor="?attr/colorPrimary"
                 app:ShowBorders="false"
-                app:RevealEmptyText="Touch to select"/>
+                app:RevealEmptyText="AnyX"/>
 
         </android.support.v7.widget.Toolbar>
 

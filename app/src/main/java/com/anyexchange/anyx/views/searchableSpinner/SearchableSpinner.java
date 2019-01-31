@@ -240,6 +240,7 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
             if (mCurrSelectedView == null && !TextUtils.isEmpty(mRevealEmptyText)) {
                 TextView textView = new TextView(mContext);
                 textView.setText(mRevealEmptyText);
+                textView.setTextSize(20);
                 mCurrSelectedView = new SelectedView(textView, -1, 0);
                 mRevealItem.addView(textView);
             }
@@ -311,6 +312,7 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
         } else {
             TextView textView = new TextView(mContext);
             textView.setText(mRevealEmptyText);
+            textView.setTextSize(20);
             mCurrSelectedView = new SelectedView(textView, -1, 0);
             mRevealItem.addView(textView);
         }

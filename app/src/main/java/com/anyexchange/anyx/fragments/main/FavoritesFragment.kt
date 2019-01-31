@@ -20,7 +20,6 @@ import com.anyexchange.anyx.adapters.FavoritesListViewAdapter
 import com.anyexchange.anyx.classes.LazyLoader
 
 
-
 /**
  * Created by anyexchange on 11/5/2017.
  */
@@ -63,7 +62,6 @@ class FavoritesFragment : RefreshFragment(), LifecycleOwner {
                 (listView?.adapter as FavoritesListViewAdapter).increaseSize()
             }
         })
-//        listView?.setHeightBasedOnChildren()
 
         dismissProgressSpinner()
         return rootView
@@ -151,7 +149,9 @@ class FavoritesFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun onResume() {
+        shouldHideSpinner = false
         super.onResume()
+
         resetHomeListeners()
 
         autoRefresh = Runnable {
