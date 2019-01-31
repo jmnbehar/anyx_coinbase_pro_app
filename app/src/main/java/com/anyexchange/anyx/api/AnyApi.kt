@@ -1,4 +1,4 @@
-package com.anyexchange.anyx.classes.api
+package com.anyexchange.anyx.api
 
 import com.anyexchange.anyx.classes.*
 import com.github.kittinunf.fuel.core.FuelError

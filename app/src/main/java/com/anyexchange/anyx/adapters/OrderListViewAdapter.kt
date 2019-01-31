@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.list_row_order.view.*
 import org.jetbrains.anko.backgroundColor
 

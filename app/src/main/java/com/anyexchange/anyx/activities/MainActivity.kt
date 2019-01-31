@@ -24,13 +24,13 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.api.CBProApi
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
-import com.anyexchange.anyx.classes.api.AnyApi
+import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
 import com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*

@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.graphics.Color
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.Button
 import android.widget.TextView
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.dialog_trade_confirm.view.*
 
 

@@ -1,8 +1,8 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProProduct
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.api.CBProProduct
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*

@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.api.CBProApi
 import java.util.*
 
 data class Candle(

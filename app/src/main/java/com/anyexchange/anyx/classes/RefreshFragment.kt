@@ -9,7 +9,7 @@ import android.view.View
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.api.ApiInitData
 import com.anyexchange.anyx.views.searchableSpinner.OnItemSelectedListener
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor

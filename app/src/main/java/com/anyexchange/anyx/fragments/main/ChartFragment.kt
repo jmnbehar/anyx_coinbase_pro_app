@@ -31,8 +31,8 @@ import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.FillListViewAdapter
 import com.anyexchange.anyx.adapters.OrderListViewAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
