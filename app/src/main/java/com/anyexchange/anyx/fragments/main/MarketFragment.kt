@@ -17,17 +17,14 @@ import com.anyexchange.anyx.api.AnyApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_market.view.*
-import android.widget.AbsListView
-import com.anyexchange.anyx.classes.LazyLoader
-
-
 
 /**
  * Created by anyexchange on 11/5/2017.
  */
-class MarketFragment : RefreshFragment(), LifecycleOwner {
+open class MarketFragment : RefreshFragment(), LifecycleOwner {
     private var listView: ListView? = null
     lateinit var inflater: LayoutInflater
+    open val onlyShowFavorites = false
 
     companion object {
         var resetHomeListeners = { }
@@ -35,7 +32,16 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
 
     private val productList: List<Product>
         get() {
-            return Product.map.values.toList().sortProductsAlphabetical()
+            return if (onlyShowFavorites) {
+                val context = context
+                if (context != null && Prefs(context).sortFavoritesAlphabetical) {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProductsAlphabetical()
+                } else {
+                    Product.map.values.filter { it.isFavorite }.toList().sortProducts()
+                }
+            } else {
+                Product.map.values.toList().sortProductsAlphabetical()
+            }
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -50,15 +56,9 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
             (activity as MainActivity).goToChartFragment(product.currency)
         }
 
-        listView?.adapter = ProductListViewAdapter(inflater, productList, onClick) { view, product ->
+        listView?.adapter = ProductListViewAdapter(inflater, productList, onlyShowFavorites, onClick) { view, product ->
             setIsFavorite(view, product)
         }
-
-        listView?.setOnScrollListener(object : LazyLoader() {
-            override fun loadMore(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
-                (listView?.adapter as ProductListViewAdapter).increaseSize()
-            }
-        })
 //        listView?.setHeightBasedOnChildren()
         shouldHideSpinner = false
 
@@ -83,7 +83,11 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
                         product.isFavorite = false
                     }
                 }
-                favoritesUpdateListener?.favoritesUpdated()
+                if (onlyShowFavorites) {
+                    completeRefresh()
+                } else {
+                    favoritesUpdateListener?.favoritesUpdated()
+                }
                 true
             }
             popup.show()
@@ -99,21 +103,51 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
             onComplete(false)
         }
         swipeRefreshLayout?.isRefreshing = true
-
-        AnyApi(apiInitData).updateAllTickers(onFailure) {
-            //Complete Market Refresh
-            if (fullRefresh) {
-                refreshCompleteListener?.refreshComplete()
+        if (onlyShowFavorites) {
+            var productsUpdated = 0
+            val time = Timespan.DAY
+            val favoriteProducts = Product.favorites()
+            val count = favoriteProducts.count()
+            for (product in favoriteProducts) {
+                //always check multiple exchanges?
+                product.defaultTradingPair?.let { tradingPair ->
+                    product.updateCandles(time, tradingPair, apiInitData, {
+                        //OnFailure
+                    }) {
+                        //OnSuccess
+                        if (lifecycle.isCreatedOrResumed) {
+                            productsUpdated++
+                            if (productsUpdated == count) {
+                                //update Favorites Tab
+                                if (fullRefresh) {
+                                    refreshCompleteListener?.refreshComplete()
+                                }
+                                completeRefresh()
+                                onComplete(true)
+                            }
+                        }
+                    }
+                } ?: run {
+                    onFailure(Result.Failure(FuelError(Exception())))
+                }
             }
-            favoritesUpdateListener?.favoritesUpdated()
-            completeRefresh()
-            onComplete(true)
+        } else {
+            AnyApi(apiInitData).updateAllTickers(onFailure) {
+                //Complete Market Refresh
+                if (fullRefresh) {
+                    refreshCompleteListener?.refreshComplete()
+                }
+                favoritesUpdateListener?.favoritesUpdated()
+                completeRefresh()
+                onComplete(true)
+            }
         }
     }
 
-    private fun completeRefresh() {
+    fun completeRefresh() {
         endRefresh()
         (listView?.adapter as? ProductListViewAdapter)?.productList = productList
+//        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
 
         context?.let {
             Prefs(it).stashedProducts = Product.map.values.toList()
@@ -121,6 +155,14 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
         listView?.invalidateViews()
         listView?.refreshDrawableState()
+
+//        val run = Runnable {
+//            //reload content
+//            (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
+//            listView?.invalidateViews()
+//            listView?.refreshDrawableState()
+//        }
+//        activity?.runOnUiThread(run)
     }
 
     private var favoritesUpdateListener: FavoritesUpdateListener? = null
@@ -130,6 +172,7 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
     fun setFavoritesListener(listener: FavoritesUpdateListener) {
         this.favoritesUpdateListener = listener
     }
+
 
     private var refreshCompleteListener: RefreshCompleteListener? = null
     interface RefreshCompleteListener {
@@ -143,7 +186,22 @@ class MarketFragment : RefreshFragment(), LifecycleOwner {
         shouldHideSpinner = false
         super.onResume()
         resetHomeListeners()
+        if (onlyShowFavorites) {
+            autoRefresh = Runnable {
+                if (!skipNextRefresh) {
+                    refresh {}
+                }
+                skipNextRefresh = false
+
+                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+            }
+            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+        }
         refresh(false) { endRefresh() }
     }
 
+    override fun onPause() {
+        handler.removeCallbacks(autoRefresh)
+        super.onPause()
+    }
 }
