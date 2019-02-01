@@ -249,8 +249,8 @@ enum class KnownCurrency {
                 USDC,
                 USD,
                 EUR,
-                GBP -> Color.BLACK
-                else -> Color.BLACK
+                GBP -> Color.WHITE
+                else -> Color.WHITE
             }
         } else {
             when (this) {
@@ -265,8 +265,8 @@ enum class KnownCurrency {
                 USDC,
                 USD,
                 EUR,
-                GBP -> Color.WHITE
-                else -> Color.WHITE
+                GBP -> Color.BLACK
+                else -> Color.BLACK
             }
         }
     }

@@ -472,4 +472,8 @@ You\'re good to go!</item>
     <string name="stable_coin_conversion_amount_label">Amount: </string>
 
 
+    <string name="done_search">Done Search</string>
+    <string name="start_search">Start search</string>
+    <string name="search">Search...</string>
+    <string name="empty_list">No Items Found</string>
 </resources>

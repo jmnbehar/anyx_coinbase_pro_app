@@ -12,6 +12,7 @@ import android.view.View
 import com.anyexchange.anyx.R
 
 import android.widget.Button
+import com.anyexchange.anyx.views.LockableViewPager
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.verify.VerifyCompleteFragment
 import com.anyexchange.anyx.fragments.verify.VerifyIntroFragment
@@ -33,7 +34,7 @@ class VerifyActivity : AppCompatActivity() {
 
     private var blockBackButton = false
 
-    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+    private var sectionsPagerAdapter: SectionsPagerAdapter? = null
 
     companion object {
         var onComplete: (Boolean) -> Unit = { }
@@ -46,7 +47,7 @@ class VerifyActivity : AppCompatActivity() {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+        sectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
         nextBtn = btn_verify_next
 
@@ -61,7 +62,7 @@ class VerifyActivity : AppCompatActivity() {
 
         // Set up the ViewPager with the sections adapter.
         viewPager = verify_view_pager
-        viewPager.adapter = mSectionsPagerAdapter
+        viewPager.adapter = sectionsPagerAdapter
 
         viewPager.isLocked = true
 

@@ -14,8 +14,8 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Unit) : BaseAdapter() {
-    private var sortedAccountList: List<Account>
+class AccountListViewAdapter(val context: Context) : BaseAdapter() {
+    var sortedAccountList: List<Account>
     init {
         sortedAccountList = sortedAccountList()
     }
@@ -78,8 +78,6 @@ class AccountListViewAdapter(val context: Context, var onClick: (Account) -> Uni
         val accounts = sortedAccountList
         if(i < accounts.size) {
             val account = accounts[i]
-            outputView.setOnClickListener { onClick(account) }
-
             when (account.currency.type) {
                 Currency.Type.FIAT -> {
                     viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)

@@ -23,7 +23,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.anyexchange.anyx.classes.LockableViewPager
+            <com.anyexchange.anyx.views.LockableViewPager
                 android:id="@+id/alerts_view_pager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -38,7 +38,7 @@
 
                 </android.support.design.widget.TabLayout>
 
-            </com.anyexchange.anyx.classes.LockableViewPager>
+            </com.anyexchange.anyx.views.LockableViewPager>
 
             <LinearLayout
                 android:id="@+id/layout_alert_price_layout"

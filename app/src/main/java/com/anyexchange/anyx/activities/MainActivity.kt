@@ -15,13 +15,9 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
-import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
@@ -36,14 +32,15 @@ import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.fragments.login.LoginFragment
+import com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
+
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    lateinit var spinnerNav: Spinner
-    var defaultSpinnerColorFilter: ColorFilter? = null
+    lateinit var spinnerNav: SearchableSpinner
 
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
@@ -66,8 +63,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = object : ActionBarDrawerToggle(
                 this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             override fun onDrawerOpened(drawerView: View) {
-                super.onDrawerOpened(drawerView)
+                spinnerNav.hideEdit()
                 hideSoftKeyboard()
+                super.onDrawerOpened(drawerView)
             }
         }
 
@@ -97,11 +95,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         spinnerNav = toolbar_spinner
 
-        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+//        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
-        spinnerNav.adapter = spinnerNavAdapter
+
+        spinnerNav.setAdapter(spinnerNavAdapter)
 
 
         val prefs = Prefs(this)
@@ -170,6 +169,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         dataFragment?.backupData()
     }
 
+    override fun onTouchEvent(event: MotionEvent) : Boolean {
+        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            spinnerNav.hideEdit()
+        }
+        return super.onTouchEvent(event);
+    }
+
     private fun hideDrawerMenu() {
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
@@ -205,6 +211,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 drawer_layout.closeDrawer(GravityCompat.START)
                 goToFragment(FragmentType.LOGIN)
             }
+
         }
     }
 
@@ -337,20 +344,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            spinnerNav.hideEdit()
+        } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-            //super.onBackPressed()
-            if (supportFragmentManager.backStackEntryCount > 1) {
-                supportFragmentManager.popBackStack()
-                val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
-                currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
-                if (currentFragment !is LoginFragment) {
-                    setDrawerMenu()
-                }
-            } else {
-                finishAffinity()
+        } else if (supportFragmentManager.backStackEntryCount > 1) {
+            supportFragmentManager.popBackStack()
+            val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
+            currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
+            if (currentFragment !is LoginFragment) {
+                setDrawerMenu()
             }
+        } else {
+            finishAffinity()
         }
     }
 

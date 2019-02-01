@@ -26,6 +26,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
 import android.view.MotionEvent
 import android.widget.*
+import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.FillListViewAdapter
 import com.anyexchange.anyx.adapters.OrderListViewAdapter

@@ -8,6 +8,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_alerts.view.*
 import android.view.*
+import com.anyexchange.anyx.views.LockableViewPager
 import com.anyexchange.anyx.adapters.AlertPagerAdapter
 import org.jetbrains.anko.textColor
 

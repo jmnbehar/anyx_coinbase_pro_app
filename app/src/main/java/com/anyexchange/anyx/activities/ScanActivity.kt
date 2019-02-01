@@ -15,41 +15,40 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView
  */
 class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
 
-    private var mScannerView: ZXingScannerView? = null
+    private var scannerView: ZXingScannerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // setContentView(R.layout.redeem_it);
 
-        mScannerView = ZXingScannerView(this)   // Programmatically initialize the scanner view
-        setContentView(mScannerView)
+        scannerView = ZXingScannerView(this)   // Programmatically initialize the scanner view
+        setContentView(scannerView)
 
-        mScannerView?.setResultHandler(this) // Register ourselves as a handler for scan results.
-        mScannerView?.startCamera()         // Start camera
+        scannerView?.setResultHandler(this) // Register ourselves as a handler for scan results.
+        scannerView?.startCamera()         // Start camera
 
 
     }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     override fun onPause() {
         super.onPause()
 
         try {
-            mScannerView?.stopCamera() // Stop camera on pause
+            scannerView?.stopCamera() // Stop camera on pause
         } catch (e: Exception) {
             Log.e("Error", e.message)
         }
 
-        val resultintent = Intent()
-        resultintent.putExtra("BarCode", "")
-        setResult(2, resultintent)
+        val resultIntent = Intent()
+        resultIntent.putExtra("BarCode", "")
+        setResult(2, resultIntent)
         finish()
     }
 
     override fun onBackPressed() {
 
         try {
-            mScannerView?.stopCamera() // Stop camera on pause
+            scannerView?.stopCamera() // Stop camera on pause
         } catch (e: Exception) {
             Log.e("Error", e.message)
         }
@@ -67,7 +66,7 @@ class ScanActivity : Activity(), ZXingScannerView.ResultHandler {
         Log.e("handler", rawResult.barcodeFormat.toString()) // Prints the scan format (qrcode)
 
         try {
-            mScannerView?.stopCamera()
+            scannerView?.stopCamera()
 
             val resultIntent = Intent()
             resultIntent.putExtra("BarCode", rawResult.text)
