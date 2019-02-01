@@ -31,7 +31,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     val binanceExchange = Exchange.Binance
 
-    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
+    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String)
 
     companion object {
         var credentials: ApiCredentials? = null
@@ -479,20 +479,19 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     override val params: List<Pair<String, Any?>>?
         get() {
             val paramList = mutableListOf<Pair<String, String>>()
+
             when (this) {
                 is orderBookDepth -> {
                     paramList.add(Pair("symbol", productId))
                     if (limit != null) {
                         paramList.add(Pair("limit", limit.toString()))
                     }
-                    return paramList.toList()
                 }
                 is recentTrades -> {
                     paramList.add(Pair("symbol", productId))
                     if (limit != null) {
                         paramList.add(Pair("limit", limit.toString()))
                     }
-                    return paramList.toList()
                 }
                 is historicalTrades -> {
                     paramList.add(Pair("symbol", productId))
@@ -502,7 +501,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (fromTradeId != null) {
                         paramList.add(Pair("fromId", fromTradeId.toString()))
                     }
-                    return paramList.toList()
                 }
                 is aggregatedTrades -> {
                     paramList.add(Pair("symbol", productId))
@@ -518,7 +516,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (endTime != null) {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
-                    return paramList.toList()
                 }
                 is candles -> {
                     paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
@@ -530,20 +527,16 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
                     paramList.add(Pair("limit", (limit ?: 500).toString()))
-                    return paramList.toList()
                 }
                 is ticker -> {
-                    return if (tradingPair == null) {
-                        listOf()
-                    } else {
-                        listOf(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
+                    if (tradingPair != null) {
+                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
                     }
                 }
                 is bookTicker -> {
                     if (productId != null) {
                         paramList.add(Pair("symbol", productId))
                     }
-                    return paramList.toList()
                 }
                 is dayChangeStats -> {
                     return listOf(Pair("symbol", productId))
@@ -554,32 +547,26 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     paramList.add(Pair("orderId", orderId.toString()))
 
                     paramList.add(Pair("timestamp", Date().time.toString()))
-                    return paramList.toList()
                 }
                 is cancelOrder -> {
                     paramList.add(Pair("symbol", productId))
                     paramList.add(Pair("orderId", orderId.toString()))
 
                     paramList.add(Pair("timestamp", Date().time.toString()))
-                    return paramList.toList()
                 }
                 is listOrders -> {
 //                    if (tradingPair != null) {
 //                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
 //                    }
                     paramList.add(Pair("timestamp", Date().time.toString()))
-                    return paramList.toList()
-
                 }
                 is allOrders -> {
                     paramList.add(Pair("symbol", productId))
 
                     paramList.add(Pair("timestamp", Date().time.toString()))
-                    return paramList.toList()
                 }
                 is accounts -> {
                     paramList.add(Pair("timestamp", Date().time.toString()))
-                    return paramList.toList()
                 }
 
 
@@ -600,8 +587,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
                     }
                     paramList.add(Pair("timestamp", Date().time.toString()))
-
-                    return paramList.toList()
                 }
 
                 is depositHistory -> {
@@ -615,8 +600,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
                     paramList.add(Pair("timestamp", Date().time.toString()))
-
-                    return paramList.toList()
                 }
                 is withdrawHistory -> {
                     if (currency != null) {
@@ -629,8 +612,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
                     paramList.add(Pair("timestamp", Date().time.toString()))
-
-                    return paramList.toList()
                 }
                 is depositAddress -> {
                     paramList.add(Pair("asset", currency.toString()))
@@ -639,12 +620,32 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         paramList.add(Pair("startTime", status.toString()))
                     }
                     paramList.add(Pair("timestamp", Date().time.toString()))
-
-                    return paramList.toList()
                 }
                 else -> return null
             }
+
+            val credentials = credentials
+            if (credentials != null) {
+                try {
+                    val secretDecoded: ByteArray? =  Base64.decode(credentials.apiSecret, 0)
+                    val sha256HMAC = Mac.getInstance("HmacSHA256")
+                    val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
+
+                    val paramListString = paramListToString(paramList)
+                    sha256HMAC.init(secretKey)
+                    val signature = Base64.encodeToString(sha256HMAC.doFinal(paramListString.toByteArray()), 0)
+
+                    paramList.add(Pair("signature", signature))
+
+                } catch (e: Exception) {
+                    println("API Secret Hashing Error")
+                }
+
+            }
+            return paramList.toList()
         }
+
+
     private val fullPath: String
         get() {
             params?.let { params ->
@@ -664,6 +665,17 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 return path
             }
         }
+
+    private fun paramListToString(paramList: List<Pair<String, Any?>>) : String {
+        var outputString = ""
+        for ((index, param) in paramList.withIndex()) {
+            if (index != 0) {
+                outputString += "&"
+            }
+            outputString += param.first + "=" + param.second
+        }
+        return outputString
+    }
 
     private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String, quantity: Double): JSONObject {
         val json = JSONObject()
@@ -727,26 +739,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             var headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
             if (credentials != null) {
-                val timestamp = (Date().timeInSeconds()).toString()
-                val message = if (this is fills || this is listOrders) {
-                    timestamp + method + fullPath + body
-                } else {
-                    timestamp + method + path + body
-                }
-                var hash = ""
-                try {
-                    val secretDecoded: ByteArray? = Base64.decode(credentials.apiSecret, 0)
-
-                    val sha256HMAC = Mac.getInstance("HmacSHA256")
-                    val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
-                    sha256HMAC.init(secretKey)
-                    hash = Base64.encodeToString(sha256HMAC.doFinal(message.toByteArray()), 0)
-
-                } catch (e: Exception) {
-                    println("API Secret Hashing Error")
-                }
-
-                headers = mutableMapOf(Pair("CB-ACCESS-KEY", credentials.apiKey), Pair("CB-ACCESS-PASSPHRASE", credentials.apiPassPhrase), Pair("CB-ACCESS-SIGN", hash), Pair("CB-ACCESS-TIMESTAMP", timestamp))
+                headers["X-MBX-APIKEY"] = credentials.apiKey
 
             }
 
