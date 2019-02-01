@@ -76,7 +76,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
                     completedProducts++
                     if (completedProducts >= cbProProducts.size) {
                         hasCbProCompleted = true
-                        if (hasBinanceCompleted || !isAnyXProActive) {
+                        if (hasBinanceCompleted || !isBinanceActive) {
                             onSuccess()
                         }
                     }
@@ -84,7 +84,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
             }
         }
 
-        if (isAnyXProActive) {
+        if (isBinanceActive) {
             //Binance:
             BinanceApi.ticker(apiInitData, null).get(onFailure) {
                 hasBinanceCompleted = true
@@ -119,7 +119,14 @@ class AnyApi(val apiInitData: ApiInitData?) {
             }
             Exchange.Binance -> {
                 //TODO: fix interval here, or extrapolate for timespan for cbpro also
-                val interval = BinanceApi.Interval.FiveMinutes
+                val interval = when (granularity) {
+                    TimeInSeconds.oneMinute -> BinanceApi.Interval.OneMinute
+                    TimeInSeconds.fiveMinutes -> BinanceApi.Interval.FiveMinutes
+                    TimeInSeconds.oneHour -> BinanceApi.Interval.OneHour
+                    TimeInSeconds.sixHours -> BinanceApi.Interval.SixHours
+                    TimeInSeconds.oneDay -> BinanceApi.Interval.OneDay
+                    else -> BinanceApi.Interval.OneHour
+                }
                 val now = Date().time
                 val startTime = now - ((timespan * 1000) + timeOffset)
                 val endTime = now - timeOffset
@@ -173,15 +180,16 @@ class AnyApi(val apiInitData: ApiInitData?) {
         //Do ALL exchanges
         var binanceProducts = listOf<BinanceSymbol>()
         var cbProProducts = listOf<CBProProduct>()
+
         CBProApi.products(apiInitData).get(onFailure) {
-            if (binanceProducts.isEmpty() && isAnyXProActive) {
+            if (binanceProducts.isEmpty() && isBinanceActive) {
                 cbProProducts = it
             } else {
                 compileAllProducts(it, binanceProducts)
                 onSuccess()
             }
         }
-        if (isAnyXProActive) {
+        if (isBinanceActive) {
             BinanceApi.exchangeInfo(apiInitData).getProducts(onFailure) {
                 if (cbProProducts.isEmpty()) {
                     binanceProducts = it
@@ -201,7 +209,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 CBProApi.accounts(apiInitData).getAllAccountInfo(onFailure, onSuccess)
             }
 
-            if (isAnyXProActive) {
+            if (isBinanceActive) {
                 if (BinanceApi.credentials != null) {
                     BinanceApi.accounts(apiInitData).getAndLink(onFailure, onSuccess)
                 }
@@ -242,4 +250,36 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 return false
             }
         }
+
+    private val enabledExchanges: List<Exchange>
+        get() {
+            //TODO: add setting to enable/disable exchanges
+            if (isAnyXProActive) {
+                return listOf(Exchange.CBPro, Exchange.Binance)
+            } else {
+                return listOf(Exchange.CBPro)
+            }
+        }
+
+//    private val loggedInExchanges: List<Exchange>
+//        get() {
+//            val exchangeList = mutableListOf<Exchange>()
+//            for (exchange in enabledExchanges) {
+//                when (exchange) {
+//                    Exchange.CBPro -> if (CBProApi.credentials != null) {
+//                        exchangeList.add(Exchange.CBPro)
+//                    }
+//                    Exchange.Binance -> if (BinanceApi.credentials != null) {
+//                        exchangeList.add(Exchange.Binance)
+//                    }
+//                }
+//            }
+//            return exchangeList
+//        }
+
+    val isBinanceActive: Boolean
+        get() { return enabledExchanges.contains(Exchange.Binance) }
+
+    val isBinanceLoggedIn: Boolean
+        get() { return isBinanceActive && BinanceApi.credentials != null }
 }

@@ -65,12 +65,14 @@ open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: St
             var tradingPairsChecked = 0
             val fullFillList = mutableListOf<Fill>()
             for (tradingPair in tradingPairs) {
-                AnyApi(apiInitData).getAndStashFillList(tradingPair.exchange, tradingPair, onFailure) {
-                    tradingPairsChecked++
-                    val combinedList = it.combineFills()
-                    fullFillList.addAll(combinedList)
-                    if (tradingPairsChecked == tradingPairs.size) {
-                        onSuccess(fullFillList)
+                if (tradingPair.exchange.isLoggedIn()) {
+                    AnyApi(apiInitData).getAndStashFillList(tradingPair.exchange, tradingPair, onFailure) {
+                        tradingPairsChecked++
+                        val combinedList = it.combineFills()
+                        fullFillList.addAll(combinedList)
+                        if (tradingPairsChecked == tradingPairs.size) {
+                            onSuccess(fullFillList)
+                        }
                     }
                 }
             }
