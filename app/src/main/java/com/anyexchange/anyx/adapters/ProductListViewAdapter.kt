@@ -17,7 +17,7 @@ import android.widget.TextView
  * Created by anyexchange on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean, var onClick: (Product) -> Unit, var onLongPress: (View, Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean) : BaseAdapter() {
 
     override fun getCount(): Int {
         return productList.size
@@ -106,13 +106,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
             viewHolder.percentChangeText?.visibility = View.GONE
         }
         viewHolder.priceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-
-        outputView.setOnLongClickListener {
-            onLongPress(it, product)
-            notifyDataSetChanged()
-            true
-        }
-        outputView.setOnClickListener { onClick(product) }
 
         return outputView
     }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.PopupMenu
 import com.anyexchange.anyx.adapters.ProductListViewAdapter
@@ -52,14 +53,19 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
 
         setupSwipeRefresh(rootView.swipe_refresh_layout as SwipeRefreshLayout)
 
-        val onClick = lambda@ { product: Product ->
+        listView?.adapter = ProductListViewAdapter(inflater, productList, onlyShowFavorites)
+
+        listView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
+            val product = (listView?.adapter as ProductListViewAdapter).productList[pos]
             (activity as MainActivity).goToChartFragment(product.currency)
         }
-
-        listView?.adapter = ProductListViewAdapter(inflater, productList, onlyShowFavorites, onClick) { view, product ->
+        listView?.onItemLongClickListener = AdapterView.OnItemLongClickListener { _, view, pos, _ ->
+            val product = (listView?.adapter as ProductListViewAdapter).productList[pos]
             setIsFavorite(view, product)
+            (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
+            true
         }
-//        listView?.setHeightBasedOnChildren()
+
         shouldHideSpinner = false
 
         dismissProgressSpinner()

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.TextView
 import com.github.mikephil.charting.data.Entry
@@ -18,6 +19,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.ProductListViewAdapter
 import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
@@ -80,7 +82,10 @@ class AccountsFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 HomeFragment.viewPager?.isLocked = true
             }
 
-            accountList?.adapter = AccountListViewAdapter(context) { account: Account ->
+            accountList?.adapter = AccountListViewAdapter(context)
+
+            accountList?.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
+                val account = (listView?.adapter as AccountListViewAdapter).sortedAccountList[pos]
                 onClickAccount(account)
             }
             accountList?.setHeightBasedOnChildren()

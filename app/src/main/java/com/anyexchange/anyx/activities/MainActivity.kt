@@ -41,7 +41,6 @@ import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     lateinit var spinnerNav: SearchableSpinner
-    var defaultSpinnerColorFilter: ColorFilter? = null
 
     private var currentFragment: RefreshFragment? = null
     private var dataFragment: DataFragment? = null
