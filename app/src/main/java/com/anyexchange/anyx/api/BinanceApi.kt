@@ -552,21 +552,21 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     paramList.add(Pair("symbol", productId))
                     paramList.add(Pair("orderId", orderId.toString()))
 
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 is listOrders -> {
 //                    if (tradingPair != null) {
 //                        paramList.add(Pair("symbol", tradingPair.idForExchange(binanceExchange)))
 //                    }
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 is allOrders -> {
                     paramList.add(Pair("symbol", productId))
 
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 is accounts -> {
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
 
 
@@ -586,7 +586,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         paramList.add(Pair("limit", limit.toString()))
 
                     }
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
 
                 is depositHistory -> {
@@ -599,7 +599,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (endTime != null) {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 is withdrawHistory -> {
                     if (currency != null) {
@@ -611,7 +611,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (endTime != null) {
                         paramList.add(Pair("endTime", endTime.toString()))
                     }
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 is depositAddress -> {
                     paramList.add(Pair("asset", currency.toString()))
@@ -619,34 +619,42 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     if (status != null) {
                         paramList.add(Pair("startTime", status.toString()))
                     }
-                    paramList.add(Pair("timestamp", Date().time.toString()))
+                    paramList.addTimestampAndSignature()
                 }
                 else -> return null
             }
-
-            val credentials = credentials
-            if (credentials != null) {
-                try {
-                    val secretByteArr: ByteArray? = credentials.apiSecret.toByteArray(Charset.defaultCharset())
-                    val sha256HMAC = Mac.getInstance("HmacSHA256")
-                    val secretKey = SecretKeySpec(secretByteArr, "HmacSHA256")
-
-                    val paramListString = paramListToString(paramList)
-                    sha256HMAC.init(secretKey)
-
-                    val signatureByteArray = sha256HMAC.doFinal(paramListString.toByteArray())
-
-                    val signatureHex = signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
-
-                    paramList.add(Pair("signature", signatureHex))
-
-                } catch (e: Exception) {
-                    println("API Secret Hashing Error")
-                }
-
-            }
             return paramList.toList()
         }
+
+    private fun MutableList<Pair<String, String>>.addTimestampAndSignature() {
+        this.add(Pair("timestamp", Date().time.toString()))
+        apiSignature(this)?.let {
+            this.add(Pair("signature", it))
+        }
+    }
+
+    private fun apiSignature(paramList: List<Pair<String, String>>) : String? {
+        val credentials = credentials
+        if (credentials != null) {
+            try {
+                val secretByteArr: ByteArray? = credentials.apiSecret.toByteArray(Charset.defaultCharset())
+                val sha256HMAC = Mac.getInstance("HmacSHA256")
+                val secretKey = SecretKeySpec(secretByteArr, "HmacSHA256")
+
+                val paramListString = paramListToString(paramList)
+                sha256HMAC.init(secretKey)
+
+                val signatureByteArray = sha256HMAC.doFinal(paramListString.toByteArray())
+
+                return signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
+            } catch (e: Exception) {
+                println("API Secret Hashing Error")
+                return null
+            }
+        } else {
+            return null
+        }
+    }
 
     private fun paramListToString(paramList: List<Pair<String, Any?>>) : String {
         var outputString = ""
