@@ -18,9 +18,30 @@ import android.widget.TextView
  */
 
 class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean) : BaseAdapter() {
+    var size = 20
+
+    init {
+        if (productList.size < size) {
+            size = productList.size
+        }
+    }
+    companion object {
+        const val sizeChangeAmount = 5
+    }
 
     override fun getCount(): Int {
-        return productList.size
+        return size
+    }
+
+    fun increaseSize() {
+        if (size < productList.size) {
+            if ((size + sizeChangeAmount) <= productList.size) {
+                size += sizeChangeAmount
+            } else {
+                size = productList.size
+            }
+            notifyDataSetChanged()
+        }
     }
 
     override fun getItem(i: Int): Any {

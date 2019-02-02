@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AbsListView
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.PopupMenu
@@ -65,7 +66,11 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
             (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
             true
         }
-
+        listView?.setOnScrollListener(object : LazyLoader() {
+            override fun loadMore(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+                (listView?.adapter as ProductListViewAdapter).increaseSize()
+            }
+        })
         shouldHideSpinner = false
 
         dismissProgressSpinner()
