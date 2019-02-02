@@ -9,13 +9,13 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Method
-import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.fuel.util.FuelRouting
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
+import java.nio.charset.Charset
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -172,7 +172,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
     }
 
-    class accounts(private val initData: ApiInitData?) : BinanceApi(initData) {
+    class accounts(initData: ApiInitData?) : BinanceApi(initData) {
 
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceBalance>) -> Unit) {
             this.executeRequest(onFailure) { result ->
@@ -627,15 +627,18 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             val credentials = credentials
             if (credentials != null) {
                 try {
-                    val secretDecoded: ByteArray? =  Base64.decode(credentials.apiSecret, 0)
+                    val secretByteArr: ByteArray? = credentials.apiSecret.toByteArray(Charset.defaultCharset())
                     val sha256HMAC = Mac.getInstance("HmacSHA256")
-                    val secretKey = SecretKeySpec(secretDecoded, "HmacSHA256")
+                    val secretKey = SecretKeySpec(secretByteArr, "HmacSHA256")
 
                     val paramListString = paramListToString(paramList)
                     sha256HMAC.init(secretKey)
-                    val signature = Base64.encodeToString(sha256HMAC.doFinal(paramListString.toByteArray()), 0)
 
-                    paramList.add(Pair("signature", signature))
+                    val signatureByteArray = sha256HMAC.doFinal(paramListString.toByteArray())
+
+                    val signatureHex = signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
+
+                    paramList.add(Pair("signature", signatureHex))
 
                 } catch (e: Exception) {
                     println("API Secret Hashing Error")
@@ -643,27 +646,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
             }
             return paramList.toList()
-        }
-
-
-    private val fullPath: String
-        get() {
-            params?.let { params ->
-                return if (params.isEmpty()) {
-                    path
-                } else {
-                    var fullPath = "$path?"
-                    for ((index, param) in params.withIndex()) {
-                        if (index > 0) {
-                            fullPath += "&"
-                        }
-                        fullPath += "${param.first}=${param.second}"
-                    }
-                    fullPath
-                }
-            } ?: run {
-                return path
-            }
         }
 
     private fun paramListToString(paramList: List<Pair<String, Any?>>) : String {
@@ -736,7 +718,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     override val headers: Map<String, String>?
         get() {
-            var headers: MutableMap<String, String> = mutableMapOf()
+            val headers: MutableMap<String, String> = mutableMapOf()
             val credentials = credentials
             if (credentials != null) {
                 headers["X-MBX-APIKEY"] = credentials.apiKey
@@ -759,7 +741,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         TwoHours,
         FourHours,
         SixHours,
-        EightHouts,
+        EightHours,
         TwelveHours,
         OneDay,
         ThreeDays,
@@ -777,7 +759,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 TwoHours -> "2h"
                 FourHours -> "4h"
                 SixHours -> "6h"
-                EightHouts -> "8h"
+                EightHours -> "8h"
                 TwelveHours -> "12h"
                 OneDay -> "1d"
                 ThreeDays -> "3d"
