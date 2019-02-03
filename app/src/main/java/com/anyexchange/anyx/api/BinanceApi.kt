@@ -173,14 +173,14 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accounts(initData: ApiInitData?) : BinanceApi(initData) {
-
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceBalance>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
-                    val apiAccountList: List<BinanceBalance> = Gson().fromJson(result.value, object : TypeToken<List<BinanceBalance>>() {}.type)
+                    val apiAccountData: BinanceAccount = Gson().fromJson(result.value, object  : TypeToken<BinanceAccount>() {}.type )
+                    val apiAccountList = apiAccountData.balances
                     onComplete(apiAccountList)
-                } catch (e: Exception) {
-                    onFailure(Result.Failure(FuelError(e)))
+                } catch (exception: Exception) {
+                    onFailure(Result.Failure(FuelError(exception)))
                 }
             }
         }

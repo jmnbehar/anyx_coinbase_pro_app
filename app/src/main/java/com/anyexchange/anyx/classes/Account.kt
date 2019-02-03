@@ -55,7 +55,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
     override fun toString(): String {
         val cbproAccountBalanceString = balance.format(currency)
-        return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
+        return "$exchange $currency Balance: $cbproAccountBalanceString"
     }
 
     companion object {
@@ -96,8 +96,6 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
                 }
                 return Currency.USD
             }
-
-//        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
 
         fun totalValue() : Double {
             val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()

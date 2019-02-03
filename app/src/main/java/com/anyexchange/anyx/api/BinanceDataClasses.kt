@@ -182,7 +182,7 @@ data class BinanceAccount(
         val canWithdraw: Boolean,
         val canDeposit: Boolean,
         val updateTime: Long,
-        val balances: List<Any>)
+        val balances: List<BinanceBalance>)
 
 data class BinanceBalance(
         val asset: String,

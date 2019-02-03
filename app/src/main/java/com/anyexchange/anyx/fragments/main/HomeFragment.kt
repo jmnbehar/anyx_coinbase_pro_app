@@ -63,6 +63,7 @@ class HomeFragment : RefreshFragment() {
         showNavSpinner(null, currencyList) { selectedCurrency ->
             (activity as MainActivity).goToChartFragment(selectedCurrency)
         }
+        (activity as MainActivity).spinnerNav.selectedItem = null
 
         super.onResume()
 
