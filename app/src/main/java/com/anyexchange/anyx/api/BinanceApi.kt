@@ -31,10 +31,12 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     val binanceExchange = Exchange.Binance
 
-    class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String)
+    class ApiCredentials(val apiKey: String, val apiSecret: String)
 
     companion object {
-        var credentials: ApiCredentials? = null
+        var testCredentials = ApiCredentials("QrOiJgU5LL6qfSV7dBN6XW83n8Xvt0nh3PutVmhO50fohySLb3PR1iJ0f3pMYYLV", "tv1tu21HYwKNgqaCPdhTSOEqwLUZ5Hh4sdV7rT4NNBvnslZcEnlVIEzN7DSvtKfW")
+
+        var credentials: ApiCredentials? = testCredentials
 
         const val basePath = "https://api.binance.com"
 
@@ -302,12 +304,13 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
-                        val apiFillList: List<Fill> = Gson().fromJson(result.value, object : TypeToken<List<Fill>>() {}.type)
+                        val binanceFillList: List<BinanceAccountFill> = Gson().fromJson(result.value, object : TypeToken<List<BinanceAccountFill>>() {}.type)
+                        val fillList: List<Fill> = binanceFillList.mapNotNull { Fill.fromBinanceFill(it) }
                         if (prefs.areFillAlertsActive) {
-                            checkForFillAlerts(apiFillList, tradingPair)
+                            checkForFillAlerts(fillList, tradingPair)
                         }
-                        prefs.stashFills(apiFillList, tradingPair, binanceExchange)
-                        onComplete(apiFillList)
+                        prefs.stashFills(fillList, tradingPair, binanceExchange)
+                        onComplete(fillList)
                     } catch (e: JsonSyntaxException) {
                         onFailure(Result.Failure(FuelError(e)))
                     }

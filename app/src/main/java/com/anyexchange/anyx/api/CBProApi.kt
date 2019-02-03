@@ -242,9 +242,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
             this.get(onFailure) { apiAccountList ->
                 val allCryptoAccount = Account.allCryptoAccounts()
                 for (account in allCryptoAccount.plus(Account.fiatAccounts)) {
-                    val apiAccount = apiAccountList.find { a -> a.currency == account.currency.toString() }
-                    apiAccount?.let {
-                        account.updateWithApiAccount(it)
+                    if (account.exchange == Exchange.CBPro) {
+                        apiAccountList.find { a -> a.currency == account.currency.toString() }?.let {
+                            account.updateWithApiAccount(it)
+                        }
                     }
                 }
                 onComplete()

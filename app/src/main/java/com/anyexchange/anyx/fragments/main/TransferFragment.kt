@@ -8,6 +8,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import org.jetbrains.anko.textColor
@@ -244,6 +245,19 @@ class TransferFragment : RefreshFragment() {
     private fun switchCurrency(currency: Currency) {
         this.currency = currency
         amountEditText?.setText("")
+
+        //TODO: generalize for other exchanges
+        val accounts = Product.map[currency.id]?.accounts?.values ?: listOf<Account>()
+        for (account in accounts) {
+            if (account.depositInfo == null) {
+                account.getDepositAddress(apiInitData, { }) {
+                    println("woohoo")
+                }
+            }
+        }
+    }
+
+    private fun completeSwitchCurrency() {
 
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
 

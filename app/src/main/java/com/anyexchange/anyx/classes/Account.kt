@@ -53,6 +53,27 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
     }
 
+    fun getDepositAddress(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (CBProDepositAddress) -> Unit) {
+        //TODO: move this to AnyApi
+        when (exchange) {
+            Exchange.CBPro -> {
+                coinbaseAccount?.id?.let { coinbaseAccountId ->
+                    CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { depositInfo ->
+                        onSuccess(depositInfo)
+                    }
+                } ?: run {
+                    onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+            Exchange.Binance -> {
+                BinanceApi.depositAddress(apiInitData, currency).executeRequest({ }) { result ->
+                    print(result)
+
+                }
+            }
+        }
+    }
+
     override fun toString(): String {
         val cbproAccountBalanceString = balance.format(currency)
         return "$exchange $currency Balance: $cbproAccountBalanceString"
