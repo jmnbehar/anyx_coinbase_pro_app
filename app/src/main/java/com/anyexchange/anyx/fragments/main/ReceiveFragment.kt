@@ -81,7 +81,7 @@ class ReceiveFragment : RefreshFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun showAddressInfo(addressInfo: CBProDepositAddress?) {
+    private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)
@@ -143,16 +143,18 @@ class ReceiveFragment : RefreshFragment() {
         val relevantAccount = Account.forCurrency(currency, exchange)
         val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
         if (coinbaseAccountId != null) {
-            CBProApi.depositAddress(apiInitData, coinbaseAccountId).get({ _ ->
-                dismissProgressSpinner()
+            Product.map[currency.id]?.accounts?.get(Exchange.CBPro)?.let {account ->
+                account.getDepositAddress(apiInitData, { _ ->
+                    dismissProgressSpinner()
+                    showAddressInfo(null)
+                }) { depositInfo ->
+                    dismissProgressSpinner()
+                    Account.forCurrency(currency, exchange)?.depositInfo = depositInfo
+                    showAddressInfo(depositInfo)
+                }
+
+            } ?: run {
                 showAddressInfo(null)
-            }) { depositInfo ->
-                dismissProgressSpinner()
-                Account.forCurrency(currency, exchange)?.depositInfo = depositInfo
-                showAddressInfo(depositInfo)
-            }
-            context?.let {
-                Prefs(it).stashedProducts = Product.map.values.toList()
             }
         }
     }

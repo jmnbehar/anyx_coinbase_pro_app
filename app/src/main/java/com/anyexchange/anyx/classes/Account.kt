@@ -45,7 +45,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
     var coinbaseAccount: CoinbaseAccount? = null
 
-    var depositInfo: CBProDepositAddress? = null
+    var depositInfo: DepositAddressInfo? = null
 
     fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         AnyApi(apiInitData).updateAccount(this, onFailure)  {
@@ -53,22 +53,23 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
     }
 
-    fun getDepositAddress(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: (CBProDepositAddress) -> Unit) {
+    fun getDepositAddress(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<Any, FuelError>) -> Unit, onSuccess: (DepositAddressInfo) -> Unit) {
         //TODO: move this to AnyApi
         when (exchange) {
             Exchange.CBPro -> {
                 coinbaseAccount?.id?.let { coinbaseAccountId ->
-                    CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { depositInfo ->
-                        onSuccess(depositInfo)
+                    CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { result ->
+                        val depositAddressInfo = DepositAddressInfo(result)
+                        onSuccess(depositAddressInfo)
                     }
                 } ?: run {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
             Exchange.Binance -> {
-                BinanceApi.depositAddress(apiInitData, currency).executeRequest({ }) { result ->
-                    print(result)
-
+                BinanceApi.depositAddress(apiInitData, currency).get(onFailure) { result ->
+                    val depositAddressInfo = DepositAddressInfo(result)
+                    onSuccess(depositAddressInfo)
                 }
             }
         }

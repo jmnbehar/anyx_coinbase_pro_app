@@ -338,7 +338,14 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
     }
     //add position?
-    class depositAddress(initData: ApiInitData?, val currency: Currency, val status: Boolean? = null) : BinanceApi(initData)
+    class depositAddress(initData: ApiInitData?, val currency: Currency, val status: Boolean? = null) : BinanceApi(initData) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceDepositAddress) -> Unit) {
+            this.executeRequest(onFailure) { result ->
+                val depositAddress : BinanceDepositAddress = Gson().fromJson(result.value, object : TypeToken<BinanceDepositAddress>() {}.type)
+                onComplete(depositAddress)
+            }
+        }
+    }
 
     class sendCrypto(initData: ApiInitData?, val currency: Currency, val destinationAddress: String, val destAddressTag: String?, val amount: Double, val name: String? = null) : BinanceApi(initData)
     class depositHistory(initData: ApiInitData?, val currency: Currency?, val startTime: Long? = null, val endTime: Long? = null) : BinanceApi(initData)

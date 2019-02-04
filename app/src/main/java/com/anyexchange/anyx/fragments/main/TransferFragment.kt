@@ -247,13 +247,25 @@ class TransferFragment : RefreshFragment() {
         amountEditText?.setText("")
 
         //TODO: generalize for other exchanges
-        val accounts = Product.map[currency.id]?.accounts?.values ?: listOf<Account>()
+        val accounts = Product.map[currency.id]?.accounts?.values ?: listOf()
+        var accountsChecked = 0
         for (account in accounts) {
             if (account.depositInfo == null) {
-                account.getDepositAddress(apiInitData, { }) {
-                    println("woohoo")
+                account.getDepositAddress(apiInitData, {
+                    accountsChecked++
+                    if (accountsChecked == accounts.size) {
+                        completeSwitchCurrency()
+                    }
+                }) {
+                    accountsChecked++
+                    if (accountsChecked == accounts.size) {
+                        completeSwitchCurrency()
+                    }
                 }
             }
+        }
+        if (accounts.isEmpty()) {
+            completeSwitchCurrency()
         }
     }
 
