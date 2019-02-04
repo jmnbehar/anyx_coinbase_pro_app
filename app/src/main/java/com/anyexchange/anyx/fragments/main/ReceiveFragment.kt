@@ -144,7 +144,7 @@ class ReceiveFragment : RefreshFragment() {
         val coinbaseAccountId = relevantAccount?.coinbaseAccount?.id
         if (coinbaseAccountId != null) {
             Product.map[currency.id]?.accounts?.get(Exchange.CBPro)?.let {account ->
-                account.getDepositAddress(apiInitData, { _ ->
+                account.getDepositAddress(apiInitData, {
                     dismissProgressSpinner()
                     showAddressInfo(null)
                 }) { depositInfo ->

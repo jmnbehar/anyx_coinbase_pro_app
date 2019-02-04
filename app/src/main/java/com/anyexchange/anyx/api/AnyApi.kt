@@ -217,6 +217,20 @@ class AnyApi(val apiInitData: ApiInitData?) {
         }
     }
 
+    fun sendCrypto(currency: Currency, amount: Double, sourceExchange: Exchange, destAddress: String, onFailure: (Result.Failure<ByteArray, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        when (sourceExchange) {
+            Exchange.CBPro -> {
+                CBProApi.sendCrypto(apiInitData, amount, currency, destAddress).executePost(onFailure) {
+                    onSuccess()
+                }
+            }
+            Exchange.Binance -> {
+                BinanceApi.sendCrypto(apiInitData, currency, destAddress, null, amount, null).executePost(onFailure) {
+                    onSuccess()
+                }
+            }
+        }
+    }
 
     private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
         Product.map.clear()

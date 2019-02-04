@@ -8,8 +8,11 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import org.jetbrains.anko.textColor
 
@@ -270,7 +273,6 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun completeSwitchCurrency() {
-
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
 
         when (currency.type) {
@@ -324,11 +326,20 @@ class TransferFragment : RefreshFragment() {
             Currency.Type.CRYPTO -> Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
             else -> Account.fiatAccounts.find { it.currency == currency }
         }
+        val sourceAccount = sourceAccount
         destAccounts = when(sourceAccount) {
-            is Account.CoinbaseAccount -> listOf(cbproAccount).filterNotNull()
-            is Account.PaymentMethod ->  listOf(cbproAccount).filterNotNull()
+            is Account.CoinbaseAccount -> listOfNotNull(cbproAccount)
+            is Account.PaymentMethod ->  listOfNotNull(cbproAccount)
             is Account -> {
-                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { it.currency == currency }.toMutableList()
+                val tempDestAccounts = mutableListOf<BaseAccount>()
+
+                val otherExchangeAccounts = Product.map[currency.id]?.accounts?.values?.filter { it.exchange != sourceAccount.exchange } ?: listOf()
+                tempDestAccounts.addAll(otherExchangeAccounts)
+
+                if (sourceAccount.exchange == Exchange.CBPro) {
+                    val relevantCBAccounts = coinbaseAccounts.asSequence().filter { it.currency == currency }
+                    tempDestAccounts.addAll(relevantCBAccounts)
+                }
                 if (currency.type == Currency.Type.FIAT) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
@@ -421,12 +432,26 @@ class TransferFragment : RefreshFragment() {
         val amountString = amountEditText?.text.toString()
         val amount = amountString.toDoubleOrZero()
 
+
+        val basicOnFailure: (result: Result.Failure<Any, FuelError>) -> Unit = { result ->
+            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+            dismissProgressSpinner()
+        }
+
+        val basicOnSuccess = {
+            toast(R.string.transfer_sent_message)
+            amountEditText?.setText("")
+            refresh { dismissProgressSpinner() }
+        }
+
         if (amount <= 0) {
             showPopup(R.string.transfer_amount_error)
         } else {
+            val sourceAccount = sourceAccount
             when (sourceAccount) {
                 is Account.CoinbaseAccount -> {
-                    val coinbaseAccount = sourceAccount as Account.CoinbaseAccount
+                    //send from cb to cbpro
+                    val coinbaseAccount = sourceAccount
                     if (amount > coinbaseAccount.balance) {
                         showPopup(R.string.transfer_funds_error)
                     } else {
@@ -439,67 +464,59 @@ class TransferFragment : RefreshFragment() {
                                 showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
                             }
                             dismissProgressSpinner()
-                        } , { _ ->
-                            toast(R.string.transfer_received_message)
-                            amountEditText?.setText("")
-
-                            refresh { _ -> dismissProgressSpinner() }
+                        } , {
+                            basicOnSuccess()
                         })
                     }
                 }
                 is Account.PaymentMethod -> {
-                    val paymentMethod = sourceAccount as Account.PaymentMethod
-                    if (paymentMethod.balance != null && amount > paymentMethod.balance) {
+                    //send from bank to cb pro
+                    val paymentMethod = sourceAccount
+                    val balance = paymentMethod.balance
+                    if (balance != null && amount > balance) {
                         showPopup(R.string.transfer_funds_error)
                     } else {
                         showProgressSpinner()
-                        CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
-                            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                            dismissProgressSpinner()
-                        } , { _ ->
-                            toast(R.string.transfer_received_message)
-                            amountEditText?.setText("")
-
-                            refresh { _ -> dismissProgressSpinner() }
+                        CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( basicOnFailure , {
+                            basicOnSuccess()
                         })
                     }
 
                 }
                 is Account -> {
+                    val destAccount = destAccount
                     when (destAccount) {
+                        is Account -> {
+                            //send between exchanges
+                            val destAddress = destAccount.depositInfo?.address
+                            if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
+                                AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure, basicOnSuccess)
+                            }
+                        }
                         is Account.CoinbaseAccount -> {
-                            val coinbaseAccount = destAccount as Account.CoinbaseAccount
+                            //send from cbPro to cb
+                            val coinbaseAccount = destAccount
                             val cbproAccount = Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
 
                             if (amount > cbproAccount?.availableBalance ?: 0.0) {
                                 showPopup(R.string.transfer_funds_error)
                             } else {
                                 showProgressSpinner()
-                                CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost({ result ->
-                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                                    dismissProgressSpinner()
-                                }, { _ ->
-                                    toast(R.string.transfer_sent_message)
-                                    amountEditText?.setText("")
-
-                                    refresh { dismissProgressSpinner() }
+                                CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost(basicOnFailure, {
+                                    basicOnSuccess()
                                 })
                             }
                         }
                         is Account.PaymentMethod -> {
+                            //send from cbpro to bank
                             val paymentMethod = destAccount as Account.PaymentMethod
                             if (paymentMethod.balance != null && amount > paymentMethod.balance) {
                                 showPopup(R.string.transfer_funds_error)
                             } else {
                                 showProgressSpinner()
-                                CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
-                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                                    dismissProgressSpinner()
-                                }, { _ ->
-                                    toast(R.string.transfer_sent_message)
-                                    amountEditText?.setText("")
-                                    refresh { dismissProgressSpinner() }
-                                })
+                                CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost(basicOnFailure) {
+                                    basicOnSuccess()
+                                }
                             }
                         }
                     }

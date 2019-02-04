@@ -40,23 +40,23 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
         const val basePath = "https://api.binance.com"
 
-        fun defaultPostFailure(context: Context?, result: Result.Failure<ByteArray, FuelError>) : String {
-            val errorCode = ErrorCode.withCode(result.error.response.statusCode)
-            return if (context!= null) {
-                when (errorCode) {
-                    ErrorCode.BadRequest -> context.resources.getString(R.string.error_400)
-                    ErrorCode.Unauthorized -> context.resources.getString(R.string.error_401)
-                    ErrorCode.Forbidden -> context.resources.getString(R.string.error_403)
-                    ErrorCode.NotFound -> context.resources.getString(R.string.error_404)
-                    ErrorCode.TooManyRequests -> context.resources.getString(R.string.error_too_many)
-                    ErrorCode.ServerError -> context.resources.getString(R.string.error_server)
-                    ErrorCode.UnknownError -> context.resources.getString(R.string.error_generic_message, result.errorMessage)
-                    else -> ""
-                }
-            } else {
-                ""
-            }
-        }
+//        fun defaultPostFailure(context: Context?, result: Result.Failure<ByteArray, FuelError>) : String {
+//            val errorCode = ErrorCode.withCode(result.error.response.statusCode)
+//            return if (context!= null) {
+//                when (errorCode) {
+//                    ErrorCode.BadRequest -> context.resources.getString(R.string.error_400)
+//                    ErrorCode.Unauthorized -> context.resources.getString(R.string.error_401)
+//                    ErrorCode.Forbidden -> context.resources.getString(R.string.error_403)
+//                    ErrorCode.NotFound -> context.resources.getString(R.string.error_404)
+//                    ErrorCode.TooManyRequests -> context.resources.getString(R.string.error_too_many)
+//                    ErrorCode.ServerError -> context.resources.getString(R.string.error_server)
+//                    ErrorCode.UnknownError -> context.resources.getString(R.string.error_generic_message, result.errorMessage)
+//                    else -> ""
+//                }
+//            } else {
+//                ""
+//            }
+//        }
     }
 
     override val basePath = Companion.basePath
@@ -429,7 +429,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         REST,
         WAPI;
     }
-    val apiType: ApiType
+    private val apiType: ApiType
         get() {
             return when (this) {
                 is sendCrypto -> ApiType.WAPI

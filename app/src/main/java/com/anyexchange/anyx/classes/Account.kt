@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.classes
 
-
 import com.anyexchange.anyx.api.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
@@ -8,7 +7,7 @@ import com.github.kittinunf.result.Result
 /**
  * Created by anyexchange on 12/20/2017.
  */
-class Account(var exchange: Exchange, override val currency: Currency, override var id: String, override var balance: Double, var holds: Double): BaseAccount() {
+class Account(var exchange: Exchange, override val currency: Currency, override var id: String, override var balance: Double, private var holds: Double): BaseAccount() {
     constructor(apiAccount: CBProAccount) : this(Exchange.CBPro, Currency(apiAccount.currency), apiAccount.id, apiAccount.balance.toDoubleOrZero(), apiAccount.holds.toDoubleOrZero())
     constructor(apiAccount: BinanceBalance) : this(Exchange.Binance, Currency(apiAccount.asset), apiAccount.asset, apiAccount.free + apiAccount.locked, apiAccount.locked)
 
