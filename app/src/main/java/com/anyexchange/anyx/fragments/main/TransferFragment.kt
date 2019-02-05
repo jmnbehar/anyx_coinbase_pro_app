@@ -295,6 +295,8 @@ class TransferFragment : RefreshFragment() {
                 tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
             }
         }
+        val dummyExternalAccount = Account.ExternalAccount(currency)
+        tempRelevantAccounts.add(dummyExternalAccount)
 
         sourceAccounts = tempRelevantAccounts
 
@@ -352,6 +354,9 @@ class TransferFragment : RefreshFragment() {
                 if (currency.type == Currency.Type.FIAT) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
+                val dummyExternalAccount = Account.ExternalAccount(currency)
+                tempDestAccounts.add(dummyExternalAccount)
+
                 tempDestAccounts.toList()
             }
             is Account.ExternalAccount -> Product.map[currency.id]?.accounts?.values?.toList() ?: listOf()
@@ -384,6 +389,7 @@ class TransferFragment : RefreshFragment() {
         infoText?.visibility = View.VISIBLE
         interactiveLayout.visibility = View.VISIBLE
         depositAddressViewLayout.visibility = View.GONE
+        destinationAddressEditLayout.visibility = View.GONE
 
         when (sourceAccount) {
             is Account.CoinbaseAccount -> {
@@ -398,6 +404,10 @@ class TransferFragment : RefreshFragment() {
                 when (destAccount) {
                     is Account.CoinbaseAccount -> infoText?.setText(R.string.transfer_coinbase_info)
                     is Account.PaymentMethod -> infoText?.setText(R.string.transfer_bank_info)
+                    is Account.ExternalAccount -> {
+                        destinationAddressEditLayout.visibility = View.VISIBLE
+                        infoText?.setText(R.string.transfer_bank_info)
+                    }
                 }
             }
             is Account.ExternalAccount -> {
