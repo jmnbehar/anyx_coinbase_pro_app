@@ -13,6 +13,7 @@ import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
+import net.glxn.qrgen.android.QRCode
 import org.jetbrains.anko.textColor
 
 /**
@@ -27,6 +28,12 @@ class TransferFragment : RefreshFragment() {
     private lateinit var transferDetailsLayout: LinearLayout
 
     private lateinit var interactiveLayout: LinearLayout
+
+    private lateinit var destinationAddressEditLayout: LinearLayout
+    private var destinationAddressEditText: EditText? = null
+
+    private lateinit var depositAddressViewLayout: LinearLayout
+    private var qrCodeImageView: ImageView? = null
 
     private var sourceAccountsLabelTxt: TextView? = null
     private var sourceAccountsSpinner: Spinner? = null
@@ -113,6 +120,10 @@ class TransferFragment : RefreshFragment() {
         sourceAccountsLabelTxt = rootView.txt_transfer_account_label
         sourceAccountsSpinner = rootView.spinner_transfer_accounts
         sourceAccountText = rootView.txt_transfer_account_info
+
+        destinationAddressEditLayout = rootView.layout_transfer_external_address_input
+        depositAddressViewLayout = rootView.layout_transfer_deposit_qr_code
+        qrCodeImageView = rootView.img_receive_qr_code
 
         destAccountsSpinner = rootView.spinner_transfer_destination_accounts
         infoText = rootView.txt_transfer_info
@@ -372,6 +383,8 @@ class TransferFragment : RefreshFragment() {
     private fun setInfoAndButtons() {
         infoText?.visibility = View.VISIBLE
         interactiveLayout.visibility = View.VISIBLE
+        depositAddressViewLayout.visibility = View.GONE
+
         when (sourceAccount) {
             is Account.CoinbaseAccount -> {
                 setInteractiveLayoutEnabled((sourceAccount?.balance ?: 0.0) > 0.0)
@@ -388,11 +401,11 @@ class TransferFragment : RefreshFragment() {
                 }
             }
             is Account.ExternalAccount -> {
-                setInteractiveLayoutEnabled((sourceAccount?.balance ?: 0.0) > 0.0)
-                when (destAccount) {
-                    is Account.CoinbaseAccount -> infoText?.setText(R.string.transfer_coinbase_info)
-                    is Account.PaymentMethod -> infoText?.setText(R.string.transfer_bank_info)
-                }
+                interactiveLayout.visibility = View.GONE
+                depositAddressViewLayout.visibility = View.VISIBLE
+
+                (destAccount as? Account)?.depositInfo
+                showAddressInfo((destAccount as? Account)?.depositInfo)
             }
             else -> {
                 interactiveLayout.visibility = View.GONE
@@ -450,8 +463,7 @@ class TransferFragment : RefreshFragment() {
                     transferFromPaymentMethod(amount, sourceAccount)
                 }
                 is Account.ExternalAccount -> {
-                    //get a deposit address
-                    transferFromExternal()
+                    //This can never happen
                 }
                 is Account -> {
                     transferFromAccount(amount, sourceAccount)
@@ -496,14 +508,6 @@ class TransferFragment : RefreshFragment() {
         }
     }
 
-
-    private fun transferFromExternal() {
-        //get a deposit address
-        val account = destAccount as Account
-        interactiveLayout.visibility = View.GONE
-        infoText?.text = "Deposit address: " + (account.depositInfo?.address ?: "null")
-    }
-
     private fun transferFromAccount(amount: Double, sourceAccount: Account) {
         val destAccount = destAccount
         when (destAccount) {
@@ -534,22 +538,22 @@ class TransferFragment : RefreshFragment() {
                 }
             }
             is Account.ExternalAccount -> {
-                //TODO: add an editText to set this here
-                //TODO: add a speedbump
-                val destAddress = destAccount.address ?: ""
-
-                AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
-                    basicOnSuccess()
-                }
-            }
-            is Account -> {
-                //TODO: add a speedbump
-                //send between exchanges
-                val destAddress = destAccount.depositInfo?.address
-                if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
+                val destAddress = destinationAddressEditText.toString()
+                showPopup("Are you sure you want to send $amount $currency to $destAddress?", {
                     AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
                         basicOnSuccess()
                     }
+                }, "No", { /* do nothing */ })
+            }
+            is Account -> {
+                //send between exchanges
+                val destAddress = destAccount.depositInfo?.address
+                if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
+                    showPopup("Are you sure you want to send $amount $currency from ${sourceAccount.exchange} to ${destAccount.exchange}?", {
+                        AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
+                            basicOnSuccess()
+                        }
+                    }, "No", { /* do nothing */ })
                 } else {
                     basicOnFailure(Result.Failure(FuelError(Exception())))
                 }
@@ -567,5 +571,22 @@ class TransferFragment : RefreshFragment() {
         toast(R.string.transfer_sent_message)
         amountEditText?.setText("")
         refresh { dismissProgressSpinner() }
+    }
+
+
+    private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
+        //show deposit address
+
+        if (addressInfo != null) {
+            val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
+            qrCodeImageView?.setImageBitmap(bitmap)
+            qrCodeImageView?.visibility = View.VISIBLE
+            infoText?.text = "Deposit address: " + (addressInfo.address)
+
+        } else {
+            qrCodeImageView?.visibility = View.GONE
+            infoText?.text = "Deposit address not available"
+
+        }
     }
 }

@@ -29,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec
 sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     val context = initData?.context
     val returnToLogin = initData?.returnToLogin ?:  { }
-    var hasCheckedTime = false
+    private var hasCheckedTime = false
 
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
