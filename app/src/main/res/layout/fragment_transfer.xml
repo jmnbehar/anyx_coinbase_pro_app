@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -113,6 +114,107 @@
             </LinearLayout>
 
 
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/layout_transfer_deposit_address"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:visibility="gone">
+
+
+                <ImageView
+                    android:id="@+id/img_receive_qr_code"
+                    android:layout_width="250dp"
+                    android:layout_height="220dp"
+                    android:layout_marginStart="70dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="70dp"
+                    android:layout_marginBottom="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/anyx_fg" />
+
+                <LinearLayout
+                    android:id="@+id/layout_receive_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code"
+                    tools:layout_editor_absoluteX="20dp">
+
+                    <TextView
+                        android:id="@+id/txt_receive_address_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
+
+                    <TextView
+                        android:id="@+id/txt_receive_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_weight="1"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_receive_account">
+
+                    <ImageView
+                        android:id="@+id/img_receive_warning"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        app:srcCompat="@drawable/anyx_fg" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_receive_details"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="100"
+                        android:orientation="vertical"
+                        android:paddingStart="10dp"
+                        android:paddingTop="20dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="20dp">
+
+                        <TextView
+                            android:id="@+id/txt_receive_warning"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp"
+                            android:text="@string/receive_warning_1" />
+
+
+                        <TextView
+                            android:id="@+id/txt_receive_warning_2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autoLink="web"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp"
+                            android:text="@string/receive_warning_2" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+
+            </android.support.constraint.ConstraintLayout>
+
             <LinearLayout
                 android:id="@+id/layout_transfer_interactive_layout"
                 android:layout_width="match_parent"
@@ -120,6 +222,43 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/layout_transfer_external_address_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_send_destination_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/send_destination_blank_label" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etxt_send_destination"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:inputType="text" />
+
+                        <ImageButton
+                            android:id="@+id/btn_send_destination_camera"
+                            android:layout_width="35dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:contentDescription="@string/send_camera_btn"
+                            app:srcCompat="@drawable/ic_menu_camera" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/txt_transfer_amount_label"

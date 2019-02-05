@@ -159,13 +159,14 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
     }
 
-//    class ExternalAccount(currency: Currency) : BaseAccount() {
-//        override val id: String = "External $currency Account"
-//        override val balance = 0.0
-//        override val currency = currency
-//
-//        override fun toString(): String {
-//            return id
-//        }
-//    }
+    class ExternalAccount(override val currency: Currency) : BaseAccount() {
+        override val id: String = "External $currency Account"
+        override val balance = 0.0
+        var name: String? = null
+        var address: String? = null
+
+        override fun toString(): String {
+            return id
+        }
+    }
 }
