@@ -1,6 +1,11 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +13,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
@@ -31,6 +37,7 @@ class TransferFragment : RefreshFragment() {
 
     private lateinit var destinationAddressEditLayout: LinearLayout
     private var destinationAddressEditText: EditText? = null
+    private var scanButton: ImageButton? = null
 
     private lateinit var depositAddressViewLayout: LinearLayout
     private var qrCodeImageView: ImageView? = null
@@ -122,6 +129,10 @@ class TransferFragment : RefreshFragment() {
         sourceAccountText = rootView.txt_transfer_account_info
 
         destinationAddressEditLayout = rootView.layout_transfer_external_address_input
+        destinationAddressEditText = rootView.etxt_send_destination
+        scanButton = rootView.btn_send_destination_camera
+        scanButton?.setOnClickListener { getAddressFromCamera() }
+
         depositAddressViewLayout = rootView.layout_transfer_deposit_qr_code
         qrCodeImageView = rootView.img_receive_qr_code
 
@@ -195,6 +206,7 @@ class TransferFragment : RefreshFragment() {
 
     private var isRefreshing = false
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        //TODO: don't reset spinners on refresh
         if (!isRefreshing) {
             isRefreshing = true
             var didUpdateCBPro = false
@@ -597,6 +609,37 @@ class TransferFragment : RefreshFragment() {
             qrCodeImageView?.visibility = View.GONE
             infoText?.text = "Deposit address not available"
 
+        }
+    }
+
+
+
+    private fun getAddressFromCamera() {
+        activity?.let { activity ->
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted
+                // Ask for camera permission
+                ActivityCompat.requestPermissions(activity,
+                        arrayOf(Manifest.permission.CAMERA),
+                        666)
+            } else {
+                val intent = Intent(activity, ScanActivity::class.java)
+                startActivityForResult(intent, 2)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        val extras = data.extras
+        if (extras != null) {
+            val barcode = extras.getString("BarCode")
+            if (barcode == "") {
+                toast(R.string.send_address_not_found_warning)
+            } else {
+                //TODO: parse more advanced qr codes
+                destinationAddressEditText?.setText(barcode)
+            }
         }
     }
 }
