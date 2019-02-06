@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class AccountListViewAdapter(val context: Context) : BaseAdapter() {
+class BalanceListViewAdapter(val context: Context) : BaseAdapter() {
     var sortedAccountList: List<Account>
     init {
         sortedAccountList = sortedAccountList()
@@ -99,7 +99,7 @@ class AccountListViewAdapter(val context: Context) : BaseAdapter() {
                         viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
                         val accountChange = (percentChange * account.defaultValue) / 100
                         val sign = if (percentChange >= 0) { "+" } else { "" }
-                        viewHolder.percentChangeText?.text = context.resources.getString(R.string.accounts_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
+                        viewHolder.percentChangeText?.text = context.resources.getString(R.string.balances_percent_change_text, percentChange.percentFormat(), sign, accountChange.format(Account.defaultFiatCurrency))
                         viewHolder.accountValueText?.visibility = View.VISIBLE
                         viewHolder.percentChangeText?.visibility = View.VISIBLE
                     } else {

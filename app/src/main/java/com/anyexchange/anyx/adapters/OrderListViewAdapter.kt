@@ -84,13 +84,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             return outputView
         } else {
             val order = orders[i]
-//            val tradeSide = order.side
-//            val price = order.price
 
-            val size = order.amount
-            val filled = order.filledAmount
-            val amount = size - filled
-            val currency = order.tradingPair.baseCurrency
             outputView.setOnClickListener { orderOnClick(order) }
 
 
@@ -101,7 +95,6 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
             viewHolder.mainLabelText?.text = order.summary(resources)
 
-            val tradeTypeString = order.type.toString().capitalize()
             viewHolder.priceText?.visibility = View.GONE
 
             if (order.showExtraInfo) {

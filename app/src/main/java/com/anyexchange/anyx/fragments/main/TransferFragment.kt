@@ -598,7 +598,6 @@ class TransferFragment : RefreshFragment() {
 
     private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
         //show deposit address
-
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)

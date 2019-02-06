@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.RefreshFragment
-import com.anyexchange.anyx.fragments.main.AccountsFragment
+import com.anyexchange.anyx.fragments.main.BalancesFragment
 import com.anyexchange.anyx.fragments.main.FavoritesFragment
 import com.anyexchange.anyx.fragments.main.MarketFragment
 import android.view.ViewGroup
@@ -22,11 +22,11 @@ import android.view.ViewGroup
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private var marketFragment : MarketFragment? = null
     var favoritesFragment : FavoritesFragment? = null
-    private var accountsFragment : AccountsFragment? = null
+    private var accountsFragment : BalancesFragment? = null
 
     init {
         MarketFragment.resetHomeListeners = { setListeners() }
-        AccountsFragment.resetHomeListeners = { setListeners() }
+        BalancesFragment.resetHomeListeners = { setListeners() }
     }
 
     fun setListeners() {
@@ -66,7 +66,7 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
                 return FavoritesFragment()
             }
             2 -> {
-                return AccountsFragment()
+                return BalancesFragment()
             }
             else -> {
                 //do something here
@@ -84,7 +84,7 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         when (position) {
             0 -> marketFragment = createdFragment as MarketFragment
             1 -> favoritesFragment = createdFragment as FavoritesFragment
-            2 -> accountsFragment = createdFragment as AccountsFragment
+            2 -> accountsFragment = createdFragment as BalancesFragment
         }
         setListeners()
         return createdFragment

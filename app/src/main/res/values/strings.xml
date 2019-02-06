@@ -18,9 +18,10 @@
     <string name="menu_alerts">Alerts</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_login">Log In</string>
-    <string name="menu_send">Send/Receive</string>
+    <string name="menu_accounts">Accounts</string>
     <string name="menu_transfer">Transfer</string>
     <string name="menu_verify">Verify</string>
+    <string name="menu_balances">Balances</string>
 
     //Login Strings
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
@@ -93,11 +94,11 @@
 
 
 
-    //Accounts Fragment
-    <string name="accounts_title">All Accounts</string>
-    <string name="accounts_logged_out_message">Sign in to view account info</string>
-    <string name="accounts_percent_change_text">%s\n(%s%s)</string>
-    <string name="accounts_balance_text">%s %s</string>
+    //Balances Fragment
+    <string name="balances_title">All Accounts</string>
+    <string name="balances_logged_out_message">Sign in to view account info</string>
+    <string name="balances_percent_change_text">%s\n(%s%s)</string>
+    <string name="balances_balance_text">%s %s</string>
 
 
     //Alerts Fragment

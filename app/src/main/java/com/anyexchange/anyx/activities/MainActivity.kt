@@ -3,7 +3,6 @@ package com.anyexchange.anyx.activities
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.ColorFilter
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
@@ -425,11 +424,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val fragmentType = when (item.itemId) {
-            R.id.nav_send -> FragmentType.SEND
+            R.id.nav_accounts -> FragmentType.ACCOUNTS
             R.id.nav_alerts -> FragmentType.ALERTS
             R.id.nav_transfer -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
+            R.id.nav_balances -> FragmentType.BALANCES
             else -> FragmentType.HOME
         }
         val currentFragmentType = FragmentType.forFragment(currentFragment)
@@ -450,22 +450,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> ChartFragment()
-            FragmentType.ACCOUNT -> AccountsFragment()
-            FragmentType.SEND, FragmentType.RECEIVE, FragmentType.SEND_RECEIVE -> {
-
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                    null
-                } else if (CBProApi.credentials?.isVerified == null) {
-                    goToVerify { if (it) { goToFragment(fragmentType) } }
-                    null
-                } else if (CBProApi.credentials?.isVerified == false) {
-                    toast(R.string.toast_missing_permissions_message)
-                    null
-                } else {
-                    SendReceiveFragment.newInstance()
-                }
-            }
+            FragmentType.BALANCES -> BalancesFragment()
+            FragmentType.ACCOUNTS -> AccountsFragment.newInstance()
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
                 if (!prefs.isLoggedIn) {
@@ -510,7 +496,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
         } else if (fragmentType != FragmentType.TRADE
-                && fragmentType != FragmentType.SEND
                 && fragmentType != FragmentType.TRANSFER) {
             println("Error switching fragments")
         }
