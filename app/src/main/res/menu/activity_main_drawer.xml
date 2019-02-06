@@ -11,6 +11,10 @@
                 android:icon="@drawable/icon_home"
                 android:title="@string/menu_home" />
             <item
+                android:id="@+id/nav_balances"
+                android:icon="@drawable/deposit"
+                android:title="@string/menu_balances" />
+            <item
                 android:id="@+id/nav_alerts"
                 android:icon="@drawable/icon_alert"
                 android:title="@string/menu_alerts" />
@@ -24,7 +28,7 @@
                 android:title="@string/menu_settings" />
             <item
                 android:id="@+id/nav_accounts"
-                android:icon="@drawable/anyx_fg"
+                android:icon="@drawable/anyx_logo"
                 android:title="@string/menu_accounts" />
 
         </menu>

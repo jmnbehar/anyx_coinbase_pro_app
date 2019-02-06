@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.list_row_exchange_account.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class ExchangeAccountsListViewAdapter(val context: Context, var exchanges: Array<Exchange>, var resources: Resources) : BaseAdapter() {
+class ExchangeAccountsListViewAdapter(val context: Context, var exchanges: Array<Exchange>, var resources: Resources, private var goToLogin: (Exchange) -> Unit) : BaseAdapter() {
 
     override fun getCount(): Int {
         return exchanges.size
@@ -97,6 +97,10 @@ class ExchangeAccountsListViewAdapter(val context: Context, var exchanges: Array
             }
         }
 
+        viewHolder.loginButton?.setOnClickListener {
+            goToLogin(exchange)
+        }
+        
         if (apiKey != null) {
             viewHolder.apiKeyLabelView?.visibility = View.VISIBLE
             viewHolder.apiKeyView?.visibility = View.VISIBLE
@@ -117,6 +121,10 @@ class ExchangeAccountsListViewAdapter(val context: Context, var exchanges: Array
         return outputView
     }
 
+//    private fun genericLogIn() {
+//        (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
+//
+//    }
 
     private fun genericLogOut() {
         val prefs = Prefs(context)

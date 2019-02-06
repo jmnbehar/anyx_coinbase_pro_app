@@ -22,7 +22,6 @@ import android.view.ViewGroup
 class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private var marketFragment : MarketFragment? = null
     var favoritesFragment : FavoritesFragment? = null
-    private var accountsFragment : BalancesFragment? = null
 
     init {
         MarketFragment.resetHomeListeners = { setListeners() }
@@ -38,18 +37,10 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         marketFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
             override fun refreshComplete() {
                 favoritesFragment?.refresh(false) {  }
-                accountsFragment?.refresh(false) {  }
             }
         })
         favoritesFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
             override fun refreshComplete() {
-                marketFragment?.refresh(false) {  }
-                accountsFragment?.refresh(false) {  }
-            }
-        })
-        accountsFragment?.setRefreshListener(object : MarketFragment.RefreshCompleteListener {
-            override fun refreshComplete() {
-                favoritesFragment?.refresh(false) {  }
                 marketFragment?.refresh(false) {  }
             }
         })
@@ -60,13 +51,10 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         args.putInt(RefreshFragment.ARG_OBJECT, i + 1)
         when (i) {
             0 -> {
-                return MarketFragment()
-            }
-            1 -> {
                 return FavoritesFragment()
             }
-            2 -> {
-                return BalancesFragment()
+            1 -> {
+                return MarketFragment()
             }
             else -> {
                 //do something here
@@ -82,23 +70,21 @@ class HomePagerAdapter(val context: Context, fm: FragmentManager) : FragmentStat
         val createdFragment = super.instantiateItem(container, position) as Fragment
         // save the appropriate reference depending on position
         when (position) {
-            0 -> marketFragment = createdFragment as MarketFragment
-            1 -> favoritesFragment = createdFragment as FavoritesFragment
-            2 -> accountsFragment = createdFragment as BalancesFragment
+            0 -> favoritesFragment = createdFragment as FavoritesFragment
+            1 -> marketFragment = createdFragment as MarketFragment
         }
         setListeners()
         return createdFragment
     }
 
     override fun getCount(): Int {
-        return 3
+        return 2
     }
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
-            0 -> context.resources.getString(R.string.home_market_tab)
-            1 -> context.resources.getString(R.string.home_favorites_tab)
-            2 -> context.resources.getString(R.string.home_account_tab)
+            0 -> context.resources.getString(R.string.home_favorites_tab)
+            1 -> context.resources.getString(R.string.home_market_tab)
             else -> context.resources.getString(R.string.home_other_tab, position + 1)
         }
     }
