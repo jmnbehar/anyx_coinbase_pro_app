@@ -13,9 +13,18 @@ import java.util.*
 
 //Never change these strings:
 private const val FILE_NAME = "com.anyexchange.gdax.prefs"  //do not rename
-private const val PASSPHRASE = "passphrase"
+
+private const val PASSPHRASE = "cbProPassphrase"
 private const val API_KEY = "api_key"
 private const val API_SECRET = "api_secret"
+
+private const val CBPRO_API_KEY = "cb_pro_api_key"
+private const val CBPRO_API_SECRET = "cb_pro_api_secret"
+private const val CBPRO_PASSPHRASE = "cbProPassphrase"
+
+private const val BINANCE_API_KEY = "binance_api_key"
+private const val BINANCE_API_SECRET = "binance_api_secret"
+
 private const val SHOULD_SAVE_API_INFO = "save_api_info"
 private const val SHOULD_SAVE_PASSPHRASE = "save_passphrase"
 private const val ALERTS = "alerts"
@@ -55,17 +64,36 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(IS_FIRST_TIME, true)
         set(value) = prefs.edit().putBoolean(IS_FIRST_TIME, value).apply()
 
-    var passphrase: String?
-        get() = prefs.getString(PASSPHRASE, null)
-        set(value) = prefs.edit().putString(PASSPHRASE, value).apply()
-
-    var apiKey: String?
+    var cbProApiKey: String?
         get() = prefs.getString(API_KEY, null)
-        set(value) = prefs.edit().putString(API_KEY, value).apply()
+        set(value) {
+            prefs.edit().putString(API_KEY, value).apply()
+            prefs.edit().putString(CBPRO_API_KEY, value).apply()
+        }
 
-    var apiSecret: String?
+    var cbProApiSecret: String?
         get() = prefs.getString(API_SECRET, null)
-        set(value) = prefs.edit().putString(API_SECRET, value).apply()
+        set(value) {
+            prefs.edit().putString(API_SECRET, value).apply()
+            prefs.edit().putString(CBPRO_API_SECRET, value).apply()
+        }
+
+    var cbProPassphrase: String?
+        get() = prefs.getString(PASSPHRASE, null)
+        set(value) {
+            prefs.edit().putString(PASSPHRASE, value).apply()
+            prefs.edit().putString(CBPRO_PASSPHRASE, value).apply()
+        }
+
+
+    var binanceApiKey: String?
+        get() = prefs.getString(BINANCE_API_KEY, null)
+        set(value) = prefs.edit().putString(BINANCE_API_KEY, value).apply()
+
+    var binanceApiSecret: String?
+        get() = prefs.getString(BINANCE_API_SECRET, null)
+        set(value) = prefs.edit().putString(BINANCE_API_SECRET, value).apply()
+
 
     var shouldShowTradeConfirmModal: Boolean
         get() = prefs.getBoolean(SHOULD_SHOW_TRADE_CONFIRM, true)

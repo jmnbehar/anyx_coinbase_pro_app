@@ -50,9 +50,9 @@ class DataFragment : Fragment() {
             if (backupCredentials != null) {
                 CBProApi.credentials = backupCredentials
             } else {
-                val apiKey = prefs.apiKey
-                val apiSecret = prefs.apiSecret
-                val passphraseEncrypted = prefs.passphrase
+                val apiKey = prefs.cbProApiKey
+                val apiSecret = prefs.cbProApiSecret
+                val passphraseEncrypted = prefs.cbProPassphrase
                 val iv = ByteArray(16)
                 val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
                 val passphrase = encryption.decryptOrNull(passphraseEncrypted)

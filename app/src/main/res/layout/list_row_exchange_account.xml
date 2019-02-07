@@ -28,6 +28,7 @@
 
 
     <LinearLayout
+        android:id="@+id/layout_exchange_account_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
@@ -46,9 +47,45 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/layout_exchange_account_edit_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/etxt_exchange_account_api_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/login_api_key_label"
+            android:inputType="text"
+            android:singleLine="false" />
+
+        <EditText
+            android:id="@+id/etxt_exchange_account_secret"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/login_api_secret_label"
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:maxLines="6"
+            android:minLines="3"
+            android:singleLine="false" />
+
+        <EditText
+            android:id="@+id/etxt_exchange_account_passphrase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/login_passphrase_label"
+            android:lines="2"
+            android:singleLine="false" />
+
+    </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
         android:orientation="horizontal">
@@ -57,20 +94,17 @@
             android:id="@+id/btn_exchange_account_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Log In"
-            android:textAlignment="textEnd" />
+            android:text="Log In" />
 
         <android.support.v4.widget.Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="5" />
+            android:layout_width="3dp"
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btn_exchange_account_logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Log Out"
-            android:textAlignment="textEnd" />
+            android:text="Log Out" />
 
     </LinearLayout>
 </LinearLayout>

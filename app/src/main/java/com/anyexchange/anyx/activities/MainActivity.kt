@@ -270,9 +270,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val prefs = Prefs(this)
         if (CBProApi.credentials == null) {
             if (!shouldSkipCredentials) {
-                val apiKey = prefs.apiKey
-                val apiSecret = prefs.apiSecret
-                val passphraseEncrypted  = prefs.passphrase
+                val apiKey = prefs.cbProApiKey
+                val apiSecret = prefs.cbProApiSecret
+                val passphraseEncrypted  = prefs.cbProPassphrase
 
                 val iv = ByteArray(16)
                 val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)

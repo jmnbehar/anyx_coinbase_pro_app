@@ -53,19 +53,19 @@ class LoginFragment : RefreshFragment()  {
         val btnSkipLogin = rootView.btn_login_skip
 
         val prefs = Prefs(context!!)
-        if(prefs.apiKey != null) {
-            apiKey = prefs.apiKey
+        if(prefs.cbProApiKey != null) {
+            apiKey = prefs.cbProApiKey
             apiKeyEditText.setText(apiKey)
         }
-        if (prefs.apiSecret != null) {
-            apiSecret = prefs.apiSecret
+        if (prefs.cbProApiSecret != null) {
+            apiSecret = prefs.cbProApiSecret
             apiSecretEditText.setText(apiSecret)
         }
 
-        if (prefs.passphrase != null) {
+        if (prefs.cbProPassphrase != null) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-            passphrase = encryption.decryptOrNull(prefs.passphrase)
+            passphrase = encryption.decryptOrNull(prefs.cbProPassphrase)
 
             passphraseEditText.setText(passphrase)
         }
@@ -163,10 +163,10 @@ class LoginFragment : RefreshFragment()  {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
             val passphraseEncrypted = encryption.encryptOrNull(passphrase)
-            prefs.apiKey = apiKey
-            prefs.apiSecret = apiSecret
+            prefs.cbProApiKey = apiKey
+            prefs.cbProApiSecret = apiSecret
             if (prefs.shouldSavePassphrase && (passphrase != null))  {
-                prefs.passphrase = passphraseEncrypted
+                prefs.cbProPassphrase = passphraseEncrypted
             }
         }
 

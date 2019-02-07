@@ -28,7 +28,7 @@ class AccountsFragment : RefreshFragment() {
 
         exchangeAccountList = rootView.list_view
         context?.let {
-            exchangeAccountListAdapter = ExchangeAccountsListViewAdapter(it, Exchange.values(), resources)
+            exchangeAccountListAdapter = ExchangeAccountsListViewAdapter(it, Exchange.values(), resources, { })
             exchangeAccountList?.adapter = exchangeAccountListAdapter
         }
         return rootView
