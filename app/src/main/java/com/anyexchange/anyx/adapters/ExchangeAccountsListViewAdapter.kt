@@ -142,6 +142,7 @@ class ExchangeAccountsListViewAdapter(val context: Context, private var exchange
             viewHolder.exchangeNameView?.text = exchange.name
 
 
+
             val isLoggedIn = when (exchange) {
                 Exchange.CBPro -> CBProApi.credentials != null
                 Exchange.Binance -> BinanceApi.credentials != null
@@ -232,6 +233,9 @@ class ExchangeAccountsListViewAdapter(val context: Context, private var exchange
                     viewHolder.passphraseEditText?.setText(apiPassphrase)
                 }
 
+                viewHolder.apiKeyEditText?.requestFocus()
+                viewHolder.apiKeyEditText?.isSelected = true
+
                 viewHolder.loginButton?.setOnClickListener {
                     saveLoginInfo(viewHolder, exchange)
                 }
@@ -240,11 +244,6 @@ class ExchangeAccountsListViewAdapter(val context: Context, private var exchange
             return outputView
         }
     }
-
-//    private fun genericLogIn() {
-//        (activity as? MainActivity)?.goToFragment(tradeFragment!!, FragmentType.TRADE.toString())
-//
-//    }
 
     private fun genericLogOut() {
         val prefs = Prefs(context)
