@@ -114,10 +114,16 @@ class AccountsFragment : RefreshFragment() {
                     apiSecret = CBProApi.credentials?.apiSecret ?: prefs.cbProApiSecret
 
                     passphraseEditText?.visibility = View.VISIBLE
-                    val encryptedPassphrase = CBProApi.credentials?.apiPassPhrase ?: prefs.cbProPassphrase
-                    val iv = ByteArray(16)
-                    val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-                    apiPassphrase = encryption.decryptOrNull(encryptedPassphrase)
+
+                    apiPassphrase = CBProApi.credentials?.apiPassPhrase
+
+                    if (apiPassphrase == null) {
+                        val encryptedPassphrase = prefs.cbProPassphrase
+                        val iv = ByteArray(16)
+                        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+
+                        apiPassphrase = encryption.decryptOrNull(encryptedPassphrase)
+                    }
                 }
                 Exchange.Binance -> {
                     apiKey = BinanceApi.credentials?.apiKey ?: prefs.binanceApiKey
