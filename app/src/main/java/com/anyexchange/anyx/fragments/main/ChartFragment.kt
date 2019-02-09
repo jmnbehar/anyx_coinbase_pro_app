@@ -228,11 +228,11 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let {
             val prefs = Prefs(it)
 
-            buyButton?.setOnClickListener {_ ->
-                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
+            buyButton?.setOnClickListener {
+                buySellButtonOnClick(tradingPair.exchange.isLoggedIn(), TradeSide.BUY)
             }
-            sellButton?.setOnClickListener { _ ->
-                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
+            sellButton?.setOnClickListener {
+                buySellButtonOnClick(tradingPair.exchange.isLoggedIn(), TradeSide.SELL)
             }
 
             val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
@@ -560,9 +560,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let {
             val currency = product.currency
             setButtonColors()
-            val prefs = Prefs(it)
             val account = relevantAccount
-            if (prefs.isLoggedIn) {
+            if (tradingPair?.exchange?.isLoggedIn() == true) {
                 val balance = account?.balance ?: 0.0
                 tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
                 currency.iconId?.let { iconId ->
@@ -772,7 +771,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         val context = context
 
         val account = relevantAccount
-        if (context != null && Prefs(context).isLoggedIn && account != null) {
+        if (context != null  && account != null && account.exchange.isLoggedIn()) {
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */

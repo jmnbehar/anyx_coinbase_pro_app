@@ -44,4 +44,10 @@ enum class Exchange {
             Binance -> BinanceApi.credentials != null
         }
     }
+
+    companion object {
+        fun isAnyLoggedIn() : Boolean {
+            return CBProApi.credentials != null || BinanceApi.credentials != null
+        }
+    }
 }

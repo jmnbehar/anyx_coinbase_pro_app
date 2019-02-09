@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.adapters.ExchangeAccountsListViewAdapter
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.api.CBProApi
@@ -19,8 +18,6 @@ import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 class AccountsFragment : RefreshFragment() {
-    private var exchangeAccountListAdapter: ExchangeAccountsListViewAdapter? = null
-
     private class ExchangeAccountCell {
         var exchangeLogoView: ImageView? = null
         var exchangeNameView: TextView? = null
@@ -31,7 +28,6 @@ class AccountsFragment : RefreshFragment() {
 
         //TODO: consider adding a permissions view here
         //TODO: consider adding a test button here
-
 
         var shouldShowEditLayout = false
         var loginEditLayout: LinearLayout? = null
@@ -258,19 +254,17 @@ class AccountsFragment : RefreshFragment() {
         return rootView
     }
 
-    override fun refresh(onComplete: (Boolean) -> Unit) {
-        super.refresh(onComplete)
-        exchangeAccountListAdapter?.notifyDataSetChanged()
-    }
+//    override fun refresh(onComplete: (Boolean) -> Unit) {
+//        super.refresh(onComplete)
+//    }
 
 
 
     private fun genericLogOut() {
-        val prefs = Prefs(context!!)
-        prefs.isLoggedIn = false
         for (product in Product.map.values) {
             product.accounts = mapOf()
         }
+        val prefs = Prefs(context!!)
         prefs.stashedProducts = Product.map.values.toList()
         prefs.nukeStashedOrders()
         prefs.nukeStashedFills()

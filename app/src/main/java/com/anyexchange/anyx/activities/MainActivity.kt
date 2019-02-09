@@ -30,7 +30,6 @@ import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
 import com.anyexchange.anyx.api.AnyApi
-import com.anyexchange.anyx.fragments.login.LoginFragment
 import com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -184,8 +183,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-        val prefs = Prefs(this)
-        if (prefs.isLoggedIn) {
+        if (Exchange.isAnyLoggedIn()) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
             if (CBProApi.credentials?.isVerified == true) {
@@ -208,10 +206,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             menu_login.setOnClickListener {
                 drawer_layout.closeDrawer(GravityCompat.START)
-                goToFragment(FragmentType.LOGIN)
+                goToFragment(FragmentType.ACCOUNTS)
             }
 
         }
+    }
+
+    private fun returnToLogin() {
+        try {
+            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        } catch (e: Exception) { }
+        goToFragment(FragmentType.ACCOUNTS)
     }
 
     fun goToVerify(onComplete: (Boolean) -> Unit) {
@@ -290,9 +295,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         checkAllResources(onFailure) {
-            if (CBProApi.credentials != null) {
-                prefs.isLoggedIn = true
-            }
             setDrawerMenu()
             onComplete()
             goHome()
@@ -333,10 +335,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
                 dataFragment?.destroyData(this)
                 prefs.stashedFiatAccountList = mutableListOf()
-
-                prefs.isLoggedIn = false
-            } else {
-                prefs.isLoggedIn = true
             }
             onSuccess()
         })
@@ -351,9 +349,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             supportFragmentManager.popBackStack()
             val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
             currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
-            if (currentFragment !is LoginFragment) {
-                setDrawerMenu()
-            }
+            setDrawerMenu()
         } else {
             finishAffinity()
         }
@@ -413,13 +409,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         (currentFragment as? AlertsFragment)?.updatePagerAdapter()
     }
 
-    private fun returnToLogin() {
-        try {
-            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        } catch (e: Exception) { }
-        goToFragment(FragmentType.LOGIN)
-    }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
@@ -447,14 +436,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun goToFragment(fragmentType: FragmentType) {
-        val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> ChartFragment()
             FragmentType.BALANCES -> BalancesFragment()
             FragmentType.ACCOUNTS -> AccountsFragment.newInstance()
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
-                if (!prefs.isLoggedIn) {
+                if (!Exchange.isAnyLoggedIn()) {
                     toast(R.string.toast_please_login_message)
                     null
                 } else if (CBProApi.credentials?.isVerified == null) {
@@ -484,10 +472,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.HOME -> HomeFragment.newInstance()
             FragmentType.TRADE -> {
                 null
-            }
-            FragmentType.LOGIN -> {
-                hideDrawerMenu()
-                LoginFragment.newInstance()
             }
             FragmentType.EULA -> EulaFragment()
             FragmentType.OTHER -> null

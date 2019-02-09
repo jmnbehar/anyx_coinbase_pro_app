@@ -66,7 +66,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         lockableScrollView = rootView.lockscroll_balances
 
         val context = context
-        if (context != null && Prefs(context).isLoggedIn) {
+        if (context != null && Exchange.isAnyLoggedIn()) {
             rootView.layout_balances_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_balances_label.text = resources.getString(R.string.balances_title)
@@ -244,21 +244,14 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        refresh(true, onComplete)
-    }
-    fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
             toast("Error: ${result.errorMessage}")
             onComplete(false)
         }
         swipeRefreshLayout?.isRefreshing = true
         val context = context
-        if (context != null && Prefs(context).isLoggedIn) {
+        if (context != null && Exchange.isAnyLoggedIn()) {
             CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
-                //Complete accounts refresh
-                if (fullRefresh) {
-                    refreshCompleteListener?.refreshComplete()
-                }
                 completeRefresh()
                 onComplete(true)
             }
@@ -285,12 +278,6 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         }
     }
 
-    private var refreshCompleteListener: MarketFragment.RefreshCompleteListener? = null
-
-    fun setRefreshListener(listener: MarketFragment.RefreshCompleteListener) {
-        this.refreshCompleteListener = listener
-    }
-
 
     override fun onResume() {
         shouldHideSpinner = false
@@ -299,7 +286,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         resetHomeListeners()
         setValueAndPercentChangeTexts()
 
-        refresh(false) { endRefresh() }
+        refresh { endRefresh() }
     }
 
 }

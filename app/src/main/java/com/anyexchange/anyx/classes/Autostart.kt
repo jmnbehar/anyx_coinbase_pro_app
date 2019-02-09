@@ -66,7 +66,7 @@ class AlertJobService : JobService() {
 
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
-        if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
+        if (prefs.areFillAlertsActive && Exchange.isAnyLoggedIn()) {
             val orderTradingPairs = mutableListOf<TradingPair>()
             for (product in Product.map.values) {
                 //TODO: fix for multiple exchanges

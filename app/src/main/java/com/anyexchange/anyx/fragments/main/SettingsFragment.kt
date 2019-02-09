@@ -193,7 +193,6 @@ class SettingsFragment : RefreshFragment() {
     private fun logOut() {
         context?.let {
             val prefs = Prefs(it)
-            prefs.isLoggedIn = false
             CBProApi.credentials = null
             for (product in Product.map.values) {
                 product.accounts = mapOf()
@@ -201,7 +200,6 @@ class SettingsFragment : RefreshFragment() {
             prefs.stashedProducts = Product.map.values.toList()
             prefs.nukeStashedOrders()
             prefs.nukeStashedFills()
-            (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
         }
     }
 
@@ -222,12 +220,6 @@ class SettingsFragment : RefreshFragment() {
                     verifyButton?.visibility = View.VISIBLE
                     txt_setting_verify_account.visibility = View.VISIBLE
                 }
-            }
-
-            if (prefs.isLoggedIn) {
-                logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
-            } else {
-                logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
             }
         }
     }

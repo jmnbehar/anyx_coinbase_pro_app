@@ -116,10 +116,6 @@ class Prefs (var context: Context) {
             }
         }
 
-    var isLoggedIn: Boolean
-        get() = prefs.getBoolean(IS_LOGGED_IN, false)
-        set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
-
     var shouldSavePassphrase: Boolean
         get() = prefs.getBoolean(SHOULD_SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()

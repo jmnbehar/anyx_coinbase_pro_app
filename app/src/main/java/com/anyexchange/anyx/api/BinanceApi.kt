@@ -87,9 +87,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                             when (result.errorMessage) {
                                 ErrorMessage.InvalidApiKey.toString(), ErrorMessage.InvalidApiKey.toString() -> {
                                     credentials = null
-                                    if (context != null) {
-                                        Prefs(context).isLoggedIn = false
-                                    }
                                     returnToLogin()
                                 }
                             }

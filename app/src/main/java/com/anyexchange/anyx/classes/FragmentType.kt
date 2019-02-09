@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.fragments.login.LoginFragment
 import com.anyexchange.anyx.fragments.main.*
 
 
@@ -13,7 +12,6 @@ enum class FragmentType {
     SETTINGS,
     TRADE,
     HOME,
-    LOGIN,
     EULA,
     OTHER;
 
@@ -28,7 +26,6 @@ enum class FragmentType {
             SETTINGS -> "SETTINGS"
             TRADE -> "TRADE"
             HOME -> "HOME"
-            LOGIN -> "LOGIN"
             EULA -> "EULA"
             OTHER -> "OTHER"
         }
@@ -53,7 +50,6 @@ enum class FragmentType {
                 is TransferFragment -> TRANSFER
                 is SettingsFragment -> SETTINGS
                 is TradeFragment -> TRADE
-                is LoginFragment -> LOGIN
                 is HomeFragment -> HOME
                 is EulaFragment -> EULA
                 else -> OTHER
