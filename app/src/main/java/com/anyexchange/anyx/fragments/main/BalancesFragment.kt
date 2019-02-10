@@ -1,5 +1,7 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -43,6 +45,10 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private var chartTimeSpan = Timespan.DAY
     private var accountTotalCandles = listOf<Candle>()
 
+    private lateinit var viewModel: BalancesViewModel
+    class BalancesViewModel : ViewModel() {
+        val activeExchange: Exchange? = null
+    }
     companion object {
         val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
         var resetHomeListeners = { }
@@ -57,6 +63,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
         this.inflater = inflater
         setupSwipeRefresh(rootView.swipe_refresh_layout)
+        viewModel = ViewModelProviders.of(this).get(BalancesViewModel::class.java)
 
         lineChart = rootView.chart_balances
         valueText = rootView.txt_balances_total_value
@@ -81,7 +88,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
                 HomeFragment.viewPager?.isLocked = true
             }
 
-            accountList?.adapter = BalanceListViewAdapter(context)
+            accountList?.adapter = BalanceListViewAdapter(context, viewModel.activeExchange)
 
             accountList?.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
                 val account = (listView?.adapter as BalanceListViewAdapter).sortedAccountList[pos]

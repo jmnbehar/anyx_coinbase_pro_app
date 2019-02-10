@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class BalanceListViewAdapter(val context: Context) : BaseAdapter() {
+class BalanceListViewAdapter(val context: Context, private var exchange: Exchange?) : BaseAdapter() {
     var sortedAccountList: List<Account>
     init {
         sortedAccountList = sortedAccountList()
@@ -38,7 +38,10 @@ class BalanceListViewAdapter(val context: Context) : BaseAdapter() {
     }
 
     private fun sortedAccountList(): List<Account> {
-        val allCryptoAccounts = Account.allCryptoAccounts()
+        var allCryptoAccounts = Account.allCryptoAccounts()
+        if (exchange != null) {
+            allCryptoAccounts = allCryptoAccounts.filter { it.exchange == exchange }
+        }
         val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
         val sortedFiatAccounts = Account.fiatAccounts.sortAccounts().toMutableList()
