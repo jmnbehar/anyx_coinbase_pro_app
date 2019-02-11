@@ -138,6 +138,10 @@ class Prefs (var context: Context) {
             prefs.edit().putStringSet(STASHED_PRODUCTS, jsonValues).apply()
         }
 
+    fun stashProducts() {
+        stashedProducts = Product.map.values.toList()
+    }
+
 
     //For now assume all fiat accounts are CBPro
     var stashedFiatAccountList: List<Account>

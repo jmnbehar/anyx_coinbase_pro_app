@@ -1,6 +1,8 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.Manifest
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -61,7 +63,7 @@ class TransferFragment : RefreshFragment() {
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
     private var sourceAccounts: MutableList<BaseAccount> = mutableListOf()
-    private val sourceAccount: BaseAccount?
+    private var sourceAccount: BaseAccount?
         get() {
             val spinnerSelection = sourceAccountsSpinner?.selectedItem as? BaseAccount
             return if (spinnerSelection?.currency == currency) {
@@ -70,8 +72,13 @@ class TransferFragment : RefreshFragment() {
                 sourceAccounts.firstOrNull()
             }
         }
+        set(value) {
+            val index = (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(value) ?: 0
+            sourceAccountsSpinner?.setSelection(index)
+        }
+
     private var destAccounts: List<BaseAccount> = mutableListOf()
-    private val destAccount: BaseAccount?
+    private var destAccount: BaseAccount?
         get() {
             return if (destAccounts.size > 1) {
                 destAccountsSpinner?.selectedItem as? BaseAccount ?: destAccounts.firstOrNull()
@@ -79,6 +86,16 @@ class TransferFragment : RefreshFragment() {
                 destAccounts.firstOrNull()
             }
         }
+        set(value) {
+            val index = (destAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(value) ?: 0
+            destAccountsSpinner?.setSelection(index)
+        }
+
+    private lateinit var viewModel: TransferViewModel
+    class TransferViewModel : ViewModel() {
+        var sourceAccount: BaseAccount? = null
+        var destAccount: BaseAccount? = null
+    }
 
     var currency: Currency = ChartFragment.currency
         set(value) {
@@ -111,6 +128,7 @@ class TransferFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
         setupSwipeRefresh(rootView.swipe_refresh_layout)
+        viewModel = ViewModelProviders.of(this).get(TransferViewModel::class.java)
 
         this.inflater = inflater
         titleText = rootView.txt_transfer_title
@@ -208,6 +226,7 @@ class TransferFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) {
         //TODO: don't reset spinners on refresh
         if (!isRefreshing) {
+            isRefreshing = true
             isRefreshing = true
             var didUpdateCBPro = false
             var didUpdateCoinbase = false

@@ -38,7 +38,7 @@ class DataFragment : Fragment() {
 
         context?.let {
             val prefs = Prefs(it)
-            prefs.stashedProducts = Product.map.values.toList()
+            prefs.stashProducts()
             prefs.stashedFiatAccountList = Account.fiatAccounts
             prefs.stashedPaymentMethodList = Account.paymentMethods
         }

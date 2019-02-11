@@ -161,7 +161,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
 //        (listView?.adapter as ProductListViewAdapter).notifyDataSetChanged()
 
         context?.let {
-            Prefs(it).stashedProducts = Product.map.values.toList()
+            Prefs(it).stashProducts()
         }
         (listView?.adapter as? ProductListViewAdapter)?.notifyDataSetChanged()
         listView?.invalidateViews()

@@ -296,7 +296,7 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
                     candlesUpdated++
                     if (candlesUpdated == count) {
                         if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashedProducts = map.values.toList()
+                            Prefs(apiInitData.context).stashProducts()
                         }
                         onComplete()
                     }

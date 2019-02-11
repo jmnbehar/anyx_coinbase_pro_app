@@ -197,7 +197,7 @@ class SettingsFragment : RefreshFragment() {
             for (product in Product.map.values) {
                 product.accounts = mapOf()
             }
-            prefs.stashedProducts = Product.map.values.toList()
+            prefs.stashProducts()
             prefs.nukeStashedOrders()
             prefs.nukeStashedFills()
         }

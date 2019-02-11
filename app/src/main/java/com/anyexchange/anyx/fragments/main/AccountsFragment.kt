@@ -265,7 +265,7 @@ class AccountsFragment : RefreshFragment() {
             product.accounts = mapOf()
         }
         val prefs = Prefs(context!!)
-        prefs.stashedProducts = Product.map.values.toList()
+        prefs.stashProducts()
         prefs.nukeStashedOrders()
         prefs.nukeStashedFills()
     }

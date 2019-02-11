@@ -186,12 +186,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (Exchange.isAnyLoggedIn()) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
-            if (CBProApi.credentials?.isVerified == true) {
+            val prefs = Prefs(this)
+            if (prefs.isAnyXProActive || CBProApi.credentials?.isVerified == true) {
                 menu_verify.visibility = View.GONE
             } else {
                 menu_verify.visibility = View.VISIBLE
-                menu_verify.setOnClickListener  { _ ->
-                    if (CBProApi.credentials?.isVerified == true) {
+                menu_verify.setOnClickListener  {
+                    if (prefs.isAnyXProActive || CBProApi.credentials?.isVerified == true) {
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
@@ -329,7 +330,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             onFailure(error)
         }, {
             dismissProgressBar()
-            prefs.stashedProducts = Product.map.values.toList()
+            prefs.stashProducts()
             setDrawerMenu()
             if (CBProApi.credentials == null) {
                 val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
@@ -442,23 +443,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.ACCOUNTS -> AccountsFragment.newInstance()
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
+                val isAnyXProActive = Prefs(this).isAnyXProActive
                 if (!Exchange.isAnyLoggedIn()) {
                     toast(R.string.toast_please_login_message)
                     null
-                } else if (CBProApi.credentials?.isVerified == null) {
+                } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == null) {
                     goToVerify { if (it) { goToFragment(fragmentType) } }
                     null
-                } else if (CBProApi.credentials?.isVerified == false) {
+                } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else if (!TransferFragment.hasRelevantData) {
                     showProgressBar()
-                    val depositFragment = TransferFragment.newInstance()
-                    depositFragment.refresh {didSucceed ->
+                    val transferFragment = TransferFragment.newInstance()
+                    transferFragment.refresh {didSucceed ->
                         if (didSucceed) {
+                            Prefs(this).stashProducts()
                             val tag = fragmentType.toString()
-                            depositFragment.skipNextRefresh = true
-                            goToFragment(depositFragment, tag)
+                            transferFragment.skipNextRefresh = true
+                            goToFragment(transferFragment, tag)
                         } else {
                             toast(R.string.error_message)
                         }

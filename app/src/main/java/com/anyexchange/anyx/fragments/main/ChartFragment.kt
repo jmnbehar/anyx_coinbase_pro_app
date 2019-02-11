@@ -416,9 +416,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun buySellButtonOnClick(isLoggedIn: Boolean, tradeSide: TradeSide) {
+        val isAnyXProActive = if (context != null) {
+            Prefs(context!!).isAnyXProActive
+        } else {
+            false
+        }
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
-        } else if (CBProApi.credentials?.isVerified == null) {
+        } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == null) {
             (activity as? MainActivity)?.let {
                 it.goToVerify{ didVerify ->
                     if (didVerify) {
@@ -429,7 +434,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } ?: run {
                 toast(R.string.toast_please_verify_message)
             }
-        } else if (CBProApi.credentials?.isVerified == false) {
+        } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == false) {
             toast(R.string.toast_missing_permissions_message)
         } else {
             goToTradeFragment(tradeSide)
