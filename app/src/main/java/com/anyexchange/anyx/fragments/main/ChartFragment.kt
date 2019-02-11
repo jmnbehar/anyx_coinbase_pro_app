@@ -341,7 +341,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             val mainActivity = activity as? MainActivity
 
-            val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
+            val selectedCurrency = mainActivity?.navSpinner?.selectedItem as? Currency
             currency = if (selectedCurrency != null) {
                 selectedCurrency
             } else {

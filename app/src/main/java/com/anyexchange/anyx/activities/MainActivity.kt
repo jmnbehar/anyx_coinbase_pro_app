@@ -38,7 +38,7 @@ import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    lateinit var spinnerNav: SearchableSpinner
+    lateinit var navSpinner: SearchableSpinner
 
     private var currentFragment: RefreshFragment? = null
 
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = object : ActionBarDrawerToggle(
                 this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             override fun onDrawerOpened(drawerView: View) {
-                spinnerNav.hideEdit()
+                navSpinner.hideEdit()
                 hideSoftKeyboard()
                 super.onDrawerOpened(drawerView)
             }
@@ -82,13 +82,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBarLayout = progress_bar_layout
         progressBar = progress_bar
 
-        spinnerNav = toolbar_spinner
+        navSpinner = toolbar_spinner
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
 
-        spinnerNav.setAdapter(spinnerNavAdapter)
-
+        navSpinner.setAdapter(spinnerNavAdapter)
 
         val prefs = Prefs(this)
         val isAppOutOfDate = (prefs.lastVersionCode < currentAppVersion)
@@ -98,10 +97,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             toast(R.string.error_message)
             returnToLogin()
         }
+
+        println("Starting up AnyX")
         val anyApi = AnyApi(apiInitData)
         if (savedInstanceState == null) {
-            spinnerNav.visibility = View.GONE
+            navSpinner.visibility = View.GONE
             if (Account.areAccountsOutOfDate()) {
+                println("Accounts out of date")
+
                 signIn(false, onFailure, {
                     //OnSuccess
                     if (isAppOutOfDate) {
@@ -120,6 +123,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 })
             } else if (isAppOutOfDate) {
+                println("App out of date")
+
                 showProgressBar()
                 anyApi.getAllProducts(onFailure) {
                     anyApi.getAllAccounts(onFailure, {
@@ -130,11 +135,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     })
                 }
             } else {
+                println("All good :)")
+
                 goHome()
                 setDrawerMenu()
             }
             return
         } else {
+            println("savedInstanceState not null")
+
             (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
                 val currency = Currency(it)
                 currency.addToList()
@@ -180,7 +189,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         prefs.stashedProducts = mutableListOf()
         prefs.stashedPaymentMethodList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
-
     }
 
 
@@ -199,8 +207,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onTouchEvent(event: MotionEvent) : Boolean {
-        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
-            spinnerNav.hideEdit()
+        if (navSpinner.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            navSpinner.hideEdit()
         }
         return super.onTouchEvent(event);
     }
@@ -371,8 +379,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (spinnerNav.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
-            spinnerNav.hideEdit()
+        if (navSpinner.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            navSpinner.hideEdit()
         } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else if (supportFragmentManager.backStackEntryCount > 1) {

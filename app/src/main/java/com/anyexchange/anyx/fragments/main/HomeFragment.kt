@@ -8,7 +8,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.views.LockableViewPager
-import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 /**
@@ -63,7 +62,7 @@ class HomeFragment : RefreshFragment() {
         showNavSpinner(null, currencyList) { selectedCurrency ->
             (activity as MainActivity).goToChartFragment(selectedCurrency)
         }
-        (activity as MainActivity).spinnerNav.selectedItem = null
+        (activity as MainActivity).navSpinner.selectedItem = null
 
         super.onResume()
 

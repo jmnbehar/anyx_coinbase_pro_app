@@ -59,8 +59,8 @@ open class RefreshFragment: Fragment() {
 
         if (shouldHideSpinner) {
             (activity as? MainActivity)?.let { mainActivity ->
-//                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                mainActivity.spinnerNav.visibility = View.GONE
+//                mainActivity.navSpinner.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                mainActivity.navSpinner.visibility = View.GONE
                 mainActivity.toolbar.title = resources.getString(R.string.app_name)
             }
         }
@@ -72,16 +72,16 @@ open class RefreshFragment: Fragment() {
             val sortedList = currencyList.sortCurrencies()
             val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, sortedList)
 
-            mainActivity.spinnerNav.setAdapter(spinnerNavAdapter)
+            mainActivity.navSpinner.setAdapter(spinnerNavAdapter)
 
             mainActivity.toolbar.title = ""
-//            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-            mainActivity.spinnerNav.isEnabled = true
-            mainActivity.spinnerNav.visibility = View.VISIBLE
+//            mainActivity.navSpinner.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+            mainActivity.navSpinner.isEnabled = true
+            mainActivity.navSpinner.visibility = View.VISIBLE
 
             val spinnerNavItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(view: View, position: Int, id: Long) {
-                    (mainActivity.spinnerNav.selectedItem as? Currency)?.let {
+                    (mainActivity.navSpinner.selectedItem as? Currency)?.let {
                         onItemSelected(it)
                     }
 //                    if (parent?.getItemAtPosition(position) is Currency) {
@@ -92,11 +92,11 @@ open class RefreshFragment: Fragment() {
 
                 override fun onNothingSelected() { }
             }
-            mainActivity.spinnerNav.setOnItemSelectedListener(spinnerNavItemSelectedListener)
+            mainActivity.navSpinner.setOnItemSelectedListener(spinnerNavItemSelectedListener)
 
 
             if (defaultSelection != null) {
-                mainActivity.spinnerNav.selectedItem = defaultSelection
+                mainActivity.navSpinner.selectedItem = defaultSelection
             }
         }
     }

@@ -306,8 +306,13 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
     public void setSelectedItem(int position) {
         Adapter adapter = mSpinnerListView.getAdapter();
         if (adapter instanceof ISpinnerSelectedView) {
-            View selectedView = ((ISpinnerSelectedView) adapter).getSelectedView(position);
-            mCurrSelectedView = new SelectedView(selectedView, position, selectedView.getId());
+            if (position == -1) {
+                View unselectedView = ((ISpinnerSelectedView) adapter).getNoSelectionView();
+                mCurrSelectedView = new SelectedView(unselectedView, position, unselectedView.getId());
+            } else {
+                View selectedView = ((ISpinnerSelectedView) adapter).getSelectedView(position);
+                mCurrSelectedView = new SelectedView(selectedView, position, selectedView.getId());
+            }
             mSpinnerListView.setSelection(position);
         } else {
             TextView textView = new TextView(mContext);
@@ -349,6 +354,8 @@ public class SearchableSpinner extends RelativeLayout implements View.OnClickLis
         int itemPosition = getItemPosition(item);
         if (itemPosition >= 0) {
             setSelectedItem(itemPosition);
+        } else {
+            setSelectedItem(-1);
         }
     }
 
