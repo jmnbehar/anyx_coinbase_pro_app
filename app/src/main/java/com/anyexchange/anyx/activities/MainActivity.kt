@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     lateinit var spinnerNav: SearchableSpinner
 
     private var currentFragment: RefreshFragment? = null
-    private var dataFragment: DataFragment? = null
 
     val apiInitData = ApiInitData(this) {
         returnToLogin()
@@ -67,15 +66,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
-
-        // create the fragment and data the first time
-        if (dataFragment == null) {
-            // add the fragment
-            dataFragment = DataFragment.newInstance()
-            supportFragmentManager.beginTransaction().add(dataFragment!!, Constants.dataFragmentTag).commit()
-        }
-        dataFragment?.restoreData(this)
+        restoreData()
 
         if (!AutoStart.hasStarted) {
             AutoStart.scheduleCustomAlertJob(this)
@@ -92,8 +83,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBar = progress_bar
 
         spinnerNav = toolbar_spinner
-
-//        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
@@ -157,14 +146,56 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+
+    private fun restoreData() {
+        val prefs = Prefs(this)
+        if ( CBProApi.credentials == null || CBProApi.credentials?.apiKey?.isEmpty() == true) {
+
+            val apiKey = prefs.cbProApiKey
+            val apiSecret = prefs.cbProApiSecret
+            val passphraseEncrypted = prefs.cbProPassphrase
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+            val passphrase = encryption.decryptOrNull(passphraseEncrypted)
+            if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+            }
+        }
+
+        Product.map = prefs.stashedProducts.associateBy { it.currency.id }.toMutableMap()
+
+        if (Account.fiatAccounts.isEmpty()){
+            Account.fiatAccounts = prefs.stashedFiatAccountList
+        }
+
+        if (Account.paymentMethods.isEmpty()){
+            Account.paymentMethods = prefs.stashedPaymentMethodList
+        }
+    }
+
+    private fun destroyData() {
+        val prefs = Prefs(this)
+
+        prefs.stashedProducts = mutableListOf()
+        prefs.stashedPaymentMethodList = mutableListOf()
+        prefs.stashedFiatAccountList = mutableListOf()
+
+    }
+
+
+    private fun stashData() {
+        Prefs(this).stashProducts()
+    }
+
     override fun onResume() {
         super.onResume()
-        dataFragment?.restoreData(this)
+        restoreData()
     }
 
     override fun onPause() {
         super.onPause()
-        dataFragment?.backupData()
+        stashData()
     }
 
     override fun onTouchEvent(event: MotionEvent) : Boolean {
@@ -227,7 +258,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        dataFragment?.restoreData(this)
+        restoreData()
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
         val chartCurrency = Currency(chartCurrencyStr)
         ChartFragment.currency = chartCurrency
@@ -236,7 +267,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        dataFragment?.backupData()
+        stashData()
         outState?.putString(CHART_CURRENCY, ChartFragment.currency.toString())
         if (currentFragment is ChartFragment) {
             val chartFragment = currentFragment as ChartFragment
@@ -333,9 +364,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             prefs.stashProducts()
             setDrawerMenu()
             if (CBProApi.credentials == null) {
-                val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
-                dataFragment?.destroyData(this)
-                prefs.stashedFiatAccountList = mutableListOf()
+                destroyData()
             }
             onSuccess()
         })

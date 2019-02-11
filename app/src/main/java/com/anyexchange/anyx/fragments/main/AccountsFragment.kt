@@ -279,6 +279,9 @@ class AccountsFragment : RefreshFragment() {
         val anyApi = AnyApi(apiInitData)
         anyApi.getAllProducts(onFailure) {
             anyApi.getAllAccounts(onFailure, {
+                context?.let {
+                    Prefs(it).stashProducts()
+                }
                 dismissProgressSpinner()
                 toast("Products updated")
             })

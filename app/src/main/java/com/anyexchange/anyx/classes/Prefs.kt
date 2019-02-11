@@ -140,6 +140,9 @@ class Prefs (var context: Context) {
 
     fun stashProducts() {
         stashedProducts = Product.map.values.toList()
+        stashedFiatAccountList = Account.fiatAccounts
+        stashedPaymentMethodList = Account.paymentMethods
+
     }
 
 
