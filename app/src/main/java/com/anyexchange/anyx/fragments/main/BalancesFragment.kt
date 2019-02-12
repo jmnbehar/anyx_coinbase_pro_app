@@ -4,10 +4,7 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.TextView
@@ -21,6 +18,7 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
@@ -47,7 +45,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private lateinit var viewModel: BalancesViewModel
     class BalancesViewModel : ViewModel() {
-        val activeExchange: Exchange? = null
+        var activeExchange: Exchange? = null
     }
     companion object {
         val dummyTradingPair = TradingPair(Exchange.CBPro, Currency.USD, Currency.USD)
@@ -71,6 +69,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountList = rootView.list_balances
         titleText = rootView.txt_balances_title
         lockableScrollView = rootView.lockscroll_balances
+        setHasOptionsMenu(true)
 
         val context = context
         if (context != null && Exchange.isAnyLoggedIn()) {
@@ -107,6 +106,32 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             dismissProgressSpinner()
         }
         return rootView
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.setGroupVisible(R.id.group_balances, true)
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        when (viewModel.activeExchange){
+            null             -> menu?.findItem(R.id.balances_show_all)?.isChecked = true
+            Exchange.Binance -> menu?.findItem(R.id.balances_filter_binance)?.isChecked = true
+            Exchange.CBPro   -> menu?.findItem(R.id.balances_filter_cbpro)?.isChecked = true
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.balances_show_all       -> viewModel.activeExchange = null
+            R.id.balances_filter_binance -> viewModel.activeExchange = Exchange.Binance
+            R.id.balances_filter_cbpro   -> viewModel.activeExchange = Exchange.CBPro
+        }
+        (accountList?.adapter as BalanceListViewAdapter).exchange = viewModel.activeExchange
+        (accountList?.adapter as BalanceListViewAdapter).notifyDataSetChanged()
+        return false
     }
 
     private fun onClickAccount(account: Account) {
@@ -222,6 +247,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onChartTranslate(me: MotionEvent, dX: Float, dY: Float) { }
 
     private fun sumAccountCandles() : List<Candle> {
+        //Refactor:
         val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()

@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_row_account.view.*
  * Created by anyexchange on 11/12/2017.
  */
 
-class BalanceListViewAdapter(val context: Context, private var exchange: Exchange?) : BaseAdapter() {
+class BalanceListViewAdapter(val context: Context, var exchange: Exchange?) : BaseAdapter() {
     var sortedAccountList: List<Account>
     init {
         sortedAccountList = sortedAccountList()

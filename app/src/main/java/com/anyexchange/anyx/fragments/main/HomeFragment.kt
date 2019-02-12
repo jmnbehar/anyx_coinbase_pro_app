@@ -72,7 +72,6 @@ class HomeFragment : RefreshFragment() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val shouldShowOptions = lifecycle.isCreatedOrResumed
-        menu.setGroupVisible(R.id.group_chart_style, false)
         menu.setGroupVisible(R.id.group_home_sort, shouldShowOptions)
     }
 

@@ -217,6 +217,10 @@
     <string name="home_sort_alphabetical">Sort Favorites Alphabetically</string>
     <string name="home_sort_balance">Sort Favorites By Account Balance</string>
 
+    <string name="menu_balance_exchanges_show_all">Show All Exchanges</string>
+    <string name="menu_balance_exchanges_binance">Binance</string>
+    <string name="menu_balance_exchanges_cbpro">Coinbase Pro</string>
+
     //Send Fragment
     <string name="send_title">Send</string>
     <string name="send_send_btn">Send</string>

@@ -373,7 +373,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPrepareOptionsMenu(menu)
         val shouldShowOptions = lifecycle.isCreatedOrResumed
         menu.setGroupVisible(R.id.group_chart_style, shouldShowOptions)
-        menu.setGroupVisible(R.id.group_home_sort, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
