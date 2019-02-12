@@ -116,6 +116,10 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
+
+        inflater?.inflate(R.menu.balances_menu, menu)
+        setOptionsMenuTextColor(menu)
+
         when (viewModel.activeExchange){
             null             -> menu?.findItem(R.id.balances_show_all)?.isChecked = true
             Exchange.Binance -> menu?.findItem(R.id.balances_filter_binance)?.isChecked = true

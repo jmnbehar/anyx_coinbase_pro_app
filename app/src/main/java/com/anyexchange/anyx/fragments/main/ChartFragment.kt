@@ -376,6 +376,9 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.chart_menu, menu)
+        setOptionsMenuTextColor(menu)
+
         super.onCreateOptionsMenu(menu, inflater)
         if (chartStyle == ChartStyle.Line) {
             menu?.findItem(R.id.chart_style_line)?.isChecked = true

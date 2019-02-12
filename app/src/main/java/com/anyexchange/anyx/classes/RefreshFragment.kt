@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -58,8 +60,6 @@ open class RefreshFragment: Fragment() {
         skipNextRefresh = false
         showDarkMode()
 
-        System.out.println("Removing spinner: ")
-
         if (shouldHideSpinner) {
             (activity as? MainActivity)?.let { mainActivity ->
 //                mainActivity.navSpinner.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
@@ -70,20 +70,15 @@ open class RefreshFragment: Fragment() {
     }
 
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        menu.setGroupVisible(R.id.group_chart_style, false)
-        menu.setGroupVisible(R.id.group_home_sort, false)
-        menu.setGroupVisible(R.id.group_balances, false)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return false
+     fun setOptionsMenuTextColor(menu: Menu?) {
+         menu?.let {
+             for (i in 0..(menu.size() - 1)) {
+                 val item = menu.getItem(i)
+                 val spanString = SpannableString(item.title.toString())
+                 spanString.setSpan(ForegroundColorSpan(Color.BLACK),0, spanString.length, 0)
+                 item.title = spanString
+             }
+         }
     }
 
     fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {

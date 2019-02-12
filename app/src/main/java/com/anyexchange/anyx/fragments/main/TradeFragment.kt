@@ -182,7 +182,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-
         tradeTypeTabLayout = rootView.tabl_trade_type
         tradeTypeTabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {

@@ -39,7 +39,11 @@ class BalanceListViewAdapter(val context: Context, var exchange: Exchange?) : Ba
 
     private fun sortedAccountList(): List<Account> {
         val allCryptoAccounts = if (exchange == null) {
-            Account.allCryptoAccounts()
+            Product.map.values.map { product ->
+                val balance = product.accounts.values.map { it.balance }.sum()
+                val holds   = product.accounts.values.map { it.holds }.sum()
+                Account(Exchange.CBPro, product.currency, product.accounts[Exchange.CBPro]?.id ?: "", balance, holds)
+            }
         } else {
             Account.allCryptoAccounts().filter { it.exchange == exchange }
         }

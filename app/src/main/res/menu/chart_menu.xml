@@ -10,27 +10,4 @@
             android:title="@string/chart_style_candle" />
     </group>
 
-    <group android:id="@+id/group_home_sort"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/home_sort_alphabetical"
-            android:title="@string/home_sort_alphabetical" />
-        <item
-            android:id="@+id/home_sort_balance"
-            android:title="@string/home_sort_balance" />
-    </group>
-
-    <group android:id="@+id/group_balances"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/balances_show_all"
-            android:title="@string/menu_balance_exchanges_show_all" />
-        <item
-            android:id="@+id/balances_filter_binance"
-            android:title="@string/menu_balance_exchanges_binance" />
-        <item
-            android:id="@+id/balances_filter_cbpro"
-            android:title="@string/menu_balance_exchanges_cbpro" />
-    </group>
-
 </menu>

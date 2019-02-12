@@ -2,6 +2,8 @@ package com.anyexchange.anyx.fragments.main
 
 import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
@@ -47,7 +49,7 @@ class HomeFragment : RefreshFragment() {
             viewPager!!.adapter = homePagerAdapter
 
 
-            viewPager?.setCurrentItem(1)
+            viewPager?.setCurrentItem(0)
         }
 
         setHasOptionsMenu(true)
@@ -77,6 +79,9 @@ class HomeFragment : RefreshFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.home_menu, menu)
+        setOptionsMenuTextColor(menu)
+
         val context = context
         val shouldSortAlphabetical = if (context == null) {
             false
@@ -84,9 +89,9 @@ class HomeFragment : RefreshFragment() {
             Prefs(context).sortFavoritesAlphabetical
         }
         if (shouldSortAlphabetical) {
-            menu?.getItem(2)?.isChecked = true
+            menu?.getItem(0)?.isChecked = true
         } else {
-            menu?.getItem(3)?.isChecked = true
+            menu?.getItem(1)?.isChecked = true
         }
     }
 
