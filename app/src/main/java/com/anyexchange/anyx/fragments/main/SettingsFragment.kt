@@ -16,8 +16,6 @@ import com.anyexchange.anyx.adapters.spinnerAdapters.CurrencySpinnerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.CBProApi
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
@@ -95,20 +93,16 @@ class SettingsFragment : RefreshFragment() {
             }
         }
 
-        updateProductsButton?.setOnClickListener { _ ->
+        updateProductsButton?.setOnClickListener {
             showProgressSpinner()
-            val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
-                dismissProgressSpinner()
-                toast("Failed to update products")
-            }
-            val anyApi = AnyApi(apiInitData)
-            anyApi.getAllProducts(onFailure) {
-                anyApi.getAllAccounts(onFailure, {
-                    dismissProgressSpinner()
-                    toast("Products updated")
-                })
-            }
-
+            AnyApi(apiInitData).reloadAllProducts(context,
+                    {
+                        dismissProgressSpinner()
+                        toast("Failed to update products") },
+                    {
+                        dismissProgressSpinner()
+                        toast("Products updated")
+                    })
         }
 
         (activity as? MainActivity)?.let { activity ->

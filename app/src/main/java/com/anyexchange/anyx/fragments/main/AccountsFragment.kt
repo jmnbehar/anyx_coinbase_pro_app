@@ -273,20 +273,13 @@ class AccountsFragment : RefreshFragment() {
 
     private fun refreshAllProductsAndAccounts() {
         showProgressSpinner()
-        val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
-            dismissProgressSpinner()
-            toast("Failed to update products")
-        }
-        val anyApi = AnyApi(apiInitData)
-        anyApi.getAllProducts(onFailure) {
-            anyApi.getAllAccounts(onFailure, {
-                context?.let {
-                    Prefs(it).stashProducts()
-                }
-                dismissProgressSpinner()
-                toast("Products updated")
-            })
-        }
-
+        AnyApi(apiInitData).reloadAllProducts(context,
+                {
+                    dismissProgressSpinner()
+                    toast("Login Failed") },
+                {
+                    dismissProgressSpinner()
+                    toast("Logged In")
+                })
     }
 }

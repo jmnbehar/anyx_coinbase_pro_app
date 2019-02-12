@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (Account.areAccountsOutOfDate()) {
                 println("Accounts out of date")
 
+                //TODO: refactor
                 signIn(false, onFailure, {
                     //OnSuccess
                     if (isAppOutOfDate) {

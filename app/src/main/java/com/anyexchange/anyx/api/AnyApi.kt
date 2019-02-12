@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.api
 
+import android.content.Context
 import com.anyexchange.anyx.classes.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
@@ -9,6 +10,17 @@ import com.anyexchange.anyx.classes.Currency
 class AnyApi(val apiInitData: ApiInitData?) {
     companion object {
         val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
+    }
+
+    fun reloadAllProducts(context: Context?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        getAllProducts(onFailure) {
+            getAllAccounts(onFailure, {
+                onSuccess()
+                context?.let {
+                    Prefs(it).stashProducts()
+                }
+            })
+        }
     }
 
     fun getAndStashOrderList(exchange: Exchange, currency: Currency?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
