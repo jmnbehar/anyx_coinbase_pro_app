@@ -47,7 +47,6 @@ class AlertJobService : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
 //        AlertHub.triggerDummyAlert(this)
         if (Product.map.isEmpty()) {
-            //investigate for nuking products:
             AnyApi(apiInitData).getAllProducts({ /* do nothing*/ }, {
                 //TODO: get all accounts here?
                 Product.updateImportantCandles(apiInitData, { /* do nothing*/ }, {

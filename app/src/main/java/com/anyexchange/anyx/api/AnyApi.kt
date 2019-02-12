@@ -245,6 +245,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
     }
 
     private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
+        val backupProductMap = Product.map
         Product.map.clear()
         for (apiProduct in cbProProducts) {
             val tradingPair = TradingPair(apiProduct)
@@ -264,6 +265,9 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 val newProduct = Product(tradingPair.baseCurrency, listOf(tradingPair))
                 newProduct.addToHashMap()
             }
+        }
+        for (product in Product.map.values) {
+            product.accounts = backupProductMap[product.currency.id]?.accounts ?: mapOf()
         }
     }
 
