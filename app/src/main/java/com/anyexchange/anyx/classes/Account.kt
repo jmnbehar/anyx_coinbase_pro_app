@@ -117,10 +117,16 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
                 return Currency.USD
             }
 
-        fun totalValue() : Double {
-            val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
-            val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
-            return cryptoAccountsValue + fiatAccountsValue
+        fun totalValue(exchange: Exchange?) : Double {
+            if (exchange == null) {
+                val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
+                val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
+                return cryptoAccountsValue + fiatAccountsValue
+            } else {
+                val cryptoAccountsValue = Product.map.values.map { product -> product.accounts[exchange]?.defaultValue ?: 0.0 }.sum()
+                val fiatAccountsValue = Account.fiatAccounts.filter { it.exchange == exchange }.asSequence().map { a -> a.defaultValue }.sum()
+                return cryptoAccountsValue + fiatAccountsValue
+            }
         }
 
         fun forCurrency(currency: Currency, exchange: Exchange): Account? {

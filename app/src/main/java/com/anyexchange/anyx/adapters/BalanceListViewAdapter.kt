@@ -38,13 +38,19 @@ class BalanceListViewAdapter(val context: Context, var exchange: Exchange?) : Ba
     }
 
     private fun sortedAccountList(): List<Account> {
-        var allCryptoAccounts = Account.allCryptoAccounts()
-        if (exchange != null) {
-            allCryptoAccounts = allCryptoAccounts.filter { it.exchange == exchange }
+        val allCryptoAccounts = if (exchange == null) {
+            Account.allCryptoAccounts()
+        } else {
+            Account.allCryptoAccounts().filter { it.exchange == exchange }
         }
         val nonEmptyCryptoAccounts = allCryptoAccounts.filter { it.balance > 0 }
 
-        val sortedFiatAccounts = Account.fiatAccounts.sortAccounts().toMutableList()
+        val filteredFiatAccounts = if (exchange == null) {
+            Account.fiatAccounts
+        } else {
+            Account.fiatAccounts.filter { it.exchange == exchange }
+        }
+        val sortedFiatAccounts = filteredFiatAccounts.sortAccounts().toMutableList()
         val sortedCryptoAccounts = nonEmptyCryptoAccounts.sortAccounts()
         sortedFiatAccounts.addAll(sortedCryptoAccounts)
 

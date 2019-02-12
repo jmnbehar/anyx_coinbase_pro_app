@@ -130,7 +130,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
             R.id.balances_filter_cbpro   -> viewModel.activeExchange = Exchange.CBPro
         }
         (accountList?.adapter as BalanceListViewAdapter).exchange = viewModel.activeExchange
-        (accountList?.adapter as BalanceListViewAdapter).notifyDataSetChanged()
+        completeRefresh()
         return false
     }
 
@@ -210,7 +210,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     }
 
     private fun setValueAndPercentChangeTexts() {
-        val totalValue = Account.totalValue()
+        val totalValue = Account.totalValue(viewModel.activeExchange)
         valueText?.text = totalValue.format(Account.defaultFiatCurrency)
 
         val open = if (accountTotalCandles.isNotEmpty()) {
@@ -248,22 +248,34 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
 
     private fun sumAccountCandles() : List<Candle> {
         //Refactor:
+
+        val ownedProducts = Product.map.values.filter { product ->
+            product.accounts.values.any { it.balance > 0 }
+        }
         val btcProduct = Product.map[Currency.BTC.id]
         if (btcProduct != null) {
             val accountTotalCandleList: MutableList<Candle> = mutableListOf()
-            val fiatValue = Account.fiatAccounts.asSequence().map { it.defaultValue }.sum()
+            val filteredFiatAccounts = Account.fiatAccounts.filter { it.exchange == (viewModel.activeExchange ?: it.exchange) }.asSequence()
+            val fiatValue = filteredFiatAccounts.map { it.defaultValue }.sum()
             for (i in 0..(btcProduct.defaultDayCandles.size - 1)) {
                 var totalCandleValue = fiatValue
                 val openTime = btcProduct.defaultDayCandles[i].openTime
                 val closeTime = btcProduct.defaultDayCandles[i].closeTime
-                for (product in Product.map.values) {
+                for (product in ownedProducts) {
                     val accountCandleValue = if (product.defaultDayCandles.size > i) {
                         product.defaultDayCandles[i].close
                     } else {
                         product.defaultDayCandles.lastOrNull()?.close ?: 0.0
                     }
-                    for (accountPair in product.accounts) {
-                        totalCandleValue += (accountCandleValue * accountPair.value.balance)
+                    when (viewModel.activeExchange) {
+                        null -> {
+                            for (accountPair in product.accounts) {
+                                totalCandleValue += (accountCandleValue * accountPair.value.balance)
+                            }
+                        }
+                        else -> {
+                            totalCandleValue += (accountCandleValue * (product.accounts[viewModel.activeExchange!!]?.balance ?: 0.0))
+                        }
                     }
                 }
 
@@ -301,7 +313,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountTotalCandles = sumAccountCandles()
         setValueAndPercentChangeTexts()
 
-        if (Account.totalValue() == 0.0) {
+        if (Account.totalValue(viewModel.activeExchange) == 0.0) {
             lineChart?.visibility = View.GONE
         } else {
             lineChart?.visibility = View.VISIBLE
@@ -315,6 +327,8 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     override fun onResume() {
         shouldHideSpinner = false
         super.onResume()
+
+        (activity as MainActivity).navSpinner.selectedItem = null
 
         resetHomeListeners()
         setValueAndPercentChangeTexts()
