@@ -213,6 +213,34 @@ class AnyApi(val apiInitData: ApiInitData?) {
         }
     }
 
+    private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
+        val backupProductMap = Product.map
+        Product.map.clear()
+        for (apiProduct in cbProProducts) {
+            val tradingPair = TradingPair(apiProduct)
+            Product.map[apiProduct.base_currency]?.let { product ->
+                product.tradingPairs = product.tradingPairs.plus(tradingPair)
+            } ?: run {
+                val currency = Currency(apiProduct.base_currency)
+                val newProduct = Product(currency, listOf(tradingPair))
+                newProduct.addToHashMap()
+            }
+        }
+        for (apiProduct in binanceProducts) {
+            val tradingPair = TradingPair(apiProduct)
+            Product.map[tradingPair.baseCurrency.id]?.let {  product ->
+                product.tradingPairs = product.tradingPairs.plus(tradingPair)
+            } ?: run {
+                val newProduct = Product(tradingPair.baseCurrency, listOf(tradingPair))
+                newProduct.addToHashMap()
+            }
+        }
+        for (product in Product.map.values) {
+            product.accounts = backupProductMap[product.currency.id]?.accounts ?: mapOf()
+        }
+    }
+
+
     fun getAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         if (CBProApi.credentials == null && CBProApi.credentials == null) {
             onSuccess()
@@ -241,33 +269,6 @@ class AnyApi(val apiInitData: ApiInitData?) {
                     onSuccess()
                 }
             }
-        }
-    }
-
-    private fun compileAllProducts(cbProProducts: List<CBProProduct>, binanceProducts: List<BinanceSymbol>) {
-        val backupProductMap = Product.map
-        Product.map.clear()
-        for (apiProduct in cbProProducts) {
-            val tradingPair = TradingPair(apiProduct)
-            Product.map[apiProduct.base_currency]?.let { product ->
-                product.tradingPairs = product.tradingPairs.plus(tradingPair)
-            } ?: run {
-                val currency = Currency(apiProduct.base_currency)
-                val newProduct = Product(currency, listOf(tradingPair))
-                newProduct.addToHashMap()
-            }
-        }
-        for (apiProduct in binanceProducts) {
-            val tradingPair = TradingPair(apiProduct)
-            Product.map[tradingPair.baseCurrency.id]?.let {  product ->
-                product.tradingPairs = product.tradingPairs.plus(tradingPair)
-            } ?: run {
-                val newProduct = Product(tradingPair.baseCurrency, listOf(tradingPair))
-                newProduct.addToHashMap()
-            }
-        }
-        for (product in Product.map.values) {
-            product.accounts = backupProductMap[product.currency.id]?.accounts ?: mapOf()
         }
     }
 

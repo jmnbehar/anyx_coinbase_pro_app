@@ -45,6 +45,9 @@ class AlertJobService : JobService() {
     val apiInitData = ApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
+        if (Product.map.isEmpty()) {
+            Product.map = Prefs(this).stashedProducts.associateBy { it.currency.id }.toMutableMap()
+        }
 //        AlertHub.triggerDummyAlert(this)
         if (Product.map.isEmpty()) {
             AnyApi(apiInitData).getAllProducts({ /* do nothing*/ }, {
@@ -70,12 +73,16 @@ class AlertJobService : JobService() {
             val orderTradingPairs = mutableListOf<TradingPair>()
             for (product in Product.map.values) {
                 //TODO: fix for multiple exchanges
-                val stashedOrders = prefs.getStashedOrders(product.currency, Exchange.CBPro)
+                val stashedOrders = prefs.getStashedOrders(product.currency)
                 val partialTradingPairs = stashedOrders.map { it.tradingPair }
                 orderTradingPairs.addAll(partialTradingPairs)
             }
 
             if (orderTradingPairs.isNotEmpty()) {
+                val orderExchangeList = orderTradingPairs.map { it.exchange }.distinct()
+                for (exchange in orderExchangeList) {
+                    AnyApi(apiInitData).getAndStashOrderList(exchange, null, { }, { })
+                }
                 CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
                 for (tradingPair in orderTradingPairs) {
                     CBProApi.fills(apiInitData, tradingPair).getAndStash({ }) { }

@@ -90,11 +90,11 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
 
     //TODO: this is extremely horribly inefficient, pls fix
     var accounts : Map<Exchange, Account>
-        get() = accountsBackingMap?.associateBy { it.exchange } ?: emptyMap()
+        get() = accountsBackingList?.associateBy { it.exchange } ?: emptyMap()
         set(value) {
-            accountsBackingMap = value.values.toList()
+            accountsBackingList = value.values.toList()
         }
-    private var accountsBackingMap : List<Account>? = listOf()
+    private var accountsBackingList : List<Account>? = listOf()
 
     fun percentChange(timespan: Timespan, quoteCurrency: Currency) : Double {
         val currentPrice = priceForQuoteCurrency(quoteCurrency)
@@ -290,20 +290,22 @@ class Product(var currency: Currency, tradingPairsIn: List<TradingPair>) {
             }
             val importantProducts = map.values.filter { it.isFavorite || alertCurrencies.contains(it.currency) }
             val count = importantProducts.size
-            for (product in importantProducts) {
-                val tradingPair = product.defaultTradingPair
-                product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
-                    candlesUpdated++
-                    if (candlesUpdated == count) {
-                        if (didUpdate && apiInitData?.context != null) {
-                            Prefs(apiInitData.context).stashProducts()
-                        }
-                        onComplete()
-                    }
-                }
-            }
+
             if (map.isEmpty()) {
                 onComplete()
+            } else {
+                for (product in importantProducts) {
+                    val tradingPair = product.defaultTradingPair
+                    product.updateCandles(Timespan.DAY, tradingPair, apiInitData, onFailure) { didUpdate ->
+                        candlesUpdated++
+                        if (candlesUpdated == count) {
+                            if (didUpdate && apiInitData?.context != null) {
+                                Prefs(apiInitData.context).stashProducts()
+                            }
+                            onComplete()
+                        }
+                    }
+                }
             }
         }
 

@@ -262,6 +262,7 @@ class Prefs (var context: Context) {
             prefs.edit().remove(STASHED_FILLS + exchange.name).apply()
         }
     }
+
     fun getStashedOrders(baseCurrency: Currency, exchange: Exchange) : List<Order> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
         return try {
