@@ -91,11 +91,6 @@ class TransferFragment : RefreshFragment() {
             destAccountsSpinner?.setSelection(index)
         }
 
-    private lateinit var viewModel: TransferViewModel
-    class TransferViewModel : ViewModel() {
-        var sourceAccount: BaseAccount? = null
-        var destAccount: BaseAccount? = null
-    }
 
     var currency: Currency = ChartFragment.currency
         set(value) {
@@ -128,7 +123,6 @@ class TransferFragment : RefreshFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
         setupSwipeRefresh(rootView.swipe_refresh_layout)
-        viewModel = ViewModelProviders.of(this).get(TransferViewModel::class.java)
 
         this.inflater = inflater
         titleText = rootView.txt_transfer_title
@@ -273,7 +267,6 @@ class TransferFragment : RefreshFragment() {
         if (isVisible) {
             transferDetailsLayout.visibility = View.VISIBLE
             amountUnitText?.text = currency.toString()
-            switchCurrency(currency)
         }
         if (tempSourceIndex >= 0 && tempSourceIndex < sourceAccounts.size) {
             sourceAccountsSpinner?.setSelection(tempSourceIndex)
@@ -359,7 +352,11 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun sourceAccountSelected() {
+        val tempDestAccount = destAccount
         setDestAccounts()
+        (destAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(tempDestAccount)?.let {
+            destAccountsSpinner?.setSelection(it, true)
+        }
         setInfoAndButtons()
     }
 
@@ -617,15 +614,16 @@ class TransferFragment : RefreshFragment() {
 
     private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
         //show deposit address
+        //TODO: set text
         if (addressInfo != null) {
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)
             qrCodeImageView?.visibility = View.VISIBLE
-            infoText?.text = "Deposit address: " + (addressInfo.address)
+//            infoText?.text = "Deposit address: " + (addressInfo.address)
 
         } else {
             qrCodeImageView?.visibility = View.GONE
-            infoText?.text = "Deposit address not available"
+//            infoText?.text = "Deposit address not available"
 
         }
     }

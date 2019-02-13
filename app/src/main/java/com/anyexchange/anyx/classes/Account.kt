@@ -59,6 +59,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
                 coinbaseAccount?.id?.let { coinbaseAccountId ->
                     CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { result ->
                         val depositAddressInfo = DepositAddressInfo(result)
+                        this.depositInfo = depositAddressInfo
                         onSuccess(depositAddressInfo)
                     }
                 } ?: run {
@@ -68,6 +69,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
             Exchange.Binance -> {
                 BinanceApi.depositAddress(apiInitData, currency).get(onFailure) { result ->
                     val depositAddressInfo = DepositAddressInfo(result)
+                    this.depositInfo = depositAddressInfo
                     onSuccess(depositAddressInfo)
                 }
             }
