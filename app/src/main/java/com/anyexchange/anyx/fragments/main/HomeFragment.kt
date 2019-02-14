@@ -2,8 +2,6 @@ package com.anyexchange.anyx.fragments.main
 
 import android.graphics.Color
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*

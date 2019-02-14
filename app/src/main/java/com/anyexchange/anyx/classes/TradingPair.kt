@@ -39,7 +39,7 @@ class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteC
 
     override fun equals(other: Any?): Boolean {
         return if (other is TradingPair) {
-            (other.baseCurrency == this.baseCurrency && other.quoteCurrency == this.quoteCurrency)
+            (other.baseCurrency == this.baseCurrency && other.quoteCurrency == this.quoteCurrency && other.exchange == this.exchange)
         } else {
             super.equals(other)
         }

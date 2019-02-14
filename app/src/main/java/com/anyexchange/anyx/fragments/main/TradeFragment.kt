@@ -258,15 +258,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair.quoteCurrency }
-        if (relevantTradingPair != null) {
-//            val index = tradingPairs.indexOf(relevantTradingPair)
-//            spinner_chart_trading_pair.setSelection(index)
-            tradingPair = relevantTradingPair
-        } else if (tradingPairs.isNotEmpty()){
-            tradingPair = tradingPairs.first()
+        if (relevantTradingPair == null) {
+            if (tradingPairs.isNotEmpty()){
+                tradingPair = tradingPairs.first()
+            }
         } else {
-            //TODO: something smarter here
-            assert(false)
+            tradingPair = relevantTradingPair
         }
         updateCurrencySpinner()
 

@@ -29,8 +29,8 @@ class TradeConfirmFragment: DialogFragment() {
 
     private var submitOrder: (NewOrder?) -> Unit = { }
 
-    var currentPrice: Double? = null
-    var newOrder: NewOrder? = null
+    private var currentPrice: Double? = null
+    private var newOrder: NewOrder? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -55,7 +55,7 @@ class TradeConfirmFragment: DialogFragment() {
             }
         }
 
-        confirmButton?.setOnClickListener {_ ->
+        confirmButton?.setOnClickListener {
             submitOrder(newOrder)
         }
 

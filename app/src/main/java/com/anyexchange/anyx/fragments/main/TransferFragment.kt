@@ -598,12 +598,12 @@ class TransferFragment : RefreshFragment() {
             }
             is Account.PaymentMethod -> {
                 //send from cbpro to bank
-                val paymentMethod = destAccount as Account.PaymentMethod
-                if (paymentMethod.balance != null && amount > paymentMethod.balance) {
+                val balance = destAccount.balance
+                if (balance != null && amount > balance) {
                     showPopup(R.string.transfer_funds_error)
                 } else {
                     showProgressSpinner()
-                    CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost(basicOnFailure) {
+                    CBProApi.sendToPayment(apiInitData, amount, currency, destAccount.id).executePost(basicOnFailure) {
                         basicOnSuccess()
                     }
                 }
@@ -647,7 +647,6 @@ class TransferFragment : RefreshFragment() {
 
     private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
         //show deposit address
-        //TODO: set text
         if (addressInfo != null) {
             depositAddressLabelText?.visibility = View.VISIBLE
             qrCodeImageView?.visibility = View.VISIBLE

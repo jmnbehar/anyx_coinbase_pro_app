@@ -226,8 +226,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         context?.let {
-            val prefs = Prefs(it)
-
             buyButton?.setOnClickListener {
                 buySellButtonOnClick(tradingPair.exchange.isLoggedIn(), TradeSide.BUY)
             }
@@ -249,7 +247,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val tempTradingPairIndex = product.tradingPairs.indexOf(tradingPair)
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
-                        miniRefresh({ _ ->
+                        miniRefresh({
                             toast(R.string.chart_update_error)
                             tradingPairSpinner?.setSelection(tempTradingPairIndex)
                             didTouchTradingPairSpinner = false
@@ -490,7 +488,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateFills(currency: Currency, orderList: List<Order>, stashedFills: List<Fill>) {
-        Fill.getAndStashList(apiInitData, currency, { _ ->
+        Fill.getAndStashList(apiInitData, currency, {
             context?.let {
                 if (lifecycle.isCreatedOrResumed) {
                     updateHistoryLists(it, orderList, stashedFills)
@@ -539,7 +537,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         context?.let { context ->
             val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
-
             val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
 
@@ -662,7 +659,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun cancelOrder(order: Order) {
-        order.cancel(apiInitData, { _ -> }) { _ ->
+        order.cancel(apiInitData, {  }) {
             if (lifecycle.isCreatedOrResumed) {
                 var orders = (orderListView?.adapter as OrderListViewAdapter).orders
                 orders = orders.filter { o -> o.id != order.id }
@@ -853,12 +850,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (currency.type == Currency.Type.FIAT || tradingPairTemp == null) {
             onComplete()
         } else {
-            product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
+            product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) {
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {
                         candles = product.candlesForTimespan(timespan, tradingPair)
                         tradingPair?.let { tradingPair ->
-                            AnyApi(apiInitData).ticker(tradingPair, onFailure) { _ ->
+                            AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)

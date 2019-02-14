@@ -1,7 +1,6 @@
 package com.anyexchange.anyx.api
 
 import android.content.Context
-import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
@@ -14,11 +13,6 @@ class AnyApi(val apiInitData: ApiInitData?) {
 
         fun isExchangeLoggedIn(exchange: Exchange): Boolean {
             return exchange.isLoggedIn()
-        }
-
-        fun nukeCredentials() {
-            CBProApi.credentials = null
-            BinanceApi.credentials = null
         }
     }
 
@@ -322,10 +316,10 @@ class AnyApi(val apiInitData: ApiInitData?) {
     private val enabledExchanges: List<Exchange>
         get() {
             //TODO: add setting to enable/disable exchanges
-            if (isAnyXProActive) {
-                return listOf(Exchange.CBPro, Exchange.Binance)
+            return if (isAnyXProActive) {
+                listOf(Exchange.CBPro, Exchange.Binance)
             } else {
-                return listOf(Exchange.CBPro)
+                listOf(Exchange.CBPro)
             }
         }
 
