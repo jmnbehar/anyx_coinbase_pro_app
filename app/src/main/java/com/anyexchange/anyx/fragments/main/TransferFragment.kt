@@ -17,6 +17,7 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.activities.ScanActivity
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.CBProApi
@@ -234,7 +235,9 @@ class TransferFragment : RefreshFragment() {
 
         amountUnitText?.text = currency.toString()
 
-        switchCurrency(currency)
+
+        (activity as MainActivity).navSpinner.selectedItem = currency
+//        switchCurrency(currency)
 
         dismissProgressSpinner()
     }
@@ -706,13 +709,11 @@ class TransferFragment : RefreshFragment() {
 
     private fun copyAddressToClipboard() {
         context?.let { context ->
-            (destAccount as? Account)?.exchange?.let { exchange ->
-                Account.forCurrency(currency, exchange)?.depositInfo?.let { depositInfo ->
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
-                    clipboard.primaryClip = clip
-                    toast("Copied Address to Clipboard")
-                }
+            (destAccount as? Account)?.depositInfo?.let { depositInfo ->
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
+                clipboard.primaryClip = clip
+                toast("Copied Address to Clipboard")
             }
         }
     }

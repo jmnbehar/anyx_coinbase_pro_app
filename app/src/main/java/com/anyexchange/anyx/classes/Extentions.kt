@@ -235,6 +235,10 @@ fun List<Currency>.sortCurrencies() : List<Currency> {
     return this.sortedWith(compareBy({ (Product.map[it.id]?.totalValueOfRelevantAccounts(Currency.USD) ?: 0.0) * -1 }, { it.orderValue }, { it.id }))
 }
 
+fun List<Currency>.sortCurrenciesAlphabetical() : List<Currency> {
+    return this.sortedWith(compareBy { it.id })
+}
+
 fun List<Product>.sortProducts() : List<Product> {
     //TODO: consider switching to BTC:
     return this.sortedWith(compareBy({ it.totalValueOfRelevantAccounts(Currency.USD) * -1 }, { it.currency.orderValue }, { it.currency.id }))
