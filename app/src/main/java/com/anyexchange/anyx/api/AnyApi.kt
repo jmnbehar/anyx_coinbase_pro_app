@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
 import com.anyexchange.anyx.classes.Currency
+import se.simbio.encryption.Encryption
 
 class AnyApi(val apiInitData: ApiInitData?) {
     companion object {
@@ -13,6 +14,31 @@ class AnyApi(val apiInitData: ApiInitData?) {
 
         fun isExchangeLoggedIn(exchange: Exchange): Boolean {
             return exchange.isLoggedIn()
+        }
+
+        fun restoreCredentials(prefs: Prefs) {
+            if ( CBProApi.credentials == null || CBProApi.credentials?.apiKey?.isEmpty() == true) {
+                val apiKey = prefs.cbProApiKey
+                val apiSecret = prefs.cbProApiSecret
+                val passphraseEncrypted = prefs.cbProPassphrase
+                val iv = ByteArray(16)
+                val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+                val passphrase = encryption.decryptOrNull(passphraseEncrypted)
+                if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
+                    val isApiKeyValid = prefs.isApiKeyValid(apiKey)
+                    CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
+                }
+            }
+            if (prefs.isAnyXProActive) {
+                if (BinanceApi.credentials == null || BinanceApi.credentials?.apiKey?.isEmpty() == true) {
+                    val apiKey = prefs.binanceApiKey
+                    val apiSecret = prefs.binanceApiSecret
+
+                    if (apiKey != null && apiSecret != null) {
+                        BinanceApi.credentials = BinanceApi.ApiCredentials(apiKey, apiSecret)
+                    }
+                }
+            }
         }
     }
 

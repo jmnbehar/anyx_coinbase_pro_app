@@ -226,6 +226,15 @@ class Prefs (var context: Context) {
 //        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
 //        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
 
+    val isVerified: Boolean?
+        get() {
+            return if (isAnyXProActive) {
+                true
+            } else {
+                CBProApi.credentials?.isVerified
+            }
+        }
+
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
         if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {

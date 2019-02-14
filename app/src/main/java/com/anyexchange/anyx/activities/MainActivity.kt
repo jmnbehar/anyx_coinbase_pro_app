@@ -21,7 +21,6 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.api.ApiInitData
-import com.anyexchange.anyx.api.CBProApi
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
@@ -32,7 +31,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
-import se.simbio.encryption.Encryption
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     lateinit var navSpinner: SearchableSpinner
@@ -49,6 +47,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         const val currentAppVersion = 17
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -156,26 +155,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun restoreData() {
         val prefs = Prefs(this)
-        if ( CBProApi.credentials == null || CBProApi.credentials?.apiKey?.isEmpty() == true) {
-
-            val apiKey = prefs.cbProApiKey
-            val apiSecret = prefs.cbProApiSecret
-            val passphraseEncrypted = prefs.cbProPassphrase
-            val iv = ByteArray(16)
-            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-            val passphrase = encryption.decryptOrNull(passphraseEncrypted)
-            if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
-                val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-            }
-        }
+        AnyApi.restoreCredentials(prefs)
 
         Product.map = prefs.stashedProducts.associateBy { it.currency.id }.toMutableMap()
 
         if (Account.fiatAccounts.isEmpty()){
             Account.fiatAccounts = prefs.stashedFiatAccountList
         }
-
         if (Account.paymentMethods.isEmpty()){
             Account.paymentMethods = prefs.stashedPaymentMethodList
         }
@@ -183,12 +169,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun destroyData() {
         val prefs = Prefs(this)
-
         prefs.stashedProducts = mutableListOf()
         prefs.stashedPaymentMethodList = mutableListOf()
         prefs.stashedFiatAccountList = mutableListOf()
     }
-
 
     private fun stashData() {
         Prefs(this).stashProducts()
@@ -224,12 +208,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
             val prefs = Prefs(this)
-            if (prefs.isAnyXProActive || CBProApi.credentials?.isVerified == true) {
+            if (prefs.isVerified == true) {
                 menu_verify.visibility = View.GONE
             } else {
                 menu_verify.visibility = View.VISIBLE
                 menu_verify.setOnClickListener  {
-                    if (prefs.isAnyXProActive || CBProApi.credentials?.isVerified == true) {
+                    if (prefs.isVerified == true) {
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
@@ -310,27 +294,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun signIn(shouldSkipCredentials: Boolean, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        val prefs = Prefs(this)
-        if (CBProApi.credentials == null) {
-            if (!shouldSkipCredentials) {
-                val apiKey = prefs.cbProApiKey
-                val apiSecret = prefs.cbProApiSecret
-                val passphraseEncrypted  = prefs.cbProPassphrase
-
-                val iv = ByteArray(16)
-                val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-                val passphrase = encryption.decryptOrNull(passphraseEncrypted)
-
-                if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
-                    val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                    CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-                }
-            } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
-                setDrawerMenu()
-                onComplete()
-                goHome()
-                return
-            }
+        if (!shouldSkipCredentials) {
+            AnyApi.restoreCredentials(Prefs(this))
+        } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
+            setDrawerMenu()
+            onComplete()
+            goHome()
+            return
         }
         checkAllResources(onFailure) {
             setDrawerMenu()
@@ -342,13 +312,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
-                if (CBProApi.credentials != null) {
+                if (Exchange.isAnyLoggedIn()) {
                     updateAllAccounts(onFailure, onComplete)
                 } else {
                     onComplete()
                 }
             }
-        } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
+        } else if (Account.areAccountsOutOfDate() && Exchange.isAnyLoggedIn()) {
             updateAllAccounts(onFailure, onComplete)
         } else {
             onComplete()
@@ -362,16 +332,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         val prefs = Prefs(this)
         showProgressBar()
-        CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
+        AnyApi(apiInitData).getAllAccounts({ error ->
             dismissProgressBar()
             onFailure(error)
         }, {
             dismissProgressBar()
             prefs.stashProducts()
             setDrawerMenu()
-            if (CBProApi.credentials == null) {
-                destroyData()
-            }
             onSuccess()
         })
     }
@@ -456,14 +423,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.ACCOUNTS -> AccountsFragment.newInstance()
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
-                val isAnyXProActive = Prefs(this).isAnyXProActive
+                val prefs = Prefs(this)
                 if (!Exchange.isAnyLoggedIn()) {
                     toast(R.string.toast_please_login_message)
                     null
-                } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == null) {
+                } else if (prefs.isVerified == null) {
                     goToVerify { if (it) { goToFragment(fragmentType) } }
                     null
-                } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == false) {
+                } else if (prefs.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else if (!TransferFragment.hasRelevantData) {
