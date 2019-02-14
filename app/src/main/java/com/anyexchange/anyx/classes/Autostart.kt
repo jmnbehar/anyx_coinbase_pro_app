@@ -10,7 +10,6 @@ import android.app.job.JobParameters
 import android.app.job.JobService
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.ApiInitData
-import com.anyexchange.anyx.api.CBProApi
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -69,6 +68,7 @@ class AlertJobService : JobService() {
 
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
+        val anyApi = AnyApi(apiInitData)
         if (prefs.areFillAlertsActive && Exchange.isAnyLoggedIn()) {
             val orderTradingPairs = mutableListOf<TradingPair>()
             for (product in Product.map.values) {
@@ -81,11 +81,10 @@ class AlertJobService : JobService() {
             if (orderTradingPairs.isNotEmpty()) {
                 val orderExchangeList = orderTradingPairs.map { it.exchange }.distinct()
                 for (exchange in orderExchangeList) {
-                    AnyApi(apiInitData).getAndStashOrderList(exchange, null, { }, { })
+                    anyApi.getAndStashOrderList(exchange, null, { }, { })
                 }
-                CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
                 for (tradingPair in orderTradingPairs) {
-                    CBProApi.fills(apiInitData, tradingPair).getAndStash({ }) { }
+                    anyApi.getAndStashFillList(tradingPair.exchange, tradingPair, { }, { } )
                 }
             }
         }

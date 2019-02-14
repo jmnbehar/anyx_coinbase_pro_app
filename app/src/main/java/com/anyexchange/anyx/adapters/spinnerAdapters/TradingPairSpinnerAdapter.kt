@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.anyexchange.anyx.classes.inflate
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.classes.Prefs
 import com.anyexchange.anyx.classes.TradingPair
 import kotlinx.android.synthetic.main.list_row_trading_pair.view.*
 import org.jetbrains.anko.backgroundColor
@@ -17,7 +18,7 @@ import org.jetbrains.anko.textColor
 /**
  * Created by anyexchange on 3/14/2018.
  */
-class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: List<TradingPair>, private val exchangeDisplayType: ExchangeDisplayType) :
+class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: List<TradingPair>, private val exchangeDisplayType: ExchangeDisplayType? = null) :
         ArrayAdapter<TradingPair>(context, layoutId, textResId, tradingPairList) {
 
     companion object {
@@ -67,24 +68,27 @@ class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: L
         if (tradingPairList.size > position) {
             val tradingPair = tradingPairList[position]
             viewHolder.tradingPairText?.textColor = Color.WHITE
-            when (exchangeDisplayType) {
+
+            val defaultExchangeDisplayType = if (Prefs(context).isAnyXProActive) {
+                TradingPairSpinnerAdapter.ExchangeDisplayType.FullName
+            } else {
+                TradingPairSpinnerAdapter.ExchangeDisplayType.None
+            }
+            viewHolder.tradingPairText?.text = when (exchangeDisplayType ?: defaultExchangeDisplayType) {
                 ExchangeDisplayType.None -> {
                     viewHolder.quoteCurrencyIcon?.visibility = View.GONE
-                    viewHolder.tradingPairText?.text = tradingPair.toString()
+                    tradingPair.toString()
                 }
                 ExchangeDisplayType.Image -> {
-//                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
                     viewHolder.quoteCurrencyIcon?.visibility = View.GONE
                     viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
-                    viewHolder.tradingPairText?.text = tradingPair.toString()
-//                viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+                    tradingPair.toString()
                 }
                 ExchangeDisplayType.FullName -> {
-//                viewHolder.quoteCurrencyIcon?.visibility = View.VISIBLE
                     viewHolder.quoteCurrencyIcon?.visibility = View.GONE
                     viewHolder.quoteCurrencyIcon?.setImageResource(tradingPair.exchange.iconId)
                     //TODO: use string resource
-                    viewHolder.tradingPairText?.text = tradingPair.toString() + " - " + tradingPair.exchange.toString()
+                    tradingPair.toString() + " - " + tradingPair.exchange.toString()
                 }
             }
         }

@@ -152,12 +152,6 @@
             android:text="@string/settings_anyx_eula" />
 
 
-        <Button
-            android:id="@+id/btn_setting_log_out"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="@string/settings_log_out" />
     </LinearLayout>
 
 </ScrollView>

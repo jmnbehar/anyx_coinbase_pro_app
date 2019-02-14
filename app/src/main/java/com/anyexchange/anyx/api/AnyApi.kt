@@ -1,6 +1,7 @@
 package com.anyexchange.anyx.api
 
 import android.content.Context
+import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
@@ -10,6 +11,15 @@ import com.anyexchange.anyx.classes.Currency
 class AnyApi(val apiInitData: ApiInitData?) {
     companion object {
         val defaultFailure: Result.Failure<String, FuelError> = Result.Failure(FuelError(Exception()))
+
+        fun isExchangeLoggedIn(exchange: Exchange): Boolean {
+            return exchange.isLoggedIn()
+        }
+
+        fun nukeCredentials() {
+            CBProApi.credentials = null
+            BinanceApi.credentials = null
+        }
     }
 
     fun reloadAllProducts(context: Context?, onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
@@ -242,7 +252,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
 
 
     fun getAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
-        if (CBProApi.credentials == null && CBProApi.credentials == null) {
+        if (!Exchange.isAnyLoggedIn()) {
             onSuccess()
         } else {
             if (CBProApi.credentials != null) {
@@ -272,6 +282,32 @@ class AnyApi(val apiInitData: ApiInitData?) {
         }
     }
 
+    fun getDepositAddress(exchange: Exchange, currency: Currency, coinbaseAccountId: String?, onFailure: (Result.Failure<Any, FuelError>) -> Unit, onSuccess: (DepositAddressInfo) -> Unit) {
+        when (exchange) {
+            Exchange.CBPro -> {
+                if (coinbaseAccountId != null) {
+                    CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { result ->
+                        onSuccess(DepositAddressInfo(result))
+                    }
+                } else {
+                    onFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+            Exchange.Binance -> {
+                BinanceApi.depositAddress(apiInitData, currency).get(onFailure) { result ->
+                    onSuccess(DepositAddressInfo(result))
+                }
+            }
+        }
+    }
+
+    fun stablecoinDirectConversion(tradingPair: TradingPair, amount: Double, onFailure: (Result.Failure<Any, FuelError>) -> Unit, onSuccess: () -> Unit) {
+        if (tradingPair.exchange == Exchange.CBPro) {
+            CBProApi.stablecoinConversion(apiInitData, amount, tradingPair).executePost(onFailure) { onSuccess() }
+        }
+    }
+
+
     private val isAnyXProActive: Boolean
         get() {
             apiInitData?.context?.let {
@@ -281,6 +317,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 return false
             }
         }
+
 
     private val enabledExchanges: List<Exchange>
         get() {

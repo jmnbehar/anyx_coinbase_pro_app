@@ -49,11 +49,7 @@ class AccountsFragment : RefreshFragment() {
                 setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
             }
 
-            val isLoggedIn = when (exchange) {
-                Exchange.CBPro -> CBProApi.credentials != null
-                Exchange.Binance -> BinanceApi.credentials != null
-            }
-            if (isLoggedIn) {
+            if (exchange.isLoggedIn()) {
                 logoutButton?.visibility = View.VISIBLE
                 logoutButton?.setOnClickListener {
                     when (exchange) {

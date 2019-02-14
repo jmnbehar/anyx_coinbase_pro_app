@@ -34,7 +34,6 @@ class SettingsFragment : RefreshFragment() {
     }
 
     private var titleText: TextView? = null
-    private var logoutButton: Button? = null
     private var verifyButton: Button? = null
     private var cbproEulaButton: Button? = null
     private var anyxEulaButton: Button? = null
@@ -52,7 +51,6 @@ class SettingsFragment : RefreshFragment() {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
 
         titleText = rootView.txt_setting_title
-        logoutButton = rootView.btn_setting_log_out
         verifyButton = rootView.btn_setting_verify_account
         cbproEulaButton = rootView.btn_setting_show_cbpro_eula
         anyxEulaButton = rootView.btn_setting_show_anyx_eula
@@ -65,11 +63,6 @@ class SettingsFragment : RefreshFragment() {
         defaultQuoteCurrencySpinner = rootView.spinner_settings_default_quote
 
         showDarkMode(rootView)
-
-
-        logoutButton?.setOnClickListener  {
-            logOut()
-        }
 
         verifyButton?.setOnClickListener  {
             val intent = Intent(activity, VerifyActivity::class.java)
@@ -182,20 +175,6 @@ class SettingsFragment : RefreshFragment() {
         showDarkMode()
 
         return rootView
-    }
-
-    private fun logOut() {
-        context?.let {
-            val prefs = Prefs(it)
-            CBProApi.credentials = null
-            for (product in Product.map.values) {
-                product.accounts = mapOf()
-            }
-            println("nuking accounts")
-            prefs.stashProducts()
-            prefs.nukeStashedOrders()
-            prefs.nukeStashedFills()
-        }
     }
 
 

@@ -251,7 +251,7 @@ class TransferFragment : RefreshFragment() {
             var didUpdateCBPro = false
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
-            CBProApi.accounts(apiInitData).updateAllAccounts({
+            AnyApi(apiInitData).getAllAccounts({
                 toast(R.string.toast_coinbase_pro_site_error)
                 isRefreshing = false
                 onComplete(false)

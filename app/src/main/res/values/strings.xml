@@ -118,6 +118,7 @@
     <string name="chart_timespan_1w">1W</string>
     <string name="chart_timespan_1m">1M</string>
     <string name="chart_timespan_1y">1Y</string>
+    <string name="chart_timespan_3y">3Y</string>
     <string name="chart_timespan_all">All</string>
     <string name="chart_trade_btn">Trade</string>
     <string name="chart_buy_btn">Buy</string>

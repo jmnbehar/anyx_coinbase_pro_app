@@ -18,9 +18,8 @@ import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.api.BinanceApi
+import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.api.CBProApi
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_balances.view.*
@@ -163,7 +162,8 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
     private fun showStablecoinConversionDialog(tradingPair: TradingPair) {
         val dialogFragment = StablecoinConversionFragment()
         dialogFragment.setInfo(tradingPair) { returnedTradingPair, amount ->
-            CBProApi.stablecoinConversion(apiInitData, amount, returnedTradingPair ?: tradingPair).executePost({
+            val finalTradingPair = returnedTradingPair ?: tradingPair
+            AnyApi(apiInitData).stablecoinDirectConversion(finalTradingPair, amount, {
                 toast(resources.getString(R.string.error_generic_message, it.errorMessage))
                 dialogFragment.dismiss()
             }, {
@@ -300,7 +300,7 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         swipeRefreshLayout?.isRefreshing = true
         val context = context
         if (context != null && Exchange.isAnyLoggedIn()) {
-            CBProApi.accounts(apiInitData).updateAllAccounts(onFailure) {
+            AnyApi(apiInitData).getAllAccounts(onFailure) {
                 completeRefresh()
                 onComplete(true)
             }

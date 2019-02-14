@@ -305,7 +305,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun updateButtonsAndText() {
         context?.let { context ->
-            tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.None)
+            tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs)
             tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     switchTradingPair(product.tradingPairs[position])
@@ -495,16 +495,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun payFee(amount: Double) {
-        currency.developerAddress?.let { developerAddress ->
-            //TODO: make and use AnyApi call
-            val context = context
-            CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
-                    {  /*  fail silently   */ },
-                    { _ ->
-                        context?.let {
-                            Prefs(it).wipeUnpaidFees(currency)
-                        }
-                    })
+        context?.let {
+            val prefs = Prefs(it)
+            val devAddress = currency.developerAddress
+            if (prefs.isAnyXProActive && devAddress != null) {
+                AnyApi(apiInitData).sendCrypto(currency, amount, Exchange.CBPro, devAddress, {  /*  fail silently   */ }) {
+                    prefs.wipeUnpaidFees(currency)
+                }
+            }
         }
     }
 

@@ -53,26 +53,9 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
     }
 
     fun getDepositAddress(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<Any, FuelError>) -> Unit, onSuccess: (DepositAddressInfo) -> Unit) {
-        //TODO: move this to AnyApi
-        when (exchange) {
-            Exchange.CBPro -> {
-                coinbaseAccount?.id?.let { coinbaseAccountId ->
-                    CBProApi.depositAddress(apiInitData, coinbaseAccountId).get(onFailure) { result ->
-                        val depositAddressInfo = DepositAddressInfo(result)
-                        this.depositInfo = depositAddressInfo
-                        onSuccess(depositAddressInfo)
-                    }
-                } ?: run {
-                    onFailure(Result.Failure(FuelError(Exception())))
-                }
-            }
-            Exchange.Binance -> {
-                BinanceApi.depositAddress(apiInitData, currency).get(onFailure) { result ->
-                    val depositAddressInfo = DepositAddressInfo(result)
-                    this.depositInfo = depositAddressInfo
-                    onSuccess(depositAddressInfo)
-                }
-            }
+        AnyApi(apiInitData).getDepositAddress(exchange, currency, coinbaseAccount?.id, onFailure) {
+            this.depositInfo = it
+            onSuccess(it)
         }
     }
 
@@ -88,7 +71,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         private fun accountsOutOfDate(): List<Exchange> {
             val exchangeList = mutableListOf<Exchange>()
 
-            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && CBProApi.credentials != null
+            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && AnyApi.isExchangeLoggedIn(Exchange.CBPro)
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
                 !Currency.brokenCoinIds.contains(product.currency.id) && product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null
             }
