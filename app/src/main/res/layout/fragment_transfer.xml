@@ -121,14 +121,15 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:paddingLeft="20dp"
+                android:paddingTop="25dp"
                 android:paddingRight="20dp"
                 android:visibility="visible">
 
 
                 <ImageView
                     android:id="@+id/img_receive_qr_code"
-                    android:layout_width="250dp"
-                    android:layout_height="220dp"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
                     app:srcCompat="@drawable/anyx_fg" />
 
                 <LinearLayout
@@ -141,7 +142,7 @@
                     tools:layout_editor_absoluteX="20dp">
 
                     <TextView
-                        android:id="@+id/txt_receive_address_label"
+                        android:id="@+id/txt_transfer_deposit_address_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
@@ -149,7 +150,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/img_receive_qr_code" />
 
                     <TextView
-                        android:id="@+id/txt_receive_address"
+                        android:id="@+id/txt_transfer_deposit_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
@@ -169,7 +170,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/layout_receive_account">
 
                     <ImageView
-                        android:id="@+id/img_receive_warning"
+                        android:id="@+id/img_transfer_deposit_warning"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         app:srcCompat="@drawable/anyx_fg" />
@@ -186,7 +187,7 @@
                         android:paddingBottom="20dp">
 
                         <TextView
-                            android:id="@+id/txt_receive_warning"
+                            android:id="@+id/txt_transfer_deposit_warning"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:paddingTop="2dp"
@@ -195,7 +196,7 @@
 
 
                         <TextView
-                            android:id="@+id/txt_receive_warning_2"
+                            android:id="@+id/txt_transfer_deposit_warning_2"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:autoLink="web"

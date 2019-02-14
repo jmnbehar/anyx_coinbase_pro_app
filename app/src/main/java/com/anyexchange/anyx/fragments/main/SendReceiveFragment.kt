@@ -55,7 +55,6 @@ class SendReceiveFragment : RefreshFragment() {
             viewPager?.adapter = sendReceivePagerAdapter
         }
 
-
         return rootView
     }
 

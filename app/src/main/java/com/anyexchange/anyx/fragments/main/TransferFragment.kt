@@ -1,8 +1,10 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.Manifest
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -43,6 +45,12 @@ class TransferFragment : RefreshFragment() {
 
     private lateinit var depositAddressViewLayout: LinearLayout
     private var qrCodeImageView: ImageView? = null
+    private var depositAddressText: TextView? = null
+    private var depositWarningText: TextView? = null
+    private var depositAddressLabelText: TextView? = null
+    private var depositWarning2Text: TextView? = null
+    private var depositWarningImageView: ImageView? = null
+
 
     private var sourceAccountsLabelTxt: TextView? = null
     private var sourceAccountsSpinner: Spinner? = null
@@ -119,6 +127,7 @@ class TransferFragment : RefreshFragment() {
             }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
@@ -147,6 +156,20 @@ class TransferFragment : RefreshFragment() {
 
         depositAddressViewLayout = rootView.layout_transfer_deposit_qr_code
         qrCodeImageView = rootView.img_receive_qr_code
+        depositAddressText = rootView.txt_transfer_deposit_address
+        depositWarningText = rootView.txt_transfer_deposit_warning
+        depositWarning2Text = rootView.txt_transfer_deposit_warning_2
+        depositAddressLabelText = rootView.txt_transfer_deposit_address_label
+        depositWarningImageView = rootView.img_transfer_deposit_warning
+
+        depositAddressLabelText?.setOnTouchListener { _, _ ->
+            copyAddressToClipboard()
+            true
+        }
+        depositWarningText?.setOnTouchListener { _, _ ->
+            copyAddressToClipboard()
+            true
+        }
 
         destAccountsSpinner = rootView.spinner_transfer_destination_accounts
         infoText = rootView.txt_transfer_info
@@ -287,6 +310,7 @@ class TransferFragment : RefreshFragment() {
         var accountsChecked = 0
         for (account in accounts) {
             if (account.depositInfo == null) {
+                showProgressSpinner()
                 account.getDepositAddress(apiInitData, {
                     accountsChecked++
                     if (accountsChecked == accounts.size) {
@@ -298,6 +322,11 @@ class TransferFragment : RefreshFragment() {
                         completeSwitchCurrency()
                     }
                 }
+            } else {
+                accountsChecked++
+                if (accountsChecked == accounts.size) {
+                    completeSwitchCurrency()
+                }
             }
         }
         if (accounts.isEmpty()) {
@@ -306,6 +335,7 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun completeSwitchCurrency() {
+        dismissProgressSpinner()
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
 
         when (currency.type) {
@@ -616,15 +646,30 @@ class TransferFragment : RefreshFragment() {
         //show deposit address
         //TODO: set text
         if (addressInfo != null) {
+            depositAddressLabelText?.visibility = View.VISIBLE
+            qrCodeImageView?.visibility = View.VISIBLE
+            depositAddressText?.visibility = View.VISIBLE
+            depositWarningText?.visibility = View.VISIBLE
+            depositWarning2Text?.visibility = View.VISIBLE
+
             val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
             qrCodeImageView?.setImageBitmap(bitmap)
-            qrCodeImageView?.visibility = View.VISIBLE
-//            infoText?.text = "Deposit address: " + (addressInfo.address)
+
+            depositAddressLabelText?.text = resources.getString(R.string.receive_address_label, currency.toString())
+
+            depositAddressText?.text = addressInfo.address
+
+            depositWarningText?.text = addressInfo.warning_title ?: getString(R.string.receive_warning_1, currency.fullName, currency.toString())
+            depositWarning2Text?.text = addressInfo.warning_details ?: getString(R.string.receive_warning_2)
 
         } else {
-            qrCodeImageView?.visibility = View.GONE
-//            infoText?.text = "Deposit address not available"
+            depositAddressLabelText?.visibility = View.GONE
 
+            qrCodeImageView?.visibility = View.GONE
+            depositAddressText?.visibility = View.GONE
+
+            depositWarningText?.text = resources.getString(R.string.receive_address_unavailable)
+            depositWarning2Text?.text = resources.getString(R.string.receive_refresh_label)
         }
     }
 
@@ -655,6 +700,19 @@ class TransferFragment : RefreshFragment() {
             } else {
                 //TODO: parse more advanced qr codes
                 destinationAddressEditText?.setText(barcode)
+            }
+        }
+    }
+
+    private fun copyAddressToClipboard() {
+        context?.let { context ->
+            (destAccount as? Account)?.exchange?.let { exchange ->
+                Account.forCurrency(currency, exchange)?.depositInfo?.let { depositInfo ->
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
+                    clipboard.primaryClip = clip
+                    toast("Copied Address to Clipboard")
+                }
             }
         }
     }

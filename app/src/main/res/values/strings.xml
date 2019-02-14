@@ -244,6 +244,7 @@
     <string name="receive_copy_address">Copy</string>
     <string name="receive_address_label">%s Address:</string>
 
+    <string name="receive_address_unavailable">Deposit address not available</string>
     <string name="receive_refresh_label">Swipe down to refresh</string>
 
     <string name="receive_warning_1">Only send %s (%s) to this address</string>
