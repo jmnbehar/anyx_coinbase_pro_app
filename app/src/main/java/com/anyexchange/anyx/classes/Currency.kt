@@ -11,7 +11,6 @@ import com.anyexchange.anyx.R
 
 class Currency(val id: String) {
     constructor(knownCurrency: KnownCurrency): this(knownCurrency.toString())
-    private val knownCurrency = KnownCurrency.forString(id)
 
     override fun toString() : String {
         return id
@@ -24,6 +23,10 @@ class Currency(val id: String) {
             false
         }
     }
+
+    private val knownCurrency
+        get() = KnownCurrency.forString(id)
+
     val symbol
         get() = knownCurrency?.symbol ?: id
 

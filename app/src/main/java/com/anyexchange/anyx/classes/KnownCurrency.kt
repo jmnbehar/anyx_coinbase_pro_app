@@ -35,7 +35,98 @@ enum class KnownCurrency {
     EUR,
     GBP;
 
+    inner class KnownCurrencyData(val symbol: String,
+                                  val shortName: String?,
+                                  val fullName: String,
+                                  val minSendAmount: Double,
+
+                                  val iconId: Int? = null,
+
+                                  val primaryColor : Int?,
+                                  val primaryColorLight: Int?,
+
+                                  val colorStateList : Int?,
+                                  val colorStateListLight: Int?,
+                                  val buttonTextColor : Int?,
+                                  val buttonTextColorLight: Int?,
+
+                                  val developerAddress : String?) {
+
+        constructor(symbol: String, fullName: String, iconId: Int?, primaryColor: Int?, colorStateList: Int, buttonTextColor: Int?, developerAddress: String?):
+                this(symbol, symbol, fullName, 0.0, iconId, primaryColor, null, colorStateList, null, buttonTextColor, null, developerAddress)
+
+        constructor(symbol: String, fullName: String, iconId: Int?, developerAddress: String?):
+                this(symbol, symbol, fullName, 0.0, iconId, null, null, null, null, null, null, developerAddress)
+
+        constructor(symbol: String, shortName: String?, fullName: String, iconId: Int?):
+                this(symbol, shortName, fullName, 0.0, iconId,null, null, null, null, null, null, null)
+    }
+
     //TODO: this class desperately needs a refactor
+
+    val currencyData: KnownCurrencyData
+    get() {
+            return when (this) {
+                BTC -> KnownCurrencyData("BTC", "BTC", "Bitcoin", .0001, R.drawable.icon_btc,
+                        R.color.btc_dk,  R.color.btc_light, R.color.btc_color_state_list_dark, R.color.btc_color_state_list_light, Color.BLACK, Color.WHITE,
+                        "3K63fgura9ctK3Wh6ofwyrTgCb4RrwWci6")
+
+                BCH -> KnownCurrencyData("BCH", "BCH", "Bitcoin Cash", .001, R.drawable.icon_bch,
+                        R.color.bch_dk,  R.color.bch_light, R.color.bch_color_state_list_dark, R.color.bch_color_state_list_light, Color.WHITE, null,
+                        "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8")
+
+                ETH -> KnownCurrencyData("ETH","ETH", "Ethereum", .001, R.drawable.icon_eth,
+                        R.color.eth_dk,  R.color.eth_light, R.color.eth_color_state_list_dark, R.color.eth_color_state_list_light, Color.WHITE, null,
+                        "0x6CDD817fdDAb3Ee5324e0Bb51b0f49f9d0Fd1247")
+
+                ETC -> KnownCurrencyData("ETC","ETC", "Ether Classic", .001, R.drawable.icon_etc,
+                        R.color.etc_dk,  R.color.etc_light, R.color.etc_color_state_list_dark, R.color.etc_color_state_list_light, Color.WHITE, null,
+                        "0x6e459139E65B4589e3F91c86D11143dBBA4570cf")
+
+                LTC -> KnownCurrencyData("LTC", "LTC", "Litecoin", .1, R.drawable.icon_ltc,
+                        R.color.ltc_dk,  R.color.ltc_light, R.color.ltc_color_state_list_dark, R.color.etc_color_state_list_light, Color.WHITE, null,
+                        "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD")
+
+                BAT -> KnownCurrencyData("BAT","BAT", "Basic Attention Token", 0.0, R.drawable.icon_bat,
+                        R.color.bat_color, null, R.color.bat_color_state_list, null, Color.WHITE, Color.BLACK,
+                        "0xF6D0aaB48BECf69f0cfF1c4693CE67a20295B02B")
+
+                ZRX -> KnownCurrencyData("ZRX", "0x", R.drawable.icon_zrx, R.color.zrx_color, R.color.zrx_color_state_list, Color.WHITE,
+                        "0x43e781a556DD3DECF64670740EE661b8d766d86c")
+
+                CVC -> KnownCurrencyData("CVC", "Civic", null,
+                        "0xbdF431184Dc6b3e7fbF1Eaf60ef3ce3D741946b2")
+
+                DAI -> KnownCurrencyData("DAI", "Dai", null,
+                        "0x7B5EFa1038934677be26417d190fF426E5bFC0da")
+
+                DNT -> KnownCurrencyData("DNT", "district0x", null,
+                        "0xFd07a94cCbcc262080df2c21241077264C338929")
+
+                GNT -> KnownCurrencyData("GNT", "Golem", null,
+                        "0x0D4Ae61164Ead343758A63A6eF02410f66c73310")
+
+                LOOM -> KnownCurrencyData("LOOM", "Loom Network", null,
+                        "0xE15897bc9Ec549068694512F464B2892BAE6a866")
+
+                MANA -> KnownCurrencyData("MANA", "Decentraland", null,
+                        "0x0E0403d06638d3cad4c4E622F7a262b6e1f8d4a1")
+
+                MKR -> KnownCurrencyData("MKR", "Maker", null, "")
+
+                ZEC -> KnownCurrencyData("ZEC", "Zcash", null,
+                        "t1azwZhxdz5LaGgxfH9FC2pnfjnBrVJPgfT")
+
+                ZIL -> KnownCurrencyData("ZIL", "Zilliqa", null, "")
+
+                USDC -> KnownCurrencyData("USDC", "USD Coin", null,
+                        "0x1aCfECe40ccbac06A183d67A1CDC7fb3aF1ad906")
+
+                USD -> KnownCurrencyData("$", "USD", "US Dollar", R.drawable.icon_usd)
+                EUR -> KnownCurrencyData("€", "EUR", "Euro", R.drawable.icon_usd)
+                GBP -> KnownCurrencyData("£", "GBP", "Pound sterling", R.drawable.icon_usd)
+            }
+        }
 
     override fun toString() : String {
         if (type == Currency.Type.CRYPTO) {
@@ -55,87 +146,22 @@ enum class KnownCurrency {
 
     val symbol : String
         get() {
-            return when (this) {
-                BTC -> "BTC"
-                BCH -> "BCH"
-                ETH -> "ETH"
-                ETC -> "ETC"
-                LTC -> "LTC"
-                ZRX -> "ZRX"
-                BAT -> "BAT"
-
-                CVC -> "CVC"
-                DAI -> "DAI"
-                DNT -> "DNT"
-                GNT -> "GNT"
-                LOOM -> "LOOM"
-                MANA -> "MANA"
-                MKR -> "MKR"
-                ZEC -> "ZEC"
-                ZIL -> "ZIL"
-
-                USDC -> "USDC"
-
-                USD -> "$"
-                EUR -> "€"
-                GBP -> "£"
-            }
+            return currencyData.symbol
         }
 
     val fullName : String
-        get() = when (this) {
-            BTC -> "Bitcoin"
-            BCH -> "Bitcoin Cash"
-            ETH -> "Ethereum"
-            ETC -> "Ether Classic"
-            LTC -> "Litecoin"
-            ZRX -> "0x"
-            BAT -> "Basic Attention Token"
-
-            CVC -> "Civic"
-            DAI -> "Dai"
-            DNT -> "district0x"
-            GNT -> "Golem"
-            LOOM -> "Loom Network"
-            MANA -> "Decentraland"
-            MKR -> "Maker"
-            ZEC -> "Zcash"
-            ZIL -> "Zilliqa"
-
-            USDC -> "USD Coin"
-            USD -> "US Dollar"
-            EUR -> "Euro"
-            GBP -> "Pound sterling"
+        get() {
+            return currencyData.fullName
         }
 
     val minSendAmount : Double
-        get() = when (this) {
-            BTC -> .0001
-            ETH -> .001
-            ETC -> .001
-            BCH -> .001
-            LTC -> .1
-            else -> 0.0
+        get() {
+            return currencyData.minSendAmount
         }
 
     val iconId: Int?
-        get() = when(this) {
-            BTC -> R.drawable.icon_btc
-            ETH -> R.drawable.icon_eth
-            ETC -> R.drawable.icon_etc
-            LTC -> R.drawable.icon_ltc
-            BCH -> R.drawable.icon_bch
-            ZRX -> R.drawable.icon_zrx
-
-            BAT -> R.drawable.icon_bat
-
-            USDC -> R.drawable.icon_usdc
-
-            USD -> R.drawable.icon_usd
-            EUR -> R.drawable.icon_eur
-            GBP -> R.drawable.icon_gbp
-
-            else -> null
+        get() {
+            return currencyData.iconId
         }
 
     val type: Currency.Type
@@ -158,144 +184,37 @@ enum class KnownCurrency {
         }
 
     fun colorPrimary(context: Context) : Int {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_dk)
-                BCH -> ContextCompat.getColor(context, R.color.bch_dk)
-                ETH -> ContextCompat.getColor(context, R.color.eth_dk)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_dk)
-                ETC -> ContextCompat.getColor(context, R.color.etc_dk)
-                ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
-                BAT -> ContextCompat.getColor(context, R.color.bat_color)
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.white)
-
-                else -> Color.WHITE
-            }
+        val currencyData = currencyData
+        val color =  if (Prefs(context).isDarkModeOn) {
+            currencyData.primaryColor ?: R.color.white
         } else {
-            when (this) {
-                BTC -> ContextCompat.getColor(context, R.color.btc_light)
-                BCH -> ContextCompat.getColor(context, R.color.bch_light)
-                ETH -> ContextCompat.getColor(context, R.color.eth_light)
-                LTC -> ContextCompat.getColor(context, R.color.ltc_light)
-                ETC -> ContextCompat.getColor(context, R.color.etc_light)
-                ZRX -> ContextCompat.getColor(context, R.color.zrx_color)
-                BAT -> ContextCompat.getColor(context, R.color.bat_color)
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> ContextCompat.getColor(context, R.color.black)
-                else -> Color.BLACK
-            }
+            currencyData.primaryColorLight ?: currencyData.primaryColor ?: R.color.black
         }
+        return ContextCompat.getColor(context, color)
     }
 
     fun colorStateList(context: Context) : ColorStateList {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_dark, context.resources.newTheme())
-                ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_dark, context.resources.newTheme())
-                BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_dark, context.resources.newTheme())
-                LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_dark, context.resources.newTheme())
-                ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
-                ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
-                BAT -> context.resources.getColorStateList(R.color.bat_color_state_list, context.resources.newTheme())
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_dark, context.resources.newTheme())
-
-                else -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-
-            }
+        val currencyData = currencyData
+        val colorStateList =  if (Prefs(context).isDarkModeOn) {
+            currencyData.colorStateList ?: R.color.usd_color_state_list_dark
         } else {
-            when (this) {
-                BTC -> context.resources.getColorStateList(R.color.btc_color_state_list_light, context.resources.newTheme())
-                ETH -> context.resources.getColorStateList(R.color.eth_color_state_list_light, context.resources.newTheme())
-                ETC -> context.resources.getColorStateList(R.color.etc_color_state_list_dark, context.resources.newTheme())
-                BCH -> context.resources.getColorStateList(R.color.bch_color_state_list_light, context.resources.newTheme())
-                LTC -> context.resources.getColorStateList(R.color.ltc_color_state_list_light, context.resources.newTheme())
-                ZRX -> context.resources.getColorStateList(R.color.zrx_color_state_list, context.resources.newTheme())
-                BAT -> context.resources.getColorStateList(R.color.bat_color_state_list, context.resources.newTheme())
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-                else -> context.resources.getColorStateList(R.color.usd_color_state_list_light, context.resources.newTheme())
-            }
+            currencyData.colorStateListLight ?: currencyData.colorStateList ?: R.color.usd_color_state_list_light
         }
+        return context.resources.getColorStateList(colorStateList, context.resources.newTheme())
     }
 
     fun buttonTextColor(context: Context) : Int {
-        val prefs = Prefs(context)
-        return if (prefs.isDarkModeOn) {
-            when (this) {
-                BTC -> Color.BLACK
-                ETH -> Color.WHITE
-                ETC -> Color.WHITE
-                BCH -> Color.WHITE
-                LTC -> Color.BLACK
-                ZRX -> Color.WHITE
-                BAT -> Color.WHITE
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> Color.WHITE
-                else -> Color.WHITE
-            }
+        val currencyData = currencyData
+        return if (Prefs(context).isDarkModeOn) {
+            currencyData.buttonTextColor ?: Color.WHITE
         } else {
-            when (this) {
-                BTC -> Color.WHITE
-                ETH -> Color.WHITE
-                ETC -> Color.WHITE
-                BCH -> Color.WHITE
-                LTC -> Color.WHITE
-                ZRX -> Color.WHITE
-                BAT -> Color.BLACK
-
-                USDC,
-                USD,
-                EUR,
-                GBP -> Color.BLACK
-                else -> Color.BLACK
-            }
+            currencyData.buttonTextColorLight ?: currencyData.buttonTextColor ?: Color.BLACK
         }
     }
 
     val developerAddress : String
-        get() = when (this) {
-        //CBPro Wallets (AnyX)
-            BTC -> "3K63fgura9ctK3Wh6ofwyrTgCb4RrwWci6"
-            ETH -> "0x6CDD817fdDAb3Ee5324e0Bb51b0f49f9d0Fd1247"
-            ETC -> "0x6e459139E65B4589e3F91c86D11143dBBA4570cf"
-            BCH -> "qztzaeg4axteayx7qngcdt2h72n2lw3asq50s50av8"
-            LTC -> "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD"
-            ZRX -> "0x43e781a556DD3DECF64670740EE661b8d766d86c"
-            BAT -> "0xF6D0aaB48BECf69f0cfF1c4693CE67a20295B02B"
-            USDC -> "0x1aCfECe40ccbac06A183d67A1CDC7fb3aF1ad906"
-
-            CVC -> "0xbdF431184Dc6b3e7fbF1Eaf60ef3ce3D741946b2"
-            DAI -> "0x7B5EFa1038934677be26417d190fF426E5bFC0da"
-            DNT -> "0xFd07a94cCbcc262080df2c21241077264C338929"
-            GNT -> "0x0D4Ae61164Ead343758A63A6eF02410f66c73310"
-            LOOM -> "0xE15897bc9Ec549068694512F464B2892BAE6a866"
-            MANA -> "0x0E0403d06638d3cad4c4E622F7a262b6e1f8d4a1"
-            MKR -> ""
-            ZEC -> "t1azwZhxdz5LaGgxfH9FC2pnfjnBrVJPgfT"
-            ZIL -> ""
-
-            USD,
-            EUR,
-            GBP -> "my irl address?"
+        get()  {
+            return currencyData.developerAddress ?: ""
         }
 
 
