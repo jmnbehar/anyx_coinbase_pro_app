@@ -90,8 +90,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
             //On Failure
-            toast(R.string.error_message)
-            returnToLogin()
+            dismissProgressBar()
+            goHome()
+            setDrawerMenu()
         }
 
         println("Starting up AnyX")
@@ -296,16 +297,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun signIn(shouldSkipCredentials: Boolean, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (!shouldSkipCredentials) {
             AnyApi.restoreCredentials(Prefs(this))
-        } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
-            setDrawerMenu()
-            onComplete()
-            goHome()
-            return
         }
-        checkAllResources(onFailure) {
+        if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
             setDrawerMenu()
             onComplete()
             goHome()
+        } else {
+            checkAllResources(onFailure) {
+                setDrawerMenu()
+                onComplete()
+                goHome()
+            }
         }
     }
 
