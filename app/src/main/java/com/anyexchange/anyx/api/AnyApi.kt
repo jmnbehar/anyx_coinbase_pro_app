@@ -54,26 +54,30 @@ class AnyApi(val apiInitData: ApiInitData?) {
     }
 
     fun getAndStashOrderList(exchange: Exchange, currency: Currency?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Order>) -> Unit) {
-        when (exchange) {
-            Exchange.CBPro -> {
-                CBProApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
-            }
-            Exchange.Binance -> {
-                BinanceApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
+        if (exchange.isLoggedIn()) {
+            when (exchange) {
+                Exchange.CBPro -> {
+                    CBProApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
+                }
+                Exchange.Binance -> {
+                    BinanceApi.listOrders(apiInitData, currency).getAndStash(onFailure, onSuccess)
+                }
             }
         }
     }
 
     fun getAndStashFillList(exchange: Exchange, tradingPair: TradingPair?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (List<Fill>) -> Unit) {
-        when (exchange) {
-            Exchange.CBPro -> {
-                CBProApi.fills(apiInitData, tradingPair).getAndStash(onFailure, onSuccess)
-            }
-            Exchange.Binance -> {
-                if (tradingPair != null) {
-                    BinanceApi.fills(apiInitData, tradingPair, null, null, null).getAndStash(onFailure, onSuccess)
-                } else {
-                    onFailure(Result.Failure(FuelError(Exception())))
+        if (exchange.isLoggedIn()) {
+            when (exchange) {
+                Exchange.CBPro -> {
+                    CBProApi.fills(apiInitData, tradingPair).getAndStash(onFailure, onSuccess)
+                }
+                Exchange.Binance -> {
+                    if (tradingPair != null) {
+                        BinanceApi.fills(apiInitData, tradingPair, null, null, null).getAndStash(onFailure, onSuccess)
+                    } else {
+                        onFailure(Result.Failure(FuelError(Exception())))
+                    }
                 }
             }
         }
@@ -148,8 +152,9 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 }
             }
             Exchange.Binance -> {
-                //TODO: figure this out
-                onFailure(defaultFailure)
+                BinanceApi.accounts(apiInitData).getAndLink(onFailure) {
+                    onSuccess(account)
+                }
             }
         }
     }

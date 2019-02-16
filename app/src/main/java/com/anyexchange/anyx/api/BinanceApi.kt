@@ -172,7 +172,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class accounts(initData: ApiInitData?) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceBalance>) -> Unit) {
+        private fun getAll(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<BinanceBalance>) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 try {
                     val apiAccountData: BinanceAccount = Gson().fromJson(result.value, object  : TypeToken<BinanceAccount>() {}.type )
@@ -185,7 +185,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         }
 
         fun getAndLink(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-            this.get(onFailure) {
+            this.getAll(onFailure) {
                 for (binanceBalance in it) {
                     val account = Account(binanceBalance)
                     val accounts = Product.map[account.currency.id]?.accounts?.toMutableMap()
@@ -217,15 +217,15 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     class account(initData: ApiInitData?, val accountId: String) : BinanceApi(initData) {
-        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (CBProAccount?) -> Unit) {
+        fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceBalance?) -> Unit) {
             this.executeRequest(onFailure) { result ->
                 val gson = Gson()
                 try {
-                    val apiAccount: CBProAccount = gson.fromJson(result.value, object : TypeToken<CBProAccount>() {}.type)
+                    val apiAccount: BinanceBalance = gson.fromJson(result.value, object : TypeToken<BinanceBalance>() {}.type)
                     onComplete(apiAccount)
                 } catch (e: JsonSyntaxException) {
                     try {
-                        val apiAccountList: List<CBProAccount> = gson.fromJson(result.value, object : TypeToken<List<CBProAccount>>() {}.type)
+                        val apiAccountList: List<BinanceBalance> = gson.fromJson(result.value, object : TypeToken<List<BinanceBalance>>() {}.type)
                         val apiAccountFirst = apiAccountList.firstOrNull()
                         if (apiAccountFirst != null) {
                             onComplete(apiAccountList.firstOrNull())
@@ -822,70 +822,11 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     }
 
     enum class ErrorMessage {
-        //Log in:
-        Forbidden,
-        InvalidApiKey,
-        InvalidPassphrase,
-        InvalidApiSignature,
-        MissingApiSignature,
-        MissingApiKey,
-
-        //Permissions:
-
-        //Trade:
-        BuyAmountTooSmallBtc,
-        BuyAmountTooSmallEth,
-        BuyAmountTooSmallBch,
-        BuyAmountTooSmallLtc,
-
-        BuyAmountTooLargeBtc,
-        BuyAmountTooLargeEth,
-        BuyAmountTooLargeBch,
-        BuyAmountTooLargeLtc,
-
-        PriceTooAccurate,
-        InsufficientFunds,
-
-        //Transfer:
-        TransferAmountTooLow,
-        InvalidCryptoAddress;
-
-        override fun toString(): String {
-            //TODO: refactor
-            return when (this) {
-                Forbidden -> "Forbidden"
-                InvalidApiKey -> "Invalid API Key"
-                InvalidPassphrase -> "Invalid Passphrase"
-                InvalidApiSignature -> "invalid signature"
-                MissingApiSignature -> "CB-ACCESS-SIGN header is required"
-                MissingApiKey -> "CB-ACCESS-KEY header is required"
-
-                BuyAmountTooSmallBtc -> "size is too small. Minimum size is 0.001"
-                BuyAmountTooSmallEth -> "size is too small. Minimum size is 0.01"
-                BuyAmountTooSmallBch -> "size is too small. Minimum size is 0.01"
-                BuyAmountTooSmallLtc -> "size is too small. Minimum size is 0.1"
-                BuyAmountTooLargeBtc -> "size is too large. Maximum size is 70"
-                BuyAmountTooLargeEth -> "size is too large. Maximum size is 700"
-                BuyAmountTooLargeBch -> "size is too large. Maximum size is 350"
-                BuyAmountTooLargeLtc -> "size is too large. Maximum size is 4000"
-
-                PriceTooAccurate -> "price is too accurate. Smallest unit is 0.01000000"
-                InsufficientFunds -> "Insufficient funds"
-
-                TransferAmountTooLow -> "amount must be a positive number"
-                InvalidCryptoAddress -> "invalid crypto_address"
-            }
-        }
+        InvalidApiKey;
 
         companion object {
             fun forString(string: String) : ErrorMessage? {
-                val errorMessage = ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
-                if (errorMessage == null) {
-                    if (string.contains("is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
-                        return TransferAmountTooLow
-                    }
-                }
-                return errorMessage
+                return ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
             }
         }
     }

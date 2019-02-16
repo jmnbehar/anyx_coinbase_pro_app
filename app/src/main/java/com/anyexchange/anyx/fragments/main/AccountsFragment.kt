@@ -231,7 +231,7 @@ class AccountsFragment : RefreshFragment() {
         cbProAccountCell.loginButton = rootView.btn_exchange_cbpro_account_login
         cbProAccountCell.logoutButton = rootView.btn_exchange_cbpro_account_logout
 
-        cbProAccountCell.setupCell(context, Exchange.CBPro, { genericLogOut() }, { refreshAllProductsAndAccounts() })
+        cbProAccountCell.setupCell(context, Exchange.CBPro, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
         binanceAccountCell.exchangeLogoView = rootView.img_exchange_binance_logo
         binanceAccountCell.exchangeNameView = rootView.txt_exchange_binance_name
@@ -245,7 +245,7 @@ class AccountsFragment : RefreshFragment() {
         binanceAccountCell.loginButton = rootView.btn_exchange_binance_account_login
         binanceAccountCell.logoutButton = rootView.btn_exchange_binance_account_logout
 
-        binanceAccountCell.setupCell(context, Exchange.Binance, { genericLogOut() }, { refreshAllProductsAndAccounts() })
+        binanceAccountCell.setupCell(context, Exchange.Binance, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
 
         return rootView
     }
@@ -256,9 +256,11 @@ class AccountsFragment : RefreshFragment() {
 
 
 
-    private fun genericLogOut() {
+    private fun genericLogOut(exchange: Exchange) {
         for (product in Product.map.values) {
-            product.accounts = mapOf()
+            val tempAccounts = product.accounts.toMutableMap()
+            tempAccounts.remove(exchange)
+            product.accounts = tempAccounts
         }
         println("nuking accounts")
         val prefs = Prefs(context!!)
