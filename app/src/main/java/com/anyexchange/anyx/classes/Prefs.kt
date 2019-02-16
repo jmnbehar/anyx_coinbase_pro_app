@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.anyexchange.anyx.api.CBProApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import se.simbio.encryption.Encryption
 import java.util.*
 
 /**
@@ -85,6 +86,19 @@ class Prefs (var context: Context) {
             prefs.edit().putString(CBPRO_PASSPHRASE, value).apply()
         }
 
+    fun stashCBProCreds(apiKey: String, apiSecret: String, apiPassphrase: String) {
+        if (shouldSaveApiInfo) {
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+            val passphraseEncrypted = encryption.encryptOrNull(apiPassphrase)
+            cbProApiKey = apiKey
+            cbProApiSecret = apiSecret
+            if (shouldSavePassphrase) {
+                cbProPassphrase = passphraseEncrypted
+            }
+        }
+    }
+
 
     var binanceApiKey: String?
         get() = prefs.getString(BINANCE_API_KEY, null)
@@ -94,6 +108,12 @@ class Prefs (var context: Context) {
         get() = prefs.getString(BINANCE_API_SECRET, null)
         set(value) = prefs.edit().putString(BINANCE_API_SECRET, value).apply()
 
+    fun stashBinanceCreds(apiKey: String, apiSecret: String) {
+        if (shouldSaveApiInfo) {
+            binanceApiKey = apiKey
+            binanceApiSecret = apiSecret
+        }
+    }
 
     var shouldShowTradeConfirmModal: Boolean
         get() = prefs.getBoolean(SHOULD_SHOW_TRADE_CONFIRM, true)
@@ -222,7 +242,7 @@ class Prefs (var context: Context) {
 
     // someday this will actually work
     val isAnyXProActive: Boolean
-        get() = true
+        get() = false
 //        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
 //        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
 

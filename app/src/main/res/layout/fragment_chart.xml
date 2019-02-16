@@ -282,11 +282,13 @@
                         <ImageView
                             android:id="@+id/img_chart_account_icon"
                             android:layout_width="30dp"
-                            android:layout_height="35dp"
+                            android:layout_height="30dp"
                             android:contentDescription="@string/chart_currency_icon_description" />
 
                         <ListView
                             android:id="@+id/list_chart_balances"
+                            android:divider="@null"
+                            android:dividerHeight="0dp"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
 

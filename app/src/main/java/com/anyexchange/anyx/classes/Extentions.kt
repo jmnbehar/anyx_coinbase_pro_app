@@ -54,9 +54,8 @@ fun ViewManager.horizontalLayout(string1Id: Int, string2: String) : LinearLayout
     }
 }
 
-fun ListView.setHeightBasedOnChildren(): Int {
+fun ListView.setHeightBasedOnChildren(bottomPadding: Int = 66, customDividerHeight: Int? = null): Int {
     val listAdapter = adapter ?: return 0
-    val bottomPadding = 66
     val desiredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED)
     var totalHeight = 0
     var view: View? = null
@@ -70,6 +69,7 @@ fun ListView.setHeightBasedOnChildren(): Int {
         totalHeight += view?.measuredHeight ?: 0
     }
     val params = layoutParams
+    val dividerHeight = customDividerHeight ?: dividerHeight
     params.height = totalHeight + dividerHeight * (listAdapter.count - 1) + bottomPadding
     layoutParams = params
     return params.height

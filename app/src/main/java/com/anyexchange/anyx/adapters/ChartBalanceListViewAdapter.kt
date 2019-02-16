@@ -60,12 +60,12 @@ class ChartBalanceListViewAdapter(val context: Context, var accounts: List<Accou
         if(i < accounts.size) {
             val account = accounts[i]
             viewHolder.balanceText?.text =  account.balance.format(account.currency)
-            viewHolder.exchangeText?.text = account.exchange.name
+            viewHolder.exchangeText?.text = "${account.exchange.name} account balance: "
             account.exchange.iconId.let {
-                viewHolder.iconView?.visibility = View.VISIBLE
+                viewHolder.iconView?.visibility = View.GONE
                 viewHolder.iconView?.setImageResource(it)
             } ?: run {
-                viewHolder.iconView?.visibility = View.INVISIBLE
+                viewHolder.iconView?.visibility = View.GONE
             }
         } else {
             val currency = accounts.first().currency
@@ -73,8 +73,12 @@ class ChartBalanceListViewAdapter(val context: Context, var accounts: List<Accou
             val price = Product.map[currency.id]?.priceForQuoteCurrency(quoteCurrency) ?: 1.0
             val totalValue = totalBalance * price
 
-            viewHolder.iconView?.visibility = View.INVISIBLE
-            viewHolder.exchangeText?.text = "Total value:"
+            viewHolder.iconView?.visibility = View.GONE
+            viewHolder.exchangeText?.text = if (i > 1) {
+                "Total value:"
+            } else {
+                "Value:"
+            }
             viewHolder.balanceText?.text =  totalValue.format(quoteCurrency)
         }
 

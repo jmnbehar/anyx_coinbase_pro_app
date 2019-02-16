@@ -68,10 +68,13 @@ class BalancesFragment : RefreshFragment(), OnChartValueSelectedListener, OnChar
         accountList = rootView.list_balances
         titleText = rootView.txt_balances_title
         lockableScrollView = rootView.lockscroll_balances
-        setHasOptionsMenu(true)
 
         val context = context
         if (context != null && Exchange.isAnyLoggedIn()) {
+            val prefs = Prefs(context)
+
+            setHasOptionsMenu(prefs.isAnyXProActive)
+
             rootView.layout_balances_chart_info.visibility = View.VISIBLE
             accountTotalCandles = sumAccountCandles()
             rootView.txt_all_balances_label.text = resources.getString(R.string.balances_title)

@@ -34,9 +34,9 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     class ApiCredentials(val apiKey: String, val apiSecret: String)
 
     companion object {
-        var testCredentials = ApiCredentials("QrOiJgU5LL6qfSV7dBN6XW83n8Xvt0nh3PutVmhO50fohySLb3PR1iJ0f3pMYYLV", "tv1tu21HYwKNgqaCPdhTSOEqwLUZ5Hh4sdV7rT4NNBvnslZcEnlVIEzN7DSvtKfW")
+//        var testCredentials = ApiCredentials("QrOiJgU5LL6qfSV7dBN6XW83n8Xvt0nh3PutVmhO50fohySLb3PR1iJ0f3pMYYLV", "tv1tu21HYwKNgqaCPdhTSOEqwLUZ5Hh4sdV7rT4NNBvnslZcEnlVIEzN7DSvtKfW")
 
-        var credentials: ApiCredentials? = testCredentials
+        var credentials: ApiCredentials? = null
 
         const val basePath = "https://api.binance.com"
 

@@ -292,7 +292,7 @@ enum class KnownCurrency {
 
                 ZIL -> KnownCurrencyData("ZIL", "Zilliqa", null, null)
 
-                USDC -> KnownCurrencyData("USDC", "USD Coin", null,
+                USDC -> KnownCurrencyData("USDC", "USD Coin", R.drawable.icon_usdc,
                         "0x1aCfECe40ccbac06A183d67A1CDC7fb3aF1ad906")
 
 

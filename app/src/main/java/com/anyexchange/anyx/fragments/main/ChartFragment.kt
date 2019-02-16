@@ -557,7 +557,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                 val accounts = product.accounts.values.toList()
                 val quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
                 balancesListView?.adapter = ChartBalanceListViewAdapter(it,  accounts, quoteCurrency)
-                balancesListView?.setHeightBasedOnChildren()
+                balancesListView?.setHeightBasedOnChildren(0, 0)
 
                 currency.iconId?.let { iconId ->
                     accountIcon?.visibility = View.VISIBLE
@@ -881,7 +881,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
         (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.accounts = product.accounts.values.toList()
         (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.notifyDataSetChanged()
-        balancesListView?.setHeightBasedOnChildren()
+        balancesListView?.setHeightBasedOnChildren(0, 0)
     }
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {

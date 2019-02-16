@@ -19,6 +19,8 @@ import se.simbio.encryption.Encryption
 
 class AccountsFragment : RefreshFragment() {
     private class ExchangeAccountCell {
+        var layout: LinearLayout? = null
+
         var exchangeLogoView: ImageView? = null
         var exchangeNameView: TextView? = null
 
@@ -38,10 +40,15 @@ class AccountsFragment : RefreshFragment() {
         var loginButton: Button? = null
         var logoutButton: Button? = null
 
+        fun hide() {
+            layout?.visibility = View.GONE
+        }
 
         fun setupCell(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+            layout?.visibility = View.VISIBLE
+
             exchangeLogoView?.setImageResource(R.drawable.fail_icon)
-            exchangeNameView?.text = exchange.name
+            exchangeNameView?.text = exchange.toString()
 
             if (shouldShowEditLayout) {
                 setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
@@ -145,62 +152,66 @@ class AccountsFragment : RefreshFragment() {
             apiKeyEditText?.isSelected = true
 
             loginButton?.setOnClickListener {
+                login(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+            }
+        }
 
-                val newApiKey = apiKeyEditText?.text.toString().trimEnd()
-                val newApiSecret = apiSecretEditText?.text.toString().trimEnd()
-                val newApiPassphrase = passphraseEditText?.text.toString().trimEnd()
 
-                val didChangeLoginInfo = when (exchange) {
+        fun login(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+            val newApiKey = apiKeyEditText?.text.toString().trimEnd()
+            val newApiSecret = apiSecretEditText?.text.toString().trimEnd()
+            val newApiPassphrase = passphraseEditText?.text.toString().trimEnd()
+            val prefs = Prefs(context)
+
+            val didChangeLoginInfo = when (exchange) {
+                Exchange.CBPro -> {
+                    newApiKey != CBProApi.credentials?.apiKey || newApiSecret != CBProApi.credentials?.apiSecret || newApiPassphrase != CBProApi.credentials?.apiPassPhrase
+                }
+                Exchange.Binance -> {
+                    newApiKey != BinanceApi.credentials?.apiKey || newApiSecret != BinanceApi.credentials?.apiSecret
+                }
+            }
+            if (!didChangeLoginInfo) {
+                when (exchange) {
                     Exchange.CBPro -> {
-                        newApiKey != CBProApi.credentials?.apiKey || newApiSecret != CBProApi.credentials?.apiSecret || newApiPassphrase != CBProApi.credentials?.apiPassPhrase
+                        if (prefs.cbProApiKey == null) {
+                            prefs.stashCBProCreds(newApiKey, newApiSecret, newApiPassphrase)
+                        }
                     }
                     Exchange.Binance -> {
-                        newApiKey != BinanceApi.credentials?.apiKey || newApiSecret != BinanceApi.credentials?.apiSecret
+                        if (prefs.binanceApiKey == null) {
+                            prefs.stashBinanceCreds(newApiKey, newApiSecret)
+                        }
                     }
                 }
-                if (!didChangeLoginInfo) {
-                    setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
-                } else {
-                    when {
-                        newApiKey.isBlank() -> context.toast(R.string.login_error_missing_api_key)
-                        newApiSecret.isBlank() -> context.toast(R.string.login_error_missing_api_secret)
-                        newApiPassphrase.isBlank() -> context.toast(R.string.login_error_missing_passphrase)
-                        else -> {
+                setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+            } else {
+                when {
+                    newApiKey.isBlank() -> context.toast(R.string.login_error_missing_api_key)
+                    newApiSecret.isBlank() -> context.toast(R.string.login_error_missing_api_secret)
+                    newApiPassphrase.isBlank() -> context.toast(R.string.login_error_missing_passphrase)
+                    else -> {
 
-                            when (exchange) {
-                                Exchange.CBPro -> {
-                                    if (prefs.shouldSaveApiInfo) {
-                                        val iv = ByteArray(16)
-                                        val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-                                        val passphraseEncrypted = encryption.encryptOrNull(newApiPassphrase)
-                                        prefs.cbProApiKey = apiKey
-                                        prefs.cbProApiSecret = apiSecret
-                                        if (prefs.shouldSavePassphrase) {
-                                            prefs.cbProPassphrase = passphraseEncrypted
-                                        }
-                                    }
-                                    val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
-                                    CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
-                                    refreshAllProductsAndAccounts()
-                                }
-                                Exchange.Binance -> {
-                                    if (prefs.shouldSaveApiInfo) {
-                                        prefs.binanceApiKey = apiKey
-                                        prefs.binanceApiSecret = apiSecret
-                                    }
-                                    BinanceApi.credentials = BinanceApi.ApiCredentials(newApiKey, newApiSecret)
-                                    refreshAllProductsAndAccounts()
-                                }
+                        when (exchange) {
+                            Exchange.CBPro -> {
+                                prefs.stashCBProCreds(newApiKey, newApiSecret, newApiPassphrase)
+                                val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
+                                CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
+                                refreshAllProductsAndAccounts()
                             }
-                            setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                            Exchange.Binance -> {
+                                prefs.stashBinanceCreds(newApiKey, newApiSecret)
+
+                                BinanceApi.credentials = BinanceApi.ApiCredentials(newApiKey, newApiSecret)
+                                refreshAllProductsAndAccounts()
+                            }
                         }
+                        setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
                     }
                 }
             }
         }
-
     }
-
 
     private var cbProAccountCell = ExchangeAccountCell()
     private var binanceAccountCell = ExchangeAccountCell()
@@ -219,6 +230,7 @@ class AccountsFragment : RefreshFragment() {
 
         val context = context!!
 
+        cbProAccountCell.layout = rootView.layout_exchange_cbpro
         cbProAccountCell.exchangeLogoView = rootView.img_exchange_cbpro_logo
         cbProAccountCell.exchangeNameView = rootView.txt_exchange_cbpro_name
         cbProAccountCell.apiKeyLayout = rootView.layout_exchange_cbpro_account_api_key
@@ -233,6 +245,7 @@ class AccountsFragment : RefreshFragment() {
 
         cbProAccountCell.setupCell(context, Exchange.CBPro, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
+        binanceAccountCell.layout = rootView.layout_exchange_binance
         binanceAccountCell.exchangeLogoView = rootView.img_exchange_binance_logo
         binanceAccountCell.exchangeNameView = rootView.txt_exchange_binance_name
         binanceAccountCell.apiKeyLayout = rootView.layout_exchange_binance_account_api_key
@@ -245,7 +258,12 @@ class AccountsFragment : RefreshFragment() {
         binanceAccountCell.loginButton = rootView.btn_exchange_binance_account_login
         binanceAccountCell.logoutButton = rootView.btn_exchange_binance_account_logout
 
-        binanceAccountCell.setupCell(context, Exchange.Binance, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
+        val prefs = Prefs(context)
+        if (prefs.isAnyXProActive) {
+            binanceAccountCell.setupCell(context, Exchange.Binance, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
+        } else {
+            binanceAccountCell.hide()
+        }
 
         return rootView
     }

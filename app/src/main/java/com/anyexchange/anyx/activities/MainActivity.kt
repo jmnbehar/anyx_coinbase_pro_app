@@ -133,10 +133,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     })
                 }
             } else {
-                println("All good :)")
+                if (!prefs.isAnyXProActive && Product.map["BNB"] != null) {
+                    //If anyXPro is not active and Binance products are here, nuke em'
+                    Product.map = mutableMapOf()
+                    showProgressBar()
+                    anyApi.getAllProducts(onFailure) {
+                        anyApi.getAllAccounts(onFailure, {
+                            prefs.lastVersionCode = currentAppVersion
+                            dismissProgressBar()
+                            goHome()
+                            setDrawerMenu()
+                        })
+                    }
+                } else {
+                    println("All good :)")
 
-                goHome()
-                setDrawerMenu()
+                    goHome()
+                    setDrawerMenu()
+                }
             }
             return
         } else {
