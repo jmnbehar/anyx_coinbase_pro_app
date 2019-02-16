@@ -274,7 +274,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="38dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp"
                         android:gravity="center_vertical">
@@ -285,53 +285,13 @@
                             android:layout_height="35dp"
                             android:contentDescription="@string/chart_currency_icon_description" />
 
-                        <TextView
-                            android:id="@+id/txt_chart_ticker"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_weight="4"
-                            android:gravity="center_vertical|start"
-                            android:text="@string/chart_default_account"
-                            app:autoSizeMaxTextSize="24sp"
-                            app:autoSizeMinTextSize="10sp"
-                            app:autoSizeStepGranularity="2sp"
-                            app:autoSizeTextType="uniform" />
+                        <ListView
+                            android:id="@+id/list_chart_balances"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:layout_weight="6"
-                            android:gravity="end"
-                            android:orientation="vertical">
+                        </ListView>
 
-                            <TextView
-                                android:id="@+id/txt_chart_account_balance"
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:text="@string/chart_default_balance"
-                                android:textAlignment="textEnd"
-                                app:autoSizeMaxTextSize="14sp"
-                                app:autoSizeMinTextSize="8sp"
-                                app:autoSizeStepGranularity="2sp"
-                                app:autoSizeTextType="uniform"/>
-
-                            <TextView
-                                android:id="@+id/txt_chart_account_value"
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:text="@string/chart_default_balance"
-                                android:textAlignment="textEnd"
-                                app:autoSizeMaxTextSize="14sp"
-                                app:autoSizeMinTextSize="8sp"
-                                app:autoSizeStepGranularity="2sp"
-                                app:autoSizeTextType="uniform" />
-
-                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>

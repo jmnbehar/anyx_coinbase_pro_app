@@ -28,6 +28,7 @@ import android.view.MotionEvent
 import android.widget.*
 import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.ChartBalanceListViewAdapter
 import com.anyexchange.anyx.adapters.FillListViewAdapter
 import com.anyexchange.anyx.adapters.OrderListViewAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
@@ -62,12 +63,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var currencyNameTextView: TextView? = null
 
-    private var tickerTextView: TextView? = null
     private var priceTextView: TextView? = null
 
-    private var balanceTextView: TextView? = null
-    private var valueTextView: TextView? = null
     private var accountIcon: ImageView? = null
+    private var balancesListView: ListView? = null
 
     private var highLabelTextView: TextView? = null
     private var highTextView: TextView? = null
@@ -125,16 +124,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         var chartStyle = ChartStyle.Line
         var tradingPair: TradingPair? = null
     }
-
-    private val relevantAccount: Account?
-        get() {
-            val exchange = tradingPair?.exchange
-            return if (exchange != null) {
-                product.accounts[exchange]
-            } else {
-                null
-            }
-        }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -200,10 +189,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lowTextView = rootView.txt_chart_low
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            tickerTextView = rootView.txt_chart_ticker
+            balancesListView = rootView.list_chart_balances
 
-            balanceTextView = rootView.txt_chart_account_balance
-            valueTextView = rootView.txt_chart_account_value
             accountIcon = rootView.img_chart_account_icon
 
             sellButton = rootView.btn_chart_sell
@@ -565,27 +552,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let {
             val currency = product.currency
             setButtonColors()
-            val account = relevantAccount
-            if (tradingPair?.exchange?.isLoggedIn() == true) {
-                val balance = account?.balance ?: 0.0
-                tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
+            if (Exchange.isAnyLoggedIn()) {
+                balancesListView?.visibility = View.VISIBLE
+                val accounts = product.accounts.values.toList()
+                val quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+                balancesListView?.adapter = ChartBalanceListViewAdapter(it,  accounts, quoteCurrency)
+                balancesListView?.setHeightBasedOnChildren()
+
                 currency.iconId?.let { iconId ->
                     accountIcon?.visibility = View.VISIBLE
                     accountIcon?.setImageResource(iconId)
                 } ?: run {
                     accountIcon?.visibility = View.GONE
                 }
-                balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
-                updateValueText()
+                updateBalancesList()
                 orderListLabel?.visibility = View.VISIBLE
                 orderListView?.visibility = View.VISIBLE
                 fillListLabel?.visibility = View.VISIBLE
                 fillListView?.visibility = View.VISIBLE
             } else {
-                tickerTextView?.visibility = View.GONE
                 accountIcon?.visibility = View.GONE
-                balanceTextView?.visibility = View.GONE
-                valueTextView?.visibility = View.GONE
+                balancesListView?.visibility = View.GONE
 
                 orderListLabel?.visibility = View.GONE
                 orderListView?.visibility = View.GONE
@@ -775,17 +762,33 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val context = context
 
-        val account = relevantAccount
-        if (context != null  && account != null && account.exchange.isLoggedIn()) {
+        if (context != null  && Exchange.isAnyLoggedIn()) {
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            AnyApi(apiInitData).updateAccount(account, onFailure) { updatedAccount ->
-                if (lifecycle.isCreatedOrResumed) {
-                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, updatedAccount.balance.btcFormat(), updatedAccount.currency)
-                    updateValueText()
-                    miniRefresh(onFailure) {
-                        onComplete(true)
+
+            var updatedAccounts = 0
+            var failedAccounts = 0
+            val accounts = product.accounts.values
+            for (account in accounts) {
+                AnyApi(apiInitData).updateAccount(account, {
+                    updatedAccounts++
+                    failedAccounts++
+                    if (failedAccounts >= accounts.size) {
+                        onFailure(it)
+                    } else if (lifecycle.isCreatedOrResumed && updatedAccounts >= accounts.size) {
+                        updateBalancesList()
+                        miniRefresh(onFailure) {
+                            onComplete(true)
+                        }
+                    }
+                }) {
+                    updatedAccounts++
+                    if (lifecycle.isCreatedOrResumed && updatedAccounts >= accounts.size) {
+                        updateBalancesList()
+                        miniRefresh(onFailure) {
+                            onComplete(true)
+                        }
                     }
                 }
             }
@@ -874,18 +877,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateValueText() {
-        relevantAccount?.let { account ->
-            valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-            valueTextView?.visibility = View.VISIBLE
-        } ?: run {
-            valueTextView?.visibility = View.GONE
-        }
+    private fun updateBalancesList() {
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.accounts = product.accounts.values.toList()
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.notifyDataSetChanged()
+        balancesListView?.setHeightBasedOnChildren()
     }
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         priceTextView?.text = price.format(quoteCurrency)
-        updateValueText()
+        updateBalancesList()
         val tradingPair = tradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
         addCandlesToActiveChart(candles, tradingPair)
         setPercentChangeText(timespan)
