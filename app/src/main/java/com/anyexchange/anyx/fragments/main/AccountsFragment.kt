@@ -56,16 +56,17 @@ class AccountsFragment : RefreshFragment() {
                 setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
             }
 
+            logoutButton?.setOnClickListener {
+                when (exchange) {
+                    Exchange.CBPro -> CBProApi.credentials = null
+                    Exchange.Binance -> BinanceApi.credentials = null
+                }
+                setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                genericLogOut()
+            }
+
             if (exchange.isLoggedIn()) {
                 logoutButton?.visibility = View.VISIBLE
-                logoutButton?.setOnClickListener {
-                    when (exchange) {
-                        Exchange.CBPro -> CBProApi.credentials = null
-                        Exchange.Binance -> BinanceApi.credentials = null
-                    }
-                    setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
-                    genericLogOut()
-                }
             } else {
                 logoutButton?.visibility = View.GONE
             }
@@ -98,6 +99,12 @@ class AccountsFragment : RefreshFragment() {
 
             loginButton?.setOnClickListener {
                 setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+            }
+
+            if (exchange.isLoggedIn()) {
+                logoutButton?.visibility = View.VISIBLE
+            } else {
+                logoutButton?.visibility = View.GONE
             }
         }
 
