@@ -119,6 +119,7 @@
     <string name="chart_timespan_1m">1M</string>
     <string name="chart_timespan_1y">1Y</string>
     <string name="chart_timespan_3y">3Y</string>
+    <string name="chart_timespan_24h">24h</string>
     <string name="chart_timespan_all">All</string>
     <string name="chart_trade_btn">Trade</string>
     <string name="chart_buy_btn">Buy</string>
@@ -170,6 +171,8 @@
 
     <string name="order_main_label">%s %s for %s</string>
     <string name="order_price_label">%s at %s per %s</string>
+    <string name="order_date_created">Date created: %s</string>
+    <string name="order_amount_label">Original Amount: %d, Filled Amount: %d</string>
 
     //For market buys with specified base currency value, ex: "(Buy) (30 ETH) at market value"
     <string name="order_summary_market_fixed_base">%s %s at market value</string>
@@ -481,6 +484,16 @@ You\'re good to go!</item>
 
     <string name="done_search">Done Search</string>
     <string name="start_search">Start search</string>
-    <string name="search">Search...</string>
+    <string name="search">Search…</string>
     <string name="empty_list">No Items Found</string>
+    <string name="accounts_api_key_label">API Key:</string>
+    <string name="accounts_change_login_info">Change Log In Info</string>
+    <string name="accounts_login_button_label">Log In</string>
+    <string name="accounts_save_login_info">Save Log In Info</string>
+    <string name="currency_id_and_fullname">%s - %s</string>
+    <string name="notification_fill_alert_title">%s Fill Alert</string>
+    <string name="notification_fill_alert_body">%s order of %d %s filled at %s</string>
+    <string name="chart_balance_account_balance">%s account balance:</string>
+    <string name="chart_balance_total_value">Total value:</string>
+    <string name="chart_balance_single_value">Value:</string>
 </resources>

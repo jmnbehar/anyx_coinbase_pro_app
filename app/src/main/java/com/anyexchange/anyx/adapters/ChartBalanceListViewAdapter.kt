@@ -60,7 +60,7 @@ class ChartBalanceListViewAdapter(val context: Context, var accounts: List<Accou
         if(i < accounts.size) {
             val account = accounts[i]
             viewHolder.balanceText?.text =  account.balance.format(account.currency)
-            viewHolder.exchangeText?.text = "${account.exchange.name} account balance: "
+            viewHolder.exchangeText?.text = context.getString(R.string.chart_balance_account_balance, account.exchange.name)
             account.exchange.iconId.let {
                 viewHolder.iconView?.visibility = View.GONE
                 viewHolder.iconView?.setImageResource(it)
@@ -75,9 +75,9 @@ class ChartBalanceListViewAdapter(val context: Context, var accounts: List<Accou
 
             viewHolder.iconView?.visibility = View.GONE
             viewHolder.exchangeText?.text = if (i > 1) {
-                "Total value:"
+                context.getString(R.string.chart_balance_total_value)
             } else {
-                "Value:"
+                context.getString(R.string.chart_balance_single_value)
             }
             viewHolder.balanceText?.text =  totalValue.format(quoteCurrency)
         }

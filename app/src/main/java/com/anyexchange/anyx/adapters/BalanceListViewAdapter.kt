@@ -94,7 +94,7 @@ class BalanceListViewAdapter(val context: Context, var exchange: Exchange?) : Ba
             when (account.currency.type) {
                 Currency.Type.FIAT -> {
                     viewHolder.accountValueText?.text = account.defaultValue.format(Account.defaultFiatCurrency)
-                    viewHolder.balanceText?.text = "${account.defaultValue.fiatFormat()} ${account.currency}"
+                    viewHolder.balanceText?.text = context.getString(R.string.balances_balance_text, account.defaultValue.fiatFormat(), account.currency)
                     viewHolder.percentChangeText?.text = ""
                 }
                 Currency.Type.STABLECOIN -> {

@@ -37,10 +37,11 @@ object AlertHub {
         val tradingPair = fill.tradingPair
         val side = fill.side
         val size = fill.amount
-        val notificationTitle = "${tradingPair.baseCurrency} Fill Alert"
+        val notificationTitle = context.getString(R.string.notification_fill_alert_title, tradingPair.baseCurrency)
+
         val price = fill.price.format(tradingPair.quoteCurrency)
 
-        val notificationText = "${side.toString().capitalize()} order of $size ${tradingPair.baseCurrency} filled at $price"
+        val notificationText = context.getString(R.string.notification_fill_alert_body, side.toString().capitalize(), size, tradingPair.baseCurrency, price)
         val notificationTag = "FillAlert_" + fill.id
 
         postAlert(channelId, notificationTitle, notificationText, notificationTag, tradingPair.baseCurrency, context)

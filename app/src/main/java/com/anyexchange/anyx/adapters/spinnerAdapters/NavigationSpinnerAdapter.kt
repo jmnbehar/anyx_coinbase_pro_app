@@ -40,7 +40,8 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         val view = View.inflate(context, R.layout.list_row_spinner_nav, null)
         val displayName = view.findViewById(R.id.txt_currency) as TextView
         val currency = currencyList[position]
-        displayName.text = "$currency - ${currency.fullName}"
+        displayName.text = currencyDisplayName(currency)
+
         displayName.setTextColor(Color.WHITE)
 
         return view
@@ -75,18 +76,25 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         if (currencyList.size > position) {
             val currency = currencyList[position]
 
-            viewHolder.currencyTxt?.text = "$currency - ${currency.fullName}"
+            viewHolder.currencyTxt?.text = currencyDisplayName(currency)
             viewHolder.currencyTxt?.visibility = View.VISIBLE
         } else {
             viewHolder.currencyTxt?.visibility = View.GONE
         }
         return outputView
     }
-
     override fun getFilter(): Filter {
         return mStringFilter
     }
 
+    private fun currencyDisplayName(currency: Currency) : String {
+        val fullName = currency.fullName
+        return if (fullName != null) {
+            context.getString(R.string.currency_id_and_fullname, currency.id, fullName)
+        } else {
+            currency.id
+        }
+    }
 
     override fun getCount(): Int {
         return currencyList.size
@@ -110,7 +118,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
             for (currency in backupCurrencyList) {
                 if (currency.id.toLowerCase().contains(searchTerm)) {
                     filteredCurrencies.add(currency)
-                } else if (currency.fullName.toLowerCase().contains(searchTerm)) {
+                } else if (currency.fullName?.toLowerCase()?.contains(searchTerm) == true) {
                     filteredCurrencies.add(currency)
                 } else if (currency.symbol.toLowerCase().contains(searchTerm)) {
                     filteredCurrencies.add(currency)
@@ -122,7 +130,8 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         }
 
         override fun publishResults(constraint: CharSequence, results: FilterResults) {
-            currencyList = results.values as? List<Currency> ?: listOf()
+            val resultList = results.values as List<*>
+            currencyList = resultList.filterIsInstance<Currency>()
             notifyDataSetChanged()
         }
     }

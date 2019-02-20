@@ -92,7 +92,7 @@ class PriceCandleChart : CandleStickChart {
             description = newDescription
             description.isEnabled = false
         } else {
-            newDescription.text = "24h"
+            newDescription.text = context.getString(R.string.chart_timespan_24h)
             newDescription.textSize = 18f
             newDescription.yOffset = 5f
             newDescription.xOffset = 5f

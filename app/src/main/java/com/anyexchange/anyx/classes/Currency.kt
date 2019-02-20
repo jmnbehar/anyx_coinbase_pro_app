@@ -31,7 +31,7 @@ class Currency(val id: String) {
         get() = knownCurrency?.symbol ?: id
 
     val fullName
-        get() = knownCurrency?.fullName ?: id
+        get() = knownCurrency?.fullName
 
     val iconId
         get() = knownCurrency?.iconId

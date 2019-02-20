@@ -12,6 +12,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.YAxis
 import android.view.VelocityTracker
+import com.anyexchange.anyx.R
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -92,7 +93,8 @@ class PriceLineChart : LineChart {
             description = newDescription
             description.isEnabled = false
         } else {
-            newDescription.text = "24h"
+            newDescription.text = context.getString(R.string.chart_timespan_24h)
+
             newDescription.textSize = 18f
             newDescription.yOffset = 5f
             newDescription.xOffset = 5f

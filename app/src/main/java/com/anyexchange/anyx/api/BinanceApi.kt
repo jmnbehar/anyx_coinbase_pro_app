@@ -197,23 +197,6 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 onComplete()
             }
         }
-
-        private fun getAccountsWithProductList(productList: List<Product>, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-
-        }
-
-        fun updateAllAccounts(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-//            this.get(onFailure) { apiAccountList ->
-//                for (account in Account.cryptoAccounts.plus(Account.fiatAccounts)) {
-//                    val apiAccount = apiAccountList.find { a -> a.asset == account.currency.toString() }
-//                    apiAccount?.let {
-//                        account.updateWithApiAccount(it)
-//                    }
-//                }
-//                onComplete()
-//            }
-        }
-
     }
 
     class account(initData: ApiInitData?, val accountId: String) : BinanceApi(initData) {
@@ -643,7 +626,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     private fun apiSignature(paramList: List<Pair<String, String>>) : String? {
         val credentials = credentials
         if (credentials != null) {
-            try {
+            return try {
                 val secretByteArr: ByteArray? = credentials.apiSecret.toByteArray(Charset.defaultCharset())
                 val sha256HMAC = Mac.getInstance("HmacSHA256")
                 val secretKey = SecretKeySpec(secretByteArr, "HmacSHA256")
@@ -653,10 +636,10 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
                 val signatureByteArray = sha256HMAC.doFinal(paramListString.toByteArray())
 
-                return signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
+                 signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
             } catch (e: Exception) {
                 println("API Secret Hashing Error")
-                return null
+                null
             }
         } else {
             return null

@@ -235,9 +235,7 @@ enum class KnownCurrency {
                 this(symbol, shortName, fullName, 0.0, iconId,null, null, null, null, null, null, null)
     }
 
-    //TODO: this class desperately needs a refactor
-
-    val currencyData: KnownCurrencyData
+    private val currencyData: KnownCurrencyData
     get() {
             return when (this) {
                 BTC -> KnownCurrencyData("BTC", "BTC", "Bitcoin", .0001, R.drawable.icon_btc,

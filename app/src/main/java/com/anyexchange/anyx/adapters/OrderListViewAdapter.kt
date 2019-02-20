@@ -99,11 +99,10 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
             if (order.showExtraInfo) {
                 viewHolder.extraInfoLayout?.visibility = View.VISIBLE
-
-                viewHolder.dateText?.text = "Date Created: ${order.time.format(Fill.dateFormat)}"
+                viewHolder.dateText?.text = context.getString(R.string.order_date_created, order.time.format(Fill.dateFormat))
 
                 if (order.filledAmount > 0) {
-                    viewHolder.amountText?.text = "Original Amount: ${order.amount}, Filled Amount: ${order.filledAmount}"
+                    viewHolder.amountText?.text =context.getString(R.string.order_amount_label, order.amount, order.filledAmount)
                     viewHolder.amountText?.visibility = View.VISIBLE
                 } else {
                     viewHolder.amountText?.visibility = View.GONE

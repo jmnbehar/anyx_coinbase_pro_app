@@ -85,16 +85,17 @@ class AccountsFragment : RefreshFragment() {
             if (apiKey != null) {
                 apiKeyLabelView?.visibility = View.VISIBLE
                 apiKeyView?.visibility = View.VISIBLE
-                apiKeyLabelView?.text = "API Key:"
+                apiKeyLabelView?.text = context.getString(R.string.accounts_api_key_label)
                 apiKeyView?.text = apiKey
 
-                loginButton?.text = "Change Log In Info"
+                loginButton?.text = context.getString(R.string.accounts_change_login_info)
             } else {
                 apiKeyLabelView?.visibility = View.INVISIBLE
                 apiKeyView?.visibility = View.INVISIBLE
 
                 loginButton?.visibility = View.VISIBLE
-                loginButton?.text = "Log In"
+                loginButton?.text = context.getString(R.string.accounts_login_button_label)
+
             }
 
             loginButton?.setOnClickListener {
@@ -142,7 +143,7 @@ class AccountsFragment : RefreshFragment() {
             apiKeyLayout?.visibility = View.GONE
 
             loginButton?.visibility = View.VISIBLE
-            loginButton?.text = "Save Log In Info"
+            loginButton?.text = context.getString(R.string.accounts_save_login_info)
 
             if(apiKey != null) {
                 apiKeyEditText?.setText(apiKey)
