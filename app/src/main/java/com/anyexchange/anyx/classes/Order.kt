@@ -49,8 +49,11 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
                             amount.format(tradingPair.baseCurrency), price?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
                 }
                 TradeType.STOP -> when (side) {
-                    TradeSide.BUY -> resources.getString(R.string.order_summary_stop_buy,
-                            (specifiedFunds ?: funds)!!.format(tradingPair.baseCurrency), stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                    TradeSide.BUY -> {
+                        val formattedFunds = (specifiedFunds ?: funds ?: 0.0).format(tradingPair.baseCurrency)
+                        resources.getString(R.string.order_summary_stop_buy,
+                                formattedFunds, stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
+                    }
                     TradeSide.SELL -> resources.getString(R.string.order_summary_stop_sell,
                             amount.format(tradingPair.baseCurrency), stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)
                 }

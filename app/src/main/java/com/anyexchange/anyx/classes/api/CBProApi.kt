@@ -375,6 +375,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         onComplete(generalFillList)
                     } catch (e: JsonSyntaxException) {
                         onFailure(Result.Failure(FuelError(e)))
+                    } catch (e: java.lang.Exception) {
+                        onFailure(Result.Failure(FuelError(e)))
                     }
                 } ?: run {
                     onFailure(Result.Failure(FuelError(Exception())))
