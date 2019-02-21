@@ -86,7 +86,7 @@ class Prefs (var context: Context) {
             prefs.edit().putString(CBPRO_PASSPHRASE, value).apply()
         }
 
-    fun stashCBProCreds(apiKey: String, apiSecret: String, apiPassphrase: String) {
+    fun stashCBProCreds(apiKey: String?, apiSecret: String?, apiPassphrase: String?) {
         if (shouldSaveApiInfo) {
             val iv = ByteArray(16)
             val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
@@ -108,7 +108,7 @@ class Prefs (var context: Context) {
         get() = prefs.getString(BINANCE_API_SECRET, null)
         set(value) = prefs.edit().putString(BINANCE_API_SECRET, value).apply()
 
-    fun stashBinanceCreds(apiKey: String, apiSecret: String) {
+    fun stashBinanceCreds(apiKey: String?, apiSecret: String?) {
         if (shouldSaveApiInfo) {
             binanceApiKey = apiKey
             binanceApiSecret = apiSecret

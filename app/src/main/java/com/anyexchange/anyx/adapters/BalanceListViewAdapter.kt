@@ -121,6 +121,7 @@ class BalanceListViewAdapter(val context: Context, var exchange: Exchange?) : Ba
                     }
                 }
             }
+
             account.currency.iconId?.let {
                 viewHolder.iconView?.visibility = View.VISIBLE
                 viewHolder.iconView?.setImageResource(it)

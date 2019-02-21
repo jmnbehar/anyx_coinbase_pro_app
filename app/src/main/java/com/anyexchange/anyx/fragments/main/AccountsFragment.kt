@@ -39,6 +39,7 @@ class AccountsFragment : RefreshFragment() {
             private var passphraseEditText: EditText?,
 
             private var helpButton: Button,
+            private var cancelButton: Button,
             private var loginButton: Button,
             private var logoutButton: Button) {
 
@@ -51,7 +52,7 @@ class AccountsFragment : RefreshFragment() {
         fun setupCell(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
             layout.visibility = View.VISIBLE
 
-            exchangeLogoView.setImageResource(R.drawable.fail_icon)
+            exchangeLogoView.setImageResource(exchange.iconId)
             exchangeNameView.text = exchange.toString()
 
             if (shouldShowEditLayout) {
@@ -65,10 +66,12 @@ class AccountsFragment : RefreshFragment() {
                     Exchange.CBPro -> CBProApi.credentials = null
                     Exchange.Binance -> BinanceApi.credentials = null
                 }
-                setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
                 genericLogOut()
             }
 
+            cancelButton.setOnClickListener {
+                setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+            }
 
             helpButton.setOnClickListener {
                 //Creating the instance of PopupMenu
@@ -94,6 +97,7 @@ class AccountsFragment : RefreshFragment() {
                 }
                 popup.show()  //showing popup menu
             }
+
 
             if (exchange.isLoggedIn()) {
                 logoutButton.visibility = View.VISIBLE
@@ -127,6 +131,9 @@ class AccountsFragment : RefreshFragment() {
                 loginButton.text = context.getString(R.string.accounts_login_button_label)
 
             }
+
+            cancelButton.visibility = View.GONE
+            helpButton.visibility = View.GONE
 
             loginButton.setOnClickListener {
                 setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
@@ -188,6 +195,9 @@ class AccountsFragment : RefreshFragment() {
 
             apiKeyEditText.requestFocus()
             apiKeyEditText.isSelected = true
+
+            cancelButton.visibility = View.VISIBLE
+            helpButton.visibility = View.VISIBLE
 
             loginButton.setOnClickListener {
                 login(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
@@ -279,6 +289,7 @@ class AccountsFragment : RefreshFragment() {
                 rootView.etxt_exchange_cbpro_account_secret,
                 rootView.etxt_exchange_cbpro_account_passphrase,
                 rootView.btn_accounts_cbpro_help,
+                rootView.btn_accounts_cbpro_cancel,
                 rootView.btn_exchange_cbpro_account_login,
                 rootView.btn_exchange_cbpro_account_logout)
 
@@ -296,6 +307,7 @@ class AccountsFragment : RefreshFragment() {
                 rootView.etxt_exchange_binance_account_secret,
                 rootView.etxt_exchange_binance_account_passphrase,
                 rootView.btn_accounts_binance_help,
+                rootView.btn_accounts_binance_cancel,
                 rootView.btn_exchange_binance_account_login,
                 rootView.btn_exchange_binance_account_logout)
 
@@ -314,16 +326,22 @@ class AccountsFragment : RefreshFragment() {
 //    }
 
     private fun genericLogOut(exchange: Exchange) {
-        for (product in Product.map.values) {
-            val tempAccounts = product.accounts.toMutableMap()
-            tempAccounts.remove(exchange)
-            product.accounts = tempAccounts
-        }
-        println("nuking accounts")
-        val prefs = Prefs(context!!)
-        prefs.stashProducts()
-        prefs.nukeStashedOrders()
-        prefs.nukeStashedFills()
+        showPopup("Are you sure you want to log out from $exchange? Your credentials will not be saved.", {
+            for (product in Product.map.values) {
+                val tempAccounts = product.accounts.toMutableMap()
+                tempAccounts.remove(exchange)
+                product.accounts = tempAccounts
+            }
+            println("nuking accounts")
+            val prefs = Prefs(context!!)
+            prefs.stashProducts()
+            prefs.nukeStashedOrders()
+            prefs.nukeStashedFills()
+            when (exchange) {
+                Exchange.CBPro ->  prefs.stashCBProCreds(null, null, null)
+                Exchange.Binance ->  prefs.stashBinanceCreds(null, null)
+            }
+        }, "No", { /* do nothing */ })
     }
 
     private fun refreshAllProductsAndAccounts() {
