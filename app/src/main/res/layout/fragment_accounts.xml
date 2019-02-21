@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <LinearLayout
             android:id="@+id/layout_exchange_accounts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,10 +23,10 @@
                 android:id="@+id/txt_accounts_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Login to Your Accounts"
+                android:text="@string/accounts_login_to_your_accounts"
                 android:textSize="24sp" />
 
-            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <LinearLayout
                 android:id="@+id/layout_exchange_cbpro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -42,7 +42,8 @@
                     <ImageView
                         android:id="@+id/img_exchange_cbpro_logo"
                         android:layout_width="50dp"
-                        android:layout_height="50dp" />
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/accounts_coinbase_pro_icon" />
 
                     <TextView
                         android:id="@+id/txt_exchange_cbpro_name"
@@ -87,7 +88,8 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/login_api_key_label"
                         android:inputType="text"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                     <EditText
                         android:id="@+id/etxt_exchange_cbpro_account_secret"
@@ -98,7 +100,8 @@
                         android:lines="3"
                         android:maxLines="6"
                         android:minLines="3"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                     <EditText
                         android:id="@+id/etxt_exchange_cbpro_account_passphrase"
@@ -108,7 +111,8 @@
                         android:hint="@string/login_passphrase_label"
                         android:inputType="textPassword"
                         android:lines="2"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                 </LinearLayout>
 
@@ -119,26 +123,47 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_exchange_cbpro_account_login"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Log In" />
-
-                    <android.support.v4.widget.Space
-                        android:layout_width="3dp"
-                        android:layout_height="wrap_content" />
-
-                    <Button
                         android:id="@+id/btn_exchange_cbpro_account_logout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Log Out" />
+                        android:text="@string/accounts_logout_button_label" />
+
+                    <android.support.v4.widget.Space
+                        android:layout_width="3dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5" />
+
+                    <Button
+                        android:id="@+id/btn_exchange_binance_account_cancel2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accounts_cancel_button" />
+
+                    <Button
+                        android:id="@+id/btn_exchange_cbpro_account_login"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accounts_login_button_label" />
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_accounts_cbpro_help"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/login_help_btn" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
 
-            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <LinearLayout
                 android:id="@+id/layout_exchange_binance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -154,7 +179,8 @@
                     <ImageView
                         android:id="@+id/img_exchange_binance_logo"
                         android:layout_width="50dp"
-                        android:layout_height="50dp" />
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/accounts_binance_icon" />
 
                     <TextView
                         android:id="@+id/txt_exchange_binance_name"
@@ -199,7 +225,8 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/login_api_key_label"
                         android:inputType="text"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                     <EditText
                         android:id="@+id/etxt_exchange_binance_account_secret"
@@ -210,7 +237,8 @@
                         android:lines="3"
                         android:maxLines="6"
                         android:minLines="3"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                     <EditText
                         android:id="@+id/etxt_exchange_binance_account_passphrase"
@@ -220,7 +248,8 @@
                         android:hint="@string/login_passphrase_label"
                         android:inputType="textPassword"
                         android:lines="2"
-                        android:singleLine="false" />
+                        android:singleLine="false"
+                        tools:ignore="Autofill" />
 
                 </LinearLayout>
 
@@ -231,22 +260,44 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_exchange_binance_account_login"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Log In" />
-
-                    <android.support.v4.widget.Space
-                        android:layout_width="3dp"
-                        android:layout_height="wrap_content" />
-
-                    <Button
                         android:id="@+id/btn_exchange_binance_account_logout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Log Out" />
+                        android:text="@string/accounts_logout_button_label" />
+
+                    <android.support.v4.widget.Space
+                        android:id="@+id/space"
+                        android:layout_width="3dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <Button
+                        android:id="@+id/btn_exchange_binance_account_cancel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accounts_cancel_button" />
+
+                    <Button
+                        android:id="@+id/btn_exchange_binance_account_login"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accounts_login_button_label" />
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_accounts_binance_help"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/login_help_btn" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <TextView

@@ -1,54 +1,58 @@
 package com.anyexchange.anyx.fragments.main
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.ContextCompat.startActivity
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.LoginHelpActivity
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.api.CBProApi
 import com.anyexchange.anyx.classes.*
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_accounts.view.*
 import org.jetbrains.anko.toast
 import se.simbio.encryption.Encryption
 
 class AccountsFragment : RefreshFragment() {
-    private class ExchangeAccountCell {
-        var layout: LinearLayout? = null
+    private class ExchangeAccountCell(
+            private var layout: LinearLayout,
 
-        var exchangeLogoView: ImageView? = null
-        var exchangeNameView: TextView? = null
+            private var exchangeLogoView: ImageView,
+            private var exchangeNameView: TextView,
 
-        var apiKeyLayout: LinearLayout? = null
-        var apiKeyLabelView: TextView? = null
-        var apiKeyView: TextView? = null
+            private var apiKeyLayout: LinearLayout,
+            private var apiKeyLabelView: TextView,
+            private var apiKeyView: TextView,
 
-        //TODO: consider adding a permissions view here
-        //TODO: consider adding a test button here
+            //TODO: consider adding a permissions view here
+            //TODO: consider adding a test button here
+
+            private var loginEditLayout: LinearLayout,
+            private var apiKeyEditText: EditText,
+            private var apiSecretEditText: EditText,
+            private var passphraseEditText: EditText?,
+
+            private var helpButton: Button,
+            private var loginButton: Button,
+            private var logoutButton: Button) {
 
         var shouldShowEditLayout = false
-        var loginEditLayout: LinearLayout? = null
-        var apiKeyEditText: EditText? = null
-        var apiSecretEditText: EditText? = null
-        var passphraseEditText: EditText? = null
-
-        var loginButton: Button? = null
-        var logoutButton: Button? = null
 
         fun hide() {
-            layout?.visibility = View.GONE
+            layout.visibility = View.GONE
         }
 
         fun setupCell(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
-            layout?.visibility = View.VISIBLE
+            layout.visibility = View.VISIBLE
 
-            exchangeLogoView?.setImageResource(R.drawable.fail_icon)
-            exchangeNameView?.text = exchange.toString()
+            exchangeLogoView.setImageResource(R.drawable.fail_icon)
+            exchangeNameView.text = exchange.toString()
 
             if (shouldShowEditLayout) {
                 setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
@@ -56,7 +60,7 @@ class AccountsFragment : RefreshFragment() {
                 setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
             }
 
-            logoutButton?.setOnClickListener {
+            logoutButton.setOnClickListener {
                 when (exchange) {
                     Exchange.CBPro -> CBProApi.credentials = null
                     Exchange.Binance -> BinanceApi.credentials = null
@@ -65,17 +69,43 @@ class AccountsFragment : RefreshFragment() {
                 genericLogOut()
             }
 
+
+            helpButton.setOnClickListener {
+                //Creating the instance of PopupMenu
+                val popup = PopupMenu(context, helpButton)
+                //Inflating the Popup using xml file
+                popup.menuInflater.inflate(R.menu.login_help_menu, popup.menu)
+                //registering popup with OnMenuItemClickListener
+                val intent = Intent(context, LoginHelpActivity::class.java)
+                popup.setOnMenuItemClickListener { item: MenuItem? ->
+                    when (item?.itemId ?: R.id.login_help_mobile) {
+                        R.id.login_help_mobile -> {
+                            popup.dismiss()
+                            intent.putExtra(Constants.isMobileLoginHelp, true)
+                            startActivity(context, intent, null)
+                        }
+                        R.id.login_help_desktop -> {
+                            popup.dismiss()
+                            intent.putExtra(Constants.isMobileLoginHelp, false)
+                            startActivity(context, intent, null)
+                        }
+                    }
+                    true
+                }
+                popup.show()  //showing popup menu
+            }
+
             if (exchange.isLoggedIn()) {
-                logoutButton?.visibility = View.VISIBLE
+                logoutButton.visibility = View.VISIBLE
             } else {
-                logoutButton?.visibility = View.GONE
+                logoutButton.visibility = View.GONE
             }
         }
 
         fun setToStaticMode(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
 
-            loginEditLayout?.visibility = View.GONE
-            apiKeyLayout?.visibility = View.VISIBLE
+            loginEditLayout.visibility = View.GONE
+            apiKeyLayout.visibility = View.VISIBLE
 
             val apiKey: String? = when (exchange) {
                 Exchange.CBPro -> CBProApi.credentials?.apiKey
@@ -83,29 +113,29 @@ class AccountsFragment : RefreshFragment() {
             }
 
             if (apiKey != null) {
-                apiKeyLabelView?.visibility = View.VISIBLE
-                apiKeyView?.visibility = View.VISIBLE
-                apiKeyLabelView?.text = context.getString(R.string.accounts_api_key_label)
-                apiKeyView?.text = apiKey
+                apiKeyLabelView.visibility = View.VISIBLE
+                apiKeyView.visibility = View.VISIBLE
+                apiKeyLabelView.text = context.getString(R.string.accounts_api_key_label)
+                apiKeyView.text = apiKey
 
-                loginButton?.text = context.getString(R.string.accounts_change_login_info)
+                loginButton.text = context.getString(R.string.accounts_change_login_info)
             } else {
-                apiKeyLabelView?.visibility = View.INVISIBLE
-                apiKeyView?.visibility = View.INVISIBLE
+                apiKeyLabelView.visibility = View.INVISIBLE
+                apiKeyView.visibility = View.INVISIBLE
 
-                loginButton?.visibility = View.VISIBLE
-                loginButton?.text = context.getString(R.string.accounts_login_button_label)
+                loginButton.visibility = View.VISIBLE
+                loginButton.text = context.getString(R.string.accounts_login_button_label)
 
             }
 
-            loginButton?.setOnClickListener {
+            loginButton.setOnClickListener {
                 setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
             }
 
             if (exchange.isLoggedIn()) {
-                logoutButton?.visibility = View.VISIBLE
+                logoutButton.visibility = View.VISIBLE
             } else {
-                logoutButton?.visibility = View.GONE
+                logoutButton.visibility = View.GONE
             }
         }
 
@@ -139,35 +169,35 @@ class AccountsFragment : RefreshFragment() {
                 }
             }
             //show editable login info
-            loginEditLayout?.visibility = View.VISIBLE
-            apiKeyLayout?.visibility = View.GONE
+            loginEditLayout.visibility = View.VISIBLE
+            apiKeyLayout.visibility = View.GONE
 
-            loginButton?.visibility = View.VISIBLE
-            loginButton?.text = context.getString(R.string.accounts_save_login_info)
+            loginButton.visibility = View.VISIBLE
+            loginButton.text = context.getString(R.string.accounts_save_login_info)
 
             if(apiKey != null) {
-                apiKeyEditText?.setText(apiKey)
+                apiKeyEditText.setText(apiKey)
             }
             if (apiSecret != null) {
-                apiSecretEditText?.setText(apiSecret)
+                apiSecretEditText.setText(apiSecret)
             }
 
             if (apiPassphrase != null) {
                 passphraseEditText?.setText(apiPassphrase)
             }
 
-            apiKeyEditText?.requestFocus()
-            apiKeyEditText?.isSelected = true
+            apiKeyEditText.requestFocus()
+            apiKeyEditText.isSelected = true
 
-            loginButton?.setOnClickListener {
+            loginButton.setOnClickListener {
                 login(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
             }
         }
 
 
         fun login(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
-            val newApiKey = apiKeyEditText?.text.toString().trimEnd()
-            val newApiSecret = apiSecretEditText?.text.toString().trimEnd()
+            val newApiKey = apiKeyEditText.text.toString().trimEnd()
+            val newApiSecret = apiSecretEditText.text.toString().trimEnd()
             val newApiPassphrase = passphraseEditText?.text.toString().trimEnd()
             val prefs = Prefs(context)
 
@@ -221,8 +251,8 @@ class AccountsFragment : RefreshFragment() {
         }
     }
 
-    private var cbProAccountCell = ExchangeAccountCell()
-    private var binanceAccountCell = ExchangeAccountCell()
+    private lateinit var cbProAccountCell : ExchangeAccountCell
+    private lateinit var binanceAccountCell : ExchangeAccountCell
 
     companion object {
 
@@ -238,33 +268,36 @@ class AccountsFragment : RefreshFragment() {
 
         val context = context!!
 
-        cbProAccountCell.layout = rootView.layout_exchange_cbpro
-        cbProAccountCell.exchangeLogoView = rootView.img_exchange_cbpro_logo
-        cbProAccountCell.exchangeNameView = rootView.txt_exchange_cbpro_name
-        cbProAccountCell.apiKeyLayout = rootView.layout_exchange_cbpro_account_api_key
-        cbProAccountCell.apiKeyLabelView = rootView.txt_exchange_cbpro_account_api_key_label
-        cbProAccountCell.apiKeyView = rootView.txt_exchange_cbpro_account_api_key
-        cbProAccountCell.loginEditLayout = rootView.layout_exchange_cbpro_account_edit_login
-        cbProAccountCell.apiKeyEditText = rootView.etxt_exchange_cbpro_account_api_key
-        cbProAccountCell.apiSecretEditText = rootView.etxt_exchange_cbpro_account_secret
-        cbProAccountCell.passphraseEditText = rootView.etxt_exchange_cbpro_account_passphrase
-        cbProAccountCell.loginButton = rootView.btn_exchange_cbpro_account_login
-        cbProAccountCell.logoutButton = rootView.btn_exchange_cbpro_account_logout
+        cbProAccountCell = ExchangeAccountCell(rootView.layout_exchange_cbpro,
+                rootView.img_exchange_cbpro_logo,
+                rootView.txt_exchange_cbpro_name,
+                rootView.layout_exchange_cbpro_account_api_key,
+                rootView.txt_exchange_cbpro_account_api_key_label,
+                rootView.txt_exchange_cbpro_account_api_key,
+                rootView.layout_exchange_cbpro_account_edit_login,
+                rootView.etxt_exchange_cbpro_account_api_key,
+                rootView.etxt_exchange_cbpro_account_secret,
+                rootView.etxt_exchange_cbpro_account_passphrase,
+                rootView.btn_accounts_cbpro_help,
+                rootView.btn_exchange_cbpro_account_login,
+                rootView.btn_exchange_cbpro_account_logout)
 
         cbProAccountCell.setupCell(context, Exchange.CBPro, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
-        binanceAccountCell.layout = rootView.layout_exchange_binance
-        binanceAccountCell.exchangeLogoView = rootView.img_exchange_binance_logo
-        binanceAccountCell.exchangeNameView = rootView.txt_exchange_binance_name
-        binanceAccountCell.apiKeyLayout = rootView.layout_exchange_binance_account_api_key
-        binanceAccountCell.apiKeyLabelView = rootView.txt_exchange_binance_account_api_key_label
-        binanceAccountCell.apiKeyView = rootView.txt_exchange_binance_account_api_key
-        binanceAccountCell.loginEditLayout = rootView.layout_exchange_binance_account_edit_login
-        binanceAccountCell.apiKeyEditText = rootView.etxt_exchange_binance_account_api_key
-        binanceAccountCell.apiSecretEditText = rootView.etxt_exchange_binance_account_secret
-        binanceAccountCell.passphraseEditText = rootView.etxt_exchange_binance_account_passphrase
-        binanceAccountCell.loginButton = rootView.btn_exchange_binance_account_login
-        binanceAccountCell.logoutButton = rootView.btn_exchange_binance_account_logout
+
+        binanceAccountCell = ExchangeAccountCell(rootView.layout_exchange_binance,
+                rootView.img_exchange_binance_logo,
+                rootView.txt_exchange_binance_name,
+                rootView.layout_exchange_binance_account_api_key,
+                rootView.txt_exchange_binance_account_api_key_label,
+                rootView.txt_exchange_binance_account_api_key,
+                rootView.layout_exchange_binance_account_edit_login,
+                rootView.etxt_exchange_binance_account_api_key,
+                rootView.etxt_exchange_binance_account_secret,
+                rootView.etxt_exchange_binance_account_passphrase,
+                rootView.btn_accounts_binance_help,
+                rootView.btn_exchange_binance_account_login,
+                rootView.btn_exchange_binance_account_logout)
 
         val prefs = Prefs(context)
         if (prefs.isAnyXProActive) {
@@ -279,8 +312,6 @@ class AccountsFragment : RefreshFragment() {
 //    override fun refresh(onComplete: (Boolean) -> Unit) {
 //        super.refresh(onComplete)
 //    }
-
-
 
     private fun genericLogOut(exchange: Exchange) {
         for (product in Product.map.values) {

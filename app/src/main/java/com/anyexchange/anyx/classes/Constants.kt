@@ -7,6 +7,7 @@ package com.anyexchange.anyx.classes
 object Constants {
     const val salt = "GdaxApp"  //DO NOT RENAME
     const val isMobileLoginHelp = "LOGIN_HELP_TYPE"
+    const val exchange = "EXCHANGE"
 
     const val CHART_CURRENCY = "CHART_CURRENCY"
     const val CHART_TRADING_PAIR = "CHART_TRADING_PAIR"
@@ -14,8 +15,6 @@ object Constants {
     const val CHART_TIMESPAN = "CHART_TIMESPAN"
 
     const val GO_TO_CURRENCY = "GO_TO_CURRENCY"
-
-    const val dataFragmentTag = "data"
 }
 
 

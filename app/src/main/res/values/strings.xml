@@ -486,14 +486,22 @@ You\'re good to go!</item>
     <string name="start_search">Start search</string>
     <string name="search">Search…</string>
     <string name="empty_list">No Items Found</string>
+
     <string name="accounts_api_key_label">API Key:</string>
     <string name="accounts_change_login_info">Change Log In Info</string>
     <string name="accounts_login_button_label">Log In</string>
+    <string name="accounts_logout_button_label">Log Out</string>
     <string name="accounts_save_login_info">Save Log In Info</string>
+    <string name="accounts_cancel_button">Cancel</string>
+
+
     <string name="currency_id_and_fullname">%s - %s</string>
     <string name="notification_fill_alert_title">%s Fill Alert</string>
     <string name="notification_fill_alert_body">%s order of %d %s filled at %s</string>
     <string name="chart_balance_account_balance">%s account balance:</string>
     <string name="chart_balance_total_value">Total value:</string>
     <string name="chart_balance_single_value">Value:</string>
+    <string name="accounts_binance_icon">Binance Icon</string>
+    <string name="accounts_login_to_your_accounts">Login to Your Accounts</string>
+    <string name="accounts_coinbase_pro_icon">Coinbase Pro Icon</string>
 </resources>

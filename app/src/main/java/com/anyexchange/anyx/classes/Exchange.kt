@@ -16,11 +16,11 @@ enum class Exchange {
         }
     }
 
+
     val iconId
         get() = when(this) {
-            //TODO: switch to binance logo
-            Binance -> R.drawable.icon_btc
-            CBPro -> R.drawable.gdax
+            Binance -> R.drawable.binance
+            CBPro -> R.drawable.cbpro
         }
 
     fun isEnabled(context: Context?) : Boolean {
@@ -48,6 +48,10 @@ enum class Exchange {
     companion object {
         fun isAnyLoggedIn() : Boolean {
             return CBProApi.credentials != null || BinanceApi.credentials != null
+        }
+
+        fun forString(string: String?) : Exchange? {
+            return Exchange.values().find { it.toString() == string || it.name == string }
         }
     }
 }
