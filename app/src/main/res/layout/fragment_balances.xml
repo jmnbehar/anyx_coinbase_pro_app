@@ -27,7 +27,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Accounts page"
                 android:textSize="30sp"
                 tools:layout_editor_absoluteX="48dp"
                 tools:layout_editor_absoluteY="16dp" />
@@ -47,7 +46,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
-                    android:paddingLeft="5dp"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
                     android:textSize="20sp" />
 
                 <TextView
@@ -55,7 +55,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
-                    android:paddingLeft="3dp"
                     android:textAlignment="textEnd"
                     app:autoSizeMaxTextSize="22sp"
                     app:autoSizeMinTextSize="10sp"
@@ -66,7 +65,8 @@
                     android:id="@+id/txt_balances_percent_change"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="2dp"
                     android:text=""
                     android:textAlignment="center" />
 
@@ -86,7 +86,8 @@
                 android:layout_marginRight="20dp"
                 android:clickable="true"
                 tools:layout_editor_absoluteX="8dp"
-                tools:layout_editor_absoluteY="8dp">
+                tools:layout_editor_absoluteY="8dp"
+                tools:ignore="KeyboardInaccessibleWidget">
 
             </ListView>
 

@@ -37,11 +37,6 @@
                     tools:layout_editor_absoluteY="16dp" />
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -224,8 +219,8 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="20"
-                                android:importantForAutofill="no"
-                                android:inputType="numberDecimal" />
+                                android:inputType="numberDecimal"
+                                tools:ignore="Autofill,LabelFor" />
 
                             <TextView
                                 android:id="@+id/txt_trade_amount_unit"
@@ -268,8 +263,8 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="20"
-                                android:importantForAutofill="no"
-                                android:inputType="numberDecimal" />
+                                android:inputType="numberDecimal"
+                                tools:ignore="Autofill,LabelFor" />
 
                             <TextView
                                 android:id="@+id/txt_trade_limit_unit"
@@ -313,8 +308,6 @@
                                 android:paddingTop="20dp" />
 
                         </LinearLayout>
-
-                    </LinearLayout>
 
                 </LinearLayout>
 

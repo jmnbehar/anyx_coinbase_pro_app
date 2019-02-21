@@ -504,4 +504,8 @@ You\'re good to go!</item>
     <string name="accounts_binance_icon">Binance Icon</string>
     <string name="accounts_login_to_your_accounts">Login to Your Accounts</string>
     <string name="accounts_coinbase_pro_icon">Coinbase Pro Icon</string>
+    <string name="login_help_finish">Finish</string>
+    <string name="login_help_continue">Continue</string>
+    <string name="login_help_skip">Skip</string>
+    <string name="settings_default_quote_currency">Default quote currency</string>
 </resources>

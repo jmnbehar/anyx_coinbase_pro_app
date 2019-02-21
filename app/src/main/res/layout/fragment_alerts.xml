@@ -13,14 +13,13 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:text="Alert Page"
             android:textSize="30sp" />
 
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="10"
         android:orientation="vertical">
 
@@ -49,7 +48,7 @@
         <CheckBox
             android:id="@+id/cb_alert_price_movement"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="2dp"
             android:layout_marginBottom="2dp"
@@ -96,7 +95,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="20"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                tools:ignore="Autofill,LabelFor" />
 
             <TextView
                 android:id="@+id/txt_alert_price_unit"
@@ -107,8 +107,7 @@
             <Button
                 android:id="@+id/btn_alert_set"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Set" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
     </LinearLayout>
