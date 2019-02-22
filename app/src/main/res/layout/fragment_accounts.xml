@@ -122,11 +122,26 @@
                     android:gravity="end"
                     android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btn_exchange_cbpro_account_logout"
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/accounts_logout_button_label" />
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btn_exchange_cbpro_account_logout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/accounts_logout_button_label" />
+
+                        <Button
+                            android:id="@+id/btn_accounts_cbpro_help"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/login_help_btn" />
+
+                    </LinearLayout>
+
 
                     <android.support.v4.widget.Space
                         android:layout_width="0dp"
@@ -144,21 +159,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/accounts_login_button_label" />
-
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btn_accounts_cbpro_help"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/login_help_btn" />
-
-                </LinearLayout>
 
             </LinearLayout>
 
@@ -259,11 +261,25 @@
                     android:gravity="end"
                     android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btn_exchange_binance_account_logout"
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/accounts_logout_button_label" />
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btn_exchange_binance_account_logout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/accounts_logout_button_label" />
+
+                        <Button
+                            android:id="@+id/btn_accounts_binance_help"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/login_help_btn" />
+
+                    </LinearLayout>
 
                     <android.support.v4.widget.Space
                         android:id="@+id/space"
@@ -285,18 +301,6 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btn_accounts_binance_help"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/login_help_btn" />
-
-                </LinearLayout>
 
             </LinearLayout>
 

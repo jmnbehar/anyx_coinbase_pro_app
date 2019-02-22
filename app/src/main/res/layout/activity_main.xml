@@ -27,13 +27,27 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical">
+
             <Button
                 android:id="@+id/menu_login"
-                android:text="@string/menu_login"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:gravity="center"
+                android:text="@string/menu_login"
                 android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/menu_accounts"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="75dp"
+                android:paddingEnd="10dp"
+                android:text="@string/menu_accounts"
+                android:textAllCaps="false"
+                android:textSize="14sp" />
+
             <Button
                 android:id="@+id/menu_verify"
                 android:text="@string/menu_verify"

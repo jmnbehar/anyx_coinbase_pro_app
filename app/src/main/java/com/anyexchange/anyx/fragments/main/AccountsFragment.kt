@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.LoginHelpActivity
+import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.api.AnyApi
 import com.anyexchange.anyx.api.BinanceApi
 import com.anyexchange.anyx.api.CBProApi
@@ -43,13 +44,11 @@ class AccountsFragment : RefreshFragment() {
             private var loginButton: Button,
             private var logoutButton: Button) {
 
-        var shouldShowEditLayout = false
-
         fun hide() {
             layout.visibility = View.GONE
         }
 
-        fun setupCell(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+        fun setupCell(context: Context, exchange: Exchange, shouldShowEditLayout: Boolean, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
             layout.visibility = View.VISIBLE
 
             exchangeLogoView.setImageResource(exchange.iconId)
@@ -196,7 +195,11 @@ class AccountsFragment : RefreshFragment() {
             apiKeyEditText.requestFocus()
             apiKeyEditText.isSelected = true
 
-            cancelButton.visibility = View.VISIBLE
+            if (exchange.isLoggedIn() || prefs.isAnyXProActive) {
+                cancelButton.visibility = View.VISIBLE
+            } else {
+                cancelButton.visibility = View.GONE
+            }
             helpButton.visibility = View.VISIBLE
 
             loginButton.setOnClickListener {
@@ -246,12 +249,16 @@ class AccountsFragment : RefreshFragment() {
                                 val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
                                 CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
                                 refreshAllProductsAndAccounts()
+
+                                //TODO: verify that this works
+                                (context as? MainActivity)?.setDrawerMenu()
                             }
                             Exchange.Binance -> {
                                 prefs.stashBinanceCreds(newApiKey, newApiSecret)
 
                                 BinanceApi.credentials = BinanceApi.ApiCredentials(newApiKey, newApiSecret)
                                 refreshAllProductsAndAccounts()
+                                (context as? MainActivity)?.setDrawerMenu()
                             }
                         }
                         setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
@@ -293,8 +300,9 @@ class AccountsFragment : RefreshFragment() {
                 rootView.btn_exchange_cbpro_account_login,
                 rootView.btn_exchange_cbpro_account_logout)
 
-        cbProAccountCell.setupCell(context, Exchange.CBPro, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
+        val prefs = Prefs(context)
 
+        cbProAccountCell.setupCell(context, Exchange.CBPro, !prefs.isAnyXProActive, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
         binanceAccountCell = ExchangeAccountCell(rootView.layout_exchange_binance,
                 rootView.img_exchange_binance_logo,
@@ -311,9 +319,8 @@ class AccountsFragment : RefreshFragment() {
                 rootView.btn_exchange_binance_account_login,
                 rootView.btn_exchange_binance_account_logout)
 
-        val prefs = Prefs(context)
         if (prefs.isAnyXProActive) {
-            binanceAccountCell.setupCell(context, Exchange.Binance, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
+            binanceAccountCell.setupCell(context, Exchange.Binance, false, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
         } else {
             binanceAccountCell.hide()
         }
@@ -341,6 +348,7 @@ class AccountsFragment : RefreshFragment() {
                 Exchange.CBPro ->  prefs.stashCBProCreds(null, null, null)
                 Exchange.Binance ->  prefs.stashBinanceCreds(null, null)
             }
+            (activity as? MainActivity)?.setDrawerMenu()
         }, "No", { /* do nothing */ })
     }
 

@@ -223,6 +223,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
             val prefs = Prefs(this)
+
+            menu_accounts.visibility = View.VISIBLE
+            menu_accounts.setOnClickListener {
+                drawer_layout.closeDrawer(GravityCompat.START)
+                goToFragment(FragmentType.ACCOUNTS)
+            }
             if (prefs.isVerified == true) {
                 menu_verify.visibility = View.GONE
             } else {
@@ -239,6 +245,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
             menu_login.visibility  = View.VISIBLE
+            menu_accounts.visibility  = View.GONE
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {
@@ -410,7 +417,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val fragmentType = when (item.itemId) {
-            R.id.nav_accounts -> FragmentType.ACCOUNTS
             R.id.nav_alerts -> FragmentType.ALERTS
             R.id.nav_transfer -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
