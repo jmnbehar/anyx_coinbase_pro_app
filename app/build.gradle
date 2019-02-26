@@ -13,7 +13,7 @@ androidExtensions {
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.anyexchange.anyxdouble"
+        applicationId "com.anyexchange.anyx"
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 17

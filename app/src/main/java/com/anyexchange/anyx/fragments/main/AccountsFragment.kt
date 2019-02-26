@@ -22,6 +22,8 @@ import se.simbio.encryption.Encryption
 
 class AccountsFragment : RefreshFragment() {
     private class ExchangeAccountCell(
+            private var context: Context,
+            private var exchange: Exchange,
             private var layout: LinearLayout,
 
             private var exchangeLogoView: ImageView,
@@ -42,22 +44,24 @@ class AccountsFragment : RefreshFragment() {
             private var helpButton: Button,
             private var cancelButton: Button,
             private var loginButton: Button,
-            private var logoutButton: Button) {
+            private var logoutButton: Button,
+            private var genericLogOut: () -> Unit,
+            private var refreshAllProductsAndAccounts: () -> Unit) {
 
         fun hide() {
             layout.visibility = View.GONE
         }
 
-        fun setupCell(context: Context, exchange: Exchange, shouldShowEditLayout: Boolean, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+        fun setupCell(shouldShowEditLayout: Boolean) {
             layout.visibility = View.VISIBLE
 
             exchangeLogoView.setImageResource(exchange.iconId)
             exchangeNameView.text = exchange.toString()
 
             if (shouldShowEditLayout) {
-                setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                setToEditMode()
             } else {
-                setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                setToStaticMode()
             }
 
             logoutButton.setOnClickListener {
@@ -69,7 +73,7 @@ class AccountsFragment : RefreshFragment() {
             }
 
             cancelButton.setOnClickListener {
-                setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                setToStaticMode()
             }
 
             helpButton.setOnClickListener {
@@ -105,7 +109,7 @@ class AccountsFragment : RefreshFragment() {
             }
         }
 
-        fun setToStaticMode(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+        fun setToStaticMode() {
 
             loginEditLayout.visibility = View.GONE
             apiKeyLayout.visibility = View.VISIBLE
@@ -135,7 +139,7 @@ class AccountsFragment : RefreshFragment() {
             helpButton.visibility = View.GONE
 
             loginButton.setOnClickListener {
-                setToEditMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                setToEditMode()
             }
 
             if (exchange.isLoggedIn()) {
@@ -145,7 +149,7 @@ class AccountsFragment : RefreshFragment() {
             }
         }
 
-        fun setToEditMode(context: Context, exchange: Exchange, genericLogOut: () -> Unit, refreshAllProductsAndAccounts: () -> Unit) {
+        fun setToEditMode() {
             val prefs = Prefs(context)
 
             val apiKey: String?
@@ -235,7 +239,7 @@ class AccountsFragment : RefreshFragment() {
                         }
                     }
                 }
-                setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                setToStaticMode()
             } else {
                 when {
                     newApiKey.isBlank() -> context.toast(R.string.login_error_missing_api_key)
@@ -249,8 +253,6 @@ class AccountsFragment : RefreshFragment() {
                                 val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
                                 CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
                                 refreshAllProductsAndAccounts()
-
-                                //TODO: verify that this works
                                 (context as? MainActivity)?.setDrawerMenu()
                             }
                             Exchange.Binance -> {
@@ -261,7 +263,7 @@ class AccountsFragment : RefreshFragment() {
                                 (context as? MainActivity)?.setDrawerMenu()
                             }
                         }
-                        setToStaticMode(context, exchange, genericLogOut, refreshAllProductsAndAccounts)
+                        setToStaticMode()
                     }
                 }
             }
@@ -285,7 +287,9 @@ class AccountsFragment : RefreshFragment() {
 
         val context = context!!
 
-        cbProAccountCell = ExchangeAccountCell(rootView.layout_exchange_cbpro,
+        cbProAccountCell = ExchangeAccountCell(context,
+                Exchange.CBPro,
+                rootView.layout_exchange_cbpro,
                 rootView.img_exchange_cbpro_logo,
                 rootView.txt_exchange_cbpro_name,
                 rootView.layout_exchange_cbpro_account_api_key,
@@ -298,14 +302,17 @@ class AccountsFragment : RefreshFragment() {
                 rootView.btn_accounts_cbpro_help,
                 rootView.btn_accounts_cbpro_cancel,
                 rootView.btn_exchange_cbpro_account_login,
-                rootView.btn_exchange_cbpro_account_logout)
+                rootView.btn_exchange_cbpro_account_logout,
+                { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
         val prefs = Prefs(context)
 
         val shouldShowEditLayout = !prefs.isAnyXProActive && !Exchange.CBPro.isLoggedIn()
-        cbProAccountCell.setupCell(context, Exchange.CBPro, shouldShowEditLayout, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
+        cbProAccountCell.setupCell(shouldShowEditLayout)
 
-        binanceAccountCell = ExchangeAccountCell(rootView.layout_exchange_binance,
+        binanceAccountCell = ExchangeAccountCell(context,
+                Exchange.Binance,
+                rootView.layout_exchange_binance,
                 rootView.img_exchange_binance_logo,
                 rootView.txt_exchange_binance_name,
                 rootView.layout_exchange_binance_account_api_key,
@@ -318,10 +325,11 @@ class AccountsFragment : RefreshFragment() {
                 rootView.btn_accounts_binance_help,
                 rootView.btn_accounts_binance_cancel,
                 rootView.btn_exchange_binance_account_login,
-                rootView.btn_exchange_binance_account_logout)
+                rootView.btn_exchange_binance_account_logout,
+                { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
 
         if (prefs.isAnyXProActive) {
-            binanceAccountCell.setupCell(context, Exchange.Binance, false, { genericLogOut(Exchange.Binance) }, { refreshAllProductsAndAccounts() })
+            binanceAccountCell.setupCell(false)
         } else {
             binanceAccountCell.hide()
         }
@@ -348,8 +356,18 @@ class AccountsFragment : RefreshFragment() {
             prefs.nukeStashedOrders()
             prefs.nukeStashedFills()
             when (exchange) {
-                Exchange.CBPro ->  prefs.stashCBProCreds(null, null, null)
-                Exchange.Binance ->  prefs.stashBinanceCreds(null, null)
+                Exchange.CBPro -> {
+                    prefs.stashCBProCreds(null, null, null)
+                    if (prefs.isAnyXProActive) {
+                        cbProAccountCell.setToStaticMode()
+                    } else {
+                        cbProAccountCell.setToEditMode()
+                    }
+                }
+                Exchange.Binance -> {
+                    prefs.stashBinanceCreds(null, null)
+                    binanceAccountCell.setToStaticMode()
+                }
             }
             (activity as? MainActivity)?.setDrawerMenu()
         }, "No", { /* do nothing */ })
