@@ -118,7 +118,6 @@
                         </LinearLayout>
 
                     </LinearLayout>
-                </LinearLayout>
 
                 <RadioGroup
                     android:id="@+id/rbtngroup_trade_buy_sell"
@@ -190,7 +189,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/trade_type_stop" />
                 </android.support.design.widget.TabLayout>
-  
+
                 <LinearLayout
                     android:id="@+id/layout_trade_order_details"
                     android:layout_width="match_parent"
@@ -326,6 +325,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/trade_order_btn" />
+
+            </LinearLayout>
 
             </LinearLayout>
         </com.anyexchange.anyx.views.LockableScrollView>
