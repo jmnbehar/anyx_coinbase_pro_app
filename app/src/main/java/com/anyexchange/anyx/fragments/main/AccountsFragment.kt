@@ -302,7 +302,8 @@ class AccountsFragment : RefreshFragment() {
 
         val prefs = Prefs(context)
 
-        cbProAccountCell.setupCell(context, Exchange.CBPro, !prefs.isAnyXProActive, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
+        val shouldShowEditLayout = !prefs.isAnyXProActive && !Exchange.CBPro.isLoggedIn()
+        cbProAccountCell.setupCell(context, Exchange.CBPro, shouldShowEditLayout, { genericLogOut(Exchange.CBPro) }, { refreshAllProductsAndAccounts() })
 
         binanceAccountCell = ExchangeAccountCell(rootView.layout_exchange_binance,
                 rootView.img_exchange_binance_logo,
@@ -333,7 +334,9 @@ class AccountsFragment : RefreshFragment() {
 //    }
 
     private fun genericLogOut(exchange: Exchange) {
-        showPopup("Are you sure you want to log out from $exchange? Your credentials will not be saved.", {
+        val popupTitle = getString(R.string.accounts_logout_title)
+        val popupMessage = getString(R.string.accounts_logout_message, exchange)
+        showPopup(popupTitle, popupMessage, {
             for (product in Product.map.values) {
                 val tempAccounts = product.accounts.toMutableMap()
                 tempAccounts.remove(exchange)

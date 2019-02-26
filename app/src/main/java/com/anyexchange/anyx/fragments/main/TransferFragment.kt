@@ -521,7 +521,7 @@ class TransferFragment : RefreshFragment() {
         val amount = amountString.toDoubleOrZero()
 
         if (amount <= 0) {
-            showPopup(R.string.transfer_amount_error)
+            showPopup(R.string.error_message, R.string.transfer_amount_error)
         } else {
             val sourceAccount = sourceAccount
             when (sourceAccount) {
@@ -540,7 +540,7 @@ class TransferFragment : RefreshFragment() {
                     transferFromAccount(amount, sourceAccount)
                 }
                 else -> {
-                    showPopup(R.string.error_message)
+                    showPopup(R.string.error_message, null)
                 }
             }
         }
@@ -549,15 +549,15 @@ class TransferFragment : RefreshFragment() {
     private fun transferFromCoinbasePrime(amount: Double, coinbaseAccount: Account.CoinbaseAccount) {
         //send from cb to cbpro
         if (amount > coinbaseAccount.balance) {
-            showPopup(R.string.transfer_funds_error)
+            showPopup(R.string.error_message, R.string.transfer_funds_error)
         } else {
             showProgressSpinner()
             CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
                 val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                 if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
-                    showPopup(R.string.transfer_amount_low_error)
+                    showPopup(R.string.error_message, R.string.transfer_amount_low_error)
                 } else {
-                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+                    showPopup(resources.getString(R.string.error_message), result.errorMessage)
                 }
                 dismissProgressSpinner()
             } , {
@@ -570,7 +570,7 @@ class TransferFragment : RefreshFragment() {
         //send from bank to cb pro
         val balance = paymentMethod.balance
         if (balance != null && amount > balance) {
-            showPopup(R.string.transfer_funds_error)
+            showPopup(R.string.error_message, R.string.transfer_funds_error)
         } else {
             showProgressSpinner()
             CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( basicOnFailure , {
@@ -588,7 +588,7 @@ class TransferFragment : RefreshFragment() {
                 val cbproAccount = Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
 
                 if (amount > cbproAccount?.availableBalance ?: 0.0) {
-                    showPopup(R.string.transfer_funds_error)
+                    showPopup(R.string.error_message, R.string.transfer_funds_error)
                 } else {
                     showProgressSpinner()
                     CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost(basicOnFailure, {
@@ -600,7 +600,7 @@ class TransferFragment : RefreshFragment() {
                 //send from cbpro to bank
                 val balance = destAccount.balance
                 if (balance != null && amount > balance) {
-                    showPopup(R.string.transfer_funds_error)
+                    showPopup(R.string.error_message, R.string.transfer_funds_error)
                 } else {
                     showProgressSpinner()
                     CBProApi.sendToPayment(apiInitData, amount, currency, destAccount.id).executePost(basicOnFailure) {
@@ -610,21 +610,27 @@ class TransferFragment : RefreshFragment() {
             }
             is Account.ExternalAccount -> {
                 val destAddress = destinationAddressEditText.toString()
-                showPopup("Are you sure you want to send $amount $currency to $destAddress?", {
+                val noString = resources.getString(R.string.transfer_popup_no)
+                val popupTitle = resources.getString(R.string.transfer_popup_confirm_title)
+                val popupMessage = resources.getString(R.string.transfer_popup_confirm_external, amount, currency, destAddress)
+                showPopup(popupTitle, popupMessage, {
                     AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
                         basicOnSuccess()
                     }
-                }, "No", { /* do nothing */ })
+                }, noString, { /* do nothing */ })
             }
             is Account -> {
                 //send between exchanges
                 val destAddress = destAccount.depositInfo?.address
+                val noString = resources.getString(R.string.transfer_popup_no)
+                val popupTitle = resources.getString(R.string.transfer_popup_confirm_title)
+                val popupMessage = resources.getString(R.string.transfer_popup_confirm_accounts, amount, currency, sourceAccount.exchange, destAccount.exchange)
                 if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
-                    showPopup("Are you sure you want to send $amount $currency from ${sourceAccount.exchange} to ${destAccount.exchange}?", {
+                    showPopup(popupTitle, popupMessage, {
                         AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
                             basicOnSuccess()
                         }
-                    }, "No", { /* do nothing */ })
+                    }, noString, { /* do nothing */ })
                 } else {
                     basicOnFailure(Result.Failure(FuelError(Exception())))
                 }
@@ -634,7 +640,7 @@ class TransferFragment : RefreshFragment() {
 
 
     private val basicOnFailure: (result: Result.Failure<Any, FuelError>) -> Unit = { result ->
-        showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
+        showPopup(resources.getString(R.string.error_message), result.errorMessage)
         dismissProgressSpinner()
     }
 

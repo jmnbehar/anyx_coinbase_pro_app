@@ -450,6 +450,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun submitOrder(newOrder: NewOrder) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+            val errorString = resources.getString(R.string.error_message)
             when (errorMessage) {
                 ErrorMessage.BuyAmountTooSmallBtc,
                 ErrorMessage.BuyAmountTooSmallEth,
@@ -458,11 +459,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 ErrorMessage.BuyAmountTooLargeBtc,
                 ErrorMessage.BuyAmountTooLargeEth,
                 ErrorMessage.BuyAmountTooLargeBch,
-                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage)) { }
+                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(errorString, tradeAmountSizeError(errorMessage)) { }
 
                 ErrorMessage.PriceTooAccurate,
-                ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
-                else -> showPopup(context?.getString(R.string.error_generic_message, result.errorMessage) ?: "Error") { }
+                ErrorMessage.InsufficientFunds -> showPopup(errorString, result.errorMessage) { }
+                else -> showPopup(errorString, result.errorMessage) { }
             }
         }
 
