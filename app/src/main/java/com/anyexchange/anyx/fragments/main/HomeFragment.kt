@@ -71,7 +71,7 @@ class HomeFragment : RefreshFragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        val shouldShowOptions = lifecycle.isCreatedOrResumed
+        val shouldShowOptions = lifecycle.isCreatedOrResumed && Exchange.isAnyLoggedIn()
         menu.setGroupVisible(R.id.group_home_sort, shouldShowOptions)
     }
 

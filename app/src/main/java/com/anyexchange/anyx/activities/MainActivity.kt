@@ -224,14 +224,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             menu_login.visibility = View.GONE
             val prefs = Prefs(this)
 
-            menu_accounts.visibility = View.VISIBLE
-            menu_accounts.setOnClickListener {
-                drawer_layout.closeDrawer(GravityCompat.START)
-                goToFragment(FragmentType.ACCOUNTS)
-            }
             if (prefs.isVerified == true) {
+                menu_accounts.visibility = View.VISIBLE
+                menu_accounts.setOnClickListener {
+                    drawer_layout.closeDrawer(GravityCompat.START)
+                    goToFragment(FragmentType.ACCOUNTS)
+                }
                 menu_verify.visibility = View.GONE
             } else {
+                menu_accounts.visibility = View.GONE
+
                 menu_verify.visibility = View.VISIBLE
                 menu_verify.setOnClickListener  {
                     if (prefs.isVerified == true) {
