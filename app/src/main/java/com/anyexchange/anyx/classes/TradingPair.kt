@@ -1,7 +1,7 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.api.BinanceSymbol
-import com.anyexchange.anyx.classes.api.CBProProduct
+import com.anyexchange.anyx.api.BinanceSymbol
+import com.anyexchange.anyx.api.CBProProduct
 
 class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteCurrency: Currency, val id: String?, val orderTypes: List<TradeType>) {
     constructor(product: CBProProduct) : this(Exchange.CBPro, Currency(product.base_currency), Currency(product.quote_currency), product.id, listOf(TradeType.LIMIT, TradeType.MARKET, TradeType.STOP))
@@ -39,7 +39,7 @@ class TradingPair(val exchange: Exchange, val baseCurrency: Currency, val quoteC
 
     override fun equals(other: Any?): Boolean {
         return if (other is TradingPair) {
-            (other.baseCurrency == this.baseCurrency && other.quoteCurrency == this.quoteCurrency)
+            (other.baseCurrency == this.baseCurrency && other.quoteCurrency == this.quoteCurrency && other.exchange == this.exchange)
         } else {
             super.equals(other)
         }

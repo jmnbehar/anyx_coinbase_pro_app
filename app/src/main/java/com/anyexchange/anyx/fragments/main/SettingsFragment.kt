@@ -14,10 +14,8 @@ import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
 import com.anyexchange.anyx.adapters.spinnerAdapters.CurrencySpinnerAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.FloatSpinnerAdapter
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.result.Result
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import org.jetbrains.anko.textColor
@@ -36,7 +34,6 @@ class SettingsFragment : RefreshFragment() {
     }
 
     private var titleText: TextView? = null
-    private var logoutButton: Button? = null
     private var verifyButton: Button? = null
     private var cbproEulaButton: Button? = null
     private var anyxEulaButton: Button? = null
@@ -54,7 +51,6 @@ class SettingsFragment : RefreshFragment() {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
 
         titleText = rootView.txt_setting_title
-        logoutButton = rootView.btn_setting_log_out
         verifyButton = rootView.btn_setting_verify_account
         cbproEulaButton = rootView.btn_setting_show_cbpro_eula
         anyxEulaButton = rootView.btn_setting_show_anyx_eula
@@ -67,11 +63,6 @@ class SettingsFragment : RefreshFragment() {
         defaultQuoteCurrencySpinner = rootView.spinner_settings_default_quote
 
         showDarkMode(rootView)
-
-
-        logoutButton?.setOnClickListener  {
-            logOut()
-        }
 
         verifyButton?.setOnClickListener  {
             val intent = Intent(activity, VerifyActivity::class.java)
@@ -95,20 +86,16 @@ class SettingsFragment : RefreshFragment() {
             }
         }
 
-        updateProductsButton?.setOnClickListener { _ ->
+        updateProductsButton?.setOnClickListener {
             showProgressSpinner()
-            val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
-                dismissProgressSpinner()
-                toast("Failed to update products")
-            }
-            val anyApi = AnyApi(apiInitData)
-            anyApi.getAllProducts(onFailure) {
-                anyApi.getAllAccounts(onFailure, {
-                    dismissProgressSpinner()
-                    toast("Products updated")
-                })
-            }
-
+            AnyApi(apiInitData).reloadAllProducts(context,
+                    {
+                        dismissProgressSpinner()
+                        toast("Failed to update products") },
+                    {
+                        dismissProgressSpinner()
+                        toast("Products updated")
+                    })
         }
 
         (activity as? MainActivity)?.let { activity ->
@@ -190,21 +177,6 @@ class SettingsFragment : RefreshFragment() {
         return rootView
     }
 
-    private fun logOut() {
-        context?.let {
-            val prefs = Prefs(it)
-            prefs.isLoggedIn = false
-            CBProApi.credentials = null
-            for (product in Product.map.values) {
-                product.accounts = mapOf()
-            }
-            prefs.stashedProducts = Product.map.values.toList()
-            prefs.nukeStashedOrders()
-            prefs.nukeStashedFills()
-            (activity as? MainActivity)?.goToFragment(FragmentType.LOGIN)
-        }
-    }
-
 
     override fun onResume() {
         super.onResume()
@@ -222,12 +194,6 @@ class SettingsFragment : RefreshFragment() {
                     verifyButton?.visibility = View.VISIBLE
                     txt_setting_verify_account.visibility = View.VISIBLE
                 }
-            }
-
-            if (prefs.isLoggedIn) {
-                logoutButton?.text = resources.getString(R.string.settings_log_out_btn)
-            } else {
-                logoutButton?.text = resources.getString(R.string.settings_log_in_btn)
             }
         }
     }

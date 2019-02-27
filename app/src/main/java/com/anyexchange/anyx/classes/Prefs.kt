@@ -2,10 +2,10 @@ package com.anyexchange.anyx.classes
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.anyexchange.anyx.classes.api.CBProAccount
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import se.simbio.encryption.Encryption
 import java.util.*
 
 /**
@@ -14,9 +14,18 @@ import java.util.*
 
 //Never change these strings:
 private const val FILE_NAME = "com.anyexchange.gdax.prefs"  //do not rename
-private const val PASSPHRASE = "passphrase"
+
+private const val PASSPHRASE = "cbProPassphrase"
 private const val API_KEY = "api_key"
 private const val API_SECRET = "api_secret"
+
+private const val CBPRO_API_KEY = "cb_pro_api_key"
+private const val CBPRO_API_SECRET = "cb_pro_api_secret"
+private const val CBPRO_PASSPHRASE = "cbProPassphrase"
+
+private const val BINANCE_API_KEY = "binance_api_key"
+private const val BINANCE_API_SECRET = "binance_api_secret"
+
 private const val SHOULD_SAVE_API_INFO = "save_api_info"
 private const val SHOULD_SAVE_PASSPHRASE = "save_passphrase"
 private const val ALERTS = "alerts"
@@ -56,17 +65,55 @@ class Prefs (var context: Context) {
         get() = prefs.getBoolean(IS_FIRST_TIME, true)
         set(value) = prefs.edit().putBoolean(IS_FIRST_TIME, value).apply()
 
-    var passphrase: String?
-        get() = prefs.getString(PASSPHRASE, null)
-        set(value) = prefs.edit().putString(PASSPHRASE, value).apply()
-
-    var apiKey: String?
+    var cbProApiKey: String?
         get() = prefs.getString(API_KEY, null)
-        set(value) = prefs.edit().putString(API_KEY, value).apply()
+        set(value) {
+            prefs.edit().putString(API_KEY, value).apply()
+            prefs.edit().putString(CBPRO_API_KEY, value).apply()
+        }
 
-    var apiSecret: String?
+    var cbProApiSecret: String?
         get() = prefs.getString(API_SECRET, null)
-        set(value) = prefs.edit().putString(API_SECRET, value).apply()
+        set(value) {
+            prefs.edit().putString(API_SECRET, value).apply()
+            prefs.edit().putString(CBPRO_API_SECRET, value).apply()
+        }
+
+    var cbProPassphrase: String?
+        get() = prefs.getString(PASSPHRASE, null)
+        set(value) {
+            prefs.edit().putString(PASSPHRASE, value).apply()
+            prefs.edit().putString(CBPRO_PASSPHRASE, value).apply()
+        }
+
+    fun stashCBProCreds(apiKey: String?, apiSecret: String?, apiPassphrase: String?) {
+        if (shouldSaveApiInfo) {
+            val iv = ByteArray(16)
+            val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
+            val passphraseEncrypted = encryption.encryptOrNull(apiPassphrase)
+            cbProApiKey = apiKey
+            cbProApiSecret = apiSecret
+            if (shouldSavePassphrase) {
+                cbProPassphrase = passphraseEncrypted
+            }
+        }
+    }
+
+
+    var binanceApiKey: String?
+        get() = prefs.getString(BINANCE_API_KEY, null)
+        set(value) = prefs.edit().putString(BINANCE_API_KEY, value).apply()
+
+    var binanceApiSecret: String?
+        get() = prefs.getString(BINANCE_API_SECRET, null)
+        set(value) = prefs.edit().putString(BINANCE_API_SECRET, value).apply()
+
+    fun stashBinanceCreds(apiKey: String?, apiSecret: String?) {
+        if (shouldSaveApiInfo) {
+            binanceApiKey = apiKey
+            binanceApiSecret = apiSecret
+        }
+    }
 
     var shouldShowTradeConfirmModal: Boolean
         get() = prefs.getBoolean(SHOULD_SHOW_TRADE_CONFIRM, true)
@@ -89,10 +136,6 @@ class Prefs (var context: Context) {
             }
         }
 
-    var isLoggedIn: Boolean
-        get() = prefs.getBoolean(IS_LOGGED_IN, false)
-        set(value) = prefs.edit().putBoolean(IS_LOGGED_IN, value).apply()
-
     var shouldSavePassphrase: Boolean
         get() = prefs.getBoolean(SHOULD_SAVE_PASSPHRASE, true)
         set(value) = prefs.edit().putBoolean(SHOULD_SAVE_PASSPHRASE, value).apply()
@@ -114,6 +157,13 @@ class Prefs (var context: Context) {
             val jsonValues = value.asSequence().mapNotNull { Gson().toJson(it) }.toSet()
             prefs.edit().putStringSet(STASHED_PRODUCTS, jsonValues).apply()
         }
+
+    fun stashProducts() {
+        stashedProducts = Product.map.values.toList()
+        stashedFiatAccountList = Account.fiatAccounts
+        stashedPaymentMethodList = Account.paymentMethods
+
+    }
 
 
     //For now assume all fiat accounts are CBPro
@@ -196,6 +246,15 @@ class Prefs (var context: Context) {
 //        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
 //        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
 
+    val isVerified: Boolean?
+        get() {
+            return if (isAnyXProActive) {
+                true
+            } else {
+                CBProApi.credentials?.isVerified
+            }
+        }
+
     fun setQuickChangeAlertActive(currency: Currency, isActive: Boolean) {
         val currentActiveAlerts = quickChangeAlertCurrencies.toMutableSet()
         if (isActive && !quickChangeAlertCurrencies.contains(currency.id)) {
@@ -232,6 +291,7 @@ class Prefs (var context: Context) {
             prefs.edit().remove(STASHED_FILLS + exchange.name).apply()
         }
     }
+
     fun getStashedOrders(baseCurrency: Currency, exchange: Exchange) : List<Order> {
         val apiOrdersJson = prefs.getString(STASHED_ORDERS + exchange.name, null)
         return try {

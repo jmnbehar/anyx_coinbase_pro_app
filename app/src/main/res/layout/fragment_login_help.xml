@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent">
 
     <android.support.design.widget.CoordinatorLayout
@@ -74,7 +75,8 @@
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
 
                 <ImageView
@@ -82,56 +84,70 @@
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_2"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_3"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_4"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_5"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_6"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription"  />
 
                 <ImageView
                     android:id="@+id/intro_indicator_7"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_launcher_background" />
+                    android:background="@drawable/ic_launcher_background"
+                    tools:ignore="ContentDescription" />
 
                 <!-- Your other 2 indicators here -->
 
@@ -158,7 +174,8 @@
                 android:padding="@dimen/activity_horizontal_margin"
                 android:src="@drawable/icon_btc"
                 android:tint="@android:color/white"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:contentDescription="@string/login_help_continue" />
 
         </FrameLayout>
     </android.support.design.widget.CoordinatorLayout>

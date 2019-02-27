@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe_refresh_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <CheckBox
+        android:id="@+id/cb_save_api_key"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/login_save_info_label" />
+
+    <CheckBox
+        android:id="@+id/cb_save_passphrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/login_save_passphrase_label" />
+
+    <TextView
+        android:id="@+id/txt_login_disclaimer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:text="@string/login_disclaimer"
+        android:textSize="16sp" />
+
+</LinearLayout>

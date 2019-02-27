@@ -13,11 +13,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.anyexchange.anyx.R
 
-import kotlinx.android.synthetic.main.activity_onboard.*
+import kotlinx.android.synthetic.main.fragment_login_help.*
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import com.anyexchange.anyx.classes.Constants
+import com.anyexchange.anyx.classes.Exchange
 import kotlinx.android.synthetic.main.fragment_onboard.view.*
 
 
@@ -30,6 +31,7 @@ class LoginHelpActivity : AppCompatActivity() {
 
     var indicators: List<ImageView> = listOf()
     var isMobileHelpPage = true
+    var exchange : Exchange? = Exchange.CBPro
 
     internal var currentPage = 0   //  to track page position
     val pageCount = 5
@@ -60,6 +62,7 @@ class LoginHelpActivity : AppCompatActivity() {
         finishBtn?.text = getString(R.string.login_help_skip_btn)
 
         isMobileHelpPage = intent.getBooleanExtra(Constants.isMobileLoginHelp, false)
+        exchange = Exchange.forString(intent.getStringExtra(Constants.exchange)) ?: Exchange.CBPro
 
         // Set up the ViewPager with the sections adapter.
         viewPager = home_view_pager

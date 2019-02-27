@@ -26,12 +26,14 @@ import com.github.mikephil.charting.listener.ChartTouchListener
 import org.jetbrains.anko.*
 import android.view.MotionEvent
 import android.widget.*
+import com.anyexchange.anyx.views.LockableScrollView
 import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.adapters.ChartBalanceListViewAdapter
 import com.anyexchange.anyx.adapters.FillListViewAdapter
 import com.anyexchange.anyx.adapters.OrderListViewAdapter
 import com.anyexchange.anyx.adapters.spinnerAdapters.TradingPairSpinnerAdapter
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
 import com.anyexchange.anyx.classes.Currency
 import com.github.mikephil.charting.data.CandleEntry
 import kotlinx.android.synthetic.main.fragment_chart.*
@@ -61,12 +63,10 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private var currencyNameTextView: TextView? = null
 
-    private var tickerTextView: TextView? = null
     private var priceTextView: TextView? = null
 
-    private var balanceTextView: TextView? = null
-    private var valueTextView: TextView? = null
     private var accountIcon: ImageView? = null
+    private var balancesListView: ListView? = null
 
     private var highLabelTextView: TextView? = null
     private var highTextView: TextView? = null
@@ -124,16 +124,6 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         var chartStyle = ChartStyle.Line
         var tradingPair: TradingPair? = null
     }
-
-    private val relevantAccount: Account?
-        get() {
-            val exchange = tradingPair?.exchange
-            return if (exchange != null) {
-                product.accounts[exchange]
-            } else {
-                null
-            }
-        }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -199,10 +189,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         lowTextView = rootView.txt_chart_low
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            tickerTextView = rootView.txt_chart_ticker
+            balancesListView = rootView.list_chart_balances
 
-            balanceTextView = rootView.txt_chart_account_balance
-            valueTextView = rootView.txt_chart_account_value
             accountIcon = rootView.img_chart_account_icon
 
             sellButton = rootView.btn_chart_sell
@@ -225,16 +213,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
 
         context?.let {
-            val prefs = Prefs(it)
-
-            buyButton?.setOnClickListener {_ ->
-                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.BUY)
+            buyButton?.setOnClickListener {
+                buySellButtonOnClick(tradingPair.exchange.isLoggedIn(), TradeSide.BUY)
             }
-            sellButton?.setOnClickListener { _ ->
-                buySellButtonOnClick(prefs.isLoggedIn, TradeSide.SELL)
+            sellButton?.setOnClickListener {
+                buySellButtonOnClick(tradingPair.exchange.isLoggedIn(), TradeSide.SELL)
             }
 
-            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
+            val tradingPairAdapter = TradingPairSpinnerAdapter(it, tradingPairs)
             tradingPairAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             tradingPairSpinner = rootView.spinner_chart_trading_pair
             tradingPairSpinner?.adapter = tradingPairAdapter
@@ -248,7 +234,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
                         val tempTradingPairIndex = product.tradingPairs.indexOf(tradingPair)
                         viewModel.tradingPair = tradingPairSpinner?.selectedItem as? TradingPair
                         showProgressSpinner()
-                        miniRefresh({ _ ->
+                        miniRefresh({
                             toast(R.string.chart_update_error)
                             tradingPairSpinner?.setSelection(tempTradingPairIndex)
                             didTouchTradingPairSpinner = false
@@ -340,7 +326,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         } else {
             val mainActivity = activity as? MainActivity
 
-            val selectedCurrency = mainActivity?.spinnerNav?.selectedItem as? Currency
+            val selectedCurrency = mainActivity?.navSpinner?.selectedItem as? Currency
             currency = if (selectedCurrency != null) {
                 selectedCurrency
             } else {
@@ -372,10 +358,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         super.onPrepareOptionsMenu(menu)
         val shouldShowOptions = lifecycle.isCreatedOrResumed
         menu.setGroupVisible(R.id.group_chart_style, shouldShowOptions)
-        menu.setGroupVisible(R.id.group_home_sort, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.chart_menu, menu)
+        setOptionsMenuTextColor(menu)
+
         super.onCreateOptionsMenu(menu, inflater)
         if (chartStyle == ChartStyle.Line) {
             menu?.findItem(R.id.chart_style_line)?.isChecked = true
@@ -415,9 +403,14 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun buySellButtonOnClick(isLoggedIn: Boolean, tradeSide: TradeSide) {
+        val isAnyXProActive = if (context != null) {
+            Prefs(context!!).isAnyXProActive
+        } else {
+            false
+        }
         if (!isLoggedIn) {
             toast(R.string.toast_please_login_message)
-        } else if (CBProApi.credentials?.isVerified == null) {
+        } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == null) {
             (activity as? MainActivity)?.let {
                 it.goToVerify{ didVerify ->
                     if (didVerify) {
@@ -428,7 +421,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
             } ?: run {
                 toast(R.string.toast_please_verify_message)
             }
-        } else if (CBProApi.credentials?.isVerified == false) {
+        } else if (!isAnyXProActive && CBProApi.credentials?.isVerified == false) {
             toast(R.string.toast_missing_permissions_message)
         } else {
             goToTradeFragment(tradeSide)
@@ -482,7 +475,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun updateFills(currency: Currency, orderList: List<Order>, stashedFills: List<Fill>) {
-        Fill.getAndStashList(apiInitData, currency, { _ ->
+        Fill.getAndStashList(apiInitData, currency, {
             context?.let {
                 if (lifecycle.isCreatedOrResumed) {
                     updateHistoryLists(it, orderList, stashedFills)
@@ -531,7 +524,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         context?.let { context ->
             val tradingPairs = Companion.product.tradingPairs.sortTradingPairs()
-            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.Image)
+            val tradingPairSpinnerAdapter = TradingPairSpinnerAdapter(context, tradingPairs)
             tradingPairSpinner?.adapter = tradingPairSpinnerAdapter
 
             val index = tradingPairs.indexOf(tradingPair)
@@ -559,28 +552,27 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         context?.let {
             val currency = product.currency
             setButtonColors()
-            val prefs = Prefs(it)
-            val account = relevantAccount
-            if (prefs.isLoggedIn) {
-                val balance = account?.balance ?: 0.0
-                tickerTextView?.text = resources.getString(R.string.chart_wallet_label, currency.toString())
+            if (Exchange.isAnyLoggedIn()) {
+                balancesListView?.visibility = View.VISIBLE
+                val accounts = product.accounts.values.toList()
+                val quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+                balancesListView?.adapter = ChartBalanceListViewAdapter(it,  accounts, quoteCurrency)
+                balancesListView?.setHeightBasedOnChildren(0, 0)
+
                 currency.iconId?.let { iconId ->
                     accountIcon?.visibility = View.VISIBLE
                     accountIcon?.setImageResource(iconId)
                 } ?: run {
                     accountIcon?.visibility = View.GONE
                 }
-                balanceTextView?.text = resources.getString(R.string.chart_balance_text, balance.btcFormat(), currency)
-                updateValueText()
+                updateBalancesList()
                 orderListLabel?.visibility = View.VISIBLE
                 orderListView?.visibility = View.VISIBLE
                 fillListLabel?.visibility = View.VISIBLE
                 fillListView?.visibility = View.VISIBLE
             } else {
-                tickerTextView?.visibility = View.GONE
                 accountIcon?.visibility = View.GONE
-                balanceTextView?.visibility = View.GONE
-                valueTextView?.visibility = View.GONE
+                balancesListView?.visibility = View.GONE
 
                 orderListLabel?.visibility = View.GONE
                 orderListView?.visibility = View.GONE
@@ -654,7 +646,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
     }
 
     private fun cancelOrder(order: Order) {
-        order.cancel(apiInitData, { _ -> }) { _ ->
+        order.cancel(apiInitData, {  }) {
             if (lifecycle.isCreatedOrResumed) {
                 var orders = (orderListView?.adapter as OrderListViewAdapter).orders
                 orders = orders.filter { o -> o.id != order.id }
@@ -770,17 +762,33 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val context = context
 
-        val account = relevantAccount
-        if (context != null && Prefs(context).isLoggedIn && account != null) {
+        if (context != null  && Exchange.isAnyLoggedIn()) {
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */
-            AnyApi(apiInitData).updateAccount(account, onFailure) { updatedAccount ->
-                if (lifecycle.isCreatedOrResumed) {
-                    balanceTextView?.text = resources.getString(R.string.chart_balance_text, updatedAccount.balance.btcFormat(), updatedAccount.currency)
-                    updateValueText()
-                    miniRefresh(onFailure) {
-                        onComplete(true)
+
+            var updatedAccounts = 0
+            var failedAccounts = 0
+            val accounts = product.accounts.values
+            for (account in accounts) {
+                AnyApi(apiInitData).updateAccount(account, {
+                    updatedAccounts++
+                    failedAccounts++
+                    if (failedAccounts >= accounts.size) {
+                        onFailure(it)
+                    } else if (lifecycle.isCreatedOrResumed && updatedAccounts >= accounts.size) {
+                        updateBalancesList()
+                        miniRefresh(onFailure) {
+                            onComplete(true)
+                        }
+                    }
+                }) {
+                    updatedAccounts++
+                    if (lifecycle.isCreatedOrResumed && updatedAccounts >= accounts.size) {
+                        updateBalancesList()
+                        miniRefresh(onFailure) {
+                            onComplete(true)
+                        }
                     }
                 }
             }
@@ -845,12 +853,12 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         if (currency.type == Currency.Type.FIAT || tradingPairTemp == null) {
             onComplete()
         } else {
-            product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) { _ ->
+            product.updateCandles(timespan, tradingPairTemp, apiInitData,  onFailure) {
                 if (lifecycle.isCreatedOrResumed) {
                     if (tradingPairTemp == tradingPair) {
                         candles = product.candlesForTimespan(timespan, tradingPair)
                         tradingPair?.let { tradingPair ->
-                            AnyApi(apiInitData).ticker(tradingPair, onFailure) { _ ->
+                            AnyApi(apiInitData).ticker(tradingPair, onFailure) {
                                 if (lifecycle.isCreatedOrResumed) {
                                     val price = product.priceForQuoteCurrency(quoteCurrency)
                                     completeMiniRefresh(price, candles, onComplete)
@@ -869,18 +877,16 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         }
     }
 
-    private fun updateValueText() {
-        relevantAccount?.let { account ->
-            valueTextView?.text = account.valueForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-            valueTextView?.visibility = View.VISIBLE
-        } ?: run {
-            valueTextView?.visibility = View.GONE
-        }
+    private fun updateBalancesList() {
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.quoteCurrency = tradingPair?.quoteCurrency ?: Account.defaultFiatCurrency
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.accounts = product.accounts.values.toList()
+        (balancesListView?.adapter as? ChartBalanceListViewAdapter)?.notifyDataSetChanged()
+        balancesListView?.setHeightBasedOnChildren(0, 0)
     }
 
     private fun completeMiniRefresh(price: Double, candles: List<Candle>, onComplete: () -> Unit) {
         priceTextView?.text = price.format(quoteCurrency)
-        updateValueText()
+        updateBalancesList()
         val tradingPair = tradingPair ?: TradingPair(Exchange.CBPro, product.currency, Currency.USD)
         addCandlesToActiveChart(candles, tradingPair)
         setPercentChangeText(timespan)

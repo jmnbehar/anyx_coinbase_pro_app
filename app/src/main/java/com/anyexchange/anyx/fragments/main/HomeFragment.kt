@@ -6,6 +6,8 @@ import android.view.*
 import com.anyexchange.anyx.adapters.HomePagerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
+import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.views.LockableViewPager
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 /**
@@ -45,8 +47,9 @@ class HomeFragment : RefreshFragment() {
             viewPager!!.adapter = homePagerAdapter
 
 
-            viewPager?.setCurrentItem(1)
+            viewPager?.setCurrentItem(0)
         }
+
         setHasOptionsMenu(true)
 
         return rootView
@@ -55,6 +58,12 @@ class HomeFragment : RefreshFragment() {
     override fun refresh(onComplete: (Boolean) -> Unit) { }
 
     override fun onResume() {
+        val currencyList = Product.map.keys.map { Currency(it) }
+        showNavSpinner(null, currencyList) { selectedCurrency ->
+            (activity as MainActivity).goToChartFragment(selectedCurrency)
+        }
+        (activity as MainActivity).navSpinner.selectedItem = null
+
         super.onResume()
 
         homePagerAdapter?.setListeners()
@@ -62,13 +71,15 @@ class HomeFragment : RefreshFragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        val shouldShowOptions = lifecycle.isCreatedOrResumed
-        menu.setGroupVisible(R.id.group_chart_style, false)
+        val shouldShowOptions = lifecycle.isCreatedOrResumed && Exchange.isAnyLoggedIn()
         menu.setGroupVisible(R.id.group_home_sort, shouldShowOptions)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.home_menu, menu)
+        setOptionsMenuTextColor(menu)
+
         val context = context
         val shouldSortAlphabetical = if (context == null) {
             false
@@ -76,9 +87,9 @@ class HomeFragment : RefreshFragment() {
             Prefs(context).sortFavoritesAlphabetical
         }
         if (shouldSortAlphabetical) {
-            menu?.getItem(2)?.isChecked = true
+            menu?.getItem(0)?.isChecked = true
         } else {
-            menu?.getItem(3)?.isChecked = true
+            menu?.getItem(1)?.isChecked = true
         }
     }
 

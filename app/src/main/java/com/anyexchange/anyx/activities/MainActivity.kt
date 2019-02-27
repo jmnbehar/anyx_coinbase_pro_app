@@ -2,8 +2,6 @@ package com.anyexchange.anyx.activities
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.ColorFilter
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
@@ -13,40 +11,31 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
-import android.widget.Spinner
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.fragments.main.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.ApiInitData
 import com.anyexchange.anyx.classes.Constants.CHART_CURRENCY
 import com.anyexchange.anyx.classes.Constants.CHART_STYLE
 import com.anyexchange.anyx.classes.Constants.CHART_TIMESPAN
 import com.anyexchange.anyx.classes.Constants.CHART_TRADING_PAIR
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.fragments.login.LoginFragment
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.views.searchableSpinner.SearchableSpinner
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
-import se.simbio.encryption.Encryption
+
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    lateinit var spinnerNav: Spinner
-    var defaultSpinnerColorFilter: ColorFilter? = null
+    lateinit var navSpinner: SearchableSpinner
 
     private var currentFragment: RefreshFragment? = null
-    private var dataFragment: DataFragment? = null
 
     val apiInitData = ApiInitData(this) {
         returnToLogin()
@@ -58,6 +47,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         const val currentAppVersion = 17
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -66,20 +56,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = object : ActionBarDrawerToggle(
                 this, drawer_layout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             override fun onDrawerOpened(drawerView: View) {
-                super.onDrawerOpened(drawerView)
+                navSpinner.hideEdit()
                 hideSoftKeyboard()
+                super.onDrawerOpened(drawerView)
             }
         }
 
-        dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
-
-        // create the fragment and data the first time
-        if (dataFragment == null) {
-            // add the fragment
-            dataFragment = DataFragment.newInstance()
-            supportFragmentManager.beginTransaction().add(dataFragment!!, Constants.dataFragmentTag).commit()
-        }
-        dataFragment?.restoreData(this)
+        restoreData()
 
         if (!AutoStart.hasStarted) {
             AutoStart.scheduleCustomAlertJob(this)
@@ -95,27 +78,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBarLayout = progress_bar_layout
         progressBar = progress_bar
 
-        spinnerNav = toolbar_spinner
-
-        defaultSpinnerColorFilter = spinnerNav.background.colorFilter
+        navSpinner = toolbar_spinner
 
         val currencies = Currency.cryptoList
         val spinnerNavAdapter = NavigationSpinnerAdapter(this, R.layout.list_row_spinner_nav, R.id.txt_currency, currencies)
-        spinnerNav.adapter = spinnerNavAdapter
 
+        navSpinner.setAdapter(spinnerNavAdapter)
 
         val prefs = Prefs(this)
         val isAppOutOfDate = (prefs.lastVersionCode < currentAppVersion)
 
         val onFailure: (Result.Failure<String, FuelError>) -> Unit = {
             //On Failure
-            toast(R.string.error_message)
-            returnToLogin()
+            dismissProgressBar()
+            goHome()
+            setDrawerMenu()
         }
+
+        println("Starting up AnyX")
         val anyApi = AnyApi(apiInitData)
         if (savedInstanceState == null) {
-            spinnerNav.visibility = View.GONE
+            navSpinner.visibility = View.GONE
             if (Account.areAccountsOutOfDate()) {
+                println("Accounts out of date")
+
+                //TODO: refactor
                 signIn(false, onFailure, {
                     //OnSuccess
                     if (isAppOutOfDate) {
@@ -134,6 +121,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 })
             } else if (isAppOutOfDate) {
+                println("App out of date")
+
                 showProgressBar()
                 anyApi.getAllProducts(onFailure) {
                     anyApi.getAllAccounts(onFailure, {
@@ -144,11 +133,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     })
                 }
             } else {
-                goHome()
-                setDrawerMenu()
+                if (!prefs.isAnyXProActive && Product.map["BNB"] != null) {
+                    //If anyXPro is not active and Binance products are here, nuke em'
+                    Product.map = mutableMapOf()
+                    showProgressBar()
+                    anyApi.getAllProducts(onFailure) {
+                        anyApi.getAllAccounts(onFailure, {
+                            prefs.lastVersionCode = currentAppVersion
+                            dismissProgressBar()
+                            goHome()
+                            setDrawerMenu()
+                        })
+                    }
+                } else {
+                    println("All good :)")
+
+                    goHome()
+                    setDrawerMenu()
+                }
             }
             return
         } else {
+            println("savedInstanceState not null")
+
             (intent?.extras?.get(Constants.GO_TO_CURRENCY) as? String)?.let {
                 val currency = Currency(it)
                 currency.addToList()
@@ -160,14 +167,47 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+
+    private fun restoreData() {
+        val prefs = Prefs(this)
+        AnyApi.restoreCredentials(prefs)
+
+        Product.map = prefs.stashedProducts.associateBy { it.currency.id }.toMutableMap()
+
+        if (Account.fiatAccounts.isEmpty()){
+            Account.fiatAccounts = prefs.stashedFiatAccountList
+        }
+        if (Account.paymentMethods.isEmpty()){
+            Account.paymentMethods = prefs.stashedPaymentMethodList
+        }
+    }
+
+    private fun destroyData() {
+        val prefs = Prefs(this)
+        prefs.stashedProducts = mutableListOf()
+        prefs.stashedPaymentMethodList = mutableListOf()
+        prefs.stashedFiatAccountList = mutableListOf()
+    }
+
+    private fun stashData() {
+        Prefs(this).stashProducts()
+    }
+
     override fun onResume() {
         super.onResume()
-        dataFragment?.restoreData(this)
+        restoreData()
     }
 
     override fun onPause() {
         super.onPause()
-        dataFragment?.backupData()
+        stashData()
+    }
+
+    override fun onTouchEvent(event: MotionEvent) : Boolean {
+        if (navSpinner.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            navSpinner.hideEdit()
+        }
+        return super.onTouchEvent(event);
     }
 
     private fun hideDrawerMenu() {
@@ -179,16 +219,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.menu.clear()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-        val prefs = Prefs(this)
-        if (prefs.isLoggedIn) {
+        if (Exchange.isAnyLoggedIn()) {
             nav_view.inflateMenu(R.menu.activity_main_drawer)
             menu_login.visibility = View.GONE
-            if (CBProApi.credentials?.isVerified == true) {
+            val prefs = Prefs(this)
+
+            if (prefs.isVerified == true) {
+                menu_accounts.visibility = View.VISIBLE
+                menu_accounts.setOnClickListener {
+                    drawer_layout.closeDrawer(GravityCompat.START)
+                    goToFragment(FragmentType.ACCOUNTS)
+                }
                 menu_verify.visibility = View.GONE
             } else {
+                menu_accounts.visibility = View.GONE
+
                 menu_verify.visibility = View.VISIBLE
-                menu_verify.setOnClickListener  { _ ->
-                    if (CBProApi.credentials?.isVerified == true) {
+                menu_verify.setOnClickListener  {
+                    if (prefs.isVerified == true) {
                         toast("Already verified!")
                         setDrawerMenu()
                     } else {
@@ -199,13 +247,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else {
             nav_view.inflateMenu(R.menu.activity_main_drawer_logged_out)
             menu_login.visibility  = View.VISIBLE
+            menu_accounts.visibility  = View.GONE
             menu_verify.visibility = View.GONE
 
             menu_login.setOnClickListener {
                 drawer_layout.closeDrawer(GravityCompat.START)
-                goToFragment(FragmentType.LOGIN)
+                goToFragment(FragmentType.ACCOUNTS)
             }
+
         }
+    }
+
+    private fun returnToLogin() {
+        try {
+            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        } catch (e: Exception) { }
+        goToFragment(FragmentType.ACCOUNTS)
     }
 
     fun goToVerify(onComplete: (Boolean) -> Unit) {
@@ -215,7 +272,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        dataFragment?.restoreData(this)
+        restoreData()
         val chartCurrencyStr = savedInstanceState?.getString(CHART_CURRENCY) ?: ""
         val chartCurrency = Currency(chartCurrencyStr)
         ChartFragment.currency = chartCurrency
@@ -224,7 +281,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        dataFragment?.backupData()
+        stashData()
         outState?.putString(CHART_CURRENCY, ChartFragment.currency.toString())
         if (currentFragment is ChartFragment) {
             val chartFragment = currentFragment as ChartFragment
@@ -261,48 +318,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun signIn(shouldSkipCredentials: Boolean, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
-        val prefs = Prefs(this)
-        if (CBProApi.credentials == null) {
-            if (!shouldSkipCredentials) {
-                val apiKey = prefs.apiKey
-                val apiSecret = prefs.apiSecret
-                val passphraseEncrypted  = prefs.passphrase
-
-                val iv = ByteArray(16)
-                val encryption = Encryption.getDefault(apiKey, apiSecret + Constants.salt, iv)
-                val passphrase = encryption.decryptOrNull(passphraseEncrypted)
-
-                if ((apiKey != null) && (apiSecret != null) && (passphrase != null)) {
-                    val isApiKeyValid = prefs.isApiKeyValid(apiKey)
-                    CBProApi.credentials = CBProApi.ApiCredentials(apiKey, apiSecret, passphrase, isApiKeyValid)
-                }
-            } else if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
-                setDrawerMenu()
-                onComplete()
-                goHome()
-                return
-            }
+        if (!shouldSkipCredentials) {
+            AnyApi.restoreCredentials(Prefs(this))
         }
-        checkAllResources(onFailure) {
-            if (CBProApi.credentials != null) {
-                prefs.isLoggedIn = true
-            }
+        if (!Account.areAccountsOutOfDate() && !Product.map.isEmpty()) {
             setDrawerMenu()
             onComplete()
             goHome()
+        } else {
+            checkAllResources(onFailure) {
+                setDrawerMenu()
+                onComplete()
+                goHome()
+            }
         }
     }
 
     private fun checkAllResources(onFailure: (Result.Failure<String, FuelError>) -> Unit, onComplete: () -> Unit) {
         if (Product.map.isEmpty()) {
             updateAllProducts(onFailure) {
-                if (CBProApi.credentials != null) {
+                if (Exchange.isAnyLoggedIn()) {
                     updateAllAccounts(onFailure, onComplete)
                 } else {
                     onComplete()
                 }
             }
-        } else if (Account.areAccountsOutOfDate() && CBProApi.credentials != null) {
+        } else if (Account.areAccountsOutOfDate() && Exchange.isAnyLoggedIn()) {
             updateAllAccounts(onFailure, onComplete)
         } else {
             onComplete()
@@ -316,63 +357,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun updateAllAccounts(onFailure: (Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         val prefs = Prefs(this)
         showProgressBar()
-        CBProApi.accounts(apiInitData).getAllAccountInfo({ error ->
+        AnyApi(apiInitData).getAllAccounts({ error ->
             dismissProgressBar()
             onFailure(error)
         }, {
             dismissProgressBar()
-            prefs.stashedProducts = Product.map.values.toList()
+            prefs.stashProducts()
             setDrawerMenu()
-            if (CBProApi.credentials == null) {
-                val dataFragment = supportFragmentManager.findFragmentByTag(Constants.dataFragmentTag) as? DataFragment
-                dataFragment?.destroyData(this)
-                prefs.stashedFiatAccountList = mutableListOf()
-
-                prefs.isLoggedIn = false
-            } else {
-                prefs.isLoggedIn = true
-            }
             onSuccess()
         })
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        if (navSpinner.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
+            navSpinner.hideEdit()
+        } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
+        } else if (supportFragmentManager.backStackEntryCount > 1) {
+            supportFragmentManager.popBackStack()
+            val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
+            currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
+            setDrawerMenu()
         } else {
-            //super.onBackPressed()
-            if (supportFragmentManager.backStackEntryCount > 1) {
-                supportFragmentManager.popBackStack()
-                val prevFragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 2).name
-                currentFragment = supportFragmentManager.findFragmentByTag(prevFragmentTag) as RefreshFragment
-                if (currentFragment !is LoginFragment) {
-                    setDrawerMenu()
-                }
-            } else {
-                finishAffinity()
-            }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.chart_menu, menu)
-        for (i in 0..(menu.size() - 1)) {
-            val item = menu.getItem(i)
-            val spanString = SpannableString(item.title.toString())
-            spanString.setSpan(ForegroundColorSpan(Color.BLACK),0, spanString.length, 0)
-            item.title = spanString
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+            finishAffinity()
         }
     }
 
@@ -408,22 +415,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         (currentFragment as? AlertsFragment)?.updatePagerAdapter()
     }
 
-    private fun returnToLogin() {
-        try {
-            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        } catch (e: Exception) { }
-        goToFragment(FragmentType.LOGIN)
-    }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val fragmentType = when (item.itemId) {
-            R.id.nav_send -> FragmentType.SEND
             R.id.nav_alerts -> FragmentType.ALERTS
             R.id.nav_transfer -> FragmentType.TRANSFER
             R.id.nav_settings -> FragmentType.SETTINGS
             R.id.nav_home -> FragmentType.HOME
+            R.id.nav_balances -> FragmentType.BALANCES
             else -> FragmentType.HOME
         }
         val currentFragmentType = FragmentType.forFragment(currentFragment)
@@ -441,44 +441,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun goToFragment(fragmentType: FragmentType) {
-        val prefs = Prefs(this)
         val fragment : RefreshFragment? = when (fragmentType) {
             FragmentType.CHART -> ChartFragment()
-            FragmentType.ACCOUNT -> AccountsFragment()
-            FragmentType.SEND, FragmentType.RECEIVE, FragmentType.SEND_RECEIVE -> {
-
-                if (!prefs.isLoggedIn) {
-                    toast(R.string.toast_please_login_message)
-                    null
-                } else if (CBProApi.credentials?.isVerified == null) {
-                    goToVerify { if (it) { goToFragment(fragmentType) } }
-                    null
-                } else if (CBProApi.credentials?.isVerified == false) {
-                    toast(R.string.toast_missing_permissions_message)
-                    null
-                } else {
-                    SendReceiveFragment.newInstance()
-                }
-            }
+            FragmentType.BALANCES -> BalancesFragment()
+            FragmentType.ACCOUNTS -> AccountsFragment.newInstance()
             FragmentType.ALERTS -> AlertsFragment.newInstance()
             FragmentType.TRANSFER -> {
-                if (!prefs.isLoggedIn) {
+                val prefs = Prefs(this)
+                if (!Exchange.isAnyLoggedIn()) {
                     toast(R.string.toast_please_login_message)
                     null
-                } else if (CBProApi.credentials?.isVerified == null) {
+                } else if (prefs.isVerified == null) {
                     goToVerify { if (it) { goToFragment(fragmentType) } }
                     null
-                } else if (CBProApi.credentials?.isVerified == false) {
+                } else if (prefs.isVerified == false) {
                     toast(R.string.toast_missing_permissions_message)
                     null
                 } else if (!TransferFragment.hasRelevantData) {
                     showProgressBar()
-                    val depositFragment = TransferFragment.newInstance()
-                    depositFragment.refresh {didSucceed ->
+                    val transferFragment = TransferFragment.newInstance()
+                    transferFragment.refresh {didSucceed ->
                         if (didSucceed) {
+                            Prefs(this).stashProducts()
                             val tag = fragmentType.toString()
-                            depositFragment.skipNextRefresh = true
-                            goToFragment(depositFragment, tag)
+                            transferFragment.skipNextRefresh = true
+                            goToFragment(transferFragment, tag)
                         } else {
                             toast(R.string.error_message)
                         }
@@ -493,10 +480,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             FragmentType.TRADE -> {
                 null
             }
-            FragmentType.LOGIN -> {
-                hideDrawerMenu()
-                LoginFragment.newInstance()
-            }
             FragmentType.EULA -> EulaFragment()
             FragmentType.OTHER -> null
         }
@@ -504,7 +487,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val tag = fragmentType.toString()
             goToFragment(fragment, tag)
         } else if (fragmentType != FragmentType.TRADE
-                && fragmentType != FragmentType.SEND
                 && fragmentType != FragmentType.TRANSFER) {
             println("Error switching fragments")
         }

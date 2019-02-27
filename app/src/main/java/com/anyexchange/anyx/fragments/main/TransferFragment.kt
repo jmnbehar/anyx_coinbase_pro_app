@@ -1,6 +1,15 @@
 package com.anyexchange.anyx.fragments.main
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,8 +17,14 @@ import android.widget.*
 import com.anyexchange.anyx.adapters.spinnerAdapters.RelatedAccountSpinnerAdapter
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.activities.MainActivity
+import com.anyexchange.anyx.activities.ScanActivity
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.result.Result
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
+import net.glxn.qrgen.android.QRCode
 import org.jetbrains.anko.textColor
 
 /**
@@ -24,6 +39,19 @@ class TransferFragment : RefreshFragment() {
     private lateinit var transferDetailsLayout: LinearLayout
 
     private lateinit var interactiveLayout: LinearLayout
+
+    private lateinit var destinationAddressEditLayout: LinearLayout
+    private var destinationAddressEditText: EditText? = null
+    private var scanButton: ImageButton? = null
+
+    private lateinit var depositAddressViewLayout: LinearLayout
+    private var qrCodeImageView: ImageView? = null
+    private var depositAddressText: TextView? = null
+    private var depositWarningText: TextView? = null
+    private var depositAddressLabelText: TextView? = null
+    private var depositWarning2Text: TextView? = null
+    private var depositWarningImageView: ImageView? = null
+
 
     private var sourceAccountsLabelTxt: TextView? = null
     private var sourceAccountsSpinner: Spinner? = null
@@ -44,7 +72,7 @@ class TransferFragment : RefreshFragment() {
     private var coinbaseAccounts: List<Account.CoinbaseAccount> = listOf()
 
     private var sourceAccounts: MutableList<BaseAccount> = mutableListOf()
-    private val sourceAccount: BaseAccount?
+    private var sourceAccount: BaseAccount?
         get() {
             val spinnerSelection = sourceAccountsSpinner?.selectedItem as? BaseAccount
             return if (spinnerSelection?.currency == currency) {
@@ -53,8 +81,13 @@ class TransferFragment : RefreshFragment() {
                 sourceAccounts.firstOrNull()
             }
         }
+        set(value) {
+            val index = (sourceAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(value) ?: 0
+            sourceAccountsSpinner?.setSelection(index)
+        }
+
     private var destAccounts: List<BaseAccount> = mutableListOf()
-    private val destAccount: BaseAccount?
+    private var destAccount: BaseAccount?
         get() {
             return if (destAccounts.size > 1) {
                 destAccountsSpinner?.selectedItem as? BaseAccount ?: destAccounts.firstOrNull()
@@ -62,6 +95,11 @@ class TransferFragment : RefreshFragment() {
                 destAccounts.firstOrNull()
             }
         }
+        set(value) {
+            val index = (destAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(value) ?: 0
+            destAccountsSpinner?.setSelection(index)
+        }
+
 
     var currency: Currency = ChartFragment.currency
         set(value) {
@@ -90,6 +128,7 @@ class TransferFragment : RefreshFragment() {
             }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_transfer, container, false)
@@ -110,6 +149,28 @@ class TransferFragment : RefreshFragment() {
         sourceAccountsLabelTxt = rootView.txt_transfer_account_label
         sourceAccountsSpinner = rootView.spinner_transfer_accounts
         sourceAccountText = rootView.txt_transfer_account_info
+
+        destinationAddressEditLayout = rootView.layout_transfer_external_address_input
+        destinationAddressEditText = rootView.etxt_send_destination
+        scanButton = rootView.btn_send_destination_camera
+        scanButton?.setOnClickListener { getAddressFromCamera() }
+
+        depositAddressViewLayout = rootView.layout_transfer_deposit_qr_code
+        qrCodeImageView = rootView.img_receive_qr_code
+        depositAddressText = rootView.txt_transfer_deposit_address
+        depositWarningText = rootView.txt_transfer_deposit_warning
+        depositWarning2Text = rootView.txt_transfer_deposit_warning_2
+        depositAddressLabelText = rootView.txt_transfer_deposit_address_label
+        depositWarningImageView = rootView.img_transfer_deposit_warning
+
+        depositAddressLabelText?.setOnTouchListener { _, _ ->
+            copyAddressToClipboard()
+            true
+        }
+        depositWarningText?.setOnTouchListener { _, _ ->
+            copyAddressToClipboard()
+            true
+        }
 
         destAccountsSpinner = rootView.spinner_transfer_destination_accounts
         infoText = rootView.txt_transfer_info
@@ -174,19 +235,23 @@ class TransferFragment : RefreshFragment() {
 
         amountUnitText?.text = currency.toString()
 
-        switchCurrency(currency)
+
+        (activity as MainActivity).navSpinner.selectedItem = currency
+//        switchCurrency(currency)
 
         dismissProgressSpinner()
     }
 
     private var isRefreshing = false
     override fun refresh(onComplete: (Boolean) -> Unit) {
+        //TODO: don't reset spinners on refresh
         if (!isRefreshing) {
+            isRefreshing = true
             isRefreshing = true
             var didUpdateCBPro = false
             var didUpdateCoinbase = false
             var didUpdatePaymentMethods = false
-            CBProApi.accounts(apiInitData).updateAllAccounts({
+            AnyApi(apiInitData).getAllAccounts({
                 toast(R.string.toast_coinbase_pro_site_error)
                 isRefreshing = false
                 onComplete(false)
@@ -228,7 +293,6 @@ class TransferFragment : RefreshFragment() {
         if (isVisible) {
             transferDetailsLayout.visibility = View.VISIBLE
             amountUnitText?.text = currency.toString()
-            switchCurrency(currency)
         }
         if (tempSourceIndex >= 0 && tempSourceIndex < sourceAccounts.size) {
             sourceAccountsSpinner?.setSelection(tempSourceIndex)
@@ -245,6 +309,36 @@ class TransferFragment : RefreshFragment() {
         this.currency = currency
         amountEditText?.setText("")
 
+        val accounts = Product.map[currency.id]?.accounts?.values ?: listOf()
+        var accountsChecked = 0
+        for (account in accounts) {
+            if (account.depositInfo == null) {
+                showProgressSpinner()
+                account.getDepositAddress(apiInitData, {
+                    accountsChecked++
+                    if (accountsChecked == accounts.size) {
+                        completeSwitchCurrency()
+                    }
+                }) {
+                    accountsChecked++
+                    if (accountsChecked == accounts.size) {
+                        completeSwitchCurrency()
+                    }
+                }
+            } else {
+                accountsChecked++
+                if (accountsChecked == accounts.size) {
+                    completeSwitchCurrency()
+                }
+            }
+        }
+        if (accounts.isEmpty()) {
+            completeSwitchCurrency()
+        }
+    }
+
+    private fun completeSwitchCurrency() {
+        dismissProgressSpinner()
         val tempRelevantAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { account -> account.currency == currency }.toMutableList()
 
         when (currency.type) {
@@ -258,6 +352,8 @@ class TransferFragment : RefreshFragment() {
                 tempRelevantAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
             }
         }
+        val dummyExternalAccount = Account.ExternalAccount(currency)
+        tempRelevantAccounts.add(dummyExternalAccount)
 
         sourceAccounts = tempRelevantAccounts
 
@@ -289,7 +385,11 @@ class TransferFragment : RefreshFragment() {
     }
 
     private fun sourceAccountSelected() {
+        val tempDestAccount = destAccount
         setDestAccounts()
+        (destAccountsSpinner?.adapter as? RelatedAccountSpinnerAdapter)?.relatedAccountList?.indexOf(tempDestAccount)?.let {
+            destAccountsSpinner?.setSelection(it, true)
+        }
         setInfoAndButtons()
     }
 
@@ -298,16 +398,29 @@ class TransferFragment : RefreshFragment() {
             Currency.Type.CRYPTO -> Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
             else -> Account.fiatAccounts.find { it.currency == currency }
         }
+        val sourceAccount = sourceAccount
         destAccounts = when(sourceAccount) {
-            is Account.CoinbaseAccount -> listOf(cbproAccount).filterNotNull()
-            is Account.PaymentMethod ->  listOf(cbproAccount).filterNotNull()
+            is Account.CoinbaseAccount -> listOfNotNull(cbproAccount)
+            is Account.PaymentMethod ->  listOfNotNull(cbproAccount)
             is Account -> {
-                val tempDestAccounts: MutableList<BaseAccount> = coinbaseAccounts.asSequence().filter { it.currency == currency }.toMutableList()
+                val tempDestAccounts = mutableListOf<BaseAccount>()
+
+                val otherExchangeAccounts = Product.map[currency.id]?.accounts?.values?.filter { it.exchange != sourceAccount.exchange } ?: listOf()
+                tempDestAccounts.addAll(otherExchangeAccounts)
+
+                if (sourceAccount.exchange == Exchange.CBPro) {
+                    val relevantCBAccounts = coinbaseAccounts.asSequence().filter { it.currency == currency }
+                    tempDestAccounts.addAll(relevantCBAccounts)
+                }
                 if (currency.type == Currency.Type.FIAT) {
                     tempDestAccounts.addAll(Account.paymentMethods.filter { pm -> pm.apiPaymentMethod.allow_withdraw && pm.apiPaymentMethod.currency == currency.toString() })
                 }
+                val dummyExternalAccount = Account.ExternalAccount(currency)
+                tempDestAccounts.add(dummyExternalAccount)
+
                 tempDestAccounts.toList()
             }
+            is Account.ExternalAccount -> Product.map[currency.id]?.accounts?.values?.toList() ?: listOf()
             else  -> listOf()
         }
         when (destAccounts.size) {
@@ -336,6 +449,9 @@ class TransferFragment : RefreshFragment() {
     private fun setInfoAndButtons() {
         infoText?.visibility = View.VISIBLE
         interactiveLayout.visibility = View.VISIBLE
+        depositAddressViewLayout.visibility = View.GONE
+        destinationAddressEditLayout.visibility = View.GONE
+
         when (sourceAccount) {
             is Account.CoinbaseAccount -> {
                 setInteractiveLayoutEnabled((sourceAccount?.balance ?: 0.0) > 0.0)
@@ -349,7 +465,18 @@ class TransferFragment : RefreshFragment() {
                 when (destAccount) {
                     is Account.CoinbaseAccount -> infoText?.setText(R.string.transfer_coinbase_info)
                     is Account.PaymentMethod -> infoText?.setText(R.string.transfer_bank_info)
+                    is Account.ExternalAccount -> {
+                        destinationAddressEditLayout.visibility = View.VISIBLE
+                        infoText?.setText(R.string.transfer_bank_info)
+                    }
                 }
+            }
+            is Account.ExternalAccount -> {
+                interactiveLayout.visibility = View.GONE
+                depositAddressViewLayout.visibility = View.VISIBLE
+
+                (destAccount as? Account)?.depositInfo
+                showAddressInfo((destAccount as? Account)?.depositInfo)
             }
             else -> {
                 interactiveLayout.visibility = View.GONE
@@ -389,98 +516,209 @@ class TransferFragment : RefreshFragment() {
         transferMaxButton?.isEnabled = enabled
     }
 
-
-
     private fun submitTransfer() {
         val amountString = amountEditText?.text.toString()
         val amount = amountString.toDoubleOrZero()
 
         if (amount <= 0) {
-            showPopup(R.string.transfer_amount_error)
+            showPopup(R.string.error_message, R.string.transfer_amount_error)
         } else {
+            val sourceAccount = sourceAccount
             when (sourceAccount) {
                 is Account.CoinbaseAccount -> {
-                    val coinbaseAccount = sourceAccount as Account.CoinbaseAccount
-                    if (amount > coinbaseAccount.balance) {
-                        showPopup(R.string.transfer_funds_error)
-                    } else {
-                        showProgressSpinner()
-                        CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
-                            val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                            if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
-                                showPopup(R.string.transfer_amount_low_error)
-                            } else {
-                                showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                            }
-                            dismissProgressSpinner()
-                        } , { _ ->
-                            toast(R.string.transfer_received_message)
-                            amountEditText?.setText("")
-
-                            refresh { _ -> dismissProgressSpinner() }
-                        })
-                    }
+                    //send from cb to cbpro
+                    transferFromCoinbasePrime(amount, sourceAccount)
                 }
                 is Account.PaymentMethod -> {
-                    val paymentMethod = sourceAccount as Account.PaymentMethod
-                    if (paymentMethod.balance != null && amount > paymentMethod.balance) {
-                        showPopup(R.string.transfer_funds_error)
-                    } else {
-                        showProgressSpinner()
-                        CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
-                            showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                            dismissProgressSpinner()
-                        } , { _ ->
-                            toast(R.string.transfer_received_message)
-                            amountEditText?.setText("")
-
-                            refresh { _ -> dismissProgressSpinner() }
-                        })
-                    }
-
+                    //send from bank to cb pro
+                    transferFromPaymentMethod(amount, sourceAccount)
+                }
+                is Account.ExternalAccount -> {
+                    //This can never happen
                 }
                 is Account -> {
-                    when (destAccount) {
-                        is Account.CoinbaseAccount -> {
-                            val coinbaseAccount = destAccount as Account.CoinbaseAccount
-                            val cbproAccount = Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
-
-                            if (amount > cbproAccount?.availableBalance ?: 0.0) {
-                                showPopup(R.string.transfer_funds_error)
-                            } else {
-                                showProgressSpinner()
-                                CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost({ result ->
-                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                                    dismissProgressSpinner()
-                                }, { _ ->
-                                    toast(R.string.transfer_sent_message)
-                                    amountEditText?.setText("")
-
-                                    refresh { dismissProgressSpinner() }
-                                })
-                            }
-                        }
-                        is Account.PaymentMethod -> {
-                            val paymentMethod = destAccount as Account.PaymentMethod
-                            if (paymentMethod.balance != null && amount > paymentMethod.balance) {
-                                showPopup(R.string.transfer_funds_error)
-                            } else {
-                                showProgressSpinner()
-                                CBProApi.sendToPayment(apiInitData, amount, currency, paymentMethod.id).executePost( { result ->
-                                    showPopup(resources.getString(R.string.error_generic_message, result.errorMessage))
-                                    dismissProgressSpinner()
-                                }, { _ ->
-                                    toast(R.string.transfer_sent_message)
-                                    amountEditText?.setText("")
-                                    refresh { dismissProgressSpinner() }
-                                })
-                            }
-                        }
-                    }
+                    transferFromAccount(amount, sourceAccount)
                 }
                 else -> {
-                    showPopup(R.string.error_message)
+                    showPopup(R.string.error_message, null)
                 }
+            }
+        }
+    }
+
+    private fun transferFromCoinbasePrime(amount: Double, coinbaseAccount: Account.CoinbaseAccount) {
+        //send from cb to cbpro
+        if (amount > coinbaseAccount.balance) {
+            showPopup(R.string.error_message, R.string.transfer_funds_error)
+        } else {
+            showProgressSpinner()
+            CBProApi.getFromCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost( { result ->
+                val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+                if (amount > 0 && errorMessage == CBProApi.ErrorMessage.TransferAmountTooLow) {
+                    showPopup(R.string.error_message, R.string.transfer_amount_low_error)
+                } else {
+                    showPopup(resources.getString(R.string.error_message), result.errorMessage)
+                }
+                dismissProgressSpinner()
+            } , {
+                basicOnSuccess()
+            })
+        }
+    }
+
+    private fun transferFromPaymentMethod(amount: Double, paymentMethod: Account.PaymentMethod) {
+        //send from bank to cb pro
+        val balance = paymentMethod.balance
+        if (balance != null && amount > balance) {
+            showPopup(R.string.error_message, R.string.transfer_funds_error)
+        } else {
+            showProgressSpinner()
+            CBProApi.getFromPayment(apiInitData, amount, currency, paymentMethod.id).executePost( basicOnFailure , {
+                basicOnSuccess()
+            })
+        }
+    }
+
+    private fun transferFromAccount(amount: Double, sourceAccount: Account) {
+        val destAccount = destAccount
+        when (destAccount) {
+            is Account.CoinbaseAccount -> {
+                //send from cbPro to cb
+                val coinbaseAccount = destAccount
+                val cbproAccount = Product.map[currency.id]?.accounts?.get(Exchange.CBPro)
+
+                if (amount > cbproAccount?.availableBalance ?: 0.0) {
+                    showPopup(R.string.error_message, R.string.transfer_funds_error)
+                } else {
+                    showProgressSpinner()
+                    CBProApi.sendToCoinbase(apiInitData, amount, currency, coinbaseAccount.id).executePost(basicOnFailure, {
+                        basicOnSuccess()
+                    })
+                }
+            }
+            is Account.PaymentMethod -> {
+                //send from cbpro to bank
+                val balance = destAccount.balance
+                if (balance != null && amount > balance) {
+                    showPopup(R.string.error_message, R.string.transfer_funds_error)
+                } else {
+                    showProgressSpinner()
+                    CBProApi.sendToPayment(apiInitData, amount, currency, destAccount.id).executePost(basicOnFailure) {
+                        basicOnSuccess()
+                    }
+                }
+            }
+            is Account.ExternalAccount -> {
+                val destAddress = destinationAddressEditText.toString()
+                val noString = resources.getString(R.string.transfer_popup_no)
+                val popupTitle = resources.getString(R.string.transfer_popup_confirm_title)
+                val popupMessage = resources.getString(R.string.transfer_popup_confirm_external, amount, currency, destAddress)
+                showPopup(popupTitle, popupMessage, {
+                    AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
+                        basicOnSuccess()
+                    }
+                }, noString, { /* do nothing */ })
+            }
+            is Account -> {
+                //send between exchanges
+                val destAddress = destAccount.depositInfo?.address
+                val noString = resources.getString(R.string.transfer_popup_no)
+                val popupTitle = resources.getString(R.string.transfer_popup_confirm_title)
+                val popupMessage = resources.getString(R.string.transfer_popup_confirm_accounts, amount, currency, sourceAccount.exchange, destAccount.exchange)
+                if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
+                    showPopup(popupTitle, popupMessage, {
+                        AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
+                            basicOnSuccess()
+                        }
+                    }, noString, { /* do nothing */ })
+                } else {
+                    basicOnFailure(Result.Failure(FuelError(Exception())))
+                }
+            }
+        }
+    }
+
+
+    private val basicOnFailure: (result: Result.Failure<Any, FuelError>) -> Unit = { result ->
+        showPopup(resources.getString(R.string.error_message), result.errorMessage)
+        dismissProgressSpinner()
+    }
+
+    private fun basicOnSuccess() {
+        toast(R.string.transfer_sent_message)
+        amountEditText?.setText("")
+        refresh { dismissProgressSpinner() }
+    }
+
+
+    private fun showAddressInfo(addressInfo: DepositAddressInfo?) {
+        //show deposit address
+        if (addressInfo != null) {
+            depositAddressLabelText?.visibility = View.VISIBLE
+            qrCodeImageView?.visibility = View.VISIBLE
+            depositAddressText?.visibility = View.VISIBLE
+            depositWarningText?.visibility = View.VISIBLE
+            depositWarning2Text?.visibility = View.VISIBLE
+
+            val bitmap = QRCode.from(addressInfo.address).withSize(1000, 1000).bitmap()
+            qrCodeImageView?.setImageBitmap(bitmap)
+
+            depositAddressLabelText?.text = resources.getString(R.string.receive_address_label, currency.toString())
+
+            depositAddressText?.text = addressInfo.address
+
+            depositWarningText?.text = addressInfo.warning_title ?: getString(R.string.receive_warning_1, currency.fullName, currency.toString())
+            depositWarning2Text?.text = addressInfo.warning_details ?: getString(R.string.receive_warning_2)
+
+        } else {
+            depositAddressLabelText?.visibility = View.GONE
+
+            qrCodeImageView?.visibility = View.GONE
+            depositAddressText?.visibility = View.GONE
+
+            depositWarningText?.text = resources.getString(R.string.receive_address_unavailable)
+            depositWarning2Text?.text = resources.getString(R.string.receive_refresh_label)
+        }
+    }
+
+
+
+    private fun getAddressFromCamera() {
+        activity?.let { activity ->
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted
+                // Ask for camera permission
+                ActivityCompat.requestPermissions(activity,
+                        arrayOf(Manifest.permission.CAMERA),
+                        666)
+            } else {
+                val intent = Intent(activity, ScanActivity::class.java)
+                startActivityForResult(intent, 2)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        val extras = data.extras
+        if (extras != null) {
+            val barcode = extras.getString("BarCode")
+            if (barcode == "") {
+                toast(R.string.send_address_not_found_warning)
+            } else {
+                //TODO: parse more advanced qr codes
+                destinationAddressEditText?.setText(barcode)
+            }
+        }
+    }
+
+    private fun copyAddressToClipboard() {
+        context?.let { context ->
+            (destAccount as? Account)?.depositInfo?.let { depositInfo ->
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
+                clipboard.primaryClip = clip
+                toast("Copied Address to Clipboard")
             }
         }
     }

@@ -12,7 +12,7 @@ import com.anyexchange.anyx.classes.Currency
 import com.anyexchange.anyx.classes.VerificationStatus
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.Prefs
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_verify_complete.view.*
 
 /**

@@ -8,9 +8,8 @@ import android.app.job.JobInfo
 import android.content.ComponentName
 import android.app.job.JobParameters
 import android.app.job.JobService
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -45,6 +44,9 @@ class AlertJobService : JobService() {
     val apiInitData = ApiInitData(this) { }
 
     override fun onStartJob(params: JobParameters): Boolean {
+        if (Product.map.isEmpty()) {
+            Product.map = Prefs(this).stashedProducts.associateBy { it.currency.id }.toMutableMap()
+        }
 //        AlertHub.triggerDummyAlert(this)
         if (Product.map.isEmpty()) {
             AnyApi(apiInitData).getAllProducts({ /* do nothing*/ }, {
@@ -66,19 +68,23 @@ class AlertJobService : JobService() {
 
     private fun checkFillAlerts() {
         val prefs = Prefs(this)
-        if (prefs.areFillAlertsActive && prefs.isLoggedIn) {
+        val anyApi = AnyApi(apiInitData)
+        if (prefs.areFillAlertsActive && Exchange.isAnyLoggedIn()) {
             val orderTradingPairs = mutableListOf<TradingPair>()
             for (product in Product.map.values) {
                 //TODO: fix for multiple exchanges
-                val stashedOrders = prefs.getStashedOrders(product.currency, Exchange.CBPro)
+                val stashedOrders = prefs.getStashedOrders(product.currency)
                 val partialTradingPairs = stashedOrders.map { it.tradingPair }
                 orderTradingPairs.addAll(partialTradingPairs)
             }
 
             if (orderTradingPairs.isNotEmpty()) {
-                CBProApi.listOrders(apiInitData, null).getAndStash({ }) { }
+                val orderExchangeList = orderTradingPairs.map { it.exchange }.distinct()
+                for (exchange in orderExchangeList) {
+                    anyApi.getAndStashOrderList(exchange, null, { }, { })
+                }
                 for (tradingPair in orderTradingPairs) {
-                    CBProApi.fills(apiInitData, tradingPair).getAndStash({ }) { }
+                    anyApi.getAndStashFillList(tradingPair.exchange, tradingPair, { }, { } )
                 }
             }
         }

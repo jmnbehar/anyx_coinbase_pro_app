@@ -1,21 +1,17 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.fragments.login.LoginFragment
 import com.anyexchange.anyx.fragments.main.*
 
 
 enum class FragmentType {
     CHART,
-    ACCOUNT,
-    SEND,
-    RECEIVE,
-    SEND_RECEIVE,
+    BALANCES,
+    ACCOUNTS,
     ALERTS,
     TRANSFER,
     SETTINGS,
     TRADE,
     HOME,
-    LOGIN,
     EULA,
     OTHER;
 
@@ -23,16 +19,13 @@ enum class FragmentType {
     override fun toString() : String {
         return when (this) {
             CHART -> "CHART"
-            ACCOUNT -> "ACCOUNT"
-            SEND -> "SEND"
-            RECEIVE -> "RECEIVE"
-            SEND_RECEIVE -> "SEND_RECEIVE"
+            BALANCES -> "BALANCES"
+            ACCOUNTS -> "ACCOUNTS"
             ALERTS -> "ALERTS"
             TRANSFER -> "TRANSFER"
             SETTINGS -> "SETTINGS"
             TRADE -> "TRADE"
             HOME -> "HOME"
-            LOGIN -> "LOGIN"
             EULA -> "EULA"
             OTHER -> "OTHER"
         }
@@ -51,15 +44,12 @@ enum class FragmentType {
         fun forFragment(fragment: RefreshFragment?) : FragmentType {
             return when (fragment) {
                 is ChartFragment -> CHART
-                is AccountsFragment -> ACCOUNT
-                is SendFragment -> SEND
-                is ReceiveFragment -> RECEIVE
-                is SendReceiveFragment -> SEND_RECEIVE
+                is BalancesFragment -> BALANCES
+                is AccountsFragment -> ACCOUNTS
                 is AlertsFragment -> ALERTS
                 is TransferFragment -> TRANSFER
                 is SettingsFragment -> SETTINGS
                 is TradeFragment -> TRADE
-                is LoginFragment -> LOGIN
                 is HomeFragment -> HOME
                 is EulaFragment -> EULA
                 else -> OTHER

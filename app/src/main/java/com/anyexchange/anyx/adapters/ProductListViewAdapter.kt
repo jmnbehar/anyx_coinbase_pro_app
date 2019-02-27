@@ -17,10 +17,31 @@ import android.widget.TextView
  * Created by anyexchange on 11/12/2017.
  */
 
-class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean, var onClick: (Product) -> Unit, var onLongPress: (View, Product) -> Unit) : BaseAdapter() {
+class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: List<Product>, var isFavorites: Boolean) : BaseAdapter() {
+    var size = 20
+
+    init {
+        if (productList.size < size) {
+            size = productList.size
+        }
+    }
+    companion object {
+        const val sizeChangeAmount = 5
+    }
 
     override fun getCount(): Int {
-        return productList.size
+        return size
+    }
+
+    fun increaseSize() {
+        if (size < productList.size) {
+            if ((size + sizeChangeAmount) <= productList.size) {
+                size += sizeChangeAmount
+            } else {
+                size = productList.size
+            }
+            notifyDataSetChanged()
+        }
     }
 
     override fun getItem(i: Int): Any {
@@ -106,13 +127,6 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
             viewHolder.percentChangeText?.visibility = View.GONE
         }
         viewHolder.priceText?.text = product.priceForQuoteCurrency(quoteCurrency).format(quoteCurrency)
-
-        outputView.setOnLongClickListener {
-            onLongPress(it, product)
-            notifyDataSetChanged()
-            true
-        }
-        outputView.setOnClickListener { onClick(product) }
 
         return outputView
     }

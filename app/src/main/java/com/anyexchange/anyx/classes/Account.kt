@@ -1,7 +1,6 @@
 package com.anyexchange.anyx.classes
 
-
-import com.anyexchange.anyx.classes.api.*
+import com.anyexchange.anyx.api.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 
@@ -45,7 +44,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
 
     var coinbaseAccount: CoinbaseAccount? = null
 
-    var depositInfo: CBProDepositAddress? = null
+    var depositInfo: DepositAddressInfo? = null
 
     fun update(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: () -> Unit) {
         AnyApi(apiInitData).updateAccount(this, onFailure)  {
@@ -53,9 +52,16 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
     }
 
+    fun getDepositAddress(apiInitData: ApiInitData?, onFailure: (result: Result.Failure<Any, FuelError>) -> Unit, onSuccess: (DepositAddressInfo) -> Unit) {
+        AnyApi(apiInitData).getDepositAddress(exchange, currency, coinbaseAccount?.id, onFailure) {
+            this.depositInfo = it
+            onSuccess(it)
+        }
+    }
+
     override fun toString(): String {
         val cbproAccountBalanceString = balance.format(currency)
-        return "Coinbase Pro $currency Balance: $cbproAccountBalanceString"
+        return "$exchange $currency Balance: $cbproAccountBalanceString"
     }
 
     companion object {
@@ -65,11 +71,10 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         private fun accountsOutOfDate(): List<Exchange> {
             val exchangeList = mutableListOf<Exchange>()
 
-            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && CBProApi.credentials != null
+            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && AnyApi.isExchangeLoggedIn(Exchange.CBPro)
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
                 !Currency.brokenCoinIds.contains(product.currency.id) && product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null
             }
-
             if (areFiatAccountsMissing || areCBProAccountsOutOfDate) {
                 exchangeList.add(Exchange.CBPro)
             }
@@ -97,12 +102,16 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
                 return Currency.USD
             }
 
-//        val dummyAccount = Account(Exchange.CBPro, Currency.USD, Currency.USD.toString(), 0.0, 0.0)
-
-        fun totalValue() : Double {
-            val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
-            val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
-            return cryptoAccountsValue + fiatAccountsValue
+        fun totalValue(exchange: Exchange?) : Double {
+            if (exchange == null) {
+                val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
+                val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
+                return cryptoAccountsValue + fiatAccountsValue
+            } else {
+                val cryptoAccountsValue = Product.map.values.map { product -> product.accounts[exchange]?.defaultValue ?: 0.0 }.sum()
+                val fiatAccountsValue = Account.fiatAccounts.filter { it.exchange == exchange }.asSequence().map { a -> a.defaultValue }.sum()
+                return cryptoAccountsValue + fiatAccountsValue
+            }
         }
 
         fun forCurrency(currency: Currency, exchange: Exchange): Account? {
@@ -140,13 +149,14 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
     }
 
-//    class ExternalAccount(currency: Currency) : BaseAccount() {
-//        override val id: String = "External $currency Account"
-//        override val balance = 0.0
-//        override val currency = currency
-//
-//        override fun toString(): String {
-//            return id
-//        }
-//    }
+    class ExternalAccount(override val currency: Currency) : BaseAccount() {
+        override val id: String = "External $currency Account"
+        override val balance = 0.0
+        var name: String? = null
+        var address: String? = null
+
+        override fun toString(): String {
+            return id
+        }
+    }
 }

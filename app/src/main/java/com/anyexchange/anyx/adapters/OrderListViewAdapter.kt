@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.*
 import com.anyexchange.anyx.classes.*
 import com.anyexchange.anyx.R
-import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.list_row_order.view.*
 import org.jetbrains.anko.backgroundColor
 
@@ -85,13 +84,7 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
             return outputView
         } else {
             val order = orders[i]
-//            val tradeSide = order.side
-//            val price = order.price
 
-            val size = order.amount
-            val filled = order.filledAmount
-            val amount = size - filled
-            val currency = order.tradingPair.baseCurrency
             outputView.setOnClickListener { orderOnClick(order) }
 
 
@@ -102,16 +95,14 @@ class OrderListViewAdapter(val context: Context, val orders: List<Order>, var re
 
             viewHolder.mainLabelText?.text = order.summary(resources)
 
-            val tradeTypeString = order.type.toString().capitalize()
             viewHolder.priceText?.visibility = View.GONE
 
             if (order.showExtraInfo) {
                 viewHolder.extraInfoLayout?.visibility = View.VISIBLE
-
-                viewHolder.dateText?.text = "Date Created: ${order.time.format(Fill.dateFormat)}"
+                viewHolder.dateText?.text = context.getString(R.string.order_date_created, order.time.format(Fill.dateFormat))
 
                 if (order.filledAmount > 0) {
-                    viewHolder.amountText?.text = "Original Amount: ${order.amount}, Filled Amount: ${order.filledAmount}"
+                    viewHolder.amountText?.text =context.getString(R.string.order_amount_label, order.amount, order.filledAmount)
                     viewHolder.amountText?.visibility = View.VISIBLE
                 } else {
                     viewHolder.amountText?.visibility = View.GONE

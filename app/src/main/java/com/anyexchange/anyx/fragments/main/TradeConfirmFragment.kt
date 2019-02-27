@@ -1,6 +1,5 @@
 package com.anyexchange.anyx.fragments.main
 
-import android.graphics.Color
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.Button
 import android.widget.TextView
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.api.CBProApi
 import kotlinx.android.synthetic.main.dialog_trade_confirm.view.*
 
 
@@ -31,8 +29,8 @@ class TradeConfirmFragment: DialogFragment() {
 
     private var submitOrder: (NewOrder?) -> Unit = { }
 
-    var currentPrice: Double? = null
-    var newOrder: NewOrder? = null
+    private var currentPrice: Double? = null
+    private var newOrder: NewOrder? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -57,7 +55,7 @@ class TradeConfirmFragment: DialogFragment() {
             }
         }
 
-        confirmButton?.setOnClickListener {_ ->
+        confirmButton?.setOnClickListener {
             submitOrder(newOrder)
         }
 

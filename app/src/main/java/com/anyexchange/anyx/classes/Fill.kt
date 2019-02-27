@@ -1,9 +1,9 @@
 package com.anyexchange.anyx.classes
 
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.ApiInitData
-import com.anyexchange.anyx.classes.api.BinanceAccountFill
-import com.anyexchange.anyx.classes.api.CBProFill
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.api.BinanceAccountFill
+import com.anyexchange.anyx.api.CBProFill
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import java.util.*
@@ -65,12 +65,14 @@ open class Fill(val exchange: Exchange, val tradingPair: TradingPair, val id: St
             var tradingPairsChecked = 0
             val fullFillList = mutableListOf<Fill>()
             for (tradingPair in tradingPairs) {
-                AnyApi(apiInitData).getAndStashFillList(tradingPair.exchange, tradingPair, onFailure) {
-                    tradingPairsChecked++
-                    val combinedList = it.combineFills()
-                    fullFillList.addAll(combinedList)
-                    if (tradingPairsChecked == tradingPairs.size) {
-                        onSuccess(fullFillList)
+                if (tradingPair.exchange.isLoggedIn()) {
+                    AnyApi(apiInitData).getAndStashFillList(tradingPair.exchange, tradingPair, onFailure) {
+                        tradingPairsChecked++
+                        val combinedList = it.combineFills()
+                        fullFillList.addAll(combinedList)
+                        if (tradingPairsChecked == tradingPairs.size) {
+                            onSuccess(fullFillList)
+                        }
                     }
                 }
             }

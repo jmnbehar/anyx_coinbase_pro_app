@@ -2,20 +2,25 @@ package com.anyexchange.anyx.classes
 
 import android.content.pm.ActivityInfo
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
 import com.anyexchange.anyx.activities.MainActivity
-import com.anyexchange.anyx.classes.api.ApiInitData
+import com.anyexchange.anyx.api.ApiInitData
+import com.anyexchange.anyx.views.searchableSpinner.OnItemSelectedListener
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onRefresh
+
 
 /**
  * Created by anyexchange on 1/15/2018.
@@ -55,42 +60,58 @@ open class RefreshFragment: Fragment() {
         skipNextRefresh = false
         showDarkMode()
 
-        System.out.println("Removing spinner: ")
-
         if (shouldHideSpinner) {
             (activity as? MainActivity)?.let { mainActivity ->
-                mainActivity.spinnerNav.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                mainActivity.spinnerNav.visibility = View.GONE
+//                mainActivity.navSpinner.background.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                mainActivity.navSpinner.visibility = View.GONE
                 mainActivity.toolbar.title = resources.getString(R.string.app_name)
             }
         }
     }
 
+
+     fun setOptionsMenuTextColor(menu: Menu?) {
+         menu?.let {
+             for (i in 0..(menu.size() - 1)) {
+                 val item = menu.getItem(i)
+                 val spanString = SpannableString(item.title.toString())
+                 spanString.setSpan(ForegroundColorSpan(Color.BLACK),0, spanString.length, 0)
+                 item.title = spanString
+             }
+         }
+    }
+
     fun showNavSpinner(defaultSelection: Currency?, currencyList: List<Currency>, onItemSelected: (currency: Currency) -> Unit) {
         shouldHideSpinner = false
         (activity as? MainActivity)?.let { mainActivity ->
-            val sortedList = currencyList.sortCurrencies()
+            val sortedList = currencyList.sortCurrenciesAlphabetical()
             val spinnerNavAdapter = NavigationSpinnerAdapter(mainActivity, R.layout.list_row_spinner_nav, R.id.txt_currency, sortedList)
-            mainActivity.spinnerNav.adapter = spinnerNavAdapter
+
+            mainActivity.navSpinner.setAdapter(spinnerNavAdapter)
 
             mainActivity.toolbar.title = ""
-            mainActivity.spinnerNav.background.colorFilter = mainActivity.defaultSpinnerColorFilter
-            mainActivity.spinnerNav.isEnabled = true
-            mainActivity.spinnerNav.visibility = View.VISIBLE
-            mainActivity.spinnerNav.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    if (parent?.getItemAtPosition(position) is Currency) {
-                        val selectedItem = parent.getItemAtPosition(position) as Currency
-                        onItemSelected(selectedItem)
+//            mainActivity.navSpinner.background.colorFilter = mainActivity.defaultSpinnerColorFilter
+            mainActivity.navSpinner.isEnabled = true
+            mainActivity.navSpinner.visibility = View.VISIBLE
+
+            val spinnerNavItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(view: View, position: Int, id: Long) {
+                    (mainActivity.navSpinner.selectedItem as? Currency)?.let {
+                        onItemSelected(it)
                     }
+//                    if (parent?.getItemAtPosition(position) is Currency) {
+//                        val selectedItem = parent.getItemAtPosition(position) as Currency
+//                        onItemSelected(selectedItem)
+//                    }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {}
+                override fun onNothingSelected() { }
             }
+            mainActivity.navSpinner.setOnItemSelectedListener(spinnerNavItemSelectedListener)
+
+
             if (defaultSelection != null) {
-                val spinnerList = (mainActivity.spinnerNav.adapter as NavigationSpinnerAdapter).currencyList
-                val currentIndex = spinnerList.indexOf(defaultSelection)
-                mainActivity.spinnerNav.setSelection(currentIndex)
+                mainActivity.navSpinner.selectedItem = defaultSelection
             }
         }
     }
@@ -108,13 +129,21 @@ open class RefreshFragment: Fragment() {
     }
 
 
-    fun showPopup(stringTextResource: Int, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
-        val string = resources.getString(stringTextResource)
-        showPopup(string, positiveAction, negativeText, negativeAction)
+    fun showPopup(titleTextResource: Int, messageTextResource: Int?, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+        val titleStr = resources.getString(titleTextResource)
+
+        val messageStr = if (messageTextResource != null) {
+            resources.getString(messageTextResource)
+        } else { null }
+
+        showPopup(titleStr, messageStr, positiveAction, negativeText, negativeAction)
     }
-    fun showPopup(string: String, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
+    fun showPopup(titleStr: String, messageStr: String?, positiveAction: () -> Unit = {}, negativeText: String? = null, negativeAction: () -> Unit = {}) {
         alert {
-            title = string
+            title = titleStr
+            if (messageStr != null) {
+                message = messageStr
+            }
             positiveButton(R.string.popup_ok_btn) { positiveAction() }
             if (negativeText != null) {
                 negativeButton(negativeText) { negativeAction() }

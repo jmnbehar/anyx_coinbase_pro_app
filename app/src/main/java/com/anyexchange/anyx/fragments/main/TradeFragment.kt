@@ -12,15 +12,15 @@ import android.widget.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.result.Result
 import com.anyexchange.anyx.classes.*
-import com.anyexchange.anyx.classes.api.CBProApi.ErrorMessage
+import com.anyexchange.anyx.api.CBProApi.ErrorMessage
 import com.anyexchange.anyx.R
 import kotlinx.android.synthetic.main.fragment_trade.view.*
 import org.jetbrains.anko.*
 import android.text.InputFilter
 import com.anyexchange.anyx.adapters.spinnerAdapters.*
 import com.anyexchange.anyx.classes.Currency
-import com.anyexchange.anyx.classes.api.AnyApi
-import com.anyexchange.anyx.classes.api.CBProApi
+import com.anyexchange.anyx.api.AnyApi
+import com.anyexchange.anyx.api.CBProApi
 
 /**
  * Created by anyexchange on 11/5/2017.
@@ -182,7 +182,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             }
         }
 
-
         tradeTypeTabLayout = rootView.tabl_trade_type
         tradeTypeTabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
@@ -259,15 +258,12 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
         val tradingPairs = product.tradingPairs.sortTradingPairs()
         val relevantTradingPair = tradingPairs.find { it.quoteCurrency == tradingPair.quoteCurrency }
-        if (relevantTradingPair != null) {
-//            val index = tradingPairs.indexOf(relevantTradingPair)
-//            spinner_chart_trading_pair.setSelection(index)
-            tradingPair = relevantTradingPair
-        } else if (tradingPairs.isNotEmpty()){
-            tradingPair = tradingPairs.first()
+        if (relevantTradingPair == null) {
+            if (tradingPairs.isNotEmpty()){
+                tradingPair = tradingPairs.first()
+            }
         } else {
-            //TODO: something smarter here
-            assert(false)
+            tradingPair = relevantTradingPair
         }
         updateCurrencySpinner()
 
@@ -306,7 +302,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun updateButtonsAndText() {
         context?.let { context ->
-            tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs, TradingPairSpinnerAdapter.ExchangeDisplayType.None)
+            tradingPairSpinner?.adapter = TradingPairSpinnerAdapter(context, product.tradingPairs)
             tradingPairSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     switchTradingPair(product.tradingPairs[position])
@@ -454,6 +450,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun submitOrder(newOrder: NewOrder) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
+            val errorString = resources.getString(R.string.error_message)
             when (errorMessage) {
                 ErrorMessage.BuyAmountTooSmallBtc,
                 ErrorMessage.BuyAmountTooSmallEth,
@@ -462,11 +459,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
                 ErrorMessage.BuyAmountTooLargeBtc,
                 ErrorMessage.BuyAmountTooLargeEth,
                 ErrorMessage.BuyAmountTooLargeBch,
-                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(tradeAmountSizeError(errorMessage)) { }
+                ErrorMessage.BuyAmountTooLargeLtc -> showPopup(errorString, tradeAmountSizeError(errorMessage)) { }
 
                 ErrorMessage.PriceTooAccurate,
-                ErrorMessage.InsufficientFunds -> showPopup(resources.getString(R.string.error_generic_message, result.errorMessage)) { }
-                else -> showPopup(context?.getString(R.string.error_generic_message, result.errorMessage) ?: "Error") { }
+                ErrorMessage.InsufficientFunds -> showPopup(errorString, result.errorMessage) { }
+                else -> showPopup(errorString, result.errorMessage) { }
             }
         }
 
@@ -496,16 +493,14 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     }
 
     private fun payFee(amount: Double) {
-        currency.developerAddress?.let { developerAddress ->
-            //TODO: make and use AnyApi call
-            val context = context
-            CBProApi.sendCrypto(apiInitData, amount, currency, developerAddress).executePost(
-                    {  /*  fail silently   */ },
-                    { _ ->
-                        context?.let {
-                            Prefs(it).wipeUnpaidFees(currency)
-                        }
-                    })
+        context?.let {
+            val prefs = Prefs(it)
+            val devAddress = currency.developerAddress
+            if (prefs.isAnyXProActive && devAddress != null) {
+                AnyApi(apiInitData).sendCrypto(currency, amount, Exchange.CBPro, devAddress, {  /*  fail silently   */ }) {
+                    prefs.wipeUnpaidFees(currency)
+                }
+            }
         }
     }
 

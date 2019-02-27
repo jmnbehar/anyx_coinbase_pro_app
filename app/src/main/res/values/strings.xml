@@ -18,9 +18,10 @@
     <string name="menu_alerts">Alerts</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_login">Log In</string>
-    <string name="menu_send">Send/Receive</string>
+    <string name="menu_accounts">Accounts</string>
     <string name="menu_transfer">Transfer</string>
     <string name="menu_verify">Verify</string>
+    <string name="menu_balances">Balances</string>
 
     //Login Strings
     <string name="login_fragment_title">Login with your\nCoinbase Pro Api Key</string>
@@ -93,11 +94,11 @@
 
 
 
-    //Accounts Fragment
-    <string name="accounts_title">All Accounts</string>
-    <string name="accounts_logged_out_message">Sign in to view account info</string>
-    <string name="accounts_percent_change_text">%s\n(%s%s)</string>
-    <string name="accounts_balance_text">%s %s</string>
+    //Balances Fragment
+    <string name="balances_title">All Accounts</string>
+    <string name="balances_logged_out_message">Sign in to view account info</string>
+    <string name="balances_percent_change_text">%s\n(%s%s)</string>
+    <string name="balances_balance_text">%s %s</string>
 
 
     //Alerts Fragment
@@ -117,6 +118,8 @@
     <string name="chart_timespan_1w">1W</string>
     <string name="chart_timespan_1m">1M</string>
     <string name="chart_timespan_1y">1Y</string>
+    <string name="chart_timespan_3y">3Y</string>
+    <string name="chart_timespan_24h">24h</string>
     <string name="chart_timespan_all">All</string>
     <string name="chart_trade_btn">Trade</string>
     <string name="chart_buy_btn">Buy</string>
@@ -168,6 +171,8 @@
 
     <string name="order_main_label">%s %s for %s</string>
     <string name="order_price_label">%s at %s per %s</string>
+    <string name="order_date_created">Date created: %s</string>
+    <string name="order_amount_label">Original Amount: %d, Filled Amount: %d</string>
 
     //For market buys with specified base currency value, ex: "(Buy) (30 ETH) at market value"
     <string name="order_summary_market_fixed_base">%s %s at market value</string>
@@ -216,6 +221,10 @@
     <string name="home_sort_alphabetical">Sort Favorites Alphabetically</string>
     <string name="home_sort_balance">Sort Favorites By Account Balance</string>
 
+    <string name="menu_balance_exchanges_show_all">Show All Exchanges</string>
+    <string name="menu_balance_exchanges_binance">Binance</string>
+    <string name="menu_balance_exchanges_cbpro">Coinbase Pro</string>
+
     //Send Fragment
     <string name="send_title">Send</string>
     <string name="send_send_btn">Send</string>
@@ -239,6 +248,7 @@
     <string name="receive_copy_address">Copy</string>
     <string name="receive_address_label">%s Address:</string>
 
+    <string name="receive_address_unavailable">Deposit address not available</string>
     <string name="receive_refresh_label">Swipe down to refresh</string>
 
     <string name="receive_warning_1">Only send %s (%s) to this address</string>
@@ -361,6 +371,14 @@
     <string name="transfer_coinbase_info">Coinbase transfers are instant and free.</string>
     <string name="transfer_bank_info">Bank wire transfers take one business day to process.</string>
 
+    <string name="transfer_popup_no">No</string>
+
+    <string name="transfer_popup_confirm_title">Confirm Transfer</string>
+
+    <string name="transfer_popup_confirm_external">Are you sure you want to send %d %s to %s?</string>
+
+    <string name="transfer_popup_confirm_accounts">Are you sure you want to send %d %s from %s to %s?</string>
+
 
     //Verify
     <string name="verify_email_help">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
@@ -472,4 +490,32 @@ You\'re good to go!</item>
     <string name="stable_coin_conversion_amount_label">Amount: </string>
 
 
+    <string name="done_search">Done Search</string>
+    <string name="start_search">Start search</string>
+    <string name="search">Search…</string>
+    <string name="empty_list">No Items Found</string>
+
+    <string name="accounts_api_key_label">API Key:</string>
+    <string name="accounts_change_login_info">Change Log In Info</string>
+    <string name="accounts_login_button_label">Log In</string>
+    <string name="accounts_logout_button_label">Log Out</string>
+    <string name="accounts_save_login_info">Save Log In Info</string>
+    <string name="accounts_cancel_button">Cancel</string>
+
+
+    <string name="currency_id_and_fullname">%s - %s</string>
+    <string name="notification_fill_alert_title">%s Fill Alert</string>
+    <string name="notification_fill_alert_body">%s order of %d %s filled at %s</string>
+    <string name="chart_balance_account_balance">%s account balance:</string>
+    <string name="chart_balance_total_value">Total value:</string>
+    <string name="chart_balance_single_value">Value:</string>
+    <string name="accounts_binance_icon">Binance Icon</string>
+    <string name="accounts_login_to_your_accounts">Login to Your Accounts</string>
+    <string name="accounts_coinbase_pro_icon">Coinbase Pro Icon</string>
+    <string name="login_help_finish">Finish</string>
+    <string name="login_help_continue">Continue</string>
+    <string name="login_help_skip">Skip</string>
+    <string name="settings_default_quote_currency">Default quote currency</string>
+    <string name="accounts_logout_title">Confirm Log Out</string>
+    <string name="accounts_logout_message">Are you sure you want to log out from %s? Your credentials will not be saved.</string>
 </resources>

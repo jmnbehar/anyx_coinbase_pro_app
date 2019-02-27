@@ -3,6 +3,7 @@
     <words>
       <w>anyexchange</w>
       <w>anyx</w>
+      <w>autofill</w>
       <w>autologin</w>
       <w>binance</w>
       <w>coinbase</w>
@@ -12,6 +13,7 @@
       <w>jsons</w>
       <w>stablecoin</w>
       <w>timespan</w>
+      <w>wapi</w>
     </words>
   </dictionary>
 </component>

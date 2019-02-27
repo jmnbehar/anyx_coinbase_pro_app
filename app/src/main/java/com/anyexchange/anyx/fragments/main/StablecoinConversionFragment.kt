@@ -48,7 +48,7 @@ class StablecoinConversionFragment: DialogFragment() {
             setText(tradingPair)
         }
 
-        confirmButton?.setOnClickListener { _ ->
+        confirmButton?.setOnClickListener {
             val amount = amountEditText?.text.toString().toDoubleOrZero()
             submitConversion(tradingPair, amount)
         }

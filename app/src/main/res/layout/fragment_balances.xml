@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.SwipeRefreshLayout
+    android:id="@+id/swipe_refresh_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <com.anyexchange.anyx.views.LockableScrollView
+        android:id="@+id/lockscroll_balances"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:descendantFocusability="blocksDescendants"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_balances_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:textSize="30sp"
+                tools:layout_editor_absoluteX="48dp"
+                tools:layout_editor_absoluteY="16dp" />
+
+            <LinearLayout
+                android:id="@+id/layout_balances_chart_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="15dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="8dp">
+
+                <TextView
+                    android:id="@+id/txt_all_balances_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/txt_balances_total_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:textAlignment="textEnd"
+                    app:autoSizeMaxTextSize="22sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform" />
+
+                <TextView
+                    android:id="@+id/txt_balances_percent_change"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="2dp"
+                    android:text=""
+                    android:textAlignment="center" />
+
+            </LinearLayout>
+
+            <com.anyexchange.anyx.classes.PriceLineChart
+                android:id="@+id/chart_balances"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:paddingTop="-80dp" />
+
+            <ListView
+                android:id="@+id/list_balances"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:clickable="true"
+                tools:layout_editor_absoluteX="8dp"
+                tools:layout_editor_absoluteY="8dp"
+                tools:ignore="KeyboardInaccessibleWidget">
+
+            </ListView>
+
+    </LinearLayout>
+    </com.anyexchange.anyx.views.LockableScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>

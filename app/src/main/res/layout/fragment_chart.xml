@@ -16,7 +16,7 @@
         android:layout_weight="3"
         android:orientation="vertical">
 
-        <com.anyexchange.anyx.classes.LockableScrollView
+        <com.anyexchange.anyx.views.LockableScrollView
             android:id="@+id/lockscroll_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -128,6 +128,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginTop="-10dp"
+                    android:layout_marginBottom="-6dp"
                     android:paddingLeft="-10dp"
                     android:paddingRight="-10dp">
 
@@ -139,6 +140,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginTop="-10dp"
+                    android:layout_marginBottom="-6dp"
                     android:paddingLeft="-10dp"
                     android:paddingRight="-10dp"
                     android:visibility="gone">
@@ -152,102 +154,94 @@
                     android:layout_marginStart="10dp"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <RadioGroup
+                        android:id="@+id/rgroup_chart_timespans"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
-                        <Spinner
-                            android:id="@+id/spinner_chart_trading_pair"
-                            android:layout_width="wrap_content"
+                        <RadioButton
+                            android:id="@+id/rbtn_chart_timespan_hour"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:entries="@array/fiat_currencies"
-                            android:prompt="@string/settings_preferred_fiat" />
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/timespan_radio_button"
+                            android:button="@android:color/transparent"
+                            android:gravity="center_horizontal"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="@string/chart_timespan_1h" />
 
-                        <RadioGroup
-                            android:id="@+id/rgroup_chart_timespans"
-                            android:layout_width="match_parent"
+                        <RadioButton
+                            android:id="@+id/rbtn_chart_timespan_day"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="2dp"
-                            android:orientation="horizontal">
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/timespan_radio_button"
+                            android:button="@android:color/transparent"
+                            android:gravity="center_horizontal"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="@string/chart_timespan_1d" />
 
-                            <RadioButton
-                                android:id="@+id/rbtn_chart_timespan_hour"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/timespan_radio_button"
-                                android:button="@android:color/transparent"
-                                android:gravity="center_horizontal"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"
-                                android:text="@string/chart_timespan_1h" />
+                        <RadioButton
+                            android:id="@+id/rbtn_chart_timespan_week"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/timespan_radio_button"
+                            android:button="@android:color/transparent"
+                            android:gravity="center_horizontal"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="@string/chart_timespan_1w" />
 
-                            <RadioButton
-                                android:id="@+id/rbtn_chart_timespan_day"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/timespan_radio_button"
-                                android:button="@android:color/transparent"
-                                android:gravity="center_horizontal"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"
-                                android:text="@string/chart_timespan_1d" />
+                        <RadioButton
+                            android:id="@+id/rbtn_chart_timespan_month"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/timespan_radio_button"
+                            android:button="@android:color/transparent"
+                            android:gravity="center_horizontal"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="@string/chart_timespan_1m" />
 
-                            <RadioButton
-                                android:id="@+id/rbtn_chart_timespan_week"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/timespan_radio_button"
-                                android:button="@android:color/transparent"
-                                android:gravity="center_horizontal"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"
-                                android:text="@string/chart_timespan_1w" />
+                        <RadioButton
+                            android:id="@+id/rbtn_chart_timespan_year"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/timespan_radio_button"
+                            android:button="@android:color/transparent"
+                            android:gravity="center_horizontal"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="@string/chart_timespan_1y" />
 
-                            <RadioButton
-                                android:id="@+id/rbtn_chart_timespan_month"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/timespan_radio_button"
-                                android:button="@android:color/transparent"
-                                android:gravity="center_horizontal"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"
-                                android:text="@string/chart_timespan_1m" />
-
-                            <RadioButton
-                                android:id="@+id/rbtn_chart_timespan_year"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/timespan_radio_button"
-                                android:button="@android:color/transparent"
-                                android:gravity="center_horizontal"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp"
-                                android:text="@string/chart_timespan_1y" />
-
-                        </RadioGroup>
-
-                    </LinearLayout>
+                    </RadioGroup>
+                    
+                    <Spinner
+                        android:id="@+id/spinner_chart_trading_pair"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:entries="@array/fiat_currencies"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="8dp"
+                        android:prompt="@string/settings_preferred_fiat" />
 
                     <LinearLayout
                         android:id="@+id/ll_chart_trade_buttons"
@@ -260,20 +254,22 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/chart_buy_btn" />
+                            android:text="@string/chart_buy_btn"
+                            tools:ignore="ButtonStyle" />
 
                         <Button
                             android:id="@+id/btn_chart_sell"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/chart_sel_btn" />
+                            android:text="@string/chart_sel_btn"
+                            tools:ignore="ButtonStyle" />
                     </LinearLayout>
 
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="38dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp"
                         android:gravity="center_vertical">
@@ -281,56 +277,18 @@
                         <ImageView
                             android:id="@+id/img_chart_account_icon"
                             android:layout_width="30dp"
-                            android:layout_height="35dp"
+                            android:layout_height="30dp"
                             android:contentDescription="@string/chart_currency_icon_description" />
 
-                        <TextView
-                            android:id="@+id/txt_chart_ticker"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_weight="4"
-                            android:gravity="center_vertical|start"
-                            android:text="@string/chart_default_account"
-                            app:autoSizeMaxTextSize="24sp"
-                            app:autoSizeMinTextSize="10sp"
-                            app:autoSizeStepGranularity="2sp"
-                            app:autoSizeTextType="uniform" />
+                        <ListView
+                            android:id="@+id/list_chart_balances"
+                            android:divider="@null"
+                            android:dividerHeight="0dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:layout_weight="6"
-                            android:gravity="end"
-                            android:orientation="vertical">
+                        </ListView>
 
-                            <TextView
-                                android:id="@+id/txt_chart_account_balance"
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:text="@string/chart_default_balance"
-                                android:textAlignment="textEnd"
-                                app:autoSizeMaxTextSize="14sp"
-                                app:autoSizeMinTextSize="8sp"
-                                app:autoSizeStepGranularity="2sp"
-                                app:autoSizeTextType="uniform"/>
-
-                            <TextView
-                                android:id="@+id/txt_chart_account_value"
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:text="@string/chart_default_balance"
-                                android:textAlignment="textEnd"
-                                app:autoSizeMaxTextSize="14sp"
-                                app:autoSizeMinTextSize="8sp"
-                                app:autoSizeStepGranularity="2sp"
-                                app:autoSizeTextType="uniform" />
-
-                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>
@@ -362,7 +320,7 @@
                     android:layout_height="match_parent" />
 
             </LinearLayout>
-        </com.anyexchange.anyx.classes.LockableScrollView>
+        </com.anyexchange.anyx.views.LockableScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
