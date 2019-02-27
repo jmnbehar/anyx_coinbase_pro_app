@@ -255,7 +255,7 @@ enum class KnownCurrency {
                         "0x6e459139E65B4589e3F91c86D11143dBBA4570cf")
 
                 LTC -> KnownCurrencyData("LTC", "LTC", "Litecoin", .1, R.drawable.icon_ltc,
-                        R.color.ltc_dk,  R.color.ltc_light, R.color.ltc_color_state_list_dark, R.color.etc_color_state_list_light, Color.WHITE, null,
+                        R.color.ltc_dk,  R.color.ltc_light, R.color.ltc_color_state_list_dark, R.color.ltc_color_state_list_light, Color.BLACK, Color.WHITE,
                         "MGnywyDCyBxGo58xnAeSS8RPLhpbenpuSD")
 
                 BAT -> KnownCurrencyData("BAT","BAT", "Basic Attention Token", 0.0, R.drawable.icon_bat,
