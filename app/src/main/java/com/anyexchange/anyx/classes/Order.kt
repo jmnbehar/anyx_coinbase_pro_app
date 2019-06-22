@@ -50,6 +50,7 @@ class Order(val exchange: Exchange, val id: String, val tradingPair: TradingPair
                 }
                 TradeType.STOP -> when (side) {
                     TradeSide.BUY -> {
+                        //TODO: find out why specifiedFunds AND funds are null
                         val formattedFunds = (specifiedFunds ?: funds ?: 0.0).format(tradingPair.baseCurrency)
                         resources.getString(R.string.order_summary_stop_buy,
                                 formattedFunds, stopPrice?.format(tradingPair.quoteCurrency), tradingPair.baseCurrency)

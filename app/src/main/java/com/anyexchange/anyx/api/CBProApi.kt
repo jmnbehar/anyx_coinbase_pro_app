@@ -359,6 +359,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 context?.let { context ->
                     try {
                         val prefs = Prefs(context)
+                        //TODO: URGENT figure out why this fails:
                         val apiFillList: List<CBProFill> = Gson().fromJson(result.value, object : TypeToken<List<CBProFill>>() {}.type)
                         val generalFillList = apiFillList.mapNotNull { Fill.fromCBProFill(it) }
 

@@ -637,8 +637,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
     private fun setPercentChangeText(timespan: Timespan) {
         val percentChange = product.percentChange(timespan, quoteCurrency)
-        txt_chart_change_or_date.text = percentChange.percentFormat()
-        txt_chart_change_or_date.textColor = if (percentChange >= 0) {
+        txt_chart_change_or_date?.text = percentChange.percentFormat()
+        txt_chart_change_or_date?.textColor = if (percentChange >= 0) {
             Color.GREEN
         } else {
             Color.RED
