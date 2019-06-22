@@ -335,6 +335,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         fun getAndStash(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (List<Order>) -> Unit) {
             this.executeRequest(onFailure) {result ->
                 try {
+                    //TODO: figure out why this isn't working
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
                     val generalOrderList = apiOrderList.mapNotNull { Order.fromCbProOrder(it) }
                     if (context != null) {

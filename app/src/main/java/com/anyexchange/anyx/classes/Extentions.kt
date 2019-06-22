@@ -182,7 +182,7 @@ fun Long.toStringWithTimespan(timespan: Timespan) : String {
         Timespan.DAY   -> SimpleDateFormat("h:mma M/d", locale)
         Timespan.WEEK  -> SimpleDateFormat("h:mma M/d", locale)
         Timespan.MONTH -> SimpleDateFormat("h:mma M/d", locale)
-        Timespan.YEAR  -> SimpleDateFormat("M/d/YYYY", locale)
+        Timespan.YEAR  -> SimpleDateFormat("M/d/yyyy", locale)
 //        Timespan.ALL   -> SimpleDateFormat("M/d/YYYY", locale)
     }
     //TODO: investigate when this is needed: only for cbpro?
