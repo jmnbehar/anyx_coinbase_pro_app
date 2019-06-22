@@ -450,7 +450,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
     private fun submitOrder(newOrder: NewOrder) {
         fun onFailure(result: Result.Failure<ByteArray, FuelError>) {
             val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-            val errorString = resources.getString(R.string.error_message)
+            val errorString = context?.getString(R.string.error_message) ?: "Error: "
             when (errorMessage) {
                 ErrorMessage.BuyAmountTooSmallBtc,
                 ErrorMessage.BuyAmountTooSmallEth,
