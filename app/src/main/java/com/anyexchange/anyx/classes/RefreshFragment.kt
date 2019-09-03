@@ -167,10 +167,10 @@ open class RefreshFragment: Fragment() {
     }
 
     fun setupSwipeRefresh(swipeRefreshLayout: SwipeRefreshLayout) {
-        this.swipeRefreshLayout = swipeRefreshLayout
-        this.swipeRefreshLayout?.onRefresh {
-            refresh { endRefresh() }
-        }
+//        this.swipeRefreshLayout = swipeRefreshLayout
+//        this.swipeRefreshLayout?.onRefresh {
+//            refresh { endRefresh() }
+//        }
     }
 
     open fun refresh(onComplete: (Boolean) -> Unit) {   //The boolean indicates whether or not refresh was successful
