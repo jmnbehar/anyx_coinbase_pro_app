@@ -149,7 +149,7 @@ class Prefs (var context: Context) {
         get() = prefs.getStringSet(STASHED_PRODUCTS, setOf<String>())?.mapNotNull {
             try {
                 Gson().fromJson(it, Product::class.java)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 null
             }
         } ?: listOf()

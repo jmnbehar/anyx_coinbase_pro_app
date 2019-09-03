@@ -338,6 +338,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                     //TODO: figure out why this isn't working
                     val apiOrderList: List<CBProOrder> = Gson().fromJson(result.value, object : TypeToken<List<CBProOrder>>() {}.type)
                     val generalOrderList = apiOrderList.mapNotNull { Order.fromCbProOrder(it) }
+
                     if (context != null) {
                         Prefs(context).stashOrders(generalOrderList, Exchange.CBPro)
                     }
@@ -348,6 +349,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         onComplete(generalOrderList)
                     }
                 } catch (e: JsonSyntaxException) {
+                    onFailure(Result.Failure(FuelError(e)))
+                } catch (e: Throwable) {
                     onFailure(Result.Failure(FuelError(Exception())))
                 }
             }
@@ -375,6 +378,8 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                         onFailure(Result.Failure(FuelError(e)))
                     } catch (e: java.lang.Exception) {
                         onFailure(Result.Failure(FuelError(e)))
+                    } catch (e: Throwable) {
+                        onFailure(Result.Failure(FuelError(Exception())))
                     }
                 } ?: run {
                     onFailure(Result.Failure(FuelError(Exception())))
