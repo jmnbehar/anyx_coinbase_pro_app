@@ -48,6 +48,8 @@ private const val DEFAULT_QUOTE = "DEFAULT_QUOTE"
 private const val QUICK_CHANGE_ALERT_TIME = "QUICK_CHANGE_ALERT_TIME"
 private const val SORT_FAVORITES_ALPHABETICAL = "SORT_FAVORITES_ALPHABETICAL"
 private const val LAST_VERSION_CODE = "LAST_VERSION_CODE"
+private const val HOURLY_BYTES = "HOURLY_BYTES"
+private const val HOURLY_BYTES_HOUR = "HOURLY_BYTES_HOUR"
 
 private const val QUICK_CHANGE_THRESHOLD = "QUICK_CHANGE_THRESHOLD"
 
@@ -239,6 +241,16 @@ class Prefs (var context: Context) {
     var quickChangeThreshold: Float
         get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, 2.0f)
         set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, value).apply()
+
+
+
+    var stashedHourlyByteHour: Int
+        get() = prefs.getInt(HOURLY_BYTES_HOUR, 0)
+        set(value) = prefs.edit().putInt(HOURLY_BYTES_HOUR, value).apply()
+    var stashedHourlyBytes: Long
+        get() = prefs.getLong(HOURLY_BYTES, 0)
+        set(value) = prefs.edit().putLong(HOURLY_BYTES, value).apply()
+
 
     // someday this will actually work
     val isAnyXProActive: Boolean

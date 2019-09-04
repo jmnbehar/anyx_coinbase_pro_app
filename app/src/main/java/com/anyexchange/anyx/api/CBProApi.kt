@@ -37,6 +37,11 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         var credentials: ApiCredentials? = null
         var timeOffset: Long = 0
 
+        var hourlyDataBytes: Long = 0
+        var loggedHour: Int = 0
+        const val maxHourlyDataBytes: Long = 5 * 1024 * 1024
+        const val superMaxHourlyDataBytes: Long = 10 * maxHourlyDataBytes
+
         val cbProExchange = Exchange.CBPro
         const val basePath = "https://api.pro.coinbase.com"
 
@@ -63,54 +68,74 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     private var timeLock = 0
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
-        FuelManager.instance.basePath = basePath
-        Fuel.request(this).responseString { _, _, result ->
-            when (result) {
-                is Result.Failure -> {
-                    when (result.error.response.statusCode) {
-                        ErrorCode.TooManyRequests.code -> {
-                            timeLock++
-                            val handler = Handler()
-                            var retry = Runnable { }
-                            retry = Runnable {
-                                timeLock--
-                                if (timeLock <= 0) {
-                                    timeLock = 0
-                                    executeRequest(onFailure, onSuccess)
-                                } else {
-                                    handler.postDelayed(retry, 200.toLong())
-                                }
-                            }
-                            handler.postDelayed(retry, 1000.toLong())
-                        }
-                        ErrorCode.Unauthorized.code, ErrorCode.BadRequest.code -> {
-                            when (result.errorMessage) {
-                                ErrorMessage.InvalidApiKey.toString(), ErrorMessage.InvalidApiKey.toString() -> {
-                                    credentials = null
-                                    returnToLogin()
-                                    onFailure(result)
-                                }
-                                ErrorMessage.TimestampExpired.toString()  -> {
-                                    if (!hasCheckedTime) {
-                                        CBProApi.time(null).get(onFailure) {
-                                            timeOffset = it.toInt() - Date().timeInSeconds()
-                                            this.executeRequest(onFailure, onSuccess)
-                                        }
-                                        hasCheckedTime = true
+        if (hourlyDataBytes > maxHourlyDataBytes) {
+            print("app using too much data")
+        } else {
+            FuelManager.instance.basePath = basePath
+            Fuel.request(this).responseString { _, response, result ->
+                val currentHour = Date().hours
+                if (hourlyDataBytes == 0L && context != null) {
+                    hourlyDataBytes = Prefs(context).stashedHourlyBytes
+                    loggedHour = Prefs(context).stashedHourlyByteHour
+                }
+                if (currentHour == loggedHour) {
+                    hourlyDataBytes += response.data.size
+                } else {
+                    hourlyDataBytes = 0
+                    loggedHour = currentHour
+                }
+                if (context != null) {
+                    Prefs(context).stashedHourlyBytes = hourlyDataBytes
+                    Prefs(context).stashedHourlyByteHour = loggedHour
+                }
+
+                when (result) {
+                    is Result.Failure -> {
+                        when (result.error.response.statusCode) {
+                            ErrorCode.TooManyRequests.code -> {
+                                timeLock++
+                                val handler = Handler()
+                                var retry = Runnable { }
+                                retry = Runnable {
+                                    timeLock--
+                                    if (timeLock <= 0) {
+                                        timeLock = 0
+                                        executeRequest(onFailure, onSuccess)
                                     } else {
+                                        handler.postDelayed(retry, 200.toLong())
+                                    }
+                                }
+                                handler.postDelayed(retry, 1000.toLong())
+                            }
+                            ErrorCode.Unauthorized.code, ErrorCode.BadRequest.code -> {
+                                when (result.errorMessage) {
+                                    ErrorMessage.InvalidApiKey.toString(), ErrorMessage.InvalidApiKey.toString() -> {
+                                        credentials = null
+                                        returnToLogin()
+                                        onFailure(result)
+                                    }
+                                    ErrorMessage.TimestampExpired.toString() -> {
+                                        if (!hasCheckedTime) {
+                                            CBProApi.time(null).get(onFailure) {
+                                                timeOffset = it.toInt() - Date().timeInSeconds()
+                                                this.executeRequest(onFailure, onSuccess)
+                                            }
+                                            hasCheckedTime = true
+                                        } else {
+                                            onFailure(result)
+                                        }
+                                    }
+                                    else -> {
                                         onFailure(result)
                                     }
                                 }
-                                else -> {
-                                    onFailure(result)
-                                }
                             }
+                            else -> onFailure(result)
                         }
-                        else -> onFailure(result)
                     }
-                }
-                is Result.Success -> {
-                    onSuccess(result)
+                    is Result.Success -> {
+                        onSuccess(result)
+                    }
                 }
             }
         }
