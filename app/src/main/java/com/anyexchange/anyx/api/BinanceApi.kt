@@ -85,7 +85,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                         }
                         ErrorCode.Unauthorized.code, ErrorCode.BadRequest.code -> {
                             when (result.errorMessage) {
-                                ErrorMessage.InvalidApiKey.toString(), ErrorMessage.InvalidApiKey.toString() -> {
+                                ErrorMessage.InvalidApiKey.toString() -> {
                                     credentials = null
                                     returnToLogin()
                                 }
@@ -786,7 +786,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 if (string == null) {
                     return null
                 }
-                for (value in TimeInForce.values()) {
+                for (value in values()) {
                     if (value.toString() == string) {
                         return value
                     }
@@ -809,7 +809,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
         companion object {
             fun forString(string: String) : ErrorMessage? {
-                return ErrorMessage.values().find { errorMessage -> errorMessage.toString() == string }
+                return values().find { errorMessage -> errorMessage.toString() == string }
             }
         }
     }

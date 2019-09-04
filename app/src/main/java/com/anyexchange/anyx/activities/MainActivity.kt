@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (navSpinner.viewState == SearchableSpinner.ViewState.ShowingEditLayout) {
             navSpinner.hideEdit()
         }
-        return super.onTouchEvent(event);
+        return super.onTouchEvent(event)
     }
 
     private fun hideDrawerMenu() {

@@ -17,6 +17,8 @@ import kotlin.math.roundToInt
 
 class AutoStart : BroadcastReceiver() {
     override fun onReceive(context: Context, arg1: Intent) {
+        //TODO: test action string to ensure it is safe
+//        arg1.action
         scheduleCustomAlertJob(context)
     }
     companion object {

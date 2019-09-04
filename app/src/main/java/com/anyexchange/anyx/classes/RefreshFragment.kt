@@ -8,8 +8,6 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import com.anyexchange.anyx.adapters.spinnerAdapters.NavigationSpinnerAdapter
 import com.anyexchange.anyx.R
@@ -19,7 +17,6 @@ import com.anyexchange.anyx.views.searchableSpinner.OnItemSelectedListener
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.onRefresh
 
 
 /**
@@ -117,14 +114,14 @@ open class RefreshFragment: Fragment() {
     }
 
     fun dismissProgressSpinner() {
-        if (activity is com.anyexchange.anyx.activities.MainActivity) {
-            (activity as com.anyexchange.anyx.activities.MainActivity).dismissProgressBar()
+        if (activity is MainActivity) {
+            (activity as MainActivity).dismissProgressBar()
         }
     }
 
     fun showProgressSpinner() {
-        if (activity is com.anyexchange.anyx.activities.MainActivity) {
-            (activity as com.anyexchange.anyx.activities.MainActivity).showProgressBar()
+        if (activity is MainActivity) {
+            (activity as MainActivity).showProgressBar()
         }
     }
 
@@ -167,10 +164,10 @@ open class RefreshFragment: Fragment() {
     }
 
     fun setupSwipeRefresh(swipeRefreshLayout: SwipeRefreshLayout) {
-//        this.swipeRefreshLayout = swipeRefreshLayout
-//        this.swipeRefreshLayout?.onRefresh {
-//            refresh { endRefresh() }
-//        }
+        this.swipeRefreshLayout = swipeRefreshLayout
+        this.swipeRefreshLayout?.setOnRefreshListener {
+            refresh { endRefresh() }
+        }
     }
 
     open fun refresh(onComplete: (Boolean) -> Unit) {   //The boolean indicates whether or not refresh was successful

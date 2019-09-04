@@ -24,7 +24,7 @@ import kotlin.math.absoluteValue
 class PriceCandleChart : CandleStickChart {
     constructor(ctx: Context) : super(ctx)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var velocityTracker: VelocityTracker? = null
     private var isVerticalDrag: Boolean? = null

@@ -71,7 +71,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         private fun accountsOutOfDate(): List<Exchange> {
             val exchangeList = mutableListOf<Exchange>()
 
-            val areFiatAccountsMissing = Account.fiatAccounts.isEmpty() && AnyApi.isExchangeLoggedIn(Exchange.CBPro)
+            val areFiatAccountsMissing = fiatAccounts.isEmpty() && AnyApi.isExchangeLoggedIn(Exchange.CBPro)
             val areCBProAccountsOutOfDate = Product.map.values.any { product ->
                 !Currency.brokenCoinIds.contains(product.currency.id) && product.tradingPairs.any { it.exchange == Exchange.CBPro } && product.accounts[Exchange.CBPro] == null
             }
@@ -86,7 +86,7 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         }
 
         //TODO: stash this
-        var paymentMethods: List<Account.PaymentMethod> = listOf()
+        var paymentMethods: List<PaymentMethod> = listOf()
 
         //TODO: make this changeable
         val defaultFiatCurrency: Currency
@@ -105,11 +105,11 @@ class Account(var exchange: Exchange, override val currency: Currency, override 
         fun totalValue(exchange: Exchange?) : Double {
             if (exchange == null) {
                 val cryptoAccountsValue = Product.map.values.map { product -> product.accounts.values.map { account -> account.defaultValue }.sum() }.sum()
-                val fiatAccountsValue = Account.fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
+                val fiatAccountsValue = fiatAccounts.asSequence().map { a -> a.defaultValue }.sum()
                 return cryptoAccountsValue + fiatAccountsValue
             } else {
                 val cryptoAccountsValue = Product.map.values.map { product -> product.accounts[exchange]?.defaultValue ?: 0.0 }.sum()
-                val fiatAccountsValue = Account.fiatAccounts.filter { it.exchange == exchange }.asSequence().map { a -> a.defaultValue }.sum()
+                val fiatAccountsValue = fiatAccounts.filter { it.exchange == exchange }.asSequence().map { a -> a.defaultValue }.sum()
                 return cryptoAccountsValue + fiatAccountsValue
             }
         }
