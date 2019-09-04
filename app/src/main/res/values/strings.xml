@@ -12,6 +12,8 @@
 
     <string name="popup_ok_btn">OK</string>
 
+    <string name="too_much_data">AnyX is using lots of data.</string>
+
     //Menu Strings
 
     <string name="menu_home">Home</string>

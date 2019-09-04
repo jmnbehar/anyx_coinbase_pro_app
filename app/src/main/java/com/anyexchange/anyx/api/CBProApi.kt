@@ -1,5 +1,6 @@
 package com.anyexchange.anyx.api
 
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Handler
 import com.anyexchange.anyx.R
@@ -15,6 +16,7 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
+import org.jetbrains.anko.toast
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,6 +33,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     val returnToLogin = initData?.returnToLogin ?:  { }
     private var hasCheckedTime = false
 
+
     class ApiCredentials(val apiKey: String, val apiSecret: String, val apiPassPhrase: String, var isVerified: Boolean?)
 
     companion object {
@@ -40,7 +43,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         var hourlyDataBytes: Long = 0
         var loggedHour: Int = 0
         const val maxHourlyDataBytes: Long = 5 * 1024 * 1024
-        const val superMaxHourlyDataBytes: Long = 10 * maxHourlyDataBytes
+        const val superMaxHourlyDataBytes: Long = 20 * maxHourlyDataBytes
 
         val cbProExchange = Exchange.CBPro
         const val basePath = "https://api.pro.coinbase.com"
@@ -68,8 +71,16 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
     private var timeLock = 0
 
     fun executeRequest(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onSuccess: (result: Result.Success<String, FuelError>) -> Unit) {
-        if (hourlyDataBytes > maxHourlyDataBytes) {
+        val activityManager = context?.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val runningAppProcesses = activityManager?.runningAppProcesses ?: listOf()
+        val isAppInForeground =  runningAppProcesses.any { it.processName == context?.packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
+
+        if (hourlyDataBytes > maxHourlyDataBytes && !isAppInForeground) {
+            //using too much data in the background
             print("app using too much data")
+        } else if (hourlyDataBytes > superMaxHourlyDataBytes) {
+            //using too much data in the foreground
+            context?.toast(context.resources.getString(R.string.too_much_data))
         } else {
             FuelManager.instance.basePath = basePath
             Fuel.request(this).responseString { _, response, result ->
