@@ -30,7 +30,11 @@ class ProductListViewAdapter(var inflater: LayoutInflater?, var productList: Lis
     }
 
     override fun getCount(): Int {
-        return size
+        return if (isFavorites) {
+            productList.size
+        } else {
+            size
+        }
     }
 
     fun increaseSize() {
