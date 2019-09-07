@@ -74,7 +74,11 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         val activityManager = context?.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
         val runningAppProcesses = activityManager?.runningAppProcesses ?: listOf()
         val isAppInForeground =  runningAppProcesses.any { it.processName == context?.packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
-
+        val currentHour = Date().hours
+        if (currentHour != loggedHour) {
+            hourlyDataBytes = 0
+            loggedHour = currentHour
+        }
         if (hourlyDataBytes > maxHourlyDataBytes && !isAppInForeground) {
             //using too much data in the background
             print("app using too much data")
@@ -84,7 +88,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
         } else {
             FuelManager.instance.basePath = basePath
             Fuel.request(this).responseString { _, response, result ->
-                val currentHour = Date().hours
                 if (hourlyDataBytes == 0L && context != null) {
                     hourlyDataBytes = Prefs(context).stashedHourlyBytes
                     loggedHour = Prefs(context).stashedHourlyByteHour

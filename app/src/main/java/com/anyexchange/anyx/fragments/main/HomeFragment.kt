@@ -46,7 +46,6 @@ class HomeFragment : RefreshFragment() {
 
             viewPager!!.adapter = homePagerAdapter
 
-
             viewPager?.setCurrentItem(0)
         }
 

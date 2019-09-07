@@ -106,7 +106,7 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
     }
 
     override fun refresh(onComplete: (Boolean) -> Unit) {
-        refresh(true, onComplete)
+        refresh(false, onComplete)
     }
     fun refresh(fullRefresh: Boolean, onComplete: (Boolean) -> Unit) {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->
@@ -200,13 +200,13 @@ open class MarketFragment : RefreshFragment(), LifecycleOwner {
         if (onlyShowFavorites) {
             autoRefresh = Runnable {
                 if (!skipNextRefresh) {
-                    refresh {}
+                    refresh(true) { }
                 }
                 skipNextRefresh = false
 
-                handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+                handler.postDelayed(autoRefresh, TimeInMillis.twoMinutes)
             }
-            handler.postDelayed(autoRefresh, TimeInMillis.halfMinute)
+            handler.postDelayed(autoRefresh, TimeInMillis.twoMinutes)
         }
         refresh(false) { endRefresh() }
     }
