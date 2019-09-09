@@ -121,6 +121,7 @@ class Currency(val id: String) {
         val ETH = Currency(KnownCurrency.ETH)
         val BCH = Currency(KnownCurrency.BCH)
         val LTC = Currency(KnownCurrency.LTC)
+        val DAI = Currency(KnownCurrency.DAI)
 
 
         val OTHER = Currency("Other")

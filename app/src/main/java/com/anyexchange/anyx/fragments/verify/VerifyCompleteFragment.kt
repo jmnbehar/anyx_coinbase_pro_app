@@ -90,7 +90,6 @@ class VerifyCompleteFragment : Fragment() {
         }
         infoText.text = when (verifyStatus) {
             VerificationStatus.Success -> resources.getString(R.string.verify_success_message)
-            VerificationStatus.RepayError -> resources.getString(R.string.verify_repay_error_message, currency.toString())
             VerificationStatus.NoTransferPermission -> resources.getString(R.string.verify_missing_permission_transfer_message)
             VerificationStatus.NoTradePermission -> resources.getString(R.string.verify_missing_permission_trade_message)
             VerificationStatus.NoViewPermission -> resources.getString(R.string.verify_missing_permission_view_message)

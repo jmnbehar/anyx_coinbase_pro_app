@@ -287,7 +287,6 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 onComplete()
             }
         }
-
     }
 
     class account(initData: ApiInitData?, val accountId: String) : CBProApi(initData) {
@@ -852,6 +851,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
 
         //Transfer:
         TransferAmountTooLow,
+        TransferFromCBFailed,
         InvalidCryptoAddress;
 
         override fun toString(): String {
@@ -879,6 +879,7 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 InsufficientFunds -> "Insufficient funds"
 
                 TransferAmountTooLow -> "amount must be a positive number"
+                TransferFromCBFailed -> "The funds were transferred to Coinbase for processing, but failed to withdraw to X. Please manually withdraw from Coinbase."
                 InvalidCryptoAddress -> "invalid crypto_address"
             }
         }
@@ -889,6 +890,10 @@ sealed class CBProApi(initData: ApiInitData?) : FuelRouting {
                 if (errorMessage == null) {
                     if (string.contains("is below the minimum", true) && string.contains("required to send on-blockchain.", true)) {
                         return TransferAmountTooLow
+                    } else if (string == "Minimum amount is 0.00001") {
+                        return TransferAmountTooLow
+                    } else if (string.contains("The funds were transferred to Coinbase for processing, but failed to withdraw to ", true)) {
+                        return TransferFromCBFailed
                     }
                 }
                 return errorMessage

@@ -34,15 +34,7 @@ class VerifySendFragment : Fragment() {
 
     private lateinit var verifySendButton: Button
 
-    private val currency: Currency
-        get() {
-            return if (activity is VerifyActivity) {
-                val activity = (activity as VerifyActivity)
-                activity.currency
-            } else {
-                Currency.BTC
-            }
-        }
+    private val currency: Currency = Currency.DAI
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -60,8 +52,7 @@ class VerifySendFragment : Fragment() {
             if (productId != null) {
                 CBProApi.orderLimit(null, TradeSide.BUY, productId, 1.0, 1.0,
                         timeInForce = TimeInForce.ImmediateOrCancel, cancelAfter = null).executePost({ result->
-                    val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
-                    when (errorMessage) {
+                    when (CBProApi.ErrorMessage.forString(result.errorMessage)) {
                         CBProApi.ErrorMessage.InsufficientFunds -> sendCryptoToVerify()
                         else -> goToVerificationComplete(VerificationStatus.NoTradePermission)
                     }
@@ -95,6 +86,7 @@ class VerifySendFragment : Fragment() {
                         CBProApi.ErrorMessage.Forbidden -> goToVerificationComplete(VerificationStatus.NoTransferPermission)
                         CBProApi.ErrorMessage.InsufficientFunds -> goToVerificationComplete(VerificationStatus.Success)
                         CBProApi.ErrorMessage.InvalidCryptoAddress -> goToVerificationComplete(VerificationStatus.UnknownError)
+                        CBProApi.ErrorMessage.TransferFromCBFailed -> goToVerificationComplete(VerificationStatus.Success)
                         else -> goToVerificationComplete(VerificationStatus.UnknownError)
                     }
                 }, {

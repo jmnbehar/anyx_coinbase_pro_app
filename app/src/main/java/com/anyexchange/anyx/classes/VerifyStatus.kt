@@ -7,7 +7,6 @@ package com.anyexchange.anyx.classes
 
 enum class VerificationStatus {
     Success,
-    RepayError,
     NoTransferPermission,
     NoTradePermission,
     NoViewPermission,
@@ -17,14 +16,8 @@ enum class VerificationStatus {
 
     val isVerified: Boolean
         get() = when (this) {
-                VerificationStatus.Success           -> true
-                VerificationStatus.RepayError        -> true
-                VerificationStatus.NoTransferPermission  -> false
-                VerificationStatus.NoTradePermission     -> false
-                VerificationStatus.NoViewPermission      -> false
-                VerificationStatus.NoPaymentMethods      -> false
-                VerificationStatus.CBProError            -> false
-                VerificationStatus.UnknownError          -> false
+                Success -> true
+                else    -> false
             }
 
 }
