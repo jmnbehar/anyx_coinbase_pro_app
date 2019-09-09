@@ -14,6 +14,7 @@ import com.anyexchange.anyx.R
 import com.anyexchange.anyx.classes.Prefs
 import com.anyexchange.anyx.api.CBProApi
 import kotlinx.android.synthetic.main.fragment_verify_complete.view.*
+import org.jetbrains.anko.support.v4.alert
 
 /**
  * Created by josephbehar on 1/20/18.
@@ -32,16 +33,6 @@ class VerifyCompleteFragment : Fragment() {
     private lateinit var statusImageView: ImageView
 
     private var bypassClicks = 0
-
-    private val currency: Currency
-        get() {
-            return if (activity is VerifyActivity) {
-                val activity = (activity as VerifyActivity)
-                activity.currency
-            } else {
-                Currency.BTC
-            }
-        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -67,9 +58,21 @@ class VerifyCompleteFragment : Fragment() {
             }
             bypassClicks = 10
         }
+        infoText.setOnLongClickListener {
+            showErrorMessage()
+            true
+        }
         return rootView
     }
-
+    private fun showErrorMessage() {
+        VerifySendFragment.errorMessageStr?.let { errorMessage ->
+            alert {
+                title = "Error Message:"
+                message = errorMessage
+                positiveButton(R.string.popup_ok_btn) {  }
+            }.show()
+        }
+    }
     override fun onResume() {
         super.onResume()
         if (activity is VerifyActivity) {

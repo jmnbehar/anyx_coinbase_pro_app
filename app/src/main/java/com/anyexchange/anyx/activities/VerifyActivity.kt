@@ -28,8 +28,6 @@ class VerifyActivity : AppCompatActivity() {
     internal var currentPage = 0   //  to track page position
     var pageCount = 2
 
-    var currency: Currency = defaultVerificationCurrency
-
     var verifyStatus: VerificationStatus? = null
 
     private var blockBackButton = false

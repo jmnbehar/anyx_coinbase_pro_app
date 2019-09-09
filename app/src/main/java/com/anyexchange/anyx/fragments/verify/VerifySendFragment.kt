@@ -26,6 +26,8 @@ class VerifySendFragment : Fragment() {
         {
             return VerifySendFragment()
         }
+
+        var errorMessageStr: String? = null
     }
 
     private lateinit var sendInfoText: TextView
@@ -79,6 +81,7 @@ class VerifySendFragment : Fragment() {
             } else if (devAddress != null){
                 val sendAmount = 0.000001
                 CBProApi.sendCrypto(null, sendAmount, currency, devAddress).executePost({ result ->
+                    errorMessageStr = result.errorMessage
                     val errorMessage = CBProApi.ErrorMessage.forString(result.errorMessage)
                     progressBar.visibility = View.INVISIBLE
                     when (errorMessage) {
