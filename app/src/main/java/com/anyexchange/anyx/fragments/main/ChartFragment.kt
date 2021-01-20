@@ -762,7 +762,7 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
 
         val context = context
 
-        if (context != null  && Exchange.isAnyLoggedIn()) {
+        if (context != null && Exchange.isAnyLoggedIn()) {
             /* Refresh does 2 things, it updates the chart, account info first
              * then candles etc in mini refresh, while simultaneously updating history info
             */

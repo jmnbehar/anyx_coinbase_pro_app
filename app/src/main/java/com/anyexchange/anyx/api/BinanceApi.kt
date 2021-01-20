@@ -136,16 +136,16 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     val candleDoubleList: List<List<Any>> = gson.fromJson(apiCandles, object : TypeToken<List<List<Double>>>() {}.type)
                     var candles = candleDoubleList.mapNotNull {
                         val openTimeMillis = (it[0] as? Double)?.toLong()
-                        val open = (it[1] as? String)?.toDoubleOrNull() ?: 0.0
-                        val high = (it[2] as? String)?.toDoubleOrNull() ?: 0.0
-                        val low = (it[3] as? String)?.toDoubleOrNull() ?: 0.0
-                        val close = (it[4] as? String)?.toDoubleOrNull()
-                        val volume = (it[5] as? String)?.toDoubleOrNull() ?: 0.0
+                        val open = it[1] as? Double ?: (it[1] as? String)?.toDoubleOrNull() ?: 0.0
+                        val high = it[2] as? Double ?: (it[2] as? String)?.toDoubleOrNull() ?: 0.0
+                        val low = it[3] as? Double ?: (it[3] as? String)?.toDoubleOrNull() ?: 0.0
+                        val close = it[4] as? Double ?: (it[4] as? String)?.toDoubleOrNull()
+                        val volume = it[5] as? Double ?: (it[5] as? String)?.toDoubleOrNull() ?: 0.0
                         val closeTimeMillis = (it[6] as? Double)?.toLong()
-                        val quoteAssetVolume = (it[7] as? String)?.toDoubleOrNull()
+                        val quoteAssetVolume = it[7] as? Double ?: (it[7] as? String)?.toDoubleOrNull()
                         val tradeCount = (it[8] as? Double)?.toLong()
-                        val takerBuyBaseAssetVolume = (it[9] as? String)?.toDoubleOrNull()
-                        val takerBuyQuoteAssetVolume = (it[10] as? String)?.toDoubleOrNull()
+                        val takerBuyBaseAssetVolume = it[9] as? Double ?: (it[9] as? String)?.toDoubleOrNull()
+                        val takerBuyQuoteAssetVolume = it[10] as? Double ?: (it[10] as? String)?.toDoubleOrNull()
                         if (close != null && openTimeMillis != null && closeTimeMillis != null) {
                             val openTime = openTimeMillis / 1000
                             val closeTime = closeTimeMillis / 1000 + 1

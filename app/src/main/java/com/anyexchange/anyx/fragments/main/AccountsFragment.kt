@@ -244,16 +244,18 @@ class AccountsFragment : RefreshFragment() {
                 when {
                     newApiKey.isBlank() -> context.toast(R.string.login_error_missing_api_key)
                     newApiSecret.isBlank() -> context.toast(R.string.login_error_missing_api_secret)
-                    newApiPassphrase.isBlank() -> context.toast(R.string.login_error_missing_passphrase)
                     else -> {
-
                         when (exchange) {
                             Exchange.CBPro -> {
-                                prefs.stashCBProCreds(newApiKey, newApiSecret, newApiPassphrase)
-                                val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
-                                CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
-                                refreshAllProductsAndAccounts()
-                                (context as? MainActivity)?.setDrawerMenu()
+                                if (newApiPassphrase.isBlank()) {
+                                    context.toast(R.string.login_error_missing_passphrase)
+                                } else {
+                                    prefs.stashCBProCreds(newApiKey, newApiSecret, newApiPassphrase)
+                                    val isApiKeyValid = prefs.isApiKeyValid(newApiKey)
+                                    CBProApi.credentials = CBProApi.ApiCredentials(newApiKey, newApiSecret, newApiPassphrase, isApiKeyValid)
+                                    refreshAllProductsAndAccounts()
+                                    (context as? MainActivity)?.setDrawerMenu()
+                                }
                             }
                             Exchange.Binance -> {
                                 prefs.stashBinanceCreds(newApiKey, newApiSecret)

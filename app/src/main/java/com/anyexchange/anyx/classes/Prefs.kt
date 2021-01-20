@@ -254,9 +254,7 @@ class Prefs (var context: Context) {
 
     // someday this will actually work
     val isAnyXProActive: Boolean
-        get() = false
-//        get() = prefs.getFloat(QUICK_CHANGE_THRESHOLD, false)
-//        set(value) = prefs.edit().putFloat(QUICK_CHANGE_THRESHOLD, false).apply()
+        get() = true
 
     val isVerified: Boolean?
         get() {
