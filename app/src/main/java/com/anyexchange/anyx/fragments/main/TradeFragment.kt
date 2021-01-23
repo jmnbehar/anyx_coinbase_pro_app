@@ -93,11 +93,13 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             return product.accounts[tradingPair.exchange]
         }
 
+    var selectedUnit: Currency? = null
+
     //TODO: possibly remove? market orders are iffy
     private val amountUnitCurrency: Currency?
         get() {
             return when (tradeType) {
-                TradeType.MARKET -> amountUnitSpinner?.selectedItem as? Currency
+                TradeType.MARKET -> selectedUnit
                 TradeType.LIMIT -> tradingPair.baseCurrency
                 TradeType.STOP -> when (tradeSide) {
                     TradeSide.BUY -> tradingPair.quoteCurrency
@@ -210,10 +212,11 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         context?.let { context ->
 
             val relevantCurrencies = listOf(tradingPair.quoteCurrency, tradingPair.baseCurrency)
-
+            selectedUnit = relevantCurrencies.firstOrNull()
             amountUnitSpinner?.adapter = CurrencySpinnerAdapter(context, relevantCurrencies)
             amountUnitSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    selectedUnit = (amountUnitSpinner?.adapter as? CurrencySpinnerAdapter)?.currencyList?.get(position)
                     amountEditText?.setText("")
                 }
                 override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -275,6 +278,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun updateCurrencySpinner() {
         val relevantCurrencies = listOf(tradingPair.quoteCurrency, tradingPair.baseCurrency)
+        selectedUnit = relevantCurrencies.firstOrNull()
         (amountUnitSpinner?.adapter as CurrencySpinnerAdapter).currencyList = relevantCurrencies
         (amountUnitSpinner?.adapter as CurrencySpinnerAdapter).notifyDataSetChanged()
     }
