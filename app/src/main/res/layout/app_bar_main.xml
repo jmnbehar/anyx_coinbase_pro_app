@@ -27,7 +27,7 @@
                 app:RevealViewBackgroundColor="?attr/colorPrimary"
                 app:SearchViewBackgroundColor="?attr/colorPrimary"
                 app:ShowBorders="false"
-                app:RevealEmptyText="AnyX"/>
+                app:RevealEmptyText="Crypto Exchange"/>
 
         </android.support.v7.widget.Toolbar>
 

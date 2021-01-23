@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">AnyX</string>
+    <string name="app_name">Crypto Exchange</string>
+    
     <string name="coinbase_pro">Coinbase Pro</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -8,11 +9,11 @@
     <string name="action_settings">Settings</string>
 
     <string name="channel_name">notification-channel</string>
-    <string name="channel_description">AnyX price alerts</string>
+    <string name="channel_description">CryptoX price alerts</string>
 
     <string name="popup_ok_btn">OK</string>
 
-    <string name="too_much_data">AnyX is using lots of data.</string>
+    <string name="too_much_data">CryptoX is using lots of data.</string>
 
     //Menu Strings
 
@@ -37,7 +38,7 @@
     <string name="login_login_btn">Log in</string>
     <string name="login_stars">*****</string>
 
-    <string name="login_disclaimer">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
+    <string name="login_disclaimer">CryptoX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.</string>
 
     <string name="login_error_missing_api_key">Missing Api Key</string>
     <string name="login_error_missing_api_secret">Missing Api Secret</string>
@@ -78,7 +79,7 @@
 
 
     <string-array name="onboarding_titles">
-        <item>Welcome to AnyX!</item>
+        <item>Welcome to CryptoX!</item>
         <item>Track Prices</item>
         <item>Your account</item>
         <item>Notifications</item>
@@ -268,12 +269,12 @@
     <string name="settings_show_fill_alerts">Alert when an open order is filled</string>
     <string name="settings_unknown"> </string>
     <string name="settings_coinbase_pro_eula">Read Coinbase/Coinbase Pro EULA</string>
-    <string name="settings_anyx_eula">Read AnyX User Agreement</string>
+    <string name="settings_anyx_eula">Read CryptoX User Agreement</string>
     <string name="settings_verify">Verify Account</string>
     <string name="settings_verify_info">Verify your account to enable trading.</string>
 
     <string name="settings_email_dev">Email Developer</string>
-    <string name="settings_email_dev_info">Tell us what you think of AnyX! We appreciate your feedback.</string>
+    <string name="settings_email_dev_info">Tell us what you think of CryptoX! We appreciate your feedback.</string>
 
     <string name="settings_preferred_fiat">Preferred Fiat Currency</string>
     <string name="settings_refresh_accounts">Refresh All Data</string>
@@ -414,7 +415,7 @@
         <item>Open Menu</item>
         <item>Open API Page</item>
         <item>Create API Key</item>
-        <item>Enter Info To AnyX</item>
+        <item>Enter Info To Crypto Exchange</item>
     </string-array>
 
     <string-array name="login_help_mobile_text">
@@ -422,8 +423,8 @@
         <item>On the Coinbase Pro mobile site, click the menu icon in the upper right hand corner.</item>
         <item>Select API from the menu.</item>
         <item>On the API Page, select View, Transfer, and Trade permissions. You may also set your own Passphrase.
-        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
-        <item>Copy the API key and API secret into AnyX\'s login screen. Save these in the app so you don\'t have to go through this process again.
+        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way CryptoX processes trades you need the other three permissions to buy or sell assets.</item>
+        <item>Copy the API key and API secret into CryptoX\'s login screen. Save these in the app so you don\'t have to go through this process again.
 You\'re good to go!</item>
     </string-array>
 
@@ -442,25 +443,25 @@ You\'re good to go!</item>
         <item>Log in to the Coinbase Pro website and click the menu icon in the upper right hand corner.</item>
         <item>Choose API from the right hand menu.</item>
         <item>On the API Page, select View, Transfer, and Trade permissions. You may also set your own Passphrase.
-        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way AnyX processes trades you need the other three permissions to buy or sell assets.</item>
-        <item>Copy down the info into the AnyX login screen. Make sure you do not send this info on any unencrypted channels to prevent someone from hacking your account</item>
+        \nAs long as you select View you will be able to track your account holdings in the app, but due to the way CryptoX processes trades you need the other three permissions to buy or sell assets.</item>
+        <item>Copy down the info into the CryptoX login screen. Make sure you do not send this info on any unencrypted channels to prevent someone from hacking your account</item>
     </string-array>
 
 
     <string name="anyx_eula_header">Before you verify your account, please read and accept our User Agreement and Privacy Policy</string>
 
-    <string name="anyx_eula_title">AnyX User Agreement and Privacy Policy</string>
+    <string name="anyx_eula_title">CryptoX User Agreement and Privacy Policy</string>
     <string name="anyx_eula_section_1_title">User Agreement</string>
-    <string name="anyx_eula_1_1">AnyX can only be used to view and track, transfer, and manage supported Digital Currencies using Coinbase Pro’s services.</string>
-    <string name="anyx_eula_1_2">AnyX does not take responsibility for any failed transactions of any time.</string>
-    <string name="anyx_eula_1_3">AnyX does not take responsibility for any Digital Currency Transactions sent to the wrong recipient. You should verify all transaction information prior to submitting instructions to AnyX</string>
-    <string name="anyx_eula_1_4">When you place an order which is not immediately matched by an existing order, you will not have to pay fees. However, when you place an order at the market price that gets filled immediately, you will pay AnyX a fee of 0.1% on top of fees charged by Coinbase Pro. Due to the way these fees are processed, sometimes you will not pay that fee immediately but it will be added on to the next fee you incur. AnyX reserves the right to change fee pricing at a later date.</string>
+    <string name="anyx_eula_1_1">CryptoX can only be used to view and track, transfer, and manage supported Digital Currencies using Coinbase Pro’s services.</string>
+    <string name="anyx_eula_1_2">CryptoX does not take responsibility for any failed transactions of any time.</string>
+    <string name="anyx_eula_1_3">CryptoX does not take responsibility for any Digital Currency Transactions sent to the wrong recipient. You should verify all transaction information prior to submitting instructions to Crypto Exchange</string>
+    <string name="anyx_eula_1_4">When you place an order which is not immediately matched by an existing order, you will not have to pay fees. However, when you place an order at the market price that gets filled immediately, you will pay CryptoX a fee of 0.1% on top of fees charged by Coinbase Pro. Due to the way these fees are processed, sometimes you will not pay that fee immediately but it will be added on to the next fee you incur. CryptoX reserves the right to change fee pricing at a later date.</string>
 
-    <string name="anyx_eula_1_5">By using AnyX, you also agree to Coinbase’s User Agreement, found here:\nhttps://www.coinbase.com/legal/user_agreement</string>
+    <string name="anyx_eula_1_5">By using CryptoX, you also agree to Coinbase’s User Agreement, found here:\nhttps://www.coinbase.com/legal/user_agreement</string>
     <string name="anyx_eula_1_6">The risk of loss in trading or holding Digital Currency can be substantial. You should therefore carefully consider whether trading or holding Digital Currency is suitable for you in light of your financial condition.</string>
 
     <string name="anyx_eula_section_2_title">Privacy Policy</string>
-    <string name="anyx_eula_2_1">AnyX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.
+    <string name="anyx_eula_2_1">CryptoX does not save any of your data. Your Coinbase Pro Api Key, Api Secret, and Passphrase are only stored locally on your device.
         \nWe do not save any pictures taken with the camera, they are only used to capture QR codes. </string>
 
 
@@ -474,7 +475,7 @@ You\'re good to go!</item>
     <string name="chart_currency_icon_description">Currency icon</string>
 
 
-    <string name="trade_confirm_anyx_fee_label">AnyX fee ≈</string>
+    <string name="trade_confirm_anyx_fee_label">CryptoX fee ≈</string>
     <string name="trade_confirm_exchange_fee_label">%s fee ≈</string>
     <string name="trade_confirm_total_label">Total ≈</string>
 

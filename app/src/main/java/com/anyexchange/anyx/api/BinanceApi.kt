@@ -726,7 +726,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     list.add(Pair("amount", amount))
 
                     val formattedName = name?.replace(" ", "%20")
-                    list.add(Pair("name", formattedName ?: "AnyX"))
+                    list.add(Pair("name", formattedName ?: "CryptoX"))
 
                     list.add(Pair("timestamp", Date().time))
 

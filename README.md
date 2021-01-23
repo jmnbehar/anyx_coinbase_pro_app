@@ -1,1 +1,1 @@
-AnyX
+Crypto Exchange
