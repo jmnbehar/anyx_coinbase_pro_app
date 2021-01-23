@@ -89,7 +89,7 @@ class TradeConfirmFragment: DialogFragment() {
         }
 
         row2Label?.text = getString(R.string.trade_confirm_anyx_fee_label)
-        row2Text?.text = newOrder.devFee(currentPrice).format(tradingPair.baseCurrency)
+        row2Text?.text = "0" //newOrder.devFee(currentPrice).format(tradingPair.baseCurrency)
 
         row3Label?.text = getString(R.string.trade_confirm_total_label)
         row3Text?.text = when (newOrder.side) {

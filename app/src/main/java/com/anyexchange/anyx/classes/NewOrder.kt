@@ -28,14 +28,14 @@ class NewOrder(val tradingPair: TradingPair, val priceLimit: Double?, val amount
         return true
     }
 
-    fun devFee(currentPrice: Double) : Double {
-        // Dev fee is always in base currency
-        return if (willIncurFee(currentPrice)) {
-            totalBase(currentPrice) * DEV_FEE_PERCENTAGE
-        } else {
-            0.0
-        }
-    }
+//    fun devFee(currentPrice: Double) : Double {
+//        // Dev fee is always in base currency
+//        return if (willIncurFee(currentPrice)) {
+//            totalBase(currentPrice) * DEV_FEE_PERCENTAGE
+//        } else {
+//            0.0
+//        }
+//    }
 
     fun exchangeFee(currentPrice: Double) : Pair<Double, Currency> {
         return if (willIncurFee(currentPrice)) {

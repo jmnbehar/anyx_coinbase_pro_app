@@ -472,18 +472,18 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             toast(R.string.toast_success)
             activity?.let { activity ->
                 activity.onBackPressed()
-                relevantAccount?.let { account ->
-                    val currency = account.currency
-                    val currentPrice = product.priceForQuoteCurrency(newOrder.tradingPair.quoteCurrency)
-                    val devFee = newOrder.devFee(currentPrice)
-                    if (devFee > 0.0) {
-                        val prefs = Prefs(activity)
-                        val unpaidFees = prefs.addUnpaidFee(devFee, currency)
-                        if (unpaidFees > currency.minSendAmount) {
-                            payFee(unpaidFees)
-                        }
-                    }
-                }
+//                relevantAccount?.let { account ->
+//                    val currency = account.currency
+//                    val currentPrice = product.priceForQuoteCurrency(newOrder.tradingPair.quoteCurrency)
+//                    val devFee = newOrder.devFee(currentPrice)
+//                    if (devFee > 0.0) {
+//                        val prefs = Prefs(activity)
+//                        val unpaidFees = prefs.addUnpaidFee(devFee, currency)
+//                        if (unpaidFees > currency.minSendAmount) {
+//                            payFee(unpaidFees)
+//                        }
+//                    }
+//                }
             }
         }
         newOrder.submit(apiInitData, { onFailure(it) }) { result ->
@@ -492,17 +492,17 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
         }
     }
 
-    private fun payFee(amount: Double) {
-        context?.let {
-            val prefs = Prefs(it)
-            val devAddress = currency.developerAddress
-            if (prefs.isAnyXProActive && devAddress != null) {
-                AnyApi(apiInitData).sendCrypto(currency, amount, Exchange.CBPro, devAddress, {  /*  fail silently   */ }) {
-                    prefs.wipeUnpaidFees(currency)
-                }
-            }
-        }
-    }
+//    private fun payFee(amount: Double) {
+//        context?.let {
+//            val prefs = Prefs(it)
+//            val devAddress = currency.developerAddress
+//            if (prefs.isAnyXProActive && devAddress != null) {
+//                AnyApi(apiInitData).sendCrypto(currency, amount, Exchange.CBPro, devAddress, {  /*  fail silently   */ }) {
+//                    prefs.wipeUnpaidFees(currency)
+//                }
+//            }
+//        }
+//    }
 
 
     private fun switchTradingPair(newTradingPair: TradingPair) {
