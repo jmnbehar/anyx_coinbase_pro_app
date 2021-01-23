@@ -507,7 +507,7 @@ You\'re good to go!</item>
 
     <string name="currency_id_and_fullname">%s - %s</string>
     <string name="notification_fill_alert_title">%s Fill Alert</string>
-    <string name="notification_fill_alert_body">%s order of %d %s filled at %s</string>
+    <string name="notification_fill_alert_body">%s order of %s %s filled at %s</string>
     <string name="chart_balance_account_balance">%s account balance:</string>
     <string name="chart_balance_total_value">Total value:</string>
     <string name="chart_balance_single_value">Value:</string>

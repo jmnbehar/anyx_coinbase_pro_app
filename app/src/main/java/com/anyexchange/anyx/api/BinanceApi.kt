@@ -448,9 +448,9 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is bookTicker -> "v3/ticker/bookTicker"
 
                 //TODO: take off the test
-                is orderLimit -> "v3/order/test"
-                is orderMarket -> "v3/order/test"
-                is orderStop -> "v3/order/test"
+                is orderLimit -> "v3/order"
+                is orderMarket -> "v3/order"
+                is orderStop -> "v3/order"
                 is getOrder -> "v3/order"
                 is cancelOrder -> "v3/order"
 
@@ -618,25 +618,26 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
 
     private fun MutableList<Pair<String, String>>.addTimestampAndSignature() {
         this.add(Pair("timestamp", Date().time.toString()))
-        apiSignature(this)?.let {
+        apiSignature(this, body)?.let {
             this.add(Pair("signature", it))
         }
     }
 
-    private fun apiSignature(paramList: List<Pair<String, String>>) : String? {
+    private fun apiSignature(paramList: List<Pair<String, String>>, body: String) : String? {
         val credentials = credentials
         if (credentials != null) {
             return try {
-                val secretByteArr: ByteArray? = credentials.apiSecret.toByteArray(Charset.defaultCharset())
+                val secretByteArr: ByteArray = credentials.apiSecret.toByteArray(Charset.defaultCharset())
                 val sha256HMAC = Mac.getInstance("HmacSHA256")
                 val secretKey = SecretKeySpec(secretByteArr, "HmacSHA256")
 
-                val paramListString = paramListToString(paramList)
                 sha256HMAC.init(secretKey)
 
-                val signatureByteArray = sha256HMAC.doFinal(paramListString.toByteArray())
+                val paramListString = paramListToString(paramList)
+                val totalParams = paramListString + body
+                val signatureByteArray = sha256HMAC.doFinal(totalParams.toByteArray())
 
-                 signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }.toLowerCase()
+                 signatureByteArray.joinToString("") { String.format("%02X", (it.toInt() and 0xFF)) }
             } catch (e: Exception) {
                 println("API Secret Hashing Error")
                 null
@@ -657,58 +658,78 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
         return outputString
     }
 
-    private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String, quantity: Double): JSONObject {
-        val json = JSONObject()
-        json.put("symbol", productId)
-        json.put("side", tradeSide.toString())
-        json.put("type", tradeType.toString())
-        json.put("quantity", quantity.toString())
-
-        json.put("timestamp", Date().time.toString())
-        return json
+    private fun basicOrderParams(tradeSide: TradeSide, tradeType: TradeType, productId: String): MutableList<Pair<String, Any?>> {
+        val list: MutableList<Pair<String, Any?>> = mutableListOf()
+        list.add(Pair("symbol", productId))
+        list.add(Pair("side", tradeSide.toString().toUpperCase(Locale.ROOT)))
+        list.add(Pair("type", tradeType.toString().toUpperCase(Locale.ROOT)))
+        list.add(Pair("timestamp", Date().time))
+        return list
     }
 
+    private fun List<Pair<String, Any?>>.formatBinanceRequestBody() : String {
+        var outputString = ""
+        for (pair in this) {
+            if (outputString != "") {
+                outputString += "&"
+            }
+            outputString += "${pair.first}=${pair.second}"
+        }
+        return outputString
+    }
     private val body: String
         get() {
             when (this) {
                 is orderLimit -> {
-                    val json = basicOrderParams(tradeSide, TradeType.LIMIT, productId, quantity)
+                    val list = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
 
+                    list.add(Pair("quantity", quantity))
+                    list.add(Pair("price", price))
+                    list.add(Pair("timeInForce", timeInForce.toString()))
 
-                    json.put("price", price.toString())
-                    json.put("timeInForce", timeInForce.toString())
-                    json.put("price", "$price")
-                    json.put("timestamp", Date().time.toString())
+                    val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
+                    list.add(Pair("signature", signature))
 
-
-                    return json.toString()
+                    return list.formatBinanceRequestBody()
                 }
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
-                    val json = basicOrderParams(tradeSide, TradeType.MARKET, productId, quantity)
-                    return json.toString()
+                    val list = basicOrderParams(tradeSide, TradeType.MARKET, productId)
+                    list.add(Pair("quantity", quantity))
+
+                    val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
+                    list.add(Pair("signature", signature))
+
+                    return list.formatBinanceRequestBody()
                 }
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
-                    val json = basicOrderParams(tradeSide, TradeType.STOP, productId, quantity)
+                    val list = basicOrderParams(tradeSide, TradeType.STOP, productId)
+                    list.add(Pair("quantity", quantity))
+                    list.add(Pair("stopPrice", stopPrice))
 
-                    json.put("stopPrice", stopPrice.toString())
-                    return json.toString()
+                    val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
+                    list.add(Pair("signature", signature))
+
+                    return list.formatBinanceRequestBody()
                 }
                 is sendCrypto -> {
-                    val json = JSONObject()
-                    json.put("asset", currency.toString())
-                    json.put("address", destinationAddress)
+                    val list: MutableList<Pair<String, Any?>> = mutableListOf()
+                    list.add(Pair("asset", currency.toString()))
+                    list.add(Pair("address", destinationAddress))
                     if (destAddressTag != null) {
-                        json.put("addressTag", destAddressTag)
+                        list.add(Pair("addressTag", destAddressTag))
                     }
-                    json.put("amount", amount)
+                    list.add(Pair("amount", amount))
 
                     if (name != null) {
-                        json.put("name", name)
+                        list.add(Pair("name", name))
                     }
 
-                    return json.toString()
+                    val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
+                    list.add(Pair("signature", signature))
+
+                    return list.formatBinanceRequestBody()
                 }
                 else -> return ""
             }

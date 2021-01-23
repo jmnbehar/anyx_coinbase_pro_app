@@ -36,12 +36,12 @@ object AlertHub {
 
         val tradingPair = fill.tradingPair
         val side = fill.side
-        val size = fill.amount
+        val size: Double = fill.amount ?: 0.0
         val notificationTitle = context.getString(R.string.notification_fill_alert_title, tradingPair.baseCurrency)
 
         val price = fill.price.format(tradingPair.quoteCurrency)
 
-        val notificationText = context.getString(R.string.notification_fill_alert_body, side.toString().capitalize(), size, tradingPair.baseCurrency, price)
+        val notificationText = context.getString(R.string.notification_fill_alert_body, side.toString().capitalize(), size.toString(), tradingPair.baseCurrency, price)
         val notificationTag = "FillAlert_" + fill.id
 
         postAlert(channelId, notificationTitle, notificationText, notificationTag, tradingPair.baseCurrency, context)
