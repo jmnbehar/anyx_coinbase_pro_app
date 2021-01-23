@@ -379,7 +379,7 @@
 
     <string name="transfer_popup_confirm_external">Are you sure you want to send %d %s to %s?</string>
 
-    <string name="transfer_popup_confirm_accounts">Are you sure you want to send %d %s from %s to %s?</string>
+    <string name="transfer_popup_confirm_accounts">Are you sure you want to send %s %s from %s to %s?</string>
 
 
     //Verify

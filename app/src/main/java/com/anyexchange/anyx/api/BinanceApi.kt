@@ -322,10 +322,11 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
     //add position?
     class depositAddress(initData: ApiInitData?, val currency: Currency, val status: Boolean? = null) : BinanceApi(initData) {
         fun get(onFailure: (result: Result.Failure<String, FuelError>) -> Unit, onComplete: (BinanceDepositAddress) -> Unit) {
-            this.executeRequest(onFailure) { result ->
-                val depositAddress : BinanceDepositAddress = Gson().fromJson(result.value, object : TypeToken<BinanceDepositAddress>() {}.type)
-                onComplete(depositAddress)
-            }
+            onFailure(Result.Failure(FuelError(java.lang.Exception())))
+//            this.executeRequest(onFailure) { result ->
+//                val depositAddress : BinanceDepositAddress = Gson().fromJson(result.value, object : TypeToken<BinanceDepositAddress>() {}.type)
+//                onComplete(depositAddress)
+//            }
         }
     }
 
@@ -717,19 +718,17 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 }
                 is sendCrypto -> {
                     val list: MutableList<Pair<String, Any?>> = mutableListOf()
-                    list.add(Pair("asset", currency.toString()))
+                    list.add(Pair("asset", currency.toString().toUpperCase(Locale.ROOT)))
                     list.add(Pair("address", destinationAddress))
                     if (destAddressTag != null) {
                         list.add(Pair("addressTag", destAddressTag))
                     }
                     list.add(Pair("amount", amount))
 
-                    if (name != null) {
-                        list.add(Pair("name", name))
-                    }
+                    val formattedName = name?.replace(" ", "%20")
+                    list.add(Pair("name", formattedName ?: "AnyX"))
 
-                    val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
-                    list.add(Pair("signature", signature))
+                    list.add(Pair("timestamp", Date().time))
 
                     return list.formatBinanceRequestBody()
                 }

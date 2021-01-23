@@ -309,8 +309,11 @@ class TransferFragment : RefreshFragment() {
         this.currency = currency
         amountEditText?.setText("")
 
-        val accounts = Product.map[currency.id]?.accounts?.values ?: listOf()
+        var accounts = Product.map[currency.id]?.accounts?.values ?: listOf()
         var accountsChecked = 0
+
+        // binance accounts do not work here:
+        accounts = accounts.filter { it.exchange == Exchange.CBPro }
         for (account in accounts) {
             if (account.depositInfo == null) {
                 showProgressSpinner()
@@ -624,7 +627,7 @@ class TransferFragment : RefreshFragment() {
                 val destAddress = destAccount.depositInfo?.address
                 val noString = resources.getString(R.string.transfer_popup_no)
                 val popupTitle = resources.getString(R.string.transfer_popup_confirm_title)
-                val popupMessage = resources.getString(R.string.transfer_popup_confirm_accounts, amount, currency, sourceAccount.exchange, destAccount.exchange)
+                val popupMessage = resources.getString(R.string.transfer_popup_confirm_accounts, amount.btcFormatShortened(null), currency, sourceAccount.exchange, destAccount.exchange)
                 if (sourceAccount.exchange != destAccount.exchange && destAddress != null) {
                     showPopup(popupTitle, popupMessage, {
                         AnyApi(apiInitData).sendCrypto(currency, amount, sourceAccount.exchange, destAddress, basicOnFailure) {
