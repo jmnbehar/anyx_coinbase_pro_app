@@ -189,7 +189,7 @@ class AnyApi(val apiInitData: ApiInitData?) {
                 CBProApi.orderLimit(apiInitData, tradeSide, tradingPair.idForExchange(Exchange.CBPro), limitPrice, amount, timeInForce = timeInForce, cancelAfter = cancelAfter.toString()).executePost({ onFailure(it) }, { onSuccess(it) })
             }
             Exchange.Binance -> {
-                val binanceTimeInForce = BinanceApi.TimeInForce.forString(timeInForce.toString())
+                val binanceTimeInForce = BinanceApi.TimeInForce.forString(timeInForce.toString()) ?: BinanceApi.TimeInForce.GoodTilCancelled
                 BinanceApi.orderLimit(apiInitData, tradingPair.idForExchange(Exchange.Binance), tradeSide, binanceTimeInForce, amount, limitPrice, icebergQty).executePost({ onFailure(it) }, { onSuccess(it) })
 
             }

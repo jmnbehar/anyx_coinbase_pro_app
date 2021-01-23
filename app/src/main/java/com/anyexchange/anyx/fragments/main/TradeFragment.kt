@@ -93,6 +93,7 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
             return product.accounts[tradingPair.exchange]
         }
 
+    //TODO: possibly remove? market orders are iffy
     private val amountUnitCurrency: Currency?
         get() {
             return when (tradeType) {
@@ -354,7 +355,6 @@ class TradeFragment : RefreshFragment(), LifecycleOwner {
 
     private fun compileOrder() {
         val onFailure: (result: Result.Failure<String, FuelError>) -> Unit = { result ->  toast("Error: ${result.errorMessage}") }
-
 
         var timeInForce: TimeInForce? = null
         var cancelAfter: TimeInForce.CancelAfter? = null

@@ -249,7 +249,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
             }
         }
     }
-    class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val price: Double, val icebergQty: Double? = null) : BinanceApi(initData)
+    class orderLimit(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce, val quantity: Double, val price: Double, val icebergQty: Double? = null) : BinanceApi(initData)
     class orderMarket(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val quantity: Double, val price: Double) : BinanceApi(initData)
     class orderStop(initData: ApiInitData?, val productId: String, val tradeSide: TradeSide, val timeInForce: TimeInForce?, val quantity: Double, val stopPrice: Double) : BinanceApi(initData)
 
@@ -308,7 +308,9 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                     for (fill in apiFillList) {
                         val fillDateTime = fill.time.time
                         if (fillDateTime > stashedFillsDate && fillDateTime + TimeInMillis.sixHours > Date().time) {
-                            AlertHub.triggerFillAlert(fill, context)
+                            //TODO: reenable?
+//                            AlertHub.triggerFillAlert(fill, context)
+                            break
                         } else if (fillDateTime <= stashedFillsDate) {
                             break
                         }
@@ -683,8 +685,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is orderLimit -> {
                     val list = basicOrderParams(tradeSide, TradeType.LIMIT, productId)
 
-                    list.add(Pair("quantity", quantity))
-                    list.add(Pair("price", price))
+                    list.add(Pair("quantity", quantity.btcFormatShortened(null)))
+                    list.add(Pair("price", price.btcFormatShortened(null)))
                     list.add(Pair("timeInForce", timeInForce.toString()))
 
                     val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
@@ -695,7 +697,7 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is orderMarket -> {
                     //can add either size or funds, for now lets do funds
                     val list = basicOrderParams(tradeSide, TradeType.MARKET, productId)
-                    list.add(Pair("quantity", quantity))
+                    list.add(Pair("quantity", quantity.btcFormatShortened(null)))
 
                     val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
                     list.add(Pair("signature", signature))
@@ -705,8 +707,8 @@ sealed class BinanceApi(initData: ApiInitData?) : FuelRouting {
                 is orderStop -> {
                     //can add either size or funds, for now lets do funds
                     val list = basicOrderParams(tradeSide, TradeType.STOP, productId)
-                    list.add(Pair("quantity", quantity))
-                    list.add(Pair("stopPrice", stopPrice))
+                    list.add(Pair("quantity", quantity.btcFormatShortened(null)))
+                    list.add(Pair("stopPrice", stopPrice.btcFormatShortened(null)))
 
                     val signature = apiSignature(listOf(), list.formatBinanceRequestBody())
                     list.add(Pair("signature", signature))

@@ -839,7 +839,8 @@ class ChartFragment : RefreshFragment(), OnChartValueSelectedListener, OnChartGe
         orderListView?.setHeightBasedOnChildren()
 
         if (fillList != null) {
-            fillListView?.adapter = FillListViewAdapter(context, fillList, resources) { fill ->
+            val sortedFills = fillList.sortedBy { it.time }.reversed()
+            fillListView?.adapter = FillListViewAdapter(context, sortedFills, resources) { fill ->
                 fill.showExtraInfo = !fill.showExtraInfo
                 (fillListView?.adapter as? FillListViewAdapter)?.notifyDataSetChanged()
                 fillListView?.setHeightBasedOnChildren()
