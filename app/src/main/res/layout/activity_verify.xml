@@ -23,7 +23,7 @@
                 android:text="Account Verification"
                 android:textSize="30sp" />
 
-            <com.anyexchange.anyx.views.LockableViewPager
+            <com.anyexchange.cryptox.views.LockableViewPager
                 android:id="@+id/verify_view_pager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

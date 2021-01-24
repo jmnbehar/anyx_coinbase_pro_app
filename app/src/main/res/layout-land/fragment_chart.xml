@@ -162,7 +162,7 @@
             </LinearLayout>
 
 
-            <com.anyexchange.anyx.classes.PriceLineChart
+            <com.anyexchange.cryptox.classes.PriceLineChart
                 android:id="@+id/chart_line_chart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -171,10 +171,10 @@
                 android:paddingLeft="-10dp"
                 android:paddingRight="-10dp">
 
-            </com.anyexchange.anyx.classes.PriceLineChart>
+            </com.anyexchange.cryptox.classes.PriceLineChart>
 
 
-            <com.anyexchange.anyx.classes.PriceCandleChart
+            <com.anyexchange.cryptox.classes.PriceCandleChart
                 android:id="@+id/chart_candle_chart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -183,7 +183,7 @@
                 android:paddingLeft="-10dp"
                 android:paddingRight="-10dp">
 
-            </com.anyexchange.anyx.classes.PriceCandleChart>
+            </com.anyexchange.cryptox.classes.PriceCandleChart>
 
             <LinearLayout
                 android:layout_width="match_parent"
