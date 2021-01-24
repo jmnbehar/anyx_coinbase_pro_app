@@ -720,7 +720,7 @@ class TransferFragment : RefreshFragment() {
             (destAccount as? Account)?.depositInfo?.let { depositInfo ->
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText("Copied Address", depositInfo.address)
-                clipboard.primaryClip = clip
+                clipboard.setPrimaryClip(clip)
                 toast("Copied Address to Clipboard")
             }
         }

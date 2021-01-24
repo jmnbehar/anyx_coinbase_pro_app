@@ -28,7 +28,7 @@ class RelatedAccountSpinnerAdapter(context: Context, var relatedAccountList: Lis
         var accountNameText: TextView? = null
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return getViewGeneric(position, convertView, parent)
     }
 

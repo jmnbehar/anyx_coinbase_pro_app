@@ -38,7 +38,7 @@ class TradingPairSpinnerAdapter(context: Context, private var tradingPairList: L
         var quoteCurrencyIcon: ImageView? = null
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return getViewGeneric(position, convertView, parent)
     }
 

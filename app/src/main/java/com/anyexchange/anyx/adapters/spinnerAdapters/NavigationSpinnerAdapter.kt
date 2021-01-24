@@ -29,7 +29,7 @@ class NavigationSpinnerAdapter(context: Context, resource: Int, textViewId: Int,
         var currencyTxt: TextView? = null
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = getViewGeneric(position, convertView, parent)
         view.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_accent))
 

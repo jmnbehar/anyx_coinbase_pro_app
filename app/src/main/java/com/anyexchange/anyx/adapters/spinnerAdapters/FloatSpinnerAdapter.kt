@@ -30,7 +30,7 @@ class FloatSpinnerAdapter(context: Context, var optionList: List<Float>) :
         var optionText: TextView? = null
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return getViewGeneric(position, convertView, parent)
     }
 
